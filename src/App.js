@@ -1,15 +1,21 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+// src/App.js
+import React from "react";
+import { Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import Login from "./pages/Login";
 import Home from "./pages/Home";
+import Signup from "./pages/Signup";
 
-function App() {
+const App = () => {
   return (
-    <BrowserRouter>
+    <AuthProvider>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Login />} />
+        <Route path="/home" element={<Home />} />
+        <Route path="/signup" element={<Signup />} />
       </Routes>
-    </BrowserRouter>
+    </AuthProvider>
   );
-}
+};
 
 export default App;
-// hello testing aaesdfesfgedgfed
