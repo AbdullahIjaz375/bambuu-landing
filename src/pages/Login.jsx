@@ -1,6 +1,6 @@
 // src/Login.js
-import React, { useState } from "react";
-import { auth } from "../firebaseConfig";
+import React, { useState, useEffect } from "react";
+import { auth, db } from "../firebaseConfig";
 import {
   GoogleAuthProvider,
   signInWithPopup,
@@ -11,6 +11,10 @@ import { useNavigate, Link } from "react-router-dom";
 import { Button, TextInput, Paper, Divider, Group, Title } from "@mantine/core";
 import { FaFacebook } from "react-icons/fa6";
 import { FaGoogle } from "react-icons/fa6";
+import { toast } from "react-toastify";
+import { useAuth } from "../context/AuthContext";
+import ClipLoader from "react-spinners/ClipLoader";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
 const Login = () => {
   const googleProvider = new GoogleAuthProvider();
@@ -19,36 +23,87 @@ const Login = () => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { user, loading } = useAuth(); // Destructure loading state
 
   const handleGoogleLogin = async () => {
+    const googleProvider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, googleProvider);
-      console.log("Google User:", result.user);
+      const user = result.user;
+
+      // Check if user data already exists in Firestore
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (!userDoc.exists()) {
+        // Set initial data with empty values if it doesn't exist
+        await setDoc(doc(db, "users", user.uid), {
+          email: user.email,
+          nickname: "",
+          country: "",
+          learningLanguage: "",
+          nativeLanguage: "",
+          timeZone: "",
+          createdAt: new Date(),
+        });
+      }
+
       navigate("/home");
     } catch (error) {
       console.error("Error during Google login:", error);
     }
   };
-
   const handleFacebookLogin = async () => {
+    const facebookProvider = new FacebookAuthProvider();
     try {
       const result = await signInWithPopup(auth, facebookProvider);
-      console.log("Facebook User:", result.user);
+      const user = result.user;
+
+      // Check if user data already exists in Firestore
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (!userDoc.exists()) {
+        // Set initial data with empty values if it doesn't exist
+        await setDoc(doc(db, "users", user.uid), {
+          email: user.email,
+          nickname: "",
+          country: "",
+          learningLanguage: "",
+          nativeLanguage: "",
+          timeZone: "",
+          createdAt: new Date(),
+        });
+      }
+
       navigate("/home");
     } catch (error) {
       console.error("Error during Facebook login:", error);
     }
   };
-
   const handleEmailLogin = async (e) => {
     e.preventDefault();
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      toast.success("Logged in successfully!");
+
       navigate("/home");
     } catch (error) {
       console.error("Error during email login:", error);
+      toast.error(`Login error: ${error.message}`);
     }
   };
+
+  useEffect(() => {
+    if (!loading && user) {
+      navigate("/home", { replace: true });
+    }
+  }, [user, loading, navigate]);
+
+  // Show a spinner while checking authentication status
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <ClipLoader color="#14B82C" size={50} />
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center justify-center min-h-screen p-6 bg-gradient-to-r from-green-200 to-yellow-100">

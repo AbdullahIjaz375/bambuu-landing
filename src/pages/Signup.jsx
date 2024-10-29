@@ -1,24 +1,73 @@
 // src/Signup.js
-import React, { useState } from "react";
-import { auth } from "../firebaseConfig";
+import React, { useState, useEffect } from "react";
+import { auth, db } from "../firebaseConfig";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { useNavigate, Link } from "react-router-dom";
-import { Button, TextInput, Paper, Title } from "@mantine/core";
+import { Button, TextInput, Paper, Title, Select } from "@mantine/core";
+import { toast } from "react-toastify";
+import { useAuth } from "../context/AuthContext";
+import ClipLoader from "react-spinners/ClipLoader";
+import { doc, setDoc } from "firebase/firestore"; // Firestore imports
+import TimezoneSelect from "react-timezone-select";
 
 const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [nickname, setNickname] = useState("");
+  const [country, setCountry] = useState("");
+  const [learningLanguage, setLearningLanguage] = useState("");
+  const [nativeLanguage, setNativeLanguage] = useState("");
+  const [timeZone, setTimeZone] = useState({});
   const navigate = useNavigate();
+  const { user, loading } = useAuth(); // Destructure loading state
+  const [loading1, setLoading1] = useState(false);
 
   const handleSignup = async (e) => {
     e.preventDefault();
+    setLoading1(true);
+
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      navigate("/home");
+      // Sign up the user
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+
+      // Add additional user information to Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        email: user.email,
+        nickname,
+        country,
+        learningLanguage,
+        nativeLanguage,
+        timeZone: timeZone.value,
+        createdAt: new Date(),
+      });
+
+      toast.success("Account created successfully!");
+      navigate("/home", { replace: true });
     } catch (error) {
-      console.error("Error during signup:", error);
+      toast.error(`Signup error: ${error.message}`);
+    } finally {
+      setLoading1(false);
     }
   };
+
+  useEffect(() => {
+    if (!loading && user) {
+      navigate("/home", { replace: true });
+    }
+  }, [user, loading, navigate]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <ClipLoader color="#14B82C" size={50} />
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center justify-center min-h-screen p-6 bg-gradient-to-r from-green-200 to-yellow-100">
@@ -53,6 +102,43 @@ const Signup = () => {
             size="md"
             className="focus:ring focus:ring-green-300"
           />
+          <TextInput
+            label="Nickname"
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value)}
+            required
+          />
+          <TextInput
+            label="Country"
+            value={country}
+            onChange={(e) => setCountry(e.target.value)}
+            required
+          />
+          <Select
+            label="Learning language"
+            placeholder="Select language"
+            data={["English", "Spanish", "French", "German"]}
+            value={learningLanguage}
+            onChange={setLearningLanguage}
+            required
+          />
+          <Select
+            label="Native language"
+            placeholder="Select language"
+            data={["English", "Spanish", "French", "German"]}
+            value={nativeLanguage}
+            onChange={setNativeLanguage}
+            required
+          />
+          <div>
+            <label className="font-medium text-gray-700">Time Zone</label>
+            <TimezoneSelect
+              value={timeZone}
+              onChange={setTimeZone}
+              className="mt-1"
+            />
+          </div>
+
           <Button type="submit" fullWidth radius="md" size="md" color="#14B82C">
             {" "}
             Sign Up
@@ -62,7 +148,7 @@ const Signup = () => {
         <p className="mt-8 text-sm text-center text-gray-500">
           Already have an account?{" "}
           <Link
-            to={"/"}
+            to={"/login"}
             className="font-semibold text-green-600 hover:underline"
           >
             Login
