@@ -6,9 +6,11 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Button, Paper } from "@mantine/core";
 import Navbar from "../components/Navbar";
+import { useAuth } from "../context/AuthContext"; // Import useAuth
 
 const Home = () => {
   const navigate = useNavigate();
+  const { user } = useAuth(); // Get the user from AuthContext
 
   const handleLogout = async () => {
     try {
@@ -23,7 +25,7 @@ const Home = () => {
 
   return (
     <>
-      <Navbar user={auth.currentUser} />
+      <Navbar user={user} />
       <div className="flex items-center justify-center h-screen">
         <Paper padding="md" shadow="md" className="text-center w-80">
           <h1 className="mb-4 text-2xl font-bold">

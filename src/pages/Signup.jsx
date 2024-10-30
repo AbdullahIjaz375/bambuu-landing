@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 import { useAuth } from "../context/AuthContext";
 import ClipLoader from "react-spinners/ClipLoader";
 import { doc, setDoc } from "firebase/firestore"; // Firestore imports
-import TimezoneSelect from "react-timezone-select";
+import countryList from "react-select-country-list"; // Import country list
 
 const Signup = () => {
   const [email, setEmail] = useState("");
@@ -17,14 +17,20 @@ const Signup = () => {
   const [country, setCountry] = useState("");
   const [learningLanguage, setLearningLanguage] = useState("");
   const [nativeLanguage, setNativeLanguage] = useState("");
-  const [timeZone, setTimeZone] = useState({});
   const navigate = useNavigate();
   const { user, loading } = useAuth(); // Destructure loading state
   const [loading1, setLoading1] = useState(false);
 
+  const countryOptions = countryList()
+    .getData()
+    .map((country) => ({
+      value: country.label, // Using country name as value
+      label: country.label,
+    }));
   const handleSignup = async (e) => {
     e.preventDefault();
     setLoading1(true);
+    toast.info("Signing up... Please wait."); // Show toast when signup starts
 
     try {
       // Sign up the user
@@ -35,19 +41,24 @@ const Signup = () => {
       );
       const user = userCredential.user;
 
-      // Add additional user information to Firestore
+      // Add additional user information to Firestore in the specified format
       await setDoc(doc(db, "users", user.uid), {
         email: user.email,
-        nickname,
-        country,
+        enrolledClasses: [], // Empty array for enrolled classes
+        joinedGroups: [], // Empty array for joined groups
+        lastLoggedIn: new Date(), // Set the timestamp of signup
         learningLanguage,
+        name: nickname, // Assuming 'name' is filled with the 'nickname' input for simplicity
         nativeLanguage,
-        timeZone: timeZone.value,
-        createdAt: new Date(),
+        nickname,
+        photoUrl: "", // Empty photo URL
+        savedDocuments: [], // Empty array for saved documents
+        tier: 1, // Initial tier value
+        currentStreak: 1, // Set current streak to 0 on signup
       });
 
       toast.success("Account created successfully!");
-      navigate("/home", { replace: true });
+      navigate("/login", { replace: true }); // Redirect to login page
     } catch (error) {
       toast.error(`Signup error: ${error.message}`);
     } finally {
@@ -56,10 +67,10 @@ const Signup = () => {
   };
 
   useEffect(() => {
-    if (!loading && user) {
+    if (!loading && user && !loading1) {
       navigate("/home", { replace: true });
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, loading1, navigate]);
 
   if (loading) {
     return (
@@ -104,20 +115,24 @@ const Signup = () => {
           />
           <TextInput
             label="Nickname"
+            placeholder="Enter your nickname"
             value={nickname}
             onChange={(e) => setNickname(e.target.value)}
             required
           />
-          <TextInput
+          <Select
             label="Country"
+            data={countryOptions}
             value={country}
-            onChange={(e) => setCountry(e.target.value)}
+            onChange={setCountry}
+            placeholder="Select your country"
+            className="mt-1"
             required
           />
           <Select
             label="Learning language"
             placeholder="Select language"
-            data={["English", "Spanish", "French", "German"]}
+            data={["English", "Spanish"]}
             value={learningLanguage}
             onChange={setLearningLanguage}
             required
@@ -125,19 +140,11 @@ const Signup = () => {
           <Select
             label="Native language"
             placeholder="Select language"
-            data={["English", "Spanish", "French", "German"]}
+            data={["English", "Spanish"]}
             value={nativeLanguage}
             onChange={setNativeLanguage}
             required
           />
-          <div>
-            <label className="font-medium text-gray-700">Time Zone</label>
-            <TimezoneSelect
-              value={timeZone}
-              onChange={setTimeZone}
-              className="mt-1"
-            />
-          </div>
 
           <Button type="submit" fullWidth radius="md" size="md" color="#14B82C">
             {" "}

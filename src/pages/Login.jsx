@@ -14,7 +14,13 @@ import { FaGoogle } from "react-icons/fa6";
 import { toast } from "react-toastify";
 import { useAuth } from "../context/AuthContext";
 import ClipLoader from "react-spinners/ClipLoader";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 
 const Login = () => {
   const googleProvider = new GoogleAuthProvider();
@@ -27,30 +33,99 @@ const Login = () => {
 
   const handleGoogleLogin = async () => {
     const googleProvider = new GoogleAuthProvider();
+    const loadingToastId = toast.loading("Logging in..."); // Show loading toast
+
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
 
-      // Check if user data already exists in Firestore
-      const userDoc = await getDoc(doc(db, "users", user.uid));
+      // Reference to user document in Firestore
+      const userRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userRef);
+
+      let isFirstTimeLogin = false; // Flag to check if it's the user's first login
+
       if (!userDoc.exists()) {
-        // Set initial data with empty values if it doesn't exist
-        await setDoc(doc(db, "users", user.uid), {
+        // Create the user document with the required fields
+        await setDoc(userRef, {
           email: user.email,
-          nickname: "",
-          country: "",
+          enrolledClasses: [],
+          joinedGroups: [],
+          lastLoggedIn: serverTimestamp(),
           learningLanguage: "",
+          name: user.displayName || "", // Use Google displayName or empty string if not available
           nativeLanguage: "",
-          timeZone: "",
-          createdAt: new Date(),
+          nickname: "", // You may ask the user to set this later
+          country: "",
+          photoUrl: "", // Set empty photoUrl to ignore Google default profile picture
+          savedDocuments: [],
+          tier: 1,
+          currentStreak: 1, // Start streak at 1 on first login
+        });
+        isFirstTimeLogin = true; // Set flag to true for first-time login
+      } else {
+        // If the document exists, update `lastLoggedIn` and possibly increment `currentStreak`
+        const userData = userDoc.data();
+        const lastLoggedIn = userData.lastLoggedIn
+          ? userData.lastLoggedIn.toDate()
+          : null;
+        const currentStreak = userData.currentStreak || 0;
+
+        const now = new Date();
+        let updatedStreak = currentStreak;
+
+        if (lastLoggedIn) {
+          const differenceInHours = Math.abs(now - lastLoggedIn) / 36e5;
+
+          if (
+            differenceInHours < 24 &&
+            lastLoggedIn.toDateString() === now.toDateString()
+          ) {
+            updatedStreak = currentStreak;
+          } else if (
+            differenceInHours < 48 &&
+            now.getDate() - lastLoggedIn.getDate() === 1
+          ) {
+            updatedStreak = currentStreak + 1;
+          } else {
+            updatedStreak = 0;
+          }
+        } else {
+          updatedStreak = 1;
+        }
+
+        // Update `lastLoggedIn` and `currentStreak`
+        await updateDoc(userRef, {
+          lastLoggedIn: serverTimestamp(),
+          currentStreak: updatedStreak,
         });
       }
 
-      navigate("/home");
+      toast.update(loadingToastId, {
+        // Update toast to success
+        render: "Logged in successfully!",
+        type: "success",
+        isLoading: false,
+        autoClose: 3000,
+      });
+      // Redirect based on first-time login status
+      if (isFirstTimeLogin) {
+        navigate("/settings", { replace: true });
+      } else {
+        navigate("/home", { replace: true });
+      }
     } catch (error) {
       console.error("Error during Google login:", error);
+      toast.update(loadingToastId, {
+        // Update toast to error
+        render: `Login error: ${error.message}`,
+        type: "error",
+        isLoading: false,
+        autoClose: 5000,
+      });
     }
   };
+
   const handleFacebookLogin = async () => {
     const facebookProvider = new FacebookAuthProvider();
     try {
@@ -72,29 +147,93 @@ const Login = () => {
         });
       }
 
-      navigate("/home");
+      navigate("/home", { replace: true });
     } catch (error) {
       console.error("Error during Facebook login:", error);
     }
   };
   const handleEmailLogin = async (e) => {
+    const loadingToastId = toast.loading("Logging in..."); // Show loading toast
+
     e.preventDefault();
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      toast.success("Logged in successfully!");
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
 
-      navigate("/home");
+      const userRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userRef);
+
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        const lastLoggedIn = userData.lastLoggedIn
+          ? userData.lastLoggedIn.toDate()
+          : null;
+        const currentStreak = userData.currentStreak || 0;
+
+        const now = new Date();
+        let updatedStreak = currentStreak;
+
+        if (lastLoggedIn) {
+          const differenceInHours = Math.abs(now - lastLoggedIn) / 36e5;
+
+          if (
+            differenceInHours < 24 &&
+            lastLoggedIn.toDateString() === now.toDateString()
+          ) {
+            // User logged in today, no streak change
+            updatedStreak = currentStreak;
+          } else if (
+            differenceInHours < 48 &&
+            now.getDate() - lastLoggedIn.getDate() === 1
+          ) {
+            // User logged in yesterday, increment streak
+            updatedStreak = currentStreak + 1;
+          } else {
+            // More than 24 hours since last login, reset streak
+            updatedStreak = 0;
+          }
+        } else {
+          // First login or no `lastLoggedIn` recorded, start streak at 1
+          updatedStreak = 1;
+        }
+
+        // Update `lastLoggedIn` and `currentStreak`
+        await updateDoc(userRef, {
+          lastLoggedIn: serverTimestamp(),
+          currentStreak: updatedStreak,
+        });
+      }
+
+      toast.update(loadingToastId, {
+        // Update toast to success
+        render: "Logged in successfully!",
+        type: "success",
+        isLoading: false,
+        autoClose: 3000,
+      });
+      navigate("/home", { replace: true });
     } catch (error) {
       console.error("Error during email login:", error);
-      toast.error(`Login error: ${error.message}`);
+
+      toast.update(loadingToastId, {
+        // Update toast to error
+        render: `Login error: ${error.message}`,
+        type: "error",
+        isLoading: false,
+        autoClose: 5000,
+      });
     }
   };
 
-  useEffect(() => {
-    if (!loading && user) {
-      navigate("/home", { replace: true });
-    }
-  }, [user, loading, navigate]);
+  // useEffect(() => {
+  //   if (!loading && user) {
+  //     navigate("/home", { replace: true });
+  //   }
+  // }, [user, loading, navigate]);
 
   // Show a spinner while checking authentication status
   if (loading) {

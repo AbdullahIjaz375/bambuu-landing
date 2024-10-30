@@ -11,6 +11,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import { useAuth } from "./context/AuthContext"; // Get useAuth in the component
 import UserSettings from "./pages/UserSettings";
 import Landing from "./pages/Landing";
+import PublicRoute from "./components/PublicRoute"; // Import PublicRoute
 
 const App = () => {
   const { user } = useAuth(); // Use useAuth() inside the component
@@ -21,8 +22,22 @@ const App = () => {
 
       <Routes>
         <Route path="/" element={<Landing />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
+        <Route
+          path="/login"
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/signup"
+          element={
+            <PublicRoute>
+              <Signup />
+            </PublicRoute>
+          }
+        />
         <Route
           path="/home"
           element={

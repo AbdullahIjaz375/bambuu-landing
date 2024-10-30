@@ -28,8 +28,8 @@ const Navbar = ({ user }) => {
   };
 
   return (
-    <div className="w-full bg-white shadow-md">
-      <div className="flex flex-col px-12 py-4">
+    <div className="w-full bg-white ">
+      <div className="flex flex-col px-12 pt-4">
         <div className="flex items-center justify-between ">
           {/* Logo */}
           <Link
@@ -40,7 +40,13 @@ const Navbar = ({ user }) => {
           </Link>
 
           {/* Desktop Navigation Links */}
-          <div className="items-center hidden mr-40 space-x-6 md:flex">
+          <div className="items-center hidden mr-48 space-x-6 md:flex">
+            <Link
+              to="/home"
+              className="text-lg text-gray-700 hover:text-green-600"
+            >
+              Home
+            </Link>
             <Link
               to="/learn"
               className="text-lg text-gray-700 hover:text-green-600"
@@ -79,7 +85,7 @@ const Navbar = ({ user }) => {
                   Sign out
                 </Button>
                 <Avatar
-                  src={user.photoURL}
+                  src={user.photoUrl}
                   radius="xl"
                   onClick={() => navigate("/settings")}
                   className="hover:cursor-pointer"
@@ -145,11 +151,18 @@ const Navbar = ({ user }) => {
               }}
             /> */}
             <Link
+              to="/home"
+              className="text-lg text-gray-700 hover:text-green-600"
+            >
+              Home
+            </Link>
+            <Link
               to="/learn"
               className="text-lg text-gray-700 hover:text-green-600"
             >
               Learn
             </Link>
+
             <Link
               to="/language-groups"
               className="text-lg text-gray-700 hover:text-green-600"
@@ -178,7 +191,7 @@ const Navbar = ({ user }) => {
                   Sign out
                 </Button>
                 <Avatar
-                  src={user.photoURL}
+                  src={user.photoUrl}
                   radius="xl"
                   className="hover:cursor-pointer"
                   onClick={() => navigate("/settings")}
