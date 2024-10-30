@@ -5,13 +5,15 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
-import Home from "./pages/Home";
+import Learn from "./pages/Learn";
 import Signup from "./pages/Signup";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useAuth } from "./context/AuthContext"; // Get useAuth in the component
 import UserSettings from "./pages/UserSettings";
 import Landing from "./pages/Landing";
 import PublicRoute from "./components/PublicRoute"; // Import PublicRoute
+import LanguageGroups from "./pages/LanguageGroups";
+import SuperTutor from "./pages/SuperTutor";
 
 const App = () => {
   const { user } = useAuth(); // Use useAuth() inside the component
@@ -39,10 +41,27 @@ const App = () => {
           }
         />
         <Route
-          path="/home"
+          path="/learn"
           element={
             <ProtectedRoute>
-              <Home />
+              <Learn />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/languageGroups"
+          element={
+            <ProtectedRoute>
+              <LanguageGroups />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/superTutor"
+          element={
+            <ProtectedRoute>
+              <SuperTutor />
             </ProtectedRoute>
           }
         />

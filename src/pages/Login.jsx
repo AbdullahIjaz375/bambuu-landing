@@ -75,20 +75,28 @@ const Login = () => {
         let updatedStreak = currentStreak;
 
         if (lastLoggedIn) {
-          const differenceInHours = Math.abs(now - lastLoggedIn) / 36e5;
+          // Get only the date parts for comparison
+          const lastLoginDate = new Date(
+            lastLoggedIn.getFullYear(),
+            lastLoggedIn.getMonth(),
+            lastLoggedIn.getDate()
+          );
+          const currentDate = new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            now.getDate()
+          );
 
-          if (
-            differenceInHours < 24 &&
-            lastLoggedIn.toDateString() === now.toDateString()
-          ) {
-            updatedStreak = currentStreak;
-          } else if (
-            differenceInHours < 48 &&
-            now.getDate() - lastLoggedIn.getDate() === 1
-          ) {
+          // Calculate the difference in days by subtracting dates
+          const differenceInDays =
+            (currentDate - lastLoginDate) / (1000 * 60 * 60 * 24);
+
+          if (differenceInDays === 1) {
+            // Increment streak for consecutive day login
             updatedStreak = currentStreak + 1;
-          } else {
-            updatedStreak = 0;
+          } else if (differenceInDays > 1) {
+            // Reset streak if login gap is more than a day
+            updatedStreak = 1;
           }
         } else {
           updatedStreak = 1;
@@ -112,7 +120,7 @@ const Login = () => {
       if (isFirstTimeLogin) {
         navigate("/settings", { replace: true });
       } else {
-        navigate("/home", { replace: true });
+        navigate("/learn", { replace: true });
       }
     } catch (error) {
       console.error("Error during Google login:", error);
@@ -147,7 +155,7 @@ const Login = () => {
         });
       }
 
-      navigate("/home", { replace: true });
+      navigate("/learn", { replace: true });
     } catch (error) {
       console.error("Error during Facebook login:", error);
     }
@@ -178,27 +186,31 @@ const Login = () => {
         let updatedStreak = currentStreak;
 
         if (lastLoggedIn) {
-          const differenceInHours = Math.abs(now - lastLoggedIn) / 36e5;
+          // Get only the date parts for comparison
+          const lastLoginDate = new Date(
+            lastLoggedIn.getFullYear(),
+            lastLoggedIn.getMonth(),
+            lastLoggedIn.getDate()
+          );
+          const currentDate = new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            now.getDate()
+          );
 
-          if (
-            differenceInHours < 24 &&
-            lastLoggedIn.toDateString() === now.toDateString()
-          ) {
-            // User logged in today, no streak change
-            updatedStreak = currentStreak;
-          } else if (
-            differenceInHours < 48 &&
-            now.getDate() - lastLoggedIn.getDate() === 1
-          ) {
-            // User logged in yesterday, increment streak
+          // Calculate the difference in days
+          const differenceInDays =
+            (currentDate - lastLoginDate) / (1000 * 60 * 60 * 24);
+
+          if (differenceInDays === 1) {
+            // Increment streak for consecutive day login
             updatedStreak = currentStreak + 1;
-          } else {
-            // More than 24 hours since last login, reset streak
-            updatedStreak = 0;
+          } else if (differenceInDays > 1) {
+            // Reset streak if login gap is more than a day
+            updatedStreak = 1;
           }
         } else {
-          // First login or no `lastLoggedIn` recorded, start streak at 1
-          updatedStreak = 1;
+          updatedStreak = 1; // First login or no `lastLoggedIn` recorded, start streak at 1
         }
 
         // Update `lastLoggedIn` and `currentStreak`
@@ -215,7 +227,7 @@ const Login = () => {
         isLoading: false,
         autoClose: 3000,
       });
-      navigate("/home", { replace: true });
+      navigate("/learn", { replace: true });
     } catch (error) {
       console.error("Error during email login:", error);
 
@@ -231,7 +243,7 @@ const Login = () => {
 
   // useEffect(() => {
   //   if (!loading && user) {
-  //     navigate("/home", { replace: true });
+  //     navigate("/learn", { replace: true });
   //   }
   // }, [user, loading, navigate]);
 

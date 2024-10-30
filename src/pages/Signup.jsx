@@ -68,7 +68,7 @@ const Signup = () => {
 
   useEffect(() => {
     if (!loading && user && !loading1) {
-      navigate("/home", { replace: true });
+      navigate("/learn", { replace: true });
     }
   }, [user, loading, loading1, navigate]);
 

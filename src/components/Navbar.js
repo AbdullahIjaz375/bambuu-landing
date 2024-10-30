@@ -42,25 +42,19 @@ const Navbar = ({ user }) => {
           {/* Desktop Navigation Links */}
           <div className="items-center hidden mr-48 space-x-6 md:flex">
             <Link
-              to="/home"
-              className="text-lg text-gray-700 hover:text-green-600"
-            >
-              Home
-            </Link>
-            <Link
               to="/learn"
               className="text-lg text-gray-700 hover:text-green-600"
             >
               Learn
             </Link>
             <Link
-              to="/language-groups"
+              to="/languageGroups"
               className="text-lg text-gray-700 hover:text-green-600"
             >
               Language Groups
             </Link>
             <Link
-              to="/supertutor"
+              to="/superTutor"
               className="text-lg text-gray-700 hover:text-green-600"
             >
               SuperTutor
@@ -150,12 +144,7 @@ const Navbar = ({ user }) => {
                 },
               }}
             /> */}
-            <Link
-              to="/home"
-              className="text-lg text-gray-700 hover:text-green-600"
-            >
-              Home
-            </Link>
+
             <Link
               to="/learn"
               className="text-lg text-gray-700 hover:text-green-600"
@@ -164,7 +153,7 @@ const Navbar = ({ user }) => {
             </Link>
 
             <Link
-              to="/language-groups"
+              to="/languageGroups"
               className="text-lg text-gray-700 hover:text-green-600"
             >
               Language Groups

@@ -6,9 +6,9 @@ import { useAuth } from "../context/AuthContext";
 const PublicRoute = ({ children }) => {
   const { user } = useAuth();
 
-  // If user is logged in, redirect to the home page
+  // If user is logged in, redirect to the learn page
   if (user) {
-    return <Navigate to="/home" />;
+    return <Navigate to="/learn" />;
   }
 
   // If not logged in, render the children components (public content)
