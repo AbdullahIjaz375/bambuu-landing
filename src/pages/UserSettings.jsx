@@ -203,7 +203,7 @@ const UserSettings = () => {
       // Upload photo if a new one is selected
       let updatedPhotoUrl = photoUrl;
       if (newPhoto) {
-        const photoRef = ref(storage, `tutors/${user.uid}`);
+        const photoRef = ref(storage, `${user.uid}/profilePic`);
         await uploadBytes(photoRef, newPhoto);
         updatedPhotoUrl = await getDownloadURL(photoRef);
       }

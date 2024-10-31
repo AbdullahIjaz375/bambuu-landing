@@ -14,6 +14,11 @@ import Landing from "./pages/Landing";
 import PublicRoute from "./components/PublicRoute"; // Import PublicRoute
 import LanguageGroups from "./pages/LanguageGroups";
 import SuperTutor from "./pages/SuperTutor";
+import ClassesUser from "./pages/user/ClassesUser";
+import GroupsUser from "./pages/user/GroupsUser";
+import Unauthorized from "./pages/Unauthorized";
+import GroupDetailUser from "./pages/user/GroupDetailUser";
+import ClassesDetailsUser from "./pages/user/ClassesDetailsUser";
 
 const App = () => {
   const { user } = useAuth(); // Use useAuth() inside the component
@@ -24,6 +29,8 @@ const App = () => {
 
       <Routes>
         <Route path="/" element={<Landing />} />
+        <Route path="/unauthorized" element={<Unauthorized />} />
+
         <Route
           path="/login"
           element={
@@ -43,7 +50,7 @@ const App = () => {
         <Route
           path="/learn"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requiredRole="user">
               <Learn />
             </ProtectedRoute>
           }
@@ -51,7 +58,7 @@ const App = () => {
         <Route
           path="/languageGroups"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requiredRole="user">
               <LanguageGroups />
             </ProtectedRoute>
           }
@@ -60,7 +67,7 @@ const App = () => {
         <Route
           path="/superTutor"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requiredRole="tutor">
               <SuperTutor />
             </ProtectedRoute>
           }
@@ -68,8 +75,41 @@ const App = () => {
         <Route
           path="/settings"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requiredRole="user">
               <UserSettings />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/classesUser"
+          element={
+            <ProtectedRoute requiredRole="user">
+              <ClassesUser />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/classesDetailsUser/:classId"
+          element={
+            <ProtectedRoute requiredRole="user">
+              <ClassesDetailsUser />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/groupsUser"
+          element={
+            <ProtectedRoute requiredRole="user">
+              <GroupsUser />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/groupDetailUser/:groupId"
+          element={
+            <ProtectedRoute requiredRole="user">
+              <GroupDetailUser />
             </ProtectedRoute>
           }
         />

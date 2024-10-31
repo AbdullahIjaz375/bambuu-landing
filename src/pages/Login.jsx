@@ -61,6 +61,7 @@ const Login = () => {
           savedDocuments: [],
           tier: 1,
           currentStreak: 1, // Start streak at 1 on first login
+          accountType: "user",
         });
         isFirstTimeLogin = true; // Set flag to true for first-time login
       } else {
@@ -106,6 +107,7 @@ const Login = () => {
         await updateDoc(userRef, {
           lastLoggedIn: serverTimestamp(),
           currentStreak: updatedStreak,
+          accountType: "user",
         });
       }
 
@@ -150,6 +152,7 @@ const Login = () => {
           country: "",
           learningLanguage: "",
           nativeLanguage: "",
+          accountType: "user",
           timeZone: "",
           createdAt: new Date(),
         });

@@ -90,6 +90,7 @@ export const AuthProvider = ({ children }) => {
       lastLoggedIn: userData.lastLoggedIn || null,
       savedDocuments: userData.savedDocuments || [],
       tier: userData.tier || 1,
+      accountType: userData.accountType || "",
     };
     sessionStorage.setItem("user", JSON.stringify(filteredUser));
   };

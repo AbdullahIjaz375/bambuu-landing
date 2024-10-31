@@ -55,6 +55,7 @@ const Signup = () => {
         savedDocuments: [], // Empty array for saved documents
         tier: 1, // Initial tier value
         currentStreak: 1, // Set current streak to 0 on signup
+        accountType: "user",
       });
 
       toast.success("Account created successfully!");
