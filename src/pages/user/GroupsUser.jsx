@@ -17,6 +17,8 @@ import { Select, Card, Text, Image, Group, Title, Button } from "@mantine/core";
 import { db, storage } from "../../firebaseConfig";
 import Modal from "react-modal";
 import { ClipLoader } from "react-spinners";
+import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
 
 Modal.setAppElement("#root");
 const GroupsUser = () => {
@@ -79,13 +81,24 @@ const GroupsUser = () => {
   const [image, setImage] = useState(null);
   const [loadingModal, setLoadingModal] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   const onRequestClose = () => {
     setModalOpen(false);
+    setStep(1);
+    setGroupType("");
+    setGroupName("");
+    setGroupDescription("");
+    setImage(null);
   };
 
   const onRequestOpen = () => {
     setModalOpen(true);
+  };
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    setImage(file); // Set the image in the parent component
+    setSelectedImage(URL.createObjectURL(file)); // Create a preview URL
   };
 
   const handleImageUpload = async () => {
@@ -149,116 +162,126 @@ const GroupsUser = () => {
 
   return (
     <>
-      <div className="flex flex-col items-center w-full px-4 pt-10 pb-10">
-        <Group position="apart" className="w-full max-w-3xl mb-4">
-          <Title order={1} className="text-gray-800">
+      <Navbar user={user} />
+      <div className="flex flex-col items-center w-full py-10 sm:px-10 md:px-20 lg:px-40 sm:pt-10 sm:pb-10">
+        <div className="flex items-center justify-between w-full mb-6">
+          <h1 className="text-xl font-bold text-gray-500 sm:text-3xl">
             Your Joined Groups
-          </Title>
+          </h1>
 
-          <Button
-            onClick={onRequestOpen}
-            className="flex items-end justify-end"
-            variant="filled"
-            color="green"
-          >
-            Add Group
-          </Button>
+          <div className="flex items-center gap-4">
+            <Select
+              value={selectedType}
+              onChange={handleFilterChange}
+              data={[
+                { value: "all", label: "All" },
+                { value: "spanish", label: "Spanish" },
+                { value: "english", label: "English" },
+              ]}
+              placeholder="Select Group Type"
+              className="w-36 sm:w-40"
+            />
 
-          {/* Mantine Select Filter */}
-          <Select
-            value={selectedType}
-            onChange={handleFilterChange}
-            data={[
-              { value: "all", label: "All" },
-              { value: "spanish", label: "Spanish" },
-              { value: "english", label: "English" },
-            ]}
-            placeholder="Select Group Type"
-            className="w-40"
-          />
-        </Group>
+            <Button
+              onClick={onRequestOpen}
+              className="text-white transition-colors bg-green-600 hover:bg-green-700"
+              variant="filled"
+            >
+              Add Group
+            </Button>
+          </div>
+        </div>
 
-        <div className="flex flex-wrap items-center justify-center gap-6 py-5">
+        <div className="flex flex-wrap justify-center w-full gap-6 px-2 py-5">
           {loadingGroups ? (
-            <div className="flex items-center justify-center min-h-[70vh]">
+            <div className="flex items-center justify-center min-h-[50vh] w-full">
               <ClipLoader color="#14B82C" size={50} />
             </div>
           ) : filteredGroups.length > 0 ? (
             filteredGroups.map((group) => (
-              <Card
+              <div
                 key={group.id}
-                shadow="sm"
-                padding="lg"
-                radius="md"
-                className="flex-shrink-0 w-64"
+                className="flex-shrink-0 w-full max-w-xs overflow-hidden rounded-lg shadow-sm sm:w-64"
               >
-                <Card.Section>
-                  <Image
+                <div className="relative">
+                  <img
                     src={group.imageUrl}
                     alt={group.groupName}
-                    height={160}
+                    className="object-cover w-full h-40"
                   />
-                </Card.Section>
-                <Text weight={500} size="lg" mt="md">
-                  {group.groupName}
-                </Text>
-                <Text size="sm" color="dimmed" mt="xs">
-                  {group.groupDescription}
-                </Text>
-                <Button
-                  onClick={() => handleOpenGroup(group.id)}
-                  className="mt-4 font-bold text-green-600 hover:underline"
-                  variant="link"
-                >
-                  Open
-                </Button>
-              </Card>
+                </div>
+                <div className="p-4">
+                  <h2 className="text-lg font-semibold truncate">
+                    {group.groupName}
+                  </h2>
+                  <p className="mt-1 text-sm text-gray-600 truncate">
+                    {group.groupDescription}
+                  </p>
+                  <button
+                    onClick={() => handleOpenGroup(group.id)}
+                    className="mt-4 font-bold text-green-600 hover:underline"
+                  >
+                    Open
+                  </button>
+                </div>
+              </div>
             ))
           ) : (
-            <p className="text-gray-500">
+            <p className="w-full text-center text-gray-500">
               You haven't joined any groups yet. Start by joining or creating a
               group!
             </p>
           )}
         </div>
       </div>
+
+      <Footer />
       <Modal
         isOpen={modalOpen}
         onRequestClose={onRequestClose}
         contentLabel="Create New Group"
-        className="max-w-lg p-6 mx-auto bg-white rounded-lg shadow-lg outline-none"
-        overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+        className="w-full max-w-md p-6 mx-auto transition-transform transform bg-white rounded-lg shadow-lg outline-none"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 sm:p-0"
       >
         {step === 1 && (
-          <div className="text-center">
-            <h2 className="mb-4 text-lg font-semibold text-gray-700">
+          <div className="space-y-6 text-center">
+            <h2 className="mb-4 text-xl font-semibold text-gray-800">
               Select Group Type
             </h2>
-            <div className="flex justify-center gap-4">
-              <button
+            <div className="flex flex-col justify-center gap-6 sm:flex-row">
+              <div
                 onClick={() => {
                   setGroupType("English");
                   setStep(2);
                 }}
-                className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none"
+                className="flex flex-col items-center w-full p-6 text-blue-600 transition-transform transform bg-blue-100 rounded-lg shadow cursor-pointer sm:w-40 hover:shadow-md hover:scale-105 hover:bg-blue-200"
               >
-                English
-              </button>
-              <button
+                <span className="mb-2 text-2xl font-semibold">English</span>
+                <p className="text-sm text-center text-gray-600">
+                  Join groups for English-speaking discussions and community
+                  support.
+                </p>
+              </div>
+
+              <div
                 onClick={() => {
                   setGroupType("Spanish");
                   setStep(2);
                 }}
-                className="px-4 py-2 text-white bg-green-500 rounded hover:bg-green-600 focus:outline-none"
+                className="flex flex-col items-center w-full p-6 text-green-600 transition-transform transform bg-green-100 rounded-lg shadow cursor-pointer sm:w-40 hover:shadow-md hover:scale-105 hover:bg-green-200"
               >
-                Spanish
-              </button>
+                <span className="mb-2 text-2xl font-semibold">Spanish</span>
+                <p className="text-sm text-center text-gray-600">
+                  Join groups for Spanish-speaking discussions and community
+                  support.
+                </p>
+              </div>
             </div>
           </div>
         )}
 
         {step === 2 && (
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div>
               <label className="block mb-1 text-sm font-medium text-gray-700">
                 Group Name
@@ -269,7 +292,7 @@ const GroupsUser = () => {
                 value={groupName}
                 onChange={(e) => setGroupName(e.target.value)}
                 required
-                className="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200 focus:outline-none"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-200 focus:outline-none"
               />
             </div>
 
@@ -277,13 +300,13 @@ const GroupsUser = () => {
               <label className="block mb-1 text-sm font-medium text-gray-700">
                 Description
               </label>
-              <input
-                type="text"
-                placeholder="Enter group description"
+              <textarea
+                placeholder="Enter group description (4 lines or more)"
                 value={groupDescription}
                 onChange={(e) => setGroupDescription(e.target.value)}
                 required
-                className="w-full p-2 border border-gray-300 rounded focus:ring focus:ring-blue-200 focus:outline-none"
+                rows="4"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md resize-none focus:ring-2 focus:ring-blue-200 focus:outline-none"
               />
             </div>
 
@@ -291,12 +314,26 @@ const GroupsUser = () => {
               <label className="block mb-1 text-sm font-medium text-gray-700">
                 Group Image
               </label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setImage(e.target.files[0])}
-                className="w-full p-2 border border-gray-300 rounded focus:outline-none"
-              />
+              <div className="relative flex flex-col items-center justify-center w-full p-6 transition-colors border border-gray-300 border-dashed rounded-md cursor-pointer hover:border-gray-400 bg-gray-50 hover:bg-gray-100">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                />
+
+                {selectedImage ? (
+                  <img
+                    src={selectedImage}
+                    alt="Selected Group"
+                    className="object-cover w-full h-32 rounded-md"
+                  />
+                ) : (
+                  <span className="text-gray-500">
+                    Click to upload an image for your group
+                  </span>
+                )}
+              </div>
             </div>
 
             <button
@@ -304,9 +341,11 @@ const GroupsUser = () => {
               disabled={
                 !groupName || !groupDescription || !image || loadingModal
               }
-              className={`w-full px-4 py-2 rounded text-white ${
-                loadingModal ? "bg-gray-400" : "bg-teal-500 hover:bg-teal-600"
-              } focus:outline-none focus:ring focus:ring-teal-200`}
+              className={`w-full py-3 rounded-md text-white font-semibold ${
+                loadingModal
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-green-500 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-teal-200"
+              }`}
             >
               {loadingModal ? "Creating Group..." : "Create Group"}
             </button>
