@@ -381,8 +381,8 @@ const Landing = () => {
       <Navbar user={user} />
       <div>
         {/* section 1 */}
-        <div className="flex flex-col items-center justify-center  space-y-12 border-b-8 rounded-[20vh] border-[#B9F9C2] mt-16">
-          <div className="flex flex-col items-center justify-center space-y-4">
+        <div className="flex section1-background flex-col items-center justify-center  space-y-16 border-b-8 rounded-[20vh] border-[#B9F9C2] mt-16">
+          <div className="flex flex-col items-center justify-center mt-6 space-y-4">
             <h1 className="text-6xl font-bold text-center text-black">
               Level-up your language
               <br /> learning today.

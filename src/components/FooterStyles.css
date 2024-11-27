@@ -1,0 +1,7 @@
+.footer-background {
+  background-image: url("../../public/images/landing-footer-bg.png");
+  background-repeat: no-repeat;
+  background-size: cover; /* Stretch the image to cover the width and height */
+  width: 100%;
+  height: 100%; /* Make sure the height fits your section */
+}

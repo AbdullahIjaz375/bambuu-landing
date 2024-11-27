@@ -7,3 +7,11 @@
   text-overflow: ellipsis;
   white-space: normal;
 }
+
+.section1-background {
+  background-image: url("../../public/images/landing-section1-bg.png");
+  background-repeat: no-repeat;
+  background-size: cover; /* Stretch the image to cover the width and height */
+  width: 100%;
+  height: 100%; /* Make sure the height fits your section */
+}
