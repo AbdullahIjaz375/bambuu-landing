@@ -24,7 +24,7 @@ const App = () => {
   const { user } = useAuth(); // Use useAuth() inside the component
 
   return (
-    <>
+    <div className="font-urbanist">
       <ToastContainer position="top-right" autoClose={3000} />
 
       <Routes>
@@ -114,7 +114,7 @@ const App = () => {
           }
         />
       </Routes>
-    </>
+    </div>
   );
 };
 
