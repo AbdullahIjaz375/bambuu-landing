@@ -26,7 +26,9 @@ const Login = () => {
   const googleProvider = new GoogleAuthProvider();
   const facebookProvider = new FacebookAuthProvider();
   const navigate = useNavigate();
-
+  const [showPassword, setShowPassword] = useState(false);
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { user, loading } = useAuth(); // Destructure loading state
@@ -165,7 +167,9 @@ const Login = () => {
   };
   const handleEmailLogin = async (e) => {
     const loadingToastId = toast.loading("Logging in..."); // Show loading toast
-
+    // Validate both fields
+    const isEmailValid = validateEmail(email);
+    const isPasswordValid = validatePassword(password);
     e.preventDefault();
     try {
       const userCredential = await signInWithEmailAndPassword(
@@ -234,9 +238,26 @@ const Login = () => {
     } catch (error) {
       console.error("Error during email login:", error);
 
+      // Handle INVALID_LOGIN_CREDENTIALS error
+      if (
+        error.code === "auth/invalid-credential" ||
+        error.message.includes("INVALID_LOGIN_CREDENTIALS")
+      ) {
+        setEmailError("Wrong email address.");
+        setPasswordError("Wrong password.");
+      }
+      // Handle other specific errors
+      else if (
+        error.code === "auth/user-not-found" ||
+        error.code === "auth/invalid-email"
+      ) {
+        setEmailError("Wrong email address.");
+      } else if (error.code === "auth/wrong-password") {
+        setPasswordError("Wrong password.");
+      }
+
       toast.update(loadingToastId, {
-        // Update toast to error
-        render: `Login error: ${error.message}`,
+        render: "Invalid email or password",
         type: "error",
         isLoading: false,
         autoClose: 5000,
@@ -251,6 +272,43 @@ const Login = () => {
   // }, [user, loading, navigate]);
 
   // Show a spinner while checking authentication status
+
+  const validateEmail = (email) => {
+    if (!email) {
+      setEmailError("Wrong email address.");
+      return false;
+    }
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      setEmailError("Wrong email address.");
+      return false;
+    }
+    setEmailError("");
+    return true;
+  };
+
+  const validatePassword = (password) => {
+    if (!password) {
+      setPasswordError("Wrong password.");
+      return false;
+    }
+    if (password.length < 6) {
+      setPasswordError("Wrong password.");
+      return false;
+    }
+    setPasswordError("");
+    return true;
+  };
+
+  const handleEmailChange = (e) => {
+    setEmail(e.target.value);
+    if (emailError) validateEmail(e.target.value);
+  };
+
+  const handlePasswordChange = (e) => {
+    setPassword(e.target.value);
+    if (passwordError) validatePassword(e.target.value);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -260,80 +318,191 @@ const Login = () => {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen p-6 bg-gradient-to-r from-green-200 to-yellow-100">
-      <Paper
-        shadow="lg"
-        padding="lg"
-        radius="lg"
-        className="w-full max-w-md px-4 py-6 bg-white rounded-lg shadow-lg md:px-8 md:py-12"
-      >
-        <h1 className="pb-8 text-4xl font-extrabold tracking-tight text-center text-gray-800">
-          Welcome to Bambuu
-        </h1>
-        <form onSubmit={handleEmailLogin} className="space-y-5">
-          <TextInput
-            label="Email"
-            placeholder="you@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            radius="md"
-            size="md"
-            className="p-2 shadow-sm"
-          />
-          <TextInput
-            label="Password"
-            placeholder="Your password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            radius="md"
-            size="md"
-            className="p-2 shadow-sm"
-          />
-          <Button type="submit" fullWidth radius="md" size="lg" color="#14B82C">
+    <div className="flex items-center justify-center min-h-screen bg-gray-50 ">
+      <div className="w-full max-w-md p-6 space-y-6 bg-white rounded-3xl border-2 border-[#e7e7e7]">
+        {/* Logo */}
+        <div className="flex justify-center">
+          <img alt="bambuu" src="/images/bambuu-b.png" />
+        </div>
+
+        {/* Welcome Text */}
+        <div className="space-y-2 text-center">
+          <h1 className="text-2xl font-bold">Welcome Back!</h1>
+          <p className="text-gray-600">Let's get you logged in.</p>
+        </div>
+
+        {/* Login Form */}
+        <form onSubmit={handleEmailLogin} className="space-y-4">
+          <div className="space-y-2">
+            <label className="block text-gray-700">Email</label>
+            <div className="relative">
+              {" "}
+              {/* Add this wrapper div */}
+              <input
+                type="email"
+                value={email}
+                onChange={handleEmailChange}
+                placeholder="Enter your email"
+                className={`w-full px-4 py-3 rounded-lg border ${
+                  emailError ? "border-red-500" : "border-gray-300"
+                } focus:outline-none focus:ring-2 ${
+                  emailError ? "focus:ring-red-500" : "focus:ring-green-500"
+                }`}
+                required
+              />
+              {emailError && (
+                <div className="absolute transform -translate-y-1/2 right-3 top-1/2">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="w-5 h-5 text-red-500"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+              )}
+            </div>
+            {emailError && <p className="text-sm text-red-500">{emailError}</p>}
+          </div>
+          <div className="space-y-2">
+            <label className="block text-gray-700">Password</label>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={handlePasswordChange}
+                placeholder="Enter your password"
+                className={`w-full px-4 py-3 rounded-lg border ${
+                  passwordError ? "border-red-500" : "border-gray-300"
+                } focus:outline-none focus:ring-2 ${
+                  passwordError ? "focus:ring-red-500" : "focus:ring-green-500"
+                }`}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute transform -translate-y-1/2 right-3 top-1/2"
+              >
+                {showPassword ? (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="w-5 h-5 text-gray-500"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="w-5 h-5 text-gray-500"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                  </svg>
+                )}
+              </button>
+            </div>
+            {passwordError && (
+              <p className="text-sm text-red-500">{passwordError}</p>
+            )}
+          </div>
+          {/* Links */}
+          <div className="flex justify-between text-sm">
+            <Link to="/forgot-password" className="font-semibold text-red-500">
+              Forgot Password?
+            </Link>
+            <Link to="/tutor-login" className="text-[#14b82c] font-semibold">
+              Login as Tutor
+            </Link>
+          </div>
+          {/* Login Button */}
+          <button
+            type="submit"
+            className="w-full py-3 text-[#888888] border border-[#888888] bg-[#b9f9c2] rounded-full hover:bg-[#93f3a0] focus:outline-none"
+          >
             Login
-          </Button>
+          </button>
         </form>
 
-        <Divider
-          className="my-8"
-          label="Or continue with"
-          labelPosition="center"
-        />
+        {/* Social Login */}
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-300"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 text-gray-500 bg-white">or sign in with</span>
+          </div>
+        </div>
 
-        <Group position="center" grow>
-          <Button
+        <div className="grid grid-cols-2 gap-4">
+          <button
             onClick={handleGoogleLogin}
-            radius="md"
-            size="lg"
-            color="#ff0808"
+            className="flex items-center justify-center px-4 py-2 space-x-4 border border-gray-300 rounded-full hover:bg-gray-50"
           >
-            <FaGoogle className="w-5 h-5 mr-2" />
-            Google
-          </Button>
-          <Button
+            <img alt="google" src="/images/google-button.png" />
+            <span>Google</span>
+          </button>
+          <button
             onClick={handleFacebookLogin}
-            radius="md"
-            size="lg"
-            color="#1877F2"
+            className="flex items-center justify-center px-4 py-2 space-x-4 border border-gray-300 rounded-full hover:bg-gray-50"
           >
-            <FaFacebook className="w-5 h-5 mr-2" />
-            Facebook
-          </Button>
-        </Group>
+            <img alt="google" src="/images/fb-button.png" />
+            <span>Facebook</span>
+          </button>
+        </div>
 
-        <p className="mt-8 text-sm text-center text-gray-500">
-          Don’t have an account?{" "}
-          <Link
-            to={"/signup"}
-            className="font-medium text-green-600 hover:underline"
-          >
-            Sign Up
-          </Link>
-        </p>
-      </Paper>
+        {/* Terms */}
+        <div className=" text-sm text-center text-[#9e9e9e] pt-6">
+          <p>
+            By logging, you agree to our{" "}
+            <a href="#" className="text-black">
+              Terms & Conditions
+            </a>
+          </p>
+          <p>
+            and{" "}
+            <a href="#" className="text-black">
+              PrivacyPolicy
+            </a>
+            .
+          </p>
+        </div>
+
+        {/* Sign Up Link */}
+        <div className="text-sm text-center text-[#5d5d5d]">
+          <p>
+            Don't have any account?{" "}
+            <Link to="/signup" className="text-[#14b82c]">
+              Sign up
+            </Link>
+          </p>
+        </div>
+      </div>
     </div>
   );
 };

@@ -19,6 +19,7 @@ import GroupsUser from "./pages/user/GroupsUser";
 import Unauthorized from "./pages/Unauthorized";
 import GroupDetailUser from "./pages/user/GroupDetailUser";
 import ClassesDetailsUser from "./pages/user/ClassesDetailsUser";
+import ForgotPassword from "./pages/ForgotPassword";
 
 const App = () => {
   const { user } = useAuth(); // Use useAuth() inside the component
@@ -44,6 +45,14 @@ const App = () => {
           element={
             <PublicRoute>
               <Signup />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/forgot-password"
+          element={
+            <PublicRoute>
+              <ForgotPassword />
             </PublicRoute>
           }
         />
