@@ -395,7 +395,7 @@ const LearnUser = () => {
       {/* Main Content */}
       <div className="flex-1 p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl ml-4">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8 border-b border-[#e7e7e7] pb-4">
+        <div className="flex items-center justify-between mb-4 border-b border-[#e7e7e7] pb-4">
           <div className="flex flex-row items-center space-x-4">
             <h1 className="text-3xl font-semibold">Hi, {user.name}!</h1>
             <p className="text-[#616161] text-lg">
@@ -422,7 +422,7 @@ const LearnUser = () => {
           </div>
         </div>
 
-        <div className="flex flex-row items-start justify-between w-full gap-8">
+        <div className="flex flex-row items-start justify-between w-full gap-8 mb-4">
           {/* Calendar */}
           <div className="w-[40%] p-4 bg-white border border-yellow-300 rounded-3xl">
             <div className="flex items-center justify-between mb-6">
@@ -558,8 +558,8 @@ const LearnUser = () => {
         {/* My Classes */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold">My Classes</h2>
-            <button className="px-4 py-2 text-base font-medium text-black bg-green-100 rounded-full hover:bg-green-200">
+            <h2 className="text-2xl font-bold">My Classes</h2>
+            <button className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]">
               View All
             </button>
           </div>

@@ -95,21 +95,25 @@ export const AuthProvider = ({ children }) => {
     sessionStorage.setItem("user", JSON.stringify(filteredUser));
   };
 
+  // In AuthContext.js
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      console.log("Auth state changed:", currentUser?.uid);
       if (currentUser) {
-        // Fetch user data from Firestore
         const userRef = doc(db, "users", currentUser.uid);
         const userDoc = await getDoc(userRef);
+        console.log("Firestore user data:", userDoc.data());
 
         if (userDoc.exists()) {
           const userData = { ...userDoc.data(), uid: currentUser.uid };
-          setUser(userData); // Store full user data in context
-          saveUserToSessionStorage(userData); // Store essential data in session storage
+          setUser(userData);
+          saveUserToSessionStorage(userData);
+          console.log("Saved user to session storage");
         }
       } else {
         setUser(null);
         sessionStorage.removeItem("user");
+        console.log("Removed user from session storage");
       }
       setLoading(false);
     });

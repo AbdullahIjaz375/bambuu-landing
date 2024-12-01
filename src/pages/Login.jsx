@@ -6,6 +6,7 @@ import {
   signInWithPopup,
   FacebookAuthProvider,
   signInWithEmailAndPassword,
+  signOut,
 } from "firebase/auth";
 import { useNavigate, Link } from "react-router-dom";
 import { Button, TextInput, Paper, Divider, Group, Title } from "@mantine/core";
@@ -165,12 +166,117 @@ const Login = () => {
       console.error("Error during Facebook login:", error);
     }
   };
+  // const handleEmailLogin = async (e) => {
+  //   const loadingToastId = toast.loading("Logging in..."); // Show loading toast
+  //   // Validate both fields
+
+  //   e.preventDefault();
+  //   try {
+  //     const userCredential = await signInWithEmailAndPassword(
+  //       auth,
+  //       email,
+  //       password
+  //     );
+  //     const user = userCredential.user;
+
+  //     const userRef = doc(db, "users", user.uid);
+  //     const userDoc = await getDoc(userRef);
+
+  //     if (userDoc.exists()) {
+  //       const userData = userDoc.data();
+  //       const lastLoggedIn = userData.lastLoggedIn
+  //         ? userData.lastLoggedIn.toDate()
+  //         : null;
+  //       const currentStreak = userData.currentStreak || 0;
+
+  //       const now = new Date();
+  //       let updatedStreak = currentStreak;
+
+  //       if (lastLoggedIn) {
+  //         // Get only the date parts for comparison
+  //         const lastLoginDate = new Date(
+  //           lastLoggedIn.getFullYear(),
+  //           lastLoggedIn.getMonth(),
+  //           lastLoggedIn.getDate()
+  //         );
+  //         const currentDate = new Date(
+  //           now.getFullYear(),
+  //           now.getMonth(),
+  //           now.getDate()
+  //         );
+
+  //         // Calculate the difference in days
+  //         const differenceInDays =
+  //           (currentDate - lastLoginDate) / (1000 * 60 * 60 * 24);
+
+  //         if (differenceInDays === 1) {
+  //           // Increment streak for consecutive day login
+  //           updatedStreak = currentStreak + 1;
+  //         } else if (differenceInDays > 1) {
+  //           // Reset streak if login gap is more than a day
+  //           updatedStreak = 1;
+  //         }
+  //       } else {
+  //         updatedStreak = 1; // First login or no `lastLoggedIn` recorded, start streak at 1
+  //       }
+
+  //       // Update `lastLoggedIn` and `currentStreak`
+  //       await updateDoc(userRef, {
+  //         lastLoggedIn: serverTimestamp(),
+  //         currentStreak: updatedStreak,
+  //       });
+  //     }
+
+  //     toast.update(loadingToastId, {
+  //       // Update toast to success
+  //       render: "Logged in successfully!",
+  //       type: "success",
+  //       isLoading: false,
+  //       autoClose: 3000,
+  //     });
+  //     navigate("/learn", { replace: true });
+  //   } catch (error) {
+  //     console.error("Error during email login:", error);
+
+  //     // Handle INVALID_LOGIN_CREDENTIALS error
+  //     if (
+  //       error.code === "auth/invalid-credential" ||
+  //       error.message.includes("INVALID_LOGIN_CREDENTIALS")
+  //     ) {
+  //       setEmailError("Wrong email address.");
+  //       setPasswordError("Wrong password.");
+  //     }
+  //     // Handle other specific errors
+  //     else if (
+  //       error.code === "auth/user-not-found" ||
+  //       error.code === "auth/invalid-email"
+  //     ) {
+  //       setEmailError("Wrong email address.");
+  //     } else if (error.code === "auth/wrong-password") {
+  //       setPasswordError("Wrong password.");
+  //     }
+
+  //     toast.update(loadingToastId, {
+  //       render: "Invalid email or password",
+  //       type: "error",
+  //       isLoading: false,
+  //       autoClose: 5000,
+  //     });
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   if (!loading && user) {
+  //     navigate("/learn", { replace: true });
+  //   }
+  // }, [user, loading, navigate]);
+
+  // Show a spinner while checking authentication status
+
   const handleEmailLogin = async (e) => {
-    const loadingToastId = toast.loading("Logging in..."); // Show loading toast
-    // Validate both fields
-    const isEmailValid = validateEmail(email);
-    const isPasswordValid = validatePassword(password);
+    const loadingToastId = toast.loading("Logging in...");
     e.preventDefault();
+
     try {
       const userCredential = await signInWithEmailAndPassword(
         auth,
@@ -182,72 +288,83 @@ const Login = () => {
       const userRef = doc(db, "users", user.uid);
       const userDoc = await getDoc(userRef);
 
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        const lastLoggedIn = userData.lastLoggedIn
-          ? userData.lastLoggedIn.toDate()
-          : null;
-        const currentStreak = userData.currentStreak || 0;
-
-        const now = new Date();
-        let updatedStreak = currentStreak;
-
-        if (lastLoggedIn) {
-          // Get only the date parts for comparison
-          const lastLoginDate = new Date(
-            lastLoggedIn.getFullYear(),
-            lastLoggedIn.getMonth(),
-            lastLoggedIn.getDate()
-          );
-          const currentDate = new Date(
-            now.getFullYear(),
-            now.getMonth(),
-            now.getDate()
-          );
-
-          // Calculate the difference in days
-          const differenceInDays =
-            (currentDate - lastLoginDate) / (1000 * 60 * 60 * 24);
-
-          if (differenceInDays === 1) {
-            // Increment streak for consecutive day login
-            updatedStreak = currentStreak + 1;
-          } else if (differenceInDays > 1) {
-            // Reset streak if login gap is more than a day
-            updatedStreak = 1;
-          }
-        } else {
-          updatedStreak = 1; // First login or no `lastLoggedIn` recorded, start streak at 1
-        }
-
-        // Update `lastLoggedIn` and `currentStreak`
-        await updateDoc(userRef, {
-          lastLoggedIn: serverTimestamp(),
-          currentStreak: updatedStreak,
-        });
+      if (!userDoc.exists()) {
+        toast.error("User profile not found");
+        await signOut(auth);
+        return;
       }
 
+      const userData = userDoc.data();
+      const lastLoggedIn = userData.lastLoggedIn
+        ? userData.lastLoggedIn.toDate()
+        : null;
+      const currentStreak = userData.currentStreak || 0;
+
+      const now = new Date();
+      let updatedStreak = currentStreak;
+
+      if (lastLoggedIn) {
+        // Get only the date parts for comparison
+        const lastLoginDate = new Date(
+          lastLoggedIn.getFullYear(),
+          lastLoggedIn.getMonth(),
+          lastLoggedIn.getDate()
+        );
+        const currentDate = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate()
+        );
+
+        // Calculate the difference in days
+        const differenceInDays =
+          (currentDate - lastLoginDate) / (1000 * 60 * 60 * 24);
+
+        if (differenceInDays === 1) {
+          // Increment streak for consecutive day login
+          updatedStreak = currentStreak + 1;
+        } else if (differenceInDays > 1) {
+          // Reset streak if login gap is more than a day
+          updatedStreak = 1;
+        }
+      } else {
+        updatedStreak = 1; // First login or no `lastLoggedIn` recorded
+      }
+
+      // Update Firestore with new streak and login time
+      await updateDoc(userRef, {
+        lastLoggedIn: serverTimestamp(),
+        currentStreak: updatedStreak,
+      });
+
+      // Store in session storage with updated data
+      const sessionUserData = {
+        ...userData,
+        uid: user.uid,
+        currentStreak: updatedStreak,
+        lastLoggedIn: now,
+      };
+      sessionStorage.setItem("user", JSON.stringify(sessionUserData));
+
       toast.update(loadingToastId, {
-        // Update toast to success
         render: "Logged in successfully!",
         type: "success",
         isLoading: false,
         autoClose: 3000,
       });
+      // Use setTimeout to ensure all updates are processed
+
       navigate("/learn", { replace: true });
     } catch (error) {
       console.error("Error during email login:", error);
 
-      // Handle INVALID_LOGIN_CREDENTIALS error
       if (
         error.code === "auth/invalid-credential" ||
         error.message.includes("INVALID_LOGIN_CREDENTIALS")
       ) {
         setEmailError("Wrong email address.");
         setPasswordError("Wrong password.");
-      }
-      // Handle other specific errors
-      else if (
+      } else if (
         error.code === "auth/user-not-found" ||
         error.code === "auth/invalid-email"
       ) {
@@ -264,15 +381,6 @@ const Login = () => {
       });
     }
   };
-
-  // useEffect(() => {
-  //   if (!loading && user) {
-  //     navigate("/learn", { replace: true });
-  //   }
-  // }, [user, loading, navigate]);
-
-  // Show a spinner while checking authentication status
-
   const validateEmail = (email) => {
     if (!email) {
       setEmailError("Wrong email address.");
