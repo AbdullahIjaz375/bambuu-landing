@@ -296,8 +296,10 @@ import Sidebar from "../../components/Sidebar";
 import ClassCard from "../../components/ClassCard";
 import { useAuth } from "../../context/AuthContext";
 import GroupCard from "../../components/GroupCard";
+import { useNavigate } from "react-router-dom";
 const LearnUser = () => {
   const { user, setUser } = useAuth();
+  const navigate = useNavigate();
 
   //---------------------------------my classes--------------------------------------------//
 
@@ -433,6 +435,8 @@ const LearnUser = () => {
     },
     // ... other items
   ];
+
+  //---------------------------navigation---------------------------------------------------//
 
   //--------------------------------------learning language----------------------------------//
 
@@ -654,40 +658,87 @@ const LearnUser = () => {
         <div className="w-full max-w-[160vh] mx-auto">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold">My Classes</h2>
-            <button className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]">
-              View All
-            </button>
+            {classesData.length > 0 && (
+              <button
+                className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+                onClick={() => navigate("/classesUser")}
+              >
+                View All
+              </button>
+            )}
           </div>
 
-          <div className="relative w-full">
-            <div className="flex gap-6 pb-4 overflow-x-auto scrollbar-hide">
-              {classesData.map((classItem) => (
-                <div key={classItem.id} className="flex-none w-80">
-                  <ClassCard {...classItem} />
-                </div>
-              ))}
+          {classesData.length === 0 ? (
+            <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
+              <img
+                alt="bambuu"
+                src="/images/no-class.png"
+                className="w-auto h-auto"
+              />
+              <p className="text-center text-gray-600">
+                You have not booked a class yet!
+              </p>
+              <button className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]">
+                Book a Class
+              </button>
             </div>
-          </div>
+          ) : (
+            <div className="relative w-full">
+              <div className="flex gap-6 pb-4 overflow-x-auto scrollbar-hide">
+                {classesData.map((classItem) => (
+                  <div key={classItem.id} className="flex-none w-80">
+                    <ClassCard {...classItem} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* My Groups */}
         <div className="w-full max-w-[160vh] mx-auto">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold">My Groups</h2>
-            <button className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]">
-              View All
-            </button>
+            {GroupData.length > 0 && (
+              <button
+                className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+                onClick={() => navigate("/groupsUser")}
+              >
+                View All
+              </button>
+            )}
           </div>
 
-          <div className="relative w-full">
-            <div className="flex gap-6 pb-4 overflow-x-auto scrollbar-hide">
-              {GroupData.map((classItem) => (
-                <div key={classItem.id} className="flex-none w-80">
-                  <GroupCard {...classItem} />
-                </div>
-              ))}
+          {GroupData.length === 0 ? (
+            <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
+              <img
+                alt="bambuu"
+                src="/images/no-class.png"
+                className="w-auto h-auto"
+              />
+              <p className="text-center text-gray-600">
+                You are not part of any group yet!
+              </p>
+              <div className="flex flex-row items-center justify-center space-x-4">
+                <button className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]">
+                  Join a Group
+                </button>
+                <button className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]">
+                  Create a Group
+                </button>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="relative w-full">
+              <div className="flex gap-6 pb-4 overflow-x-auto scrollbar-hide">
+                {GroupData.map((classItem) => (
+                  <div key={classItem.id} className="flex-none w-80">
+                    <GroupCard {...classItem} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
