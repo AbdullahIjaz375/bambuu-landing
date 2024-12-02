@@ -47,6 +47,7 @@
 //           }
 //         }
 //         setClasses(classesData);
+//         console.log("Final classes data:", classesData);
 //       } catch (error) {
 //         console.error("Error fetching classes:", error);
 //         setError(
@@ -135,108 +136,121 @@
 // };
 
 // export default ClassesUser;
-
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Search, ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { db } from "../../firebaseConfig";
+import { doc, getDoc } from "firebase/firestore";
+import { ClipLoader } from "react-spinners";
 import ClassCard from "../../components/ClassCard";
 import Sidebar from "../../components/Sidebar";
-import { useAuth } from "../../context/AuthContext";
-import { useNavigate } from "react-router-dom";
 
 const ClassesUser = () => {
-  const { user, setUser } = useAuth();
-
+  const { user } = useAuth();
+  const [classes, setClasses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState("group");
+  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
 
   const handleBack = () => {
     navigate(-1);
   };
 
-  const [activeTab, setActiveTab] = useState("group");
+  useEffect(() => {
+    const fetchClasses = async () => {
+      if (!user || !user.enrolledClasses) {
+        setLoading(false);
+        return;
+      }
 
-  const classesData = [
-    {
-      id: 1,
-      title: "Spanish Conversation Class",
-      language: "Spanish",
-      level: "Advanced",
-      time: "5:00-6:00 pm",
-      date: "20 DEC 2024",
-      tutor: "Taimoor (Admin)",
-      progress: "100/100",
-      type: "Ongoing",
-      imageSrc: "/images/class1.png",
-    },
-    {
-      id: 2,
-      title: "Beginner Spanish",
-      language: "Spanish",
-      level: "Beginner",
-      time: "5:00-6:00 pm",
-      date: "20 DEC 2024",
-      tutor: "Taimoor (Tutor)",
-      progress: "100/100",
-      type: "Ongoing",
-      imageSrc: "/images/class2.png",
-    },
-    {
-      id: 3,
-      title: "Spanish Conversation Class",
-      language: "Spanish",
-      level: "Advanced",
-      time: "5:00-6:00 pm",
-      date: "20 DEC 2024",
-      tutor: "Taimoor (Tutor)",
-      progress: "100/100",
-      type: "Ongoing",
-      imageSrc: "/images/class3.png",
-    },
-    {
-      id: 4,
-      title: "Spanish Conversation Class",
-      language: "Spanish",
-      level: "Advanced",
-      time: "5:00-6:00 pm",
-      date: "20 DEC 2024",
-      tutor: "Taimoor (Admin)",
-      progress: "100/100",
-      type: "Ongoing",
-      imageSrc: "/images/class1.png",
-    },
-    {
-      id: 5,
-      title: "Beginner Spanish",
-      language: "Spanish",
-      level: "Beginner",
-      time: "5:00-6:00 pm",
-      date: "20 DEC 2024",
-      tutor: "Taimoor (Tutor)",
-      progress: "100/100",
-      type: "Ongoing",
-      imageSrc: "/images/class2.png",
-    },
-    {
-      id: 6,
-      title: "Spanish Conversation Class",
-      language: "Spanish",
-      level: "Advanced",
-      time: "5:00-6:00 pm",
-      date: "20 DEC 2024",
-      tutor: "Taimoor (Tutor)",
-      progress: "100/100",
-      type: "Ongoing",
-      imageSrc: "/images/class3.png",
-    },
-  ];
+      setLoading(true);
+      const classesData = [];
+
+      try {
+        for (const classId of user.enrolledClasses) {
+          const classRef = doc(db, "classes", classId);
+          const classDoc = await getDoc(classRef);
+
+          if (classDoc.exists()) {
+            const classData = classDoc.data();
+
+            if (classData.classGroupId) {
+              const groupRef = doc(db, "groups", classData.classGroupId);
+              const groupDoc = await getDoc(groupRef);
+
+              if (groupDoc.exists()) {
+                const groupData = groupDoc.data();
+                classData.photoUrl = groupData.imageUrl;
+              }
+            }
+
+            classesData.push({ id: classId, ...classData });
+          }
+        }
+        setClasses(classesData);
+      } catch (error) {
+        console.error("Error fetching classes:", error);
+        setError(
+          "Unable to fetch classes at this time. Please try again later."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchClasses();
+  }, [user]);
+
+  const formatClassForCard = (classItem) => {
+    const timestamp = classItem.classDate;
+    const date = new Date(timestamp.seconds * 1000);
+    const formattedDate = date.toLocaleDateString("en-US", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+
+    return {
+      id: classItem.id,
+      title: classItem.className,
+      language: classItem.classLanguageType,
+      level: classItem.classLevel,
+      time: classItem.classTime,
+      date: formattedDate,
+      tutor: "TBD",
+      progress: `${classItem.classMembers?.length || 0}/${
+        classItem.availableSpots
+      }`,
+      type: classItem.classType,
+      imageSrc: classItem.photoUrl || "/images/default-class.png",
+    };
+  };
+
+  const filteredClasses = classes.filter((classItem) => {
+    const searchTerm = searchQuery.toLowerCase().trim();
+    if (!searchTerm) return true;
+
+    return (
+      classItem.className?.toLowerCase().includes(searchTerm) ||
+      classItem.classLanguageType?.toLowerCase().includes(searchTerm) ||
+      classItem.classLevel?.toLowerCase().includes(searchTerm)
+    );
+  });
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
 
   return (
     <div className="flex min-h-screen bg-white">
-      {/* Sidebar */}
       <Sidebar user={user} />
 
       <div className="flex-1 p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl ml-[17rem] m-2">
         <div className="flex items-center justify-between pb-4 mb-6 border-b">
-          <div className="flex items-center gap-4 ">
+          <div className="flex items-center gap-4">
             <button
               className="p-3 bg-gray-100 rounded-full"
               onClick={handleBack}
@@ -280,16 +294,38 @@ const ClassesUser = () => {
               type="text"
               placeholder="Search classes by name"
               className="w-[40vh] py-3 pl-10 pr-4 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              value={searchQuery}
+              onChange={handleSearchChange}
             />
           </div>
         </div>
-        <div className="flex flex-wrap gap-4">
-          {classesData.map((classItem) => (
-            <div key={classItem.id} className="flex-none w-80">
-              <ClassCard {...classItem} />
-            </div>
-          ))}
-        </div>
+
+        {loading ? (
+          <div className="flex items-center justify-center min-h-[50vh]">
+            <ClipLoader color="#14B82C" size={50} />
+          </div>
+        ) : error ? (
+          <p className="text-center text-red-500">{error}</p>
+        ) : filteredClasses.length === 0 ? (
+          <p className="text-center text-gray-500">
+            {searchQuery
+              ? "No classes found matching your search."
+              : "No classes found."}
+          </p>
+        ) : (
+          <div className="flex flex-wrap gap-4">
+            {filteredClasses.map((classItem) => (
+              <div key={classItem.id} className="flex-none w-80">
+                <ClassCard
+                  {...formatClassForCard(classItem)}
+                  onClick={() =>
+                    navigate(`/classesDetailsUser/${classItem.id}`)
+                  }
+                />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
