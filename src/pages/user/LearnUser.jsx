@@ -295,6 +295,7 @@ import {
 import Sidebar from "../../components/Sidebar";
 import ClassCard from "../../components/ClassCard";
 import { useAuth } from "../../context/AuthContext";
+import GroupCard from "../../components/GroupCard";
 const LearnUser = () => {
   const { user, setUser } = useAuth();
 
@@ -337,6 +338,100 @@ const LearnUser = () => {
       type: "Ongoing",
       imageSrc: "/images/class3.png", // Replace with your actual image path
     },
+    {
+      id: 4,
+      title: "Spanish Conversation Class",
+      language: "Spanish",
+      level: "Advanced",
+      time: "5:00-6:00 pm",
+      date: "20 DEC 2024",
+      tutor: "Taimoor (Admin)",
+      progress: "100/100",
+      type: "Ongoing",
+      imageSrc: "/images/class1.png", // Replace with your actual image path
+    },
+    {
+      id: 5,
+      title: "Beginner Spanish",
+      language: "Spanish",
+      level: "Beginner",
+      time: "5:00-6:00 pm",
+      date: "20 DEC 2024",
+      tutor: "Taimoor (Tutor)",
+      progress: "100/100",
+      type: "Ongoing",
+      imageSrc: "/images/class2.png", // Replace with your actual image path
+    },
+    {
+      id: 6,
+      title: "Spanish Conversation Class",
+      language: "Spanish",
+      level: "Advanced",
+      time: "5:00-6:00 pm",
+      date: "20 DEC 2024",
+      tutor: "Taimoor (Tutor)",
+      progress: "100/100",
+      type: "Ongoing",
+      imageSrc: "/images/class3.png", // Replace with your actual image path
+    },
+  ];
+
+  const GroupData = [
+    {
+      id: 1,
+      title: "Spanish Learners",
+      language: "Spanish",
+      level: "Advanced",
+      adminName: "Taimoor",
+      memberCount: "2K+",
+      flagSrc: "/images/flag1.png", // Replace with actual flag image path
+    },
+    {
+      id: 2,
+      title: "Spanish Learners",
+      language: "Spanish",
+      level: "Advanced",
+      adminName: "Taimoor",
+      memberCount: "2K+",
+      flagSrc: "/images/flag2.png", // Replace with actual flag image path
+    },
+    {
+      id: 3,
+      title: "Spanish Learners",
+      language: "Spanish",
+      level: "Advanced",
+      adminName: "Taimoor",
+      memberCount: "2K+",
+      flagSrc: "/images/flag3.png", // Replace with actual flag image path
+    },
+    {
+      id: 4,
+      title: "Spanish Learners",
+      language: "Spanish",
+      level: "Advanced",
+      adminName: "Taimoor",
+      memberCount: "2K+",
+      flagSrc: "/images/flag1.png", // Replace with actual flag image path
+    },
+    {
+      id: 5,
+      title: "Spanish Learners",
+      language: "Spanish",
+      level: "Advanced",
+      adminName: "Taimoor",
+      memberCount: "2K+",
+      flagSrc: "/images/flag2.png", // Replace with actual flag image path
+    },
+    {
+      id: 6,
+      title: "Spanish Learners",
+      language: "Spanish",
+      level: "Advanced",
+      adminName: "Taimoor",
+      memberCount: "2K+",
+      flagSrc: "/images/flag3.png", // Replace with actual flag image path
+    },
+    // ... other items
   ];
 
   //--------------------------------------learning language----------------------------------//
@@ -388,12 +483,12 @@ const LearnUser = () => {
   //------------------------------------------------------------------------------------------//
 
   return (
-    <div className="flex min-h-screen p-4 bg-white">
+    <div className="flex min-h-screen bg-white">
       {/* Sidebar */}
       <Sidebar user={user} />
 
       {/* Main Content */}
-      <div className="flex-1 p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl ml-4">
+      <div className="flex-1 p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl ml-[17rem] m-2">
         {/* Header */}
         <div className="flex items-center justify-between mb-4 border-b border-[#e7e7e7] pb-4">
           <div className="flex flex-row items-center space-x-4">
@@ -556,7 +651,7 @@ const LearnUser = () => {
         </div>
 
         {/* My Classes */}
-        <div className="mb-8">
+        <div className="w-full max-w-[160vh] mx-auto">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold">My Classes</h2>
             <button className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]">
@@ -564,51 +659,34 @@ const LearnUser = () => {
             </button>
           </div>
 
-          <div className="grid grid-cols-3 gap-6">
-            {classesData.map((classItem) => (
-              <ClassCard key={classItem.id} {...classItem} />
-            ))}
+          <div className="relative w-full">
+            <div className="flex gap-6 pb-4 overflow-x-auto scrollbar-hide">
+              {classesData.map((classItem) => (
+                <div key={classItem.id} className="flex-none w-80">
+                  <ClassCard {...classItem} />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
         {/* My Groups */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold">My Groups</h2>
-            <button className="text-green-500 hover:underline">View All</button>
+        <div className="w-full max-w-[160vh] mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold">My Groups</h2>
+            <button className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]">
+              View All
+            </button>
           </div>
 
-          <div className="grid grid-cols-3 gap-6">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="p-4 bg-white border rounded-xl">
-                <img
-                  src="/api/placeholder/64/64"
-                  alt="Group"
-                  className="w-16 h-16 mb-4 rounded-full"
-                />
-                <h3 className="mb-2 font-bold">Spanish Learners</h3>
-                <div className="flex items-center gap-2 mb-2">
-                  <img
-                    src="/api/placeholder/24/24"
-                    alt="Spanish"
-                    className="w-6 h-6 rounded-full"
-                  />
-                  <span>Spanish</span>
-                  <span className="px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded-full text-sm">
-                    Advanced
-                  </span>
+          <div className="relative w-full">
+            <div className="flex gap-6 pb-4 overflow-x-auto scrollbar-hide">
+              {GroupData.map((classItem) => (
+                <div key={classItem.id} className="flex-none w-80">
+                  <GroupCard {...classItem} />
                 </div>
-                <div className="flex items-center gap-2 mb-2">
-                  <img
-                    src="/api/placeholder/24/24"
-                    alt="Admin"
-                    className="w-6 h-6 rounded-full"
-                  />
-                  <span className="text-sm text-gray-500">Taimoor (Admin)</span>
-                </div>
-                <div className="text-sm text-gray-500">2k+</div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>

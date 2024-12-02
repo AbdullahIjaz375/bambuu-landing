@@ -13,64 +13,58 @@ const ClassCard = ({
   imageSrc,
 }) => {
   return (
-    <div className="relative overflow-hidden border border-green-400 rounded-3xl">
-      {/* Main Image */}
-      <div className="w-full aspect-video">
-        <img
-          src={imageSrc}
-          alt={title}
-          className="object-cover w-full h-full"
-        />
-      </div>
-
-      {/* Content Container with Gradient Background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-green-50/80 to-green-50">
-        {/* Type Badge */}
-        <div className="absolute top-4 left-4">
-          <span className="px-4 py-1.5 text-sm font-medium text-white bg-green-500 rounded-full">
-            {type}
-          </span>
+    <div className="max-w-md">
+      <div className="flex flex-col items-center justify-center border border-[#14b82c] bg-white rounded-3xl p-2 ">
+        <div className="w-full ">
+          <img
+            alt="Learn Spanish"
+            src={imageSrc}
+            className="object-cover w-full h-48 rounded-t-2xl"
+          />
         </div>
 
-        {/* Bottom Content */}
-        <div className="absolute bottom-0 left-0 right-0 p-4">
-          {/* Title */}
-          <h3 className="mb-3 text-xl font-bold">{title}</h3>
-
-          {/* Language and Level */}
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <span className="text-xl">🇪🇸</span>
-              <span className="text-base">{language}</span>
-            </div>
-            <span className="px-3 py-1 text-sm bg-yellow-200 rounded-full">
-              {level}
+        <div className="w-full space-y-2 bg-[#c3f3c9] rounded-b-3xl p-2">
+          {/* Status Badge */}
+          <div className="flex items-start">
+            <span className="px-4 py-1 text-sm bg-[#14b82c] text-white rounded-full">
+              {type}
             </span>
           </div>
 
-          {/* Time and Date */}
-          <div className="flex items-center gap-4 mb-3">
-            <div className="flex items-center gap-2">
-              <Clock className="w-5 h-5 text-gray-600" />
-              <span className="text-gray-600">{time}</span>
+          {/* Title */}
+          <h2 className="text-xl font-bold text-gray-800">{title}</h2>
+
+          {/* Language and Level */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <span className="flex items-center">
+                <span className="ml-2 text-[#042f0c]">{language}</span>
+              </span>
             </div>
-            <div className="flex items-center gap-2">
+            <span className="px-3 py-1 text-sm bg-[#fff885] rounded-full">
+              {level}
+            </span>
+          </div>
+        </div>
+        <div className="flex flex-col items-center justify-center w-full p-2 space-y-2">
+          <div className="flex flex-row items-center justify-between w-full ">
+            <div className="flex flex-row items-center justify-center space-x-2">
+              <Clock className="w-5 h-5 text-gray-600" />
+              <span className=" text-[#454545] text-md">{time}</span>
+            </div>
+            <div className="flex flex-row items-center justify-center space-x-2">
               <Calendar className="w-5 h-5 text-gray-600" />
-              <span className="text-gray-600">{date}</span>
+              <span className=" text-[#454545] text-md">{date}</span>
             </div>
           </div>
-
-          {/* Tutor and Progress */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 overflow-hidden rounded-full">
-                <User />
-              </div>
-              <span className="text-gray-700">{tutor}</span>
+          <div className="flex flex-row items-center justify-between w-full ">
+            <div className="flex flex-row items-center justify-center space-x-2">
+              <User className="w-5 h-5 text-gray-600" />
+              <span className=" text-[#454545] text-md">{tutor}</span>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex flex-row items-center justify-center space-x-2">
               <Users className="w-5 h-5 text-gray-600" />
-              <span className="text-gray-600">{progress}</span>
+              <span className=" text-[#454545] text-md">{progress}</span>
             </div>
           </div>
         </div>

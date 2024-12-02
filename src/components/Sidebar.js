@@ -43,7 +43,7 @@ const Sidebar = ({ user }) => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-[#e6fde9] w-64 py-6 rounded-3xl border-2 border-[#b9f9c2]">
+    <div className=" fixed top-2 left-2 flex flex-col h-[calc(100vh-1rem)] bg-[#e6fde9] w-64 py-6 rounded-3xl border-2 border-[#b9f9c2]">
       {/* Logo */}
       <Link to="/" className="px-6 mb-8">
         <img alt="bambuu" src="/images/bambuu-new-logo.png" />
