@@ -306,108 +306,271 @@
 // export default Landing;
 
 // src/pages/Landing.js
+// import React from "react";
+// import Navbar from "../components/Navbar";
+// import { useAuth } from "../context/AuthContext";
+// import { db, auth } from "../firebaseConfig";
+// import { IoSearchOutline } from "react-icons/io5";
+// import { TextInput, Button } from "@mantine/core";
+// import "../styles/LandingStyles.css";
+// import Footer from "../components/Footer";
+
+// const Landing = () => {
+//   const { user } = useAuth(); // Get the user from AuthContext
+
+//   return (
+//     <>
+//       <Navbar user={user} />
+//       <div>
+//         {/* section 1 */}
+//         <div className="flex section1-background flex-col items-center justify-center  space-y-16 border-b-8 rounded-[20vh] border-[#B9F9C2] mt-16">
+//           <div className="flex flex-col items-center justify-center mt-6 space-y-4">
+//             <h1 className="text-6xl font-bold text-center text-black">
+//               Level-up your language
+//               <br /> learning today.
+//             </h1>
+//             <h1 className="text-2xl text-center text-black">
+//               Learn a new language. Practice through conversation.{" "}
+//             </h1>
+//           </div>
+
+//           <div>
+//             <img
+//               alt="bambuu"
+//               src="/images/landing-section1-1.png"
+//               className="w-full h-auto"
+//             />
+//           </div>
+//         </div>
+
+//         {/* section 2 */}
+
+//         <div className="flex flex-row items-start justify-between mt-56 mb-40 px-28">
+//           <h1 className="w-1/2 text-6xl font-semibold text-left text-black">
+//             About bammbuu
+//           </h1>
+//           <h1 className="w-1/2 text-2xl text-left text-[#3d3d3d]">
+//             Learning a new language? Need someone to practice with? bammbuu was
+//             created by language learners, for language learners. We believe that
+//             language is best learned through conversation and in community. Join
+//             today to connect with native speakers, practice conversation in a
+//             community, and learn from certified language instructors.
+//             <br />
+//             <span className="font-semibold text-[#3d3d3d]">
+//               {" "}
+//               bammbuu is a safe place to practice.{" "}
+//             </span>
+//           </h1>
+//         </div>
+//         {/* section 3 */}
+//         <div className="flex flex-col items-center justify-center mb-40 space-y-12 px-28">
+//           {/* cards */}
+
+//           <div className="flex flex-row items-center justify-center space-x-12">
+//             <div className="w-1/2 flex h-[100vh] flex-col justify-center items-center border-2 space-y-10 border-[#14b82c] rounded-[8vh] bg-[#e6fde9] px-20 pt-28">
+//               <h1 className="text-4xl font-semibold text-center text-[#042f0c]">
+//                 Explore conversation classes &<br /> groups
+//               </h1>
+
+//               <h1 className="text-2xl text-center text-[#3d3d3d]">
+//                 We believe that language is best learned through conversation
+//                 and in community. Join a language group and practice through
+//                 conversation for free today.
+//               </h1>
+
+//               <img
+//                 alt="bambuu"
+//                 src="/images/landing-card1.png"
+//                 className="w-auto h-full"
+//               />
+//             </div>
+//             <div className="w-1/2 flex flex-col h-[100vh] justify-center items-center border-2 space-y-10 border-[#14b82c] rounded-[8vh] bg-[#e6fde9] px-20 pt-28">
+//               <h1 className="text-4xl font-semibold text-center text-[#042f0c]">
+//                 Connect with real people{" "}
+//               </h1>
+
+//               <h1 className="text-2xl text-center text-[#3d3d3d]">
+//                 Practice speaking with native speakers in real-time. Improve
+//                 your fluency and confidence through interactive 1:1
+//                 conversations that bring the language to life.
+//               </h1>
+
+//               <img
+//                 alt="bambuu"
+//                 src="/images/landing-card2.png"
+//                 className="w-auto h-full"
+//               />
+//             </div>
+//           </div>
+//           <div className="flex flex-row items-center justify-center space-x-12">
+//             <div className="w-1/2 flex flex-col h-[100vh] justify-center items-center border-2 space-y-10 border-[#14b82c] rounded-[8vh] bg-[#e6fde9] px-20 pt-28">
+//               <h1 className="text-4xl font-semibold text-center text-[#042f0c]">
+//                 Learn from certified <br />
+//                 language instructors{" "}
+//               </h1>
+
+//               <h1 className="text-2xl text-center text-[#3d3d3d]">
+//                 Find a certified language instructor to help you reach your
+//                 goals through 1:1 private classes. Later, you can practice with
+//                 a language conversation group.
+//               </h1>
+
+//               <img
+//                 alt="bambuu"
+//                 src="/images/landing-card3.png"
+//                 className="w-auto h-full"
+//               />
+//             </div>
+//             <div className="w-1/2 flex flex-col h-[100vh] justify-center items-center border-2 space-y-10 border-[#14b82c] rounded-[8vh] bg-[#e6fde9] px-20 pt-28">
+//               <h1 className="text-4xl font-semibold text-center text-[#042f0c]">
+//                 Meet SuperTutor{" "}
+//               </h1>
+
+//               <h1 className="text-2xl text-center text-[#3d3d3d]">
+//                 Your personal AI language tutor that is available to help you
+//                 practice conversation 24/7. SuperTutor adapts to your learning
+//                 style to help you improve and build confidence.
+//               </h1>
+
+//               <img
+//                 alt="bambuu"
+//                 src="/images/landing-card4.png"
+//                 className="w-auto h-full"
+//               />
+//             </div>
+//           </div>
+//         </div>
+
+//         {/* section 4 */}
+
+//         <div className="flex flex-col items-center justify-center mt-56 space-y-12 mb-28">
+//           <h1 className="text-6xl font-semibold text-center text-black">
+//             Download Mobile App
+//           </h1>
+//           <img
+//             alt="bambuu"
+//             src="/images/qr-code.png"
+//             className="w-auto h-full"
+//           />
+//           <div className="flex flex-row items-center justify-center space-x-6">
+//             <img
+//               alt="bambuu"
+//               src="/images/apple-button.png"
+//               className="w-auto h-full hover:cursor-pointer"
+//             />
+//             <img
+//               alt="bambuu"
+//               src="/images/playstore-button.png"
+//               className="w-auto h-full hover:cursor-pointer"
+//             />
+//           </div>
+//         </div>
+
+//         {/* section 5 */}
+
+//         <div className="flex flex-col items-center justify-center rounded-[6vh] border-2 border-[#14b82c] bg-[#e6fde9] pt-28 mx-28 space-y-10">
+//           <h1 className="text-6xl font-semibold text-center text-black">
+//             The bammbuu web version
+//             <br /> is coming soon!{" "}
+//           </h1>
+
+//           <Button
+//             className="text-black border-2 border-black"
+//             size="xl"
+//             variant="filled"
+//             color="#ffbf00"
+//             radius="xl"
+//           >
+//             {" "}
+//             Coming Soon!
+//           </Button>
+
+//           <img
+//             alt="bambuu"
+//             src="/images/landing-laptop.png"
+//             className="w-[150vh] h-auto"
+//           />
+//         </div>
+//       </div>
+//       <Footer />
+//     </>
+//   );
+// };
+
+// export default Landing;
+
 import React from "react";
+import { motion } from "framer-motion";
 import Navbar from "../components/Navbar";
 import { useAuth } from "../context/AuthContext";
-import { db, auth } from "../firebaseConfig";
-import { IoSearchOutline } from "react-icons/io5";
-import { TextInput, Button } from "@mantine/core";
+import { Button } from "@mantine/core";
 import "../styles/LandingStyles.css";
 import Footer from "../components/Footer";
 
+const Card = ({ title, description, imageSrc, index }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 100 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-100px" }}
+      transition={{ duration: 0.8, delay: index * 0.2 }}
+      className="w-full md:w-1/2  flex h-[100vh] flex-col justify-center items-center border-2 space-y-10 border-[#14b82c] rounded-[8vh] bg-[#e6fde9] px-20 pt-28"
+    >
+      <h1 className="text-2xl lg:text-4xl font-semibold text-center text-[#042f0c]">
+        {title}
+      </h1>
+      <h1 className="text-lg lg:text-2xl text-center text-[#3d3d3d]">
+        {description}
+      </h1>
+      <img alt="bambuu" src={imageSrc} className="w-auto h-full" />
+    </motion.div>
+  );
+};
+
 const Landing = () => {
-  const { user } = useAuth(); // Get the user from AuthContext
-
-  const cardData = [
-    {
-      title: "AI SuperTutor",
-      description:
-        "Join live webinars conducted by subject matter experts, where they delve into specific topics, and answer questions from participants.",
-      imageUrl: "/images/landing-card-1.png",
-    },
-    {
-      title: "Language Exchange",
-      description:
-        "Connect with native speakers to practice your language skills in a friendly environment.",
-      imageUrl: "/images/landing-card-2.png",
-    },
-    {
-      title: "Certified Instructors",
-      description:
-        "Learn from certified instructors with experience in language teaching and cultural exchange.",
-      imageUrl: "/images/landing-card-3.png",
-    },
-    {
-      title: "AI SuperTutor",
-      description:
-        "Join live webinars conducted by subject matter experts, where they delve into specific topics, and answer questions from participants.",
-      imageUrl: "/images/landing-card-1.png",
-    },
-    {
-      title: "Language Exchange",
-      description:
-        "Connect with native speakers to practice your language skills in a friendly environment.",
-      imageUrl: "/images/landing-card-2.png",
-    },
-    {
-      title: "Certified Instructors",
-      description:
-        "Learn from certified instructors with experience in language teaching and cultural exchange.",
-      imageUrl: "/images/landing-card-3.png",
-    },
-  ];
-
-  const instructors = [
-    { id: 1, img: "/images/ins-1.png" },
-    { id: 2, img: "/images/ins-2.png" },
-    { id: 3, img: "/images/ins-3.png" },
-    { id: 4, img: "/images/ins-4.png" },
-    { id: 5, img: "/images/ins-5.png" },
-    { id: 6, img: "/images/ins-6.png" },
-    { id: 7, img: "/images/ins-7.png" },
-    { id: 8, img: "/images/ins-1.png" },
-    { id: 9, img: "/images/ins-2.png" },
-    { id: 10, img: "/images/ins-3.png" },
-    { id: 11, img: "/images/ins-4.png" },
-    { id: 12, img: "/images/ins-5.png" },
-    { id: 13, img: "/images/ins-6.png" },
-    { id: 14, img: "/images/ins-7.png" },
-    { id: 15, img: "/images/ins-1.png" },
-    { id: 16, img: "/images/ins-2.png" },
-  ];
+  const { user } = useAuth();
 
   return (
     <>
       <Navbar user={user} />
-      <div>
+      <div className="overflow-hidden">
         {/* section 1 */}
-        <div className="flex section1-background flex-col items-center justify-center  space-y-16 border-b-8 rounded-[20vh] border-[#B9F9C2] mt-16">
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="flex section1-background flex-col items-center justify-center space-y-8 lg:space-y-16 border-b-8 rounded-3xl lg:rounded-[20vh] border-[#B9F9C2] mt-8 lg:mt-16 px-4 lg:px-0"
+        >
           <div className="flex flex-col items-center justify-center mt-6 space-y-4">
-            <h1 className="text-6xl font-bold text-center text-black">
+            <h1 className="text-3xl font-bold text-center text-black lg:text-6xl">
               Level-up your language
               <br /> learning today.
             </h1>
-            <h1 className="text-2xl text-center text-black">
-              Learn a new language. Practice through conversation.{" "}
+            <h1 className="text-xl text-center text-black lg:text-2xl">
+              Learn a new language. Practice through conversation.
             </h1>
           </div>
-
-          <div>
+          <div className="">
             <img
               alt="bambuu"
               src="/images/landing-section1-1.png"
               className="w-full h-auto"
             />
           </div>
-        </div>
+        </motion.div>
 
         {/* section 2 */}
-
-        <div className="flex flex-row items-start justify-between mt-56 mb-40 px-28">
-          <h1 className="w-1/2 text-6xl font-semibold text-left text-black">
+        <motion.div
+          initial={{ opacity: 0, y: 100 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="flex flex-col items-start justify-between px-6 mt-20 mb-20 space-y-8 lg:flex-row lg:mt-56 lg:mb-40 lg:px-28 lg:space-y-0"
+        >
+          <h1 className="w-full text-3xl font-semibold text-left text-black lg:w-1/2 lg:text-6xl">
             About bammbuu
           </h1>
-          <h1 className="w-1/2 text-2xl text-left text-[#3d3d3d]">
+          <h1 className="w-full lg:w-1/2 text-xl lg:text-2xl text-left text-[#3d3d3d]">
             Learning a new language? Need someone to practice with? bammbuu was
             created by language learners, for language learners. We believe that
             language is best learned through conversation and in community. Join
@@ -415,123 +578,85 @@ const Landing = () => {
             community, and learn from certified language instructors.
             <br />
             <span className="font-semibold text-[#3d3d3d]">
-              {" "}
-              bammbuu is a safe place to practice.{" "}
+              bammbuu is a safe place to practice.
             </span>
           </h1>
-        </div>
-        {/* section 3 */}
-        <div className="flex flex-col items-center justify-center mb-40 space-y-12 px-28">
-          {/* cards */}
+        </motion.div>
 
-          <div className="flex flex-row items-center justify-center space-x-12">
-            <div className="w-1/2 flex h-[100vh] flex-col justify-center items-center border-2 space-y-10 border-[#14b82c] rounded-[8vh] bg-[#e6fde9] px-20 pt-28">
-              <h1 className="text-4xl font-semibold text-center text-[#042f0c]">
-                Explore conversation classes &<br /> groups
-              </h1>
-
-              <h1 className="text-2xl text-center text-[#3d3d3d]">
-                We believe that language is best learned through conversation
-                and in community. Join a language group and practice through
-                conversation for free today.
-              </h1>
-
-              <img
-                alt="bambuu"
-                src="/images/landing-card1.png"
-                className="w-auto h-full"
-              />
-            </div>
-            <div className="w-1/2 flex flex-col h-[100vh] justify-center items-center border-2 space-y-10 border-[#14b82c] rounded-[8vh] bg-[#e6fde9] px-20 pt-28">
-              <h1 className="text-4xl font-semibold text-center text-[#042f0c]">
-                Connect with real people{" "}
-              </h1>
-
-              <h1 className="text-2xl text-center text-[#3d3d3d]">
-                Practice speaking with native speakers in real-time. Improve
-                your fluency and confidence through interactive 1:1
-                conversations that bring the language to life.
-              </h1>
-
-              <img
-                alt="bambuu"
-                src="/images/landing-card2.png"
-                className="w-auto h-full"
-              />
-            </div>
+        {/* section 3 - Cards */}
+        <div className="flex flex-col items-center justify-center px-4 mb-20 space-y-8 lg:mb-40 lg:space-y-12 lg:px-28">
+          <div className="flex flex-col items-center justify-center space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0">
+            <Card
+              index={0}
+              title="Explore conversation classes & groups"
+              description="We believe that language is best learned through conversation and in community. Join a language group and practice through conversation for free today."
+              imageSrc="/images/landing-card1.png"
+            />
+            <Card
+              index={1}
+              title="Connect with real people"
+              description="Practice speaking with native speakers in real-time. Improve your fluency and confidence through interactive 1:1 conversations that bring the language to life."
+              imageSrc="/images/landing-card2.png"
+            />
           </div>
-          <div className="flex flex-row items-center justify-center space-x-12">
-            <div className="w-1/2 flex flex-col h-[100vh] justify-center items-center border-2 space-y-10 border-[#14b82c] rounded-[8vh] bg-[#e6fde9] px-20 pt-28">
-              <h1 className="text-4xl font-semibold text-center text-[#042f0c]">
-                Learn from certified <br />
-                language instructors{" "}
-              </h1>
-
-              <h1 className="text-2xl text-center text-[#3d3d3d]">
-                Find a certified language instructor to help you reach your
-                goals through 1:1 private classes. Later, you can practice with
-                a language conversation group.
-              </h1>
-
-              <img
-                alt="bambuu"
-                src="/images/landing-card3.png"
-                className="w-auto h-full"
-              />
-            </div>
-            <div className="w-1/2 flex flex-col h-[100vh] justify-center items-center border-2 space-y-10 border-[#14b82c] rounded-[8vh] bg-[#e6fde9] px-20 pt-28">
-              <h1 className="text-4xl font-semibold text-center text-[#042f0c]">
-                Meet SuperTutor{" "}
-              </h1>
-
-              <h1 className="text-2xl text-center text-[#3d3d3d]">
-                Your personal AI language tutor that is available to help you
-                practice conversation 24/7. SuperTutor adapts to your learning
-                style to help you improve and build confidence.
-              </h1>
-
-              <img
-                alt="bambuu"
-                src="/images/landing-card4.png"
-                className="w-auto h-full"
-              />
-            </div>
+          <div className="flex flex-col items-center justify-center space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0">
+            <Card
+              index={2}
+              title="Learn from certified language instructors"
+              description="Find a certified language instructor to help you reach your goals through 1:1 private classes. Later, you can practice with a language conversation group."
+              imageSrc="/images/landing-card3.png"
+            />
+            <Card
+              index={3}
+              title="Meet SuperTutor"
+              description="Your personal AI language tutor that is available to help you practice conversation 24/7. SuperTutor adapts to your learning style to help you improve and build confidence."
+              imageSrc="/images/landing-card4.png"
+            />
           </div>
         </div>
 
         {/* section 4 */}
-
-        <div className="flex flex-col items-center justify-center mt-56 space-y-12 mb-28">
-          <h1 className="text-6xl font-semibold text-center text-black">
+        <motion.div
+          initial={{ opacity: 0, y: 100 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="flex flex-col items-center justify-center px-4 mt-20 mb-20 space-y-8 lg:mt-56 lg:space-y-12 lg:mb-28 lg:px-0"
+        >
+          <h1 className="text-3xl font-semibold text-center text-black lg:text-6xl">
             Download Mobile App
           </h1>
           <img
             alt="bambuu"
             src="/images/qr-code.png"
-            className="w-auto h-full"
+            className="w-64 h-auto lg:w-auto"
           />
-          <div className="flex flex-row items-center justify-center space-x-6">
+          <div className="flex flex-col items-center justify-center space-y-4 sm:flex-row sm:space-y-0 sm:space-x-6">
             <img
               alt="bambuu"
               src="/images/apple-button.png"
-              className="w-auto h-full hover:cursor-pointer"
+              className="w-48 h-auto sm:w-auto hover:cursor-pointer"
             />
             <img
               alt="bambuu"
               src="/images/playstore-button.png"
-              className="w-auto h-full hover:cursor-pointer"
+              className="w-48 h-auto sm:w-auto hover:cursor-pointer"
             />
           </div>
-        </div>
+        </motion.div>
 
         {/* section 5 */}
-
-        <div className="flex flex-col items-center justify-center rounded-[6vh] border-2 border-[#14b82c] bg-[#e6fde9] pt-28 mx-28 space-y-10">
-          <h1 className="text-6xl font-semibold text-center text-black">
+        <motion.div
+          initial={{ opacity: 0, y: 100 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="flex flex-col items-center justify-center rounded-3xl lg:rounded-[6vh] border-2 border-[#14b82c] bg-[#e6fde9] pt-16 lg:pt-28 mx-4 lg:mx-28 space-y-6 lg:space-y-10 mb-8"
+        >
+          <h1 className="px-4 text-3xl font-semibold text-center text-black lg:text-6xl">
             The bammbuu web version
-            <br /> is coming soon!{" "}
+            <br /> is coming soon!
           </h1>
-
           <Button
             className="text-black border-2 border-black"
             size="xl"
@@ -539,16 +664,14 @@ const Landing = () => {
             color="#ffbf00"
             radius="xl"
           >
-            {" "}
             Coming Soon!
           </Button>
-
           <img
             alt="bambuu"
             src="/images/landing-laptop.png"
-            className="w-[150vh] h-auto"
+            className="w-full lg:w-[150vh] h-auto"
           />
-        </div>
+        </motion.div>
       </div>
       <Footer />
     </>
