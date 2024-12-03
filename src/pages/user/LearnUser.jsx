@@ -280,7 +280,7 @@
 // export default LearnUser;
 import { Search } from "lucide-react";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Bell,
   ChevronLeft,
@@ -297,144 +297,108 @@ import ClassCard from "../../components/ClassCard";
 import { useAuth } from "../../context/AuthContext";
 import GroupCard from "../../components/GroupCard";
 import { useNavigate } from "react-router-dom";
+import { db } from "../../firebaseConfig";
+import { doc, getDoc } from "firebase/firestore";
+import { ClipLoader } from "react-spinners";
 const LearnUser = () => {
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
 
-  //---------------------------------my classes--------------------------------------------//
+  //---------------------------------getting my classes--------------------------------------------//
 
-  const classesData = [
-    {
-      id: 1,
-      title: "Spanish Conversation Class",
-      language: "Spanish",
-      level: "Advanced",
-      time: "5:00-6:00 pm",
-      date: "20 DEC 2024",
-      tutor: "Taimoor (Admin)",
-      progress: "100/100",
-      type: "Ongoing",
-      imageSrc: "/images/class1.png", // Replace with your actual image path
-    },
-    {
-      id: 2,
-      title: "Beginner Spanish",
-      language: "Spanish",
-      level: "Beginner",
-      time: "5:00-6:00 pm",
-      date: "20 DEC 2024",
-      tutor: "Taimoor (Tutor)",
-      progress: "100/100",
-      type: "Ongoing",
-      imageSrc: "/images/class2.png", // Replace with your actual image path
-    },
-    {
-      id: 3,
-      title: "Spanish Conversation Class",
-      language: "Spanish",
-      level: "Advanced",
-      time: "5:00-6:00 pm",
-      date: "20 DEC 2024",
-      tutor: "Taimoor (Tutor)",
-      progress: "100/100",
-      type: "Ongoing",
-      imageSrc: "/images/class3.png", // Replace with your actual image path
-    },
-    {
-      id: 4,
-      title: "Spanish Conversation Class",
-      language: "Spanish",
-      level: "Advanced",
-      time: "5:00-6:00 pm",
-      date: "20 DEC 2024",
-      tutor: "Taimoor (Admin)",
-      progress: "100/100",
-      type: "Ongoing",
-      imageSrc: "/images/class1.png", // Replace with your actual image path
-    },
-    {
-      id: 5,
-      title: "Beginner Spanish",
-      language: "Spanish",
-      level: "Beginner",
-      time: "5:00-6:00 pm",
-      date: "20 DEC 2024",
-      tutor: "Taimoor (Tutor)",
-      progress: "100/100",
-      type: "Ongoing",
-      imageSrc: "/images/class2.png", // Replace with your actual image path
-    },
-    {
-      id: 6,
-      title: "Spanish Conversation Class",
-      language: "Spanish",
-      level: "Advanced",
-      time: "5:00-6:00 pm",
-      date: "20 DEC 2024",
-      tutor: "Taimoor (Tutor)",
-      progress: "100/100",
-      type: "Ongoing",
-      imageSrc: "/images/class3.png", // Replace with your actual image path
-    },
-  ];
+  const [classes, setClasses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const GroupData = [
-    {
-      id: 1,
-      title: "Spanish Learners",
-      language: "Spanish",
-      level: "Advanced",
-      adminName: "Taimoor",
-      memberCount: "2K+",
-      flagSrc: "/images/flag1.png", // Replace with actual flag image path
-    },
-    {
-      id: 2,
-      title: "Spanish Learners",
-      language: "Spanish",
-      level: "Advanced",
-      adminName: "Taimoor",
-      memberCount: "2K+",
-      flagSrc: "/images/flag2.png", // Replace with actual flag image path
-    },
-    {
-      id: 3,
-      title: "Spanish Learners",
-      language: "Spanish",
-      level: "Advanced",
-      adminName: "Taimoor",
-      memberCount: "2K+",
-      flagSrc: "/images/flag3.png", // Replace with actual flag image path
-    },
-    {
-      id: 4,
-      title: "Spanish Learners",
-      language: "Spanish",
-      level: "Advanced",
-      adminName: "Taimoor",
-      memberCount: "2K+",
-      flagSrc: "/images/flag1.png", // Replace with actual flag image path
-    },
-    {
-      id: 5,
-      title: "Spanish Learners",
-      language: "Spanish",
-      level: "Advanced",
-      adminName: "Taimoor",
-      memberCount: "2K+",
-      flagSrc: "/images/flag2.png", // Replace with actual flag image path
-    },
-    {
-      id: 6,
-      title: "Spanish Learners",
-      language: "Spanish",
-      level: "Advanced",
-      adminName: "Taimoor",
-      memberCount: "2K+",
-      flagSrc: "/images/flag3.png", // Replace with actual flag image path
-    },
-    // ... other items
-  ];
+  useEffect(() => {
+    const fetchClasses = async () => {
+      if (!user || !user.enrolledClasses) {
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+      const classesData = [];
+
+      try {
+        // Limit to first 6 classes for the dashboard view
+        const classesToFetch = user.enrolledClasses.slice(0, 6);
+
+        for (const classId of classesToFetch) {
+          const classRef = doc(db, "classes", classId);
+          const classDoc = await getDoc(classRef);
+
+          if (classDoc.exists()) {
+            const classData = classDoc.data();
+            classesData.push({ id: classId, ...classData });
+          }
+        }
+        setClasses(classesData);
+      } catch (error) {
+        console.error("Error fetching classes:", error);
+        setError("Unable to fetch classes at this time.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchClasses();
+  }, [user]);
+
+  const formatClassForCard = (classItem) => ({
+    id: classItem.id,
+    title: classItem.className,
+    language: classItem.language,
+    level: classItem.languageLevel,
+    dateTime: classItem.classDateTime,
+    duration: classItem.classDuration,
+    tutor: classItem.tutorName || "TBD",
+    memberCount: classItem.classMemberIds?.length || 0,
+    maxSpots: classItem.availableSpots,
+    isPhysical: classItem.physicalClass,
+    imageSrc: classItem.imageUrl || "/images/default-class.png",
+  });
+
+  //------------------------------------getting my groups-------------------------------------------//
+  const [groups, setGroups] = useState([]);
+  const [loadingGroups, setLoadingGroups] = useState(true);
+  const [errorGroups, setErrorGroups] = useState(null);
+
+  useEffect(() => {
+    const fetchGroups = async () => {
+      if (!user?.joinedGroups?.length) {
+        setLoadingGroups(false);
+        return;
+      }
+
+      try {
+        const fetchedGroups = [];
+        const groupsToFetch = user.joinedGroups.slice(0, 6);
+
+        for (let groupId of groupsToFetch) {
+          const groupRef = doc(db, "groups", groupId);
+          const groupDoc = await getDoc(groupRef);
+
+          if (groupDoc.exists()) {
+            fetchedGroups.push({
+              id: groupDoc.id,
+              ...groupDoc.data(),
+            });
+          }
+        }
+
+        setGroups(fetchedGroups);
+        setErrorGroups(null);
+      } catch (error) {
+        console.error("Error fetching groups:", error);
+        setErrorGroups("Failed to load groups. Please try again.");
+      } finally {
+        setLoadingGroups(false);
+      }
+    };
+
+    fetchGroups();
+  }, [user]);
 
   //---------------------------navigation---------------------------------------------------//
 
@@ -587,7 +551,10 @@ const LearnUser = () => {
           <div className="w-[60%]">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold">Learn a Language</h2>
-              <button className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]">
+              <button
+                className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+                onClick={() => navigate("/learnLanguageUser")}
+              >
                 View All
               </button>
             </div>
@@ -656,9 +623,9 @@ const LearnUser = () => {
 
         {/* My Classes */}
         <div className="w-full max-w-[160vh] mx-auto">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold">My Classes</h2>
-            {classesData.length > 0 && (
+            {classes.length > 0 && (
               <button
                 className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
                 onClick={() => navigate("/classesUser")}
@@ -668,7 +635,21 @@ const LearnUser = () => {
             )}
           </div>
 
-          {classesData.length === 0 ? (
+          {loading ? (
+            <div className="flex items-center justify-center h-48">
+              <ClipLoader color="#14B82C" size={50} />
+            </div>
+          ) : error ? (
+            <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
+              <p className="text-center text-red-500">{error}</p>
+              <button
+                className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+                onClick={() => window.location.reload()}
+              >
+                Try Again
+              </button>
+            </div>
+          ) : classes.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
               <img
                 alt="bambuu"
@@ -678,28 +659,38 @@ const LearnUser = () => {
               <p className="text-center text-gray-600">
                 You have not booked a class yet!
               </p>
-              <button className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]">
+              <button
+                className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+                onClick={() => navigate("/classes")}
+              >
                 Book a Class
               </button>
             </div>
           ) : (
             <div className="relative w-full">
-              <div className="flex gap-6 pb-4 overflow-x-auto scrollbar-hide">
-                {classesData.map((classItem) => (
-                  <div key={classItem.id} className="flex-none w-80">
-                    <ClassCard {...classItem} />
+              <div className="flex gap-2 pb-4 overflow-x-auto scrollbar-hide">
+                {classes.map((classItem) => (
+                  <div
+                    key={classItem.id}
+                    className="flex-none px-2 pt-3 w-[22rem]"
+                  >
+                    <ClassCard
+                      {...formatClassForCard(classItem)}
+                      onClick={() =>
+                        navigate(`/classesDetailsUser/${classItem.id}`)
+                      }
+                    />
                   </div>
                 ))}
               </div>
             </div>
           )}
         </div>
-
         {/* My Groups */}
         <div className="w-full max-w-[160vh] mx-auto">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-1">
             <h2 className="text-2xl font-bold">My Groups</h2>
-            {GroupData.length > 0 && (
+            {groups.length > 0 && (
               <button
                 className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
                 onClick={() => navigate("/groupsUser")}
@@ -709,10 +700,24 @@ const LearnUser = () => {
             )}
           </div>
 
-          {GroupData.length === 0 ? (
+          {loadingGroups ? (
+            <div className="flex items-center justify-center h-48">
+              <ClipLoader color="#14B82C" size={50} />
+            </div>
+          ) : errorGroups ? (
+            <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
+              <p className="text-center text-red-500">{errorGroups}</p>
+              <button
+                className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+                onClick={() => window.location.reload()}
+              >
+                Try Again
+              </button>
+            </div>
+          ) : groups.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
               <img
-                alt="bambuu"
+                alt="No groups"
                 src="/images/no-class.png"
                 className="w-auto h-auto"
               />
@@ -720,20 +725,35 @@ const LearnUser = () => {
                 You are not part of any group yet!
               </p>
               <div className="flex flex-row items-center justify-center space-x-4">
-                <button className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]">
+                <button
+                  onClick={() => navigate("/join-group")}
+                  className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+                >
                   Join a Group
                 </button>
-                <button className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]">
+                <button
+                  onClick={() => navigate("/create-group")}
+                  className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+                >
                   Create a Group
                 </button>
               </div>
             </div>
           ) : (
             <div className="relative w-full">
-              <div className="flex gap-6 pb-4 overflow-x-auto scrollbar-hide">
-                {GroupData.map((classItem) => (
-                  <div key={classItem.id} className="flex-none w-80">
-                    <GroupCard {...classItem} />
+              <div className="flex gap-2 pb-4 overflow-x-auto scrollbar-hide">
+                {groups.map((group) => (
+                  <div key={group.id} className="flex-none px-2 pt-2 w-[22rem]">
+                    <GroupCard
+                      id={group.id}
+                      title={group.groupName}
+                      language={group.groupType}
+                      level={group.level || "Not specified"}
+                      adminName={group.adminName || "Admin"}
+                      memberCount={`${group.memberIds?.length || 0} members`}
+                      flagSrc={group.imageUrl}
+                      description={group.groupDescription}
+                    />
                   </div>
                 ))}
               </div>

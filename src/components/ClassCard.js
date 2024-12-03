@@ -7,36 +7,51 @@ const ClassCard = ({
   title,
   language,
   level,
-  time,
-  date,
+  dateTime,
+  duration,
   tutor,
-  progress,
-  type,
+  memberCount,
+  maxSpots,
+  isPhysical,
   imageSrc,
+  onClick,
 }) => {
-  const navigate = useNavigate();
+  const formatTime = (timestamp) => {
+    if (!timestamp) return "TBD";
+    const date = new Date(timestamp.seconds * 1000);
+    return date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
 
-  const handleClick = () => {
-    navigate(`/classesDetailsUser/${id}`);
+  const formatDate = (timestamp) => {
+    if (!timestamp) return "TBD";
+    const date = new Date(timestamp.seconds * 1000);
+    return date.toLocaleDateString("en-US", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
   };
 
   return (
     <div
       className="max-w-md transition-transform transform cursor-pointer hover:scale-105"
-      onClick={handleClick}
+      onClick={onClick}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
-          handleClick();
+          onClick();
         }
       }}
     >
-      <div className="flex flex-col items-center justify-center border border-[#14b82c] bg-white rounded-3xl p-2 ">
-        <div className="w-full ">
+      <div className="flex flex-col items-center justify-center border border-[#14b82c] bg-white rounded-3xl p-2">
+        <div className="w-full">
           <img
-            alt="Learn Spanish"
-            src={imageSrc}
+            alt={title}
+            src={imageSrc || "/images/default-class.png"}
             className="object-cover w-full h-48 rounded-t-2xl"
           />
         </div>
@@ -44,7 +59,7 @@ const ClassCard = ({
         <div className="w-full space-y-2 bg-[#c3f3c9] rounded-b-3xl p-2">
           <div className="flex items-start">
             <span className="px-4 py-1 text-sm bg-[#14b82c] text-white rounded-full">
-              {type}
+              {isPhysical ? "Physical" : "Online"}
             </span>
           </div>
 
@@ -61,25 +76,32 @@ const ClassCard = ({
             </span>
           </div>
         </div>
+
         <div className="flex flex-col items-center justify-center w-full p-2 space-y-2">
-          <div className="flex flex-row items-center justify-between w-full ">
+          <div className="flex flex-row items-center justify-between w-full">
             <div className="flex flex-row items-center justify-center space-x-2">
               <Clock className="w-5 h-5 text-gray-600" />
-              <span className="text-[#454545] text-md">{time}</span>
+              <span className="text-[#454545] text-md">
+                {formatTime(dateTime)} ({duration} min)
+              </span>
             </div>
             <div className="flex flex-row items-center justify-center space-x-2">
               <Calendar className="w-5 h-5 text-gray-600" />
-              <span className="text-[#454545] text-md">{date}</span>
+              <span className="text-[#454545] text-md">
+                {formatDate(dateTime)}
+              </span>
             </div>
           </div>
-          <div className="flex flex-row items-center justify-between w-full ">
+          <div className="flex flex-row items-center justify-between w-full">
             <div className="flex flex-row items-center justify-center space-x-2">
               <User className="w-5 h-5 text-gray-600" />
-              <span className="text-[#454545] text-md">{tutor}</span>
+              <span className="text-[#454545] text-md">{tutor || "TBD"}</span>
             </div>
             <div className="flex flex-row items-center justify-center space-x-2">
               <Users className="w-5 h-5 text-gray-600" />
-              <span className="text-[#454545] text-md">{progress}</span>
+              <span className="text-[#454545] text-md">
+                {memberCount}/{maxSpots}
+              </span>
             </div>
           </div>
         </div>

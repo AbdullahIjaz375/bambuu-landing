@@ -136,6 +136,7 @@
 // };
 
 // export default ClassesUser;
+
 import React, { useEffect, useState } from "react";
 import { Search, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -176,17 +177,6 @@ const ClassesUser = () => {
 
           if (classDoc.exists()) {
             const classData = classDoc.data();
-
-            if (classData.classGroupId) {
-              const groupRef = doc(db, "groups", classData.classGroupId);
-              const groupDoc = await getDoc(groupRef);
-
-              if (groupDoc.exists()) {
-                const groupData = groupDoc.data();
-                classData.photoUrl = groupData.imageUrl;
-              }
-            }
-
             classesData.push({ id: classId, ...classData });
           }
         }
@@ -204,30 +194,19 @@ const ClassesUser = () => {
     fetchClasses();
   }, [user]);
 
-  const formatClassForCard = (classItem) => {
-    const timestamp = classItem.classDate;
-    const date = new Date(timestamp.seconds * 1000);
-    const formattedDate = date.toLocaleDateString("en-US", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-
-    return {
-      id: classItem.id,
-      title: classItem.className,
-      language: classItem.classLanguageType,
-      level: classItem.classLevel,
-      time: classItem.classTime,
-      date: formattedDate,
-      tutor: "TBD",
-      progress: `${classItem.classMembers?.length || 0}/${
-        classItem.availableSpots
-      }`,
-      type: classItem.classType,
-      imageSrc: classItem.photoUrl || "/images/default-class.png",
-    };
-  };
+  const formatClassForCard = (classItem) => ({
+    id: classItem.id,
+    title: classItem.className,
+    language: classItem.language,
+    level: classItem.languageLevel,
+    dateTime: classItem.classDateTime,
+    duration: classItem.classDuration,
+    tutor: classItem.tutorName || "TBD",
+    memberCount: classItem.classMemberIds?.length || 0,
+    maxSpots: classItem.availableSpots,
+    isPhysical: classItem.physicalClass,
+    imageSrc: classItem.imageUrl,
+  });
 
   const filteredClasses = classes.filter((classItem) => {
     const searchTerm = searchQuery.toLowerCase().trim();
@@ -235,8 +214,8 @@ const ClassesUser = () => {
 
     return (
       classItem.className?.toLowerCase().includes(searchTerm) ||
-      classItem.classLanguageType?.toLowerCase().includes(searchTerm) ||
-      classItem.classLevel?.toLowerCase().includes(searchTerm)
+      classItem.language?.toLowerCase().includes(searchTerm) ||
+      classItem.languageLevel?.toLowerCase().includes(searchTerm)
     );
   });
 

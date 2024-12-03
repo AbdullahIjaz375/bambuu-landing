@@ -20,6 +20,7 @@ import Unauthorized from "./pages/Unauthorized";
 import GroupDetailUser from "./pages/user/GroupDetailUser";
 import ClassesDetailsUser from "./pages/user/ClassesDetailsUser";
 import ForgotPassword from "./pages/ForgotPassword";
+import LearnLanguageUser from "./pages/user/LearnLanguageUser";
 
 const App = () => {
   const { user } = useAuth(); // Use useAuth() inside the component
@@ -119,6 +120,14 @@ const App = () => {
           element={
             <ProtectedRoute requiredRole="user">
               <GroupDetailUser />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/learnLanguageUser"
+          element={
+            <ProtectedRoute requiredRole="user">
+              <LearnLanguageUser />
             </ProtectedRoute>
           }
         />

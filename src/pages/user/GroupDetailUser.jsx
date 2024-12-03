@@ -31,6 +31,8 @@ import "react-datepicker/dist/react-datepicker-cssmodules.css";
 import TimePicker from "react-time-picker";
 import "react-time-picker/dist/TimePicker.css";
 import "react-clock/dist/Clock.css";
+import { Radio, Group } from "@mantine/core";
+import { DateTimePicker } from "@mantine/dates";
 
 Modal.setAppElement("#root");
 
@@ -54,29 +56,35 @@ const GroupDetails = () => {
   // Add Class Modal State
 
   const [isAddClassModalOpen, setAddClassModalOpen] = useState(false);
-  const [className, setClassName] = useState("");
-  const [classDescription, setClassDescription] = useState("");
-  const [classDate, setClassDate] = useState(new Date());
-  const [classTime, setClassTime] = useState("12:00"); // Default time in HH:mm format
-  const [classDuration, setClassDuration] = useState(30);
-  const [classType, setClassType] = useState("online");
-  const [availableSpots, setAvailableSpots] = useState(45);
-  const [classLanguageType, setClassLanguageType] = useState("");
-  const [classLevel, setClassLevel] = useState("Beginner");
-  const [isRecurring, setIsRecurring] = useState(false);
-  const [recurrenceDays, setRecurrenceDays] = useState([]);
-  const [onlineLink, setOnlineLink] = useState("");
-  const [physicalAddress, setPhysicalAddress] = useState("");
+  const [classImage, setClassImage] = useState(null);
+  const [classPreviewImage, setClassPreviewImage] = useState(null);
+  const [classData, setClassData] = useState({
+    className: "",
+    classDescription: "",
+    language: "English",
+    languageLevel: "Beginner",
+    availableSpots: 6,
+    classDuration: 60,
+    classDateTime: new Date(),
+    recurrenceType: "One-time",
+    physicalClass: false,
+    classAddress: "",
+  });
 
-  const recurrenceOptions = [
-    { value: "Mon", label: "Mon" },
-    { value: "Tue", label: "Tue" },
-    { value: "Wed", label: "Wed" },
-    { value: "Thu", label: "Thu" },
-    { value: "Fri", label: "Fri" },
-    { value: "Sat", label: "Sat" },
-    { value: "Sun", label: "Sun" },
-  ];
+  const handleClassImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setClassImage(file);
+      setClassPreviewImage(URL.createObjectURL(file));
+    }
+  };
+
+  const handleClassDataChange = (field, value) => {
+    setClassData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
 
   useEffect(() => {
     const fetchGroupDetails = async () => {
@@ -172,45 +180,64 @@ const GroupDetails = () => {
   const handleAddClassButtonClick = () => {
     setAddClassModalOpen(true);
   };
+
   const handleSaveClass = async () => {
-    const newClass = {
-      availableSpots,
-      classDate: serverTimestamp(),
-      classDescription,
-      classDuration,
-      classGroupId: groupId,
-      classLanguageType: group.groupType,
-      classLevel,
-      classMembers: [],
-      className,
-      classTime,
-      classType,
-      isRecurring,
-      onlineLink: classType === "online" ? onlineLink : null,
-      physicalAddress: classType === "physical" ? physicalAddress : null,
-      recurrenceDays: isRecurring
-        ? recurrenceDays
-        : recurrenceDays.length > 0
-        ? [recurrenceDays[0]]
-        : [], // Ensure array format
-    };
-
     try {
-      // Add the new class document to Firestore and get the generated ID
-      const classRef = await addDoc(collection(db, "classes"), newClass);
-      const classId = classRef.id; // Get Firestore-generated ID
+      let imageUrl = "";
+      if (classImage) {
+        const imageRef = ref(
+          storage,
+          `classes/${Date.now()}_${classImage.name}`
+        );
+        await uploadBytes(imageRef, classImage);
+        imageUrl = await getDownloadURL(imageRef);
+      }
 
-      // Update user document with the new class ID in enrolledClasses
+      const newClass = {
+        ...classData,
+        adminId: user.uid,
+        adminName: user.name || "",
+        adminImageUrl: user.photoUrl || "",
+        groupId,
+        imageUrl,
+        classMemberIds: [user.uid],
+        tutorId: "",
+        tutorName: "",
+        tutorImageUrl: "",
+        classDateTime: serverTimestamp(),
+      };
+
+      // Add the new class document to Firestore
+      const classRef = await addDoc(collection(db, "classes"), newClass);
+      const classId = classRef.id;
+
+      // Update user document with the new class ID
       const userRef = doc(db, "users", user.uid);
       const updatedEnrolledClasses = [...(user.enrolledClasses || []), classId];
       await updateDoc(userRef, { enrolledClasses: updatedEnrolledClasses });
 
       // Update context and session storage
       const updatedUser = { ...user, enrolledClasses: updatedEnrolledClasses };
-      setUser(updatedUser); // Update user context
-      sessionStorage.setItem("user", JSON.stringify(updatedUser)); // Update session storage
+      setUser(updatedUser);
+      sessionStorage.setItem("user", JSON.stringify(updatedUser));
 
-      setAddClassModalOpen(false); // Close modal on success
+      setAddClassModalOpen(false);
+
+      // Reset form
+      setClassImage(null);
+      setClassPreviewImage(null);
+      setClassData({
+        className: "",
+        classDescription: "",
+        language: "English",
+        languageLevel: "Beginner",
+        availableSpots: 6,
+        classDuration: 60,
+        classDateTime: new Date(),
+        recurrenceType: "One-time",
+        physicalClass: false,
+        classAddress: "",
+      });
     } catch (error) {
       console.error("Error adding class:", error);
     }
@@ -385,138 +412,189 @@ const GroupDetails = () => {
         isOpen={isAddClassModalOpen}
         onRequestClose={() => setAddClassModalOpen(false)}
         contentLabel="Add Class"
-        className="w-full max-w-3xl p-8 mx-auto transition-all bg-white rounded-lg shadow-xl outline-none"
-        overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+        className="w-full max-w-4xl p-8 mx-auto bg-white rounded-lg shadow-xl outline-none"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4"
       >
-        <h2 className="mb-6 text-2xl font-semibold text-gray-800">Add Class</h2>
+        <div className="w-full">
+          <h2 className="mb-6 text-2xl font-semibold text-gray-800">
+            Create New Class
+          </h2>
 
-        {/* Two-Column Grid Layout */}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          {/* Class Name Input */}
-          <TextInput
-            label="Class Name"
-            value={className}
-            onChange={(e) => setClassName(e.target.value)}
-            required
-            inputClassName="px-4 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200 focus:outline-none"
-          />
+          <div className="space-y-6">
+            {/* Image Upload */}
+            <div className="relative">
+              <div
+                className="flex items-center justify-center w-full h-40 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
+                onClick={() => document.getElementById("classImage").click()}
+              >
+                {classPreviewImage ? (
+                  <img
+                    src={classPreviewImage}
+                    alt="Preview"
+                    className="object-cover w-full h-full rounded-lg"
+                  />
+                ) : (
+                  <div className="text-center">
+                    <p className="text-gray-500">Click to upload class image</p>
+                    <p className="text-sm text-gray-400">
+                      Recommended size: 800x600px
+                    </p>
+                  </div>
+                )}
+              </div>
+              <input
+                id="classImage"
+                type="file"
+                accept="image/*"
+                onChange={handleClassImageChange}
+                className="hidden"
+              />
+            </div>
 
-          {/* Available Spots Number Input */}
-          <NumberInput
-            label="Available Spots"
-            value={availableSpots}
-            onChange={(value) => setAvailableSpots(value)}
-            required
-            min={1}
-            inputClassName="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200 focus:outline-none"
-          />
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <TextInput
+                label="Class Name"
+                value={classData.className}
+                onChange={(e) =>
+                  handleClassDataChange("className", e.target.value)
+                }
+                placeholder="Enter class name"
+                required
+              />
 
-          {/* Class Description Textarea */}
-          <Textarea
-            label="Class Description"
-            value={classDescription}
-            onChange={(e) => setClassDescription(e.target.value)}
-            required
-            rows={3}
-            inputClassName="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200 focus:outline-none resize-none"
-          />
+              <Select
+                label="Language"
+                value={classData.language}
+                onChange={(value) => handleClassDataChange("language", value)}
+                data={[
+                  { value: "English", label: "English" },
+                  { value: "Spanish", label: "Spanish" },
+                  {
+                    value: "English-Spanish Exchange",
+                    label: "English-Spanish Exchange",
+                  },
+                ]}
+                required
+              />
 
-          {/* Class Duration Number Input */}
-          <NumberInput
-            label="Class Duration (minutes)"
-            value={classDuration}
-            onChange={(value) => setClassDuration(value)}
-            required
-            min={1}
-            inputClassName="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200 focus:outline-none"
-          />
+              <Select
+                label="Language Level"
+                value={classData.languageLevel}
+                onChange={(value) =>
+                  handleClassDataChange("languageLevel", value)
+                }
+                data={[
+                  { value: "Beginner", label: "Beginner" },
+                  { value: "Intermediate", label: "Intermediate" },
+                  { value: "Advanced", label: "Advanced" },
+                ]}
+                required
+              />
 
-          {/* Date Picker */}
-          <DatePicker
-            selected={classDate}
-            onChange={(date) => setClassDate(date)}
-            dateFormat="MMMM d, yyyy"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200 focus:outline-none"
-          />
+              <NumberInput
+                label="Available Spots"
+                value={classData.availableSpots}
+                onChange={(value) =>
+                  handleClassDataChange("availableSpots", value)
+                }
+                min={1}
+                max={100}
+                required
+              />
 
-          {/* Time Picker */}
-          <TimePicker
-            onChange={setClassTime}
-            value={classTime}
-            format="HH:mm"
-            clearIcon={null}
-            clockIcon={null}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200 focus:outline-none"
-          />
+              <Select
+                label="Class Duration"
+                value={classData.classDuration.toString()}
+                onChange={(value) =>
+                  handleClassDataChange("classDuration", parseInt(value))
+                }
+                data={[
+                  { value: "30", label: "30 min" },
+                  { value: "60", label: "60 min" },
+                  { value: "90", label: "90 min" },
+                  { value: "120", label: "120 min" },
+                ]}
+                required
+              />
 
-          {/* Class Level Select */}
-          <Select
-            label="Class Level"
-            value={classLevel}
-            onChange={setClassLevel}
-            data={[
-              { value: "Beginner", label: "Beginner" },
-              { value: "Intermediate", label: "Intermediate" },
-              { value: "Advanced", label: "Advanced" },
-            ]}
-          />
+              <DateTimePicker
+                label="Class Date & Time"
+                value={classData.classDateTime}
+                onChange={(value) =>
+                  handleClassDataChange("classDateTime", value)
+                }
+                required
+              />
+            </div>
 
-          {/* Class Type Select */}
-          <Select
-            label="Class Type"
-            value={classType}
-            onChange={setClassType}
-            data={[
-              { value: "online", label: "Online" },
-              { value: "physical", label: "Physical" },
-            ]}
-          />
-
-          {/* Conditional Input for Online Link or Physical Address */}
-          {classType === "online" ? (
-            <TextInput
-              label="Online Link"
-              value={onlineLink}
-              onChange={(e) => setOnlineLink(e.target.value)}
-              inputClassName="px-4 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200 focus:outline-none"
+            <Textarea
+              label="Class Description"
+              value={classData.classDescription}
+              onChange={(e) =>
+                handleClassDataChange("classDescription", e.target.value)
+              }
+              placeholder="Enter class description"
+              minRows={3}
+              required
             />
-          ) : (
-            <TextInput
-              label="Physical Address"
-              value={physicalAddress}
-              onChange={(e) => setPhysicalAddress(e.target.value)}
-              inputClassName="px-4 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200 focus:outline-none"
-            />
-          )}
 
-          {/* Recurring Class Checkbox */}
-          <Checkbox
-            label="Recurring Class"
-            checked={isRecurring}
-            onChange={(e) => setIsRecurring(e.target.checked)}
-          />
+            <Radio.Group
+              label="Class Type"
+              value={classData.recurrenceType}
+              onChange={(value) =>
+                handleClassDataChange("recurrenceType", value)
+              }
+              required
+            >
+              <Group mt="xs">
+                <Radio value="One-time" label="One-time" />
+                <Radio value="Daily" label="Daily" />
+                <Radio value="Weekly" label="Weekly" />
+                <Radio value="Monthly" label="Monthly" />
+              </Group>
+            </Radio.Group>
 
-          {/* MultiSelect for Recurrence Days */}
-          <MultiSelect
-            label="Select Days"
-            data={recurrenceOptions}
-            value={recurrenceDays}
-            onChange={setRecurrenceDays}
-            clearable
-            searchable
-            disabled={!isRecurring}
-            maxSelectedValues={isRecurring ? 7 : 1}
-          />
-        </div>
+            <Radio.Group
+              label="Class Mode"
+              value={classData.physicalClass.toString()}
+              onChange={(value) =>
+                handleClassDataChange("physicalClass", value === "true")
+              }
+              required
+            >
+              <Group mt="xs">
+                <Radio value="false" label="Virtual" />
+                <Radio value="true" label="Physical" />
+              </Group>
+            </Radio.Group>
 
-        {/* Save Button */}
-        <div className="flex justify-end mt-6">
-          <Button
-            onClick={handleSaveClass}
-            className="px-6 py-2 font-semibold text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700"
-          >
-            Add Class
-          </Button>
+            {classData.physicalClass && (
+              <TextInput
+                label="Class Address"
+                value={classData.classAddress}
+                onChange={(e) =>
+                  handleClassDataChange("classAddress", e.target.value)
+                }
+                placeholder="Enter physical class address"
+                required
+              />
+            )}
+
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => setAddClassModalOpen(false)}
+                className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveClass}
+                className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+              >
+                Create Class
+              </button>
+            </div>
+          </div>
         </div>
       </Modal>
 
