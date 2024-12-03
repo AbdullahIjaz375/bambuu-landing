@@ -181,6 +181,7 @@ const ClassesUser = () => {
           }
         }
         setClasses(classesData);
+        console.log(classes);
       } catch (error) {
         console.error("Error fetching classes:", error);
         setError(
@@ -296,10 +297,10 @@ const ClassesUser = () => {
             {filteredClasses.map((classItem) => (
               <div key={classItem.id} className="flex-none w-80">
                 <ClassCard
-                  {...formatClassForCard(classItem)}
-                  onClick={() =>
-                    navigate(`/classesDetailsUser/${classItem.id}`)
-                  }
+                  {...classItem}
+                  // onClick={() =>
+                  //   navigate(`/classesDetailsUser/${classItem.id}`)
+                  // }
                 />
               </div>
             ))}

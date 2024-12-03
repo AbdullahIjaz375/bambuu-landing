@@ -53,17 +53,6 @@ const LearnLanguageUser = () => {
 
           if (classDoc.exists()) {
             const classData = classDoc.data();
-
-            if (classData.classGroupId) {
-              const groupRef = doc(db, "groups", classData.classGroupId);
-              const groupDoc = await getDoc(groupRef);
-
-              if (groupDoc.exists()) {
-                const groupData = groupDoc.data();
-                classData.photoUrl = groupData.imageUrl;
-              }
-            }
-
             classesData.push({ id: classId, ...classData });
           }
         }
@@ -79,30 +68,19 @@ const LearnLanguageUser = () => {
     fetchClasses();
   }, [user]);
 
-  const formatClassForCard = (classItem) => {
-    const timestamp = classItem.classDate;
-    const date = new Date(timestamp.seconds * 1000);
-    const formattedDate = date.toLocaleDateString("en-US", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-
-    return {
-      id: classItem.id,
-      title: classItem.className,
-      language: classItem.classLanguageType,
-      level: classItem.classLevel,
-      time: classItem.classTime,
-      date: formattedDate,
-      tutor: "TBD",
-      progress: `${classItem.classMembers?.length || 0}/${
-        classItem.availableSpots
-      }`,
-      type: classItem.classType,
-      imageSrc: classItem.photoUrl || "/images/default-class.png",
-    };
-  };
+  const formatClassForCard = (classItem) => ({
+    id: classItem.id,
+    title: classItem.className,
+    language: classItem.language,
+    level: classItem.languageLevel,
+    dateTime: classItem.classDateTime,
+    duration: classItem.classDuration,
+    tutor: classItem.tutorName || "TBD",
+    memberCount: classItem.classMemberIds?.length || 0,
+    maxSpots: classItem.availableSpots,
+    isPhysical: classItem.physicalClass,
+    imageSrc: classItem.imageUrl || "/images/default-class.png",
+  });
   //------------------------------------getting my groups-------------------------------------------//
   const [groups, setGroups] = useState([]);
   const [loadingGroups, setLoadingGroups] = useState(true);
@@ -202,7 +180,7 @@ const LearnLanguageUser = () => {
 
         {/* My Classes */}
         <div className="w-full max-w-[160vh] mx-auto">
-          <div className="flex items-center justify-between ">
+          <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold">My Classes</h2>
             {classes.length > 0 && (
               <button
@@ -238,7 +216,10 @@ const LearnLanguageUser = () => {
               <p className="text-center text-gray-600">
                 You have not booked a class yet!
               </p>
-              <button className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]">
+              <button
+                className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+                onClick={() => navigate("/classes")}
+              >
                 Book a Class
               </button>
             </div>
@@ -250,7 +231,12 @@ const LearnLanguageUser = () => {
                     key={classItem.id}
                     className="flex-none px-2 pt-3 w-[22rem]"
                   >
-                    <ClassCard {...formatClassForCard(classItem)} />
+                    <ClassCard
+                      {...classItem}
+                      onClick={() =>
+                        navigate(`/classesDetailsUser/${classItem.id}`)
+                      }
+                    />
                   </div>
                 ))}
               </div>
@@ -315,16 +301,7 @@ const LearnLanguageUser = () => {
               <div className="flex gap-2 pb-4 overflow-x-auto scrollbar-hide">
                 {groups.map((group) => (
                   <div key={group.id} className="flex-none px-2 pt-2 w-[22rem]">
-                    <GroupCard
-                      id={group.id}
-                      title={group.groupName}
-                      language={group.groupType}
-                      level={group.level || "Not specified"}
-                      adminName={group.adminName || "Admin"}
-                      memberCount={`${group.memberIds?.length || 0} members`}
-                      flagSrc={group.imageUrl}
-                      description={group.groupDescription}
-                    />
+                    <GroupCard group={group} />
                   </div>
                 ))}
               </div>

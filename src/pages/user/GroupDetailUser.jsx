@@ -216,6 +216,13 @@ const GroupDetails = () => {
       const updatedEnrolledClasses = [...(user.enrolledClasses || []), classId];
       await updateDoc(userRef, { enrolledClasses: updatedEnrolledClasses });
 
+      const groupRef = doc(db, "groups", groupId);
+      const groupDoc = await getDoc(groupRef);
+      const currentClassIds = groupDoc.data().classIds || [];
+      await updateDoc(groupRef, {
+        classIds: [...currentClassIds, classId],
+      });
+
       // Update context and session storage
       const updatedUser = { ...user, enrolledClasses: updatedEnrolledClasses };
       setUser(updatedUser);

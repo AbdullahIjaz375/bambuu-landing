@@ -675,7 +675,7 @@ const LearnUser = () => {
                     className="flex-none px-2 pt-3 w-[22rem]"
                   >
                     <ClassCard
-                      {...formatClassForCard(classItem)}
+                      {...classItem}
                       onClick={() =>
                         navigate(`/classesDetailsUser/${classItem.id}`)
                       }
@@ -744,16 +744,7 @@ const LearnUser = () => {
               <div className="flex gap-2 pb-4 overflow-x-auto scrollbar-hide">
                 {groups.map((group) => (
                   <div key={group.id} className="flex-none px-2 pt-2 w-[22rem]">
-                    <GroupCard
-                      id={group.id}
-                      title={group.groupName}
-                      language={group.groupType}
-                      level={group.level || "Not specified"}
-                      adminName={group.adminName || "Admin"}
-                      memberCount={`${group.memberIds?.length || 0} members`}
-                      flagSrc={group.imageUrl}
-                      description={group.groupDescription}
-                    />
+                    <GroupCard group={group} />
                   </div>
                 ))}
               </div>

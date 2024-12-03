@@ -1,21 +1,32 @@
-import React from "react";
-import { Clock, Calendar, Users, User } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { Clock, Calendar, Users, User, X, MapPin } from "lucide-react";
+import Modal from "react-modal";
+
+Modal.setAppElement("#root");
 
 const ClassCard = ({
   id,
-  title,
+  className,
   language,
-  level,
-  dateTime,
-  duration,
-  tutor,
-  memberCount,
-  maxSpots,
-  isPhysical,
-  imageSrc,
+  languageLevel,
+  classDateTime,
+  classDuration,
+  tutorName,
+  tutorImageUrl,
+  classMemberIds,
+  availableSpots,
+  physicalClass,
+  imageUrl,
+  classDescription,
+  classAddress,
+  adminName,
+  adminImageUrl,
+  groupId,
+  recurrenceType,
   onClick,
 }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const formatTime = (timestamp) => {
     if (!timestamp) return "TBD";
     const date = new Date(timestamp.seconds * 1000);
@@ -35,78 +46,227 @@ const ClassCard = ({
     });
   };
 
+  const handleCardClick = (e) => {
+    if (onClick) {
+      onClick(e);
+    } else {
+      setIsModalOpen(true);
+    }
+  };
+
   return (
-    <div
-      className="max-w-md transition-transform transform cursor-pointer hover:scale-105"
-      onClick={onClick}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          onClick();
-        }
-      }}
-    >
-      <div className="flex flex-col items-center justify-center border border-[#14b82c] bg-white rounded-3xl p-2">
-        <div className="w-full">
-          <img
-            alt={title}
-            src={imageSrc || "/images/default-class.png"}
-            className="object-cover w-full h-48 rounded-t-2xl"
-          />
-        </div>
-
-        <div className="w-full space-y-2 bg-[#c3f3c9] rounded-b-3xl p-2">
-          <div className="flex items-start">
-            <span className="px-4 py-1 text-sm bg-[#14b82c] text-white rounded-full">
-              {isPhysical ? "Physical" : "Online"}
-            </span>
+    <>
+      <div
+        className="max-w-md transition-transform transform cursor-pointer hover:scale-105"
+        onClick={handleCardClick}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            handleCardClick(e);
+          }
+        }}
+      >
+        <div className="flex flex-col items-center justify-center border border-[#14b82c] bg-white rounded-3xl p-2">
+          <div className="w-full">
+            <img
+              alt={className}
+              src={imageUrl || "/images/default-class.png"}
+              className="object-cover w-full h-48 rounded-t-2xl"
+            />
           </div>
 
-          <h2 className="text-xl font-bold text-gray-800">{title}</h2>
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <span className="flex items-center">
-                <span className="ml-2 text-[#042f0c]">{language}</span>
+          <div className="w-full space-y-2 bg-[#c3f3c9] rounded-b-3xl p-2">
+            <div className="flex items-start justify-between">
+              <span className="px-4 py-1 text-sm bg-[#14b82c] text-white rounded-full">
+                {physicalClass ? "Physical" : "Online"}
               </span>
+              {recurrenceType && (
+                <span className="px-4 py-1 text-sm bg-[#14b82c] text-white rounded-full">
+                  {recurrenceType}
+                </span>
+              )}
             </div>
-            <span className="px-3 py-1 text-sm bg-[#fff885] rounded-full">
-              {level}
-            </span>
-          </div>
-        </div>
 
-        <div className="flex flex-col items-center justify-center w-full p-2 space-y-2">
-          <div className="flex flex-row items-center justify-between w-full">
-            <div className="flex flex-row items-center justify-center space-x-2">
-              <Clock className="w-5 h-5 text-gray-600" />
-              <span className="text-[#454545] text-md">
-                {formatTime(dateTime)} ({duration} min)
-              </span>
-            </div>
-            <div className="flex flex-row items-center justify-center space-x-2">
-              <Calendar className="w-5 h-5 text-gray-600" />
-              <span className="text-[#454545] text-md">
-                {formatDate(dateTime)}
+            <h2 className="text-xl font-bold text-gray-800">{className}</h2>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <span className="flex items-center">
+                  <span className="ml-2 text-[#042f0c]">{language}</span>
+                </span>
+              </div>
+              <span className="px-3 py-1 text-sm bg-[#fff885] rounded-full">
+                {languageLevel}
               </span>
             </div>
           </div>
-          <div className="flex flex-row items-center justify-between w-full">
-            <div className="flex flex-row items-center justify-center space-x-2">
-              <User className="w-5 h-5 text-gray-600" />
-              <span className="text-[#454545] text-md">{tutor || "TBD"}</span>
+
+          <div className="flex flex-col items-center justify-center w-full p-2 space-y-2">
+            <div className="flex flex-row items-center justify-between w-full">
+              <div className="flex flex-row items-center justify-center space-x-2">
+                <Clock className="w-5 h-5 text-gray-600" />
+                <span className="text-[#454545] text-md">
+                  {formatTime(classDateTime)} ({classDuration} min)
+                </span>
+              </div>
+              <div className="flex flex-row items-center justify-center space-x-2">
+                <Calendar className="w-5 h-5 text-gray-600" />
+                <span className="text-[#454545] text-md">
+                  {formatDate(classDateTime)}
+                </span>
+              </div>
             </div>
-            <div className="flex flex-row items-center justify-center space-x-2">
-              <Users className="w-5 h-5 text-gray-600" />
-              <span className="text-[#454545] text-md">
-                {memberCount}/{maxSpots}
-              </span>
+            <div className="flex flex-row items-center justify-between w-full">
+              <div className="flex flex-row items-center justify-center space-x-2">
+                <User className="w-5 h-5 text-gray-600" />
+                <span className="text-[#454545] text-md">
+                  {tutorName || adminName || "TBD"}
+                </span>
+              </div>
+              <div className="flex flex-row items-center justify-center space-x-2">
+                <Users className="w-5 h-5 text-gray-600" />
+                <span className="text-[#454545] text-md">
+                  {classMemberIds?.length || 0}/{availableSpots}
+                </span>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+
+      <Modal
+        isOpen={isModalOpen}
+        onRequestClose={() => setIsModalOpen(false)}
+        className="max-w-md mx-auto mt-20 bg-white outline-none rounded-3xl font-urbanist"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+        style={{
+          content: {
+            border: "none",
+            padding: 0,
+            maxWidth: "450px",
+          },
+        }}
+      >
+        <div className="">
+          {/* Header */}
+          <div className="flex items-center justify-between p-6 pb-4">
+            <h2 className="text-2xl font-semibold">Class Details</h2>
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="p-2 bg-gray-200 rounded-full hover:bg-gray-300"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Main content with yellow background */}
+          <div className="bg-[#fff9e6] px-6 pt-8 pb-6 rounded-2xl mx-4">
+            {/* Profile image */}
+            <div className="flex flex-col items-center">
+              <div className="w-24 h-24 mb-4">
+                <img
+                  src={imageUrl || "/api/placeholder/96/96"}
+                  alt={className}
+                  className="object-cover w-full h-full rounded-full"
+                />
+              </div>
+
+              <h2 className="mb-3 text-2xl font-bold">{className}</h2>
+
+              {/* Language badge */}
+              <div className="flex items-center gap-2 mb-6">
+                <div className="w-6 h-6">
+                  <img
+                    src="/api/placeholder/24/24"
+                    alt={language}
+                    className="w-full h-full rounded-full"
+                  />
+                </div>
+                <span>{language}</span>
+                <span className="px-2 py-0.5 text-sm bg-[#fff885] rounded-full">
+                  {languageLevel}
+                </span>
+              </div>
+
+              {/* Time, Date, Users row */}
+              <div className="flex justify-center gap-8 mb-6 text-sm">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4" />
+                  <span>{formatTime(classDateTime)}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  <span>{formatDate(classDateTime)}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4" />
+                  <span>
+                    {classMemberIds?.length || 0}/{availableSpots}
+                  </span>
+                </div>
+              </div>
+
+              {/* Description */}
+              <p className="mb-6 text-center text-gray-600">
+                {classDescription}
+              </p>
+
+              {/* Language Group */}
+              <div className="w-full">
+                <h3 className="mb-3 text-lg font-bold text-center">
+                  Language Group
+                </h3>
+                <div className="flex items-center gap-4 p-4 bg-white rounded-xl border border-[#fab906]">
+                  <img
+                    src="/api/placeholder/48/48"
+                    alt="Spanish flag"
+                    className="w-12 h-12 rounded-full"
+                  />
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-medium">Spanish Learners</span>
+                      <span className="px-2 py-0.5 text-sm bg-[#fff885] rounded-full">
+                        Advanced
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <img
+                        src="/api/placeholder/16/16"
+                        alt="Spanish"
+                        className="w-4 h-4 rounded-full"
+                      />
+                      <span>Spanish</span>
+                      <span>•</span>
+                      <div className="flex items-center gap-1">
+                        <img
+                          src={adminImageUrl || "/api/placeholder/16/16"}
+                          alt="Admin"
+                          className="w-4 h-4 rounded-full"
+                        />
+                        <span>Taimoor (Admin)</span>
+                      </div>
+                      <span>•</span>
+                      <div className="flex items-center gap-1">
+                        <Users className="w-3 h-3" />
+                        <span>2K+</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="p-4">
+            <button className="w-full py-3 font-medium text-black bg-[#ffbf00] rounded-full hover:bg-[#e6ac00] border border-black">
+              Join Class, Starting in 5 minutes
+            </button>
+          </div>
+        </div>
+      </Modal>
+    </>
   );
 };
 
