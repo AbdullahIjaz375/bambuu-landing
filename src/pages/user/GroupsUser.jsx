@@ -779,7 +779,7 @@ const GroupsUser = () => {
   };
 
   const handleCreateGroup = () => {
-    navigate("/create-group"); // Update with your actual route
+    navigate("/addGroupsUser"); // Update with your actual route
   };
 
   const handleJoinGroup = () => {

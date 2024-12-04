@@ -24,6 +24,7 @@ const ClassCard = ({
   groupId,
   recurrenceType,
   onClick,
+  isBammbuu,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -68,12 +69,19 @@ const ClassCard = ({
         }}
       >
         <div className="flex flex-col items-center justify-center border border-[#14b82c] bg-white rounded-3xl p-2">
-          <div className="w-full">
+          <div className="relative w-full">
             <img
               alt={className}
               src={imageUrl || "/images/default-class.png"}
               className="object-cover w-full h-48 rounded-t-2xl"
             />
+            {isBammbuu && (
+              <img
+                src="/images/bambuu-plus-tag.png"
+                alt="Bammbuu+"
+                className="absolute h-8 w-28 top-2 left-2"
+              />
+            )}
           </div>
 
           <div className="w-full space-y-2 bg-[#c3f3c9] rounded-b-3xl p-2">

@@ -136,7 +136,6 @@
 // };
 
 // export default ClassesUser;
-
 import React, { useEffect, useState } from "react";
 import { Search, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -181,7 +180,6 @@ const ClassesUser = () => {
           }
         }
         setClasses(classesData);
-        console.log(classes);
       } catch (error) {
         console.error("Error fetching classes:", error);
         setError(
@@ -195,22 +193,15 @@ const ClassesUser = () => {
     fetchClasses();
   }, [user]);
 
-  const formatClassForCard = (classItem) => ({
-    id: classItem.id,
-    title: classItem.className,
-    language: classItem.language,
-    level: classItem.languageLevel,
-    dateTime: classItem.classDateTime,
-    duration: classItem.classDuration,
-    tutor: classItem.tutorName || "TBD",
-    memberCount: classItem.classMemberIds?.length || 0,
-    maxSpots: classItem.availableSpots,
-    isPhysical: classItem.physicalClass,
-    imageSrc: classItem.imageUrl,
-  });
-
   const filteredClasses = classes.filter((classItem) => {
     const searchTerm = searchQuery.toLowerCase().trim();
+    const isBambuu = Boolean(classItem.tutorId);
+
+    // First filter by tab
+    if (activeTab === "bammbuu" && !isBambuu) return false;
+    if (activeTab === "group" && isBambuu) return false;
+
+    // Then filter by search term
     if (!searchTerm) return true;
 
     return (
@@ -290,7 +281,9 @@ const ClassesUser = () => {
           <p className="text-center text-gray-500">
             {searchQuery
               ? "No classes found matching your search."
-              : "No classes found."}
+              : `No ${
+                  activeTab === "bammbuu" ? "bammbuu+" : "group"
+                } classes found.`}
           </p>
         ) : (
           <div className="flex flex-wrap gap-4">
@@ -298,9 +291,7 @@ const ClassesUser = () => {
               <div key={classItem.id} className="flex-none w-80">
                 <ClassCard
                   {...classItem}
-                  // onClick={() =>
-                  //   navigate(`/classesDetailsUser/${classItem.id}`)
-                  // }
+                  isBammbuu={Boolean(classItem.tutorId)}
                 />
               </div>
             ))}

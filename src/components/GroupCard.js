@@ -20,7 +20,7 @@ const GroupCard = ({ group }) => {
         className="max-w-md transition-transform transform cursor-pointer hover:scale-105"
         onClick={() => setShowModal(true)}
       >
-        <div className="max-w-sm p-4 bg-white border border-[#ffc310] rounded-3xl">
+        <div className="max-w-sm p-4 bg-white border border-[#ffc310] rounded-3xl ">
           {/* Rest of your existing GroupCard code */}
           <div className="flex flex-col items-center">
             <div className="w-40 h-40 mb-2 overflow-hidden rounded-full">
@@ -42,7 +42,7 @@ const GroupCard = ({ group }) => {
                   alt={`${groupLearningLanguage} flag`}
                   className="w-6 h-6 rounded-full"
                 />
-                <span className="text-lg text-green-900">
+                <span className="text-lg text-green-900 truncate max-w-[120px]">
                   {groupLearningLanguage}
                 </span>
               </div>

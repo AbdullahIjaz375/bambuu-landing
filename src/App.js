@@ -21,6 +21,7 @@ import GroupDetailUser from "./pages/user/GroupDetailUser";
 import ClassesDetailsUser from "./pages/user/ClassesDetailsUser";
 import ForgotPassword from "./pages/ForgotPassword";
 import LearnLanguageUser from "./pages/user/LearnLanguageUser";
+import AddGroupsUser from "./pages/user/AddGroupsUser";
 
 const App = () => {
   const { user } = useAuth(); // Use useAuth() inside the component
@@ -107,6 +108,7 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/groupsUser"
           element={
@@ -115,11 +117,20 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/groupDetailUser/:groupId"
           element={
             <ProtectedRoute requiredRole="user">
               <GroupDetailUser />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/addGroupsUser"
+          element={
+            <ProtectedRoute requiredRole="user">
+              <AddGroupsUser />
             </ProtectedRoute>
           }
         />
