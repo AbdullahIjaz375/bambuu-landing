@@ -135,7 +135,12 @@ const GroupDetailsModal = ({ group, onClose }) => {
         imageUrl = await getDownloadURL(imageRef);
       }
 
+      // Add the new class document to Firestore
+      const classRef = await addDoc(collection(db, "classes"), {});
+      const classId = classRef.id;
+
       const newClass = {
+        classId: classId, // Add the classId here
         ...classData,
         adminId: user.uid,
         adminName: user.name || "",
@@ -149,9 +154,7 @@ const GroupDetailsModal = ({ group, onClose }) => {
         classDateTime: serverTimestamp(),
       };
 
-      // Add the new class document to Firestore
-      const classRef = await addDoc(collection(db, "classes"), newClass);
-      const classId = classRef.id;
+      await updateDoc(doc(db, "classes", classId), newClass);
 
       // Update user document with the new class ID
       const userRef = doc(db, "users", user.uid);
@@ -191,7 +194,80 @@ const GroupDetailsModal = ({ group, onClose }) => {
       console.error("Error adding class:", error);
     }
   };
+
   //----------------------------------------------------------------------------------------------------------//
+
+  // const handleSaveClass = async () => {
+  //   try {
+  //     let imageUrl = "";
+  //     if (classImage) {
+  //       const imageRef = ref(
+  //         storage,
+  //         `classes/${Date.now()}_${classImage.name}`
+  //       );
+  //       await uploadBytes(imageRef, classImage);
+  //       imageUrl = await getDownloadURL(imageRef);
+  //     }
+
+  //     // Add the new class document to Firestore
+  //     const classRef = await addDoc(collection(db, "classes"), {});
+  //     const classId = classRef.id;
+
+  //     const newClass = {
+  //       classId: classId, // Add the classId here
+  //       ...classData,
+  //       adminId: user.uid,
+  //       adminName: user.name || "",
+  //       adminImageUrl: user.photoUrl || "",
+  //       groupId: group.id,
+  //       imageUrl,
+  //       classMemberIds: [],
+  //       tutorId: "",
+  //       tutorName: "",
+  //       tutorImageUrl: "",
+  //       classDateTime: serverTimestamp(),
+  //     };
+
+  //     await updateDoc(doc(db, "classes", classId), newClass);
+
+  //     // Update user document with the new class ID
+  //     // const userRef = doc(db, "users", user.uid);
+  //     // const updatedEnrolledClasses = [...(user.enrolledClasses || []), classId];
+  //     // await updateDoc(userRef, { enrolledClasses: updatedEnrolledClasses });
+
+  //     const groupRef = doc(db, "groups", group.id);
+  //     const groupDoc = await getDoc(groupRef);
+  //     const currentClassIds = groupDoc.data().classIds || [];
+  //     await updateDoc(groupRef, {
+  //       classIds: [...currentClassIds, classId],
+  //     });
+
+  //     // Update context and session storage
+  //     // const updatedUser = { ...user, enrolledClasses: updatedEnrolledClasses };
+  //     // setUser(updatedUser);
+  //     // sessionStorage.setItem("user", JSON.stringify(updatedUser));
+
+  //     setAddClassModalOpen(false);
+
+  //     // Reset form
+  //     setClassImage(null);
+  //     setClassPreviewImage(null);
+  //     setClassData({
+  //       className: "",
+  //       classDescription: "",
+  //       language: "English",
+  //       languageLevel: "Beginner",
+  //       availableSpots: 6,
+  //       classDuration: 60,
+  //       classDateTime: new Date(),
+  //       recurrenceType: "One-time",
+  //       physicalClass: false,
+  //       classAddress: "",
+  //     });
+  //   } catch (error) {
+  //     console.error("Error adding class:", error);
+  //   }
+  // };
 
   const renderClasses = () => {
     if (classes.length === 0) {

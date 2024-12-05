@@ -44,10 +44,7 @@ const LearnLanguageUser = () => {
       const classesData = [];
 
       try {
-        // Limit to first 6 classes for the dashboard view
-        const classesToFetch = user.enrolledClasses.slice(0, 6);
-
-        for (const classId of classesToFetch) {
+        for (const classId of user.enrolledClasses) {
           const classRef = doc(db, "classes", classId);
           const classDoc = await getDoc(classRef);
 
@@ -59,7 +56,9 @@ const LearnLanguageUser = () => {
         setClasses(classesData);
       } catch (error) {
         console.error("Error fetching classes:", error);
-        setError("Unable to fetch classes at this time.");
+        setError(
+          "Unable to fetch classes at this time. Please try again later."
+        );
       } finally {
         setLoading(false);
       }
@@ -68,19 +67,6 @@ const LearnLanguageUser = () => {
     fetchClasses();
   }, [user]);
 
-  const formatClassForCard = (classItem) => ({
-    id: classItem.id,
-    title: classItem.className,
-    language: classItem.language,
-    level: classItem.languageLevel,
-    dateTime: classItem.classDateTime,
-    duration: classItem.classDuration,
-    tutor: classItem.tutorName || "TBD",
-    memberCount: classItem.classMemberIds?.length || 0,
-    maxSpots: classItem.availableSpots,
-    isPhysical: classItem.physicalClass,
-    imageSrc: classItem.imageUrl || "/images/default-class.png",
-  });
   //------------------------------------getting my groups-------------------------------------------//
   const [groups, setGroups] = useState([]);
   const [loadingGroups, setLoadingGroups] = useState(true);

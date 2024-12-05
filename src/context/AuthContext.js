@@ -91,6 +91,7 @@ export const AuthProvider = ({ children }) => {
       savedDocuments: userData.savedDocuments || [],
       tier: userData.tier || 1,
       accountType: userData.accountType || "",
+      proficiency: userData.proficiency || "Beginner", // Added proficiency with default value
     };
     sessionStorage.setItem("user", JSON.stringify(filteredUser));
   };

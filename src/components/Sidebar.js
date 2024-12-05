@@ -73,49 +73,26 @@ const Sidebar = ({ user }) => {
       </nav>
 
       {/* User Profile Section */}
-      <div className="px-6">
+      <div className="px-2">
         {user ? (
-          <Menu
-            opened={dropdownOpen}
-            onOpen={toggleDropdown}
-            onClose={toggleDropdown}
-            position="right-end"
-            radius="lg"
+          <Link
+            to="/profileUser"
+            className="flex items-center p-2 space-x-3 transition-colors bg-green-500 rounded-3xl hover:bg-green-600"
           >
-            <Menu.Target>
-              <div className="flex items-center p-3 space-x-2 bg-white cursor-pointer rounded-2xl">
-                <Avatar
-                  src={user.photoUrl}
-                  radius="xl"
-                  size="sm"
-                  className="hover:cursor-pointer"
-                />
-                <span className="text-lg text-black">
-                  {user.name || "User"}
-                </span>
-                <FaAngleDown />
-              </div>
-            </Menu.Target>
-            <Menu.Dropdown>
-              <Menu.Item
-                component={Link}
-                to="/membership"
-                className={`text-[#042f0c] ${
-                  location.pathname === "/membership" ? "bg-green-100" : ""
-                }`}
-                leftSection={<LuCrown />}
-              >
-                Membership
-              </Menu.Item>
-              <Menu.Item
-                onClick={handleSignOut}
-                color="#f04438"
-                leftSection={<LuLogOut />}
-              >
-                Logout
-              </Menu.Item>
-            </Menu.Dropdown>
-          </Menu>
+            <div className="w-10 h-10 overflow-hidden bg-white rounded-full">
+              <img src={user.photoUrl} alt="Profile" className="w-10 h-10 " />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-black ">
+                {" "}
+                {user.name || "User"}
+              </span>
+              <span className="text-sm text-gray-700">
+                {" "}
+                {user.email || "email"}
+              </span>
+            </div>
+          </Link>
         ) : (
           <Link to="/login" className="flex items-center space-x-2">
             <Avatar radius="xl" size="sm" />

@@ -9,7 +9,6 @@ import Learn from "./pages/Learn";
 import Signup from "./pages/Signup";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useAuth } from "./context/AuthContext"; // Get useAuth in the component
-import UserSettings from "./pages/UserSettings";
 import Landing from "./pages/Landing";
 import PublicRoute from "./components/PublicRoute"; // Import PublicRoute
 import LanguageGroups from "./pages/LanguageGroups";
@@ -22,6 +21,9 @@ import ClassesDetailsUser from "./pages/user/ClassesDetailsUser";
 import ForgotPassword from "./pages/ForgotPassword";
 import LearnLanguageUser from "./pages/user/LearnLanguageUser";
 import AddGroupsUser from "./pages/user/AddGroupsUser";
+import ProfileUser from "./pages/user/ProfileUser";
+import UserEditProfile from "./pages/user/UserEditProfile";
+import UserSettings from "./pages/user/UserSettings";
 
 const App = () => {
   const { user } = useAuth(); // Use useAuth() inside the component
@@ -83,8 +85,27 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+
         <Route
-          path="/settings"
+          path="/profileUser"
+          element={
+            <ProtectedRoute requiredRole="user">
+              <ProfileUser />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/userEditProfile"
+          element={
+            <ProtectedRoute requiredRole="user">
+              <UserEditProfile />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/userSettings"
           element={
             <ProtectedRoute requiredRole="user">
               <UserSettings />
