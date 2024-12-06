@@ -661,9 +661,9 @@ const LearnUser = () => {
                   >
                     <ClassCard
                       {...classItem}
-                      onClick={() =>
-                        navigate(`/classesDetailsUser/${classItem.id}`)
-                      }
+                      // onClick={() =>
+                      //   navigate(`/classesDetailsUser/${classItem.id}`)
+                      // }
                     />
                   </div>
                 ))}

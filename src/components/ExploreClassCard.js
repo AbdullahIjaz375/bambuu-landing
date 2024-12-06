@@ -2,10 +2,98 @@ import React, { useState } from "react";
 import { Clock, Calendar, Users, User, X, MapPin } from "lucide-react";
 import Modal from "react-modal";
 
+import { useAuth } from "../context/AuthContext";
+import { doc, updateDoc, arrayUnion, getDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { db, storage } from "../firebaseConfig";
+
 Modal.setAppElement("#root");
 
-const ClassCard = ({
-  id,
+const useClassEnrollment = () => {
+  const [isEnrolling, setIsEnrolling] = useState(false);
+  const [error, setError] = useState(null);
+  const { user, setUser } = useAuth();
+
+  // Helper function to update session storage
+  const updateSessionStorage = (newEnrolledClass) => {
+    const storedUser = JSON.parse(sessionStorage.getItem("user"));
+    if (storedUser) {
+      const updatedUser = {
+        ...storedUser,
+        enrolledClasses: [
+          ...(storedUser.enrolledClasses || []),
+          newEnrolledClass,
+        ],
+      };
+      sessionStorage.setItem("user", JSON.stringify(updatedUser));
+    }
+  };
+
+  const enrollInClass = async (classId, userId) => {
+    setIsEnrolling(true);
+    setError(null);
+
+    try {
+      // Get references to both documents
+      const classRef = doc(db, "classes", classId);
+      const userRef = doc(db, "users", userId);
+
+      // Get the current class document to check available spots
+      const classDoc = await getDoc(classRef);
+      const classData = classDoc.data();
+
+      if (!classData) {
+        throw new Error("Class not found");
+      }
+
+      // Check if user is already enrolled
+      if (classData.classMemberIds?.includes(userId)) {
+        throw new Error("You are already enrolled in this class");
+      }
+
+      // Check if class is full
+      if (classData.classMemberIds?.length >= classData.availableSpots) {
+        throw new Error("Class is full");
+      }
+
+      // Update both documents in parallel
+      await Promise.all([
+        updateDoc(classRef, {
+          classMemberIds: arrayUnion(userId),
+        }),
+        updateDoc(userRef, {
+          enrolledClasses: arrayUnion(classId),
+        }),
+      ]);
+
+      // Update context and session storage
+      if (user) {
+        const updatedUser = {
+          ...user,
+          enrolledClasses: [...(user.enrolledClasses || []), classId],
+        };
+        setUser(updatedUser);
+        updateSessionStorage(classId);
+      }
+
+      return true;
+    } catch (err) {
+      setError(err.message);
+      return false;
+    } finally {
+      setIsEnrolling(false);
+    }
+  };
+
+  return {
+    enrollInClass,
+    isEnrolling,
+    error,
+  };
+};
+
+const ExploreClassCard = ({
+  classId,
   className,
   language,
   languageLevel,
@@ -26,7 +114,12 @@ const ClassCard = ({
   onClick,
   isBammbuu,
 }) => {
+  const { user, setUser } = useAuth();
+  const { enrollInClass, isEnrolling, error, setError } = useClassEnrollment();
+
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isBookingConfirmationOpen, setIsBookingConfirmationOpen] =
+    useState(false);
 
   const formatTime = (timestamp) => {
     if (!timestamp) return "TBD";
@@ -52,6 +145,26 @@ const ClassCard = ({
       onClick(e);
     } else {
       setIsModalOpen(true);
+    }
+  };
+
+  const handleBookClass = (e) => {
+    e.stopPropagation(); // Prevent event bubbling
+    setIsBookingConfirmationOpen(true);
+  };
+
+  const handleConfirmBooking = async () => {
+    if (!user) {
+      setError("Please log in to enroll in classes");
+      return;
+    }
+
+    const success = await enrollInClass(classId, user.uid);
+
+    if (success) {
+      setIsBookingConfirmationOpen(false);
+      setIsModalOpen(false);
+      // You might want to show a success toast or message here
     }
   };
 
@@ -139,6 +252,12 @@ const ClassCard = ({
                 </span>
               </div>
             </div>
+            <button
+              onClick={handleBookClass}
+              className="w-full py-2 font-medium text-black bg-[#14b82c] rounded-full hover:bg-[#119924] border border-[#042f0c]"
+            >
+              Book Class
+            </button>
           </div>
         </div>
       </div>
@@ -272,8 +391,50 @@ const ClassCard = ({
 
           {/* Footer */}
           <div className="p-4">
-            <button className="w-full py-3 font-medium text-black bg-[#ffbf00] rounded-full hover:bg-[#e6ac00] border border-black">
-              Join Class, Starting in 5 minutes
+            <button
+              onClick={handleBookClass}
+              className="w-full py-3 font-medium text-black bg-[#14b82c] rounded-full hover:bg-[#119924] border border-[#042f0c]"
+            >
+              Book Class
+            </button>
+          </div>
+        </div>
+      </Modal>
+      <Modal
+        isOpen={isBookingConfirmationOpen}
+        onRequestClose={() => setIsBookingConfirmationOpen(false)}
+        className="max-w-sm p-6 mx-auto mt-40 bg-white outline-none rounded-3xl font-urbanist"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+        style={{
+          content: {
+            border: "none",
+            padding: "24px",
+            maxWidth: "420px", // max-w-sm
+          },
+        }}
+      >
+        <div className="text-center">
+          <h2 className="mb-4 text-xl font-semibold">
+            Are you sure you want to book this class?
+          </h2>
+          {error && <p className="mb-4 text-red-600">{error}</p>}
+          <p className="mb-6 text-gray-600">
+            By booking class you will be added in the group and you'll be able
+            to join the class 5 minutes before it starts. It will also be added
+            to your calendar.
+          </p>
+          <div className="flex flex-row gap-2">
+            <button
+              onClick={() => setIsBookingConfirmationOpen(false)}
+              className="w-full py-2 font-medium border border-gray-300 rounded-full hover:bg-gray-50"
+            >
+              No, Cancel
+            </button>
+            <button
+              onClick={handleConfirmBooking}
+              className="w-full py-2 font-medium text-black bg-[#14b82c] rounded-full hover:bg-[#119924] border border-[#042f0c]"
+            >
+              {isEnrolling ? "Enrolling..." : "Yes, Book Now"}
             </button>
           </div>
         </div>
@@ -282,4 +443,4 @@ const ClassCard = ({
   );
 };
 
-export default ClassCard;
+export default ExploreClassCard;

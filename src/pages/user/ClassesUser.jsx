@@ -188,6 +188,7 @@ const ClassesUser = () => {
         );
       } finally {
         setLoading(false);
+        console.log(classes);
       }
     };
 
