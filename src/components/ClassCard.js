@@ -1,24 +1,26 @@
 import React, { useState } from "react";
-import { Clock, Calendar, Users, User, X, MapPin } from "lucide-react";
+import { Clock, Calendar, Users, User, X } from "lucide-react";
 import Modal from "react-modal";
 
 Modal.setAppElement("#root");
 
 const ClassCard = ({
-  id,
+  classId,
   className,
   language,
   languageLevel,
   classDateTime,
   classDuration,
+  tutorId,
   tutorName,
   tutorImageUrl,
-  classMemberIds,
+  classMemberIds = [],
   availableSpots,
   physicalClass,
   imageUrl,
   classDescription,
   classAddress,
+  adminId,
   adminName,
   adminImageUrl,
   groupId,
@@ -27,6 +29,11 @@ const ClassCard = ({
   isBammbuu,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Determine which user details to display based on isBammbuu flag
+  const displayName = isBammbuu ? tutorName : adminName;
+  const displayImage = isBammbuu ? tutorImageUrl : adminImageUrl;
+  const displayId = isBammbuu ? tutorId : adminId;
 
   const formatTime = (timestamp) => {
     if (!timestamp) return "TBD";
@@ -129,13 +136,13 @@ const ClassCard = ({
               <div className="flex flex-row items-center justify-center space-x-2">
                 <User className="w-5 h-5 text-gray-600" />
                 <span className="text-[#454545] text-md">
-                  {tutorName || adminName || "TBD"}
+                  {displayName || "TBD"}
                 </span>
               </div>
               <div className="flex flex-row items-center justify-center space-x-2">
                 <Users className="w-5 h-5 text-gray-600" />
                 <span className="text-[#454545] text-md">
-                  {classMemberIds?.length || 0}/{availableSpots}
+                  {classMemberIds.length}/{availableSpots}
                 </span>
               </div>
             </div>
@@ -157,7 +164,6 @@ const ClassCard = ({
         }}
       >
         <div className="">
-          {/* Header */}
           <div className="flex items-center justify-between p-6 pb-4">
             <h2 className="text-2xl font-semibold">Class Details</h2>
             <button
@@ -168,13 +174,11 @@ const ClassCard = ({
             </button>
           </div>
 
-          {/* Main content with yellow background */}
           <div
             className={`${
               isBammbuu ? "bg-[#e6fde9]" : "bg-yellow-50"
             } px-6 pt-8 pb-6 rounded-2xl mx-4`}
           >
-            {/* Profile image */}
             <div className="flex flex-col items-center">
               <div className="w-24 h-24 mb-4">
                 <img
@@ -186,7 +190,6 @@ const ClassCard = ({
 
               <h2 className="mb-3 text-2xl font-bold">{className}</h2>
 
-              {/* Language badge */}
               <div className="flex items-center gap-2 mb-6">
                 <div className="w-6 h-6">
                   <img
@@ -201,7 +204,6 @@ const ClassCard = ({
                 </span>
               </div>
 
-              {/* Time, Date, Users row */}
               <div className="flex justify-center gap-8 mb-6 text-sm">
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4" />
@@ -214,66 +216,62 @@ const ClassCard = ({
                 <div className="flex items-center gap-2">
                   <Users className="w-4 h-4" />
                   <span>
-                    {classMemberIds?.length || 0}/{availableSpots}
+                    {classMemberIds.length}/{availableSpots}
                   </span>
                 </div>
               </div>
 
-              {/* Description */}
               <p className="mb-6 text-center text-gray-600">
                 {classDescription}
               </p>
 
-              {/* Language Group */}
-              <div className="w-full">
-                <h3 className="mb-3 text-lg font-bold text-center">
-                  Language Group
-                </h3>
-                <div className="flex items-center gap-4 p-4 bg-white rounded-xl border border-[#97e3a2]">
-                  <img
-                    src="/api/placeholder/48/48"
-                    alt="Spanish flag"
-                    className="w-12 h-12 rounded-full"
-                  />
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-medium">Spanish Learners</span>
-                      {/* <span className="px-2 py-0.5 text-sm bg-[#fff885] rounded-full">
-                        Advanced
-                      </span> */}
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <img
-                        src="/api/placeholder/16/16"
-                        alt="Spanish"
-                        className="w-4 h-4 rounded-full"
-                      />
-                      <span>Spanish</span>
-                      <span>•</span>
-                      <div className="flex items-center gap-1">
+              {groupId && (
+                <div className="w-full">
+                  <h3 className="mb-3 text-lg font-bold text-center">
+                    Language Group
+                  </h3>
+                  <div className="flex items-center gap-4 p-4 bg-white rounded-xl border border-[#97e3a2]">
+                    <img
+                      src="/api/placeholder/48/48"
+                      alt={`${language} flag`}
+                      className="w-12 h-12 rounded-full"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-medium">{`${language} Learners`}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
                         <img
-                          src={adminImageUrl || "/api/placeholder/16/16"}
-                          alt="Admin"
+                          src="/api/placeholder/16/16"
+                          alt={language}
                           className="w-4 h-4 rounded-full"
                         />
-                        <span>{adminName || tutorName}</span>
-                      </div>
-                      <span>•</span>
-                      <div className="flex items-center gap-1">
-                        <Users className="w-3 h-3" />
-                        <span>2K+</span>
+                        <span>{language}</span>
+                        <span>•</span>
+                        <div className="flex items-center gap-1">
+                          <img
+                            src={displayImage || "/api/placeholder/16/16"}
+                            alt="Leader"
+                            className="w-4 h-4 rounded-full"
+                          />
+                          <span>{displayName}</span>
+                        </div>
+                        <span>•</span>
+                        <div className="flex items-center gap-1">
+                          <Users className="w-3 h-3" />
+                          <span>{classMemberIds.length}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
 
-          {/* Footer */}
           <div className="p-4">
             <button className="w-full py-3 font-medium text-black bg-[#ffbf00] rounded-full hover:bg-[#e6ac00] border border-black">
-              Join Class, Starting in 5 minutes
+              Join Class
             </button>
           </div>
         </div>

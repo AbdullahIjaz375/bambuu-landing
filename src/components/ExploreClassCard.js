@@ -99,14 +99,16 @@ const ExploreClassCard = ({
   languageLevel,
   classDateTime,
   classDuration,
+  tutorId,
   tutorName,
   tutorImageUrl,
-  classMemberIds,
+  classMemberIds = [],
   availableSpots,
   physicalClass,
   imageUrl,
   classDescription,
   classAddress,
+  adminId,
   adminName,
   adminImageUrl,
   groupId,
@@ -120,6 +122,11 @@ const ExploreClassCard = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isBookingConfirmationOpen, setIsBookingConfirmationOpen] =
     useState(false);
+
+  // Determine which user details to display based on isBammbuu flag
+  const displayName = isBammbuu ? tutorName : adminName;
+  const displayImage = isBammbuu ? tutorImageUrl : adminImageUrl;
+  const displayId = isBammbuu ? tutorId : adminId;
 
   const formatTime = (timestamp) => {
     if (!timestamp) return "TBD";
@@ -344,48 +351,47 @@ const ExploreClassCard = ({
               </p>
 
               {/* Language Group */}
-              <div className="w-full">
-                <h3 className="mb-3 text-lg font-bold text-center">
-                  Language Group
-                </h3>
-                <div className="flex items-center gap-4 p-4 bg-white rounded-xl border border-[#97e3a2]">
-                  <img
-                    src="/api/placeholder/48/48"
-                    alt="Spanish flag"
-                    className="w-12 h-12 rounded-full"
-                  />
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-medium">Spanish Learners</span>
-                      {/* <span className="px-2 py-0.5 text-sm bg-[#fff885] rounded-full">
-                        Advanced
-                      </span> */}
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <img
-                        src="/api/placeholder/16/16"
-                        alt="Spanish"
-                        className="w-4 h-4 rounded-full"
-                      />
-                      <span>Spanish</span>
-                      <span>•</span>
-                      <div className="flex items-center gap-1">
+              {groupId && (
+                <div className="w-full">
+                  <h3 className="mb-3 text-lg font-bold text-center">
+                    Language Group
+                  </h3>
+                  <div className="flex items-center gap-4 p-4 bg-white rounded-xl border border-[#97e3a2]">
+                    <img
+                      src="/api/placeholder/48/48"
+                      alt={`${language} flag`}
+                      className="w-12 h-12 rounded-full"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-medium">{`${language} Learners`}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
                         <img
-                          src={adminImageUrl || "/api/placeholder/16/16"}
-                          alt="Admin"
+                          src="/api/placeholder/16/16"
+                          alt={language}
                           className="w-4 h-4 rounded-full"
                         />
-                        <span>{adminName || tutorName}</span>
-                      </div>
-                      <span>•</span>
-                      <div className="flex items-center gap-1">
-                        <Users className="w-3 h-3" />
-                        <span>2K+</span>
+                        <span>{language}</span>
+                        <span>•</span>
+                        <div className="flex items-center gap-1">
+                          <img
+                            src={displayImage || "/api/placeholder/16/16"}
+                            alt="Leader"
+                            className="w-4 h-4 rounded-full"
+                          />
+                          <span>{displayName}</span>
+                        </div>
+                        <span>•</span>
+                        <div className="flex items-center gap-1">
+                          <Users className="w-3 h-3" />
+                          <span>{classMemberIds.length}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
 

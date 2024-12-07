@@ -278,6 +278,7 @@
 // };
 
 // export default LearnUser;
+
 import { Search } from "lucide-react";
 
 import React, { useState, useEffect } from "react";
@@ -358,7 +359,7 @@ const LearnUser = () => {
 
       try {
         const fetchedGroups = [];
-        const groupsToFetch = user.joinedGroups.slice(0, 6);
+        const groupsToFetch = user.joinedGroups;
 
         for (let groupId of groupsToFetch) {
           const groupRef = doc(db, "groups", groupId);
@@ -385,7 +386,66 @@ const LearnUser = () => {
     fetchGroups();
   }, [user]);
 
-  //---------------------------navigation---------------------------------------------------//
+  //---------------------------time for next class---------------------------------------------------//
+
+  const [nextClass, setNextClass] = useState(null);
+
+  useEffect(() => {
+    const calculateNextClass = () => {
+      if (!classes || classes.length === 0) return null;
+
+      const now = new Date();
+      let closestClass = null;
+      let smallestTimeDiff = Infinity;
+
+      classes.forEach((classItem) => {
+        // Get timestamp from classDateTime
+        const classTime = classItem.classDateTime?.toDate();
+
+        if (classTime && classTime > now) {
+          const timeDiff = classTime - now;
+          if (timeDiff < smallestTimeDiff) {
+            smallestTimeDiff = timeDiff;
+            closestClass = {
+              ...classItem,
+              timeUntil: formatTimeUntil(timeDiff),
+              startTime: classTime,
+            };
+          }
+        }
+      });
+
+      return closestClass;
+    };
+
+    const formatTimeUntil = (milliseconds) => {
+      const hours = Math.floor(milliseconds / (1000 * 60 * 60));
+      const minutes = Math.floor(
+        (milliseconds % (1000 * 60 * 60)) / (1000 * 60)
+      );
+
+      if (hours > 24) {
+        const days = Math.floor(hours / 24);
+        return `${days} day${days > 1 ? "s" : ""} away`;
+      } else if (hours > 0) {
+        return `${hours} hour${
+          hours > 1 ? "s" : ""
+        } and ${minutes} minutes away`;
+      } else {
+        return `${minutes} minute${minutes > 1 ? "s" : ""} away`;
+      }
+    };
+
+    // Update next class every minute
+    const updateNextClass = () => {
+      setNextClass(calculateNextClass());
+    };
+
+    updateNextClass();
+    const interval = setInterval(updateNextClass, 60000);
+
+    return () => clearInterval(interval);
+  }, [classes]);
 
   //--------------------------------------learning language----------------------------------//
 
@@ -447,7 +507,10 @@ const LearnUser = () => {
           <div className="flex flex-row items-center space-x-4">
             <h1 className="text-3xl font-semibold">Hi, {user.name}!</h1>
             <p className="text-[#616161] text-lg">
-              How are you today? Your next class is 2 hours away
+              How are you today?{" "}
+              {nextClass
+                ? `Your next class "${nextClass.className}" is ${nextClass.timeUntil}`
+                : "You have no upcoming classes"}
             </p>
           </div>
           <div className="flex items-center gap-4 ">
@@ -661,9 +724,7 @@ const LearnUser = () => {
                   >
                     <ClassCard
                       {...classItem}
-                      // onClick={() =>
-                      //   navigate(`/classesDetailsUser/${classItem.id}`)
-                      // }
+                      isBammbuu={Boolean(classItem.tutorId)}
                     />
                   </div>
                 ))}

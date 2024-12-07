@@ -24,6 +24,8 @@ import AddGroupsUser from "./pages/user/AddGroupsUser";
 import ProfileUser from "./pages/user/ProfileUser";
 import UserEditProfile from "./pages/user/UserEditProfile";
 import UserSettings from "./pages/user/UserSettings";
+import SuperTutorUser from "./pages/user/SuperTutorUser";
+import CommunityUser from "./pages/user/CommunityUser";
 
 const App = () => {
   const { user } = useAuth(); // Use useAuth() inside the component
@@ -78,10 +80,19 @@ const App = () => {
         />
 
         <Route
-          path="/superTutor"
+          path="/superTutorUser"
           element={
-            <ProtectedRoute requiredRole="tutor">
-              <SuperTutor />
+            <ProtectedRoute requiredRole="user">
+              <SuperTutorUser />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/communityUser"
+          element={
+            <ProtectedRoute requiredRole="user">
+              <CommunityUser />
             </ProtectedRoute>
           }
         />

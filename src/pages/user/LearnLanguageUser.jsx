@@ -86,7 +86,7 @@ const LearnLanguageUser = () => {
 
       try {
         const fetchedGroups = [];
-        const groupsToFetch = user.joinedGroups.slice(0, 6);
+        const groupsToFetch = user.joinedGroups;
 
         for (let groupId of groupsToFetch) {
           const groupRef = doc(db, "groups", groupId);

@@ -21,8 +21,8 @@ const Sidebar = ({ user }) => {
 
   const menuItems = [
     { path: "/learn", label: "Learn", icon: BookOpen },
-    { path: "/community", label: "Community", icon: Users },
-    { path: "/super-tutor", label: "SuperTutor", icon: GraduationCap },
+    { path: "/communityUser", label: "Community", icon: Users },
+    { path: "/superTutorUser", label: "SuperTutor", icon: GraduationCap },
     { path: "/language-experts", label: "Language Experts", icon: Languages },
     { path: "/saved-resources", label: "Saved Resources", icon: BookmarkPlus },
   ];
