@@ -201,12 +201,6 @@ const LearnLanguageUser = () => {
                 <p className="text-center text-gray-600">
                   You have not booked a class yet!
                 </p>
-                <button
-                  className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
-                  onClick={() => navigate("/classes")}
-                >
-                  Book a Class
-                </button>
               </div>
             ) : (
               <div className="relative w-full">
@@ -267,13 +261,7 @@ const LearnLanguageUser = () => {
                 </p>
                 <div className="flex flex-row items-center justify-center space-x-4">
                   <button
-                    onClick={() => navigate("/join-group")}
-                    className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
-                  >
-                    Join a Group
-                  </button>
-                  <button
-                    onClick={() => navigate("/create-group")}
+                    onClick={() => navigate("/groupsUser")}
                     className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
                   >
                     Create a Group

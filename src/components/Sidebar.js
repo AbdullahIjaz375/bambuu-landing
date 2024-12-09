@@ -23,8 +23,16 @@ const Sidebar = ({ user }) => {
     { path: "/learn", label: "Learn", icon: BookOpen },
     { path: "/communityUser", label: "Community", icon: Users },
     { path: "/superTutorUser", label: "SuperTutor", icon: GraduationCap },
-    { path: "/language-experts", label: "Language Experts", icon: Languages },
-    { path: "/saved-resources", label: "Saved Resources", icon: BookmarkPlus },
+    {
+      path: "/languageExpertsUser",
+      label: "Language Experts",
+      icon: Languages,
+    },
+    {
+      path: "/savedRecourcesUser",
+      label: "Saved Resources",
+      icon: BookmarkPlus,
+    },
   ];
 
   const handleSignOut = async () => {

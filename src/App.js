@@ -26,6 +26,9 @@ import UserEditProfile from "./pages/user/UserEditProfile";
 import UserSettings from "./pages/user/UserSettings";
 import SuperTutorUser from "./pages/user/SuperTutorUser";
 import CommunityUser from "./pages/user/CommunityUser";
+import Splash from "./pages/Splash";
+import LanguageExpertsUser from "./pages/user/LanguageExpertsUser";
+import SavedRecourcesUser from "./pages/user/SavedRecourcesUser";
 
 const App = () => {
   const { user } = useAuth(); // Use useAuth() inside the component
@@ -35,7 +38,14 @@ const App = () => {
       <ToastContainer position="top-right" autoClose={3000} />
 
       <Routes>
-        <Route path="/" element={<Landing />} />
+        <Route
+          path="/"
+          element={
+            <PublicRoute>
+              <Splash />
+            </PublicRoute>
+          }
+        />
         <Route path="/unauthorized" element={<Unauthorized />} />
 
         <Route
@@ -93,6 +103,22 @@ const App = () => {
           element={
             <ProtectedRoute requiredRole="user">
               <CommunityUser />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/languageExpertsUser"
+          element={
+            <ProtectedRoute requiredRole="user">
+              <LanguageExpertsUser />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/savedRecourcesUser"
+          element={
+            <ProtectedRoute requiredRole="user">
+              <SavedRecourcesUser />
             </ProtectedRoute>
           }
         />

@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { Search, ArrowLeft, RotateCw, Send } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { Search, ArrowLeft, RotateCw, Send, Ellipsis } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
-
 import Sidebar from "../../components/Sidebar";
 
 const ChatMessage = ({ message, isBot }) => (
@@ -13,7 +12,11 @@ const ChatMessage = ({ message, isBot }) => (
           : "bg-[#14b82c] text-white border border-[#14561d] rounded-tl-2xl rounded-bl-2xl rounded-br-2xl"
       }`}
     >
-      <p className="text-lg">{message}</p>
+      {message ? (
+        <p className="text-lg">{message}</p>
+      ) : (
+        <Ellipsis className="w-6 h-6 text-gray-600 animate-spin" />
+      )}
     </div>
   </div>
 );
@@ -24,59 +27,70 @@ const SuperTutorChat = () => {
       text: "Hi, I'm your language SuperTutor. Here to help you practice your language conversation skills. Just tell me which language you want to practice and we can get started.",
       isBot: true,
     },
-    {
-      text: "English",
-      isBot: false,
-    },
-    {
-      text: "Nice! Are there any specific areas you're finding difficult, like grammar or pronunciation?",
-      isBot: true,
-    },
-    {
-      text: "Hi, I'm your language SuperTutor. Here to help you practice your language conversation skills. Just tell me which language you want to practice and we can get started.",
-      isBot: true,
-    },
-    {
-      text: "English",
-      isBot: false,
-    },
-    {
-      text: "Nice! Are there any specific areas you're finding difficult, like grammar or pronunciation?",
-      isBot: true,
-    },
-    {
-      text: "Hi, I'm your language SuperTutor. Here to help you practice your language conversation skills. Just tell me which language you want to practice and we can get started.",
-      isBot: true,
-    },
-    {
-      text: "English",
-      isBot: false,
-    },
-    {
-      text: "Nice! Are there any specific areas you're finding difficult, like grammar or pronunciation?",
-      isBot: true,
-    },
-    {
-      text: "Hi, I'm your language SuperTutor. Here to help you practice your language conversation skills. Just tell me which language you want to practice and we can get started.",
-      isBot: true,
-    },
-    {
-      text: "English",
-      isBot: false,
-    },
-    {
-      text: "Nice! Are there any specific areas you're finding difficult, like grammar or pronunciation?",
-      isBot: true,
-    },
   ]);
   const [inputText, setInputText] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef(null);
 
-  const handleSubmit = (e) => {
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isLoading]);
+
+  const generateGeminiResponse = async (userInput) => {
+    const apiKey = process.env.REACT_APP_GEMINI_API_KEY;
+    if (!apiKey) {
+      console.error("Gemini API key not found");
+      return "I'm sorry, I'm having trouble connecting right now. Please try again later.";
+    }
+
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  {
+                    text: `You are a helpful language tutor. Respond to: ${userInput}`,
+                  },
+                ],
+              },
+            ],
+          }),
+        }
+      );
+
+      const data = await response.json();
+      return data.candidates[0].content.parts[0].text;
+    } catch (error) {
+      console.error("Error calling Gemini API:", error);
+      return "I apologize, but I'm having trouble responding right now. Please try again.";
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!inputText.trim()) return;
 
-    setMessages([...messages, { text: inputText, isBot: false }]);
+    // Add user message
+    const newMessages = [...messages, { text: inputText, isBot: false }];
+    setMessages(newMessages);
     setInputText("");
+    setIsLoading(true);
+
+    // Get and add bot response
+    const botResponse = await generateGeminiResponse(inputText);
+    setMessages([...newMessages, { text: botResponse, isBot: true }]);
+    setIsLoading(false);
   };
 
   return (
@@ -89,10 +103,12 @@ const SuperTutorChat = () => {
             isBot={message.isBot}
           />
         ))}
+        {isLoading && <ChatMessage isBot={true} />}
+        <div ref={messagesEndRef} />
       </div>
 
-      <form onSubmit={handleSubmit} className="mt-4 ">
-        <div className="flex items-center space-x-2 ">
+      <form onSubmit={handleSubmit} className="mt-4">
+        <div className="flex items-center space-x-2">
           <input
             type="text"
             value={inputText}
@@ -102,7 +118,12 @@ const SuperTutorChat = () => {
           />
           <button
             type="submit"
-            className="p-2 text-white bg-yellow-500 rounded-full hover:bg-yellow-600"
+            disabled={isLoading}
+            className={`p-2 text-white bg-yellow-500 rounded-full ${
+              isLoading
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:bg-yellow-600"
+            }`}
           >
             <Send size={24} className="text-black" />
           </button>
@@ -132,7 +153,7 @@ const SuperTutorUser = () => {
           <button className="p-3 text-xl font-medium text-black bg-gray-100 rounded-full">
             <RotateCw />
           </button>
-        </div>{" "}
+        </div>
         <SuperTutorChat />
       </div>
     </div>

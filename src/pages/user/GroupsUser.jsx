@@ -783,7 +783,7 @@ const GroupsUser = () => {
   };
 
   const handleJoinGroup = () => {
-    navigate("/join-group"); // Update with your actual route
+    navigate("/learnLanguageUser"); // Update with your actual route
   };
 
   return (
