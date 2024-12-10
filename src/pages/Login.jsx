@@ -45,6 +45,13 @@ const Login = () => {
       const userRef = doc(db, "students", user.uid);
       const userDoc = await getDoc(userRef);
 
+      const notificationPrefsRef = doc(
+        db,
+        "notification_preferences",
+        user.uid
+      );
+      const notificationPrefsDoc = await getDoc(notificationPrefsRef);
+
       let isFirstTimeLogin = false;
 
       if (!userDoc.exists()) {
@@ -67,6 +74,17 @@ const Login = () => {
           tier: 1,
           currentStreak: 0,
         });
+
+        if (!notificationPrefsDoc.exists()) {
+          await setDoc(notificationPrefsRef, {
+            userId: user.uid,
+            appUpdates: true,
+            classReminder: true,
+            groupChat: true,
+            newMessages: true,
+            resourceAssign: true,
+          });
+        }
         isFirstTimeLogin = true;
       } else {
         // Update lastLoggedIn and handle streak logic
@@ -119,7 +137,7 @@ const Login = () => {
       });
 
       if (isFirstTimeLogin) {
-        navigate("/settings", { replace: true });
+        navigate("/userEditProfile", { replace: true });
       } else {
         navigate("/learn", { replace: true });
       }

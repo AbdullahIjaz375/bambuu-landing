@@ -701,6 +701,20 @@ const Signup = () => {
 
       await setDoc(doc(db, "students", auth.currentUser.uid), userData);
 
+      const notificationPreferences = {
+        appUpdates: true,
+        classReminder: true,
+        groupChat: true,
+        newMessages: true,
+        resourceAssign: true,
+        userId: auth.currentUser.uid,
+      };
+
+      await setDoc(
+        doc(db, "notification_preferences", auth.currentUser.uid),
+        notificationPreferences
+      );
+
       // Sign out and clear any existing session data
       await signOut(auth);
       sessionStorage.removeItem("user");
