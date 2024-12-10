@@ -39,7 +39,7 @@ const ProfileUser = () => {
     const fetchUserData = async () => {
       try {
         if (user?.uid) {
-          const userDoc = await getDoc(doc(db, "users", user.uid));
+          const userDoc = await getDoc(doc(db, "students", user.uid));
           if (userDoc.exists()) {
             setUserData(userDoc.data());
           }
@@ -58,6 +58,8 @@ const ProfileUser = () => {
     try {
       await signOut(auth);
       toast.success("Logged out successfully!");
+      sessionStorage.removeItem("userType"); // Remove userType from session storage
+
       navigate("/");
     } catch (error) {
       toast.error("Error during logout");

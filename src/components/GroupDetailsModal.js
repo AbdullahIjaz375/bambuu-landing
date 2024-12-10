@@ -71,7 +71,7 @@ const GroupDetailsModal = ({ group, onClose }) => {
       if (group.memberIds && group.memberIds.length > 0) {
         const membersData = await Promise.all(
           group.memberIds.map(async (memberId) => {
-            const userDoc = await getDoc(doc(db, "users", memberId));
+            const userDoc = await getDoc(doc(db, "students", memberId));
             // Add detailed logging
             console.log(`Fetching user ${memberId}:`);
             console.log("User document exists:", userDoc.exists());
@@ -108,7 +108,7 @@ const GroupDetailsModal = ({ group, onClose }) => {
 
       // Get references to the group and user documents
       const groupRef = doc(db, "groups", group.id);
-      const userRef = doc(db, "users", user.uid);
+      const userRef = doc(db, "students", user.uid);
 
       // Get current group data
       const groupDoc = await getDoc(groupRef);
@@ -164,7 +164,7 @@ const GroupDetailsModal = ({ group, onClose }) => {
 
       // Get references to the group and user documents
       const groupRef = doc(db, "groups", group.id);
-      const userRef = doc(db, "users", userId);
+      const userRef = doc(db, "students", userId);
 
       // Get current group data
       const groupDoc = await getDoc(groupRef);
@@ -283,14 +283,14 @@ const GroupDetailsModal = ({ group, onClose }) => {
       const classId = classRef.id;
 
       const newClass = {
-        classId: classId, // Add the classId here
+        classId: classId,
         ...classData,
         adminId: user.uid,
         adminName: user.name || "",
         adminImageUrl: user.photoUrl || "",
         groupId: group.id,
         imageUrl,
-        classMemberIds: [user.uid],
+        classMemberIds: [],
         tutorId: "",
         tutorName: "",
         tutorImageUrl: "",
@@ -299,11 +299,17 @@ const GroupDetailsModal = ({ group, onClose }) => {
 
       await updateDoc(doc(db, "classes", classId), newClass);
 
-      // Update user document with the new class ID
-      const userRef = doc(db, "users", user.uid);
-      const updatedEnrolledClasses = [...(user.enrolledClasses || []), classId];
-      await updateDoc(userRef, { enrolledClasses: updatedEnrolledClasses });
+      // Update user document with the new class ID in both arrays
+      const userRef = doc(db, "students", user.uid);
+      const updatedJoinedClasses = [...(user.enrolledClasses || []), classId];
+      const updatedAdminOfClasses = [...(user.adminOfClasses || []), classId];
 
+      await updateDoc(userRef, {
+        enrolledClasses: updatedJoinedClasses,
+        adminOfClasses: updatedAdminOfClasses,
+      });
+
+      // Update group document with the new class ID
       const groupRef = doc(db, "groups", group.id);
       const groupDoc = await getDoc(groupRef);
       const currentClassIds = groupDoc.data().classIds || [];
@@ -311,8 +317,12 @@ const GroupDetailsModal = ({ group, onClose }) => {
         classIds: [...currentClassIds, classId],
       });
 
-      // Update context and session storage
-      const updatedUser = { ...user, enrolledClasses: updatedEnrolledClasses };
+      // Update context and session storage with both arrays
+      const updatedUser = {
+        ...user,
+        enrolledClasses: updatedJoinedClasses,
+        adminOfClasses: updatedAdminOfClasses,
+      };
       setUser(updatedUser);
       sessionStorage.setItem("user", JSON.stringify(updatedUser));
 
@@ -333,12 +343,92 @@ const GroupDetailsModal = ({ group, onClose }) => {
         physicalClass: false,
         classAddress: "",
       });
+
+      // Refresh the classes list
+      await fetchData();
     } catch (error) {
       console.error("Error adding class:", error);
     } finally {
       setIsCreating(false);
     }
   };
+
+  // const handleSaveClass = async () => {
+  //   if (!isFormValid || isCreating) return;
+  //   setIsCreating(true);
+
+  //   try {
+  //     let imageUrl = "";
+  //     if (classImage) {
+  //       const imageRef = ref(
+  //         storage,
+  //         `classes/${Date.now()}_${classImage.name}`
+  //       );
+  //       await uploadBytes(imageRef, classImage);
+  //       imageUrl = await getDownloadURL(imageRef);
+  //     }
+
+  //     // Add the new class document to Firestore
+  //     const classRef = await addDoc(collection(db, "classes"), {});
+  //     const classId = classRef.id;
+
+  //     const newClass = {
+  //       classId: classId, // Add the classId here
+  //       ...classData,
+  //       adminId: user.uid,
+  //       adminName: user.name || "",
+  //       adminImageUrl: user.photoUrl || "",
+  //       groupId: group.id,
+  //       imageUrl,
+  //       classMemberIds: [user.uid],
+  //       tutorId: "",
+  //       tutorName: "",
+  //       tutorImageUrl: "",
+  //       classDateTime: serverTimestamp(),
+  //     };
+
+  //     await updateDoc(doc(db, "classes", classId), newClass);
+
+  //     // Update user document with the new class ID
+  //     const userRef = doc(db, "users", user.uid);
+  //     const updatedEnrolledClasses = [...(user.enrolledClasses || []), classId];
+  //     await updateDoc(userRef, { enrolledClasses: updatedEnrolledClasses });
+
+  //     const groupRef = doc(db, "groups", group.id);
+  //     const groupDoc = await getDoc(groupRef);
+  //     const currentClassIds = groupDoc.data().classIds || [];
+  //     await updateDoc(groupRef, {
+  //       classIds: [...currentClassIds, classId],
+  //     });
+
+  //     // Update context and session storage
+  //     const updatedUser = { ...user, enrolledClasses: updatedEnrolledClasses };
+  //     setUser(updatedUser);
+  //     sessionStorage.setItem("user", JSON.stringify(updatedUser));
+
+  //     setAddClassModalOpen(false);
+
+  //     // Reset form
+  //     setClassImage(null);
+  //     setClassPreviewImage(null);
+  //     setClassData({
+  //       className: "",
+  //       classDescription: "",
+  //       language: "English",
+  //       languageLevel: "Beginner",
+  //       availableSpots: 6,
+  //       classDuration: 60,
+  //       classDateTime: new Date(),
+  //       recurrenceType: "One-time",
+  //       physicalClass: false,
+  //       classAddress: "",
+  //     });
+  //   } catch (error) {
+  //     console.error("Error adding class:", error);
+  //   } finally {
+  //     setIsCreating(false);
+  //   }
+  // };
 
   const formatTime = (timestamp) => {
     if (!timestamp) return "TBD";

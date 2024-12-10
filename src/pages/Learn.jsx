@@ -662,6 +662,7 @@ import LearnUser from "./user/LearnUser";
 
 const Learn = () => {
   const { user, setUser } = useAuth(); // Get the user from AuthContext
+  const userType = sessionStorage.getItem("userType");
 
   // If user is not found, handle it (e.g., redirect to login)
   if (!user) {
@@ -670,8 +671,8 @@ const Learn = () => {
 
   return (
     <>
-      {user.accountType === "user" && <LearnUser />} {/* Student Courses */}
-      {user.accountType === "tutor" && <div>under dev</div>}{" "}
+      {userType === "student" && <LearnUser />} {/* Student Courses */}
+      {userType === "tutor" && <div>under dev</div>}{" "}
     </>
   );
 };

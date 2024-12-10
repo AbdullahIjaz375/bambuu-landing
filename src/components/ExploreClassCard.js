@@ -36,7 +36,7 @@ const useClassEnrollment = () => {
     try {
       // Get references to both documents
       const classRef = doc(db, "classes", classId);
-      const userRef = doc(db, "users", userId);
+      const userRef = doc(db, "students", userId);
 
       // Get the current class document to check available spots
       const classDoc = await getDoc(classRef);

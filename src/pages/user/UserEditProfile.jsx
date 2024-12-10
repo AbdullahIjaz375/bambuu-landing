@@ -32,7 +32,7 @@ const UserEditProfile = () => {
     email: user?.email || "",
     nativeLanguage: user?.nativeLanguage || "",
     learningLanguage: user?.learningLanguage || "Spanish",
-    proficiency: user?.proficiency || "Intermediate",
+    learningLanguageProficiency: user?.proficiency || "Intermediate",
     country: user?.country || "",
   });
   const [image, setImage] = useState(null);
@@ -77,7 +77,7 @@ const UserEditProfile = () => {
       };
 
       // Update Firestore
-      const userRef = doc(db, "users", user.uid);
+      const userRef = doc(db, "students", user.uid);
       await updateDoc(userRef, updatedUserData);
 
       // Update context and session storage

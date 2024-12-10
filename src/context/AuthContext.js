@@ -76,22 +76,23 @@ export const AuthProvider = ({ children }) => {
   // Function to store essential user data in session storage
   const saveUserToSessionStorage = (userData) => {
     const filteredUser = {
-      uid: userData.uid,
-      email: userData.email,
-      name: userData.name || "User",
-      photoUrl: userData.photoUrl || "",
+      adminOfClasses: userData.adminOfClasses || [],
+      adminOfGroups: userData.adminOfGroups || [],
       country: userData.country || "",
       currentStreak: userData.currentStreak || 0,
-      learningLanguage: userData.learningLanguage || "",
-      nativeLanguage: userData.nativeLanguage || "",
-      nickname: userData.nickname || "",
+      email: userData.email,
       enrolledClasses: userData.enrolledClasses || [],
       joinedGroups: userData.joinedGroups || [],
-      lastLoggedIn: userData.lastLoggedIn || null,
+      lastLoggedIn: userData.lastLoggedIn || new Date(),
+      learningLanguage: userData.learningLanguage || "",
+      learningLanguageProficiency:
+        userData.learningLanguageProficiency || "Beginner",
+      name: userData.name || "User",
+      nativeLanguage: userData.nativeLanguage || "",
+      photoUrl: userData.photoUrl || "",
       savedDocuments: userData.savedDocuments || [],
       tier: userData.tier || 1,
-      accountType: userData.accountType || "",
-      proficiency: userData.proficiency || "Beginner", // Added proficiency with default value
+      uid: userData.uid,
     };
     sessionStorage.setItem("user", JSON.stringify(filteredUser));
   };
@@ -101,7 +102,7 @@ export const AuthProvider = ({ children }) => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       console.log("Auth state changed:", currentUser?.uid);
       if (currentUser) {
-        const userRef = doc(db, "users", currentUser.uid);
+        const userRef = doc(db, "students", currentUser.uid);
         const userDoc = await getDoc(userRef);
         console.log("Firestore user data:", userDoc.data());
 

@@ -75,7 +75,7 @@ const App = () => {
         <Route
           path="/learn"
           element={
-            <ProtectedRoute requiredRole="user">
+            <ProtectedRoute requiredRole="student">
               <Learn />
             </ProtectedRoute>
           }
@@ -83,7 +83,7 @@ const App = () => {
         <Route
           path="/languageGroups"
           element={
-            <ProtectedRoute requiredRole="user">
+            <ProtectedRoute requiredRole="student">
               <LanguageGroups />
             </ProtectedRoute>
           }
@@ -92,7 +92,7 @@ const App = () => {
         <Route
           path="/superTutorUser"
           element={
-            <ProtectedRoute requiredRole="user">
+            <ProtectedRoute requiredRole="student">
               <SuperTutorUser />
             </ProtectedRoute>
           }
@@ -101,7 +101,7 @@ const App = () => {
         <Route
           path="/communityUser"
           element={
-            <ProtectedRoute requiredRole="user">
+            <ProtectedRoute requiredRole="student">
               <CommunityUser />
             </ProtectedRoute>
           }
@@ -109,7 +109,7 @@ const App = () => {
         <Route
           path="/languageExpertsUser"
           element={
-            <ProtectedRoute requiredRole="user">
+            <ProtectedRoute requiredRole="student">
               <LanguageExpertsUser />
             </ProtectedRoute>
           }
@@ -117,7 +117,7 @@ const App = () => {
         <Route
           path="/savedRecourcesUser"
           element={
-            <ProtectedRoute requiredRole="user">
+            <ProtectedRoute requiredRole="student">
               <SavedRecourcesUser />
             </ProtectedRoute>
           }
@@ -126,7 +126,7 @@ const App = () => {
         <Route
           path="/profileUser"
           element={
-            <ProtectedRoute requiredRole="user">
+            <ProtectedRoute requiredRole="student">
               <ProfileUser />
             </ProtectedRoute>
           }
@@ -135,7 +135,7 @@ const App = () => {
         <Route
           path="/userEditProfile"
           element={
-            <ProtectedRoute requiredRole="user">
+            <ProtectedRoute requiredRole="student">
               <UserEditProfile />
             </ProtectedRoute>
           }
@@ -144,7 +144,7 @@ const App = () => {
         <Route
           path="/userSettings"
           element={
-            <ProtectedRoute requiredRole="user">
+            <ProtectedRoute requiredRole="student">
               <UserSettings />
             </ProtectedRoute>
           }
@@ -153,7 +153,7 @@ const App = () => {
         <Route
           path="/classesUser"
           element={
-            <ProtectedRoute requiredRole="user">
+            <ProtectedRoute requiredRole="student">
               <ClassesUser />
             </ProtectedRoute>
           }
@@ -161,7 +161,7 @@ const App = () => {
         <Route
           path="/classesDetailsUser/:classId"
           element={
-            <ProtectedRoute requiredRole="user">
+            <ProtectedRoute requiredRole="student">
               <ClassesDetailsUser />
             </ProtectedRoute>
           }
@@ -170,7 +170,7 @@ const App = () => {
         <Route
           path="/groupsUser"
           element={
-            <ProtectedRoute requiredRole="user">
+            <ProtectedRoute requiredRole="student">
               <GroupsUser />
             </ProtectedRoute>
           }
@@ -179,7 +179,7 @@ const App = () => {
         <Route
           path="/groupDetailUser/:groupId"
           element={
-            <ProtectedRoute requiredRole="user">
+            <ProtectedRoute requiredRole="student">
               <GroupDetailUser />
             </ProtectedRoute>
           }
@@ -187,7 +187,7 @@ const App = () => {
         <Route
           path="/addGroupsUser"
           element={
-            <ProtectedRoute requiredRole="user">
+            <ProtectedRoute requiredRole="student">
               <AddGroupsUser />
             </ProtectedRoute>
           }
@@ -195,7 +195,7 @@ const App = () => {
         <Route
           path="/learnLanguageUser"
           element={
-            <ProtectedRoute requiredRole="user">
+            <ProtectedRoute requiredRole="student">
               <LearnLanguageUser />
             </ProtectedRoute>
           }

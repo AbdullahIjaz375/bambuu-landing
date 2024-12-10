@@ -34,41 +34,42 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const { user, loading } = useAuth(); // Destructure loading state
 
-  const handleGoogleLogin = async () => {
-    const googleProvider = new GoogleAuthProvider();
-    const loadingToastId = toast.loading("Logging in..."); // Show loading toast
+  const handleGoogleLoginStudent = async () => {
+    const loadingToastId = toast.loading("Logging in...");
 
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
 
       // Reference to user document in Firestore
-      const userRef = doc(db, "users", user.uid);
+      const userRef = doc(db, "students", user.uid);
       const userDoc = await getDoc(userRef);
 
-      let isFirstTimeLogin = false; // Flag to check if it's the user's first login
+      let isFirstTimeLogin = false;
 
       if (!userDoc.exists()) {
-        // Create the user document with the required fields
+        // Create new student document with updated structure
         await setDoc(userRef, {
           email: user.email,
+          name: user.displayName || "",
+          uid: user.uid,
           enrolledClasses: [],
           joinedGroups: [],
+          adminOfClasses: [],
+          adminOfGroups: [],
           lastLoggedIn: serverTimestamp(),
           learningLanguage: "",
-          name: user.displayName || "", // Use Google displayName or empty string if not available
+          learningLanguageProficiency: "Beginner",
           nativeLanguage: "",
-          nickname: "", // You may ask the user to set this later
           country: "",
-          photoUrl: "", // Set empty photoUrl to ignore Google default profile picture
+          photoUrl: "",
           savedDocuments: [],
           tier: 1,
-          currentStreak: 1, // Start streak at 1 on first login
-          accountType: "user",
+          currentStreak: 0,
         });
-        isFirstTimeLogin = true; // Set flag to true for first-time login
+        isFirstTimeLogin = true;
       } else {
-        // If the document exists, update `lastLoggedIn` and possibly increment `currentStreak`
+        // Update lastLoggedIn and handle streak logic
         const userData = userDoc.data();
         const lastLoggedIn = userData.lastLoggedIn
           ? userData.lastLoggedIn.toDate()
@@ -79,7 +80,6 @@ const Login = () => {
         let updatedStreak = currentStreak;
 
         if (lastLoggedIn) {
-          // Get only the date parts for comparison
           const lastLoginDate = new Date(
             lastLoggedIn.getFullYear(),
             lastLoggedIn.getMonth(),
@@ -91,37 +91,33 @@ const Login = () => {
             now.getDate()
           );
 
-          // Calculate the difference in days by subtracting dates
           const differenceInDays =
             (currentDate - lastLoginDate) / (1000 * 60 * 60 * 24);
 
           if (differenceInDays === 1) {
-            // Increment streak for consecutive day login
             updatedStreak = currentStreak + 1;
           } else if (differenceInDays > 1) {
-            // Reset streak if login gap is more than a day
             updatedStreak = 1;
           }
         } else {
           updatedStreak = 1;
         }
 
-        // Update `lastLoggedIn` and `currentStreak`
+        // Update only lastLoggedIn and currentStreak
         await updateDoc(userRef, {
           lastLoggedIn: serverTimestamp(),
           currentStreak: updatedStreak,
-          accountType: "user",
         });
       }
+      sessionStorage.setItem("userType", "student");
 
       toast.update(loadingToastId, {
-        // Update toast to success
         render: "Logged in successfully!",
         type: "success",
         isLoading: false,
         autoClose: 3000,
       });
-      // Redirect based on first-time login status
+
       if (isFirstTimeLogin) {
         navigate("/settings", { replace: true });
       } else {
@@ -130,7 +126,6 @@ const Login = () => {
     } catch (error) {
       console.error("Error during Google login:", error);
       toast.update(loadingToastId, {
-        // Update toast to error
         render: `Login error: ${error.message}`,
         type: "error",
         isLoading: false,
@@ -139,141 +134,7 @@ const Login = () => {
     }
   };
 
-  const handleFacebookLogin = async () => {
-    const facebookProvider = new FacebookAuthProvider();
-    try {
-      const result = await signInWithPopup(auth, facebookProvider);
-      const user = result.user;
-
-      // Check if user data already exists in Firestore
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (!userDoc.exists()) {
-        // Set initial data with empty values if it doesn't exist
-        await setDoc(doc(db, "users", user.uid), {
-          email: user.email,
-          nickname: "",
-          country: "",
-          learningLanguage: "",
-          nativeLanguage: "",
-          accountType: "user",
-          timeZone: "",
-          createdAt: new Date(),
-        });
-      }
-
-      navigate("/learn", { replace: true });
-    } catch (error) {
-      console.error("Error during Facebook login:", error);
-    }
-  };
-  // const handleEmailLogin = async (e) => {
-  //   const loadingToastId = toast.loading("Logging in..."); // Show loading toast
-  //   // Validate both fields
-
-  //   e.preventDefault();
-  //   try {
-  //     const userCredential = await signInWithEmailAndPassword(
-  //       auth,
-  //       email,
-  //       password
-  //     );
-  //     const user = userCredential.user;
-
-  //     const userRef = doc(db, "users", user.uid);
-  //     const userDoc = await getDoc(userRef);
-
-  //     if (userDoc.exists()) {
-  //       const userData = userDoc.data();
-  //       const lastLoggedIn = userData.lastLoggedIn
-  //         ? userData.lastLoggedIn.toDate()
-  //         : null;
-  //       const currentStreak = userData.currentStreak || 0;
-
-  //       const now = new Date();
-  //       let updatedStreak = currentStreak;
-
-  //       if (lastLoggedIn) {
-  //         // Get only the date parts for comparison
-  //         const lastLoginDate = new Date(
-  //           lastLoggedIn.getFullYear(),
-  //           lastLoggedIn.getMonth(),
-  //           lastLoggedIn.getDate()
-  //         );
-  //         const currentDate = new Date(
-  //           now.getFullYear(),
-  //           now.getMonth(),
-  //           now.getDate()
-  //         );
-
-  //         // Calculate the difference in days
-  //         const differenceInDays =
-  //           (currentDate - lastLoginDate) / (1000 * 60 * 60 * 24);
-
-  //         if (differenceInDays === 1) {
-  //           // Increment streak for consecutive day login
-  //           updatedStreak = currentStreak + 1;
-  //         } else if (differenceInDays > 1) {
-  //           // Reset streak if login gap is more than a day
-  //           updatedStreak = 1;
-  //         }
-  //       } else {
-  //         updatedStreak = 1; // First login or no `lastLoggedIn` recorded, start streak at 1
-  //       }
-
-  //       // Update `lastLoggedIn` and `currentStreak`
-  //       await updateDoc(userRef, {
-  //         lastLoggedIn: serverTimestamp(),
-  //         currentStreak: updatedStreak,
-  //       });
-  //     }
-
-  //     toast.update(loadingToastId, {
-  //       // Update toast to success
-  //       render: "Logged in successfully!",
-  //       type: "success",
-  //       isLoading: false,
-  //       autoClose: 3000,
-  //     });
-  //     navigate("/learn", { replace: true });
-  //   } catch (error) {
-  //     console.error("Error during email login:", error);
-
-  //     // Handle INVALID_LOGIN_CREDENTIALS error
-  //     if (
-  //       error.code === "auth/invalid-credential" ||
-  //       error.message.includes("INVALID_LOGIN_CREDENTIALS")
-  //     ) {
-  //       setEmailError("Wrong email address.");
-  //       setPasswordError("Wrong password.");
-  //     }
-  //     // Handle other specific errors
-  //     else if (
-  //       error.code === "auth/user-not-found" ||
-  //       error.code === "auth/invalid-email"
-  //     ) {
-  //       setEmailError("Wrong email address.");
-  //     } else if (error.code === "auth/wrong-password") {
-  //       setPasswordError("Wrong password.");
-  //     }
-
-  //     toast.update(loadingToastId, {
-  //       render: "Invalid email or password",
-  //       type: "error",
-  //       isLoading: false,
-  //       autoClose: 5000,
-  //     });
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   if (!loading && user) {
-  //     navigate("/learn", { replace: true });
-  //   }
-  // }, [user, loading, navigate]);
-
-  // Show a spinner while checking authentication status
-
-  const handleEmailLogin = async (e) => {
+  const handleEmailLoginStudent = async (e) => {
     const loadingToastId = toast.loading("Logging in...");
     e.preventDefault();
 
@@ -285,7 +146,7 @@ const Login = () => {
       );
       const user = userCredential.user;
 
-      const userRef = doc(db, "users", user.uid);
+      const userRef = doc(db, "students", user.uid);
       const userDoc = await getDoc(userRef);
 
       if (!userDoc.exists()) {
@@ -345,6 +206,7 @@ const Login = () => {
         lastLoggedIn: now,
       };
       sessionStorage.setItem("user", JSON.stringify(sessionUserData));
+      sessionStorage.setItem("userType", "student");
 
       toast.update(loadingToastId, {
         render: "Logged in successfully!",
@@ -381,6 +243,35 @@ const Login = () => {
       });
     }
   };
+
+  const handleFacebookLogin = async () => {
+    const facebookProvider = new FacebookAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, facebookProvider);
+      const user = result.user;
+
+      // Check if user data already exists in Firestore
+      const userDoc = await getDoc(doc(db, "students", user.uid));
+      if (!userDoc.exists()) {
+        // Set initial data with empty values if it doesn't exist
+        await setDoc(doc(db, "students", user.uid), {
+          email: user.email,
+          nickname: "",
+          country: "",
+          learningLanguage: "",
+          nativeLanguage: "",
+          accountType: "user",
+          timeZone: "",
+          createdAt: new Date(),
+        });
+      }
+
+      navigate("/learn", { replace: true });
+    } catch (error) {
+      console.error("Error during Facebook login:", error);
+    }
+  };
+
   const validateEmail = (email) => {
     if (!email) {
       setEmailError("Wrong email address.");
@@ -440,7 +331,7 @@ const Login = () => {
         </div>
 
         {/* Login Form */}
-        <form onSubmit={handleEmailLogin} className="space-y-4">
+        <form onSubmit={handleEmailLoginStudent} className="space-y-4">
           <div className="space-y-2">
             <label className="block text-gray-700">Email</label>
             <div className="relative">
@@ -569,7 +460,7 @@ const Login = () => {
 
         <div className="grid grid-cols-2 gap-4">
           <button
-            onClick={handleGoogleLogin}
+            onClick={handleGoogleLoginStudent}
             className="flex items-center justify-center px-4 py-2 space-x-4 border border-gray-300 rounded-full hover:bg-gray-50"
           >
             <img alt="google" src="/images/google-button.png" />

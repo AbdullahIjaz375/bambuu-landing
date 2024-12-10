@@ -681,24 +681,25 @@ const Signup = () => {
       }
 
       const userData = {
+        adminOfClasses: [],
+        adminOfGroups: [],
+        country: profileData.country,
+        currentStreak: 0,
         email: auth.currentUser.email,
         enrolledClasses: [],
         joinedGroups: [],
         lastLoggedIn: new Date(),
         learningLanguage: profileData.learningLanguage,
+        learningLanguageProficiency: profileData.proficiency,
         name: profileData.name,
         nativeLanguage: profileData.nativeLanguage,
-        nickname: profileData.name,
         photoUrl: "",
         savedDocuments: [],
         tier: 1,
-        currentStreak: 1,
-        accountType: "user",
-        country: profileData.country,
-        proficiency: profileData.proficiency,
+        uid: auth.currentUser.uid,
       };
 
-      await setDoc(doc(db, "users", auth.currentUser.uid), userData);
+      await setDoc(doc(db, "students", auth.currentUser.uid), userData);
 
       // Sign out and clear any existing session data
       await signOut(auth);

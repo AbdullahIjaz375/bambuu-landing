@@ -228,7 +228,7 @@ const GroupCard = ({ group }) => {
 
       // Get references to the group and user documents
       const groupRef = doc(db, "groups", groupId);
-      const userRef = doc(db, "users", user.uid);
+      const userRef = doc(db, "students", user.uid);
 
       // Get the current group data to check if user is already a member
       const groupDoc = await getDoc(groupRef);
