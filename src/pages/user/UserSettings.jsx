@@ -11,6 +11,7 @@ import {
   RectangleEllipsis,
   Crown,
 } from "lucide-react";
+import { Switch } from "@mantine/core";
 import countryList from "react-select-country-list";
 import ISO6391 from "iso-639-1";
 import Sidebar from "../../components/Sidebar";
@@ -22,6 +23,20 @@ const UserSettings = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("App");
   const [appLanguage, setAppLanguage] = useState("ENG");
+  const [notifications, setNotifications] = useState({
+    classReminder: true,
+    newMessage: true,
+    resourceAssign: true,
+    groupChat: false,
+    appUpdates: false,
+  });
+
+  const handleNotificationChange = (key) => {
+    setNotifications((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
 
   return (
     <div className="flex min-h-screen bg-white">
@@ -47,7 +62,7 @@ const UserSettings = () => {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-12 py-2 rounded-full text-lg font-medium transition-all  ${
+              className={`px-12 py-2 rounded-full text-lg font-medium transition-all ${
                 activeTab === tab
                   ? "bg-[#ffbf00] text-[#042f0c] border border-[#042f0c]"
                   : "text-[#042f0c] hover:text-black"
@@ -109,8 +124,59 @@ const UserSettings = () => {
 
         {/* Notifications Tab Content */}
         {activeTab === "Notifications" && (
-          <div className="text-center text-gray-500">
-            Notifications settings content here
+          <div className="max-w-2xl">
+            <h2 className="mb-6 text-xl font-medium">In-App Notification</h2>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-2xl">
+                <span className="text-lg">Class Reminder Notification</span>
+                <Switch
+                  checked={notifications.classReminder}
+                  onChange={() => handleNotificationChange("classReminder")}
+                  size="md"
+                  color="green"
+                />
+              </div>
+
+              <div className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-2xl">
+                <span className="text-lg">New Message Notification</span>
+                <Switch
+                  checked={notifications.newMessage}
+                  onChange={() => handleNotificationChange("newMessage")}
+                  size="md"
+                  color="green"
+                />
+              </div>
+
+              <div className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-2xl">
+                <span className="text-lg">Resource Assign Notification</span>
+                <Switch
+                  checked={notifications.resourceAssign}
+                  onChange={() => handleNotificationChange("resourceAssign")}
+                  size="md"
+                  color="green"
+                />
+              </div>
+
+              <div className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-2xl">
+                <span className="text-lg">Group Chat Notification</span>
+                <Switch
+                  checked={notifications.groupChat}
+                  onChange={() => handleNotificationChange("groupChat")}
+                  size="md"
+                  color="green"
+                />
+              </div>
+
+              <div className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-2xl">
+                <span className="text-lg">App Updates</span>
+                <Switch
+                  checked={notifications.appUpdates}
+                  onChange={() => handleNotificationChange("appUpdates")}
+                  size="md"
+                  color="green"
+                />
+              </div>
+            </div>
           </div>
         )}
       </div>

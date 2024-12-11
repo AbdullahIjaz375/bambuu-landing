@@ -29,6 +29,8 @@ import CommunityUser from "./pages/user/CommunityUser";
 import Splash from "./pages/Splash";
 import LanguageExpertsUser from "./pages/user/LanguageExpertsUser";
 import SavedRecourcesUser from "./pages/user/SavedRecourcesUser";
+import PrivacyPolicyUser from "./pages/user/PrivacyPolicyUser";
+import AboutBambuuUser from "./pages/user/AboutBambuuUser";
 
 const App = () => {
   const { user } = useAuth(); // Use useAuth() inside the component
@@ -146,6 +148,23 @@ const App = () => {
           element={
             <ProtectedRoute requiredRole="student">
               <UserSettings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/privacyPolicyUser"
+          element={
+            <ProtectedRoute requiredRole="student">
+              <PrivacyPolicyUser />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/aboutBambuuUser"
+          element={
+            <ProtectedRoute requiredRole="student">
+              <AboutBambuuUser />
             </ProtectedRoute>
           }
         />

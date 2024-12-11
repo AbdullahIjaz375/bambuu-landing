@@ -280,7 +280,7 @@
 // export default LearnUser;
 
 import { Search } from "lucide-react";
-
+import NotificationDropdown from "../../components/NotificationDropdown";
 import React, { useState, useEffect } from "react";
 import {
   Bell,
@@ -527,9 +527,7 @@ const LearnUser = () => {
                 />
               </div>
             </div>
-            <button className=" rounded-full hover:bg-gray-100 border border-[#ffbf00] p-2">
-              <Bell className="w-6 h-6" />
-            </button>
+            <NotificationDropdown />{" "}
           </div>
         </div>
 

@@ -175,7 +175,7 @@ const ProfileUser = () => {
               </button>
 
               <button
-                onClick={() => navigate("/about")}
+                onClick={() => navigate("/aboutBambuuUser")}
                 className="flex items-center justify-between w-full p-4 text-green-600 border border-green-500 rounded-full hover:bg-green-50"
               >
                 <div className="flex items-center gap-2">
@@ -187,7 +187,7 @@ const ProfileUser = () => {
               </button>
 
               <button
-                onClick={() => navigate("/privacy")}
+                onClick={() => navigate("/privacyPolicyUser")}
                 className="flex items-center justify-between w-full p-4 text-green-600 border border-green-500 rounded-full hover:bg-green-50"
               >
                 <div className="flex items-center gap-2">
