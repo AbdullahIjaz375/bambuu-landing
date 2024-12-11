@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import { Users, User } from "lucide-react";
 import GroupDetailsModal from "./GroupDetailsModal";
+import { useNavigate } from "react-router-dom";
 
 const GroupCard = ({ group }) => {
+  const navigate = useNavigate();
+
   const [showModal, setShowModal] = useState(false);
   const {
     groupName,
@@ -11,14 +14,18 @@ const GroupCard = ({ group }) => {
     groupAdminName = "Admin",
     memberIds = [],
     imageUrl,
-    groupDescription,
+    id,
   } = group;
+
+  const handleClick = () => {
+    navigate(`/groupDetailsUser/${id}`);
+  };
 
   return (
     <>
       <div
         className="max-w-md transition-transform transform cursor-pointer hover:scale-105"
-        onClick={() => setShowModal(true)}
+        onClick={() => handleClick()}
       >
         <div className="max-w-sm p-4 bg-white border border-[#ffc310] rounded-3xl ">
           {/* Rest of your existing GroupCard code */}
@@ -69,10 +76,10 @@ const GroupCard = ({ group }) => {
           </div>
         </div>
       </div>
-
+      {/* 
       {showModal && (
         <GroupDetailsModal group={group} onClose={() => setShowModal(false)} />
-      )}
+      )} */}
     </>
   );
 };

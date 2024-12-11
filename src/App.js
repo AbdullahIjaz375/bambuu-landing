@@ -177,7 +177,7 @@ const App = () => {
         />
 
         <Route
-          path="/groupDetailUser/:groupId"
+          path="/groupDetailsUser/:groupId"
           element={
             <ProtectedRoute requiredRole="student">
               <GroupDetailUser />
