@@ -31,6 +31,14 @@ import LanguageExpertsUser from "./pages/user/LanguageExpertsUser";
 import SavedRecourcesUser from "./pages/user/SavedRecourcesUser";
 import PrivacyPolicyUser from "./pages/user/PrivacyPolicyUser";
 import AboutBambuuUser from "./pages/user/AboutBambuuUser";
+import LoginTutor from "./pages/LoginTutor";
+import ProfileTutor from "./pages/tutor/ProfileTutor";
+import EditProfileTutor from "./pages/tutor/EditProfileTutor";
+import TutorSettings from "./pages/tutor/SettingsTutor";
+import PrivacyPolicyTutor from "./pages/tutor/PrivacyPolicyTutor";
+import AboutBambuuTutor from "./pages/tutor/AboutBambuuTutor";
+import SavedResourcesTutor from "./pages/tutor/SavedResourcesTutor";
+import StudentsTutor from "./pages/tutor/StudentsTutor";
 
 const App = () => {
   const { user } = useAuth(); // Use useAuth() inside the component
@@ -58,6 +66,15 @@ const App = () => {
             </PublicRoute>
           }
         />
+
+        <Route
+          path="/login-tutor"
+          element={
+            <PublicRoute>
+              <LoginTutor />
+            </PublicRoute>
+          }
+        />
         <Route
           path="/signup"
           element={
@@ -77,7 +94,7 @@ const App = () => {
         <Route
           path="/learn"
           element={
-            <ProtectedRoute requiredRole="student">
+            <ProtectedRoute requiredRole={["student", "tutor"]}>
               <Learn />
             </ProtectedRoute>
           }
@@ -108,6 +125,15 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+
+        <Route
+          path="/studentsTutor"
+          element={
+            <ProtectedRoute requiredRole="tutor">
+              <StudentsTutor />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/languageExpertsUser"
           element={
@@ -124,6 +150,14 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/savedRecourcesTutor"
+          element={
+            <ProtectedRoute requiredRole="tutor">
+              <SavedResourcesTutor />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/profileUser"
@@ -133,12 +167,28 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/profileTutor"
+          element={
+            <ProtectedRoute requiredRole="tutor">
+              <ProfileTutor />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path="/userEditProfile"
           element={
             <ProtectedRoute requiredRole="student">
               <UserEditProfile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/tutorEditProfile"
+          element={
+            <ProtectedRoute requiredRole="tutor">
+              <EditProfileTutor />
             </ProtectedRoute>
           }
         />
@@ -152,10 +202,27 @@ const App = () => {
           }
         />
         <Route
+          path="/tutorSettings"
+          element={
+            <ProtectedRoute requiredRole="tutor">
+              <TutorSettings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/privacyPolicyUser"
           element={
             <ProtectedRoute requiredRole="student">
               <PrivacyPolicyUser />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/privacyPolicyTutor"
+          element={
+            <ProtectedRoute requiredRole="tutor">
+              <PrivacyPolicyTutor />
             </ProtectedRoute>
           }
         />
@@ -168,7 +235,14 @@ const App = () => {
             </ProtectedRoute>
           }
         />
-
+        <Route
+          path="/aboutBambuuTutor"
+          element={
+            <ProtectedRoute requiredRole="tutor">
+              <AboutBambuuTutor />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/classesUser"
           element={

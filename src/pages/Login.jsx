@@ -697,7 +697,7 @@ const Login = () => {
             <Link to="/forgot-password" className="font-semibold text-red-500">
               Forgot Password?
             </Link>
-            <Link to="/tutor-login" className="text-[#14b82c] font-semibold">
+            <Link to="/login-tutor" className="text-[#14b82c] font-semibold">
               Login as Tutor
             </Link>
           </div>

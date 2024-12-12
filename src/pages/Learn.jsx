@@ -658,6 +658,7 @@
 // export default Learn;
 
 import { useAuth } from "../context/AuthContext";
+import LearnTutor from "./tutor/LearnTutor";
 import LearnUser from "./user/LearnUser";
 
 const Learn = () => {
@@ -672,7 +673,7 @@ const Learn = () => {
   return (
     <>
       {userType === "student" && <LearnUser />} {/* Student Courses */}
-      {userType === "tutor" && <div>under dev</div>}{" "}
+      {userType === "tutor" && <LearnTutor />}{" "}
     </>
   );
 };

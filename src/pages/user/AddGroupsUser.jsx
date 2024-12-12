@@ -258,11 +258,7 @@ const AddGroupsUser = () => {
             <button
               onClick={handleCreateGroup}
               disabled={
-                loading ||
-                !groupName ||
-                !groupDescription ||
-                !learningLanguage ||
-                !languageLevel
+                loading || !groupName || !groupDescription || !learningLanguage
               }
               className="px-10 py-3 text-[#042f0c] text-xl font-medium bg-[#14b82c] border border-[#5d5d5d] disabled:bg-[#b9f9c2] disabled:text-[#b0b0b0] disabled:border-[#b0b0b0] rounded-full"
             >
