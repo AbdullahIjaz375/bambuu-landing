@@ -39,6 +39,9 @@ import PrivacyPolicyTutor from "./pages/tutor/PrivacyPolicyTutor";
 import AboutBambuuTutor from "./pages/tutor/AboutBambuuTutor";
 import SavedResourcesTutor from "./pages/tutor/SavedResourcesTutor";
 import StudentsTutor from "./pages/tutor/StudentsTutor";
+import InstructorProfileUser from "./pages/user/InstructorProfileUser";
+import BecomeAnExpertUser from "./pages/user/BecomeAnExpertUser";
+import AddClassTutor from "./pages/tutor/AddClassTutor";
 
 const App = () => {
   const { user } = useAuth(); // Use useAuth() inside the component
@@ -142,6 +145,31 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/addClassTutor"
+          element={
+            <ProtectedRoute requiredRole="tutor">
+              <AddClassTutor />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/tutor/:tutorId"
+          element={
+            <ProtectedRoute requiredRole="student">
+              <InstructorProfileUser />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/becomeAnExpert"
+          element={
+            <ProtectedRoute requiredRole="student">
+              <BecomeAnExpertUser />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/savedRecourcesUser"
           element={

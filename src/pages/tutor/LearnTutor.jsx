@@ -27,7 +27,6 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { ClipLoader } from "react-spinners";
-
 const LearnTutor = () => {
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
@@ -126,6 +125,10 @@ const LearnTutor = () => {
 
   const weekDates = getWeekDates(date);
 
+  const handleAddClassClick = () => {
+    navigate("/addClassTutor");
+  };
+
   return (
     <div className="flex min-h-screen bg-white">
       <Sidebar user={user} />
@@ -217,7 +220,10 @@ const LearnTutor = () => {
             ))}
           </div>
 
-          <button className="px-3 py-2 text-[#042f0c] text-lg font-semibold bg-[#e6fde9] border border-black rounded-full flex items-center">
+          <button
+            className="px-3 py-2 text-[#042f0c] text-lg font-semibold bg-[#e6fde9] border border-black rounded-full flex items-center"
+            onClick={handleAddClassClick}
+          >
             <Plus /> Add Class
           </button>
         </div>
