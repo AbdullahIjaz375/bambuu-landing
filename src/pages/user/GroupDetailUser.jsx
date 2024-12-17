@@ -315,18 +315,17 @@ const GroupDetailsUser = ({ onClose }) => {
 
     try {
       let imageUrl = "";
+      // Add the new class document to Firestore
+      const classRef = await addDoc(collection(db, "classes"), {});
+      const classId = classRef.id;
       if (classImage) {
         const imageRef = ref(
           storage,
-          `classes/${Date.now()}_${classImage.name}`
+          `classes/${classId}/image_${Date.now()}_${classImage.name}`
         );
         await uploadBytes(imageRef, classImage);
         imageUrl = await getDownloadURL(imageRef);
       }
-
-      // Add the new class document to Firestore
-      const classRef = await addDoc(collection(db, "classes"), {});
-      const classId = classRef.id;
 
       const newClass = {
         classId: classId,
