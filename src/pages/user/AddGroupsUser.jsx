@@ -36,51 +36,6 @@ const AddGroupsUser = () => {
     return await getDownloadURL(storageRef);
   };
 
-  // const handleCreateGroup = async () => {
-  //   setLoading(true);
-
-  //   try {
-  //     const newGroup = {
-  //       groupName,
-  //       groupDescription,
-  //       groupLearningLanguage: learningLanguage,
-  //       languageLevel,
-  //       groupAdminId: user.uid,
-  //       groupAdminName: user.name || "Anonymous",
-  //       groupAdminImageUrl: user.photoUrl || null,
-  //       memberIds: [],
-  //       classIds: [],
-  //       createdAt: new Date().toISOString(),
-  //     };
-
-  //     const groupRef = await addDoc(collection(db, "groups"), newGroup);
-  //     const groupId = groupRef.id;
-
-  //     const imageUrl = await handleImageUpload(groupId);
-  //     await updateDoc(groupRef, { imageUrl, id: groupId });
-
-  //     const userRef = doc(db, "users", user.uid);
-  //     await updateDoc(userRef, {
-  //       joinedGroups: [...(user.joinedGroups || []), groupId],
-  //     });
-
-  //     const updatedUser = {
-  //       ...user,
-  //       joinedGroups: [...(user.joinedGroups || []), groupId],
-  //     };
-  //     setUser(updatedUser);
-  //     sessionStorage.setItem("user", JSON.stringify(updatedUser));
-
-  //     setTimeout(() => {
-  //       navigate("/groupsUser");
-  //     }, 1000);
-  //   } catch (error) {
-  //     console.error("Error creating group:", error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   const handleCreateGroup = async () => {
     setLoading(true);
 
@@ -96,6 +51,7 @@ const AddGroupsUser = () => {
         memberIds: [],
         classIds: [],
         createdAt: new Date().toISOString(),
+        isPremium: true,
       };
 
       // Add group to Firestore

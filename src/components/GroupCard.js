@@ -1,86 +1,108 @@
-import React, { useState } from "react";
-import { Users, User } from "lucide-react";
-import GroupDetailsModal from "./GroupDetailsModal";
 import { useNavigate } from "react-router-dom";
+import React from "react";
+import { Users, User } from "lucide-react";
 
 const GroupCard = ({ group }) => {
-  const navigate = useNavigate();
-
-  const [showModal, setShowModal] = useState(false);
   const {
     groupName,
     groupLearningLanguage,
-    level = "Not specified",
-    groupAdminName = "Admin",
+    groupAdminName,
+    groupAdminImageUrl,
     memberIds = [],
     imageUrl,
     id,
+    isPremium,
   } = group;
-
+  const navigate = useNavigate();
   const handleClick = () => {
+    // Note: Removed useNavigate since it should be passed as a prop or handled differently
     navigate(`/groupDetailsUser/${id}`);
   };
 
   return (
-    <>
+    <div
+      className="transition-transform transform cursor-pointer w-80 hover:scale-105"
+      onClick={handleClick}
+    >
       <div
-        className="max-w-md transition-transform transform cursor-pointer hover:scale-105"
-        onClick={() => handleClick()}
+        className={`relative p-6 rounded-[32px] border ${
+          isPremium
+            ? "bg-[#f0fdf1] border-green-300"
+            : "bg-[#ffffea] border-[#ffc310]"
+        }`}
       >
-        <div className="max-w-sm p-4 bg-white border border-[#ffc310] rounded-3xl ">
-          {/* Rest of your existing GroupCard code */}
-          <div className="flex flex-col items-center">
-            <div className="w-40 h-40 mb-2 overflow-hidden rounded-full">
+        <div className="flex flex-col items-center">
+          {/* Group Image Container with Relative Positioning */}
+          <div className="relative w-40 h-40 mb-4">
+            {/* Bambuu+ Tag */}
+            {isPremium && (
+              <div className="absolute z-10 -translate-x-1/2 left-1/2 -top-3">
+                <div className="px-3 py-1 text-sm font-medium text-green-600 bg-white border border-green-300 rounded-full whitespace-nowrap">
+                  bammbuu+
+                </div>
+              </div>
+            )}
+            {/* Group Image */}
+            <div className="w-full h-full overflow-hidden rounded-full">
               <img
                 src={imageUrl}
-                alt={`${groupLearningLanguage} flag`}
+                alt={groupName}
                 className="object-cover w-full h-full"
               />
             </div>
+          </div>
 
-            <h2 className="mb-2 text-2xl font-medium text-gray-900">
-              {groupName}
-            </h2>
+          {/* Group Name */}
+          <h2 className="mb-4 text-2xl font-semibold text-center text-gray-900">
+            {groupName}
+          </h2>
 
-            <div className="flex items-center gap-2 mb-2">
-              <div className="flex items-center gap-2">
+          {/* Language */}
+          <div className="flex items-center gap-2 mb-6">
+            <div className="w-6 h-6 overflow-hidden rounded-full">
+              {groupLearningLanguage === "Spanish" ? (
                 <img
-                  src={imageUrl}
-                  alt={`${groupLearningLanguage} flag`}
-                  className="w-6 h-6 rounded-full"
+                  src="/flags/spain.png"
+                  alt="Spanish flag"
+                  className="object-cover w-full h-full"
                 />
-                <span className="text-lg text-green-900 truncate max-w-[120px]">
-                  {groupLearningLanguage}
-                </span>
-              </div>
-              <span className="px-3 py-1 text-gray-800 bg-[#fff885] rounded-full">
-                {level}
+              ) : (
+                <img
+                  src="/flags/us.png"
+                  alt="US flag"
+                  className="object-cover w-full h-full"
+                />
+              )}
+            </div>
+            <span className="text-lg font-medium">{groupLearningLanguage}</span>
+          </div>
+
+          {/* Admin and Member Count */}
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-2">
+              {groupAdminImageUrl ? (
+                <img
+                  src={groupAdminImageUrl}
+                  alt={groupAdminName}
+                  className="w-8 h-8 rounded-full"
+                />
+              ) : (
+                <div className="flex items-center justify-center w-8 h-8 bg-gray-200 rounded-full">
+                  <User className="w-5 h-5 text-gray-600" />
+                </div>
+              )}
+              <span className="text-gray-700">
+                {groupAdminName} <span className="text-gray-500">(Admin)</span>
               </span>
             </div>
-
-            <div className="flex items-center justify-between w-full">
-              <div className="flex items-center gap-2">
-                <User />
-                <span className="text-lg text-gray-700">
-                  {groupAdminName}{" "}
-                  <span className="text-gray-500">(Admin)</span>
-                </span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Users className="w-5 h-5 text-gray-600" />
-                <span className="text-gray-700">
-                  {memberIds.length} members
-                </span>
-              </div>
+            <div className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-gray-600" />
+              <span className="text-gray-700">2K+</span>
             </div>
           </div>
         </div>
       </div>
-      {/* 
-      {showModal && (
-        <GroupDetailsModal group={group} onClose={() => setShowModal(false)} />
-      )} */}
-    </>
+    </div>
   );
 };
 

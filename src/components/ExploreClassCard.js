@@ -29,7 +29,7 @@ const useClassEnrollment = () => {
     }
   };
 
-  const enrollInClass = async (classId, userId) => {
+  const enrollInClass = async (classId, userId, tutorId) => {
     setIsEnrolling(true);
     setError(null);
 
@@ -37,6 +37,7 @@ const useClassEnrollment = () => {
       // Get references to both documents
       const classRef = doc(db, "classes", classId);
       const userRef = doc(db, "students", userId);
+      const tutorRef = doc(db, "tutors", tutorId);
 
       // Get the current class document to check available spots
       const classDoc = await getDoc(classRef);
@@ -63,6 +64,9 @@ const useClassEnrollment = () => {
         }),
         updateDoc(userRef, {
           enrolledClasses: arrayUnion(classId),
+        }),
+        updateDoc(tutorRef, {
+          tutorStudentIds: arrayUnion(userId),
         }),
       ]);
 
@@ -166,7 +170,7 @@ const ExploreClassCard = ({
       return;
     }
 
-    const success = await enrollInClass(classId, user.uid);
+    const success = await enrollInClass(classId, user.uid, tutorId);
 
     if (success) {
       setIsBookingConfirmationOpen(false);

@@ -260,12 +260,14 @@ const GroupDetailsUser = ({ onClose }) => {
     classDescription: "",
     language: "English",
     languageLevel: "Beginner",
-    availableSpots: 6,
+    availableSpots: 5,
     classDuration: 60,
     classDateTime: new Date(),
     recurrenceType: "One-time",
-    physicalClass: false,
+    classLocation: "Virtual",
+    classType: "Group Premium",
     classAddress: "",
+    imageUrl: "",
   });
 
   const handleClassImageChange = (e) => {
@@ -299,15 +301,19 @@ const GroupDetailsUser = ({ onClose }) => {
         classDuration: !!classData.classDuration,
         classDateTime: !!classData.classDateTime,
         recurrenceType: !!classData.recurrenceType,
+        classLocation: !!classData.classLocation,
+        classType: !!classData.classType,
         classAddress:
-          !classData.physicalClass || !!classData.classAddress.trim(),
+          classData.classLocation === "Physical"
+            ? !!classData.classAddress.trim()
+            : true,
       };
 
       return Object.values(requiredFields).every((field) => field === true);
     };
 
     setIsFormValid(validateForm());
-  }, [classData, classImage]);
+  }, [classData]);
 
   const handleSaveClass = async () => {
     if (!isFormValid || isCreating) return;
@@ -315,9 +321,9 @@ const GroupDetailsUser = ({ onClose }) => {
 
     try {
       let imageUrl = "";
-      // Add the new class document to Firestore
       const classRef = await addDoc(collection(db, "classes"), {});
       const classId = classRef.id;
+
       if (classImage) {
         const imageRef = ref(
           storage,
@@ -329,22 +335,28 @@ const GroupDetailsUser = ({ onClose }) => {
 
       const newClass = {
         classId: classId,
-        ...classData,
         adminId: user.uid,
         adminName: user.name || "",
         adminImageUrl: user.photoUrl || "",
         groupId: group.id,
+        className: classData.className,
+        classDescription: classData.classDescription,
+        language: classData.language,
+        languageLevel: classData.languageLevel,
+        availableSpots: classData.availableSpots,
+        classDuration: classData.classDuration,
+        classDateTime: serverTimestamp(),
+        recurrenceType: classData.recurrenceType,
+        classLocation: classData.classLocation,
+        classType: classData.classType,
+        classAddress: classData.classAddress,
         imageUrl,
         classMemberIds: [],
-        tutorId: "",
-        tutorName: "",
-        tutorImageUrl: "",
-        classDateTime: serverTimestamp(),
       };
 
       await updateDoc(doc(db, "classes", classId), newClass);
 
-      // Update user document with the new class ID in both arrays
+      // Update user document
       const userRef = doc(db, "students", user.uid);
       const updatedJoinedClasses = [...(user.enrolledClasses || []), classId];
       const updatedAdminOfClasses = [...(user.adminOfClasses || []), classId];
@@ -354,7 +366,7 @@ const GroupDetailsUser = ({ onClose }) => {
         adminOfClasses: updatedAdminOfClasses,
       });
 
-      // Update group document with the new class ID
+      // Update group document
       const groupRef = doc(db, "groups", group.id);
       const groupDoc = await getDoc(groupRef);
       const currentClassIds = groupDoc.data().classIds || [];
@@ -362,7 +374,7 @@ const GroupDetailsUser = ({ onClose }) => {
         classIds: [...currentClassIds, classId],
       });
 
-      // Update context and session storage with both arrays
+      // Update context and storage
       const updatedUser = {
         ...user,
         enrolledClasses: updatedJoinedClasses,
@@ -371,11 +383,8 @@ const GroupDetailsUser = ({ onClose }) => {
       setUser(updatedUser);
       sessionStorage.setItem("user", JSON.stringify(updatedUser));
 
+      // Reset form and close modal
       setAddClassModalOpen(false);
-
-      fetchGroup();
-
-      // Reset form
       setClassImage(null);
       setClassPreviewImage(null);
       setClassData({
@@ -383,15 +392,17 @@ const GroupDetailsUser = ({ onClose }) => {
         classDescription: "",
         language: "English",
         languageLevel: "Beginner",
-        availableSpots: 6,
+        availableSpots: 5,
         classDuration: 60,
         classDateTime: new Date(),
         recurrenceType: "One-time",
-        physicalClass: false,
+        classLocation: "Virtual",
+        classType: "Group Premium",
         classAddress: "",
+        imageUrl: "",
       });
 
-      // Refresh the classes list
+      fetchGroup();
       await fetchData();
     } catch (error) {
       console.error("Error adding class:", error);
@@ -431,20 +442,25 @@ const GroupDetailsUser = ({ onClose }) => {
       <div className="flex flex-wrap items-center p-4 space-x-4">
         {classes.map((classItem) => (
           <ClassCard
-            key={classItem.id}
-            classId={classItem.id}
+            key={classItem.classId}
+            classId={classItem.classId}
             className={classItem.className}
-            language={classItem.groupLearningLanguage}
+            language={classItem.language}
             languageLevel={classItem.languageLevel}
             classDateTime={classItem.classDateTime}
             classDuration={classItem.classDuration}
-            tutorName={classItem.teacherName}
-            classMemberIds={classItem.classMemberIds || []}
-            availableSpots={classItem.maxStudents || 100}
-            physicalClass={classItem.isPhysical}
+            adminId={classItem.adminId}
+            adminName={classItem.adminName}
+            adminImageUrl={classItem.adminImageUrl}
+            classMemberIds={classItem.classMemberIds}
+            availableSpots={classItem.availableSpots}
             imageUrl={classItem.imageUrl}
+            classDescription={classItem.classDescription}
+            classAddress={classItem.classAddress}
+            groupId={classItem.groupId}
             recurrenceType={classItem.recurrenceType}
-            isBammbuu={classItem.isBammbuu}
+            classType={classItem.classType}
+            classLocation={classItem.classLocation}
           />
         ))}
       </div>
@@ -560,7 +576,12 @@ const GroupDetailsUser = ({ onClose }) => {
 
             <div className="flex flex-1 min-h-0 gap-6">
               {/* Left sidebar */}
-              <div className="w-1/4 p-6 bg-[#ffffea] rounded-3xl">
+              <div
+                className={`w-1/4 p-6 rounded-3xl ${
+                  group.isPremium ? "bg-[#e6fce8]" : "bg-[#ffffea]"
+                }`}
+              >
+                {" "}
                 <div className="flex flex-col items-center justify-between h-full text-center">
                   <div className="flex flex-col items-center text-center">
                     <img
@@ -592,7 +613,13 @@ const GroupDetailsUser = ({ onClose }) => {
 
                   <div className="w-full">
                     {" "}
-                    <button className="w-full px-4 py-2 mb-2 text-black border border-gray-300 rounded-full bg-[#fffbc5]">
+                    <button
+                      className={`w-full px-4 py-2 mb-2 text-black border  rounded-full ${
+                        group.isPremium
+                          ? "bg-[#bffcc4] border-[#0a0d0b]"
+                          : "bg-[#ffffea] border-gray-300"
+                      }`}
+                    >
                       View Group Chat
                     </button>
                     <button
@@ -841,9 +868,11 @@ const GroupDetailsUser = ({ onClose }) => {
                 </label>
                 <div className="flex gap-2 mt-1">
                   <button
-                    onClick={() => handleClassDataChange("physicalClass", true)}
+                    onClick={() =>
+                      handleClassDataChange("classLocation", "Physical")
+                    }
                     className={`px-4 py-2 rounded-full text-sm ${
-                      classData.physicalClass
+                      classData.classLocation === "Physical"
                         ? "bg-yellow-400 border border-yellow-500"
                         : "border border-gray-200"
                     }`}
@@ -852,10 +881,10 @@ const GroupDetailsUser = ({ onClose }) => {
                   </button>
                   <button
                     onClick={() =>
-                      handleClassDataChange("physicalClass", false)
+                      handleClassDataChange("classLocation", "Virtual")
                     }
                     className={`px-4 py-2 rounded-full text-sm ${
-                      !classData.physicalClass
+                      classData.classLocation === "Virtual"
                         ? "bg-yellow-400 border border-yellow-500"
                         : "border border-gray-200"
                     }`}
@@ -864,24 +893,46 @@ const GroupDetailsUser = ({ onClose }) => {
                   </button>
                 </div>
               </div>
-              {classData.physicalClass && (
-                <div>
-                  {" "}
-                  <label className="text-sm font-medium text-gray-700">
-                    Class Location
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Enter physical class address"
-                    value={classData.classAddress}
-                    onChange={(e) =>
-                      handleClassDataChange("classAddress", e.target.value)
+
+              {/* Class Type */}
+              <div>
+                <label className="text-sm font-medium text-gray-700">
+                  Class Type
+                </label>
+                <div className="flex gap-2 mt-1">
+                  <button
+                    onClick={() =>
+                      handleClassDataChange("classType", "Group Premium")
                     }
-                    className="mt-2 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
-                  />
+                    className={`px-4 py-2 rounded-full text-sm ${
+                      classData.classType === "Group Premium"
+                        ? "bg-yellow-400 border border-yellow-500"
+                        : "border border-gray-200"
+                    }`}
+                  >
+                    Group Premium
+                  </button>
                 </div>
-              )}
+              </div>
             </div>
+
+            {/* Class Address (shown only when Physical is selected) */}
+            {classData.classLocation === "Physical" && (
+              <div>
+                <label className="text-sm font-medium text-gray-700">
+                  Class Address
+                </label>
+                <input
+                  type="text"
+                  placeholder="Enter physical class address"
+                  value={classData.classAddress}
+                  onChange={(e) =>
+                    handleClassDataChange("classAddress", e.target.value)
+                  }
+                  className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                />
+              </div>
+            )}
 
             <div className="flex flex-row items-start justify-between space-x-4">
               {/* Available Slots */}
