@@ -191,7 +191,7 @@ const Login = () => {
           savedDocuments: [],
           tier: 1,
           currentStreak: 1,
-          userType: "student", // Include userType in Firestore
+          // userType: "student", // Include userType in Firestore
         };
 
         await setDoc(userRef, newUserData);
@@ -251,7 +251,7 @@ const Login = () => {
         await updateDoc(userRef, {
           lastLoggedIn: serverTimestamp(),
           currentStreak: updatedStreak,
-          userType: "student", // Ensure userType is stored in Firestore
+          // userType: "student", // Ensure userType is stored in Firestore
         });
 
         // Update session with updated user data
@@ -457,7 +457,7 @@ const Login = () => {
       await updateDoc(userRef, {
         lastLoggedIn: serverTimestamp(),
         currentStreak: updatedStreak,
-        userType: "student", // Ensure userType is stored in Firestore
+        // userType: "student", // Ensure userType is stored in Firestore
       });
 
       // Store complete user data

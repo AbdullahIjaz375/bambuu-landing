@@ -11,29 +11,24 @@ const ClassCardTutor = ({
   languageLevel,
   classDateTime,
   classDuration,
-  tutorId,
-  tutorName,
-  tutorImageUrl,
-  classMemberIds = [],
-  availableSpots,
-  physicalClass,
-  imageUrl,
-  classDescription,
-  classAddress,
   adminId,
   adminName,
   adminImageUrl,
+  classMemberIds = [],
+  availableSpots,
+  imageUrl,
+  classDescription,
+  classAddress,
   groupId,
   recurrenceType,
+  classType,
+  classLocation,
   onClick,
-  isBammbuu,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Determine which user details to display based on isBammbuu flag
-  const displayName = isBammbuu ? tutorName : adminName;
-  const displayImage = isBammbuu ? tutorImageUrl : adminImageUrl;
-  const displayId = isBammbuu ? tutorId : adminId;
+  const isPremium =
+    classType === "Individual Premium" || classType === "Group Premium";
 
   const formatTime = (timestamp) => {
     if (!timestamp) return "TBD";
@@ -75,29 +70,45 @@ const ClassCardTutor = ({
           }
         }}
       >
-        <div className="flex flex-col items-center justify-center border border-[#14b82c] bg-white rounded-3xl p-2">
+        <div
+          className={`flex flex-col items-center justify-center border ${
+            isPremium ? "border-[#14b82c]" : "border-[#ffc71f]"
+          } bg-white rounded-3xl p-2`}
+        >
           <div className="relative w-full">
             <img
               alt={className}
               src={imageUrl || "/images/default-class.png"}
               className="object-cover w-full h-48 rounded-t-2xl"
             />
-            {isBammbuu && (
+            {isPremium && (
               <img
                 src="/images/bambuu-plus-tag.png"
-                alt="Bammbuu+"
+                alt="Premium"
                 className="absolute h-8 w-28 top-2 left-2"
               />
             )}
           </div>
 
-          <div className="w-full space-y-2 bg-[#c3f3c9] rounded-b-3xl p-2">
+          <div
+            className={`w-full space-y-2 ${
+              isPremium ? "bg-[#c3f3c9]" : "bg-[#c3f3c9]"
+            } rounded-b-3xl p-2`}
+          >
             <div className="flex items-start justify-between">
-              <span className="px-4 py-1 text-sm bg-[#14b82c] text-white rounded-full">
-                {physicalClass ? "Physical" : "Online"}
+              <span
+                className={`px-4 py-1 text-sm ${
+                  isPremium ? "bg-[#14b82c]" : "bg-[#14b82c]"
+                } text-white rounded-full`}
+              >
+                {classLocation}
               </span>
               {recurrenceType && (
-                <span className="px-4 py-1 text-sm bg-[#14b82c] text-white rounded-full">
+                <span
+                  className={`px-4 py-1 text-sm ${
+                    isPremium ? "bg-[#14b82c]" : "bg-[#14b82c]"
+                  } text-white rounded-full`}
+                >
                   {recurrenceType}
                 </span>
               )}
@@ -136,7 +147,7 @@ const ClassCardTutor = ({
               <div className="flex flex-row items-center justify-center space-x-2">
                 <User className="w-5 h-5 text-gray-600" />
                 <span className="text-[#454545] text-md">
-                  {displayName || "TBD"}
+                  {adminName || "TBD"}
                 </span>
               </div>
               <div className="flex flex-row items-center justify-center space-x-2">
@@ -176,7 +187,7 @@ const ClassCardTutor = ({
 
           <div
             className={`${
-              isBammbuu ? "bg-[#e6fde9]" : "bg-yellow-50"
+              isPremium ? "bg-[#e6fde9]" : "bg-[#ffffea]"
             } px-6 pt-8 pb-6 rounded-2xl mx-4`}
           >
             <div className="flex flex-col items-center">
@@ -192,11 +203,11 @@ const ClassCardTutor = ({
 
               <div className="flex items-center gap-2 mb-6">
                 <div className="w-6 h-6">
-                  <img
+                  {/* <img
                     src="/api/placeholder/24/24"
                     alt={language}
                     className="w-full h-full rounded-full"
-                  />
+                  /> */}
                 </div>
                 <span>{language}</span>
                 <span className="px-2 py-0.5 text-sm bg-[#fff885] rounded-full">
@@ -230,7 +241,11 @@ const ClassCardTutor = ({
                   <h3 className="mb-3 text-lg font-bold text-center">
                     Language Group
                   </h3>
-                  <div className="flex items-center gap-4 p-4 bg-white rounded-xl border border-[#97e3a2]">
+                  <div
+                    className={`flex items-center gap-4 p-4 bg-white rounded-xl border ${
+                      isPremium ? "border-[#97e3a2]" : "border-gray-300"
+                    }`}
+                  >
                     <img
                       src="/api/placeholder/48/48"
                       alt={`${language} flag`}
@@ -250,11 +265,11 @@ const ClassCardTutor = ({
                         <span>•</span>
                         <div className="flex items-center gap-1">
                           <img
-                            src={displayImage || "/api/placeholder/16/16"}
+                            src={adminImageUrl || "/api/placeholder/16/16"}
                             alt="Leader"
                             className="w-4 h-4 rounded-full"
                           />
-                          <span>{displayName}</span>
+                          <span>{adminName}</span>
                         </div>
                         <span>•</span>
                         <div className="flex items-center gap-1">

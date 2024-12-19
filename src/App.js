@@ -42,6 +42,8 @@ import StudentsTutor from "./pages/tutor/StudentsTutor";
 import InstructorProfileUser from "./pages/user/InstructorProfileUser";
 import BecomeAnExpertUser from "./pages/user/BecomeAnExpertUser";
 import AddClassTutor from "./pages/tutor/AddClassTutor";
+import ClassesTutor from "./pages/tutor/ClassesTutor";
+import GroupsTutor from "./pages/tutor/GroupsTutor";
 
 const App = () => {
   const { user } = useAuth(); // Use useAuth() inside the component
@@ -280,6 +282,14 @@ const App = () => {
           }
         />
         <Route
+          path="/classesTutor"
+          element={
+            <ProtectedRoute requiredRole="tutor">
+              <ClassesTutor />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/classesDetailsUser/:classId"
           element={
             <ProtectedRoute requiredRole="student">
@@ -293,6 +303,15 @@ const App = () => {
           element={
             <ProtectedRoute requiredRole="student">
               <GroupsUser />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/groupsTutor"
+          element={
+            <ProtectedRoute requiredRole="tutor">
+              <GroupsTutor />
             </ProtectedRoute>
           }
         />

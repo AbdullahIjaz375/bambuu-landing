@@ -1,14 +1,28 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { ArrowLeft, Camera } from "lucide-react";
 import Sidebar from "../../components/Sidebar";
+import { useLocation } from "react-router-dom";
 
 const AddClassTutor = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
   const [loading, setLoading] = useState(false);
   const [classPreviewImage, setClassPreviewImage] = useState(null);
+
+  // Get type and groupId from URL parameters
+  const searchParams = new URLSearchParams(location.search);
+  const classType = searchParams.get("type");
+  const groupId = searchParams.get("groupId");
+
+  useEffect(() => {
+    if (!classType) {
+      navigate("/addClassFlow");
+    }
+  }, [classType, navigate]);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -20,8 +34,16 @@ const AddClassTutor = () => {
     classDate: "",
     classDuration: "30 min",
     classStartTime: "",
-    timeZone: "",
+    classType: classType, // Add classType to form data
+    groupId: groupId, // Add groupId if present
   });
+
+  const handleClassDataChange = (field, value) => {
+    // setClassData((prev) => ({
+    //   ...prev,
+    //   [field]: value,
+    // }));
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -30,7 +52,17 @@ const AddClassTutor = () => {
       [name]: value,
     }));
   };
-
+  const isFormValid = () => {
+    return (
+      formData.className.trim() !== "" &&
+      formData.classLanguage.trim() !== "" &&
+      formData.classDescription.trim() !== "" &&
+      formData.classDate !== "" &&
+      formData.classDuration !== "" &&
+      formData.classStartTime !== "" &&
+      (formData.isRecurring ? formData.recurringFrequency !== "" : true)
+    );
+  };
   const handleClassImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -239,7 +271,80 @@ const AddClassTutor = () => {
                 </div>
               </div>
             </div>
+            <div className="flex flex-row items-start justify-between space-x-4">
+              {/* Class Location */}
+              <div className="flex flex-row items-center space-x-10">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Class Location
+                  </label>
+                  <div className="flex gap-2 mt-1">
+                    <button
+                      onClick={() =>
+                        handleClassDataChange("classLocation", "Physical")
+                      }
+                      // className={`px-4 py-2 rounded-full text-sm ${
+                      //   classData.classLocation === "Physical"
+                      //     ? "bg-yellow-400 border border-yellow-500"
+                      //     : "border border-gray-200"
+                      // }`}
+                    >
+                      Physical
+                    </button>
+                    <button
+                      onClick={() =>
+                        handleClassDataChange("classLocation", "Virtual")
+                      }
+                      // className={`px-4 py-2 rounded-full text-sm ${
+                      //   classData.classLocation === "Virtual"
+                      //     ? "bg-yellow-400 border border-yellow-500"
+                      //     : "border border-gray-200"
+                      // }`}
+                    >
+                      Virtual
+                    </button>
+                  </div>
+                </div>
+                {/* Class Address (shown only when Physical is selected) */}
+                {/* {classData.classLocation === "Physical" && (
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">
+                      Class Address
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Enter physical class address"
+                      value={classData.classAddress}
+                      onChange={(e) =>
+                        handleClassDataChange("classAddress", e.target.value)
+                      }
+                      className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                    />
+                  </div>
+                )} */}
+              </div>
 
+              {/* Class Type */}
+              <div>
+                <label className="text-sm font-medium text-gray-700">
+                  Class Type
+                </label>
+                <div className="flex gap-2 mt-1">
+                  <button
+                  // onClick={() =>
+                  //   handleClassDataChange("classType", "Group Premium")
+                  // }
+                  // className={`px-4 py-2 rounded-full text-sm ${
+                  //   classData.classType === "Group Premium"
+                  //     ? "bg-yellow-400 border border-yellow-500"
+                  //     : "border border-gray-200"
+                  // }`}
+                  >
+                    Group Premium
+                  </button>
+                </div>
+              </div>
+            </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block mb-2 text-sm font-medium">
@@ -253,21 +358,6 @@ const AddClassTutor = () => {
                   className="w-full p-3 border rounded-lg"
                 />
               </div>
-
-              <div>
-                <label className="block mb-2 text-sm font-medium">
-                  Time Zone
-                </label>
-                <select
-                  name="timeZone"
-                  value={formData.timeZone}
-                  onChange={handleInputChange}
-                  className="w-full p-3 border rounded-lg"
-                >
-                  <option value="">Select time zone</option>
-                  {/* Add time zone options here */}
-                </select>
-              </div>
             </div>
           </div>
         </div>
@@ -280,7 +370,7 @@ const AddClassTutor = () => {
             Cancel
           </button>
           <button
-            disabled={loading}
+            disabled={loading || !isFormValid()}
             className="px-8 py-3 text-[#042f0c] bg-[#14b82c] border border-[#5d5d5d] rounded-full disabled:bg-[#b9f9c2] disabled:text-[#b0b0b0] disabled:border-[#b0b0b0]"
           >
             Create a Class

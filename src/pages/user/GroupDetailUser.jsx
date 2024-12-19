@@ -265,7 +265,7 @@ const GroupDetailsUser = ({ onClose }) => {
     classDateTime: new Date(),
     recurrenceType: "One-time",
     classLocation: "Virtual",
-    classType: "Group Premium",
+    classType: "Group Standard",
     classAddress: "",
     imageUrl: "",
   });
@@ -333,6 +333,9 @@ const GroupDetailsUser = ({ onClose }) => {
         imageUrl = await getDownloadURL(imageRef);
       }
 
+      const classAddress =
+        classData.classLocation === "Virtual" ? "" : classData.classAddress;
+
       const newClass = {
         classId: classId,
         adminId: user.uid,
@@ -349,7 +352,7 @@ const GroupDetailsUser = ({ onClose }) => {
         recurrenceType: classData.recurrenceType,
         classLocation: classData.classLocation,
         classType: classData.classType,
-        classAddress: classData.classAddress,
+        classAddress: classAddress,
         imageUrl,
         classMemberIds: [],
       };
@@ -862,36 +865,55 @@ const GroupDetailsUser = ({ onClose }) => {
             </div>
             <div className="flex flex-row items-start justify-between space-x-4">
               {/* Class Location */}
-              <div>
-                <label className="text-sm font-medium text-gray-700">
-                  Class Location
-                </label>
-                <div className="flex gap-2 mt-1">
-                  <button
-                    onClick={() =>
-                      handleClassDataChange("classLocation", "Physical")
-                    }
-                    className={`px-4 py-2 rounded-full text-sm ${
-                      classData.classLocation === "Physical"
-                        ? "bg-yellow-400 border border-yellow-500"
-                        : "border border-gray-200"
-                    }`}
-                  >
-                    Physical
-                  </button>
-                  <button
-                    onClick={() =>
-                      handleClassDataChange("classLocation", "Virtual")
-                    }
-                    className={`px-4 py-2 rounded-full text-sm ${
-                      classData.classLocation === "Virtual"
-                        ? "bg-yellow-400 border border-yellow-500"
-                        : "border border-gray-200"
-                    }`}
-                  >
-                    Virtual
-                  </button>
+              <div className="flex flex-row items-center space-x-10">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Class Location
+                  </label>
+                  <div className="flex gap-2 mt-1">
+                    <button
+                      onClick={() =>
+                        handleClassDataChange("classLocation", "Physical")
+                      }
+                      className={`px-4 py-2 rounded-full text-sm ${
+                        classData.classLocation === "Physical"
+                          ? "bg-yellow-400 border border-yellow-500"
+                          : "border border-gray-200"
+                      }`}
+                    >
+                      Physical
+                    </button>
+                    <button
+                      onClick={() =>
+                        handleClassDataChange("classLocation", "Virtual")
+                      }
+                      className={`px-4 py-2 rounded-full text-sm ${
+                        classData.classLocation === "Virtual"
+                          ? "bg-yellow-400 border border-yellow-500"
+                          : "border border-gray-200"
+                      }`}
+                    >
+                      Virtual
+                    </button>
+                  </div>
                 </div>
+                {/* Class Address (shown only when Physical is selected) */}
+                {classData.classLocation === "Physical" && (
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">
+                      Class Address
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Enter physical class address"
+                      value={classData.classAddress}
+                      onChange={(e) =>
+                        handleClassDataChange("classAddress", e.target.value)
+                      }
+                      className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Class Type */}
@@ -915,24 +937,6 @@ const GroupDetailsUser = ({ onClose }) => {
                 </div>
               </div>
             </div>
-
-            {/* Class Address (shown only when Physical is selected) */}
-            {classData.classLocation === "Physical" && (
-              <div>
-                <label className="text-sm font-medium text-gray-700">
-                  Class Address
-                </label>
-                <input
-                  type="text"
-                  placeholder="Enter physical class address"
-                  value={classData.classAddress}
-                  onChange={(e) =>
-                    handleClassDataChange("classAddress", e.target.value)
-                  }
-                  className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
-                />
-              </div>
-            )}
 
             <div className="flex flex-row items-start justify-between space-x-4">
               {/* Available Slots */}

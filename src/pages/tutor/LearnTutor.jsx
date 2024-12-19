@@ -34,17 +34,18 @@ const LearnTutor = () => {
   const TABS = ["Booked Classes", "Available Classes"];
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [groups, setGroups] = useState([]);
 
   // Calendar state and functions remain the same
   const [date, setDate] = useState(new Date());
   const [view, setView] = useState("weekly");
 
   useEffect(() => {
-    const fetchClassesData = async () => {
+    const fetchClassesAndGroupsData = async () => {
       try {
         setLoading(true);
 
-        // First, get the tutor document
+        // Get the tutor document
         const tutorDoc = await getDoc(doc(db, "tutors", user.uid));
 
         if (!tutorDoc.exists()) {
@@ -55,19 +56,35 @@ const LearnTutor = () => {
 
         const tutorData = tutorDoc.data();
         const tutorClasses = tutorData.tutorOfClasses || [];
+        const tutorGroups = tutorData.tutorOfGroups || [];
 
-        // Fetch all classes mentioned in tutorOfClasses array
+        // Fetch classes
         const classPromises = tutorClasses.map((classId) =>
           getDoc(doc(db, "classes", classId))
         );
 
-        const classSnapshots = await Promise.all(classPromises);
+        // Fetch groups
+        const groupPromises = tutorGroups.map((groupId) =>
+          getDoc(doc(db, "groups", groupId))
+        );
+
+        const [classSnapshots, groupSnapshots] = await Promise.all([
+          Promise.all(classPromises),
+          Promise.all(groupPromises),
+        ]);
 
         const fetchedClasses = classSnapshots
           .filter((doc) => doc.exists())
           .map((doc) => ({
             ...doc.data(),
             classId: doc.id,
+          }));
+
+        const fetchedGroups = groupSnapshots
+          .filter((doc) => doc.exists())
+          .map((doc) => ({
+            ...doc.data(),
+            groupId: doc.id,
           }));
 
         // Filter classes based on active tab
@@ -81,14 +98,15 @@ const LearnTutor = () => {
               );
 
         setClasses(filteredClasses);
+        setGroups(fetchedGroups);
       } catch (error) {
-        console.error("Error fetching classes:", error);
+        console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchClassesData();
+    fetchClassesAndGroupsData();
   }, [user.uid, activeTab]);
 
   // Calendar helper functions remain the same
@@ -134,7 +152,6 @@ const LearnTutor = () => {
       <Sidebar user={user} />
 
       <div className="flex-1 p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl ml-[17rem] m-2">
-        {/* Header section remains the same */}
         <div className="flex items-center justify-between mb-4 border-b border-[#e7e7e7] pb-4">
           <div className="flex flex-row items-center space-x-4">
             <h1 className="text-3xl font-semibold">Hi, {user.name}!</h1>
@@ -158,7 +175,6 @@ const LearnTutor = () => {
           </div>
         </div>
 
-        {/* Calendar section remains the same */}
         <div className="flex flex-row items-start justify-between w-full gap-8 mb-4">
           <div className="w-full p-4 bg-white border border-yellow-300 rounded-3xl">
             <div className="flex items-center justify-center mb-6">
@@ -201,7 +217,6 @@ const LearnTutor = () => {
             </div>
           </div>
         </div>
-
         {/* Tabs section remains the same */}
         <div className="flex flex-row items-center justify-between pt-4">
           <div className="flex bg-gray-100 border border-[#888888] rounded-full w-fit">
@@ -219,13 +234,21 @@ const LearnTutor = () => {
               </button>
             ))}
           </div>
+          <div className="flex flex-row items-center space-x-2">
+            <button
+              className="px-3 py-2 text-[#042f0c] text-lg font-semibold bg-[#14b82c] border border-black rounded-full flex items-center"
+              onClick={handleAddClassClick}
+            >
+              <Plus /> New Class
+            </button>
 
-          <button
-            className="px-3 py-2 text-[#042f0c] text-lg font-semibold bg-[#e6fde9] border border-black rounded-full flex items-center"
-            onClick={handleAddClassClick}
-          >
-            <Plus /> Add Class
-          </button>
+            <button
+              className="px-3 py-2 text-[#042f0c] text-lg font-semibold bg-[#e6fde9] border border-black rounded-full flex items-center"
+              onClick={() => navigate("/classesTutor")}
+            >
+              View All
+            </button>
+          </div>
         </div>
 
         {/* Classes Grid */}
@@ -237,10 +260,46 @@ const LearnTutor = () => {
           <div className="grid grid-cols-1 gap-6 mt-6 md:grid-cols-3 lg:grid-cols-4">
             {classes.map((classData) => (
               <ClassCardTutor
-                key={classData.classId}
                 {...classData}
-                isBammbuu={classData.isPremium}
+                isBammbuu={Boolean(classData.tutorId)}
               />
+            ))}
+          </div>
+        )}
+        <div className="flex flex-row items-center justify-between pt-4">
+          <div>
+            <h2 className="text-3xl font-bold">My Groups</h2>
+          </div>
+          <div className="flex flex-row items-center space-x-2">
+            <button
+              className="px-3 py-2 text-[#042f0c] text-lg font-semibold bg-[#14b82c] border border-black rounded-full flex items-center"
+              onClick={handleAddClassClick}
+            >
+              <Plus /> New Group
+            </button>
+
+            <button
+              className="px-3 py-2 text-[#042f0c] text-lg font-semibold bg-[#e6fde9] border border-black rounded-full flex items-center"
+              onClick={() => navigate("/groupsTutor")}
+            >
+              View All
+            </button>
+          </div>
+        </div>
+        {/* Classes Grid */}
+        {loading ? (
+          <div className="flex items-center justify-center w-full h-64">
+            <ClipLoader color="#14b82c" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-6 mt-6 md:grid-cols-3 lg:grid-cols-4">
+            {groups.map((group) => (
+              <div
+                key={group.groupId}
+                className="flex-none px-2 pt-2 w-[22rem]"
+              >
+                <GroupCard group={group} />
+              </div>
             ))}
           </div>
         )}
