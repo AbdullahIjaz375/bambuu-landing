@@ -70,11 +70,11 @@ const GroupsTutor = () => {
   }, [searchQuery, groups]);
 
   const handleBack = () => {
-    navigate(-1);
+    navigate("/learn");
   };
 
   const handleCreateGroup = () => {
-    navigate("/addGroupTutor");
+    navigate("/addGroupsTutor");
   };
 
   return (
@@ -118,7 +118,7 @@ const GroupsTutor = () => {
             <ClipLoader color="#14B82C" size={50} />
           </div>
         ) : filteredGroups.length > 0 ? (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4">
             {filteredGroups.map((group) => (
               <GroupCardTutor key={group.id} group={group} />
             ))}

@@ -4,9 +4,22 @@ import { useAuth } from "../../context/AuthContext";
 import { ArrowLeft, Camera } from "lucide-react";
 import Sidebar from "../../components/Sidebar";
 import { useLocation } from "react-router-dom";
+import {
+  doc,
+  getDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+  serverTimestamp,
+  addDoc,
+  updateDoc,
+} from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { db, storage } from "../../firebaseConfig";
 
 const AddClassTutor = () => {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -21,54 +34,183 @@ const AddClassTutor = () => {
   useEffect(() => {
     if (!classType) {
       navigate("/addClassFlow");
+    } else {
+      // Set the classType based on the URL parameter
+      setClassData((prevData) => ({
+        ...prevData,
+        classType:
+          classType.toLowerCase() === "group"
+            ? "Group Premium"
+            : "Individual Premium",
+      }));
     }
   }, [classType, navigate]);
 
-  // Form state
-  const [formData, setFormData] = useState({
+  const [isFormValid, setIsFormValid] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [isAddClassModalOpen, setAddClassModalOpen] = useState(false);
+  const [classImage, setClassImage] = useState(null);
+  const [classData, setClassData] = useState({
     className: "",
-    classLanguage: "English",
     classDescription: "",
-    isRecurring: false,
-    recurringFrequency: "Daily",
-    classDate: "",
-    classDuration: "30 min",
-    classStartTime: "",
-    classType: classType, // Add classType to form data
-    groupId: groupId, // Add groupId if present
+    language: "English",
+    languageLevel: "Beginner",
+    availableSpots: 5,
+    classDuration: 60,
+    classDateTime: new Date(),
+    recurrenceType: "One-time",
+    classLocation: "Virtual",
+    classType,
+    classAddress: "",
+    imageUrl: "",
   });
 
-  const handleClassDataChange = (field, value) => {
-    // setClassData((prev) => ({
-    //   ...prev,
-    //   [field]: value,
-    // }));
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-  const isFormValid = () => {
-    return (
-      formData.className.trim() !== "" &&
-      formData.classLanguage.trim() !== "" &&
-      formData.classDescription.trim() !== "" &&
-      formData.classDate !== "" &&
-      formData.classDuration !== "" &&
-      formData.classStartTime !== "" &&
-      (formData.isRecurring ? formData.recurringFrequency !== "" : true)
-    );
-  };
   const handleClassImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setClassImage(file);
       setClassPreviewImage(URL.createObjectURL(file));
     }
   };
+
+  const handleClassDataChange = (field, value) => {
+    setClassData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleAddClassButtonClick = () => {
+    setAddClassModalOpen(true);
+  };
+
+  const handleSaveClass = async () => {
+    if (!isFormValid || isCreating) return;
+    setIsCreating(true);
+
+    try {
+      let imageUrl = "";
+      const classRef = await addDoc(collection(db, "classes"), {});
+      const classId = classRef.id;
+
+      if (classImage) {
+        const imageRef = ref(
+          storage,
+          `classes/${classId}/image_${Date.now()}_${classImage.name}`
+        );
+        await uploadBytes(imageRef, classImage);
+        imageUrl = await getDownloadURL(imageRef);
+      }
+
+      const classAddress =
+        classData.classLocation === "Virtual" ? "" : classData.classAddress;
+
+      const newClass = {
+        classId: classId,
+        adminId: user.uid,
+        adminName: user.name || "",
+        adminImageUrl: user.photoUrl || "",
+        groupId: groupId || null, // Handle case when groupId is not available
+        className: classData.className,
+        classDescription: classData.classDescription,
+        language: classData.language,
+        languageLevel: classData.languageLevel,
+        availableSpots: classData.availableSpots,
+        classDuration: classData.classDuration,
+        classDateTime: serverTimestamp(),
+        recurrenceType: classData.recurrenceType,
+        classLocation: classData.classLocation,
+        classType: classData.classType,
+        classAddress: classAddress,
+        imageUrl,
+        classMemberIds: [],
+        createdAt: serverTimestamp(),
+      };
+
+      // Update the class document
+      await updateDoc(doc(db, "classes", classId), newClass);
+
+      // Update tutor document with new class ID in tutorOfClasses array
+      const userRef = doc(db, "tutors", user.uid);
+      const updatedTutorOfClasses = [...(user.tutorOfClasses || []), classId];
+      await updateDoc(userRef, {
+        tutorOfClasses: updatedTutorOfClasses,
+      });
+
+      // If groupId exists, update the group document with the new class ID
+      if (groupId) {
+        const groupRef = doc(db, "groups", groupId);
+        const groupDoc = await getDoc(groupRef);
+
+        if (groupDoc.exists()) {
+          const currentClassIds = groupDoc.data().classIds || [];
+          await updateDoc(groupRef, {
+            classIds: [...currentClassIds, classId],
+            updatedAt: serverTimestamp(),
+          });
+        }
+      }
+
+      // Update user context and session storage
+      const updatedUser = {
+        ...user,
+        tutorOfClasses: updatedTutorOfClasses,
+      };
+      setUser(updatedUser);
+      sessionStorage.setItem("user", JSON.stringify(updatedUser));
+
+      // Reset form and close modal
+      setAddClassModalOpen(false);
+      setClassImage(null);
+      setClassPreviewImage(null);
+      setClassData({
+        className: "",
+        classDescription: "",
+        language: "English",
+        languageLevel: "Beginner",
+        availableSpots: 5,
+        classDuration: 60,
+        classDateTime: new Date(),
+        recurrenceType: "One-time",
+        classLocation: "Virtual",
+        classType: "Group Premium",
+        classAddress: "",
+        imageUrl: "",
+      });
+
+      // Navigate to classes tutor page
+      navigate("/classesTutor");
+    } catch (error) {
+      console.error("Error adding class:", error);
+    } finally {
+      setIsCreating(false);
+    }
+  };
+  useEffect(() => {
+    const validateForm = () => {
+      const requiredFields = {
+        className: !!classData.className.trim(),
+        classDescription: !!classData.classDescription.trim(),
+        language: !!classData.language,
+        languageLevel: !!classData.languageLevel,
+        availableSpots:
+          !!classData.availableSpots && classData.availableSpots > 0,
+        classDuration: !!classData.classDuration,
+        classDateTime: !!classData.classDateTime,
+        recurrenceType: !!classData.recurrenceType,
+        classLocation: !!classData.classLocation,
+        classType: !!classData.classType,
+        classAddress:
+          classData.classLocation === "Physical"
+            ? !!classData.classAddress.trim()
+            : true,
+      };
+
+      return Object.values(requiredFields).every((field) => field === true);
+    };
+
+    setIsFormValid(validateForm());
+  }, [classData]);
 
   return (
     <div className="flex min-h-screen bg-white">
@@ -87,13 +229,10 @@ const AddClassTutor = () => {
           </div>
         </div>
 
-        <div className="max-w-5xl">
+        <div className="max-w-6xl">
           <div className="space-y-6">
             {/* Image Upload */}
-            <div>
-              <label className="block mb-2 text-sm font-medium">
-                Class Image
-              </label>
+            <div className="flex justify-start mb-8">
               <div
                 className="relative flex items-center justify-center border border-gray-300 border-dashed rounded-full cursor-pointer w-28 h-28 bg-gray-50"
                 onClick={() => document.getElementById("classImage").click()}
@@ -116,156 +255,133 @@ const AddClassTutor = () => {
                 className="hidden"
               />
             </div>
-            <div className="flex flex-row items-center justify-between space-x-8">
-              <div className="w-full">
-                <label className="block mb-2 text-sm font-medium">
-                  Class Name
+
+            <div className="flex flex-row items-start justify-between space-x-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700">
+                  Class name
                 </label>
                 <input
                   type="text"
-                  name="className"
-                  value={formData.className}
-                  onChange={handleInputChange}
-                  className="w-full p-3 border rounded-lg"
                   placeholder="Class name"
+                  value={classData.className}
+                  onChange={(e) =>
+                    handleClassDataChange("className", e.target.value)
+                  }
+                  className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
                 />
               </div>
 
+              {/* Language */}
               <div>
-                <label className="block mb-2 text-sm font-medium">
+                <label className="text-sm font-medium text-gray-700">
                   Class Language
                 </label>
-                <div className="flex gap-2">
-                  {["English", "Spanish"].map((lang) => (
-                    <button
-                      key={lang}
-                      type="button"
-                      onClick={() =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          classLanguage: lang,
-                        }))
-                      }
-                      className={`flex-1 py-2 px-4 rounded-full ${
-                        formData.classLanguage === lang
-                          ? "bg-yellow-400 border border-yellow-500"
-                          : "border border-gray-200"
-                      }`}
-                    >
-                      {lang}
-                    </button>
-                  ))}
+                <div className="flex gap-2 mt-1">
+                  <button
+                    onClick={() => handleClassDataChange("language", "English")}
+                    className={`px-4 py-2 rounded-full text-sm ${
+                      classData.language === "English"
+                        ? "bg-yellow-400 border border-yellow-500"
+                        : "border border-gray-200"
+                    }`}
+                  >
+                    English
+                  </button>
+                  <button
+                    onClick={() => handleClassDataChange("language", "Spanish")}
+                    className={`px-4 py-2 rounded-full text-sm ${
+                      classData.language === "Spanish"
+                        ? "bg-yellow-400 border border-yellow-500"
+                        : "border border-gray-200"
+                    }`}
+                  >
+                    Spanish
+                  </button>
+                  <button
+                    onClick={() =>
+                      handleClassDataChange(
+                        "language",
+                        "English-Spanish Exchange"
+                      )
+                    }
+                    className={`px-4 py-2 rounded-full text-sm ${
+                      classData.language === "English-Spanish Exchange"
+                        ? "bg-yellow-400 border border-yellow-500"
+                        : "border border-gray-200"
+                    }`}
+                  >
+                    English-Spanish Exchange
+                  </button>
                 </div>
               </div>
             </div>
+            {/* Description */}
             <div>
-              <label className="block mb-2 text-sm font-medium">
+              <label className="text-sm font-medium text-gray-700">
                 Class Description
               </label>
               <textarea
-                name="classDescription"
-                value={formData.classDescription}
-                onChange={handleInputChange}
-                className="w-full p-3 border rounded-lg"
-                placeholder="Enter short description of class (max 200 letters)"
+                placeholder="Enter short description of class (max 200 letter)"
+                value={classData.classDescription}
+                onChange={(e) =>
+                  handleClassDataChange("classDescription", e.target.value)
+                }
                 maxLength={200}
-                rows={4}
+                rows={3}
+                className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
               />
             </div>
-            <div className="flex flex-row items-center justify-between space-x-8">
+            <div className="flex flex-row items-start justify-between space-x-4">
+              {/* Class Level */}
               <div>
-                <label className="block mb-2 text-sm font-medium">
-                  Recurring Class
+                <label className="text-sm font-medium text-gray-700">
+                  Class Level
                 </label>
-                <div className="flex gap-2">
-                  {["No", "Yes"].map((option) => (
+                <div className="flex gap-2 mt-1">
+                  {["Beginner", "Intermediate", "Advanced"].map((level) => (
                     <button
-                      key={option}
-                      type="button"
+                      key={level}
                       onClick={() =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          isRecurring: option === "Yes",
-                        }))
+                        handleClassDataChange("languageLevel", level)
                       }
-                      className={`flex-1 py-2 px-4 rounded-full ${
-                        (option === "Yes" ? true : false) ===
-                        formData.isRecurring
+                      className={`px-4 py-2 rounded-full text-sm ${
+                        classData.languageLevel === level
                           ? "bg-yellow-400 border border-yellow-500"
                           : "border border-gray-200"
                       }`}
                     >
-                      {option}
+                      {level}
                     </button>
                   ))}
                 </div>
               </div>
 
+              {/* Class Type */}
               <div>
-                <label className="block mb-2 text-sm font-medium">
-                  Recurring Frequency
+                <label className="text-sm font-medium text-gray-700">
+                  Class Type
                 </label>
-                <div className="flex flex-wrap gap-2">
-                  {["Daily", "Daily (Weekdays)", "Weekly", "Monthly"].map(
-                    (freq) => (
-                      <button
-                        key={freq}
-                        type="button"
-                        onClick={() =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            recurringFrequency: freq,
-                          }))
-                        }
-                        className={`py-2 px-4 rounded-full ${
-                          formData.recurringFrequency === freq
-                            ? "bg-yellow-400 border border-yellow-500"
-                            : "border border-gray-200"
-                        }`}
-                      >
-                        {freq}
-                      </button>
-                    )
-                  )}
-                </div>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block mb-2 text-sm font-medium">
-                  Class Date
-                </label>
-                <input
-                  type="date"
-                  name="classDate"
-                  value={formData.classDate}
-                  onChange={handleInputChange}
-                  className="w-full p-3 border rounded-lg"
-                />
-              </div>
-
-              <div>
-                <label className="block mb-2 text-sm font-medium">
-                  Class Duration
-                </label>
-                <div className="flex gap-2">
-                  {["30 min", "60 min", "90 min", "120 min"].map((duration) => (
+                <div className="flex flex-wrap gap-2 mt-1">
+                  {[
+                    "One-time",
+                    "Daily",
+                    "Daily (Weekdays)",
+                    "Weekly",
+                    "Monthly",
+                  ].map((type) => (
                     <button
-                      key={duration}
-                      type="button"
+                      key={type}
                       onClick={() =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          classDuration: duration,
-                        }))
+                        handleClassDataChange("recurrenceType", type)
                       }
-                      className={`py-2 px-4 rounded-full ${
-                        formData.classDuration === duration
+                      className={`px-4 py-2 rounded-full text-sm ${
+                        classData.recurrenceType === type
                           ? "bg-yellow-400 border border-yellow-500"
                           : "border border-gray-200"
                       }`}
                     >
-                      {duration}
+                      {type}
                     </button>
                   ))}
                 </div>
@@ -283,11 +399,11 @@ const AddClassTutor = () => {
                       onClick={() =>
                         handleClassDataChange("classLocation", "Physical")
                       }
-                      // className={`px-4 py-2 rounded-full text-sm ${
-                      //   classData.classLocation === "Physical"
-                      //     ? "bg-yellow-400 border border-yellow-500"
-                      //     : "border border-gray-200"
-                      // }`}
+                      className={`px-4 py-2 rounded-full text-sm ${
+                        classData.classLocation === "Physical"
+                          ? "bg-yellow-400 border border-yellow-500"
+                          : "border border-gray-200"
+                      }`}
                     >
                       Physical
                     </button>
@@ -295,18 +411,18 @@ const AddClassTutor = () => {
                       onClick={() =>
                         handleClassDataChange("classLocation", "Virtual")
                       }
-                      // className={`px-4 py-2 rounded-full text-sm ${
-                      //   classData.classLocation === "Virtual"
-                      //     ? "bg-yellow-400 border border-yellow-500"
-                      //     : "border border-gray-200"
-                      // }`}
+                      className={`px-4 py-2 rounded-full text-sm ${
+                        classData.classLocation === "Virtual"
+                          ? "bg-yellow-400 border border-yellow-500"
+                          : "border border-gray-200"
+                      }`}
                     >
                       Virtual
                     </button>
                   </div>
                 </div>
                 {/* Class Address (shown only when Physical is selected) */}
-                {/* {classData.classLocation === "Physical" && (
+                {classData.classLocation === "Physical" && (
                   <div>
                     <label className="text-sm font-medium text-gray-700">
                       Class Address
@@ -321,7 +437,7 @@ const AddClassTutor = () => {
                       className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
                     />
                   </div>
-                )} */}
+                )}
               </div>
 
               {/* Class Type */}
@@ -331,49 +447,111 @@ const AddClassTutor = () => {
                 </label>
                 <div className="flex gap-2 mt-1">
                   <button
-                  // onClick={() =>
-                  //   handleClassDataChange("classType", "Group Premium")
-                  // }
-                  // className={`px-4 py-2 rounded-full text-sm ${
-                  //   classData.classType === "Group Premium"
-                  //     ? "bg-yellow-400 border border-yellow-500"
-                  //     : "border border-gray-200"
-                  // }`}
+                    onClick={() =>
+                      handleClassDataChange("classType", "Group Premium")
+                    }
+                    className={`px-4 py-2 rounded-full text-sm ${
+                      classData.classType === "Group Premium"
+                        ? "bg-yellow-400 border border-yellow-500"
+                        : "border border-gray-200"
+                    }`}
                   >
                     Group Premium
                   </button>
                 </div>
               </div>
             </div>
+
+            <div className="flex flex-row items-start justify-between space-x-4">
+              {/* Available Slots */}
+              <div>
+                <label className="text-sm font-medium text-gray-700">
+                  Available Slots
+                </label>
+                <input
+                  type="number"
+                  placeholder="Enter slots number"
+                  value={classData.availableSpots}
+                  onChange={(e) =>
+                    handleClassDataChange(
+                      "availableSpots",
+                      parseInt(e.target.value)
+                    )
+                  }
+                  className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                />
+              </div>
+
+              {/* Class Duration */}
+              <div>
+                <label className="text-sm font-medium text-gray-700">
+                  Class Duration
+                </label>
+                <div className="flex gap-2 mt-1">
+                  {[30, 60, 90, 120].map((duration) => (
+                    <button
+                      key={duration}
+                      onClick={() =>
+                        handleClassDataChange("classDuration", duration)
+                      }
+                      className={`px-4 py-2 rounded-full text-sm ${
+                        classData.classDuration === duration
+                          ? "bg-yellow-400 border border-yellow-500"
+                          : "border border-gray-200"
+                      }`}
+                    >
+                      {duration} min
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+            {/* Date and Time */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block mb-2 text-sm font-medium">
+                <label className="text-sm font-medium text-gray-700">
+                  Class Date
+                </label>
+                <input
+                  type="date"
+                  value={classData.classDateTime}
+                  onChange={(e) =>
+                    handleClassDataChange("classDateTime", e.target.value)
+                  }
+                  className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700">
                   Class Starting Time
                 </label>
                 <input
                   type="time"
-                  name="classStartTime"
-                  value={formData.classStartTime}
-                  onChange={handleInputChange}
-                  className="w-full p-3 border rounded-lg"
+                  className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
                 />
               </div>
             </div>
           </div>
         </div>
 
-        <div className="flex justify-between mt-12">
+        {/* Buttons */}
+        <div className="flex justify-between pt-4">
           <button
-            onClick={() => navigate(-1)}
-            className="px-8 py-3 text-[#042f0c] border border-[#5d5d5d] rounded-full"
+            onClick={() => setAddClassModalOpen(false)}
+            className="px-8 py-3 font-medium border border-gray-200 rounded-full text-md"
           >
             Cancel
           </button>
           <button
-            disabled={loading || !isFormValid()}
-            className="px-8 py-3 text-[#042f0c] bg-[#14b82c] border border-[#5d5d5d] rounded-full disabled:bg-[#b9f9c2] disabled:text-[#b0b0b0] disabled:border-[#b0b0b0]"
+            onClick={handleSaveClass}
+            disabled={!isFormValid || isCreating}
+            className={`px-8 py-3 rounded-full text-md font-medium min-w-[120px] flex items-center justify-center ${
+              isFormValid && !isCreating
+                ? "bg-[#a6fab6] border border-[#042f0c] cursor-pointer hover:bg-[#95e1a4]"
+                : "bg-gray-200 border border-gray-300 cursor-not-allowed"
+            }`}
           >
-            Create a Class
+            {isCreating ? "Creating..." : "Create Class"}
           </button>
         </div>
       </div>

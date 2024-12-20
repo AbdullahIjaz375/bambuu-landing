@@ -27,6 +27,11 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { ClipLoader } from "react-spinners";
+import {
+  ClassTypeModal,
+  GroupSelectModal,
+} from "../../components-tutor/AddClassFlow";
+
 const LearnTutor = () => {
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
@@ -147,164 +152,203 @@ const LearnTutor = () => {
     navigate("/addClassTutor");
   };
 
+  //--------------------------------------------adding class----------------------------//
+
+  const [showClassTypeModal, setShowClassTypeModal] = useState(false);
+  const [showGroupSelectModal, setShowGroupSelectModal] = useState(false);
+  // Add these handlers
+  const handleClassTypeSelect = (type) => {
+    setShowClassTypeModal(false);
+    if (type === "group") {
+      setShowGroupSelectModal(true);
+    } else {
+      navigate(`/addClassTutor?type=individual`);
+    }
+  };
+
+  const handleGroupSelect = (group) => {
+    setShowGroupSelectModal(false);
+    navigate(`/addClassTutor?type=group&groupId=${group.id}`);
+  };
+
+  //------------------------------------------------------------------------------------//
+
   return (
-    <div className="flex min-h-screen bg-white">
-      <Sidebar user={user} />
+    <>
+      <div className="flex min-h-screen bg-white">
+        <Sidebar user={user} />
 
-      <div className="flex-1 p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl ml-[17rem] m-2">
-        <div className="flex items-center justify-between mb-4 border-b border-[#e7e7e7] pb-4">
-          <div className="flex flex-row items-center space-x-4">
-            <h1 className="text-3xl font-semibold">Hi, {user.name}!</h1>
-            <p className="text-[#616161] text-lg">How are you today? </p>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="relative">
+        <div className="flex-1 p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl ml-[17rem] m-2">
+          <div className="flex items-center justify-between mb-4 border-b border-[#e7e7e7] pb-4">
+            <div className="flex flex-row items-center space-x-4">
+              <h1 className="text-3xl font-semibold">Hi, {user.name}!</h1>
+              <p className="text-[#616161] text-lg">How are you today? </p>
+            </div>
+            <div className="flex items-center gap-4">
               <div className="relative">
-                <input
-                  type="search"
-                  placeholder="Search classes, instructors or groups"
-                  className="py-2 pl-10 pr-4 border border-gray-200 rounded-full w-96"
-                />
-                <Search
-                  className="absolute text-gray-400 -translate-y-1/2 left-3 top-1/2"
-                  size={16}
-                />
+                <div className="relative">
+                  <input
+                    type="search"
+                    placeholder="Search classes, instructors or groups"
+                    className="py-2 pl-10 pr-4 border border-gray-200 rounded-full w-96"
+                  />
+                  <Search
+                    className="absolute text-gray-400 -translate-y-1/2 left-3 top-1/2"
+                    size={16}
+                  />
+                </div>
               </div>
+              <NotificationDropdown />
             </div>
-            <NotificationDropdown />
           </div>
-        </div>
 
-        <div className="flex flex-row items-start justify-between w-full gap-8 mb-4">
-          <div className="w-full p-4 bg-white border border-yellow-300 rounded-3xl">
-            <div className="flex items-center justify-center mb-6">
-              <div className="flex items-center justify-center gap-4">
-                <button
-                  onClick={() => navigateWeek("prev")}
-                  className="p-1 text-gray-600 hover:text-gray-800"
-                >
-                  <ChevronLeft className="w-6 h-6" />
-                </button>
-                <h2 className="text-xl font-medium">{formatHeader(date)}</h2>
-                <button
-                  onClick={() => navigateWeek("next")}
-                  className="p-1 text-gray-600 hover:text-gray-800"
-                >
-                  <ChevronRight className="w-6 h-6" />
-                </button>
+          <div className="flex flex-row items-start justify-between w-full gap-8 mb-4">
+            <div className="w-full p-4 bg-white border border-yellow-300 rounded-3xl">
+              <div className="flex items-center justify-center mb-6">
+                <div className="flex items-center justify-center gap-4">
+                  <button
+                    onClick={() => navigateWeek("prev")}
+                    className="p-1 text-gray-600 hover:text-gray-800"
+                  >
+                    <ChevronLeft className="w-6 h-6" />
+                  </button>
+                  <h2 className="text-xl font-medium">{formatHeader(date)}</h2>
+                  <button
+                    onClick={() => navigateWeek("next")}
+                    className="p-1 text-gray-600 hover:text-gray-800"
+                  >
+                    <ChevronRight className="w-6 h-6" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex justify-between gap-2">
+                {weekDates.map((day) => (
+                  <button
+                    key={day.toISOString()}
+                    className={`flex flex-col items-center justify-center rounded-full py-4 px-6 transition-colors ${
+                      isToday(day)
+                        ? "bg-green-500 text-white"
+                        : "bg-white border hover:border-gray-300"
+                    }`}
+                    onClick={() => setDate(day)}
+                  >
+                    <span className="mb-1 text-2xl font-medium">
+                      {day.getDate()}
+                    </span>
+                    <span className="text-sm">
+                      {day.toLocaleString("default", { weekday: "short" })}
+                    </span>
+                  </button>
+                ))}
               </div>
             </div>
-
-            <div className="flex justify-between gap-2">
-              {weekDates.map((day) => (
+          </div>
+          {/* Tabs section remains the same */}
+          <div className="flex flex-row items-center justify-between pt-4">
+            <div className="flex bg-gray-100 border border-[#888888] rounded-full w-fit">
+              {TABS.map((tab) => (
                 <button
-                  key={day.toISOString()}
-                  className={`flex flex-col items-center justify-center rounded-full py-4 px-6 transition-colors ${
-                    isToday(day)
-                      ? "bg-green-500 text-white"
-                      : "bg-white border hover:border-gray-300"
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`px-12 py-2 rounded-full text-lg font-medium transition-all ${
+                    activeTab === tab
+                      ? "bg-[#ffbf00] text-[#042f0c] border border-[#042f0c]"
+                      : "text-[#042f0c] hover:text-black"
                   }`}
-                  onClick={() => setDate(day)}
                 >
-                  <span className="mb-1 text-2xl font-medium">
-                    {day.getDate()}
-                  </span>
-                  <span className="text-sm">
-                    {day.toLocaleString("default", { weekday: "short" })}
-                  </span>
+                  {tab}
                 </button>
               ))}
             </div>
-          </div>
-        </div>
-        {/* Tabs section remains the same */}
-        <div className="flex flex-row items-center justify-between pt-4">
-          <div className="flex bg-gray-100 border border-[#888888] rounded-full w-fit">
-            {TABS.map((tab) => (
+            <div className="flex flex-row items-center space-x-2">
               <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-12 py-2 rounded-full text-lg font-medium transition-all ${
-                  activeTab === tab
-                    ? "bg-[#ffbf00] text-[#042f0c] border border-[#042f0c]"
-                    : "text-[#042f0c] hover:text-black"
-                }`}
+                className="px-3 py-2 text-[#042f0c] text-lg font-semibold bg-[#14b82c] border border-black rounded-full flex items-center"
+                onClick={() => setShowClassTypeModal(true)}
               >
-                {tab}
+                <Plus /> New Class
               </button>
-            ))}
-          </div>
-          <div className="flex flex-row items-center space-x-2">
-            <button
-              className="px-3 py-2 text-[#042f0c] text-lg font-semibold bg-[#14b82c] border border-black rounded-full flex items-center"
-              onClick={handleAddClassClick}
-            >
-              <Plus /> New Class
-            </button>
 
-            <button
-              className="px-3 py-2 text-[#042f0c] text-lg font-semibold bg-[#e6fde9] border border-black rounded-full flex items-center"
-              onClick={() => navigate("/classesTutor")}
-            >
-              View All
-            </button>
-          </div>
-        </div>
-
-        {/* Classes Grid */}
-        {loading ? (
-          <div className="flex items-center justify-center w-full h-64">
-            <ClipLoader color="#14b82c" />
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-6 mt-6 md:grid-cols-3 lg:grid-cols-4">
-            {classes.map((classData) => (
-              <ClassCardTutor
-                {...classData}
-                isBammbuu={Boolean(classData.tutorId)}
-              />
-            ))}
-          </div>
-        )}
-        <div className="flex flex-row items-center justify-between pt-4">
-          <div>
-            <h2 className="text-3xl font-bold">My Groups</h2>
-          </div>
-          <div className="flex flex-row items-center space-x-2">
-            <button
-              className="px-3 py-2 text-[#042f0c] text-lg font-semibold bg-[#14b82c] border border-black rounded-full flex items-center"
-              onClick={handleAddClassClick}
-            >
-              <Plus /> New Group
-            </button>
-
-            <button
-              className="px-3 py-2 text-[#042f0c] text-lg font-semibold bg-[#e6fde9] border border-black rounded-full flex items-center"
-              onClick={() => navigate("/groupsTutor")}
-            >
-              View All
-            </button>
-          </div>
-        </div>
-        {/* Classes Grid */}
-        {loading ? (
-          <div className="flex items-center justify-center w-full h-64">
-            <ClipLoader color="#14b82c" />
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-6 mt-6 md:grid-cols-3 lg:grid-cols-4">
-            {groups.map((group) => (
-              <div
-                key={group.groupId}
-                className="flex-none px-2 pt-2 w-[22rem]"
+              <button
+                className="px-3 py-2 text-[#042f0c] text-lg font-semibold bg-[#e6fde9] border border-black rounded-full flex items-center"
+                onClick={() => navigate("/classesTutor")}
               >
-                <GroupCard group={group} />
-              </div>
-            ))}
+                View All
+              </button>
+            </div>
           </div>
-        )}
+
+          {/* Classes Grid */}
+          {loading ? (
+            <div className="flex items-center justify-center w-full h-64">
+              <ClipLoader color="#14b82c" />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-6 mt-6 md:grid-cols-3 lg:grid-cols-4">
+              {classes.map((classData) => (
+                <ClassCardTutor
+                  {...classData}
+                  isBammbuu={Boolean(classData.tutorId)}
+                />
+              ))}
+            </div>
+          )}
+          <div className="flex flex-row items-center justify-between pt-4">
+            <div>
+              <h2 className="text-3xl font-bold">My Groups</h2>
+            </div>
+            <div className="flex flex-row items-center space-x-2">
+              <button
+                className="px-3 py-2 text-[#042f0c] text-lg font-semibold bg-[#14b82c] border border-black rounded-full flex items-center"
+                onClick={() => navigate("/addGroupsTutor")}
+              >
+                <Plus /> New Group
+              </button>
+
+              <button
+                className="px-3 py-2 text-[#042f0c] text-lg font-semibold bg-[#e6fde9] border border-black rounded-full flex items-center"
+                onClick={() => navigate("/groupsTutor")}
+              >
+                View All
+              </button>
+            </div>
+          </div>
+          {/* Classes Grid */}
+          {loading ? (
+            <div className="flex items-center justify-center w-full h-64">
+              <ClipLoader color="#14b82c" />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-6 mt-6 md:grid-cols-3 lg:grid-cols-4">
+              {groups.map((group) => (
+                <div
+                  key={group.groupId}
+                  className="flex-none px-2 pt-2 w-[22rem]"
+                >
+                  <GroupCard group={group} />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+
+      <ClassTypeModal
+        isOpen={showClassTypeModal}
+        onClose={() => setShowClassTypeModal(false)}
+        onSelect={handleClassTypeSelect}
+      />
+
+      <GroupSelectModal
+        isOpen={showGroupSelectModal}
+        onClose={() => {
+          setShowGroupSelectModal(false);
+          setShowClassTypeModal(true);
+        }}
+        onSelect={handleGroupSelect}
+        groups={groups}
+      />
+    </>
   );
 };
 

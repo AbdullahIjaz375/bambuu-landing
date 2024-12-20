@@ -10,7 +10,7 @@ import Footer from "../../components/Footer";
 import Sidebar from "../../components/Sidebar";
 import { ArrowLeft, ImagePlus } from "lucide-react";
 
-const AddGroupsUser = () => {
+const AddGroupsTutor = () => {
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -51,7 +51,7 @@ const AddGroupsUser = () => {
         memberIds: [],
         classIds: [],
         createdAt: new Date().toISOString(),
-        isPremium: false,
+        isPremium: true,
       };
 
       // Add group to Firestore
@@ -63,25 +63,23 @@ const AddGroupsUser = () => {
       await updateDoc(groupRef, { imageUrl, id: groupId });
 
       // Update user document in Firestore
-      const userRef = doc(db, "students", user.uid);
+      const userRef = doc(db, "tutors", user.uid);
       await updateDoc(userRef, {
         // Add group to both arrays
-        adminOfGroups: [...(user.adminOfGroups || []), groupId],
-        joinedGroups: [...(user.joinedGroups || []), groupId],
+        tutorOfGroups: [...(user.tutorOfGroups || []), groupId],
       });
 
       // Update local user state and session storage
       const updatedUser = {
         ...user,
-        adminOfGroups: [...(user.adminOfGroups || []), groupId],
-        joinedGroups: [...(user.joinedGroups || []), groupId],
+        tutorOfGroups: [...(user.tutorOfGroups || []), groupId],
       };
       setUser(updatedUser);
       sessionStorage.setItem("user", JSON.stringify(updatedUser));
 
       // Navigate after successful creation
       setTimeout(() => {
-        navigate("/groupsUser");
+        navigate("/groupsTutor");
       }, 1000);
     } catch (error) {
       console.error("Error creating group:", error);
@@ -227,4 +225,4 @@ const AddGroupsUser = () => {
   );
 };
 
-export default AddGroupsUser;
+export default AddGroupsTutor;

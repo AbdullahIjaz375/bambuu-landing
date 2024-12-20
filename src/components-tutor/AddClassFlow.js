@@ -1,52 +1,26 @@
 import React, { useState } from "react";
 import { Search, X, Users } from "lucide-react";
 
-export const ClassTypeModal = ({ isOpen, onClose, onSelect }) => {
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="p-6 bg-white w-96 rounded-3xl">
-        <div className="flex flex-col items-center space-y-6">
-          {/* Add close button */}
-          <div className="flex justify-end w-full">
-            <button onClick={onClose} className="p-2">
-              <X size={24} />
-            </button>
-          </div>
-          <img alt="bambuu" src="/images/classType.png" />
-
-          <h2 className="text-xl font-semibold text-center">
-            Select form of class you want to create.
-          </h2>
-
-          <div className="w-full space-y-3">
-            <button
-              onClick={() => onSelect("group")}
-              className="w-full py-3 text-center border border-black rounded-full hover:bg-gray-100"
-            >
-              Group Class
-            </button>
-            <button
-              onClick={() => onSelect("individual")}
-              className="w-full py-3 text-center border border-black rounded-full hover:bg-gray-100"
-            >
-              Individual Class
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
 export const GroupSelectModal = ({ isOpen, onClose, onSelect, groups }) => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedGroup, setSelectedGroup] = useState(null);
 
   if (!isOpen) return null;
 
   const filteredGroups = groups.filter((group) =>
     group.groupName.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleGroupSelection = (group) => {
+    setSelectedGroup(group);
+  };
+
+  const handleNext = () => {
+    if (selectedGroup) {
+      onSelect(selectedGroup);
+      onClose();
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
@@ -77,8 +51,12 @@ export const GroupSelectModal = ({ isOpen, onClose, onSelect, groups }) => {
             {filteredGroups.map((group) => (
               <div
                 key={group.id}
-                onClick={() => onSelect(group)}
-                className="p-4 border border-[#14b82c] cursor-pointer rounded-3xl hover:bg-gray-50"
+                onClick={() => handleGroupSelection(group)}
+                className={`p-4 border cursor-pointer rounded-3xl hover:bg-gray-50 ${
+                  selectedGroup?.id === group.id
+                    ? "border-2 border-[#14b82c] bg-gray-50"
+                    : "border-[#14b82c]"
+                }`}
               >
                 <div className="flex items-center gap-4">
                   <img
@@ -123,10 +101,53 @@ export const GroupSelectModal = ({ isOpen, onClose, onSelect, groups }) => {
               Cancel
             </button>
             <button
-              onClick={onClose}
-              className="flex-1 py-3 text-black border border-[#042f0c] bg-[#14b82c] rounded-full hover:bg-[#3edb56]"
+              onClick={handleNext}
+              disabled={!selectedGroup}
+              className={`flex-1 py-3 text-black border border-[#042f0c] rounded-full ${
+                selectedGroup
+                  ? "bg-[#14b82c] hover:bg-[#3edb56]"
+                  : "bg-gray-300 cursor-not-allowed"
+              }`}
             >
               Next
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const ClassTypeModal = ({ isOpen, onClose, onSelect }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="p-6 bg-white w-96 rounded-3xl">
+        <div className="flex flex-col items-center space-y-6">
+          <div className="flex justify-end w-full">
+            <button onClick={onClose} className="p-2">
+              <X size={24} />
+            </button>
+          </div>
+          <img alt="bambuu" src="/images/classType.png" />
+
+          <h2 className="text-xl font-semibold text-center">
+            Select form of class you want to create.
+          </h2>
+
+          <div className="w-full space-y-3">
+            <button
+              onClick={() => onSelect("group")}
+              className="w-full py-3 text-center border border-black rounded-full hover:bg-gray-100"
+            >
+              Group Class
+            </button>
+            <button
+              onClick={() => onSelect("individual")}
+              className="w-full py-3 text-center border border-black rounded-full hover:bg-gray-100"
+            >
+              Individual Class
             </button>
           </div>
         </div>

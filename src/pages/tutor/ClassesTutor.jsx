@@ -26,7 +26,7 @@ const ClassesTutor = () => {
   const navigate = useNavigate();
 
   const handleBack = () => {
-    navigate(-1);
+    navigate("/learn");
   };
 
   useEffect(() => {
@@ -119,6 +119,8 @@ const ClassesTutor = () => {
       classItem.languageLevel?.toLowerCase().includes(searchTerm)
     );
   });
+
+  //--------------------------------------------adding class----------------------------//
   // Add these handlers
   const handleClassTypeSelect = (type) => {
     setShowClassTypeModal(false);
@@ -137,6 +139,7 @@ const ClassesTutor = () => {
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
+  //-------------------------------------------------------------------------------//
 
   return (
     <>
