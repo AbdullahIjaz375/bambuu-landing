@@ -18,9 +18,11 @@ import {
   serverTimestamp,
   addDoc,
   updateDoc,
+  deleteDoc,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-
+import { createStreamChannel } from "../../services/streamService";
+import { ChannelType } from "../../config/stream";
 import { db, storage } from "../../firebaseConfig";
 import { ClipLoader } from "react-spinners";
 import { useNavigate } from "react-router-dom";
@@ -331,6 +333,24 @@ const GroupDetailsUser = ({ onClose }) => {
         );
         await uploadBytes(imageRef, classImage);
         imageUrl = await getDownloadURL(imageRef);
+      }
+
+      // Create GetStream channel first
+      try {
+        await createStreamChannel({
+          channelId: classId,
+          channelName: classData.className,
+          channelType: ChannelType.STUDENT_GROUP_CLASS,
+          members: [user.uid], // Initially only admin is member
+          adminId: user.uid,
+          imageUrl,
+          description: classData.classDescription,
+        });
+      } catch (streamError) {
+        console.error("Error creating stream channel:", streamError);
+        // Delete the class if channel creation fails
+        await deleteDoc(doc(db, "classes", classId));
+        throw streamError;
       }
 
       const classAddress =

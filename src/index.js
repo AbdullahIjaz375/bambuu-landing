@@ -24,8 +24,9 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import { AuthProvider } from "./context/AuthContext";
 import { MantineProvider } from "@mantine/core";
-
+import { Chat } from "stream-chat-react";
 import "@mantine/core/styles.css";
+import "stream-chat-react/dist/css/v2/index.css";
 import "./index.css";
 
 ReactDOM.render(

@@ -29,6 +29,8 @@
     "react-time-picker": "^7.0.0",
     "react-timezone-select": "^3.2.8",
     "react-toastify": "^10.0.6",
+    "stream-chat": "^8.48.0",
+    "stream-chat-react": "^12.8.1",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

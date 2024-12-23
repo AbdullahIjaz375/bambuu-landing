@@ -136,7 +136,6 @@
 // };
 
 // export default ClassesUser;
-
 import React, { useEffect, useState } from "react";
 import { Search, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -188,20 +187,23 @@ const ClassesUser = () => {
         );
       } finally {
         setLoading(false);
-        console.log(classes);
       }
     };
 
     fetchClasses();
   }, [user]);
 
+  const isBambbuuPlusClass = (classType) => {
+    return classType === "Individual Premium" || classType === "Group Premium";
+  };
+
   const filteredClasses = classes.filter((classItem) => {
     const searchTerm = searchQuery.toLowerCase().trim();
-    const isBambuu = Boolean(classItem.tutorId);
+    const isBambuuPlus = isBambbuuPlusClass(classItem.classType);
 
     // First filter by tab
-    if (activeTab === "bammbuu" && !isBambuu) return false;
-    if (activeTab === "group" && isBambuu) return false;
+    if (activeTab === "bammbuu" && !isBambuuPlus) return false;
+    if (activeTab === "group" && isBambuuPlus) return false;
 
     // Then filter by search term
     if (!searchTerm) return true;
@@ -293,7 +295,7 @@ const ClassesUser = () => {
               <div key={classItem.id} className="flex-none w-80">
                 <ClassCard
                   {...classItem}
-                  isBammbuu={Boolean(classItem.tutorId)}
+                  isBammbuu={isBambbuuPlusClass(classItem.classType)}
                 />
               </div>
             ))}
