@@ -1,10 +1,17 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { collection, addDoc, updateDoc, doc } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  doc,
+  deleteDoc,
+} from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "../../firebaseConfig";
-
+import { createStreamChannel } from "../../services/streamService";
+import { ChannelType } from "../../config/stream";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import Sidebar from "../../components/Sidebar";
@@ -41,7 +48,44 @@ const AddGroupsTutor = () => {
 
     try {
       // Create new group object
+
+      // Add group to Firestore
+      const groupRef = await addDoc(collection(db, "groups"), {});
+      const groupId = groupRef.id;
+
+      // Upload and update image if exists
+      const imageUrl = await handleImageUpload(groupId);
+
+      // Create GetStream channel first before completing group creation
+      try {
+        // Create member roles mapping for GetStream
+        const memberRoles = [
+          {
+            user_id: user.uid,
+            role: "Moderator", // Group creator gets Moderator role
+          },
+        ];
+
+        const channelData = {
+          id: groupId,
+          type: ChannelType.PREMIUM_GROUP,
+          members: [user.uid],
+          name: groupName,
+          image: imageUrl,
+          description: groupDescription,
+          created_by_id: user.uid, // Important for GetStream
+          member_roles: memberRoles,
+        };
+        await createStreamChannel(channelData);
+      } catch (streamError) {
+        console.error("Error creating stream channel:", streamError);
+        // Delete the group if channel creation fails
+        await deleteDoc(doc(db, "groups", groupId));
+        throw streamError;
+      }
+
       const newGroup = {
+        id: groupId,
         groupName,
         groupDescription,
         groupLearningLanguage: learningLanguage,
@@ -52,15 +96,10 @@ const AddGroupsTutor = () => {
         classIds: [],
         createdAt: new Date().toISOString(),
         isPremium: true,
+        imageUrl,
       };
 
-      // Add group to Firestore
-      const groupRef = await addDoc(collection(db, "groups"), newGroup);
-      const groupId = groupRef.id;
-
-      // Upload and update image if exists
-      const imageUrl = await handleImageUpload(groupId);
-      await updateDoc(groupRef, { imageUrl, id: groupId });
+      await updateDoc(doc(db, "groups", groupId), newGroup);
 
       // Update user document in Firestore
       const userRef = doc(db, "tutors", user.uid);

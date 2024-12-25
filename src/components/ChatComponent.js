@@ -12,27 +12,73 @@ import {
 import { useAuth } from "../context/AuthContext";
 import "stream-chat-react/dist/css/v2/index.css";
 
-const ChatComponent = ({ channelId }) => {
+const ChatComponent = ({ channelId, type }) => {
   const { streamClient, user } = useAuth();
   const [channel, setChannel] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const initChannel = async () => {
-      if (!channelId || !streamClient) return;
+      if (!channelId || !streamClient) {
+        setIsLoading(false);
+        return;
+      }
 
       try {
-        const channel = streamClient.channel("student_group_class", channelId);
+        setIsLoading(true);
+        setError(null);
+
+        // Ensure we have both the channelId and type
+        if (!type) {
+          throw new Error("Channel type is required");
+        }
+
+        const channel = streamClient.channel(type, channelId);
         await channel.watch();
         setChannel(channel);
       } catch (error) {
         console.error("Error loading channel:", error);
+        setError(error.message);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     initChannel();
-  }, [channelId, streamClient]);
 
-  if (!channel) return <div>Loading...</div>;
+    // Cleanup function
+    return () => {
+      if (channel) {
+        // Properly cleanup the channel subscription
+        channel.stopWatching();
+      }
+    };
+  }, [channelId, streamClient, type]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-gray-600">Loading channel...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-red-600">Error: {error}</div>
+      </div>
+    );
+  }
+
+  if (!channel || !streamClient) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-gray-600">No channel selected</div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full">

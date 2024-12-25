@@ -350,11 +350,12 @@ import ChatComponent from "../../components/ChatComponent";
 import { useAuth } from "../../context/AuthContext";
 import { streamClient } from "../../config/stream";
 import Sidebar from "../../components/Sidebar";
+import { ChannelType } from "../../config/stream";
 
 const CommunityUser = () => {
   const { user } = useAuth();
   const [channels, setChannels] = useState([]);
-  const [selectedChannelId, setSelectedChannelId] = useState(null);
+  const [selectedChannel, setSelectedChannel] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -365,7 +366,14 @@ const CommunityUser = () => {
         // Get all channels where the user is a member
         const filter = {
           members: { $in: [user.uid] },
-          type: "student_group_class",
+          type: {
+            $in: [
+              "standard_group",
+              "premium_group",
+              "premium_individual_class",
+              "one_to_one_chat",
+            ],
+          },
         };
 
         const sort = { last_message_at: -1 };
@@ -376,9 +384,10 @@ const CommunityUser = () => {
         });
 
         setChannels(channels);
-        if (channels.length > 0) {
-          setSelectedChannelId(channels[0].id);
+        if (channels.length > 0 && !selectedChannel) {
+          setSelectedChannel(channels[0]);
         }
+        console.log(channels);
       } catch (error) {
         console.error("Error loading channels:", error);
       } finally {
@@ -388,6 +397,10 @@ const CommunityUser = () => {
 
     loadChannels();
   }, [user]);
+
+  const handleChannelSelect = (channel) => {
+    setSelectedChannel(channel);
+  };
 
   if (loading) {
     return (
@@ -426,9 +439,9 @@ const CommunityUser = () => {
             {channels.map((channel) => (
               <div
                 key={channel.id}
-                onClick={() => setSelectedChannelId(channel.id)}
+                onClick={() => handleChannelSelect(channel)}
                 className={`p-3 rounded-lg cursor-pointer ${
-                  selectedChannelId === channel.id
+                  selectedChannel?.id === channel.id
                     ? "bg-blue-50 border border-blue-200"
                     : "hover:bg-gray-50"
                 }`}
@@ -447,8 +460,11 @@ const CommunityUser = () => {
 
         {/* Chat Area */}
         <div className="flex-1">
-          {selectedChannelId ? (
-            <ChatComponent channelId={selectedChannelId} />
+          {selectedChannel ? (
+            <ChatComponent
+              channelId={selectedChannel.id}
+              type={selectedChannel.type}
+            />
           ) : (
             <div className="flex items-center justify-center h-full text-gray-500">
               Select a chat to start messaging

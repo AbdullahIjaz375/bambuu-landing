@@ -59,8 +59,6 @@ const ProfileUser = () => {
       await signOut(auth);
       toast.success("Logged out successfully!");
       sessionStorage.removeItem("userType"); // Remove userType from session storage
-
-      navigate("/");
     } catch (error) {
       toast.error("Error during logout");
       console.error("Error during logout:", error);

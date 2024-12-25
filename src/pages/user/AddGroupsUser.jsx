@@ -1,13 +1,21 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { collection, addDoc, updateDoc, doc } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  doc,
+  deleteDoc,
+} from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "../../firebaseConfig";
 
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import Sidebar from "../../components/Sidebar";
+import { createStreamChannel } from "../../services/streamService";
+import { ChannelType } from "../../config/stream";
 import { ArrowLeft, ImagePlus } from "lucide-react";
 
 const AddGroupsUser = () => {
@@ -36,12 +44,102 @@ const AddGroupsUser = () => {
     return await getDownloadURL(storageRef);
   };
 
+  // const handleCreateGroup = async () => {
+  //   setLoading(true);
+
+  //   try {
+  //     // Create new group object
+  //     const newGroup = {
+  //       groupName,
+  //       groupDescription,
+  //       groupLearningLanguage: learningLanguage,
+  //       groupAdminId: user.uid,
+  //       groupAdminName: user.name || "Anonymous",
+  //       groupAdminImageUrl: user.photoUrl || null,
+  //       memberIds: [],
+  //       classIds: [],
+  //       createdAt: new Date().toISOString(),
+  //       isPremium: false,
+  //     };
+
+  //     // Add group to Firestore
+  //     const groupRef = await addDoc(collection(db, "groups"), newGroup);
+  //     const groupId = groupRef.id;
+
+  //     // Upload and update image if exists
+  //     const imageUrl = await handleImageUpload(groupId);
+  //     await updateDoc(groupRef, { imageUrl, id: groupId });
+
+  //     // Update user document in Firestore
+  //     const userRef = doc(db, "students", user.uid);
+  //     await updateDoc(userRef, {
+  //       // Add group to both arrays
+  //       adminOfGroups: [...(user.adminOfGroups || []), groupId],
+  //       joinedGroups: [...(user.joinedGroups || []), groupId],
+  //     });
+
+  //     // Update local user state and session storage
+  //     const updatedUser = {
+  //       ...user,
+  //       adminOfGroups: [...(user.adminOfGroups || []), groupId],
+  //       joinedGroups: [...(user.joinedGroups || []), groupId],
+  //     };
+  //     setUser(updatedUser);
+  //     sessionStorage.setItem("user", JSON.stringify(updatedUser));
+
+  //     // Navigate after successful creation
+  //     setTimeout(() => {
+  //       navigate("/groupsUser");
+  //     }, 1000);
+  //   } catch (error) {
+  //     console.error("Error creating group:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const handleCreateGroup = async () => {
     setLoading(true);
 
     try {
-      // Create new group object
+      // Create new group in Firestore first
+      const groupRef = await addDoc(collection(db, "groups"), {});
+      const groupId = groupRef.id;
+
+      // Upload and get image URL if exists
+      const imageUrl = await handleImageUpload(groupId);
+
+      // Create GetStream channel first before completing group creation
+      try {
+        // Create member roles mapping for GetStream
+        const memberRoles = [
+          {
+            user_id: user.uid,
+            role: "Moderator", // Group creator gets Moderator role
+          },
+        ];
+
+        const channelData = {
+          id: groupId,
+          type: ChannelType.STANDARD_GROUP,
+          members: [user.uid],
+          name: groupName,
+          image: imageUrl,
+          description: groupDescription,
+          created_by_id: user.uid, // Important for GetStream
+          member_roles: memberRoles,
+        };
+        await createStreamChannel(channelData);
+      } catch (streamError) {
+        console.error("Error creating stream channel:", streamError);
+        // Delete the group if channel creation fails
+        await deleteDoc(doc(db, "groups", groupId));
+        throw streamError;
+      }
+
+      // Create new group object with all data
       const newGroup = {
+        id: groupId,
         groupName,
         groupDescription,
         groupLearningLanguage: learningLanguage,
@@ -52,20 +150,15 @@ const AddGroupsUser = () => {
         classIds: [],
         createdAt: new Date().toISOString(),
         isPremium: false,
+        imageUrl,
       };
 
-      // Add group to Firestore
-      const groupRef = await addDoc(collection(db, "groups"), newGroup);
-      const groupId = groupRef.id;
-
-      // Upload and update image if exists
-      const imageUrl = await handleImageUpload(groupId);
-      await updateDoc(groupRef, { imageUrl, id: groupId });
+      // Update the group document with all data
+      await updateDoc(doc(db, "groups", groupId), newGroup);
 
       // Update user document in Firestore
       const userRef = doc(db, "students", user.uid);
       await updateDoc(userRef, {
-        // Add group to both arrays
         adminOfGroups: [...(user.adminOfGroups || []), groupId],
         joinedGroups: [...(user.joinedGroups || []), groupId],
       });
@@ -85,10 +178,13 @@ const AddGroupsUser = () => {
       }, 1000);
     } catch (error) {
       console.error("Error creating group:", error);
+      setLoading(false);
+      // You might want to show an error message to the user here
     } finally {
       setLoading(false);
     }
   };
+
   return (
     <div className="flex min-h-screen bg-white">
       <Sidebar user={user} />

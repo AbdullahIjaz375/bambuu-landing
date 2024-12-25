@@ -60,7 +60,7 @@ const ClassCard = ({
   return (
     <>
       <div
-        className="max-w-md transition-transform transform cursor-pointer hover:scale-105"
+        className="transition-transform transform cursor-pointer w-80 hover:scale-105"
         onClick={handleCardClick}
         role="button"
         tabIndex={0}
@@ -71,15 +71,15 @@ const ClassCard = ({
         }}
       >
         <div
-          className={`flex flex-col items-center justify-center border ${
+          className={`flex flex-col h-[26rem] border ${
             isPremium ? "border-[#14b82c]" : "border-[#ffc71f]"
           } bg-white rounded-3xl p-2`}
         >
-          <div className="relative w-full">
+          <div className="relative w-full h-48">
             <img
               alt={className}
               src={imageUrl || "/images/default-class.png"}
-              className="object-cover w-full h-48 rounded-t-2xl"
+              className="object-cover w-full h-full rounded-t-2xl"
             />
             {isPremium && (
               <img
@@ -91,7 +91,7 @@ const ClassCard = ({
           </div>
 
           <div
-            className={`w-full space-y-2 ${
+            className={`w-full flex-grow space-y-2 ${
               isPremium ? "bg-[#c3f3c9]" : "bg-[#c3f3c9]"
             } rounded-b-3xl p-2`}
           >
@@ -114,7 +114,9 @@ const ClassCard = ({
               )}
             </div>
 
-            <h2 className="text-xl font-bold text-gray-800">{className}</h2>
+            <h2 className="text-xl font-bold text-gray-800 line-clamp-2">
+              {className}
+            </h2>
 
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
@@ -128,7 +130,7 @@ const ClassCard = ({
             </div>
           </div>
 
-          <div className="flex flex-col items-center justify-center w-full p-2 space-y-2">
+          <div className="flex flex-col items-center justify-end w-full p-2 space-y-2">
             <div className="flex flex-row items-center justify-between w-full">
               <div className="flex flex-row items-center justify-center space-x-2">
                 <Clock className="w-5 h-5 text-gray-600" />

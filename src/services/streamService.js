@@ -2,36 +2,48 @@
 import { streamClient, ChannelType } from "../config/stream";
 
 export const createStreamChannel = async ({
-  channelId,
-  channelName,
-  channelType = ChannelType.STUDENT_GROUP_CLASS,
+  id,
+  type,
   members,
-  adminId,
-  imageUrl,
+  name,
+  image,
   description,
+  member_roles,
 }) => {
   try {
-    // Create member roles array with admin as moderator
-    const memberRoles = members.map((memberId) => ({
-      user_id: memberId,
-      role: memberId === adminId ? "moderator" : "member",
-    }));
-
-    // Create the channel
-    const channel = streamClient.channel(channelType, channelId, {
-      name: channelName,
+    console.log("Creating channel with data:", {
+      id,
+      type,
       members,
-      image: imageUrl,
+      name,
+      image,
       description,
-      member_roles: memberRoles,
+      member_roles,
+    });
+
+    // Create the channel with the provided data
+    const channel = streamClient.channel(type, id, {
+      name,
+      members,
+      image,
+      description,
+      member_roles,
     });
 
     // Watch the channel
-    await channel.watch();
-    console.log("Channel successfully created:", channelId);
+    const response = await channel.watch();
+    console.log("Channel watch response:", response);
+
+    // Verify channel creation
+    const createdChannel = await streamClient.queryChannels({ id: id });
+    console.log("Query result:", createdChannel);
+
     return channel;
   } catch (error) {
-    console.error("Error creating stream channel:", error);
+    console.error("Error creating stream channel:", error.message);
+    if (error.response) {
+      console.error("Error response:", error.response);
+    }
     throw error;
   }
 };
