@@ -6,7 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import { doc, updateDoc, arrayUnion, getDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "../firebaseConfig";
-
+import { useNavigate } from "react-router-dom";
 Modal.setAppElement("#root");
 
 const useClassEnrollment = () => {
@@ -32,7 +32,7 @@ const useClassEnrollment = () => {
   const enrollInClass = async (classId, userId, tutorId) => {
     setIsEnrolling(true);
     setError(null);
-
+    console.log(classId, userId, tutorId);
     try {
       // Get references to both documents
       const classRef = doc(db, "classes", classId);
@@ -45,11 +45,6 @@ const useClassEnrollment = () => {
 
       if (!classData) {
         throw new Error("Class not found");
-      }
-
-      // Check if user is already enrolled
-      if (classData.classMemberIds?.includes(userId)) {
-        throw new Error("You are already enrolled in this class");
       }
 
       // Check if class is full
@@ -122,7 +117,7 @@ const ExploreClassCard = ({
 }) => {
   const { user, setUser } = useAuth();
   const { enrollInClass, isEnrolling, error, setError } = useClassEnrollment();
-
+  const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isBookingConfirmationOpen, setIsBookingConfirmationOpen] =
     useState(false);
@@ -151,12 +146,8 @@ const ExploreClassCard = ({
     });
   };
 
-  const handleCardClick = (e) => {
-    if (onClick) {
-      onClick(e);
-    } else {
-      setIsModalOpen(true);
-    }
+  const handleCardClick = () => {
+    navigate(`/newClassDetailsUser/${classId}`);
   };
 
   const handleBookClass = (e) => {
@@ -170,7 +161,7 @@ const ExploreClassCard = ({
       return;
     }
 
-    const success = await enrollInClass(classId, user.uid, tutorId);
+    const success = await enrollInClass(classId, user.uid, adminId);
 
     if (success) {
       setIsBookingConfirmationOpen(false);

@@ -47,6 +47,9 @@ import GroupsTutor from "./pages/tutor/GroupsTutor";
 import GroupDetailsTutor from "./pages/tutor/GroupDetailsTutor";
 import AddGroupsTutor from "./pages/tutor/AddGroupsTutor";
 import { Chat } from "stream-chat-react";
+import GroupDetailsNotJoinedUser from "./pages/user/GroupDetailsNotJoinedUser";
+import ClassDetailsUser from "./pages/user/ClassDetailsUser";
+import ClassDetailsNotJoinedUser from "./pages/user/ClassDetailsNotJoinedUser";
 
 const App = () => {
   const { user, streamClient } = useAuth(); // Use useAuth() inside the component
@@ -288,18 +291,26 @@ const App = () => {
             }
           />
           <Route
-            path="/classesTutor"
+            path="/classDetailsUser/:classId"
             element={
-              <ProtectedRoute requiredRole="tutor">
-                <ClassesTutor />
+              <ProtectedRoute requiredRole="student">
+                <ClassDetailsUser />
               </ProtectedRoute>
             }
           />
           <Route
-            path="/classesDetailsUser/:classId"
+            path="/newClassDetailsUser/:classId"
             element={
               <ProtectedRoute requiredRole="student">
-                <ClassesDetailsUser />
+                <ClassDetailsNotJoinedUser />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/classesTutor"
+            element={
+              <ProtectedRoute requiredRole="tutor">
+                <ClassesTutor />
               </ProtectedRoute>
             }
           />
@@ -327,6 +338,14 @@ const App = () => {
             element={
               <ProtectedRoute requiredRole="student">
                 <GroupDetailUser />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/newGroupDetailsUser/:groupId"
+            element={
+              <ProtectedRoute requiredRole="student">
+                <GroupDetailsNotJoinedUser />
               </ProtectedRoute>
             }
           />

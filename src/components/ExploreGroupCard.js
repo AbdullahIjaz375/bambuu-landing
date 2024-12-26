@@ -203,6 +203,11 @@ const GroupCard = ({ group }) => {
     setShowJoinConfirmation(true);
   };
 
+  const handleClick = () => {
+    // Note: Removed useNavigate since it should be passed as a prop or handled differently
+    navigate(`/newGroupDetailsUser/${groupId}`);
+  };
+
   const updateContextAndSession = (newGroupId) => {
     // Create updated user object with new group
     const updatedUser = {
@@ -272,7 +277,7 @@ const GroupCard = ({ group }) => {
     <>
       <div
         className="max-w-md mt-1 transition-transform transform cursor-pointer hover:scale-105"
-        onClick={() => setShowDetailsModal(true)}
+        onClick={handleClick}
       >
         <div className="max-w-sm p-4 bg-white border border-[#ffc310] rounded-3xl ">
           {/* Rest of your existing GroupCard code */}

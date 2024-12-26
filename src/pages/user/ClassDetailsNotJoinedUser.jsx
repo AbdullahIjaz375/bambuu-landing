@@ -1,0 +1,474 @@
+import React, { useState, useEffect } from "react";
+import { ArrowLeft, User, Clock, Calendar, MapPin } from "lucide-react";
+import { doc, updateDoc, arrayUnion, getDoc } from "firebase/firestore";
+import { db } from "../../firebaseConfig";
+import { ClipLoader } from "react-spinners";
+import { useNavigate, useParams } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import Modal from "react-modal";
+Modal.setAppElement("#root");
+
+const ClassDetailsNotJoinedUser = ({ onClose }) => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("Members");
+  const [members, setMembers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [classData, setClassData] = useState(null);
+  const [error, setError] = useState(null);
+  const { classId } = useParams();
+
+  const fetchClass = async () => {
+    if (!classId) {
+      setError("No class ID provided");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const classDoc = await getDoc(doc(db, "classes", classId));
+      if (!classDoc.exists()) {
+        setError("Class not found");
+        setLoading(false);
+        return;
+      }
+      setClassData({ id: classDoc.id, ...classDoc.data() });
+    } catch (err) {
+      console.error("Error fetching class:", err);
+      setError("Failed to fetch class details");
+    }
+    setLoading(false);
+  };
+
+  const fetchMembers = async () => {
+    if (!classData?.classMemberIds) return;
+
+    try {
+      const membersData = await Promise.all(
+        classData.classMemberIds.map(async (memberId) => {
+          const userDoc = await getDoc(doc(db, "students", memberId));
+          return userDoc.exists()
+            ? { id: userDoc.id, ...userDoc.data() }
+            : null;
+        })
+      );
+      setMembers(membersData.filter(Boolean));
+    } catch (error) {
+      console.error("Error fetching members:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchClass();
+  }, [classId]);
+
+  useEffect(() => {
+    if (classData) {
+      fetchMembers();
+    }
+  }, [classData]);
+
+  //-----------------------------getting admin details------------------------------------------//
+
+  const [groupTutor, setGroupTutor] = useState(null);
+
+  const fetchClassAdmin = async () => {
+    if (!classData?.adminId) return;
+
+    try {
+      // Check in tutors collection
+      const tutorDoc = await getDoc(doc(db, "tutors", classData.adminId));
+      if (tutorDoc.exists()) {
+        setGroupTutor({ id: tutorDoc.id, ...tutorDoc.data() });
+        return;
+      }
+
+      // If not found in tutors, check students collection
+      const studentDoc = await getDoc(doc(db, "students", classData.adminId));
+      if (studentDoc.exists()) {
+        setGroupTutor({ id: studentDoc.id, ...studentDoc.data() });
+      }
+    } catch (error) {
+      console.error("Error fetching group admin:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (classData) {
+      fetchClassAdmin();
+      console.log("admin:", groupTutor);
+    }
+  }, [classData]);
+  //---------------------------------------------------------------------------------------------------//
+  const getClassTypeColor = (type) => {
+    switch (type) {
+      case "Group Premium":
+        return "bg-[#e6fce8]";
+      case "Individual Premium":
+        return "bg-[#e6fce8]";
+      default:
+        return "bg-[#ffffea]";
+    }
+  };
+
+  const renderMembers = () => {
+    if (members.length === 0) {
+      return (
+        <div className="flex items-center justify-center h-64">
+          <p className="text-gray-500">No members available</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
+        {members.map((member) => (
+          <div
+            key={member.id}
+            className="flex items-center justify-between px-4 py-3 border-b border-gray-100 hover:bg-gray-50"
+          >
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <img
+                  src={member.photoUrl || "/api/placeholder/40/40"}
+                  alt={member.name}
+                  className="object-cover rounded-full w-9 h-9"
+                />
+                {member.id === classData.adminId && (
+                  <div className="absolute flex items-center justify-center w-4 h-4 bg-yellow-400 rounded-full -top-1 -right-1">
+                    <span className="text-xs text-black">★</span>
+                  </div>
+                )}
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm font-medium text-gray-900">
+                  {member.name}
+                </span>
+                {member.id === classData.adminId && (
+                  <span className="text-xs text-gray-500">Teacher</span>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  //------------------------------------booking class-------------------------//
+  const [isEnrolling, setIsEnrolling] = useState(false);
+  const { setUser } = useAuth();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [isBookingConfirmationOpen, setIsBookingConfirmationOpen] =
+    useState(false);
+
+  // Helper function to update session storage
+  const updateSessionStorage = (newEnrolledClass) => {
+    const storedUser = JSON.parse(sessionStorage.getItem("user"));
+    if (storedUser) {
+      const updatedUser = {
+        ...storedUser,
+        enrolledClasses: [
+          ...(storedUser.enrolledClasses || []),
+          newEnrolledClass,
+        ],
+      };
+      sessionStorage.setItem("user", JSON.stringify(updatedUser));
+    }
+  };
+
+  const enrollInClass = async (classId, userId, tutorId) => {
+    setIsEnrolling(true);
+    setError(null);
+
+    try {
+      // Get references to both documents
+      const classRef = doc(db, "classes", classId);
+      const userRef = doc(db, "students", userId);
+      const tutorRef = doc(db, "tutors", tutorId);
+
+      // Get the current class document to check available spots
+      const classDoc = await getDoc(classRef);
+      const classData = classDoc.data();
+
+      if (!classData) {
+        throw new Error("Class not found");
+      }
+
+      // Check if user is already enrolled
+      if (classData.classMemberIds?.includes(userId)) {
+        throw new Error("You are already enrolled in this class");
+      }
+
+      // Check if class is full
+      if (classData.classMemberIds?.length >= classData.availableSpots) {
+        throw new Error("Class is full");
+      }
+
+      // Update both documents in parallel
+      await Promise.all([
+        updateDoc(classRef, {
+          classMemberIds: arrayUnion(userId),
+        }),
+        updateDoc(userRef, {
+          enrolledClasses: arrayUnion(classId),
+        }),
+        updateDoc(tutorRef, {
+          tutorStudentIds: arrayUnion(userId),
+        }),
+      ]);
+
+      // Update context and session storage
+      if (user) {
+        const updatedUser = {
+          ...user,
+          enrolledClasses: [...(user.enrolledClasses || []), classId],
+        };
+        setUser(updatedUser);
+        updateSessionStorage(classId);
+      }
+      navigate(`/classDetailsUser/${classId}`, { replace: true });
+
+      return true;
+    } catch (err) {
+      setError(err.message);
+      return false;
+    } finally {
+      setIsEnrolling(false);
+    }
+  };
+
+  const handleBookClass = (e) => {
+    e.stopPropagation(); // Prevent event bubbling
+    setIsBookingConfirmationOpen(true);
+  };
+
+  const handleConfirmBooking = async () => {
+    if (!user) {
+      setError("Please log in to enroll in classes");
+      return;
+    }
+
+    const success = await enrollInClass(classId, user.uid, classData.adminId);
+
+    if (success) {
+      setIsBookingConfirmationOpen(false);
+      setIsModalOpen(false);
+      // You might want to show a success toast or message here
+    }
+  };
+
+  //--------------------------------------------------------------------------//
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <ClipLoader color="#FFB800" size={40} />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="p-8 bg-white rounded-lg">
+          <p className="mb-4 text-red-500">{error}</p>
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!classData) return null;
+
+  return (
+    <>
+      <div className="flex min-h-screen">
+        <div className="flex flex-1 m-6 border rounded-3xl">
+          <div className="flex flex-col w-full p-6 mx-4 bg-white rounded-3xl">
+            <div className="flex items-center justify-between pb-4 mb-6 border-b">
+              <div className="flex items-center gap-4">
+                <button
+                  className="p-3 bg-gray-100 rounded-full"
+                  onClick={() => navigate(-1)}
+                >
+                  <ArrowLeft size="30" />
+                </button>
+                <h1 className="text-4xl font-semibold">Class Details</h1>
+              </div>
+            </div>
+
+            <div className="flex flex-1 min-h-0 gap-6">
+              <div
+                className={`w-1/4 p-6 rounded-3xl ${getClassTypeColor(
+                  classData.classType
+                )}`}
+              >
+                <div className="flex flex-col items-center justify-between h-full text-center">
+                  <div className="flex flex-col items-center text-center">
+                    <img
+                      src={classData.imageUrl}
+                      alt={classData.className}
+                      className="w-32 h-32 mb-4 rounded-full"
+                    />
+                    <h3 className="mb-2 text-2xl font-medium">
+                      {classData.className}
+                    </h3>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="px-3 py-1 text-sm bg-yellow-200 rounded-full">
+                        {classData.language}
+                      </span>
+                      <span className="px-3 py-1 text-sm bg-yellow-200 rounded-full">
+                        {classData.languageLevel}
+                      </span>
+                    </div>
+                    <div className="flex flex-row items-center justify-between mt-4 space-x-6">
+                      {" "}
+                      <div className="flex flex-col gap-2 mb-4">
+                        <div className="flex items-center gap-2">
+                          <User />
+                          <span className="text-sm">
+                            {classData.adminName} (Teacher)
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Clock />
+                          <span className="text-sm">
+                            {classData.classDuration} minutes
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-2 mb-4">
+                        <div className="flex items-center gap-2">
+                          <Calendar />
+                          <span className="text-sm">
+                            {new Date(
+                              classData.classDateTime.seconds * 1000
+                            ).toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <MapPin />
+                          <span className="text-sm">
+                            {classData.classLocation}
+                          </span>
+                        </div>
+                      </div>{" "}
+                    </div>
+
+                    <p className="mb-6 text-gray-600">
+                      {classData.classDescription}
+                    </p>
+                  </div>
+
+                  <div className="w-full space-y-4">
+                    {groupTutor && (
+                      <div className="flex flex-row items-center w-full max-w-lg gap-4 p-4 bg-white border border-green-500 rounded-xl">
+                        <img
+                          alt={`${groupTutor.name}'s profile`}
+                          src={groupTutor.photoUrl}
+                          className="object-cover w-28 h-28 rounded-xl"
+                        />
+                        <div className="flex flex-col items-start flex-1 gap-2">
+                          <h1 className="text-xl font-semibold">
+                            {groupTutor.name}
+                          </h1>
+                          <p className="text-sm text-left text-gray-600">
+                            {groupTutor?.bio
+                              ? groupTutor.bio
+                                  .split(" ")
+                                  .slice(0, 12)
+                                  .join(" ") + "..."
+                              : null}
+                          </p>
+                          <div className="flex items-center gap-6">
+                            <div className="flex items-center gap-1">
+                              <span className="text-gray-700">
+                                {groupTutor.teachingLanguage} (Teaching)
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <MapPin size={16} className="text-gray-500" />
+                              <span className="text-gray-700">
+                                {groupTutor.country}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    <button
+                      className="w-full px-4 py-2 text-black bg-[#14b82c] border border-black rounded-full hover:bg-[#14b82c]"
+                      onClick={handleBookClass}
+                    >
+                      Book Class
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col flex-1 min-h-0">
+                <div className="flex flex-row items-center justify-between mb-6">
+                  <button
+                    className="px-6 py-2 text-black bg-yellow-400 rounded-full"
+                    onClick={() => setActiveTab("Members")}
+                  >
+                    Members ({members.length})
+                  </button>
+                </div>
+                <div className="flex-1 overflow-y-auto">{renderMembers()}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <Modal
+        isOpen={isBookingConfirmationOpen}
+        onRequestClose={() => setIsBookingConfirmationOpen(false)}
+        className="max-w-sm p-6 mx-auto mt-40 bg-white outline-none rounded-3xl font-urbanist"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+        style={{
+          content: {
+            border: "none",
+            padding: "24px",
+            maxWidth: "420px", // max-w-sm
+          },
+        }}
+      >
+        <div className="text-center">
+          <h2 className="mb-4 text-xl font-semibold">
+            Are you sure you want to book this class?
+          </h2>
+          {error && <p className="mb-4 text-red-600">{error}</p>}
+          <p className="mb-6 text-gray-600">
+            By booking class you will be added in the group and you'll be able
+            to join the class 5 minutes before it starts. It will also be added
+            to your calendar.
+          </p>
+          <div className="flex flex-row gap-2">
+            <button
+              onClick={() => setIsBookingConfirmationOpen(false)}
+              className="w-full py-2 font-medium border border-gray-300 rounded-full hover:bg-gray-50"
+            >
+              No, Cancel
+            </button>
+            <button
+              onClick={handleConfirmBooking}
+              className="w-full py-2 font-medium text-black bg-[#14b82c] rounded-full hover:bg-[#119924] border border-[#042f0c]"
+            >
+              {isEnrolling ? "Enrolling..." : "Yes, Book Now"}
+            </button>
+          </div>
+        </div>
+      </Modal>
+    </>
+  );
+};
+
+export default ClassDetailsNotJoinedUser;

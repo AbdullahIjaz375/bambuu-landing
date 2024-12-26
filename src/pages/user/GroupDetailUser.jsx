@@ -6,6 +6,7 @@ import {
   User,
   Users,
   Camera,
+  MapPin,
   ArrowLeft,
 } from "lucide-react";
 import {
@@ -47,6 +48,7 @@ import { DateTimePicker } from "@mantine/dates";
 import { useParams } from "react-router-dom";
 import ClassCard from "../../components/ClassCard";
 import Modal from "react-modal";
+import ExploreClassCard from "../../components/ExploreClassCard";
 Modal.setAppElement("#root");
 
 const GroupDetailsUser = ({ onClose }) => {
@@ -89,6 +91,38 @@ const GroupDetailsUser = ({ onClose }) => {
   useEffect(() => {
     fetchGroup();
   }, [groupId]);
+
+  //-----------------------------getting tutor details------------------------------------------//
+
+  const [groupTutor, setGroupTutor] = useState(null);
+
+  const fetchGroupTutor = async () => {
+    if (!group?.groupAdminId) return;
+
+    try {
+      // Check in tutors collection
+      const tutorDoc = await getDoc(doc(db, "tutors", group.groupAdminId));
+      if (tutorDoc.exists()) {
+        setGroupTutor({ id: tutorDoc.id, ...tutorDoc.data() });
+        return;
+      }
+
+      // If not found in tutors, check students collection
+      const studentDoc = await getDoc(doc(db, "students", group.groupAdminId));
+      if (studentDoc.exists()) {
+        setGroupTutor({ id: studentDoc.id, ...studentDoc.data() });
+      }
+    } catch (error) {
+      console.error("Error fetching group admin:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (group) {
+      fetchGroupTutor();
+      console.log("tutor:", groupTutor);
+    }
+  }, [group]);
   //---------------------------------------------------------------------------------------------------//
 
   const fetchData = async () => {
@@ -186,11 +220,11 @@ const GroupDetailsUser = ({ onClose }) => {
       };
       setUser(updatedUser);
       sessionStorage.setItem("user", JSON.stringify(updatedUser));
+      navigate(-1);
 
       // Close modals and navigate
       setShowLeaveConfirmation(false);
       onClose();
-      navigate("/learn");
     } catch (error) {
       console.error("Error leaving group:", error);
     } finally {
@@ -442,31 +476,61 @@ const GroupDetailsUser = ({ onClose }) => {
       );
     }
 
+    // Get enrolled classes from localStorage
+    const user = JSON.parse(sessionStorage.getItem("user"));
+    const enrolledClasses = user?.enrolledClasses || [];
+
     return (
       <div className="flex flex-wrap items-center gap-4 p-4">
-        {classes.map((classItem) => (
-          <ClassCard
-            key={classItem.classId}
-            classId={classItem.classId}
-            className={classItem.className}
-            language={classItem.language}
-            languageLevel={classItem.languageLevel}
-            classDateTime={classItem.classDateTime}
-            classDuration={classItem.classDuration}
-            adminId={classItem.adminId}
-            adminName={classItem.adminName}
-            adminImageUrl={classItem.adminImageUrl}
-            classMemberIds={classItem.classMemberIds}
-            availableSpots={classItem.availableSpots}
-            imageUrl={classItem.imageUrl}
-            classDescription={classItem.classDescription}
-            classAddress={classItem.classAddress}
-            groupId={classItem.groupId}
-            recurrenceType={classItem.recurrenceType}
-            classType={classItem.classType}
-            classLocation={classItem.classLocation}
-          />
-        ))}
+        {classes.map((classItem) => {
+          const isEnrolled = enrolledClasses.includes(classItem.classId);
+
+          return isEnrolled ? (
+            <ClassCard
+              key={classItem.classId}
+              classId={classItem.classId}
+              className={classItem.className}
+              language={classItem.language}
+              languageLevel={classItem.languageLevel}
+              classDateTime={classItem.classDateTime}
+              classDuration={classItem.classDuration}
+              adminId={classItem.adminId}
+              adminName={classItem.adminName}
+              adminImageUrl={classItem.adminImageUrl}
+              classMemberIds={classItem.classMemberIds}
+              availableSpots={classItem.availableSpots}
+              imageUrl={classItem.imageUrl}
+              classDescription={classItem.classDescription}
+              classAddress={classItem.classAddress}
+              groupId={classItem.groupId}
+              recurrenceType={classItem.recurrenceType}
+              classType={classItem.classType}
+              classLocation={classItem.classLocation}
+            />
+          ) : (
+            <ExploreClassCard
+              key={classItem.classId}
+              classId={classItem.classId}
+              className={classItem.className}
+              language={classItem.language}
+              languageLevel={classItem.languageLevel}
+              classDateTime={classItem.classDateTime}
+              classDuration={classItem.classDuration}
+              adminId={classItem.adminId}
+              adminName={classItem.adminName}
+              adminImageUrl={classItem.adminImageUrl}
+              classMemberIds={classItem.classMemberIds}
+              availableSpots={classItem.availableSpots}
+              imageUrl={classItem.imageUrl}
+              classDescription={classItem.classDescription}
+              classAddress={classItem.classAddress}
+              groupId={classItem.groupId}
+              recurrenceType={classItem.recurrenceType}
+              classType={classItem.classType}
+              classLocation={classItem.classLocation}
+            />
+          );
+        })}
       </div>
     );
   };
@@ -615,10 +679,45 @@ const GroupDetailsUser = ({ onClose }) => {
                     </p>
                   </div>
 
-                  <div className="w-full">
+                  <div className="w-full space-y-4">
                     {" "}
+                    {groupTutor && (
+                      <div className="flex flex-row items-center w-full max-w-lg gap-4 p-4 bg-white border border-green-500 rounded-xl">
+                        <img
+                          alt={`${groupTutor.name}'s profile`}
+                          src={groupTutor.photoUrl}
+                          className="object-cover w-28 h-28 rounded-xl"
+                        />
+                        <div className="flex flex-col items-start flex-1 gap-2">
+                          <h1 className="text-xl font-semibold">
+                            {groupTutor.name}
+                          </h1>
+                          <p className="text-sm text-left text-gray-600">
+                            {groupTutor?.bio
+                              ? groupTutor.bio
+                                  .split(" ")
+                                  .slice(0, 12)
+                                  .join(" ") + "..."
+                              : null}
+                          </p>
+                          <div className="flex items-center gap-6">
+                            <div className="flex items-center gap-1">
+                              <span className="text-gray-700">
+                                {groupTutor.teachingLanguage} (Teaching)
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <MapPin size={16} className="text-gray-500" />
+                              <span className="text-gray-700">
+                                {groupTutor.country}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                     <button
-                      className={`w-full px-4 py-2 mb-2 text-black border  rounded-full ${
+                      className={`w-full px-4 py-2  text-black border  rounded-full ${
                         group.isPremium
                           ? "bg-[#bffcc4] border-[#0a0d0b]"
                           : "bg-[#ffffea] border-gray-300"
