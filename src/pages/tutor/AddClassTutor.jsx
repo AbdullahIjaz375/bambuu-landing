@@ -204,13 +204,14 @@ const AddClassTutor = () => {
           classData.classLocation === "Physical"
             ? !!classData.classAddress.trim()
             : true,
+        classImage: !!classImage, // Check if the class image is present
       };
 
       return Object.values(requiredFields).every((field) => field === true);
     };
 
     setIsFormValid(validateForm());
-  }, [classData]);
+  }, [classData, classImage]);
 
   return (
     <div className="flex min-h-screen bg-white">

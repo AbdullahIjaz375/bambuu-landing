@@ -125,7 +125,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
         {members.map((member) => (
           <div
             key={member.id}
-            className="flex items-center justify-between px-4 py-3 border-b border-gray-100 hover:bg-gray-50"
+            className="flex items-center justify-between px-4 py-3 border border-gray-200 hover:bg-gray-50 rounded-3xl"
           >
             <div className="flex items-center gap-3">
               <div className="relative">

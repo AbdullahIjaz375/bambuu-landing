@@ -46,6 +46,7 @@ import { DateTimePicker } from "@mantine/dates";
 import { useParams } from "react-router-dom";
 import ClassCard from "../../components/ClassCard";
 import Modal from "react-modal";
+import ClassCardTutor from "../../components-tutor/ClassCardTutor";
 Modal.setAppElement("#root");
 
 const GroupDetailsTutor = ({ onClose }) => {
@@ -450,7 +451,7 @@ const GroupDetailsTutor = ({ onClose }) => {
     return (
       <div className="flex flex-wrap items-center p-4 space-x-4">
         {classes.map((classItem) => (
-          <ClassCard
+          <ClassCardTutor
             key={classItem.classId}
             classId={classItem.classId}
             className={classItem.className}

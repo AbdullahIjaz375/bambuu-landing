@@ -31,6 +31,7 @@ import {
   ClassTypeModal,
   GroupSelectModal,
 } from "../../components-tutor/AddClassFlow";
+import GroupCardTutor from "../../components-tutor/GroupCardTutor";
 
 const LearnTutor = () => {
   const { user, setUser } = useAuth();
@@ -201,7 +202,6 @@ const LearnTutor = () => {
               <NotificationDropdown />
             </div>
           </div>
-
           <div className="flex flex-row items-start justify-between w-full gap-8 mb-4">
             <div className="w-full p-4 bg-white border border-yellow-300 rounded-3xl">
               <div className="flex items-center justify-center mb-6">
@@ -245,91 +245,118 @@ const LearnTutor = () => {
             </div>
           </div>
           {/* Tabs section remains the same */}
-          <div className="flex flex-row items-center justify-between pt-4">
-            <div className="flex bg-gray-100 border border-[#888888] rounded-full w-fit">
-              {TABS.map((tab) => (
+          <div className="w-full max-w-[160vh] mx-auto">
+            <div className="flex flex-row items-center justify-between pt-4">
+              <div className="flex bg-gray-100 border border-[#888888] rounded-full w-fit">
+                {TABS.map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`px-12 py-2 rounded-full text-lg font-medium transition-all ${
+                      activeTab === tab
+                        ? "bg-[#ffbf00] text-[#042f0c] border border-[#042f0c]"
+                        : "text-[#042f0c] hover:text-black"
+                    }`}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
+              <div className="flex flex-row items-center space-x-2">
                 <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-12 py-2 rounded-full text-lg font-medium transition-all ${
-                    activeTab === tab
-                      ? "bg-[#ffbf00] text-[#042f0c] border border-[#042f0c]"
-                      : "text-[#042f0c] hover:text-black"
-                  }`}
+                  className="px-3 py-2 text-[#042f0c] text-lg font-semibold bg-[#14b82c] border border-black rounded-full flex items-center"
+                  onClick={() => setShowClassTypeModal(true)}
                 >
-                  {tab}
+                  <Plus /> New Class
                 </button>
-              ))}
-            </div>
-            <div className="flex flex-row items-center space-x-2">
-              <button
-                className="px-3 py-2 text-[#042f0c] text-lg font-semibold bg-[#14b82c] border border-black rounded-full flex items-center"
-                onClick={() => setShowClassTypeModal(true)}
-              >
-                <Plus /> New Class
-              </button>
 
-              <button
-                className="px-3 py-2 text-[#042f0c] text-lg font-semibold bg-[#e6fde9] border border-black rounded-full flex items-center"
-                onClick={() => navigate("/classesTutor")}
-              >
-                View All
-              </button>
-            </div>
-          </div>
-
-          {/* Classes Grid */}
-          {loading ? (
-            <div className="flex items-center justify-center w-full h-64">
-              <ClipLoader color="#14b82c" />
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-6 mt-6 md:grid-cols-3 lg:grid-cols-4">
-              {classes.map((classData) => (
-                <ClassCardTutor
-                  {...classData}
-                  isBammbuu={Boolean(classData.tutorId)}
-                />
-              ))}
-            </div>
-          )}
-          <div className="flex flex-row items-center justify-between pt-4">
-            <div>
-              <h2 className="text-3xl font-bold">My Groups</h2>
-            </div>
-            <div className="flex flex-row items-center space-x-2">
-              <button
-                className="px-3 py-2 text-[#042f0c] text-lg font-semibold bg-[#14b82c] border border-black rounded-full flex items-center"
-                onClick={() => navigate("/addGroupsTutor")}
-              >
-                <Plus /> New Group
-              </button>
-
-              <button
-                className="px-3 py-2 text-[#042f0c] text-lg font-semibold bg-[#e6fde9] border border-black rounded-full flex items-center"
-                onClick={() => navigate("/groupsTutor")}
-              >
-                View All
-              </button>
-            </div>
-          </div>
-          {/* Classes Grid */}
-          {loading ? (
-            <div className="flex items-center justify-center w-full h-64">
-              <ClipLoader color="#14b82c" />
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-6 mt-6 md:grid-cols-3 lg:grid-cols-4">
-              {groups.map((group) => (
-                <div
-                  key={group.groupId}
-                  className="flex-none px-2 pt-2 w-[22rem]"
+                <button
+                  className="px-3 py-2 text-[#042f0c] text-lg font-semibold bg-[#e6fde9] border border-black rounded-full flex items-center"
+                  onClick={() => navigate("/classesTutor")}
                 >
-                  <GroupCard group={group} />
-                </div>
-              ))}
+                  View All
+                </button>
+              </div>
             </div>
-          )}
+            {/* Classes Grid */}
+            {loading ? (
+              <div className="flex items-center justify-center w-full h-64">
+                <ClipLoader color="#14b82c" />
+              </div>
+            ) : classes.length === 0 ? (
+              <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
+                <img
+                  alt="bambuu"
+                  src="/images/no-class.png"
+                  className="w-auto h-auto"
+                />
+                <p className="text-center text-gray-600">No class yet!</p>
+              </div>
+            ) : (
+              <div className="relative w-full mt-2">
+                <div className="flex gap-4 pb-4 overflow-x-auto scrollbar-hide">
+                  {classes.map((classData) => (
+                    <div className="flex-none px-2 pt-3  w-[22rem]">
+                      <ClassCardTutor
+                        {...classData}
+                        isBammbuu={Boolean(classData.tutorId)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}{" "}
+          </div>
+          <div className="w-full max-w-[160vh] mx-auto">
+            <div className="flex flex-row items-center justify-between pt-4 ">
+              <div>
+                <h2 className="text-3xl font-bold">My Groups</h2>
+              </div>
+              <div className="flex flex-row items-center space-x-2">
+                <button
+                  className="px-3 py-2 text-[#042f0c] text-lg font-semibold bg-[#14b82c] border border-black rounded-full flex items-center"
+                  onClick={() => navigate("/addGroupsTutor")}
+                >
+                  <Plus /> New Group
+                </button>
+
+                <button
+                  className="px-3 py-2 text-[#042f0c] text-lg font-semibold bg-[#e6fde9] border border-black rounded-full flex items-center"
+                  onClick={() => navigate("/groupsTutor")}
+                >
+                  View All
+                </button>
+              </div>
+            </div>
+            {/* Classes Grid */}
+            {loading ? (
+              <div className="flex items-center justify-center w-full h-64">
+                <ClipLoader color="#14b82c" />
+              </div>
+            ) : groups.length === 0 ? (
+              <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
+                <img
+                  alt="No groups"
+                  src="/images/no-class.png"
+                  className="w-auto h-auto"
+                />
+                <p className="text-center text-gray-600">No group yet!</p>
+              </div>
+            ) : (
+              <div className="relative w-full">
+                <div className="flex gap-4 pt-2 pb-4 overflow-x-auto scrollbar-hide">
+                  {groups.map((group) => (
+                    <div
+                      key={group.groupId}
+                      className="flex-none px-2 pt-2 w-[22rem]"
+                    >
+                      <GroupCardTutor group={group} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>{" "}
         </div>
       </div>
 

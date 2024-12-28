@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Clock, Calendar, Users, User, X } from "lucide-react";
 import Modal from "react-modal";
+import { useNavigate } from "react-router-dom";
 
 Modal.setAppElement("#root");
 
@@ -26,7 +27,7 @@ const ClassCardTutor = ({
   onClick,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  const navigate = useNavigate();
   const isPremium =
     classType === "Individual Premium" || classType === "Group Premium";
 
@@ -49,26 +50,31 @@ const ClassCardTutor = ({
     });
   };
 
-  const handleCardClick = (e) => {
-    if (onClick) {
-      onClick(e);
-    } else {
-      setIsModalOpen(true);
-    }
+  const handleClick = () => {
+    // Note: Removed useNavigate since it should be passed as a prop or handled differently
+    navigate(`/classDetailsTutor/${classId}`);
   };
+
+  // const handleCardClick = (e) => {
+  //   if (onClick) {
+  //     onClick(e);
+  //   } else {
+  //     setIsModalOpen(true);
+  //   }
+  // };
 
   return (
     <>
       <div
-        className="max-w-md transition-transform transform cursor-pointer hover:scale-105"
-        onClick={handleCardClick}
+        className="max-w-md transition-transform transform cursor-pointer hover:scale-105  w-[22rem]"
+        onClick={handleClick}
         role="button"
         tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            handleCardClick(e);
-          }
-        }}
+        // onKeyDown={(e) => {
+        //   if (e.key === "Enter" || e.key === " ") {
+        //     handleCardClick(e);
+        //   }
+        // }}
       >
         <div
           className={`flex flex-col items-center justify-center border ${

@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { ArrowLeft, User, Clock, Calendar, MapPin } from "lucide-react";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import { ClipLoader } from "react-spinners";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import Modal from "react-modal";
+
 Modal.setAppElement("#root");
 
-const ClassDetailsUser = ({ onClose }) => {
+const ClassDetailsTutor = ({ onClose }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("Members");
@@ -100,6 +101,56 @@ const ClassDetailsUser = ({ onClose }) => {
     }
   }, [classData]);
   //---------------------------------------------------------------------------------------------------//
+
+  const [showRemoveConfirmation, setShowRemoveConfirmation] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [isRemoving, setIsRemoving] = useState(false);
+
+  const handleRemoveUser = async (userId) => {
+    try {
+      setIsRemoving(true);
+
+      // Get references to the group and user documents
+      const classRef = doc(db, "classes", classId);
+      const userRef = doc(db, "students", userId);
+
+      // Get current group data
+      const classDoc = await getDoc(classRef);
+      const currentClass = classDoc.data();
+
+      // Remove user from group's memberIds
+      const updatedMemberIds = currentClass.classMemberIds.filter(
+        (id) => id !== userId
+      );
+      await updateDoc(classRef, {
+        classMemberIds: updatedMemberIds,
+      });
+
+      // Get user data and update their joinedGroups
+      const userDoc = await getDoc(userRef);
+      const userData = userDoc.data();
+      const updatedEnrolledClasses = (userData.enrolledClasses || []).filter(
+        (id) => id !== classId
+      );
+
+      // Update user document
+      await updateDoc(userRef, {
+        enrolledClasses: updatedEnrolledClasses,
+      });
+
+      // Update local state
+      setMembers((prevMembers) =>
+        prevMembers.filter((member) => member.id !== userId)
+      );
+      setShowRemoveConfirmation(false);
+      setSelectedUser(null);
+    } catch (error) {
+      console.error("Error removing user:", error);
+    } finally {
+      setIsRemoving(false);
+    }
+  };
+
   const getClassTypeColor = (type) => {
     switch (type) {
       case "Group Premium":
@@ -121,37 +172,94 @@ const ClassDetailsUser = ({ onClose }) => {
     }
 
     return (
-      <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
-        {members.map((member) => (
-          <div
-            key={member.id}
-            className="flex items-center justify-between px-4 py-3 border border-gray-200 hover:bg-gray-50 rounded-3xl"
-          >
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <img
-                  src={member.photoUrl || "/api/placeholder/40/40"}
-                  alt={member.name}
-                  className="object-cover rounded-full w-9 h-9"
-                />
-                {member.id === classData.adminId && (
-                  <div className="absolute flex items-center justify-center w-4 h-4 bg-yellow-400 rounded-full -top-1 -right-1">
-                    <span className="text-xs text-black">★</span>
-                  </div>
-                )}
+      <>
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
+          {members.map((member) => (
+            <div
+              key={member.id}
+              className="flex items-center justify-between px-4 py-3 border border-gray-200 hover:bg-gray-50 rounded-3xl"
+            >
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <img
+                    src={member.photoUrl || "/api/placeholder/40/40"}
+                    alt={member.name}
+                    className="object-cover rounded-full w-9 h-9"
+                  />
+                  {member.id === classData.adminId && (
+                    <div className="absolute flex items-center justify-center w-4 h-4 bg-yellow-400 rounded-full -top-1 -right-1">
+                      <span className="text-xs text-black">★</span>
+                    </div>
+                  )}
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-gray-900">
+                    {member.name}
+                  </span>
+                  {member.id === classData.adminId && (
+                    <span className="text-xs text-gray-500">Teacher</span>
+                  )}
+                </div>
               </div>
-              <div className="flex flex-col">
-                <span className="text-sm font-medium text-gray-900">
-                  {member.name}
-                </span>
-                {member.id === classData.adminId && (
-                  <span className="text-xs text-gray-500">Teacher</span>
+              {user.uid === classData.adminId &&
+                member.id !== classData.adminId && (
+                  <button
+                    onClick={() => {
+                      setSelectedUser(member);
+                      setShowRemoveConfirmation(true);
+                    }}
+                    className="px-3 py-1 text-xs text-red-500 border border-red-500 rounded-full hover:bg-red-50"
+                  >
+                    Remove
+                  </button>
                 )}
-              </div>
+            </div>
+          ))}
+        </div>
+        <Modal
+          isOpen={showRemoveConfirmation}
+          onRequestClose={() => setShowRemoveConfirmation(false)}
+          className="z-50 max-w-sm p-6 mx-auto mt-40 bg-white outline-none rounded-3xl font-urbanist"
+          overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          style={{
+            overlay: {
+              zIndex: 60,
+            },
+            content: {
+              border: "none",
+              padding: "24px",
+              maxWidth: "420px",
+              position: "relative",
+              zIndex: 61,
+            },
+          }}
+        >
+          <div className="text-center">
+            <h2 className="mb-4 text-xl font-semibold">
+              Remove {selectedUser?.name} from group?
+            </h2>
+            <p className="mb-6 text-gray-600">
+              This action cannot be undone. The user will need to request to
+              join again.
+            </p>
+            <div className="flex flex-row gap-2">
+              <button
+                className="w-full py-2 font-medium border border-gray-300 rounded-full hover:bg-gray-50"
+                onClick={() => setShowRemoveConfirmation(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="w-full py-2 font-medium text-black bg-[#ff4d4d] rounded-full hover:bg-[#ff3333] border border-[#8b0000]"
+                onClick={() => handleRemoveUser(selectedUser.id)}
+                disabled={isRemoving}
+              >
+                {isRemoving ? "Removing..." : "Remove"}
+              </button>
             </div>
           </div>
-        ))}
-      </div>
+        </Modal>
+      </>
     );
   };
 
@@ -297,6 +405,9 @@ const ClassDetailsUser = ({ onClose }) => {
                   <button className="w-full px-4 py-2 text-black bg-[#ffbf00] border border-black rounded-full hover:bg-[#ffbf00]">
                     Join Class
                   </button>
+                  <button className="w-full px-4 py-2 text-[#f04438] bg-white border border-[#f04438] rounded-full ">
+                    Delete Class
+                  </button>
                 </div>
               </div>
             </div>
@@ -319,4 +430,4 @@ const ClassDetailsUser = ({ onClose }) => {
   );
 };
 
-export default ClassDetailsUser;
+export default ClassDetailsTutor;

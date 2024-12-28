@@ -50,6 +50,7 @@ import { Chat } from "stream-chat-react";
 import GroupDetailsNotJoinedUser from "./pages/user/GroupDetailsNotJoinedUser";
 import ClassDetailsUser from "./pages/user/ClassDetailsUser";
 import ClassDetailsNotJoinedUser from "./pages/user/ClassDetailsNotJoinedUser";
+import ClassDetailsTutor from "./pages/tutor/ClassDetailsTutor";
 
 const App = () => {
   const { user, streamClient } = useAuth(); // Use useAuth() inside the component
@@ -295,6 +296,14 @@ const App = () => {
             element={
               <ProtectedRoute requiredRole="student">
                 <ClassDetailsUser />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/classDetailsTutor/:classId"
+            element={
+              <ProtectedRoute requiredRole="tutor">
+                <ClassDetailsTutor />
               </ProtectedRoute>
             }
           />
