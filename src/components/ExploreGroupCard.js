@@ -4,12 +4,12 @@ import { Users, User } from "lucide-react";
 import { X } from "lucide-react";
 import { doc, getDoc, updateDoc, arrayUnion } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-
+import { addMemberToStreamChannel } from "../services/streamService";
 import { db, storage } from "../firebaseConfig";
 import { ClipLoader } from "react-spinners";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext"; // Import useAuth to access context
-
+import { ChannelType } from "../config/stream";
 import "react-datepicker/dist/react-datepicker.css";
 import "react-datepicker/dist/react-datepicker-cssmodules.css";
 import "react-time-picker/dist/TimePicker.css";
@@ -194,6 +194,7 @@ const GroupCard = ({ group }) => {
     groupAdminName = "Admin",
     memberIds = [],
     imageUrl,
+    isPremium,
     groupDescription,
     id: groupId,
   } = group;
@@ -244,6 +245,22 @@ const GroupCard = ({ group }) => {
         return;
       }
 
+      // const channel = isPremium
+      //   ? ChannelType.PREMIUM_GROUP
+      //   : ChannelType.STANDARD_GROUP;
+
+      // try {
+      //   await addMemberToStreamChannel({
+      //     channelId: groupId,
+      //     userId: user.uid,
+      //     type: channel,
+      //     role: "member",
+      //   });
+      // } catch (streamError) {
+      //   console.error("Error adding to stream channel:", streamError);
+      //   throw new Error("Failed to join group chat");
+      // }
+
       // Update the group document to add the user's ID to memberIds
       await updateDoc(groupRef, {
         memberIds: arrayUnion(user.uid),
@@ -279,15 +296,32 @@ const GroupCard = ({ group }) => {
         className="max-w-md mt-1 transition-transform transform cursor-pointer hover:scale-105"
         onClick={handleClick}
       >
-        <div className="max-w-sm p-4 bg-white border border-[#ffc310] rounded-3xl ">
+        <div
+          className={`max-w-sm p-4  rounded-3xl ${
+            isPremium
+              ? "bg-[#e8feeb] border border-[#14b82c]"
+              : "bg-white border border-[#ffc310]"
+          }`}
+        >
           {/* Rest of your existing GroupCard code */}
           <div className="flex flex-col items-center">
-            <div className="w-40 h-40 mb-2 overflow-hidden rounded-full">
-              <img
-                src={imageUrl}
-                alt={`${groupLearningLanguage} flag`}
-                className="object-cover w-full h-full"
-              />
+            <div className="relative w-40 h-40 mb-4">
+              {/* Bambuu+ Tag */}
+              {isPremium && (
+                <div className="absolute z-10 -translate-x-1/2 left-1/2 -top-3">
+                  <div className="px-3 py-1 text-sm font-medium text-green-600 bg-white border border-green-300 rounded-full whitespace-nowrap">
+                    bammbuu+
+                  </div>
+                </div>
+              )}
+              {/* Group Image */}
+              <div className="w-full h-full overflow-hidden rounded-full">
+                <img
+                  src={imageUrl}
+                  alt={groupName}
+                  className="object-cover w-full h-full"
+                />
+              </div>
             </div>
 
             <h2 className="mb-2 text-2xl font-medium text-gray-900">

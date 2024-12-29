@@ -266,6 +266,7 @@ import { useAuth } from "../../context/AuthContext";
 import { streamClient } from "../../config/stream";
 import Sidebar from "../../components/Sidebar";
 import { ChannelType } from "../../config/stream";
+import { ClipLoader } from "react-spinners";
 
 const StudentsTutor = () => {
   const { user } = useAuth();
@@ -313,8 +314,6 @@ const StudentsTutor = () => {
     loadChannels();
   }, [user]);
 
-  // In StudentsTutor.jsx
-
   // Update the channel selection handler
   const handleChannelSelect = (channel) => {
     setSelectedChannel(channel);
@@ -325,7 +324,7 @@ const StudentsTutor = () => {
       <div className="flex min-h-screen bg-white">
         <Sidebar user={user} />
         <div className="flex items-center justify-center flex-1">
-          Loading chats...
+          <ClipLoader color="#FFB800" size={40} />
         </div>
       </div>
     );
@@ -335,60 +334,81 @@ const StudentsTutor = () => {
     <div className="flex min-h-screen bg-white">
       <Sidebar user={user} />
 
-      <div className="flex-1 flex bg-white border-2 border-[#e7e7e7] rounded-3xl ml-[17rem] m-2">
-        {/* Channels List */}
-        <div className="w-80 border-r border-[#e7e7e7] p-4">
-          <div className="mb-4">
-            <h2 className="mb-2 text-xl font-semibold">Your Chats</h2>
-            <div className="relative">
+      <div className="flex-1 px-8 pt-6 pb-4 bg-white border-2 border-[#e7e7e7] rounded-3xl ml-[17rem] m-2">
+        <div className="flex items-center justify-between pb-4 mb-6 border-b">
+          <div className="flex items-center gap-4">
+            <h1 className="text-4xl font-semibold">Students</h1>
+          </div>
+          <button className=" rounded-full hover:bg-gray-100 border border-[#ffbf00] p-2">
+            <Bell className="w-6 h-6" />
+          </button>
+        </div>{" "}
+        <div className="flex gap-6 h-[calc(100vh-145px)]">
+          {/* Left Panel */}
+          <div className="p-4 bg-[#f6f6f6] w-96 rounded-2xl overflow-hidden flex flex-col ">
+            <div className="relative mb-4">
+              <Search className="absolute w-5 h-5 text-[#5d5d5d] left-3 top-3" />
               <input
                 type="text"
-                placeholder="Search chats..."
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg"
-              />
-              <Search
-                className="absolute right-3 top-2.5 text-gray-400"
-                size={20}
+                placeholder="Search student"
+                className="w-full py-2 pl-10 pr-4 bg-gray-100 border border-[#d1d1d1] rounded-full"
               />
             </div>
-          </div>
 
-          <div className="space-y-2">
-            {channels.map((channel) => (
-              <div
-                key={channel.id}
-                onClick={() => handleChannelSelect(channel)}
-                className={`p-3 rounded-lg cursor-pointer ${
-                  selectedChannel?.id === channel.id
-                    ? "bg-blue-50 border border-blue-200"
-                    : "hover:bg-gray-50"
-                }`}
-              >
-                <div className="font-medium">
-                  {channel.data?.name || "Unnamed Channel"}
+            <div className="flex-1 space-y-2 overflow-y-auto">
+              {channels.map((channel) => (
+                <div
+                  key={channel.id}
+                  className={`flex items-center gap-3 p-3 border border-[#22bf37] cursor-pointer rounded-3xl ${
+                    selectedChannel?.id === channel.id ? "bg-[#f0fdf1]" : ""
+                  }`}
+                  onClick={() => handleChannelSelect(channel)}
+                >
+                  <div className="relative">
+                    <img
+                      src={channel.data.image || "/default-avatar.png"}
+                      alt={channel.data.name}
+                      className="object-cover w-12 h-12 rounded-full"
+                    />
+                    {!channel.data.disabled && (
+                      <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    {" "}
+                    {/* Added min-w-0 to enable truncation */}
+                    <div className="flex justify-between">
+                      <h3 className="font-semibold truncate">
+                        {channel.data.name}
+                      </h3>
+                      <span className="flex-shrink-0 ml-2 text-xs text-gray-500">
+                        {new Date(
+                          channel.data.last_message_at
+                        ).toLocaleTimeString()}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-500 line-clamp-1">
+                      {channel.data.description || "No description"}
+                    </p>
+                  </div>
                 </div>
-                <div className="text-sm text-gray-500 truncate">
-                  {channel.state.messages[channel.state.messages.length - 1]
-                    ?.text || "No messages yet"}
-                </div>
+              ))}
+            </div>
+          </div>
+          {/* Chat Area */}
+          <div className="flex-1">
+            {selectedChannel ? (
+              <ChatComponent
+                channelId={selectedChannel.id}
+                type={selectedChannel.type}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full text-gray-500">
+                Select a chat to start messaging
               </div>
-            ))}
+            )}
           </div>
-        </div>
-
-        {/* Chat Area */}
-        <div className="flex-1">
-          {selectedChannel ? (
-            <ChatComponent
-              channelId={selectedChannel.id}
-              type={selectedChannel.type}
-            />
-          ) : (
-            <div className="flex items-center justify-center h-full text-gray-500">
-              Select a chat to start messaging
-            </div>
-          )}
-        </div>
+        </div>{" "}
       </div>
     </div>
   );

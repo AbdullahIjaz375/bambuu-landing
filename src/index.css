@@ -11,3 +11,114 @@
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }
+
+/* chat-overrides.css */
+.str-chat__input-flat {
+  padding: 0.5rem 1rem !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+.str-chat__input-flat-wrapper {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  padding: 0.5rem !important;
+  margin: 0.5rem !important;
+  background: rgb(249 250 251) !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 9999px !important;
+}
+
+.str-chat__input-flat-wrapper textarea {
+  flex: 1 !important;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  resize: none !important;
+  min-height: 0 !important;
+  height: 24px !important;
+  line-height: 24px !important;
+}
+
+.str-chat__emoji-picker-button {
+  padding: 0.5rem !important;
+  border-radius: 9999px !important;
+  transition: background-color 0.2s !important;
+}
+
+.str-chat__emoji-picker-button:hover {
+  background: rgb(229 231 235) !important;
+}
+
+.str-chat__emoji-picker-button svg {
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  color: rgb(156 163 175) !important;
+}
+
+.str-chat__send-button {
+  padding: 0.5rem !important;
+  background-color: rgb(250 204 21) !important;
+  border-radius: 9999px !important;
+  transition: background-color 0.2s !important;
+}
+
+.str-chat__send-button:hover {
+  background-color: rgb(234 179 8) !important;
+}
+
+.str-chat__send-button svg {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+}
+
+/* Hide file upload button */
+.str-chat__input-flat-fileupload,
+.str-chat__input-flat-tools {
+  display: none !important;
+}
+
+/* Add these to your chat-overrides.css */
+
+/* Hide scrollbar for the message list */
+.str-chat__list {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.str-chat__list::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* Hide scrollbar for the main chat container */
+.str-chat__main-panel {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.str-chat__main-panel::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* Hide scrollbar for thread if present */
+.str-chat__thread {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.str-chat__thread::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* Hide scrollbar for message text container */
+.str-chat__message-text {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.str-chat__message-text::-webkit-scrollbar {
+  display: none !important;
+}

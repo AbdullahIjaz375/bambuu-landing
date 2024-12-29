@@ -7,10 +7,10 @@ import {
   MessageList,
   MessageInput,
   Thread,
-  ChannelList,
 } from "stream-chat-react";
 import { useAuth } from "../context/AuthContext";
 import "stream-chat-react/dist/css/v2/index.css";
+import { ClipLoader } from "react-spinners";
 
 const ChatComponent = ({ channelId, type }) => {
   const { streamClient, user } = useAuth();
@@ -29,7 +29,6 @@ const ChatComponent = ({ channelId, type }) => {
         setIsLoading(true);
         setError(null);
 
-        // Ensure we have both the channelId and type
         if (!type) {
           throw new Error("Channel type is required");
         }
@@ -47,10 +46,8 @@ const ChatComponent = ({ channelId, type }) => {
 
     initChannel();
 
-    // Cleanup function
     return () => {
       if (channel) {
-        // Properly cleanup the channel subscription
         channel.stopWatching();
       }
     };
@@ -58,36 +55,49 @@ const ChatComponent = ({ channelId, type }) => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-gray-600">Loading channel...</div>
+      <div className="flex items-center justify-center w-full h-full min-h-64">
+        <ClipLoader color="#FFB800" size={40} />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-red-600">Error: {error}</div>
+      <div className="flex items-center justify-center w-full h-full min-h-64">
+        <div className="text-lg text-red-600">Error: {error}</div>
       </div>
     );
   }
 
   if (!channel || !streamClient) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-gray-600">No channel selected</div>
+      <div className="flex items-center justify-center w-full h-full min-h-64">
+        <div className="text-lg text-gray-600">No channel selected</div>
       </div>
     );
   }
 
   return (
-    <div className="h-full">
+    <div className="flex flex-col w-full h-screen max-h-[calc(100vh-145px)] overflow-hidden rounded-lg border border-gray-200 bg-white">
       <Chat client={streamClient}>
         <Channel channel={channel}>
           <Window>
-            <ChannelHeader />
-            <MessageList />
-            <MessageInput focus />
+            <div className="flex flex-col h-full">
+              <div className="flex-none">
+                <ChannelHeader />
+              </div>
+              <div className="flex-1 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                <MessageList />
+              </div>
+              <div className="flex-none border-t border-gray-200">
+                <MessageInput
+                  focus
+                  additionalTextareaProps={{
+                    placeholder: "Type your message...",
+                  }}
+                />
+              </div>
+            </div>
           </Window>
           <Thread />
         </Channel>

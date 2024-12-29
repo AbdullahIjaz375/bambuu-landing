@@ -97,6 +97,7 @@ const ExploreClassCard = ({
   language,
   languageLevel,
   classDateTime,
+  classType,
   classDuration,
   tutorId,
   tutorName,
@@ -106,14 +107,11 @@ const ExploreClassCard = ({
   physicalClass,
   imageUrl,
   classDescription,
-  classAddress,
   adminId,
   adminName,
   adminImageUrl,
   groupId,
   recurrenceType,
-  onClick,
-  isBammbuu,
 }) => {
   const { user, setUser } = useAuth();
   const { enrollInClass, isEnrolling, error, setError } = useClassEnrollment();
@@ -123,9 +121,12 @@ const ExploreClassCard = ({
     useState(false);
 
   // Determine which user details to display based on isBammbuu flag
-  const displayName = isBammbuu ? tutorName : adminName;
-  const displayImage = isBammbuu ? tutorImageUrl : adminImageUrl;
-  const displayId = isBammbuu ? tutorId : adminId;
+  const isPremium =
+    classType === "Individual Premium" || classType === "Group Premium";
+
+  const displayName = isPremium ? tutorName : adminName;
+  const displayImage = isPremium ? tutorImageUrl : adminImageUrl;
+  const displayId = isPremium ? tutorId : adminId;
 
   const formatTime = (timestamp) => {
     if (!timestamp) return "TBD";
@@ -183,14 +184,18 @@ const ExploreClassCard = ({
           }
         }}
       >
-        <div className="flex flex-col items-center justify-center border border-[#14b82c] bg-white rounded-3xl p-2">
+        <div
+          className={`flex flex-col items-center justify-center  bg-white rounded-3xl p-2 ${
+            isPremium ? "border border-[#14b82c]" : "border border-[#f2a105]"
+          }`}
+        >
           <div className="relative w-full">
             <img
               alt={className}
               src={imageUrl || "/images/default-class.png"}
               className="object-cover w-full h-48 rounded-t-2xl"
             />
-            {isBammbuu && (
+            {isPremium && (
               <img
                 src="/images/bambuu-plus-tag.png"
                 alt="Bammbuu+"
@@ -292,7 +297,7 @@ const ExploreClassCard = ({
           {/* Main content with yellow background */}
           <div
             className={`${
-              isBammbuu ? "bg-[#e6fde9]" : "bg-yellow-50"
+              isPremium ? "bg-[#e6fde9]" : "bg-yellow-50"
             } px-6 pt-8 pb-6 rounded-2xl mx-4`}
           >
             {/* Profile image */}

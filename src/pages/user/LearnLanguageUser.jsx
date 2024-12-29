@@ -142,7 +142,7 @@ const LearnLanguageUser = () => {
           (group) => !user?.joinedGroups?.includes(group.id)
         );
         setExploreGroups(otherGroups);
-
+        console.log(exploreClasses);
         setErrorExplore(null);
       } catch (error) {
         console.error("Error fetching explore content:", error);

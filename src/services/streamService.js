@@ -1,5 +1,5 @@
 // src/services/streamService.js
-import { streamClient, ChannelType } from "../config/stream";
+import { streamClient } from "../config/stream";
 
 export const createStreamChannel = async ({
   id,
@@ -48,13 +48,38 @@ export const createStreamChannel = async ({
   }
 };
 
-export const addMemberToChannel = async (channelId, memberId) => {
+export const addMemberToStreamChannel = async ({
+  channelId,
+  userId,
+  role,
+  type,
+}) => {
   try {
-    const channel = streamClient.channel("student_group_class", channelId);
-    await channel.addMembers([memberId]);
-    console.log("Member added to channel successfully:", memberId);
+    console.log("Adding member to channel:", {
+      channelId,
+      userId,
+      role,
+      type,
+    });
+
+    // Create channel reference using the provided type
+    const channel = streamClient.channel(type, channelId);
+
+    // Add the member with their role
+    const response = await channel.addMembers([
+      {
+        user_id: userId,
+        role: role,
+      },
+    ]);
+
+    console.log("Add member response:", response);
+    return response;
   } catch (error) {
-    console.error("Error adding member to channel:", error);
+    console.error("Error adding member to stream channel:", error.message);
+    if (error.response) {
+      console.error("Error response:", error.response);
+    }
     throw error;
   }
 };
