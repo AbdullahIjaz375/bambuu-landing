@@ -62,16 +62,25 @@ export const addMemberToStreamChannel = async ({
       type,
     });
 
-    // Create channel reference using the provided type
     const channel = streamClient.channel(type, channelId);
+    await channel.watch();
 
-    // Add the member with their role
     const response = await channel.addMembers([
       {
         user_id: userId,
         role: role,
       },
     ]);
+
+    // // Verify member addition
+    // const updatedChannel = await channel.query();
+    // const memberExists = updatedChannel.members.some(
+    //   (member) => member.user_id === userId && member.role === role
+    // );
+
+    // if (!memberExists) {
+    //   throw new Error("Member addition verification failed");
+    // }
 
     console.log("Add member response:", response);
     return response;

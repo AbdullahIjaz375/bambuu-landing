@@ -254,7 +254,7 @@ const GroupCard = ({ group }) => {
       //     channelId: groupId,
       //     userId: user.uid,
       //     type: channel,
-      //     role: "member",
+      //     role: "channel_member",
       //   });
       // } catch (streamError) {
       //   console.error("Error adding to stream channel:", streamError);

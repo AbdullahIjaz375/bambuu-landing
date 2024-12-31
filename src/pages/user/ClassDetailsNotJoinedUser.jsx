@@ -40,6 +40,12 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
     setLoading(false);
   };
 
+  useEffect(() => {
+    if (classData?.recurrenceTypes?.length > 0) {
+      setSelectedRecurrenceType(classData.recurrenceTypes[0]);
+    }
+  }, [classData]);
+
   const fetchMembers = async () => {
     if (!classData?.classMemberIds) return;
 
@@ -206,18 +212,28 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
         throw new Error("Class is full");
       }
 
-      // Update both documents in parallel
-      await Promise.all([
+      // Prepare updates array
+      const updates = [
         updateDoc(classRef, {
           classMemberIds: arrayUnion(userId),
         }),
         updateDoc(userRef, {
           enrolledClasses: arrayUnion(classId),
         }),
-        updateDoc(tutorRef, {
-          tutorStudentIds: arrayUnion(userId),
-        }),
-      ]);
+      ];
+
+      // Check if the tutorId corresponds to an actual tutor document
+      const tutorDoc = await getDoc(tutorRef);
+      if (tutorDoc.exists()) {
+        updates.push(
+          updateDoc(tutorRef, {
+            tutorStudentIds: arrayUnion(userId),
+          })
+        );
+      }
+
+      // Execute all updates in parallel
+      await Promise.all(updates);
 
       // Update context and session storage
       if (user) {
@@ -258,6 +274,13 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
       // You might want to show a success toast or message here
     }
   };
+
+  //-----------------------------------------------------------------//
+
+  const [selectedRecurrenceType, setSelectedRecurrenceType] = useState(
+    classData?.recurrenceTypes?.[0] || ""
+  );
+  const [totalClasses, setTotalClasses] = useState("");
 
   //--------------------------------------------------------------------------//
 
@@ -414,15 +437,98 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
               </div>
 
               <div className="flex flex-col flex-1 min-h-0">
-                <div className="flex flex-row items-center justify-between mb-6">
-                  <button
-                    className="px-6 py-2 text-black bg-yellow-400 rounded-full"
-                    onClick={() => setActiveTab("Members")}
-                  >
-                    Members ({members.length})
-                  </button>
-                </div>
-                <div className="flex-1 overflow-y-auto">{renderMembers()}</div>
+                {classData.classType === "Group Premium" ? (
+                  <>
+                    {/* Group Premium UI */}
+                    <div className="flex flex-row items-center justify-between mb-6">
+                      <button
+                        className="px-6 py-2 text-black bg-yellow-400 rounded-full"
+                        onClick={() => setActiveTab("Members")}
+                      >
+                        Members ({members.length})
+                      </button>
+                    </div>
+                    <div className="flex-1 overflow-y-auto">
+                      {renderMembers()}
+                    </div>
+                  </>
+                ) : classData.classType === "Individual Premium" ? (
+                  <>
+                    <div className="flex flex-row items-center justify-between mb-6">
+                      <div className="flex flex-col flex-1 min-h-0">
+                        <div className="flex flex-row items-center justify-between mb-6">
+                          <div className="w-full max-w-md space-y-6">
+                            {/* Class Type Selection */}
+                            <div className="space-y-2">
+                              <label className="block text-sm font-medium text-gray-700">
+                                Class Type
+                              </label>
+                              <div className="flex flex-wrap gap-3">
+                                {classData?.recurrenceTypes?.map((type) => (
+                                  <label
+                                    key={type}
+                                    className={`
+                                      inline-flex items-center px-4 py-2 rounded-full cursor-pointer border
+                                      ${
+                                        selectedRecurrenceType === type
+                                          ? "bg-green-50 text-black"
+                                          : "bg-gray-50 text-gray-500"
+                                      }`}
+                                  >
+                                    <input
+                                      type="radio"
+                                      className="hidden"
+                                      value={type}
+                                      checked={selectedRecurrenceType === type}
+                                      onChange={(e) => {
+                                        setSelectedRecurrenceType(
+                                          e.target.value
+                                        );
+                                      }}
+                                    />
+                                    <span>{type}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Total Classes */}
+                            <div className="space-y-2">
+                              <label className="block text-sm font-medium text-gray-700">
+                                Total Class
+                              </label>
+                              <input
+                                type="number"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg "
+                                placeholder="Enter total number of classes you want"
+                                value={totalClasses}
+                                onChange={(e) =>
+                                  setTotalClasses(e.target.value)
+                                }
+                              />
+                              <p className="text-sm text-gray-500">
+                                You have 3 bammbou+ classes available in your
+                                plan.
+                              </p>
+                            </div>
+
+                            {/* Update Plan Link */}
+                            <div className="flex items-center space-x-1 text-sm">
+                              <span className="text-gray-600">
+                                Do you want more class credits?
+                              </span>
+                              <button className="font-medium text-gray-900 hover:underline">
+                                Update Plan
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>{" "}
+                    </div>
+                  </>
+                ) : (
+                  <></>
+                )}
               </div>
             </div>
           </div>

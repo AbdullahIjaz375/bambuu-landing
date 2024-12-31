@@ -471,17 +471,16 @@ export const AuthProvider = ({ children }) => {
       // For development, using devToken. In production, get from your backend
       const streamToken = streamClient.devToken(userData.uid);
 
-      await streamClient.connectUser(
+      const conectedUser = await streamClient.connectUser(
         {
           id: userData.uid,
           name: userData.name || "",
           image: userData.photoUrl || "",
-          // Add any additional user data needed for Stream
-          userType: userData.userType, // Include user type for different roles
+          userType: userData.userType,
         },
         streamToken
       );
-      console.log("Stream user connected successfully");
+      console.log("Stream user connected successfully", conectedUser);
     } catch (error) {
       console.error("Error connecting Stream user:", error);
     }

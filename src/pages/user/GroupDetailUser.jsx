@@ -298,7 +298,9 @@ const GroupDetailsUser = ({ onClose }) => {
     availableSpots: 5,
     classDuration: 60,
     classDateTime: new Date(),
-    recurrenceType: "One-time",
+    recurrenceTypes: ["One-time"],
+    selectedRecurrenceType: "",
+    recurringSlots: [],
     classLocation: "Virtual",
     classType: "Group Standard",
     classAddress: "",
@@ -335,7 +337,7 @@ const GroupDetailsUser = ({ onClose }) => {
           !!classData.availableSpots && classData.availableSpots > 0,
         classDuration: !!classData.classDuration,
         classDateTime: !!classData.classDateTime,
-        recurrenceType: !!classData.recurrenceType,
+        recurrenceTypes: !!classData.recurrenceTypes,
         classLocation: !!classData.classLocation,
         classType: !!classData.classType,
         classAddress:
@@ -385,7 +387,9 @@ const GroupDetailsUser = ({ onClose }) => {
         availableSpots: classData.availableSpots,
         classDuration: classData.classDuration,
         classDateTime: serverTimestamp(),
-        recurrenceType: classData.recurrenceType,
+        recurrenceTypes: classData.recurrenceTypes,
+        selectedRecurrenceType: "",
+        recurringSlots: [],
         classLocation: classData.classLocation,
         classType: classData.classType,
         classAddress: classAddress,
@@ -434,11 +438,13 @@ const GroupDetailsUser = ({ onClose }) => {
         availableSpots: 5,
         classDuration: 60,
         classDateTime: new Date(),
-        recurrenceType: "One-time",
+        recurrenceTypes: ["One-time"],
         classLocation: "Virtual",
         classType: "Group Premium",
         classAddress: "",
         imageUrl: "",
+        selectedRecurrenceType: "",
+        recurringSlots: [],
       });
 
       fetchGroup();
@@ -940,20 +946,14 @@ const GroupDetailsUser = ({ onClose }) => {
                   Class Type
                 </label>
                 <div className="flex flex-wrap gap-2 mt-1">
-                  {[
-                    "One-time",
-                    "Daily",
-                    "Daily (Weekdays)",
-                    "Weekly",
-                    "Monthly",
-                  ].map((type) => (
+                  {["One-time", "Daily", "Weekly", "Monthly"].map((type) => (
                     <button
                       key={type}
                       onClick={() =>
-                        handleClassDataChange("recurrenceType", type)
+                        handleClassDataChange("selectedRecurrenceType", type)
                       }
                       className={`px-4 py-2 rounded-full text-sm ${
-                        classData.recurrenceType === type
+                        classData.selectedRecurrenceType === type
                           ? "bg-yellow-400 border border-yellow-500"
                           : "border border-gray-200"
                       }`}
@@ -1018,7 +1018,7 @@ const GroupDetailsUser = ({ onClose }) => {
               </div>
 
               {/* Class Type */}
-              <div>
+              {/* <div>
                 <label className="text-sm font-medium text-gray-700">
                   Class Type
                 </label>
@@ -1036,7 +1036,7 @@ const GroupDetailsUser = ({ onClose }) => {
                     Group Premium
                   </button>
                 </div>
-              </div>
+              </div> */}
             </div>
 
             <div className="flex flex-row items-start justify-between space-x-4">

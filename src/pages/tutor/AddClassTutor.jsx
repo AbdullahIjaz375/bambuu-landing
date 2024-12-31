@@ -36,6 +36,7 @@ const AddClassTutor = () => {
       navigate("/addClassFlow");
     } else {
       // Set the classType based on the URL parameter
+
       setClassData((prevData) => ({
         ...prevData,
         classType:
@@ -55,14 +56,16 @@ const AddClassTutor = () => {
     classDescription: "",
     language: "English",
     languageLevel: "Beginner",
-    availableSpots: 5,
+    availableSpots: 1,
     classDuration: 60,
     classDateTime: new Date(),
     recurrenceType: "One-time",
     classLocation: "Virtual",
-    classType,
+    recurrenceTypes: ["One-time"],
     classAddress: "",
     imageUrl: "",
+    selectedRecurrenceType: "",
+    recurringSlots: [],
   });
 
   const handleClassImageChange = (e) => {
@@ -80,8 +83,24 @@ const AddClassTutor = () => {
     }));
   };
 
-  const handleAddClassButtonClick = () => {
-    setAddClassModalOpen(true);
+  const handleClassTypeSelect = (type) => {
+    const isIndividualPremium = classData.classType === "Individual Premium";
+    let newTypes;
+
+    if (isIndividualPremium) {
+      // Toggle selection for Individual Premium
+      newTypes = classData.recurrenceTypes.includes(type)
+        ? classData.recurrenceTypes.filter((t) => t !== type)
+        : [...classData.recurrenceTypes, type];
+    } else {
+      // Single selection for Group Premium
+      newTypes = [type];
+    }
+
+    setClassData((prev) => ({
+      ...prev,
+      recurrenceTypes: newTypes,
+    }));
   };
 
   const handleSaveClass = async () => {
@@ -118,7 +137,9 @@ const AddClassTutor = () => {
         availableSpots: classData.availableSpots,
         classDuration: classData.classDuration,
         classDateTime: serverTimestamp(),
-        recurrenceType: classData.recurrenceType,
+        recurrenceTypes: classData.recurrenceTypes,
+        selectedRecurrenceType: "",
+        recurringSlots: [],
         classLocation: classData.classLocation,
         classType: classData.classType,
         classAddress: classAddress,
@@ -168,14 +189,16 @@ const AddClassTutor = () => {
         classDescription: "",
         language: "English",
         languageLevel: "Beginner",
-        availableSpots: 5,
+        availableSpots: 1,
         classDuration: 60,
         classDateTime: new Date(),
-        recurrenceType: "One-time",
+        recurrenceTypes: ["One-time"],
         classLocation: "Virtual",
         classType: "Group Premium",
         classAddress: "",
         imageUrl: "",
+        selectedRecurrenceType: "",
+        recurringSlots: [],
       });
 
       // Navigate to classes tutor page
@@ -364,20 +387,12 @@ const AddClassTutor = () => {
                   Class Type
                 </label>
                 <div className="flex flex-wrap gap-2 mt-1">
-                  {[
-                    "One-time",
-                    "Daily",
-                    "Daily (Weekdays)",
-                    "Weekly",
-                    "Monthly",
-                  ].map((type) => (
+                  {["One-time", "Daily", "Weekly", "Monthly"].map((type) => (
                     <button
                       key={type}
-                      onClick={() =>
-                        handleClassDataChange("recurrenceType", type)
-                      }
+                      onClick={() => handleClassTypeSelect(type)}
                       className={`px-4 py-2 rounded-full text-sm ${
-                        classData.recurrenceType === type
+                        classData.recurrenceTypes.includes(type)
                           ? "bg-yellow-400 border border-yellow-500"
                           : "border border-gray-200"
                       }`}
@@ -440,27 +455,6 @@ const AddClassTutor = () => {
                   </div>
                 )}
               </div>
-
-              {/* Class Type */}
-              <div>
-                <label className="text-sm font-medium text-gray-700">
-                  Class Type
-                </label>
-                <div className="flex gap-2 mt-1">
-                  <button
-                    onClick={() =>
-                      handleClassDataChange("classType", "Group Premium")
-                    }
-                    className={`px-4 py-2 rounded-full text-sm ${
-                      classData.classType === "Group Premium"
-                        ? "bg-yellow-400 border border-yellow-500"
-                        : "border border-gray-200"
-                    }`}
-                  >
-                    Group Premium
-                  </button>
-                </div>
-              </div>
             </div>
 
             <div className="flex flex-row items-start justify-between space-x-4">
@@ -473,12 +467,17 @@ const AddClassTutor = () => {
                   type="number"
                   placeholder="Enter slots number"
                   value={classData.availableSpots}
-                  onChange={(e) =>
-                    handleClassDataChange(
-                      "availableSpots",
-                      parseInt(e.target.value)
-                    )
-                  }
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value);
+                    if (
+                      classData.classType === "Individual Premium" &&
+                      value > 1
+                    ) {
+                      handleClassDataChange("availableSpots", 1);
+                    } else {
+                      handleClassDataChange("availableSpots", value);
+                    }
+                  }}
                   className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
                 />
               </div>

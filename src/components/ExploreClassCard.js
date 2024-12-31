@@ -260,7 +260,7 @@ const ExploreClassCard = ({
               </div>
             </div>
             <button
-              onClick={handleBookClass}
+              onClick={handleCardClick}
               className="w-full py-2 font-medium text-black bg-[#14b82c] rounded-full hover:bg-[#119924] border border-[#042f0c]"
             >
               Book Class
