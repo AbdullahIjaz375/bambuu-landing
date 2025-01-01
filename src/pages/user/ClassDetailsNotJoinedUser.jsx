@@ -6,6 +6,8 @@ import { ClipLoader } from "react-spinners";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import Modal from "react-modal";
+import { Timestamp } from "firebase/firestore";
+
 Modal.setAppElement("#root");
 
 const ClassDetailsNotJoinedUser = ({ onClose }) => {
@@ -212,11 +214,27 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
         throw new Error("Class is full");
       }
 
+      // Calculate recurring slots if applicable
+      let recurringSlots = [];
+      if (selectedRecurrenceType !== "One-time") {
+        recurringSlots = calculateRecurringSlots(
+          classData.classDateTime.seconds * 1000,
+          selectedRecurrenceType,
+          parseInt(totalClasses)
+        );
+      }
+
+      // Prepare the update data
+      const updateData = {
+        classMemberIds: arrayUnion(userId),
+        selectedRecurrenceType,
+        recurringSlots:
+          selectedRecurrenceType === "One-time" ? [] : recurringSlots,
+      };
+
       // Prepare updates array
       const updates = [
-        updateDoc(classRef, {
-          classMemberIds: arrayUnion(userId),
-        }),
+        updateDoc(classRef, updateData),
         updateDoc(userRef, {
           enrolledClasses: arrayUnion(classId),
         }),
@@ -282,6 +300,109 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
   );
   const [totalClasses, setTotalClasses] = useState("");
 
+  const calculateRecurringSlots = (
+    startDateTimeMillis, // Expect milliseconds
+    recurrenceType,
+    numberOfClasses
+  ) => {
+    if (typeof startDateTimeMillis !== "number") {
+      console.error("Invalid startDateTime:", startDateTimeMillis);
+      return [];
+    }
+
+    const baseDate = new Date(startDateTimeMillis);
+    console.log("Base date:", baseDate);
+
+    if (!["Daily", "Weekly", "Monthly"].includes(recurrenceType)) {
+      console.error("Invalid recurrenceType:", recurrenceType);
+      return [];
+    }
+
+    const slots = [];
+
+    for (let i = 0; i < numberOfClasses; i++) {
+      const slotDate = new Date(baseDate.getTime()); // Clone the base date
+      switch (recurrenceType) {
+        case "Daily":
+          slotDate.setDate(baseDate.getDate() + i);
+          break;
+        case "Weekly":
+          slotDate.setDate(baseDate.getDate() + i * 7);
+          break;
+        case "Monthly":
+          slotDate.setMonth(baseDate.getMonth() + i);
+          break;
+        default:
+          continue;
+      }
+
+      if (isNaN(slotDate.getTime())) {
+        console.error("Generated an invalid date:", slotDate);
+        continue;
+      }
+
+      // Create a Firebase Timestamp
+      slots.push(new Timestamp(Math.floor(slotDate.getTime() / 1000), 0));
+    }
+
+    console.log("Generated slots:", slots);
+    return slots;
+  };
+  const renderRecurrenceOptions = () => (
+    <div className="space-y-2">
+      <label className="block text-sm font-medium text-gray-700">
+        Class Type
+      </label>
+      <div className="flex flex-wrap gap-3">
+        {classData?.recurrenceTypes?.map((type) => (
+          <label
+            key={type}
+            className={`
+              inline-flex items-center px-4 py-2 rounded-full cursor-pointer border
+              ${
+                selectedRecurrenceType === type
+                  ? "bg-green-50 text-black"
+                  : "bg-gray-50 text-gray-500"
+              }`}
+          >
+            <input
+              type="radio"
+              className="hidden"
+              value={type}
+              checked={selectedRecurrenceType === type}
+              onChange={(e) => setSelectedRecurrenceType(e.target.value)}
+            />
+            <span>{type}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+
+  // Total classes input field - only shown for recurring types
+  const renderTotalClassesInput = () => {
+    if (
+      selectedRecurrenceType === "One-time" ||
+      selectedRecurrenceType === "None"
+    )
+      return null;
+
+    return (
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">
+          Total Classes
+        </label>
+        <input
+          type="number"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+          placeholder="Enter total number of classes"
+          value={totalClasses}
+          onChange={(e) => setTotalClasses(e.target.value)}
+          min="1"
+        />
+      </div>
+    );
+  };
   //--------------------------------------------------------------------------//
 
   if (loading) {
@@ -454,80 +575,25 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
                   </>
                 ) : classData.classType === "Individual Premium" ? (
                   <>
-                    <div className="flex flex-row items-center justify-between mb-6">
-                      <div className="flex flex-col flex-1 min-h-0">
-                        <div className="flex flex-row items-center justify-between mb-6">
-                          <div className="w-full max-w-md space-y-6">
-                            {/* Class Type Selection */}
-                            <div className="space-y-2">
-                              <label className="block text-sm font-medium text-gray-700">
-                                Class Type
-                              </label>
-                              <div className="flex flex-wrap gap-3">
-                                {classData?.recurrenceTypes?.map((type) => (
-                                  <label
-                                    key={type}
-                                    className={`
-                                      inline-flex items-center px-4 py-2 rounded-full cursor-pointer border
-                                      ${
-                                        selectedRecurrenceType === type
-                                          ? "bg-green-50 text-black"
-                                          : "bg-gray-50 text-gray-500"
-                                      }`}
-                                  >
-                                    <input
-                                      type="radio"
-                                      className="hidden"
-                                      value={type}
-                                      checked={selectedRecurrenceType === type}
-                                      onChange={(e) => {
-                                        setSelectedRecurrenceType(
-                                          e.target.value
-                                        );
-                                      }}
-                                    />
-                                    <span>{type}</span>
-                                  </label>
-                                ))}
-                              </div>
-                            </div>
-
-                            {/* Total Classes */}
-                            <div className="space-y-2">
-                              <label className="block text-sm font-medium text-gray-700">
-                                Total Class
-                              </label>
-                              <input
-                                type="number"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg "
-                                placeholder="Enter total number of classes you want"
-                                value={totalClasses}
-                                onChange={(e) =>
-                                  setTotalClasses(e.target.value)
-                                }
-                              />
-                              <p className="text-sm text-gray-500">
-                                You have 3 bammbou+ classes available in your
-                                plan.
-                              </p>
-                            </div>
-
-                            {/* Update Plan Link */}
-                            <div className="flex items-center space-x-1 text-sm">
-                              <span className="text-gray-600">
-                                Do you want more class credits?
-                              </span>
-                              <button className="font-medium text-gray-900 hover:underline">
-                                Update Plan
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>{" "}
+                    <div className="w-full max-w-md space-y-6">
+                      {renderRecurrenceOptions()}
+                      {renderTotalClassesInput()}
                     </div>
                   </>
                 ) : (
-                  <></>
+                  <>
+                    <div className="flex flex-row items-center justify-between mb-6">
+                      <button
+                        className="px-6 py-2 text-black bg-yellow-400 rounded-full"
+                        onClick={() => setActiveTab("Members")}
+                      >
+                        Members ({members.length})
+                      </button>
+                    </div>
+                    <div className="flex-1 overflow-y-auto">
+                      {renderMembers()}
+                    </div>
+                  </>
                 )}
               </div>
             </div>

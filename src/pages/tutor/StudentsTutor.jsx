@@ -355,7 +355,7 @@ const StudentsTutor = () => {
               />
             </div>
 
-            <div className="flex-1 space-y-2 overflow-y-auto">
+            <div className="flex-1 space-y-2 overflow-y-auto scrollbar-hide">
               {channels.map((channel) => (
                 <div
                   key={channel.id}

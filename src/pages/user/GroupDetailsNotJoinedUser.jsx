@@ -12,7 +12,8 @@ import {
 import { doc, getDoc, updateDoc, arrayUnion } from "firebase/firestore";
 
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-
+import { ChannelType } from "../../config/stream";
+import { addMemberToStreamChannel } from "../../services/streamService";
 import { db, storage } from "../../firebaseConfig";
 import { ClipLoader } from "react-spinners";
 import { useNavigate } from "react-router-dom";
@@ -251,6 +252,22 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
       if (groupData.memberIds.includes(user.uid)) {
         console.log("User is already a member of this group");
         return;
+      }
+
+      const channel = group.isPremium
+        ? ChannelType.PREMIUM_GROUP
+        : ChannelType.STANDARD_GROUP;
+
+      try {
+        await addMemberToStreamChannel({
+          channelId: groupId,
+          userId: user.uid,
+          type: channel,
+          role: "channel_member",
+        });
+      } catch (streamError) {
+        console.error("Error adding to stream channel:", streamError);
+        throw new Error("Failed to join group chat");
       }
 
       // Update the group document to add the user's ID to memberIds

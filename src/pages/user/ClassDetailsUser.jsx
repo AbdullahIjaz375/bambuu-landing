@@ -6,7 +6,134 @@ import { ClipLoader } from "react-spinners";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import Modal from "react-modal";
+import { updateDoc } from "firebase/firestore";
+import { Timestamp } from "firebase/firestore"; // Import Timestamp
+
 Modal.setAppElement("#root");
+
+const modalStyles = {
+  overlay: {
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    zIndex: 1000,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  content: {
+    position: "relative",
+    top: "auto",
+    left: "auto",
+    right: "auto",
+    bottom: "auto",
+    width: "100%",
+    maxWidth: "400px",
+    padding: "24px",
+    border: "none",
+    borderRadius: "50px",
+    backgroundColor: "white",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+  },
+};
+
+const AddSlotsModal = ({ isOpen, onClose, classData, setClassData }) => {
+  const [numClasses, setNumClasses] = useState("");
+
+  const calculateNextSlots = (currentSlots, numToAdd, recurrenceType) => {
+    if (!numToAdd || numToAdd <= 0) return currentSlots;
+
+    const updatedSlots = [...currentSlots];
+    const lastSlot = updatedSlots[updatedSlots.length - 1];
+    const lastSlotDate = new Date(lastSlot.seconds * 1000); // Convert Firestore timestamp to Date
+
+    for (let i = 1; i <= numToAdd; i++) {
+      const nextSlot = new Date(lastSlotDate); // Clone lastSlotDate
+      if (recurrenceType === "Daily") {
+        nextSlot.setDate(lastSlotDate.getDate() + i);
+      } else if (recurrenceType === "Weekly") {
+        nextSlot.setDate(lastSlotDate.getDate() + i * 7);
+      } else if (recurrenceType === "Monthly") {
+        nextSlot.setMonth(lastSlotDate.getMonth() + i);
+      }
+
+      // Create Firestore Timestamp object
+      updatedSlots.push(Timestamp.fromDate(nextSlot));
+    }
+
+    return updatedSlots;
+  };
+
+  const handleDone = async () => {
+    if (!numClasses || isNaN(numClasses) || numClasses <= 0) {
+      alert("Please enter a valid number of slots.");
+      return;
+    }
+
+    // Ensure classData and recurringSlots exist
+    if (!classData || !classData.recurringSlots) {
+      alert("Recurring slots data is not available.");
+      return;
+    }
+
+    // Calculate the new slots
+    const updatedSlots = calculateNextSlots(
+      classData.recurringSlots,
+      parseInt(numClasses),
+      classData.selectedRecurrenceType // Assuming this is part of your classData
+    );
+
+    console.log(updatedSlots);
+
+    // Update local state
+    setClassData((prevData) => ({
+      ...prevData,
+      recurringSlots: updatedSlots,
+    }));
+
+    // Update Firebase
+    try {
+      const classRef = doc(db, "classes", classData.id); // Use the class ID to reference the document
+      await updateDoc(classRef, { recurringSlots: updatedSlots });
+      console.log("Slots updated successfully in Firebase.");
+    } catch (error) {
+      console.error("Error updating slots in Firebase:", error);
+      alert("Failed to update slots. Please try again.");
+    }
+
+    onClose();
+  };
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onRequestClose={onClose}
+      style={modalStyles}
+      contentLabel="Add Additional Class Slots"
+    >
+      <div className="space-y-6">
+        <h2 className="text-lg font-medium text-gray-700">
+          Additional class slots
+        </h2>
+
+        <div className="space-y-4">
+          <input
+            type="number"
+            value={numClasses}
+            onChange={(e) => setNumClasses(e.target.value)}
+            placeholder="Enter number of classes you want to add"
+            className="w-full px-4 py-3 text-gray-600 border border-gray-200 rounded-2xl focus:outline-none focus:border-gray-400"
+          />
+        </div>
+
+        <button
+          onClick={handleDone}
+          className="w-full py-2 text-[#042F0C] bg-[#14B82C] rounded-full hover:bg-[#30a842] border border-[#042F0C]"
+        >
+          Done
+        </button>
+      </div>
+    </Modal>
+  );
+};
 
 const ClassDetailsUser = ({ onClose }) => {
   const { user } = useAuth();
@@ -155,6 +282,66 @@ const ClassDetailsUser = ({ onClose }) => {
     );
   };
 
+  //----------------------------------------class slots----------------------------------------//
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const getCurrentStatus = (timestamp) => {
+    const now = new Date();
+    const slotDate = new Date(timestamp.seconds * 1000);
+
+    if (slotDate < now) {
+      return "completed";
+    } else if (
+      slotDate.getDate() === now.getDate() &&
+      slotDate.getMonth() === now.getMonth() &&
+      slotDate.getFullYear() === now.getFullYear()
+    ) {
+      return "current";
+    } else {
+      return "upcoming";
+    }
+  };
+
+  const formatDate = (timestamp) => {
+    const date = new Date(timestamp.seconds * 1000);
+    return new Intl.DateTimeFormat("en-US", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    }).format(date);
+  };
+
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case "completed":
+        return (
+          <span className="px-2 py-1 text-sm text-green-600 bg-green-100 rounded-full">
+            Completed
+          </span>
+        );
+      case "current":
+        return (
+          <span className="px-2 py-1 text-sm text-green-600 bg-green-100 rounded-full">
+            Current Class
+          </span>
+        );
+      case "upcoming":
+        return (
+          <span className="px-2 py-1 text-sm text-gray-600 bg-gray-100 rounded-full">
+            Upcoming
+          </span>
+        );
+      default:
+        return null;
+    }
+  };
+
+  //------------------------------------------------------------------------------------------//
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -182,140 +369,216 @@ const ClassDetailsUser = ({ onClose }) => {
   if (!classData) return null;
 
   return (
-    <div className="flex min-h-screen">
-      <div className="flex flex-1 m-6 border rounded-3xl">
-        <div className="flex flex-col w-full p-6 mx-4 bg-white rounded-3xl">
-          <div className="flex items-center justify-between pb-4 mb-6 border-b">
-            <div className="flex items-center gap-4">
-              <button
-                className="p-3 bg-gray-100 rounded-full"
-                onClick={() => navigate(-1)}
-              >
-                <ArrowLeft size="30" />
-              </button>
-              <h1 className="text-4xl font-semibold">Class Details</h1>
+    <>
+      <div className="flex min-h-screen">
+        <div className="flex flex-1 m-6 border rounded-3xl">
+          <div className="flex flex-col w-full p-6 mx-4 bg-white rounded-3xl">
+            <div className="flex items-center justify-between pb-4 mb-6 border-b">
+              <div className="flex items-center gap-4">
+                <button
+                  className="p-3 bg-gray-100 rounded-full"
+                  onClick={() => navigate(-1)}
+                >
+                  <ArrowLeft size="30" />
+                </button>
+                <h1 className="text-4xl font-semibold">Class Details</h1>
+              </div>
             </div>
-          </div>
 
-          <div className="flex flex-1 min-h-0 gap-6">
-            <div
-              className={`w-1/4 p-6 rounded-3xl ${getClassTypeColor(
-                classData.classType
-              )}`}
-            >
-              <div className="flex flex-col items-center justify-between h-full text-center">
-                <div className="flex flex-col items-center text-center">
-                  <img
-                    src={classData.imageUrl}
-                    alt={classData.className}
-                    className="w-32 h-32 mb-4 rounded-full"
-                  />
-                  <h3 className="mb-2 text-2xl font-medium">
-                    {classData.className}
-                  </h3>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="px-3 py-1 text-sm bg-yellow-200 rounded-full">
-                      {classData.language}
-                    </span>
-                    <span className="px-3 py-1 text-sm bg-yellow-200 rounded-full">
-                      {classData.languageLevel}
-                    </span>
-                  </div>
-                  <div className="flex flex-row items-center justify-between mt-4 space-x-6">
-                    {" "}
-                    <div className="flex flex-col gap-2 mb-4">
-                      <div className="flex items-center gap-2">
-                        <User />
-                        <span className="text-sm">
-                          {classData.adminName} (Teacher)
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Clock />
-                        <span className="text-sm">
-                          {classData.classDuration} minutes
-                        </span>
-                      </div>
+            <div className="flex flex-1 min-h-0 gap-6">
+              <div
+                className={`w-1/4 p-6 rounded-3xl ${getClassTypeColor(
+                  classData.classType
+                )}`}
+              >
+                <div className="flex flex-col items-center justify-between h-full text-center">
+                  <div className="flex flex-col items-center text-center">
+                    <img
+                      src={classData.imageUrl}
+                      alt={classData.className}
+                      className="w-32 h-32 mb-4 rounded-full"
+                    />
+                    <h3 className="mb-2 text-2xl font-medium">
+                      {classData.className}
+                    </h3>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="px-3 py-1 text-sm bg-yellow-200 rounded-full">
+                        {classData.language}
+                      </span>
+                      <span className="px-3 py-1 text-sm bg-yellow-200 rounded-full">
+                        {classData.languageLevel}
+                      </span>
                     </div>
-                    <div className="flex flex-col gap-2 mb-4">
-                      <div className="flex items-center gap-2">
-                        <Calendar />
-                        <span className="text-sm">
-                          {new Date(
-                            classData.classDateTime.seconds * 1000
-                          ).toLocaleString()}
-                        </span>
+                    <div className="flex flex-row items-center justify-between mt-4 space-x-6">
+                      {" "}
+                      <div className="flex flex-col gap-2 mb-4">
+                        <div className="flex items-center gap-2">
+                          <User />
+                          <span className="text-sm">
+                            {classData.adminName} (Teacher)
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Clock />
+                          <span className="text-sm">
+                            {classData.classDuration} minutes
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <MapPin />
-                        <span className="text-sm">
-                          {classData.classLocation}
-                        </span>
-                      </div>
-                    </div>{" "}
+                      <div className="flex flex-col gap-2 mb-4">
+                        <div className="flex items-center gap-2">
+                          <Calendar />
+                          <span className="text-sm">
+                            {new Date(
+                              classData.classDateTime.seconds * 1000
+                            ).toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <MapPin />
+                          <span className="text-sm">
+                            {classData.classLocation}
+                          </span>
+                        </div>
+                      </div>{" "}
+                    </div>
+
+                    <p className="mb-6 text-gray-600">
+                      {classData.classDescription}
+                    </p>
                   </div>
 
-                  <p className="mb-6 text-gray-600">
-                    {classData.classDescription}
-                  </p>
-                </div>
-
-                <div className="w-full space-y-4">
-                  {groupTutor && (
-                    <div className="flex flex-row items-center w-full max-w-lg gap-4 p-4 bg-white border border-green-500 rounded-xl">
-                      <img
-                        alt={`${groupTutor.name}'s profile`}
-                        src={groupTutor.photoUrl}
-                        className="object-cover w-28 h-28 rounded-xl"
-                      />
-                      <div className="flex flex-col items-start flex-1 gap-2">
-                        <h1 className="text-xl font-semibold">
-                          {groupTutor.name}
-                        </h1>
-                        <p className="text-sm text-left text-gray-600">
-                          {groupTutor?.bio
-                            ? groupTutor.bio.split(" ").slice(0, 12).join(" ") +
-                              "..."
-                            : null}
-                        </p>
-                        <div className="flex items-center gap-6">
-                          <div className="flex items-center gap-1">
-                            <span className="text-gray-700">
-                              {groupTutor.teachingLanguage} (Teaching)
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <MapPin size={16} className="text-gray-500" />
-                            <span className="text-gray-700">
-                              {groupTutor.country}
-                            </span>
+                  <div className="w-full space-y-4">
+                    {groupTutor && (
+                      <div className="flex flex-row items-center w-full max-w-lg gap-4 p-4 bg-white border border-green-500 rounded-xl">
+                        <img
+                          alt={`${groupTutor.name}'s profile`}
+                          src={groupTutor.photoUrl}
+                          className="object-cover w-28 h-28 rounded-xl"
+                        />
+                        <div className="flex flex-col items-start flex-1 gap-2">
+                          <h1 className="text-xl font-semibold">
+                            {groupTutor.name}
+                          </h1>
+                          <p className="text-sm text-left text-gray-600">
+                            {groupTutor?.bio
+                              ? groupTutor.bio
+                                  .split(" ")
+                                  .slice(0, 12)
+                                  .join(" ") + "..."
+                              : null}
+                          </p>
+                          <div className="flex items-center gap-6">
+                            <div className="flex items-center gap-1">
+                              <span className="text-gray-700">
+                                {groupTutor.teachingLanguage} (Teaching)
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <MapPin size={16} className="text-gray-500" />
+                              <span className="text-gray-700">
+                                {groupTutor.country}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  )}
-                  <button className="w-full px-4 py-2 text-black bg-[#ffbf00] border border-black rounded-full hover:bg-[#ffbf00]">
-                    Join Class
-                  </button>
+                    )}
+                    <button className="w-full px-4 py-2 text-black bg-[#ffbf00] border border-black rounded-full hover:bg-[#ffbf00]">
+                      Join Class
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="flex flex-col flex-1 min-h-0">
-              <div className="flex flex-row items-center justify-between mb-6">
-                <button
-                  className="px-6 py-2 text-black bg-yellow-400 rounded-full"
-                  onClick={() => setActiveTab("Members")}
-                >
-                  Members ({members.length})
-                </button>
+              <div className="flex flex-col flex-1 min-h-0">
+                {classData.classType === "Group Premium" ? (
+                  <>
+                    {/* Group Premium UI */}
+                    <div className="flex flex-row items-center justify-between mb-6">
+                      <button
+                        className="px-6 py-2 text-black bg-yellow-400 rounded-full"
+                        onClick={() => setActiveTab("Members")}
+                      >
+                        Members ({members.length})
+                      </button>
+                    </div>
+                    <div className="flex-1 overflow-y-auto">
+                      {renderMembers()}
+                    </div>
+                  </>
+                ) : classData.classType === "Individual Premium" ? (
+                  <>
+                    <div className="w-full space-y-6">
+                      {" "}
+                      <div className="w-full space-y-4">
+                        <div className="flex items-center justify-between">
+                          <h2 className="text-xl font-semibold">
+                            Recurring Class Slots
+                          </h2>
+                          <button
+                            className="px-4 py-2 text-sm bg-yellow-200 rounded-full hover:bg-yellow-300 border border-[#042F0C]"
+                            onClick={() => setIsModalOpen(true)}
+                          >
+                            + More Slots
+                          </button>
+                        </div>
+
+                        <div className="space-y-3">
+                          {classData.recurringSlots.map((slot, index) => {
+                            const status = getCurrentStatus(slot);
+                            return (
+                              <div
+                                key={index}
+                                className={`flex items-center justify-between px-4 py-3 border rounded-full ${
+                                  status === "current"
+                                    ? "border-green-500"
+                                    : "border-gray-200"
+                                }`}
+                              >
+                                <div className="flex items-center gap-4">
+                                  <span className="text-lg font-medium text-gray-500">
+                                    {String(index + 1).padStart(2, "0")}.
+                                  </span>
+                                  <span className="text-lg font-medium">
+                                    {formatDate(slot)}
+                                  </span>
+                                </div>
+                                {getStatusBadge(status)}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex flex-row items-center justify-between mb-6">
+                      <button
+                        className="px-6 py-2 text-black bg-yellow-400 rounded-full"
+                        onClick={() => setActiveTab("Members")}
+                      >
+                        Members ({members.length})
+                      </button>
+                    </div>
+                    <div className="flex-1 overflow-y-auto">
+                      {renderMembers()}
+                    </div>
+                  </>
+                )}{" "}
               </div>
-              <div className="flex-1 overflow-y-auto">{renderMembers()}</div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+      <AddSlotsModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        classData={classData}
+        setClassData={setClassData}
+      />
+    </>
   );
 };
 

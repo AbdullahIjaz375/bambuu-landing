@@ -245,21 +245,21 @@ const GroupCard = ({ group }) => {
         return;
       }
 
-      // const channel = isPremium
-      //   ? ChannelType.PREMIUM_GROUP
-      //   : ChannelType.STANDARD_GROUP;
+      const channel = isPremium
+        ? ChannelType.PREMIUM_GROUP
+        : ChannelType.STANDARD_GROUP;
 
-      // try {
-      //   await addMemberToStreamChannel({
-      //     channelId: groupId,
-      //     userId: user.uid,
-      //     type: channel,
-      //     role: "channel_member",
-      //   });
-      // } catch (streamError) {
-      //   console.error("Error adding to stream channel:", streamError);
-      //   throw new Error("Failed to join group chat");
-      // }
+      try {
+        await addMemberToStreamChannel({
+          channelId: groupId,
+          userId: user.uid,
+          type: channel,
+          role: "channel_member",
+        });
+      } catch (streamError) {
+        console.error("Error adding to stream channel:", streamError);
+        throw new Error("Failed to join group chat");
+      }
 
       // Update the group document to add the user's ID to memberIds
       await updateDoc(groupRef, {
