@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Search, MapPin, Users } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import Sidebar from "../../components/Sidebar";
@@ -9,7 +9,7 @@ import { ClipLoader } from "react-spinners";
 const LanguageExpertsPage = () => {
   const [activeFilter, setActiveFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
-  const [tutors, setTutors] = useState([]);
+  const [allTutors, setAllTutors] = useState([]); // Store all tutors
   const [featuredTutorIds, setFeaturedTutorIds] = useState(new Set());
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -19,6 +19,7 @@ const LanguageExpertsPage = () => {
       try {
         setLoading(true);
 
+        // Fetch featured tutors
         const featuredSnapshot = await getDocs(
           collection(db, "featured_tutors")
         );
@@ -27,31 +28,14 @@ const LanguageExpertsPage = () => {
         );
         setFeaturedTutorIds(featuredIds);
 
-        let tutorsQuery = collection(db, "tutors");
-
-        if (activeFilter !== "All") {
-          tutorsQuery = query(
-            tutorsQuery,
-            where("teachingLanguage", "==", activeFilter)
-          );
-        }
-
-        const tutorsSnapshot = await getDocs(tutorsQuery);
+        // Fetch all tutors without filtering
+        const tutorsSnapshot = await getDocs(collection(db, "tutors"));
         const tutorsData = tutorsSnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
 
-        const filteredTutors = tutorsData.filter((tutor) => {
-          const searchLower = searchQuery.toLowerCase();
-          return (
-            !searchQuery ||
-            tutor.name.toLowerCase().includes(searchLower) ||
-            tutor.bio?.toLowerCase().includes(searchLower)
-          );
-        });
-
-        setTutors(filteredTutors);
+        setAllTutors(tutorsData);
       } catch (error) {
         console.error("Error fetching tutors:", error);
       } finally {
@@ -60,14 +44,31 @@ const LanguageExpertsPage = () => {
     };
 
     fetchTutors();
-  }, [activeFilter, searchQuery]);
+  }, []); // Empty dependency array - only fetch once
 
-  const featuredTutors = tutors.filter((tutor) =>
-    featuredTutorIds.has(tutor.uid)
-  );
-  const regularTutors = tutors.filter(
-    (tutor) => !featuredTutorIds.has(tutor.uid)
-  );
+  const filteredTutors = useMemo(() => {
+    return allTutors.filter((tutor) => {
+      const matchesFilter =
+        activeFilter === "All" || tutor.teachingLanguage === activeFilter;
+      const matchesSearch =
+        !searchQuery ||
+        tutor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        tutor.bio?.toLowerCase().includes(searchQuery.toLowerCase());
+
+      return matchesFilter && matchesSearch;
+    });
+  }, [allTutors, activeFilter, searchQuery]);
+
+  // Separate featured and regular tutors using useMemo
+  const { featuredTutors, regularTutors } = useMemo(() => {
+    const featured = filteredTutors.filter((tutor) =>
+      featuredTutorIds.has(tutor.uid)
+    );
+    const regular = filteredTutors.filter(
+      (tutor) => !featuredTutorIds.has(tutor.uid)
+    );
+    return { featuredTutors: featured, regularTutors: regular };
+  }, [filteredTutors, featuredTutorIds]);
 
   const navigate = useNavigate();
 

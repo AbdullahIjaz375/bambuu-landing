@@ -72,16 +72,6 @@ export const addMemberToStreamChannel = async ({
       },
     ]);
 
-    // // Verify member addition
-    // const updatedChannel = await channel.query();
-    // const memberExists = updatedChannel.members.some(
-    //   (member) => member.user_id === userId && member.role === role
-    // );
-
-    // if (!memberExists) {
-    //   throw new Error("Member addition verification failed");
-    // }
-
     console.log("Add member response:", response);
     return response;
   } catch (error) {
@@ -93,13 +83,30 @@ export const addMemberToStreamChannel = async ({
   }
 };
 
-export const removeMemberFromChannel = async (channelId, memberId) => {
+export const removeMemberFromStreamChannel = async ({
+  channelId,
+  userId,
+  type,
+}) => {
   try {
-    const channel = streamClient.channel("student_group_class", channelId);
-    await channel.removeMembers([memberId]);
-    console.log("Member removed from channel successfully:", memberId);
+    console.log("Removing member from channel:", {
+      channelId,
+      userId,
+      type,
+    });
+
+    const channel = streamClient.channel(type, channelId);
+    await channel.watch();
+
+    const response = await channel.removeMembers([userId]);
+
+    console.log("Remove member response:", response);
+    return response;
   } catch (error) {
-    console.error("Error removing member from channel:", error);
+    console.error("Error removing member from stream channel:", error.message);
+    if (error.response) {
+      console.error("Error response:", error.response);
+    }
     throw error;
   }
 };

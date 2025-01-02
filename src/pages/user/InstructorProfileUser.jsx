@@ -21,9 +21,9 @@ import { ClipLoader } from "react-spinners";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import ClassCard from "../../components/ClassCard";
-
+import ExploreClassCard from "../../components/ExploreClassCard";
 const InstructorProfileUser = () => {
-  const { tutorId } = useParams(); // Get tutor ID from URL
+  const { tutorId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -78,35 +78,67 @@ const InstructorProfileUser = () => {
   const renderClasses = () => {
     if (classes.length === 0) {
       return (
-        <div className="flex flex-col items-center justify-center p-8">
-          <div className="flex items-center justify-center w-16 h-16 mb-4 bg-yellow-100 rounded-full">
-            <img alt="empty state" src="/images/no_saved.png" />
-          </div>
-          <p className="text-gray-600">No classes available</p>
+        <div className="flex items-center justify-center h-64">
+          <p className="text-gray-500">No classes available</p>
         </div>
       );
     }
 
+    // Get enrolled classes from localStorage
+    const user = JSON.parse(sessionStorage.getItem("user"));
+    const enrolledClasses = user?.enrolledClasses || [];
+
     return (
-      <div className="grid grid-cols-4 gap-4 ">
-        {classes.map((classItem) => (
-          <ClassCard
-            key={classItem.id}
-            classId={classItem.id}
-            className={classItem.className}
-            language={classItem.groupLearningLanguage}
-            languageLevel={classItem.languageLevel}
-            classDateTime={classItem.classDateTime}
-            classDuration={classItem.classDuration}
-            tutorName={classItem.teacherName}
-            classMemberIds={classItem.classMemberIds || []}
-            availableSpots={classItem.maxStudents || 100}
-            physicalClass={classItem.isPhysical}
-            imageUrl={classItem.imageUrl}
-            recurrenceType={classItem.recurrenceType}
-            isBammbuu={classItem.isBammbuu}
-          />
-        ))}
+      <div className="flex flex-wrap items-center gap-4 p-4">
+        {classes.map((classItem) => {
+          const isEnrolled = enrolledClasses.includes(classItem.classId);
+
+          return isEnrolled ? (
+            <ClassCard
+              key={classItem.classId}
+              classId={classItem.classId}
+              className={classItem.className}
+              language={classItem.language}
+              languageLevel={classItem.languageLevel}
+              classDateTime={classItem.classDateTime}
+              classDuration={classItem.classDuration}
+              adminId={classItem.adminId}
+              adminName={classItem.adminName}
+              adminImageUrl={classItem.adminImageUrl}
+              classMemberIds={classItem.classMemberIds}
+              availableSpots={classItem.availableSpots}
+              imageUrl={classItem.imageUrl}
+              classDescription={classItem.classDescription}
+              classAddress={classItem.classAddress}
+              groupId={classItem.groupId}
+              recurrenceType={classItem.recurrenceType}
+              classType={classItem.classType}
+              classLocation={classItem.classLocation}
+            />
+          ) : (
+            <ExploreClassCard
+              key={classItem.classId}
+              classId={classItem.classId}
+              className={classItem.className}
+              language={classItem.language}
+              languageLevel={classItem.languageLevel}
+              classDateTime={classItem.classDateTime}
+              classDuration={classItem.classDuration}
+              adminId={classItem.adminId}
+              adminName={classItem.adminName}
+              adminImageUrl={classItem.adminImageUrl}
+              classMemberIds={classItem.classMemberIds}
+              availableSpots={classItem.availableSpots}
+              imageUrl={classItem.imageUrl}
+              classDescription={classItem.classDescription}
+              classAddress={classItem.classAddress}
+              groupId={classItem.groupId}
+              recurrenceType={classItem.recurrenceType}
+              classType={classItem.classType}
+              classLocation={classItem.classLocation}
+            />
+          );
+        })}
       </div>
     );
   };
@@ -120,6 +152,7 @@ const InstructorProfileUser = () => {
       </div>
     );
   }
+
   if (error) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
@@ -141,9 +174,10 @@ const InstructorProfileUser = () => {
   }
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-screen">
       <div className="flex flex-1 m-6 border rounded-3xl">
         <div className="flex flex-col w-full p-6 mx-4 bg-white rounded-3xl">
+          {/* Header */}
           <div className="flex items-center justify-between pb-4 mb-6 border-b">
             <div className="flex items-center gap-4">
               <button
@@ -156,9 +190,12 @@ const InstructorProfileUser = () => {
             </div>
           </div>
 
+          {/* Content Container */}
           <div className="flex flex-1 min-h-0 gap-2">
-            {/* Left sidebar */}
-            <div className="w-1/4 p-6 bg-[#ffffea] rounded-3xl">
+            {" "}
+            {/* min-h-0 is crucial for nested flex scroll */}
+            {/* Left sidebar - Fixed height */}
+            <div className="w-1/4 p-6 bg-[#ffffea] rounded-3xl shrink-0">
               <div className="flex flex-col items-center justify-between h-full text-center">
                 <div className="flex flex-col items-center text-center">
                   <img
@@ -197,11 +234,12 @@ const InstructorProfileUser = () => {
                 </div>
               </div>
             </div>
-
-            {/* Main content */}
-            <div className="flex flex-col flex-1 min-h-0 ">
-              <div className="flex-1 overflow-y-auto">
-                <h2 className="mb-4 text-2xl font-semibold">Classes</h2>
+            {/* Main content - Scrollable */}
+            <div className="flex flex-col flex-1 min-h-0">
+              {" "}
+              {/* min-h-0 enables proper flex child height */}
+              <h2 className="mb-4 text-2xl font-semibold">Classes</h2>
+              <div className="flex-1 pr-4 overflow-y-auto scrollbar-hide">
                 {renderClasses()}
               </div>
             </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Search,
   Plus,
@@ -11,6 +11,9 @@ import {
 import { Menu } from "@mantine/core";
 import { useAuth } from "../../context/AuthContext";
 import Sidebar from "../../components/Sidebar";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import {
   doc,
   getDoc,
@@ -22,8 +25,9 @@ import {
   query,
   where,
   getDocs,
+  Timestamp,
 } from "firebase/firestore";
-import { db } from "../../firebaseConfig";
+import { db, storage } from "../../firebaseConfig";
 import Modal from "react-modal";
 
 Modal.setAppElement("#root");
@@ -161,10 +165,14 @@ const SavedResourcesTutor = () => {
       setStudentSearchQuery("");
 
       // Optional: Show success message
-      alert("Resource assigned successfully!");
+      toast.success(
+        `Resource assigned to ${selectedStudents.length} student${
+          selectedStudents.length > 1 ? "s" : ""
+        }`
+      );
     } catch (error) {
       console.error("Error assigning resource to students:", error);
-      alert("Error assigning resource. Please try again.");
+      toast.error("Failed to assign resource. Please try again.");
     }
   };
 
@@ -183,6 +191,74 @@ const SavedResourcesTutor = () => {
   const handleCardClick = (url) => {
     window.open(url, "_blank");
   };
+
+  //---------------------------------------------uploading---------------------------------------//
+  const fileInputRef = useRef(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleFileUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file || !user?.uid) return;
+
+    setIsUploading(true);
+    try {
+      // Create a unique filename
+      const timestamp = Date.now();
+      const fileName = `${file.name
+        .split(".")[0]
+        .toLowerCase()
+        .replace(/\s+/g, "")}%${timestamp}`;
+      const fileType = file.name.split(".").pop().toUpperCase();
+
+      // Upload to Firebase Storage
+      const storageRef = ref(
+        storage,
+        `tutors/${user.uid}/resources/${fileName}`
+      );
+      await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(storageRef);
+
+      // Create document object
+      const newDocument = {
+        docId: fileName,
+        documentName: file.name.split(".")[0],
+        documentType: fileType,
+        documentUrl: downloadURL,
+        createdAt: Timestamp.now(),
+        isFavorite: false,
+      };
+
+      // Update Firestore
+      const tutorRef = doc(db, "tutors", user.uid);
+      await updateDoc(tutorRef, {
+        savedDocuments: arrayUnion(newDocument),
+      });
+
+      // Update local state
+      setResources((prev) => [...prev, newDocument]);
+
+      // Update context and session storage
+      const updatedUser = {
+        ...user,
+        savedDocuments: [...resources, newDocument],
+      };
+      setUser(updatedUser);
+      sessionStorage.setItem("user", JSON.stringify(updatedUser));
+
+      toast.success("Resource uploaded successfully!");
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      toast.error("Failed to upload file. Please try again.");
+    } finally {
+      setIsUploading(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  //-------------------------------------------------------------------------------------------------//
 
   const filteredStudents = students.filter((student) =>
     student.name?.toLowerCase().includes(studentSearchQuery.toLowerCase())
@@ -277,6 +353,27 @@ const SavedResourcesTutor = () => {
         <img alt="bambuu" src="/images/no_saved.png" />
       </div>
       <p className="text-gray-600">You've not saved any resources yet!</p>
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileUpload}
+        accept=".pdf,.doc,.docx,.txt"
+        className="hidden"
+      />
+
+      {/* Update the Add Resource button */}
+      <button
+        disabled={isUploading}
+        onClick={() => fileInputRef.current?.click()}
+        className="px-3 py-2 text-[#042f0c] text-lg my-2 font-semibold bg-[#E6FDE9] border border-black rounded-full flex items-center"
+      >
+        {isUploading ? (
+          <div className="w-5 h-5 mr-2 border-2 border-white rounded-full animate-spin border-t-transparent" />
+        ) : (
+          <Plus />
+        )}
+        {isUploading ? "Uploading..." : "Add Resource"}
+      </button>
     </div>
   );
 
@@ -329,11 +426,26 @@ const SavedResourcesTutor = () => {
             <div>
               <div className="flex flex-row items-center justify-between">
                 <h2 className="mb-4 text-2xl font-bold">More Resources</h2>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileUpload}
+                  accept=".pdf,.doc,.docx,.txt"
+                  className="hidden"
+                />
+
+                {/* Update the Add Resource button */}
                 <button
-                  disabled={loading}
-                  className="px-3 py-2 text-[#042f0c] text-lg font-semibold bg-[#14b82c] border border-black rounded-full flex items-center"
+                  disabled={isUploading}
+                  onClick={() => fileInputRef.current?.click()}
+                  className="px-3 py-2 mb-2 text-[#042f0c] text-lg font-semibold bg-[#14b82c] border border-black rounded-full flex items-center"
                 >
-                  <Plus /> Add Resource
+                  {isUploading ? (
+                    <div className="w-5 h-5 mr-2 border-2 border-white rounded-full animate-spin border-t-transparent" />
+                  ) : (
+                    <Plus />
+                  )}
+                  {isUploading ? "Uploading..." : "Add Resource"}
                 </button>
               </div>
               <div className="grid grid-cols-3 gap-4">
@@ -346,7 +458,18 @@ const SavedResourcesTutor = () => {
             </div>
           </div>
         )}
-
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
         <Modal
           isOpen={isAssignModalOpen}
           onRequestClose={() => setIsAssignModalOpen(false)}
@@ -393,7 +516,7 @@ const SavedResourcesTutor = () => {
                   }`}
               >
                 <img
-                  src="/api/placeholder/32/32"
+                  src={student.photoUrl}
                   alt={student.name}
                   className="w-8 h-8 mr-3 rounded-full"
                 />

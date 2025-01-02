@@ -174,7 +174,7 @@ const ExploreClassCard = ({
   return (
     <>
       <div
-        className="max-w-md transition-transform transform cursor-pointer hover:scale-105"
+        className="transition-transform transform cursor-pointer w-80 hover:scale-105"
         onClick={handleCardClick}
         role="button"
         tabIndex={0}

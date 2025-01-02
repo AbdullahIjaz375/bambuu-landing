@@ -22,7 +22,8 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-
+import { removeMemberFromStreamChannel } from "../../services/streamService";
+import { ChannelType } from "../../config/stream";
 import { db, storage } from "../../firebaseConfig";
 import { ClipLoader } from "react-spinners";
 import { useNavigate } from "react-router-dom";
@@ -194,6 +195,21 @@ const GroupDetailsUser = ({ onClose }) => {
       // Get current group data
       const groupDoc = await getDoc(groupRef);
       const groupData = groupDoc.data();
+
+      const channel = group.isPremium
+        ? ChannelType.PREMIUM_GROUP
+        : ChannelType.STANDARD_GROUP;
+
+      try {
+        await removeMemberFromStreamChannel({
+          channelId: group.id,
+          userId: user.uid,
+          type: channel,
+        });
+      } catch (streamError) {
+        console.error("Error removing from stream channel:", streamError);
+        throw new Error("Failed to leave group chat");
+      }
 
       // Remove user from group's memberIds
       const updatedMemberIds = groupData.memberIds.filter(
