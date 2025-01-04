@@ -787,7 +787,7 @@ const LearnUser = () => {
             <div className="relative w-full">
               <div className="flex gap-2 pb-4 overflow-x-auto scrollbar-hide">
                 {groups.map((group) => (
-                  <div key={group.id} className="flex-none px-2 pt-2 w-[22rem]">
+                  <div key={group.id} className="flex-none px-2 pt-3 w-[22rem]">
                     <GroupCard group={group} />
                   </div>
                 ))}

@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { ArrowLeft, Camera } from "lucide-react";
 import Sidebar from "../../components/Sidebar";
+import { ChannelType } from "../../config/stream";
+import { createStreamChannel } from "../../services/streamService";
 import { useLocation } from "react-router-dom";
 import {
   doc,
@@ -14,6 +16,7 @@ import {
   serverTimestamp,
   addDoc,
   updateDoc,
+  deleteDoc,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "../../firebaseConfig";
@@ -150,6 +153,35 @@ const AddClassTutor = () => {
 
       // Update the class document
       await updateDoc(doc(db, "classes", classId), newClass);
+
+      if (classData.classType === "Individual Premium") {
+        try {
+          const memberRoles = [
+            {
+              user_id: user.uid,
+              role: "Moderator",
+            },
+          ];
+
+          const channelData = {
+            id: classId, // Using classId instead of groupId
+            type: ChannelType.PREMIUM_INDIVIDUAL_CLASS,
+            members: [user.uid],
+            name: classData.className,
+            image: imageUrl,
+            description: classData.classDescription,
+            created_by_id: user.uid,
+            member_roles: memberRoles,
+          };
+
+          await createStreamChannel(channelData);
+        } catch (streamError) {
+          console.error("Error creating stream channel:", streamError);
+          // Delete the class if channel creation fails
+          await deleteDoc(doc(db, "classes", classId));
+          throw streamError;
+        }
+      }
 
       // Update tutor document with new class ID in tutorOfClasses array
       const userRef = doc(db, "tutors", user.uid);

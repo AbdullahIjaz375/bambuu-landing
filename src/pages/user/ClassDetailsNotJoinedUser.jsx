@@ -7,7 +7,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import Modal from "react-modal";
 import { Timestamp } from "firebase/firestore";
-
+import { addMemberToStreamChannel } from "../../services/streamService";
+import { ChannelType } from "../../config/stream";
 Modal.setAppElement("#root");
 
 const ClassDetailsNotJoinedUser = ({ onClose }) => {
@@ -239,7 +240,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
           enrolledClasses: arrayUnion(classId),
         }),
       ];
-
+      console.log(classData.type);
       // Check if the tutorId corresponds to an actual tutor document
       const tutorDoc = await getDoc(tutorRef);
       if (tutorDoc.exists()) {
@@ -252,7 +253,19 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
 
       // Execute all updates in parallel
       await Promise.all(updates);
-
+      if (classData.classType === "Individual Premium") {
+        try {
+          await addMemberToStreamChannel({
+            channelId: classId,
+            userId: userId,
+            type: ChannelType.PREMIUM_INDIVIDUAL_CLASS,
+            role: "channel_member",
+          });
+        } catch (streamError) {
+          console.error("Error adding to stream channel:", streamError);
+          throw new Error("Failed to join class chat");
+        }
+      }
       // Update context and session storage
       if (user) {
         const updatedUser = {

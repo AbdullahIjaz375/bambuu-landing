@@ -11,6 +11,13 @@ import {
 import { useAuth } from "../context/AuthContext";
 import "stream-chat-react/dist/css/v2/index.css";
 import { ClipLoader } from "react-spinners";
+import { MoreVertical } from "lucide-react";
+import { useRef } from "react";
+import {
+  removeMemberFromStreamChannel,
+  deleteStreamChannel,
+} from "../services/streamService";
+import { LogOut, Trash2 } from "lucide-react";
 
 // Add custom styles to override Stream Chat default styling
 const customStyles = `
@@ -63,8 +70,67 @@ const customStyles = `
   // }
 `;
 
-const CustomChannelHeader = () => {
+const CustomChannelHeader = ({ onChannelLeave }) => {
   const { channel } = useChannelStateContext();
+  const [isLoading, setIsLoading] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef(null);
+  const user = JSON.parse(sessionStorage.getItem("user"));
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleLeaveChat = async () => {
+    try {
+      setIsLoading(true);
+      const user = JSON.parse(sessionStorage.getItem("user"));
+
+      if (!user || !user.uid) {
+        throw new Error("User not found");
+      }
+
+      // Store channel ID before any operations
+      const currentChannelId = channel.id;
+
+      // Stop watching before any operations
+      await channel.stopWatching();
+
+      if (user.userType === "student") {
+        await removeMemberFromStreamChannel({
+          channelId: currentChannelId,
+          userId: user.uid,
+          type: channel.type,
+        });
+      } else if (user.userType === "tutor") {
+        await deleteStreamChannel({
+          channelId: currentChannelId,
+          type: channel.type,
+        });
+      } else {
+        throw new Error("Invalid user type");
+      }
+
+      // Update UI state after channel operations
+      setShowDropdown(false);
+
+      // Call onChannelLeave after all operations are complete
+      if (onChannelLeave) {
+        onChannelLeave(currentChannelId);
+      }
+    } catch (error) {
+      console.error("Error leaving chat:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="flex items-center px-6 py-4 bg-gray-100 border-b border-gray-200">
@@ -79,18 +145,64 @@ const CustomChannelHeader = () => {
                 ? channel.data.description.slice(0, 40) + "..."
                 : channel.data.description
               : "No description"}
-          </p>{" "}
+          </p>
         </div>
+      </div>
+
+      <div className="relative" ref={dropdownRef}>
+        <button
+          className="p-2 transition-colors rounded-full hover:bg-gray-200"
+          onClick={() => setShowDropdown(!showDropdown)}
+          disabled={isLoading}
+        >
+          <MoreVertical className="w-5 h-5 text-gray-600" />
+        </button>
+
+        {showDropdown && (
+          <div className="absolute right-0 z-10 w-40 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg">
+            <button
+              className="w-full px-4 py-2 text-left text-[#3D3D3D] transition-colors hover:bg-gray-50"
+              onClick={handleLeaveChat}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <LogOut className="inline-block mr-2" />
+                  Processing...
+                </>
+              ) : user?.userType === "tutor" ? (
+                <>
+                  <LogOut className="inline-block mr-2" />
+                  Delete Chat
+                </>
+              ) : (
+                <>
+                  <LogOut className="inline-block mr-2" />
+                  Leave Chat
+                </>
+              )}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
-const ChatComponent = ({ channelId, type }) => {
+const ChatComponent = ({ channelId, type, onChannelLeave }) => {
   const { streamClient, user } = useAuth();
   const [channel, setChannel] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  // Add this at the beginning of the ChatComponent
+  useEffect(() => {
+    if (streamClient?.disconnected) {
+      streamClient.connectUser(
+        { id: user.uid },
+        streamClient.devToken(user.uid)
+      );
+    }
+  }, [streamClient, user]);
 
   useEffect(() => {
     const initChannel = async () => {
@@ -107,12 +219,43 @@ const ChatComponent = ({ channelId, type }) => {
           throw new Error("Channel type is required");
         }
 
+        // Check if client is connected, if not, reconnect
+        if (streamClient.disconnected) {
+          await streamClient.connectUser(
+            {
+              id: user.uid,
+              // Include any other user data you need
+            },
+            user.streamToken // Make sure you have this from your auth context
+          );
+        }
+
         const channel = streamClient.channel(type, channelId);
         await channel.watch();
         setChannel(channel);
       } catch (error) {
         console.error("Error loading channel:", error);
         setError(error.message);
+
+        // If we get a disconnect error, try to reconnect
+        if (error.message.includes("disconnect")) {
+          try {
+            await streamClient.connectUser(
+              {
+                id: user.uid,
+              },
+              user.streamToken
+            );
+            // Retry channel creation after reconnecting
+            const channel = streamClient.channel(type, channelId);
+            await channel.watch();
+            setChannel(channel);
+            setError(null);
+          } catch (reconnectError) {
+            console.error("Error reconnecting:", reconnectError);
+            setError(reconnectError.message);
+          }
+        }
       } finally {
         setIsLoading(false);
       }
@@ -120,12 +263,13 @@ const ChatComponent = ({ channelId, type }) => {
 
     initChannel();
 
+    // Cleanup function
     return () => {
       if (channel) {
-        channel.stopWatching();
+        channel.stopWatching().catch(console.error);
       }
     };
-  }, [channelId, streamClient, type]);
+  }, [channelId, streamClient, type, user]);
 
   if (isLoading) {
     return (
@@ -159,7 +303,7 @@ const ChatComponent = ({ channelId, type }) => {
           <Channel channel={channel}>
             <Window>
               <div className="flex flex-col h-full">
-                <CustomChannelHeader />
+                <CustomChannelHeader onChannelLeave={onChannelLeave} />
                 <div className="flex-1 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                   <MessageList />
                 </div>

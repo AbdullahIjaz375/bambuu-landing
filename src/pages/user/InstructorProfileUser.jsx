@@ -16,12 +16,14 @@ import {
   where,
   getDocs,
 } from "firebase/firestore";
+import { createStreamChannel } from "../../services/streamService";
 import { db } from "../../firebaseConfig";
 import { ClipLoader } from "react-spinners";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import ClassCard from "../../components/ClassCard";
 import ExploreClassCard from "../../components/ExploreClassCard";
+import { ChannelType } from "../../config/stream";
 const InstructorProfileUser = () => {
   const { tutorId } = useParams();
   const navigate = useNavigate();
@@ -31,6 +33,53 @@ const InstructorProfileUser = () => {
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const sendMessageClicked = async () => {
+    try {
+      // Create channel ID by combining student and teacher IDs
+      const channelId = `${user.uid}${tutorId}`;
+
+      // Create channel name by combining student and tutor names
+      const sessionUser = JSON.parse(sessionStorage.getItem("user"));
+      const studentName = sessionUser?.name || "Student";
+
+      // Create channel name by combining student and tutor names
+      const channelName = `${studentName} - ${tutor.name}`;
+
+      // Set up member roles
+      const memberRoles = [
+        {
+          user_id: user.uid,
+          role: "member",
+        },
+        {
+          user_id: tutorId,
+          role: "member",
+        },
+      ];
+
+      // Create channel data object
+      const channelData = {
+        id: channelId,
+        type: ChannelType.ONE_TO_ONE_CHAT,
+        members: [user.uid, tutorId],
+        name: channelName,
+        image: tutor.photoUrl || "",
+        description: "",
+        created_by_id: user.uid,
+        member_roles: memberRoles,
+      };
+
+      // Create the Stream channel
+      await createStreamChannel(channelData);
+
+      // Navigate to community page on success
+      navigate("/communityUser");
+    } catch (error) {
+      console.error("Error creating chat channel:", error);
+      // You might want to show an error message to the user here
+    }
+  };
 
   useEffect(() => {
     const fetchTutorAndClasses = async () => {
@@ -228,7 +277,10 @@ const InstructorProfileUser = () => {
                 </div>
 
                 <div className="w-full">
-                  <button className="w-full px-4 py-2 mb-2 text-black border border-gray-300 rounded-full bg-[#fffbc5]">
+                  <button
+                    onClick={sendMessageClicked}
+                    className="w-full px-4 py-2 mb-2 text-black border border-gray-300 rounded-full bg-[#fffbc5]"
+                  >
                     Send Message
                   </button>
                 </div>

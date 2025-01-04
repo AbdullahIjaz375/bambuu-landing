@@ -14,6 +14,23 @@ const StudentsTutor = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const handleChannelLeave = (channelId) => {
+    // Remove the channel from the channels list
+    setChannels((prevChannels) =>
+      prevChannels.filter((channel) => channel.id !== channelId)
+    );
+
+    // If the left channel was selected, select the first available channel or null
+    if (selectedChannel?.id === channelId) {
+      const remainingChannels = channels.filter(
+        (channel) => channel.id !== channelId
+      );
+      setSelectedChannel(
+        remainingChannels.length > 0 ? remainingChannels[0] : null
+      );
+    }
+  };
+
   useEffect(() => {
     const loadChannels = async () => {
       if (!user) return;
@@ -155,6 +172,7 @@ const StudentsTutor = () => {
               <ChatComponent
                 channelId={selectedChannel.id}
                 type={selectedChannel.type}
+                onChannelLeave={handleChannelLeave}
               />
             ) : (
               <div className="flex items-center justify-center h-full text-gray-500">

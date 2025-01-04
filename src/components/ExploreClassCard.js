@@ -7,6 +7,8 @@ import { doc, updateDoc, arrayUnion, getDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "../firebaseConfig";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+
 Modal.setAppElement("#root");
 
 const useClassEnrollment = () => {
@@ -112,6 +114,7 @@ const ExploreClassCard = ({
   adminImageUrl,
   groupId,
   recurrenceType,
+  selectedRecurrenceType,
 }) => {
   const { user, setUser } = useAuth();
   const { enrollInClass, isEnrolling, error, setError } = useClassEnrollment();
@@ -148,7 +151,21 @@ const ExploreClassCard = ({
   };
 
   const handleCardClick = () => {
-    navigate(`/newClassDetailsUser/${classId}`);
+    if (selectedRecurrenceType) {
+      toast.error(
+        "This class is currently full. Please check back later or explore other available classes.",
+        {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        }
+      );
+    } else {
+      navigate(`/newClassDetailsUser/${classId}`);
+    }
   };
 
   const handleBookClass = (e) => {

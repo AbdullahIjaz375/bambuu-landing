@@ -110,3 +110,29 @@ export const removeMemberFromStreamChannel = async ({
     throw error;
   }
 };
+
+export const deleteStreamChannel = async ({ channelId, type }) => {
+  try {
+    console.log("Deleting channel:", {
+      channelId,
+      type,
+    });
+
+    const channel = streamClient.channel(type, channelId);
+    await channel.watch();
+
+    // Stop watching before deletion
+    await channel.stopWatching();
+
+    const response = await channel.delete();
+    console.log("Delete channel response:", response);
+
+    return response;
+  } catch (error) {
+    console.error("Error deleting stream channel:", error.message);
+    if (error.response) {
+      console.error("Error response:", error.response);
+    }
+    throw error;
+  }
+};
