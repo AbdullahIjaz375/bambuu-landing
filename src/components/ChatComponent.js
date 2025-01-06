@@ -150,13 +150,13 @@ const CustomChannelHeader = ({ onChannelLeave }) => {
       </div>
 
       <div className="relative" ref={dropdownRef}>
-        <button
+        {/* <button
           className="p-2 transition-colors rounded-full hover:bg-gray-200"
           onClick={() => setShowDropdown(!showDropdown)}
           disabled={isLoading}
         >
           <MoreVertical className="w-5 h-5 text-gray-600" />
-        </button>
+        </button> */}
 
         {showDropdown && (
           <div className="absolute right-0 z-10 w-40 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg">

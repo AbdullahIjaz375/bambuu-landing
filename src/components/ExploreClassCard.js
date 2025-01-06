@@ -151,7 +151,7 @@ const ExploreClassCard = ({
   };
 
   const handleCardClick = () => {
-    if (selectedRecurrenceType) {
+    if (selectedRecurrenceType && selectedRecurrenceType !== "None") {
       toast.error(
         "This class is currently full. Please check back later or explore other available classes.",
         {

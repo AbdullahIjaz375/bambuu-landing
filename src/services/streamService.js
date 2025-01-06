@@ -122,7 +122,7 @@ export const deleteStreamChannel = async ({ channelId, type }) => {
     await channel.watch();
 
     // Stop watching before deletion
-    await channel.stopWatching();
+    await channel.watch({ timeout: 10000 }); // Increased timeout to 10s
 
     const response = await channel.delete();
     console.log("Delete channel response:", response);

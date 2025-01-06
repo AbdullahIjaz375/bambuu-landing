@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ArrowLeft, User, Clock, Calendar, MapPin } from "lucide-react";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, deleteDoc } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import { ClipLoader } from "react-spinners";
 import { useNavigate, useParams } from "react-router-dom";
@@ -226,6 +226,114 @@ const ClassDetailsUser = ({ onClose }) => {
       console.log("admin:", groupTutor);
     }
   }, [classData]);
+
+  //-------------------------------------------------Deleting Class---------------------------------------//
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDeleteClass = async () => {
+    setIsDeleting(true);
+    try {
+      const userType = JSON.parse(sessionStorage.getItem("user")).userType;
+      const userCollection = userType === "tutor" ? "tutors" : "students";
+
+      // 1. Update students
+      if (classData.classMemberIds?.length > 0) {
+        await Promise.all(
+          classData.classMemberIds.map(async (memberId) => {
+            const studentRef = doc(db, "students", memberId);
+            const studentDoc = await getDoc(studentRef);
+            const studentData = studentDoc.data();
+
+            if (studentData) {
+              await updateDoc(studentRef, {
+                enrolledClasses: (studentData.enrolledClasses || []).filter(
+                  (id) => id !== classId
+                ),
+              });
+            }
+          })
+        );
+      }
+
+      // 2. Update group
+      if (classData.groupId) {
+        const groupRef = doc(db, "groups", classData.groupId);
+        const groupDoc = await getDoc(groupRef);
+
+        if (groupDoc.exists()) {
+          await updateDoc(groupRef, {
+            classIds: (groupDoc.data().classIds || []).filter(
+              (id) => id !== classId
+            ),
+          });
+        }
+      }
+
+      // 3. Update admin
+      const adminRef = doc(db, userCollection, classData.adminId);
+      const adminDoc = await getDoc(adminRef);
+      const adminData = adminDoc.data();
+
+      if (adminData) {
+        if (userType === "tutor") {
+          await updateDoc(adminRef, {
+            tutorOfClasses: (adminData.tutorOfClasses || []).filter(
+              (id) => id !== classId
+            ),
+            enrolledClasses: (adminData.enrolledClasses || []).filter(
+              (id) => id !== classId
+            ),
+            tutorStudentIds: (adminData.tutorStudentIds || []).filter(
+              (studentId) => !classData.classMemberIds?.includes(studentId)
+            ),
+          });
+        } else {
+          await updateDoc(adminRef, {
+            adminOfClasses: (adminData.adminOfClasses || []).filter(
+              (id) => id !== classId
+            ),
+            enrolledClasses: (adminData.enrolledClasses || []).filter(
+              (id) => id !== classId
+            ),
+          });
+        }
+      }
+
+      // 4. Update session storage
+      const updatedUser = JSON.parse(sessionStorage.getItem("user"));
+      if (userType === "tutor") {
+        updatedUser.tutorOfClasses = (updatedUser.tutorOfClasses || []).filter(
+          (id) => id !== classId
+        );
+        updatedUser.enrolledClasses = (
+          updatedUser.enrolledClasses || []
+        ).filter((id) => id !== classId);
+        updatedUser.tutorStudentIds = (
+          updatedUser.tutorStudentIds || []
+        ).filter((studentId) => !classData.classMemberIds?.includes(studentId));
+      } else {
+        updatedUser.adminOfClasses = (updatedUser.adminOfClasses || []).filter(
+          (id) => id !== classId
+        );
+        updatedUser.enrolledClasses = (
+          updatedUser.enrolledClasses || []
+        ).filter((id) => id !== classId);
+      }
+      sessionStorage.setItem("user", JSON.stringify(updatedUser));
+
+      // 5. Delete class document
+      await deleteDoc(doc(db, "classes", classId));
+
+      navigate(-1);
+    } catch (error) {
+      console.error("Error deleting class:", error);
+      alert("Failed to delete class. Please try again.");
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirmation(false);
+    }
+  };
   //---------------------------------------------------------------------------------------------------//
   const getClassTypeColor = (type) => {
     switch (type) {
@@ -487,6 +595,21 @@ const ClassDetailsUser = ({ onClose }) => {
                     <button className="w-full px-4 py-2 text-black bg-[#ffbf00] border border-black rounded-full hover:bg-[#ffbf00]">
                       Join Class
                     </button>
+                    {user.uid === classData.adminId ? (
+                      <button
+                        className="w-full px-4 py-2 text-red-500 border border-red-500 rounded-full"
+                        onClick={() => setShowDeleteConfirmation(true)}
+                      >
+                        Delete Class
+                      </button>
+                    ) : (
+                      <button
+                        className="w-full px-4 py-2 text-red-500 border border-red-500 rounded-full"
+                        // onClick={() => setShowLeaveConfirmation(true)}
+                      >
+                        Leave Class
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -578,6 +701,46 @@ const ClassDetailsUser = ({ onClose }) => {
         classData={classData}
         setClassData={setClassData}
       />
+
+      <Modal
+        isOpen={showDeleteConfirmation}
+        onRequestClose={() => setShowDeleteConfirmation(false)}
+        className="z-50 max-w-sm p-6 mx-auto mt-40 bg-white outline-none rounded-3xl font-urbanist"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        style={{
+          overlay: {
+            zIndex: 60,
+          },
+          content: {
+            border: "none",
+            padding: "24px",
+            maxWidth: "420px",
+            position: "relative",
+            zIndex: 61,
+          },
+        }}
+      >
+        <div className="text-center">
+          <h2 className="mb-4 text-xl font-semibold">
+            Are you sure you want to delete this class?
+          </h2>
+          <div className="flex flex-row gap-2">
+            <button
+              className="w-full py-2 font-medium border border-gray-300 rounded-full hover:bg-gray-50"
+              onClick={() => setShowDeleteConfirmation(false)}
+            >
+              No, Cancel
+            </button>
+            <button
+              className="w-full py-2 font-medium text-black bg-[#ff4d4d] rounded-full hover:bg-[#ff3333] border border-[#8b0000]"
+              onClick={handleDeleteClass}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </button>
+          </div>
+        </div>
+      </Modal>
     </>
   );
 };

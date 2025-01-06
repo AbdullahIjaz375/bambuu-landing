@@ -21,31 +21,20 @@ import {
   updateDoc,
   deleteDoc,
 } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { removeMemberFromStreamChannel } from "../../services/streamService";
 import { ChannelType } from "../../config/stream";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import {
+  deleteStreamChannel,
+  removeMemberFromStreamChannel,
+} from "../../services/streamService";
 import { db, storage } from "../../firebaseConfig";
 import { ClipLoader } from "react-spinners";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import {
-  Button,
-  TextInput,
-  Textarea,
-  Select,
-  NumberInput,
-  Checkbox,
-  MultiSelect,
-} from "@mantine/core";
-import { TimeInput } from "@mantine/dates";
-import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "react-datepicker/dist/react-datepicker-cssmodules.css";
-import TimePicker from "react-time-picker";
 import "react-time-picker/dist/TimePicker.css";
 import "react-clock/dist/Clock.css";
-import { Radio, Group } from "@mantine/core";
-import { DateTimePicker } from "@mantine/dates";
 import { useParams } from "react-router-dom";
 import ClassCard from "../../components/ClassCard";
 import Modal from "react-modal";
@@ -456,7 +445,7 @@ const GroupDetailsUser = ({ onClose }) => {
         classDateTime: new Date(),
         recurrenceTypes: ["One-time"],
         classLocation: "Virtual",
-        classType: "Group Premium",
+        classType: "Group Standard",
         classAddress: "",
         imageUrl: "",
         selectedRecurrenceType: "",
@@ -490,6 +479,182 @@ const GroupDetailsUser = ({ onClose }) => {
     });
   };
 
+  //-------------------------------------------------Deleting Group---------------------------------------//
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDeleteGroup = async () => {
+    try {
+      setIsDeleting(true);
+      const userType = JSON.parse(sessionStorage.getItem("user")).userType;
+      const userCollection = userType === "tutor" ? "tutors" : "students";
+
+      // 1. Delete all classes in the group
+      await Promise.all(
+        group.classIds.map(async (classId) => {
+          const classRef = doc(db, "classes", classId);
+          const classDoc = await getDoc(classRef);
+          const classData = classDoc.data();
+
+          if (!classData) {
+            console.log(`Class ${classId} not found or has no data`);
+            return;
+          }
+
+          // Update class members (students)
+          if (classData.classMemberIds?.length > 0) {
+            await Promise.all(
+              classData.classMemberIds.map(async (memberId) => {
+                const memberRef = doc(db, "students", memberId);
+                const memberDoc = await getDoc(memberRef);
+                const memberData = memberDoc.data();
+
+                if (memberData) {
+                  await updateDoc(memberRef, {
+                    enrolledClasses: (memberData.enrolledClasses || []).filter(
+                      (id) => id !== classId
+                    ),
+                    // Remove tutorStudentIds relationship if exists
+                    tutorStudentIds: (memberData.tutorStudentIds || []).filter(
+                      (id) => id !== classData.adminId
+                    ),
+                  });
+                }
+              })
+            );
+          }
+
+          // Update tutor/admin
+          const adminRef = doc(db, userCollection, classData.adminId);
+          const adminDoc = await getDoc(adminRef);
+          const adminData = adminDoc.data();
+
+          if (adminData) {
+            if (userType === "tutor") {
+              await updateDoc(adminRef, {
+                tutorOfClasses: (adminData.tutorOfClasses || []).filter(
+                  (id) => id !== classId
+                ),
+                enrolledClasses: (adminData.enrolledClasses || []).filter(
+                  (id) => id !== classId
+                ),
+                // Update tutorStudentIds
+                tutorStudentIds: (adminData.tutorStudentIds || []).filter(
+                  (studentId) => !classData.classMemberIds?.includes(studentId)
+                ),
+              });
+            } else {
+              await updateDoc(adminRef, {
+                adminOfClasses: (adminData.adminOfClasses || []).filter(
+                  (id) => id !== classId
+                ),
+                enrolledClasses: (adminData.enrolledClasses || []).filter(
+                  (id) => id !== classId
+                ),
+              });
+            }
+          }
+
+          // Delete class document
+          await deleteDoc(classRef);
+        })
+      );
+
+      // 2. Update group members
+      if (group.memberIds?.length > 0) {
+        await Promise.all(
+          group.memberIds.map(async (memberId) => {
+            const memberRef = doc(db, "students", memberId);
+            const memberDoc = await getDoc(memberRef);
+            const memberData = memberDoc.data();
+
+            if (memberData) {
+              await updateDoc(memberRef, {
+                joinedGroups: (memberData.joinedGroups || []).filter(
+                  (id) => id !== group.id
+                ),
+              });
+            }
+          })
+        );
+      }
+
+      // 3. Update group admin
+      const adminRef = doc(db, userCollection, user.uid);
+      const adminDoc = await getDoc(adminRef);
+      const adminData = adminDoc.data();
+
+      if (adminData) {
+        const updateData =
+          userType === "tutor"
+            ? {
+                tutorOfGroups: (adminData.tutorOfGroups || []).filter(
+                  (id) => id !== group.id
+                ),
+                joinedGroups: (adminData.joinedGroups || []).filter(
+                  (id) => id !== group.id
+                ),
+              }
+            : {
+                adminOfGroups: (adminData.adminOfGroups || []).filter(
+                  (id) => id !== group.id
+                ),
+                joinedGroups: (adminData.joinedGroups || []).filter(
+                  (id) => id !== group.id
+                ),
+              };
+        await updateDoc(adminRef, updateData);
+      }
+
+      // 4. Delete group document
+      await deleteDoc(doc(db, "groups", group.id));
+
+      // 5. Update session storage
+      const updatedUser = JSON.parse(sessionStorage.getItem("user"));
+      if (userType === "tutor") {
+        updatedUser.tutorOfGroups = (updatedUser.tutorOfGroups || []).filter(
+          (id) => id !== group.id
+        );
+        updatedUser.tutorOfClasses = (updatedUser.tutorOfClasses || []).filter(
+          (id) => !group.classIds?.includes(id)
+        );
+        updatedUser.enrolledClasses = (
+          updatedUser.enrolledClasses || []
+        ).filter((id) => !group.classIds?.includes(id));
+        updatedUser.joinedGroups = (updatedUser.joinedGroups || []).filter(
+          (id) => id !== group.id
+        );
+      } else {
+        updatedUser.adminOfGroups = (updatedUser.adminOfGroups || []).filter(
+          (id) => id !== group.id
+        );
+        updatedUser.adminOfClasses = (updatedUser.adminOfClasses || []).filter(
+          (id) => !group.classIds?.includes(id)
+        );
+        updatedUser.enrolledClasses = (
+          updatedUser.enrolledClasses || []
+        ).filter((id) => !group.classIds?.includes(id));
+        updatedUser.joinedGroups = (updatedUser.joinedGroups || []).filter(
+          (id) => id !== group.id
+        );
+      }
+      sessionStorage.setItem("user", JSON.stringify(updatedUser));
+
+      await deleteStreamChannel({
+        channelId: group.id,
+        type: ChannelType.STANDARD_GROUP,
+      });
+
+      navigate(-1);
+    } catch (error) {
+      console.error("Error deleting group:", error);
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirmation(false);
+    }
+  };
+
+  //---------------------------------------------------------------------------------------------------------//
   const renderClasses = () => {
     if (classes.length === 0) {
       return (
@@ -701,7 +866,6 @@ const GroupDetailsUser = ({ onClose }) => {
                       {group.groupDescription}
                     </p>
                   </div>
-
                   <div className="w-full space-y-4">
                     {" "}
                     {groupTutor && (
@@ -745,16 +909,26 @@ const GroupDetailsUser = ({ onClose }) => {
                           ? "bg-[#bffcc4] border-[#0a0d0b]"
                           : "bg-[#ffffea] border-gray-300"
                       }`}
+                      onClick={() => navigate("/communityUser")}
                     >
                       View Group Chat
                     </button>
-                    <button
-                      className="w-full px-4 py-2 text-red-500 border border-red-500 rounded-full"
-                      onClick={() => setShowLeaveConfirmation(true)}
-                    >
-                      Leave Group
-                    </button>
-                  </div>
+                    {user.uid === group.groupAdminId ? (
+                      <button
+                        className="w-full px-4 py-2 text-red-500 border border-red-500 rounded-full"
+                        onClick={() => setShowDeleteConfirmation(true)}
+                      >
+                        Delete Group
+                      </button>
+                    ) : (
+                      <button
+                        className="w-full px-4 py-2 text-red-500 border border-red-500 rounded-full"
+                        onClick={() => setShowLeaveConfirmation(true)}
+                      >
+                        Leave Group
+                      </button>
+                    )}
+                  </div>{" "}
                 </div>
               </div>
 
@@ -1227,6 +1401,46 @@ const GroupDetailsUser = ({ onClose }) => {
               disabled={isRemoving}
             >
               {isRemoving ? "Removing..." : "Remove"}
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={showDeleteConfirmation}
+        onRequestClose={() => setShowDeleteConfirmation(false)}
+        className="z-50 max-w-sm p-6 mx-auto mt-40 bg-white outline-none rounded-3xl font-urbanist"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        style={{
+          overlay: {
+            zIndex: 60,
+          },
+          content: {
+            border: "none",
+            padding: "24px",
+            maxWidth: "420px",
+            position: "relative",
+            zIndex: 61,
+          },
+        }}
+      >
+        <div className="text-center">
+          <h2 className="mb-4 text-xl font-semibold">
+            Are you sure you want to delete this group?
+          </h2>
+          <div className="flex flex-row gap-2">
+            <button
+              className="w-full py-2 font-medium border border-gray-300 rounded-full hover:bg-gray-50"
+              onClick={() => setShowDeleteConfirmation(false)}
+            >
+              No, Cancel
+            </button>
+            <button
+              className="w-full py-2 font-medium text-black bg-[#ff4d4d] rounded-full hover:bg-[#ff3333] border border-[#8b0000]"
+              onClick={handleDeleteGroup}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
             </button>
           </div>
         </div>
