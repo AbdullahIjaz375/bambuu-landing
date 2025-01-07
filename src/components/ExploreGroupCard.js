@@ -330,12 +330,12 @@ const GroupCard = ({ group }) => {
 
             <div className="flex items-center gap-2 mb-2">
               <div className="flex items-center gap-2">
-                <img
-                  src={imageUrl}
-                  alt={`${groupLearningLanguage} flag`}
-                  className="w-6 h-6 rounded-full"
-                />
-                <span className="text-lg text-green-900 truncate max-w-[120px]">
+                {groupLearningLanguage === "Spanish" ? (
+                  <img src="/images/spain-small.png" alt="Spanish flag" />
+                ) : (
+                  <img src="/images/usa-small.png" alt="US flag" />
+                )}
+                <span className="text-md text-green-900 truncate max-w-[120px]">
                   {groupLearningLanguage}
                 </span>
               </div>
@@ -347,14 +347,14 @@ const GroupCard = ({ group }) => {
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center gap-2">
                 <User />
-                <span className="text-lg text-gray-700">
+                <span className="text-gray-700 text-md">
                   {groupAdminName}{" "}
                   <span className="text-gray-500">(Admin)</span>
                 </span>
               </div>
               <div className="flex items-center gap-1">
-                <Users className="w-5 h-5 text-gray-600" />
-                <span className="text-gray-700">
+                <Users className="w-4 h-4 text-gray-600" />
+                <span className="text-gray-700 text-md">
                   {memberIds.length} members
                 </span>
               </div>

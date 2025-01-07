@@ -231,7 +231,11 @@ const Sidebar = ({ user }) => {
                 {user.name || "User"}
               </span>
               <span className="text-sm text-gray-700">
-                {user.email || "email"}
+                {user.email
+                  ? user.email.length > 20
+                    ? user.email.substring(0, 22) + "..."
+                    : user.email
+                  : "email"}
               </span>
             </div>
           </Link>

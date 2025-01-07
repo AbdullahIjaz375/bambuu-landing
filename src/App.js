@@ -51,6 +51,8 @@ import GroupDetailsNotJoinedUser from "./pages/user/GroupDetailsNotJoinedUser";
 import ClassDetailsUser from "./pages/user/ClassDetailsUser";
 import ClassDetailsNotJoinedUser from "./pages/user/ClassDetailsNotJoinedUser";
 import ClassDetailsTutor from "./pages/tutor/ClassDetailsTutor";
+import ExploreClassesUser from "./pages/user/ExploreClassesUser";
+import ExploreGroupsUser from "./pages/user/ExploreGroupsUser";
 
 const App = () => {
   const { user, streamClient } = useAuth(); // Use useAuth() inside the component
@@ -320,6 +322,22 @@ const App = () => {
             element={
               <ProtectedRoute requiredRole="tutor">
                 <ClassesTutor />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/exploreClassesUser"
+            element={
+              <ProtectedRoute requiredRole="student">
+                <ExploreClassesUser />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/exploreGroupsUser"
+            element={
+              <ProtectedRoute requiredRole="student">
+                <ExploreGroupsUser />
               </ProtectedRoute>
             }
           />

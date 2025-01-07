@@ -62,13 +62,13 @@ const GroupCard = ({ group }) => {
             <div className="w-6 h-6 overflow-hidden rounded-full">
               {groupLearningLanguage === "Spanish" ? (
                 <img
-                  src="/flags/spain.png"
+                  src="/images/spain-small.png"
                   alt="Spanish flag"
                   className="object-cover w-full h-full"
                 />
               ) : (
                 <img
-                  src="/flags/us.png"
+                  src="/images/usa-small.png"
                   alt="US flag"
                   className="object-cover w-full h-full"
                 />

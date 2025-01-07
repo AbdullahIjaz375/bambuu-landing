@@ -292,6 +292,14 @@ const LearnLanguageUser = () => {
           <div className="w-full max-w-[160vh] mx-auto">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-bold">Explore Classes</h2>
+              {exploreClasses.length > 0 && (
+                <button
+                  className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+                  onClick={() => navigate("/exploreClassesUser")}
+                >
+                  View All
+                </button>
+              )}
             </div>
 
             {loadingExplore ? (
@@ -342,6 +350,14 @@ const LearnLanguageUser = () => {
           <div className="w-full max-w-[160vh] mx-auto mt-8">
             <div className="flex items-center justify-between mb-1">
               <h2 className="text-2xl font-bold">Explore Groups</h2>
+              {exploreGroups.length > 0 && (
+                <button
+                  className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+                  onClick={() => navigate("/exploreGroupsUser")}
+                >
+                  View All
+                </button>
+              )}
             </div>
 
             {loadingExplore ? (

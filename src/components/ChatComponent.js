@@ -18,6 +18,8 @@ import {
   deleteStreamChannel,
 } from "../services/streamService";
 import { LogOut, Trash2 } from "lucide-react";
+import Modal from "react-modal";
+Modal.setAppElement("#root");
 
 // Add custom styles to override Stream Chat default styling
 const customStyles = `
@@ -74,6 +76,8 @@ const CustomChannelHeader = ({ onChannelLeave }) => {
   const { channel } = useChannelStateContext();
   const [isLoading, setIsLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+
   const dropdownRef = useRef(null);
   const user = JSON.parse(sessionStorage.getItem("user"));
 
@@ -133,59 +137,110 @@ const CustomChannelHeader = ({ onChannelLeave }) => {
   };
 
   return (
-    <div className="flex items-center px-6 py-4 bg-gray-100 border-b border-gray-200">
-      <div className="flex-1 space-y-1">
-        <div className="text-xl font-semibold text-[#3D3D3D]">
-          {channel?.data?.name || "Untitled Channel"}
+    <>
+      <div className="flex items-center px-6 py-4 bg-gray-100 border-b border-gray-200">
+        <div className="flex-1 space-y-1">
+          <div className="text-xl font-semibold text-[#3D3D3D]">
+            {channel?.data?.name || "Untitled Channel"}
+          </div>
+          <div className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 truncate">
+              {channel.data.description
+                ? channel.data.description.length > 40
+                  ? channel.data.description.slice(0, 40) + "..."
+                  : channel.data.description
+                : "No description"}
+            </p>
+          </div>
         </div>
-        <div className="text-sm text-gray-500">
-          <p className="text-sm text-gray-500 truncate">
-            {channel.data.description
-              ? channel.data.description.length > 40
-                ? channel.data.description.slice(0, 40) + "..."
-                : channel.data.description
-              : "No description"}
-          </p>
+
+        <div className="relative" ref={dropdownRef}>
+          <button
+            className="p-2 transition-colors rounded-full hover:bg-gray-200"
+            onClick={() => setShowDropdown(!showDropdown)}
+            disabled={isLoading}
+          >
+            <MoreVertical className="w-5 h-5 text-gray-600" />
+          </button>
+
+          {showDropdown && (
+            <div className="absolute right-0 z-10 w-40 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg">
+              <button
+                className="w-full px-4 py-2 text-left text-[#3D3D3D] transition-colors hover:bg-gray-50"
+                onClick={() => {
+                  setShowConfirmModal(true);
+                  setShowDropdown(false);
+                }}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <div className="flex items-center ">
+                    <LogOut className="inline-block mr-2" size={20} />
+                    Processing...
+                  </div>
+                ) : user?.userType === "tutor" ? (
+                  <div className="flex items-center">
+                    <LogOut className="inline-block mr-2" size={20} />
+                    Delete Chat
+                  </div>
+                ) : (
+                  <div className="flex items-center ">
+                    <LogOut className="inline-block mr-2" size={20} />
+                    Leave Chat
+                  </div>
+                )}
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="relative" ref={dropdownRef}>
-        {/* <button
-          className="p-2 transition-colors rounded-full hover:bg-gray-200"
-          onClick={() => setShowDropdown(!showDropdown)}
-          disabled={isLoading}
-        >
-          <MoreVertical className="w-5 h-5 text-gray-600" />
-        </button> */}
-
-        {showDropdown && (
-          <div className="absolute right-0 z-10 w-40 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg">
+      <Modal
+        isOpen={showConfirmModal}
+        onRequestClose={() => setShowConfirmModal(false)}
+        className="z-50 max-w-sm p-6 mx-auto mt-40 bg-white outline-none rounded-3xl font-urbanist"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        style={{
+          overlay: {
+            zIndex: 60,
+          },
+          content: {
+            border: "none",
+            padding: "24px",
+            maxWidth: "420px",
+            position: "relative",
+            zIndex: 61,
+          },
+        }}
+      >
+        <div className="text-center">
+          <h2 className="mb-4 text-xl font-semibold">
+            {user?.userType === "tutor"
+              ? "Are you sure you want to delete this chat?"
+              : "Are you sure you want to leave this chat?"}
+          </h2>
+          <div className="flex flex-row gap-2">
             <button
-              className="w-full px-4 py-2 text-left text-[#3D3D3D] transition-colors hover:bg-gray-50"
+              className="w-full py-2 font-medium border border-gray-300 rounded-full hover:bg-gray-50"
+              onClick={() => setShowConfirmModal(false)}
+            >
+              No, Cancel
+            </button>
+            <button
+              className="w-full py-2 font-medium text-black bg-[#ff4d4d] rounded-full hover:bg-[#ff3333] border border-[#8b0000]"
               onClick={handleLeaveChat}
               disabled={isLoading}
             >
-              {isLoading ? (
-                <>
-                  <LogOut className="inline-block mr-2" />
-                  Processing...
-                </>
-              ) : user?.userType === "tutor" ? (
-                <>
-                  <LogOut className="inline-block mr-2" />
-                  Delete Chat
-                </>
-              ) : (
-                <>
-                  <LogOut className="inline-block mr-2" />
-                  Leave Chat
-                </>
-              )}
+              {isLoading
+                ? "Processing..."
+                : user?.userType === "tutor"
+                ? "Delete"
+                : "Leave"}
             </button>
           </div>
-        )}
-      </div>
-    </div>
+        </div>
+      </Modal>
+    </>
   );
 };
 
