@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { ArrowLeft, User, Clock, Calendar, MapPin } from "lucide-react";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import { ClipLoader } from "react-spinners";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import Modal from "react-modal";
+import { deleteStreamChannel } from "../../services/streamService";
+import { ChannelType } from "../../config/stream";
 
 Modal.setAppElement("#root");
 
@@ -162,6 +164,120 @@ const ClassDetailsTutor = ({ onClose }) => {
     }
   };
 
+  //-------------------------------------------------Deleting Class---------------------------------------//
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDeleteClass = async () => {
+    setIsDeleting(true);
+    try {
+      const userType = JSON.parse(sessionStorage.getItem("user")).userType;
+      const userCollection = userType === "tutor" ? "tutors" : "students";
+
+      // 1. Update students
+      if (classData.classMemberIds?.length > 0) {
+        await Promise.all(
+          classData.classMemberIds.map(async (memberId) => {
+            const studentRef = doc(db, "students", memberId);
+            const studentDoc = await getDoc(studentRef);
+            const studentData = studentDoc.data();
+
+            if (studentData) {
+              await updateDoc(studentRef, {
+                enrolledClasses: (studentData.enrolledClasses || []).filter(
+                  (id) => id !== classId
+                ),
+              });
+            }
+          })
+        );
+      }
+
+      // 2. Update group
+      if (classData.groupId) {
+        const groupRef = doc(db, "groups", classData.groupId);
+        const groupDoc = await getDoc(groupRef);
+
+        if (groupDoc.exists()) {
+          await updateDoc(groupRef, {
+            classIds: (groupDoc.data().classIds || []).filter(
+              (id) => id !== classId
+            ),
+          });
+        }
+      }
+
+      // 3. Update admin
+      const adminRef = doc(db, userCollection, classData.adminId);
+      const adminDoc = await getDoc(adminRef);
+      const adminData = adminDoc.data();
+
+      if (adminData) {
+        if (userType === "tutor") {
+          await updateDoc(adminRef, {
+            tutorOfClasses: (adminData.tutorOfClasses || []).filter(
+              (id) => id !== classId
+            ),
+            enrolledClasses: (adminData.enrolledClasses || []).filter(
+              (id) => id !== classId
+            ),
+            // tutorStudentIds: (adminData.tutorStudentIds || []).filter(
+            //   (studentId) => !classData.classMemberIds?.includes(studentId)
+            // ),
+          });
+        } else {
+          await updateDoc(adminRef, {
+            adminOfClasses: (adminData.adminOfClasses || []).filter(
+              (id) => id !== classId
+            ),
+            enrolledClasses: (adminData.enrolledClasses || []).filter(
+              (id) => id !== classId
+            ),
+          });
+        }
+      }
+
+      // 4. Update session storage
+      const updatedUser = JSON.parse(sessionStorage.getItem("user"));
+      if (userType === "tutor") {
+        updatedUser.tutorOfClasses = (updatedUser.tutorOfClasses || []).filter(
+          (id) => id !== classId
+        );
+        updatedUser.enrolledClasses = (
+          updatedUser.enrolledClasses || []
+        ).filter((id) => id !== classId);
+        // updatedUser.tutorStudentIds = (
+        //   updatedUser.tutorStudentIds || []
+        // ).filter((studentId) => !classData.classMemberIds?.includes(studentId));
+      } else {
+        updatedUser.adminOfClasses = (updatedUser.adminOfClasses || []).filter(
+          (id) => id !== classId
+        );
+        updatedUser.enrolledClasses = (
+          updatedUser.enrolledClasses || []
+        ).filter((id) => id !== classId);
+      }
+      sessionStorage.setItem("user", JSON.stringify(updatedUser));
+
+      // 5. Delete class document
+      await deleteDoc(doc(db, "classes", classId));
+
+      await deleteStreamChannel({
+        channelId: classData.id,
+        type: ChannelType.PREMIUM_INDIVIDUAL_CLASS,
+      });
+
+      navigate(-1);
+    } catch (error) {
+      console.error("Error deleting class:", error);
+      alert("Failed to delete class. Please try again.");
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirmation(false);
+    }
+  };
+  //---------------------------------------------------------------------------------------------------//
+
   const renderMembers = () => {
     if (members.length === 0) {
       return (
@@ -290,143 +406,189 @@ const ClassDetailsTutor = ({ onClose }) => {
   if (!classData) return null;
 
   return (
-    <div className="flex min-h-screen">
-      <div className="flex flex-1 m-6 border rounded-3xl">
-        <div className="flex flex-col w-full p-6 mx-4 bg-white rounded-3xl">
-          <div className="flex items-center justify-between pb-4 mb-6 border-b">
-            <div className="flex items-center gap-4">
-              <button
-                className="p-3 bg-gray-100 rounded-full"
-                onClick={() => navigate(-1)}
-              >
-                <ArrowLeft size="30" />
-              </button>
-              <h1 className="text-4xl font-semibold">Class Details</h1>
+    <>
+      <div className="flex min-h-screen">
+        <div className="flex flex-1 m-6 border rounded-3xl">
+          <div className="flex flex-col w-full p-6 mx-4 bg-white rounded-3xl">
+            <div className="flex items-center justify-between pb-4 mb-6 border-b">
+              <div className="flex items-center gap-4">
+                <button
+                  className="p-3 bg-gray-100 rounded-full"
+                  onClick={() => navigate(-1)}
+                >
+                  <ArrowLeft size="30" />
+                </button>
+                <h1 className="text-4xl font-semibold">Class Details</h1>
+              </div>
             </div>
-          </div>
 
-          <div className="flex flex-1 min-h-0 gap-6">
-            <div
-              className={`w-1/4 p-6 rounded-3xl ${getClassTypeColor(
-                classData.classType
-              )}`}
-            >
-              <div className="flex flex-col items-center justify-between h-full text-center">
-                <div className="flex flex-col items-center text-center">
-                  <img
-                    src={classData.imageUrl}
-                    alt={classData.className}
-                    className="w-32 h-32 mb-4 rounded-full"
-                  />
-                  <h3 className="mb-2 text-2xl font-medium">
-                    {classData.className}
-                  </h3>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="px-3 py-1 text-sm bg-yellow-200 rounded-full">
-                      {classData.language}
-                    </span>
-                    <span className="px-3 py-1 text-sm bg-yellow-200 rounded-full">
-                      {classData.languageLevel}
-                    </span>
-                  </div>
-                  <div className="flex flex-row items-center justify-between mt-4 space-x-6">
-                    {" "}
-                    <div className="flex flex-col gap-2 mb-4">
-                      <div className="flex items-center gap-2">
-                        <User />
-                        <span className="text-sm">
-                          {classData.adminName} (Teacher)
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Clock />
-                        <span className="text-sm">
-                          {classData.classDuration} minutes
-                        </span>
-                      </div>
+            <div className="flex flex-1 min-h-0 gap-6">
+              <div
+                className={`w-1/4 p-6 rounded-3xl ${getClassTypeColor(
+                  classData.classType
+                )}`}
+              >
+                <div className="flex flex-col items-center justify-between h-full text-center">
+                  <div className="flex flex-col items-center text-center">
+                    <img
+                      src={classData.imageUrl}
+                      alt={classData.className}
+                      className="w-32 h-32 mb-4 rounded-full"
+                    />
+                    <h3 className="mb-2 text-2xl font-medium">
+                      {classData.className}
+                    </h3>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="px-3 py-1 text-sm bg-yellow-200 rounded-full">
+                        {classData.language}
+                      </span>
+                      <span className="px-3 py-1 text-sm bg-yellow-200 rounded-full">
+                        {classData.languageLevel}
+                      </span>
                     </div>
-                    <div className="flex flex-col gap-2 mb-4">
-                      <div className="flex items-center gap-2">
-                        <Calendar />
-                        <span className="text-sm">
-                          {new Date(
-                            classData.classDateTime.seconds * 1000
-                          ).toLocaleString()}
-                        </span>
+                    <div className="flex flex-row items-center justify-between mt-4 space-x-6">
+                      {" "}
+                      <div className="flex flex-col gap-2 mb-4">
+                        <div className="flex items-center gap-2">
+                          <User />
+                          <span className="text-sm">
+                            {classData.adminName} (Teacher)
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Clock />
+                          <span className="text-sm">
+                            {classData.classDuration} minutes
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <MapPin />
-                        <span className="text-sm">
-                          {classData.classLocation}
-                        </span>
-                      </div>
-                    </div>{" "}
+                      <div className="flex flex-col gap-2 mb-4">
+                        <div className="flex items-center gap-2">
+                          <Calendar />
+                          <span className="text-sm">
+                            {new Date(
+                              classData.classDateTime.seconds * 1000
+                            ).toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <MapPin />
+                          <span className="text-sm">
+                            {classData.classLocation}
+                          </span>
+                        </div>
+                      </div>{" "}
+                    </div>
+
+                    <p className="mb-6 text-gray-600">
+                      {classData.classDescription}
+                    </p>
                   </div>
 
-                  <p className="mb-6 text-gray-600">
-                    {classData.classDescription}
-                  </p>
-                </div>
-
-                <div className="w-full space-y-4">
-                  {groupTutor && (
-                    <div className="flex flex-row items-center w-full max-w-lg gap-4 p-4 bg-white border border-green-500 rounded-xl">
-                      <img
-                        alt={`${groupTutor.name}'s profile`}
-                        src={groupTutor.photoUrl}
-                        className="object-cover w-28 h-28 rounded-xl"
-                      />
-                      <div className="flex flex-col items-start flex-1 gap-2">
-                        <h1 className="text-xl font-semibold">
-                          {groupTutor.name}
-                        </h1>
-                        <p className="text-sm text-left text-gray-600">
-                          {groupTutor?.bio
-                            ? groupTutor.bio.split(" ").slice(0, 12).join(" ") +
-                              "..."
-                            : null}
-                        </p>
-                        <div className="flex items-center gap-6">
-                          <div className="flex items-center gap-1">
-                            <span className="text-gray-700">
-                              {groupTutor.teachingLanguage} (Teaching)
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <MapPin size={16} className="text-gray-500" />
-                            <span className="text-gray-700">
-                              {groupTutor.country}
-                            </span>
+                  <div className="w-full space-y-4">
+                    {groupTutor && (
+                      <div className="flex flex-row items-center w-full max-w-lg gap-4 p-4 bg-white border border-green-500 rounded-xl">
+                        <img
+                          alt={`${groupTutor.name}'s profile`}
+                          src={groupTutor.photoUrl}
+                          className="object-cover w-28 h-28 rounded-xl"
+                        />
+                        <div className="flex flex-col items-start flex-1 gap-2">
+                          <h1 className="text-xl font-semibold">
+                            {groupTutor.name}
+                          </h1>
+                          <p className="text-sm text-left text-gray-600">
+                            {groupTutor?.bio
+                              ? groupTutor.bio
+                                  .split(" ")
+                                  .slice(0, 12)
+                                  .join(" ") + "..."
+                              : null}
+                          </p>
+                          <div className="flex items-center gap-6">
+                            <div className="flex items-center gap-1">
+                              <span className="text-gray-700">
+                                {groupTutor.teachingLanguage} (Teaching)
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <MapPin size={16} className="text-gray-500" />
+                              <span className="text-gray-700">
+                                {groupTutor.country}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  )}
-                  <button className="w-full px-4 py-2 text-black bg-[#ffbf00] border border-black rounded-full hover:bg-[#ffbf00]">
-                    Join Class
-                  </button>
-                  <button className="w-full px-4 py-2 text-[#f04438] bg-white border border-[#f04438] rounded-full ">
-                    Delete Class
-                  </button>
+                    )}
+                    <button className="w-full px-4 py-2 text-black bg-[#ffbf00] border border-black rounded-full hover:bg-[#ffbf00]">
+                      Join Class
+                    </button>
+                    <button
+                      className="w-full px-4 py-2 text-red-500 border border-red-500 rounded-full"
+                      onClick={() => setShowDeleteConfirmation(true)}
+                    >
+                      Delete Class
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="flex flex-col flex-1 min-h-0">
-              <div className="flex flex-row items-center justify-between mb-6">
-                <button
-                  className="px-6 py-2 text-black bg-yellow-400 rounded-full"
-                  onClick={() => setActiveTab("Members")}
-                >
-                  Members ({members.length})
-                </button>
+              <div className="flex flex-col flex-1 min-h-0">
+                <div className="flex flex-row items-center justify-between mb-6">
+                  <button
+                    className="px-6 py-2 text-black bg-yellow-400 rounded-full"
+                    onClick={() => setActiveTab("Members")}
+                  >
+                    Members ({members.length})
+                  </button>
+                </div>
+                <div className="flex-1 overflow-y-auto">{renderMembers()}</div>
               </div>
-              <div className="flex-1 overflow-y-auto">{renderMembers()}</div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+      <Modal
+        isOpen={showDeleteConfirmation}
+        onRequestClose={() => setShowDeleteConfirmation(false)}
+        className="z-50 max-w-sm p-6 mx-auto mt-40 bg-white outline-none rounded-3xl font-urbanist"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        style={{
+          overlay: {
+            zIndex: 60,
+          },
+          content: {
+            border: "none",
+            padding: "24px",
+            maxWidth: "420px",
+            position: "relative",
+            zIndex: 61,
+          },
+        }}
+      >
+        <div className="text-center">
+          <h2 className="mb-4 text-xl font-semibold">
+            Are you sure you want to delete this class?
+          </h2>
+          <div className="flex flex-row gap-2">
+            <button
+              className="w-full py-2 font-medium border border-gray-300 rounded-full hover:bg-gray-50"
+              onClick={() => setShowDeleteConfirmation(false)}
+            >
+              No, Cancel
+            </button>
+            <button
+              className="w-full py-2 font-medium text-black bg-[#ff4d4d] rounded-full hover:bg-[#ff3333] border border-[#8b0000]"
+              onClick={handleDeleteClass}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </button>
+          </div>
+        </div>
+      </Modal>
+    </>
   );
 };
 
