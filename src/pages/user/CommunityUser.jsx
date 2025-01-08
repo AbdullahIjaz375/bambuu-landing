@@ -124,9 +124,9 @@ const CommunityUser = () => {
           <div className="flex items-center gap-4">
             <h1 className="text-4xl font-semibold">Community</h1>
           </div>
-          <button className="rounded-full hover:bg-gray-100 border border-[#ffbf00] p-2">
+          {/* <button className="rounded-full hover:bg-gray-100 border border-[#ffbf00] p-2">
             <Bell className="w-6 h-6" />
-          </button>
+          </button> */}
         </div>
         <div className="flex-1 flex bg-white rounded-3xl m-2 h-[calc(100vh-145px)]">
           {/*  Left Panel */}

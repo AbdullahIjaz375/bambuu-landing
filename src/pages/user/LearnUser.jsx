@@ -299,8 +299,10 @@ import { useAuth } from "../../context/AuthContext";
 import GroupCard from "../../components/GroupCard";
 import { useNavigate } from "react-router-dom";
 import { db } from "../../firebaseConfig";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { ClipLoader } from "react-spinners";
+import { getToken } from "firebase/messaging";
+import { messaging } from "../../firebaseConfig";
 const LearnUser = () => {
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
@@ -493,6 +495,35 @@ const LearnUser = () => {
 
   const weekDates = getWeekDates(date);
 
+  //----------------------------------updating FCMtoken--------------------------------------//
+
+  useEffect(() => {
+    const updateFCMToken = async () => {
+      try {
+        const currentToken = await getToken(messaging, {
+          vapidKey: process.env.REACT_APP_FIREBASE_VAPID_KEY,
+        });
+
+        if (currentToken && user) {
+          await updateDoc(doc(db, "students", user.uid), {
+            fcmToken: currentToken,
+          });
+
+          const sessionUser = JSON.parse(sessionStorage.getItem("user"));
+          sessionUser.fcmToken = currentToken;
+          sessionStorage.setItem("user", JSON.stringify(sessionUser));
+
+          setUser((prev) => ({ ...prev, fcmToken: currentToken }));
+        }
+      } catch (error) {
+        console.error("Error updating FCM token:", error);
+      }
+    };
+
+    if (user?.uid) {
+      updateFCMToken();
+    }
+  }, []); // Empty dependency array to run on mount
   //------------------------------------------------------------------------------------------//
 
   return (

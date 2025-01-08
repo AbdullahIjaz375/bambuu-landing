@@ -22,7 +22,7 @@ import {
   updateDoc,
   serverTimestamp,
 } from "firebase/firestore";
-
+import { getMessaging, getToken } from "firebase/messaging";
 const Login = () => {
   const googleProvider = new GoogleAuthProvider();
   const facebookProvider = new FacebookAuthProvider();
@@ -152,6 +152,24 @@ const Login = () => {
   //   }
   // };
 
+  const getFCMToken = async () => {
+    try {
+      const messaging = getMessaging();
+      const currentToken = await getToken(messaging, {
+        vapidKey: process.env.REACT_APP_FIREBASE_VAPID_KEY,
+      });
+
+      if (currentToken) {
+        return currentToken;
+      }
+
+      console.log("No registration token available.");
+      return null;
+    } catch (error) {
+      console.error("Error getting FCM token:", error);
+      return null;
+    }
+  };
   const handleGoogleLoginStudent = async () => {
     const loadingToastId = toast.loading("Logging in...");
 
@@ -170,6 +188,7 @@ const Login = () => {
       const notificationPrefsDoc = await getDoc(notificationPrefsRef);
 
       let isFirstTimeLogin = false;
+      const fcmToken = await getFCMToken(); // Call getFCMToken here
 
       if (!userDoc.exists()) {
         isFirstTimeLogin = true;
@@ -191,7 +210,7 @@ const Login = () => {
           savedDocuments: [],
           tier: 1,
           currentStreak: 1,
-          // userType: "student", // Include userType in Firestore
+          fcmToken: fcmToken || "", // Add FCM token
         };
 
         await setDoc(userRef, newUserData);

@@ -3,6 +3,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore"; // Import Firestore
 import { getStorage } from "firebase/storage"; // Import Storage
+import { getMessaging, getToken } from "firebase/messaging";
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -19,5 +20,6 @@ const app = initializeApp(firebaseConfig);
 const storage = getStorage(app); // Initialize Firebase Storage
 const auth = getAuth(app);
 const db = getFirestore(app); // Initialize Firestore
+const messaging = getMessaging(app);
 
-export { auth, db, storage };
+export { auth, db, storage, messaging };

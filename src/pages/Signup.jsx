@@ -5,12 +5,14 @@ import {
   sendEmailVerification,
   signOut,
 } from "firebase/auth";
+import { messaging } from "../firebaseConfig";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useAuth } from "../context/AuthContext";
 import ClipLoader from "react-spinners/ClipLoader";
 import { setDoc } from "firebase/firestore";
 import { doc } from "firebase/firestore";
+import { getToken } from "firebase/messaging";
 const TEACHINGLANGUAGES = ["English", "Spanish"];
 
 const LANGUAGES = [
@@ -352,6 +354,18 @@ const Signup = () => {
     }
   };
 
+  const getFCMToken = async () => {
+    try {
+      const currentToken = await getToken(messaging, {
+        vapidKey: process.env.REACT_APP_FIREBASE_VAPID_KEY,
+      });
+      return currentToken || null;
+    } catch (error) {
+      console.error("Error getting FCM token:", error);
+      return null;
+    }
+  };
+
   const handleProfileSubmit = async (e) => {
     console.log(profileData);
     e.preventDefault();
@@ -362,6 +376,7 @@ const Signup = () => {
       if (!auth.currentUser || !auth.currentUser.emailVerified) {
         throw new Error("Please verify your email first");
       }
+      const fcmToken = await getFCMToken(); // Call getFCMToken here
 
       const userData = {
         adminOfClasses: [],
@@ -380,6 +395,7 @@ const Signup = () => {
         savedDocuments: [],
         tier: 1,
         uid: auth.currentUser.uid,
+        fcmToken: fcmToken || "", // Add FCM token
       };
 
       await setDoc(doc(db, "students", auth.currentUser.uid), userData);
