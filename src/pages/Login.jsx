@@ -599,22 +599,22 @@ const Login = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50 ">
-      <div className="w-full max-w-md p-6 space-y-6 bg-white rounded-3xl border-2 border-[#e7e7e7]">
+      <div className="w-full max-w-md p-6 space-y-4 bg-white rounded-3xl border border-[#e7e7e7]">
         {/* Logo */}
         <div className="flex justify-center">
-          <img alt="bambuu" src="/images/bambuu-b.png" />
+          <img alt="bambuu" src="/svgs/logo-login.svg" />
         </div>
 
         {/* Welcome Text */}
         <div className="space-y-2 text-center">
-          <h1 className="text-2xl font-bold">Welcome Back!</h1>
+          <h1 className="text-3xl font-bold">Welcome Back!</h1>
           <p className="text-gray-600">Let's get you logged in.</p>
         </div>
 
         {/* Login Form */}
         <form onSubmit={handleEmailLoginStudent} className="space-y-4">
-          <div className="space-y-2">
-            <label className="block text-gray-700">Email</label>
+          <div className="space-y-1">
+            <label className="block text-sm text-gray-700">Email</label>
             <div className="relative">
               {" "}
               {/* Add this wrapper div */}
@@ -623,7 +623,7 @@ const Login = () => {
                 value={email}
                 onChange={handleEmailChange}
                 placeholder="Enter your email"
-                className={`w-full px-4 py-3 rounded-lg border ${
+                className={`w-full px-4 py-2 rounded-full border ${
                   emailError ? "border-red-500" : "border-gray-300"
                 } focus:outline-none focus:ring-2 ${
                   emailError ? "focus:ring-red-500" : "focus:ring-green-500"
@@ -649,15 +649,15 @@ const Login = () => {
             </div>
             {emailError && <p className="text-sm text-red-500">{emailError}</p>}
           </div>
-          <div className="space-y-2">
-            <label className="block text-gray-700">Password</label>
+          <div className="space-y-1">
+            <label className="block text-sm text-gray-700">Password</label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={handlePasswordChange}
                 placeholder="Enter your password"
-                className={`w-full px-4 py-3 rounded-lg border ${
+                className={`w-full px-4 py-2 rounded-full border ${
                   passwordError ? "border-red-500" : "border-gray-300"
                 } focus:outline-none focus:ring-2 ${
                   passwordError ? "focus:ring-red-500" : "focus:ring-green-500"
@@ -712,7 +712,7 @@ const Login = () => {
             )}
           </div>
           {/* Links */}
-          <div className="flex justify-between text-sm">
+          <div className="flex justify-between pb-4 text-sm">
             <Link to="/forgot-password" className="font-semibold text-red-500">
               Forgot Password?
             </Link>
@@ -723,7 +723,9 @@ const Login = () => {
           {/* Login Button */}
           <button
             type="submit"
-            className="w-full py-3 text-[#888888] border border-[#888888] bg-[#b9f9c2] rounded-full hover:bg-[#93f3a0] focus:outline-none"
+            className={`w-full py-3 rounded-full focus:outline-none border border-[#042F0C] text-[#042F0C] ${
+              email && password ? " bg-[#14B82C] " : " bg-[#b9f9c2]"
+            }`}
           >
             Login
           </button>
@@ -744,14 +746,14 @@ const Login = () => {
             onClick={handleGoogleLoginStudent}
             className="flex items-center justify-center px-4 py-2 space-x-4 border border-gray-300 rounded-full hover:bg-gray-50"
           >
-            <img alt="google" src="/images/google-button.png" />
+            <img alt="google" src="/svgs/login-insta.svg" />
             <span>Google</span>
           </button>
           <button
             onClick={handleFacebookLogin}
             className="flex items-center justify-center px-4 py-2 space-x-4 border border-gray-300 rounded-full hover:bg-gray-50"
           >
-            <img alt="google" src="/images/fb-button.png" />
+            <img alt="google" src="/svgs/login-fb.svg" />
             <span>Facebook</span>
           </button>
         </div>
@@ -777,7 +779,7 @@ const Login = () => {
         <div className="text-sm text-center text-[#5d5d5d]">
           <p>
             Don't have any account?{" "}
-            <Link to="/signup" className="text-[#14b82c]">
+            <Link to="/signup" className="text-[#14B82C]">
               Sign up
             </Link>
           </p>

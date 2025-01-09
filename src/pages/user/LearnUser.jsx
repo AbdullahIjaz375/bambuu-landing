@@ -451,7 +451,7 @@ const LearnUser = () => {
 
   //--------------------------------------learning language----------------------------------//
 
-  const students = Array(8).fill(null); // 8 student icons per language
+  const students = Array(12).fill(null); // 8 student icons per language
 
   //------------------------------------calender-------------------------------------------//
 
@@ -484,6 +484,13 @@ const LearnUser = () => {
   const navigateWeek = (direction) => {
     const newDate = new Date(date);
     newDate.setDate(date.getDate() + (direction === "next" ? 7 : -7));
+    setDate(newDate);
+  };
+
+  // Navigate months
+  const navigateMonth = (direction) => {
+    const newDate = new Date(date);
+    newDate.setMonth(date.getMonth() + (direction === "next" ? 1 : -1));
     setDate(newDate);
   };
 
@@ -564,29 +571,33 @@ const LearnUser = () => {
 
         <div className="flex flex-row items-start justify-between w-full gap-8 mb-4">
           {/* Calendar */}
-          <div className="w-[40%] p-4 bg-white border border-yellow-300 rounded-3xl">
+          <div className="max-w-[40%] p-4 bg-white border border-[#FFBF00] rounded-3xl">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-4">
                 <button
-                  onClick={() => navigateWeek("prev")}
+                  onClick={() => navigateMonth("prev")}
                   className="p-1 text-gray-600 hover:text-gray-800"
                 >
                   <ChevronLeft className="w-6 h-6" />
                 </button>
-                <h2 className="text-xl font-medium">{formatHeader(date)}</h2>
+                <h2 className="text-2xl font-medium text-[#3D3D3D]">
+                  {formatHeader(date)}
+                </h2>
                 <button
-                  onClick={() => navigateWeek("next")}
+                  onClick={() => navigateMonth("next")}
                   className="p-1 text-gray-600 hover:text-gray-800"
                 >
                   <ChevronRight className="w-6 h-6" />
                 </button>
               </div>
 
-              <div className="flex p-1 bg-gray-100 rounded-full">
+              <div className="flex bg-gray-100 rounded-full">
                 <button
                   onClick={() => setView("weekly")}
                   className={`px-4 py-1 rounded-full text-sm transition-colors ${
-                    view === "weekly" ? "bg-green-200" : "text-gray-600"
+                    view === "weekly"
+                      ? "bg-[#DBFDDF] text-[#042F0C] border border-[#042F0C]"
+                      : "text-gray-600"
                   }`}
                 >
                   Weekly
@@ -594,7 +605,9 @@ const LearnUser = () => {
                 <button
                   onClick={() => setView("monthly")}
                   className={`px-4 py-1 rounded-full text-sm transition-colors ${
-                    view === "monthly" ? "bg-green-200" : "text-gray-600"
+                    view === "monthly"
+                      ? "bg-[#DBFDDF] text-[#042F0C] border border-[#042F0C]"
+                      : "text-gray-600"
                   }`}
                 >
                   Monthly
@@ -602,14 +615,21 @@ const LearnUser = () => {
               </div>
             </div>
 
-            <div className="flex justify-between gap-2">
+            <div className="flex items-center justify-between gap-2 ">
+              <button
+                onClick={() => navigateWeek("prev")}
+                className="p-1 text-gray-600 hover:text-gray-800"
+              >
+                <ChevronLeft className="w-6 h-6 text-[#3D3D3D]" />
+              </button>
+
               {weekDates.map((day) => (
                 <button
                   key={day.toISOString()}
-                  className={`flex flex-col items-center justify-center rounded-full py-4 px-6 transition-colors ${
+                  className={`flex flex-col items-center justify-center rounded-full py-4 px-5 transition-colors ${
                     isToday(day)
-                      ? "bg-green-500 text-white"
-                      : "bg-white border hover:border-gray-300"
+                      ? "bg-[#14B82C] text-white"
+                      : "bg-white border border-[#888888]"
                   }`}
                   onClick={() => setDate(day)}
                 >
@@ -621,6 +641,13 @@ const LearnUser = () => {
                   </span>
                 </button>
               ))}
+
+              <button
+                onClick={() => navigateWeek("next")}
+                className="p-1 text-gray-600 hover:text-gray-800"
+              >
+                <ChevronRight className="w-6 h-6 text-[#3D3D3D]" />
+              </button>
             </div>
           </div>
 
@@ -641,7 +668,7 @@ const LearnUser = () => {
               <div className="flex items-center gap-6 border border-[#d58287] p-6 bg-[#fff0f1] rounded-3xl w-full">
                 <div className="w-16 h-16 overflow-hidden rounded-full">
                   <img
-                    src="/images/spain.png" // You'll provide this
+                    src="/svgs/spain-big.svg" // You'll provide this
                     alt="Spanish"
                     className="object-cover w-full h-full"
                   />
@@ -659,9 +686,9 @@ const LearnUser = () => {
                         </div>
                       ))}
                     </div>
-                    <span className="px-2 py-1 ml-2 text-sm text-green-600 bg-green-100 rounded-full">
+                    {/* <span className="px-2 py-1 ml-2 text-sm text-green-600 bg-green-100 rounded-full">
                       +200k
-                    </span>
+                    </span> */}
                   </div>
                 </div>
               </div>
@@ -670,7 +697,7 @@ const LearnUser = () => {
               <div className="flex items-center w-full gap-6 p-6 bg-[#edf2ff] rounded-3xl border border-[#768bbd]">
                 <div className="w-16 h-16 overflow-hidden rounded-full">
                   <img
-                    src="/images/america.png" // You'll provide this
+                    src="/svgs/us-big.svg" // You'll provide this
                     alt="English"
                     className="object-cover w-full h-full"
                   />
@@ -688,9 +715,9 @@ const LearnUser = () => {
                         </div>
                       ))}
                     </div>
-                    <span className="px-2 py-1 ml-2 text-sm text-green-600 bg-green-100 rounded-full">
+                    {/* <span className="px-2 py-1 ml-2 text-sm text-green-600 bg-green-100 rounded-full">
                       +500k
-                    </span>
+                    </span> */}
                   </div>
                 </div>
               </div>

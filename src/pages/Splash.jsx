@@ -43,12 +43,12 @@ const SplashScreen = () => {
   const isLastStep = currentStep === splashContent.length - 1;
 
   return (
-    <div className="bg-[#14b82c] min-h-screen flex flex-col items-center justify-center px-4">
+    <div className="flex flex-col items-center justify-center min-h-screen px-4 bg-[#f0fdf1]">
       <div className="flex flex-col items-center w-full max-w-md space-y-8">
         {/* Panda Mascot */}
         <div className="">
           <img
-            src="/images/panda-large.png"
+            src="/svgs/panda-splash.svg"
             alt="Bammbuu Panda"
             className="w-full h-auto"
           />
@@ -56,10 +56,10 @@ const SplashScreen = () => {
 
         {/* Welcome Text */}
         <div className="space-y-4 text-center">
-          <h1 className="text-2xl font-semibold text-white">Hi, Welcome to</h1>
+          <h1 className="text-2xl font-semibold text-black">Hi, Welcome to</h1>
           <div className="">
             <img
-              src="/images/bambuu-large.png"
+              src="/svgs/logo-splash.svg"
               alt="Bammbuu Panda"
               className="w-full h-auto"
             />
@@ -68,10 +68,10 @@ const SplashScreen = () => {
 
         {/* Content */}
         <div className="text-center space-y-4 min-h-[120px]">
-          <h2 className="text-3xl font-semibold text-white">
+          <h2 className="text-3xl font-semibold text-black">
             {splashContent[currentStep].title}
           </h2>
-          <p className="px-4 text-lg text-center text-white">
+          <p className="px-4 text-lg text-center text-black">
             {splashContent[currentStep].description}
           </p>
         </div>
@@ -82,7 +82,7 @@ const SplashScreen = () => {
             <div
               key={index}
               className={`h-2 w-2 rounded-full ${
-                index === currentStep ? "bg-white" : "bg-white/50"
+                index === currentStep ? "bg-[#14B82C]" : "bg-[#83F292]"
               }`}
             />
           ))}
@@ -92,7 +92,7 @@ const SplashScreen = () => {
         <div className="w-full space-y-6">
           <button
             onClick={handleNext}
-            className="w-full py-3 font-semibold text-black bg-[#ffbf00] rounded-full border border-black"
+            className="w-full py-3 font-semibold text-black bg-[#14B82C] rounded-full border border-black"
           >
             {isLastStep ? "Get Started" : "Next"}
           </button>

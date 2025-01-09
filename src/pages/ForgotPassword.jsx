@@ -30,16 +30,16 @@ const ForgotPassword = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
-      <div className="w-full max-w-md p-6 space-y-6 bg-white rounded-3xl border-2 border-[#e7e7e7]">
+      <div className="w-full max-w-md p-6 space-y-6 bg-white rounded-3xl border border-[#e7e7e7]">
         {/* Lock Icon */}
         <div className="flex justify-center">
           <div className="w-24 h-24 flex items-center justify-center bg-[#fff5d1] rounded-full">
-            <img alt="bambuu" src="/images/forgot-password.png" />
+            <img alt="bambuu" src="/svgs/forgot-pass.svg" />
           </div>
         </div>
 
         {/* Title */}
-        <h1 className="text-2xl font-bold text-center">Forgot Password</h1>
+        <h1 className="text-3xl font-bold text-center">Forgot Password</h1>
 
         {!isEmailSent ? (
           <>
@@ -49,14 +49,14 @@ const ForgotPassword = () => {
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <label className="block text-gray-700">Email</label>
+              <div className="space-y-1">
+                <label className="block text-sm text-gray-700">Email</label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
                   required
                 />
               </div>

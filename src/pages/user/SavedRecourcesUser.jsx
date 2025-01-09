@@ -25,6 +25,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import Modal from "react-modal";
+import { ClipLoader } from "react-spinners";
 
 Modal.setAppElement("#root");
 
@@ -224,7 +225,7 @@ const SavedResources = () => {
       <div className="flex min-h-screen bg-white">
         <Sidebar user={user} />
         <div className="flex items-center justify-center flex-1">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#16bc2e] border-t-transparent"></div>
+          <ClipLoader color="#14B82C" size={50} />
         </div>
       </div>
     );

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Clock, Calendar, Users, User, X, MapPin } from "lucide-react";
 import Modal from "react-modal";
 
@@ -129,7 +129,6 @@ const ExploreClassCard = ({
 
   const displayName = isPremium ? tutorName : adminName;
   const displayImage = isPremium ? tutorImageUrl : adminImageUrl;
-  const displayId = isPremium ? tutorId : adminId;
 
   const formatTime = (timestamp) => {
     if (!timestamp) return "TBD";
@@ -188,6 +187,39 @@ const ExploreClassCard = ({
     }
   };
 
+  const [profileUrl, setProfileUrl] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAdminProfile = async () => {
+      if (!adminId) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        // Try to fetch from tutors collection first
+        let adminDoc = await getDoc(doc(db, "tutors", adminId));
+
+        // If not found in tutors, try students collection
+        if (!adminDoc.exists()) {
+          adminDoc = await getDoc(doc(db, "students", adminId));
+        }
+
+        if (adminDoc.exists()) {
+          const adminData = adminDoc.data();
+          setProfileUrl(adminData.photoUrl || null);
+        }
+      } catch (error) {
+        console.error("Error fetching admin profile:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAdminProfile();
+  }, [adminId]);
+
   return (
     <>
       <div
@@ -210,7 +242,7 @@ const ExploreClassCard = ({
             <img
               alt={className}
               src={imageUrl || "/images/default-class.png"}
-              className="object-cover w-full h-48 rounded-t-2xl"
+              className="object-cover w-full h-56 rounded-t-2xl"
             />
             {isPremium && (
               <img
@@ -223,22 +255,33 @@ const ExploreClassCard = ({
 
           <div className="w-full space-y-2 bg-[#c3f3c9] rounded-b-3xl p-2">
             <div className="flex items-start justify-between">
-              <span className="px-4 py-1 text-sm bg-[#14b82c] text-white rounded-full">
+              {/* <span className="px-4 py-1 text-sm bg-[#14b82c] text-white rounded-full">
                 {physicalClass ? "Physical" : "Online"}
               </span>
               {recurrenceType && (
                 <span className="px-4 py-1 text-sm bg-[#14b82c] text-white rounded-full">
                   {recurrenceType}
                 </span>
-              )}
+              )} */}
             </div>
 
-            <h2 className="text-xl font-bold text-gray-800">{className}</h2>
+            <h2 className="ml-2 text-xl font-bold text-gray-800">
+              {className}
+            </h2>
 
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
+                <img
+                  src={
+                    language === "English"
+                      ? "/svgs/xs-us.svg"
+                      : "/svgs/xs-spain.svg"
+                  }
+                  alt={language === "English" ? "US Flag" : "Spain Flag"}
+                />
+
                 <span className="flex items-center">
-                  <span className="ml-2 text-[#042f0c]">{language}</span>
+                  <span className="text-[#042f0c]">{language}</span>
                 </span>
               </div>
               <span className="px-3 py-1 text-sm bg-[#fff885] rounded-full">
@@ -264,16 +307,28 @@ const ExploreClassCard = ({
             </div>
             <div className="flex flex-row items-center justify-between w-full">
               <div className="flex flex-row items-center justify-center space-x-2">
-                <User className="w-5 h-5 text-gray-600" />
+                {profileUrl ? (
+                  <img
+                    src={profileUrl}
+                    alt={adminName}
+                    className="object-cover w-5 h-5 rounded-full"
+                  />
+                ) : (
+                  <User className="w-5 h-5 text-gray-600" />
+                )}
                 <span className="text-[#454545] text-md">
-                  {tutorName || adminName || "TBD"}
+                  {adminName || "TBD"}
                 </span>
               </div>
               <div className="flex flex-row items-center justify-center space-x-2">
                 <Users className="w-5 h-5 text-gray-600" />
-                <span className="text-[#454545] text-md">
-                  {classMemberIds?.length || 0}/{availableSpots}
-                </span>
+                {isPremium ? (
+                  <span className="text-[#454545] text-md"></span>
+                ) : (
+                  <span className="text-[#454545] text-md">
+                    {classMemberIds.length}/{availableSpots}
+                  </span>
+                )}
               </div>
             </div>
             <button

@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Clock, Calendar, Users, User, X } from "lucide-react";
 import Modal from "react-modal";
 import { useNavigate } from "react-router-dom";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../firebaseConfig";
 
 Modal.setAppElement("#root");
 
@@ -50,36 +52,54 @@ const ClassCard = ({
     });
   };
 
-  // const handleCardClick = (e) => {
-  //   if (onClick) {
-  //     onClick(e);
-  //   } else {
-  //     setIsModalOpen(true);
-  //   }
-  // };
   const handleClick = () => {
-    // Note: Removed useNavigate since it should be passed as a prop or handled differently
     navigate(`/classDetailsUser/${classId}`);
   };
+
+  const [profileUrl, setProfileUrl] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAdminProfile = async () => {
+      if (!adminId) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        // Try to fetch from tutors collection first
+        let adminDoc = await getDoc(doc(db, "tutors", adminId));
+
+        // If not found in tutors, try students collection
+        if (!adminDoc.exists()) {
+          adminDoc = await getDoc(doc(db, "students", adminId));
+        }
+
+        if (adminDoc.exists()) {
+          const adminData = adminDoc.data();
+          setProfileUrl(adminData.photoUrl || null);
+        }
+      } catch (error) {
+        console.error("Error fetching admin profile:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAdminProfile();
+  }, [adminId]);
   return (
     <>
       <div
         className="transition-transform transform cursor-pointer w-80 hover:scale-105"
         onClick={handleClick}
-        // role="button"
-        // tabIndex={0}
-        // onKeyDown={(e) => {
-        //   if (e.key === "Enter" || e.key === " ") {
-        //     handleCardClick(e);
-        //   }
-        // }}
       >
         <div
           className={`flex flex-col h-[26rem] border ${
             isPremium ? "border-[#14b82c]" : "border-[#ffc71f]"
           } bg-white rounded-3xl p-2`}
         >
-          <div className="relative w-full h-48">
+          <div className="relative w-full h-56">
             <img
               alt={className}
               src={imageUrl || "/images/default-class.png"}
@@ -100,14 +120,14 @@ const ClassCard = ({
             } rounded-b-3xl p-2`}
           >
             <div className="flex items-start justify-between">
-              <span
+              {/* <span
                 className={`px-4 py-1 text-sm ${
                   isPremium ? "bg-[#14b82c]" : "bg-[#14b82c]"
                 } text-white rounded-full`}
               >
                 {classLocation}
-              </span>
-              {recurrenceType && (
+              </span> */}
+              {/* {recurrenceType && (
                 <span
                   className={`px-4 py-1 text-sm ${
                     isPremium ? "bg-[#14b82c]" : "bg-[#14b82c]"
@@ -115,19 +135,29 @@ const ClassCard = ({
                 >
                   {recurrenceType}
                 </span>
-              )}
+              )} */}
             </div>
 
-            <h2 className="text-xl font-bold text-gray-800 line-clamp-2">
+            <h2 className="ml-2 text-2xl font-bold text-gray-800 line-clamp-2">
               {className}
             </h2>
 
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center ml-2 space-x-2">
+                <img
+                  src={
+                    language === "English"
+                      ? "/svgs/xs-us.svg"
+                      : "/svgs/xs-spain.svg"
+                  }
+                  alt={language === "English" ? "US Flag" : "Spain Flag"}
+                />
+
                 <span className="flex items-center">
-                  <span className="ml-2 text-[#042f0c]">{language}</span>
+                  <span className="text-[#042f0c]">{language}</span>
                 </span>
               </div>
+
               <span className="px-3 py-1 text-sm bg-[#fff885] rounded-full">
                 {languageLevel}
               </span>
@@ -150,17 +180,32 @@ const ClassCard = ({
               </div>
             </div>
             <div className="flex flex-row items-center justify-between w-full">
-              <div className="flex flex-row items-center justify-center space-x-2">
-                <User className="w-5 h-5 text-gray-600" />
+              <div className="flex flex-row items-center justify-center space-x-1">
+                {profileUrl ? (
+                  <img
+                    src={profileUrl}
+                    alt={adminName}
+                    className="object-cover w-5 h-5 rounded-full"
+                  />
+                ) : (
+                  <User className="w-5 h-5 text-gray-600" />
+                )}
                 <span className="text-[#454545] text-md">
                   {adminName || "TBD"}
                 </span>
               </div>
               <div className="flex flex-row items-center justify-center space-x-2">
                 <Users className="w-5 h-5 text-gray-600" />
-                <span className="text-[#454545] text-md">
-                  {classMemberIds.length}/{availableSpots}
-                </span>
+
+                {isPremium ? (
+                  <span className="text-[#454545] text-md">
+                    {classMemberIds.length}/1
+                  </span>
+                ) : (
+                  <span className="text-[#454545] text-md">
+                    {classMemberIds.length}/{availableSpots}
+                  </span>
+                )}
               </div>
             </div>
           </div>

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Bell, X } from "lucide-react";
+import { Bell, ChevronRight, X } from "lucide-react";
 import { doc, getDoc, updateDoc, onSnapshot } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { format } from "date-fns";
+import { useNavigate } from "react-router-dom";
 
 // Import SVGs
 const getNotificationSvg = (event) => {
@@ -30,6 +31,7 @@ const getNotificationSvg = (event) => {
 };
 
 const NotificationDropdown = () => {
+  const navigate = useNavigate();
   const user = JSON.parse(sessionStorage.getItem("user"));
   const userId = user?.uid;
   const [isOpen, setIsOpen] = useState(false);
@@ -56,11 +58,43 @@ const NotificationDropdown = () => {
     return () => unsubscribe();
   }, [userId]);
 
-  const handleNotificationClick = async (notification) => {
-    console.log("Notification clicked:", notification);
+  const handleNavigateToPage = (notification) => {
+    const { event, data } = notification;
 
-    if (!notification.isRead) {
-      try {
+    switch (event) {
+      case "SOMEONE_JOINED_YOUR_GROUP":
+        navigate(`/groupDetailsUser/${data.groupId}`);
+        break;
+      case "SOMEONE_JOINED_YOUR_CLASS":
+        navigate(`/classDetailsUser/${data.classId}`);
+        break;
+      case "CLASS_IS_STARTING":
+        navigate(`/classDetailsUser/${data.classId}`);
+        break;
+      case "RESOURCE_SENT_BY_TUTOR":
+        // navigate(`/resources/${data.resourceId}`);
+        navigate(`savedRecourcesUser`);
+
+        break;
+      case "PAYMENT_WAS_SUCCESSFUL":
+      case "PAYMENT_COULD_NOT_GO_THROUGH":
+      case "NEW_CREDITS_ADDED":
+        navigate("/billing");
+        break;
+      case "CLASS_SLOTS_COMPLETED":
+      case "GROUP_CLASS_THRESHOLD_MET":
+        navigate(`/classDetailsUser/${data.classId}`);
+        break;
+      default:
+        navigate("/dashboard");
+        break;
+    }
+  };
+
+  const handleNotificationClick = async (notification) => {
+    try {
+      // First update the read status if notification is unread
+      if (!notification.isRead) {
         const docRef = doc(db, "user_notifications", userId);
         const updatedNotifications = notifications.map((n) =>
           n.notificationId === notification.notificationId
@@ -73,9 +107,15 @@ const NotificationDropdown = () => {
           notification_list: updatedNotifications,
           unreadCount: newUnreadCount,
         });
-      } catch (error) {
-        console.error("Error updating notification:", error);
       }
+
+      // Then navigate to the appropriate page
+      handleNavigateToPage(notification);
+
+      // Close the dropdown after navigation
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Error updating notification:", error);
     }
   };
 
@@ -132,11 +172,15 @@ const NotificationDropdown = () => {
                       </p>
                     </div>
                   </div>
-                  <span className="text-xs text-gray-400">
-                    {notification.data.timestamp
-                      ? format(new Date(notification.data.timestamp), "HH:mm")
-                      : "Just now"}
-                  </span>
+
+                  <div className="flex flex-col items-end justify-between space-y-3">
+                    <span className="text-xs text-gray-400">
+                      {notification.data.timestamp
+                        ? format(new Date(notification.data.timestamp), "HH:mm")
+                        : "Just now"}
+                    </span>
+                    <ChevronRight className="w-4 h-4" />
+                  </div>
                 </div>
               ))
             ) : (

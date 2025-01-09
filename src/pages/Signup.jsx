@@ -241,7 +241,7 @@ const Signup = () => {
     name: "",
     nativeLanguage: "",
     learningLanguage: "",
-    proficiency: "Normal",
+    proficiency: "Beginner",
     country: "",
   });
 
@@ -443,10 +443,10 @@ const Signup = () => {
   if (verificationSent && !isEmailVerified) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-white ">
-        <div className="w-full max-w-md p-8 bg-white rounded-3xl border-2 border-[#e7e7e7]">
+        <div className="w-full max-w-md p-8 bg-white rounded-3xl border border-[#e7e7e7]">
           <div className="space-y-4 text-center">
             <div className="flex justify-center mb-6">
-              <img alt="bambuu" src="/images/email_verification.png" />
+              <img alt="bambuu" src="/svgs/email-verify.svg" />
             </div>
             <h2 className="text-3xl font-bold">Email Verification</h2>
             <p className="text-lg text-gray-600">
@@ -467,10 +467,10 @@ const Signup = () => {
   if (isEmailVerified && !hasProfile) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-white">
-        <div className="w-full max-w-md p-8 bg-white  border-2 border-[#e7e7e7] rounded-3xl">
+        <div className="w-full max-w-md p-8 bg-white  border border-[#e7e7e7] rounded-3xl">
           <div className="space-y-4">
             <div className="flex justify-center">
-              <img alt="babuu" src="/images/complete_profile.png" />
+              <img alt="babuu" src="/svgs/signup.svg" />
             </div>
 
             <h2 className="text-3xl font-bold text-center">Complete Profile</h2>
@@ -489,7 +489,7 @@ const Signup = () => {
                     setProfileData({ ...profileData, name: e.target.value })
                   }
                   placeholder="Enter your name"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full px-4 py-2 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
                   required
                 />
               </div>
@@ -506,7 +506,7 @@ const Signup = () => {
                       nativeLanguage: e.target.value,
                     })
                   }
-                  className="w-full px-4 py-3 text-gray-600 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full px-4 py-2 text-gray-600 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
                   required
                 >
                   <option value="">Select your native language</option>
@@ -530,7 +530,7 @@ const Signup = () => {
                       learningLanguage: e.target.value,
                     })
                   }
-                  className="w-full px-4 py-3 text-gray-600 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full px-4 py-2 text-gray-600 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
                   required
                 >
                   <option value="">Select language you want to learn</option>
@@ -547,7 +547,7 @@ const Signup = () => {
                   Your Proficiency in {profileData.learningLanguage || "[x]"}
                 </label>
                 <div className="flex gap-2">
-                  {["Normal", "Intermediate", "Advanced"].map((level) => (
+                  {["Beginner", "Intermediate", "Advanced"].map((level) => (
                     <button
                       key={level}
                       type="button"
@@ -577,7 +577,7 @@ const Signup = () => {
                       country: e.target.value,
                     })
                   }
-                  className="w-full px-4 py-3 text-gray-600 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full px-4 py-2 text-gray-600 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
                   required
                 >
                   <option value="">Select your country</option>
@@ -591,7 +591,7 @@ const Signup = () => {
 
               <button
                 type="submit"
-                className="w-full py-3 mt-8 text-black bg-green-500 border border-black rounded-full hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                className="w-full py-3 mt-8 text-black bg-[#14B82C] border border-black rounded-full  focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
               >
                 Submit
               </button>
@@ -607,7 +607,7 @@ const Signup = () => {
       <div className="w-full max-w-md p-8 bg-white rounded-3xl">
         <div className="mb-8 space-y-2 text-center">
           <h1 className="text-3xl font-bold">Sign Up</h1>
-          <p className="text-gray-600">Let's create a new account!</p>
+          <p className="text-lg text-gray-600">Let's create a new account!</p>
         </div>
 
         <form onSubmit={handleInitialSignup} className="space-y-6">
@@ -619,7 +619,7 @@ const Signup = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full px-4 py-2 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
               required
             />
           </div>
@@ -632,7 +632,7 @@ const Signup = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full px-4 py-2 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
                 required
               />
               <button
@@ -690,7 +690,7 @@ const Signup = () => {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Re-enter your password"
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full px-4 py-2 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
                 required
               />
               <button
