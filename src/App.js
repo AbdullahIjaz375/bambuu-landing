@@ -53,6 +53,9 @@ import ClassDetailsNotJoinedUser from "./pages/user/ClassDetailsNotJoinedUser";
 import ClassDetailsTutor from "./pages/tutor/ClassDetailsTutor";
 import ExploreClassesUser from "./pages/user/ExploreClassesUser";
 import ExploreGroupsUser from "./pages/user/ExploreGroupsUser";
+import UserPlans from "./pages/user/UserPlans";
+import VideoCall from "./pages/user/VideoCall";
+import { Video } from "lucide-react";
 
 const App = () => {
   const { user, streamClient } = useAuth(); // Use useAuth() inside the component
@@ -405,6 +408,23 @@ const App = () => {
             element={
               <ProtectedRoute requiredRole="student">
                 <LearnLanguageUser />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/call/:classId"
+            element={
+              <ProtectedRoute requiredRole="student">
+                <VideoCall />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/plans"
+            element={
+              <ProtectedRoute requiredRole="student">
+                <UserPlans />
               </ProtectedRoute>
             }
           />

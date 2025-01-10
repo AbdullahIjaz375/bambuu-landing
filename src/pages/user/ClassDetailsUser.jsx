@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { ArrowLeft, User, Clock, Calendar, MapPin } from "lucide-react";
 import { doc, getDoc, deleteDoc } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
@@ -448,7 +448,14 @@ const ClassDetailsUser = ({ onClose }) => {
     }
   };
 
-  //------------------------------------------------------------------------------------------//
+  //---------------------------------------------video class start---------------------------------------------//
+
+  const [showVideoCall, setShowVideoCall] = useState(false);
+
+  const handleJoinClass = () => {
+    navigate(`/call/${classId}`);
+  };
+  //-----------------------------------------------------------------------------------------------------------//
 
   if (loading) {
     return (
@@ -592,9 +599,13 @@ const ClassDetailsUser = ({ onClose }) => {
                         </div>
                       </div>
                     )}
-                    <button className="w-full px-4 py-2 text-black bg-[#ffbf00] border border-black rounded-full hover:bg-[#ffbf00]">
+                    <button
+                      className="w-full px-4 py-2 text-black bg-[#ffbf00] border border-black rounded-full hover:bg-[#ffbf00]"
+                      onClick={handleJoinClass}
+                    >
                       Join Class
                     </button>
+
                     {user.uid === classData.adminId ? (
                       <button
                         className="w-full px-4 py-2 text-red-500 border border-red-500 rounded-full"

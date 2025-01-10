@@ -199,15 +199,56 @@ const GroupCard = ({ group }) => {
     id: groupId,
   } = group;
 
+  const checkValidSubscription = () => {
+    // Check if user has any subscriptions
+    if (!user.subscriptions || user.subscriptions.length === 0) {
+      return false;
+    }
+
+    // Find a valid Bammbuu Groups subscription
+    return user.subscriptions.some(
+      (sub) =>
+        sub.type === "Bammbuu Groups" &&
+        (!sub.endDate || new Date(sub.endDate) > new Date()) &&
+        (!sub.startDate || new Date(sub.startDate) <= new Date())
+    );
+  };
+
+  const handlePremiumAccess = () => {
+    if (!isPremium) {
+      return true;
+    }
+
+    const hasValidSubscription = checkValidSubscription();
+    if (!hasValidSubscription) {
+      navigate("/plans");
+      return false;
+    }
+
+    return true;
+  };
+
   const handleJoinClick = (e) => {
     e.stopPropagation(); // Prevent triggering the card click
-    setShowJoinConfirmation(true);
+    if (handlePremiumAccess()) {
+      setShowJoinConfirmation(true);
+    }
   };
 
   const handleClick = () => {
-    // Note: Removed useNavigate since it should be passed as a prop or handled differently
-    navigate(`/newGroupDetailsUser/${groupId}`);
+    if (handlePremiumAccess()) {
+      navigate(`/newGroupDetailsUser/${groupId}`);
+    }
   };
+  // const handleJoinClick = (e) => {
+  //   e.stopPropagation(); // Prevent triggering the card click
+  //   setShowJoinConfirmation(true);
+  // };
+
+  // const handleClick = () => {
+  //   // Note: Removed useNavigate since it should be passed as a prop or handled differently
+  //   navigate(`/newGroupDetailsUser/${groupId}`);
+  // };
 
   const updateContextAndSession = (newGroupId) => {
     // Create updated user object with new group

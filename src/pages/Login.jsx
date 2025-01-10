@@ -34,124 +34,6 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const { user, loading, updateUserData } = useAuth(); // Destructure loading state
 
-  // const handleGoogleLoginStudent = async () => {
-  //   const loadingToastId = toast.loading("Logging in...");
-
-  //   try {
-  //     const result = await signInWithPopup(auth, googleProvider);
-  //     const user = result.user;
-
-  //     // Reference to user document in Firestore
-  //     const userRef = doc(db, "students", user.uid);
-  //     const userDoc = await getDoc(userRef);
-
-  //     const notificationPrefsRef = doc(
-  //       db,
-  //       "notification_preferences",
-  //       user.uid
-  //     );
-  //     const notificationPrefsDoc = await getDoc(notificationPrefsRef);
-
-  //     let isFirstTimeLogin = false;
-
-  //     if (!userDoc.exists()) {
-  //       // Create new student document with updated structure
-  //       await setDoc(userRef, {
-  //         email: user.email,
-  //         name: user.displayName || "",
-  //         uid: user.uid,
-  //         enrolledClasses: [],
-  //         joinedGroups: [],
-  //         adminOfClasses: [],
-  //         adminOfGroups: [],
-  //         lastLoggedIn: serverTimestamp(),
-  //         learningLanguage: "",
-  //         learningLanguageProficiency: "Beginner",
-  //         nativeLanguage: "",
-  //         country: "",
-  //         photoUrl: "",
-  //         savedDocuments: [],
-  //         tier: 1,
-  //         currentStreak: 0,
-  //       });
-
-  //       if (!notificationPrefsDoc.exists()) {
-  //         await setDoc(notificationPrefsRef, {
-  //           userId: user.uid,
-  //           appUpdates: true,
-  //           classReminder: true,
-  //           groupChat: true,
-  //           newMessages: true,
-  //           resourceAssign: true,
-  //         });
-  //       }
-  //       isFirstTimeLogin = true;
-  //     } else {
-  //       // Update lastLoggedIn and handle streak logic
-  //       const userData = userDoc.data();
-  //       const lastLoggedIn = userData.lastLoggedIn
-  //         ? userData.lastLoggedIn.toDate()
-  //         : null;
-  //       const currentStreak = userData.currentStreak || 0;
-
-  //       const now = new Date();
-  //       let updatedStreak = currentStreak;
-
-  //       if (lastLoggedIn) {
-  //         const lastLoginDate = new Date(
-  //           lastLoggedIn.getFullYear(),
-  //           lastLoggedIn.getMonth(),
-  //           lastLoggedIn.getDate()
-  //         );
-  //         const currentDate = new Date(
-  //           now.getFullYear(),
-  //           now.getMonth(),
-  //           now.getDate()
-  //         );
-
-  //         const differenceInDays =
-  //           (currentDate - lastLoginDate) / (1000 * 60 * 60 * 24);
-
-  //         if (differenceInDays === 1) {
-  //           updatedStreak = currentStreak + 1;
-  //         } else if (differenceInDays > 1) {
-  //           updatedStreak = 1;
-  //         }
-  //       } else {
-  //         updatedStreak = 1;
-  //       }
-
-  //       // Update only lastLoggedIn and currentStreak
-  //       await updateDoc(userRef, {
-  //         lastLoggedIn: serverTimestamp(),
-  //         currentStreak: updatedStreak,
-  //       });
-  //     }
-  //     sessionStorage.setItem("userType", "student");
-
-  //     toast.update(loadingToastId, {
-  //       render: "Logged in successfully!",
-  //       type: "success",
-  //       isLoading: false,
-  //       autoClose: 3000,
-  //     });
-
-  //     if (isFirstTimeLogin) {
-  //       navigate("/userEditProfile", { replace: true });
-  //     } else {
-  //       navigate("/learn", { replace: true });
-  //     }
-  //   } catch (error) {
-  //     console.error("Error during Google login:", error);
-  //     toast.update(loadingToastId, {
-  //       render: `Login error: ${error.message}`,
-  //       type: "error",
-  //       isLoading: false,
-  //       autoClose: 5000,
-  //     });
-  //   }
-  // };
-
   const getFCMToken = async () => {
     try {
       const messaging = getMessaging();
@@ -211,6 +93,14 @@ const Login = () => {
           tier: 1,
           currentStreak: 1,
           fcmToken: fcmToken || "", // Add FCM token
+          credits: 0,
+          subscriptions: [
+            {
+              endDate: null,
+              startDate: null,
+              type: "None",
+            },
+          ],
         };
 
         await setDoc(userRef, newUserData);
@@ -306,118 +196,6 @@ const Login = () => {
       });
     }
   };
-
-  // const handleEmailLoginStudent = async (e) => {
-  //   const loadingToastId = toast.loading("Logging in...");
-  //   e.preventDefault();
-
-  //   try {
-  //     const userCredential = await signInWithEmailAndPassword(
-  //       auth,
-  //       email,
-  //       password
-  //     );
-  //     const user = userCredential.user;
-
-  //     const userRef = doc(db, "students", user.uid);
-  //     const userDoc = await getDoc(userRef);
-
-  //     if (!userDoc.exists()) {
-  //       toast.error("User profile not found");
-  //       await signOut(auth);
-  //       return;
-  //     }
-
-  //     const userData = userDoc.data();
-  //     const lastLoggedIn = userData.lastLoggedIn
-  //       ? userData.lastLoggedIn.toDate()
-  //       : null;
-  //     const currentStreak = userData.currentStreak || 0;
-
-  //     const now = new Date();
-  //     let updatedStreak = currentStreak;
-
-  //     if (lastLoggedIn) {
-  //       // Get only the date parts for comparison
-  //       const lastLoginDate = new Date(
-  //         lastLoggedIn.getFullYear(),
-  //         lastLoggedIn.getMonth(),
-  //         lastLoggedIn.getDate()
-  //       );
-  //       const currentDate = new Date(
-  //         now.getFullYear(),
-  //         now.getMonth(),
-  //         now.getDate()
-  //       );
-
-  //       // Calculate the difference in days
-  //       const differenceInDays =
-  //         (currentDate - lastLoginDate) / (1000 * 60 * 60 * 24);
-
-  //       if (differenceInDays === 1) {
-  //         // Increment streak for consecutive day login
-  //         updatedStreak = currentStreak + 1;
-  //       } else if (differenceInDays > 1) {
-  //         // Reset streak if login gap is more than a day
-  //         updatedStreak = 1;
-  //       }
-  //     } else {
-  //       updatedStreak = 1; // First login or no `lastLoggedIn` recorded
-  //     }
-
-  //     // Update Firestore with new streak and login time
-  //     await updateDoc(userRef, {
-  //       lastLoggedIn: serverTimestamp(),
-  //       currentStreak: updatedStreak,
-  //     });
-
-  //     // Store in session storage with updated data
-  //     const sessionUserData = {
-  //       ...userData,
-  //       uid: user.uid,
-  //       currentStreak: updatedStreak,
-  //       lastLoggedIn: now,
-  //     };
-  //     sessionStorage.setItem("user", JSON.stringify(sessionUserData));
-  //     sessionStorage.setItem("userType", "student");
-
-  //     toast.update(loadingToastId, {
-  //       render: "Logged in successfully!",
-  //       type: "success",
-  //       isLoading: false,
-  //       autoClose: 3000,
-  //     });
-  //     // Use setTimeout to ensure all updates are processed
-
-  //     navigate("/learn", { replace: true });
-  //   } catch (error) {
-  //     console.error("Error during email login:", error);
-
-  //     if (
-  //       error.code === "auth/invalid-credential" ||
-  //       error.message.includes("INVALID_LOGIN_CREDENTIALS")
-  //     ) {
-  //       setEmailError("Wrong email address.");
-  //       setPasswordError("Wrong password.");
-  //     } else if (
-  //       error.code === "auth/user-not-found" ||
-  //       error.code === "auth/invalid-email"
-  //     ) {
-  //       setEmailError("Wrong email address.");
-  //     } else if (error.code === "auth/wrong-password") {
-  //       setPasswordError("Wrong password.");
-  //     }
-
-  //     toast.update(loadingToastId, {
-  //       render: "Invalid email or password",
-  //       type: "error",
-  //       isLoading: false,
-  //       autoClose: 5000,
-  //     });
-  //   }
-  // };
-
-  // Login handlers
 
   const handleEmailLoginStudent = async (e) => {
     const loadingToastId = toast.loading("Logging in...");

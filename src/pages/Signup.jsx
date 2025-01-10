@@ -396,6 +396,14 @@ const Signup = () => {
         tier: 1,
         uid: auth.currentUser.uid,
         fcmToken: fcmToken || "", // Add FCM token
+        credits: 0,
+        subscriptions: [
+          {
+            endDate: null,
+            startDate: null,
+            type: "None",
+          },
+        ],
       };
 
       await setDoc(doc(db, "students", auth.currentUser.uid), userData);
