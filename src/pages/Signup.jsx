@@ -13,6 +13,10 @@ import ClipLoader from "react-spinners/ClipLoader";
 import { setDoc } from "firebase/firestore";
 import { doc } from "firebase/firestore";
 import { getToken } from "firebase/messaging";
+import Modal from "react-modal";
+
+Modal.setAppElement("#root");
+
 const TEACHINGLANGUAGES = ["English", "Spanish"];
 
 const LANGUAGES = [
@@ -245,8 +249,10 @@ const Signup = () => {
     country: "",
   });
 
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+
   const navigate = useNavigate();
-  const { user, loading } = useAuth();
+  const { user, loading, updateUserData } = useAuth();
   const [loading1, setLoading1] = useState(false);
 
   const resetStates = async () => {
@@ -370,19 +376,19 @@ const Signup = () => {
     console.log(profileData);
     e.preventDefault();
     setLoading1(true);
-    toast.info("Completing account setup...");
+    const loadingToastId = toast.loading("Completing account setup...");
 
     try {
       if (!auth.currentUser || !auth.currentUser.emailVerified) {
         throw new Error("Please verify your email first");
       }
-      const fcmToken = await getFCMToken(); // Call getFCMToken here
+      const fcmToken = await getFCMToken();
 
       const userData = {
         adminOfClasses: [],
         adminOfGroups: [],
         country: profileData.country,
-        currentStreak: 0,
+        currentStreak: 1, // Set initial streak to 1 for first login
         email: auth.currentUser.email,
         enrolledClasses: [],
         joinedGroups: [],
@@ -395,7 +401,7 @@ const Signup = () => {
         savedDocuments: [],
         tier: 1,
         uid: auth.currentUser.uid,
-        fcmToken: fcmToken || "", // Add FCM token
+        fcmToken: fcmToken || "",
         credits: 0,
         subscriptions: [
           {
@@ -422,18 +428,43 @@ const Signup = () => {
         notificationPreferences
       );
 
-      // Sign out and clear any existing session data
-      await signOut(auth);
-      sessionStorage.removeItem("user");
+      // Update the user data in context
+      const sessionUserData = {
+        ...userData,
+        userType: "student",
+      };
+      updateUserData(sessionUserData);
 
-      toast.success("Account setup completed! Please log in.");
-      navigate("/login", { replace: true });
+      toast.update(loadingToastId, {
+        render: "Account created successfully!",
+        type: "success",
+        isLoading: false,
+        autoClose: 3000,
+      });
+
+      // Show success modal instead of navigating
+      setHasProfile(true);
+
+      setShowSuccessModal(true);
     } catch (error) {
-      toast.error(`Profile creation failed: ${error.message}`);
+      toast.update(loadingToastId, {
+        render: `Profile creation failed: ${error.message}`,
+        type: "error",
+        isLoading: false,
+        autoClose: 5000,
+      });
       console.error(error);
     } finally {
       setLoading1(false);
     }
+  };
+
+  const handleSkip = () => {
+    navigate("/learn", { replace: true });
+  };
+
+  const handleOnboarding = () => {
+    navigate("/onboarding", { replace: true });
   };
 
   const handleBackToSignup = async () => {
@@ -611,210 +642,251 @@ const Signup = () => {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
-      <div className="w-full max-w-md p-8 bg-white rounded-3xl">
-        <div className="mb-8 space-y-2 text-center">
-          <h1 className="text-3xl font-bold">Sign Up</h1>
-          <p className="text-lg text-gray-600">Let's create a new account!</p>
-        </div>
-
-        <form onSubmit={handleInitialSignup} className="space-y-6">
-          <div className="space-y-1">
-            <label className="block text-sm font-medium">Email</label>
-
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
-              className="w-full px-4 py-2 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
-              required
-            />
+    <>
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="w-full max-w-md p-8 bg-white rounded-3xl">
+          <div className="mb-8 space-y-2 text-center">
+            <h1 className="text-3xl font-bold">Sign Up</h1>
+            <p className="text-lg text-gray-600">Let's create a new account!</p>
           </div>
 
-          <div className="space-y-1">
-            <label className="block text-sm font-medium">Password</label>
-            <div className="relative">
+          <form onSubmit={handleInitialSignup} className="space-y-6">
+            <div className="space-y-1">
+              <label className="block text-sm font-medium">Email</label>
+
               <input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
                 className="w-full px-4 py-2 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
                 required
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute transform -translate-y-1/2 right-3 top-1/2"
-              >
-                {showPassword ? (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="w-5 h-5 text-gray-500"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"
-                    />
-                  </svg>
-                ) : (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="w-5 h-5 text-gray-500"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
-                )}
-              </button>
+            </div>
+
+            <div className="space-y-1">
+              <label className="block text-sm font-medium">Password</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  className="w-full px-4 py-2 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute transform -translate-y-1/2 right-3 top-1/2"
+                >
+                  {showPassword ? (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="w-5 h-5 text-gray-500"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"
+                      />
+                    </svg>
+                  ) : (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="w-5 h-5 text-gray-500"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                    </svg>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <label className="block text-sm font-medium">
+                Confirm Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Re-enter your password"
+                  className="w-full px-4 py-2 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute text-gray-500 transform -translate-y-1/2 right-3 top-1/2"
+                >
+                  {showConfirmPassword ? (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="w-5 h-5 text-gray-500"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"
+                      />
+                    </svg>
+                  ) : (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="w-5 h-5 text-gray-500"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                    </svg>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-3 mt-8 border border-black text-black bg-[#14b82c] rounded-full hover:bg-[#119523] focus:outline-none focus:ring-2 focus:ring-[#119523] focus:ring-offset-2"
+            >
+              Create Account
+            </button>
+          </form>
+
+          <div className="relative my-8">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 text-gray-500 bg-white">
+                or continue with
+              </span>
             </div>
           </div>
 
-          <div className="space-y-1">
-            <label className="block text-sm font-medium">
-              Confirm Password
-            </label>
-            <div className="relative">
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Re-enter your password"
-                className="w-full px-4 py-2 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
-                required
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <button
+              className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-full hover:bg-gray-50"
+              onClick={() => toast.info("Google signin coming soon!")}
+            >
+              <img
+                alt="google"
+                src="/images/google-button.png"
+                className="w-5 h-5 mr-2"
               />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute text-gray-500 transform -translate-y-1/2 right-3 top-1/2"
-              >
-                {showConfirmPassword ? (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="w-5 h-5 text-gray-500"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"
-                    />
-                  </svg>
-                ) : (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="w-5 h-5 text-gray-500"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
-                )}
-              </button>
-            </div>
+              <span>Google</span>
+            </button>
+            <button
+              className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-full hover:bg-gray-50"
+              onClick={() => toast.info("Facebook signin coming soon!")}
+            >
+              <img
+                alt="facebook"
+                src="/images/fb-button.png"
+                className="w-5 h-5 mr-2"
+              />
+              <span>Facebook</span>
+            </button>
           </div>
 
-          <button
-            type="submit"
-            className="w-full py-3 mt-8 border border-black text-black bg-[#14b82c] rounded-full hover:bg-[#119523] focus:outline-none focus:ring-2 focus:ring-[#119523] focus:ring-offset-2"
-          >
-            Create Account
-          </button>
-        </form>
-
-        <div className="relative my-8">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300"></div>
+          <div className="mb-4 text-sm text-center text-gray-500">
+            <p>
+              By signing up, you agree to our{" "}
+              <Link to="/terms" className="text-black hover:underline">
+                Terms & Conditions
+              </Link>{" "}
+              and{" "}
+              <Link to="/privacy" className="text-black hover:underline">
+                Privacy Policy
+              </Link>
+              .
+            </p>
           </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 text-gray-500 bg-white">
-              or continue with
-            </span>
-          </div>
-        </div>
 
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          <button
-            className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-full hover:bg-gray-50"
-            onClick={() => toast.info("Google signin coming soon!")}
-          >
-            <img
-              alt="google"
-              src="/images/google-button.png"
-              className="w-5 h-5 mr-2"
-            />
-            <span>Google</span>
-          </button>
-          <button
-            className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-full hover:bg-gray-50"
-            onClick={() => toast.info("Facebook signin coming soon!")}
-          >
-            <img
-              alt="facebook"
-              src="/images/fb-button.png"
-              className="w-5 h-5 mr-2"
-            />
-            <span>Facebook</span>
-          </button>
-        </div>
-
-        <div className="mb-4 text-sm text-center text-gray-500">
-          <p>
-            By signing up, you agree to our{" "}
-            <Link to="/terms" className="text-black hover:underline">
-              Terms & Conditions
-            </Link>{" "}
-            and{" "}
-            <Link to="/privacy" className="text-black hover:underline">
-              Privacy Policy
+          <div className="text-sm text-center text-gray-600">
+            Already have an account?{" "}
+            <Link
+              to="/login"
+              className="font-semibold text-green-600 hover:text-green-700"
+            >
+              Login
             </Link>
-            .
-          </p>
-        </div>
-
-        <div className="text-sm text-center text-gray-600">
-          Already have an account?{" "}
-          <Link
-            to="/login"
-            className="font-semibold text-green-600 hover:text-green-700"
-          >
-            Login
-          </Link>
+          </div>
         </div>
       </div>
-    </div>
+
+      <Modal
+        isOpen={showSuccessModal}
+        onRequestClose={() => {}}
+        className="fixed w-full max-w-xl p-6 transform -translate-x-1/2 -translate-y-1/2 bg-white outline-none font-urbanist top-1/2 left-1/2 rounded-3xl"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-50 z-[1000]" // Added high z-index
+        shouldCloseOnOverlayClick={false}
+        shouldCloseOnEsc={false}
+      >
+        <div className="text-center">
+          <div className="flex justify-center mb-4">
+            <img alt="bammbuu" src="/svgs/account-created.svg" />
+          </div>
+
+          <h2 className="mb-2 text-2xl font-semibold text-gray-900">
+            Account Created Successfully!
+          </h2>
+
+          <p className="mb-6 text-gray-600">
+            Great! All set. You can book your first class and start learning.
+          </p>
+
+          <div className="flex flex-row items-center space-x-3">
+            <button
+              onClick={handleSkip}
+              className="w-full py-2 font-medium border  rounded-full text-[#042F0C]  border-[#042F0C]"
+            >
+              Skip Now
+            </button>
+
+            <button
+              onClick={handleOnboarding}
+              className="w-full py-2 px-2 font-medium text-[#042F0C] bg-[#14B82C] rounded-full border border-[#042F0C]"
+            >
+              Start Learning with bammbuu
+            </button>
+          </div>
+        </div>
+      </Modal>
+    </>
   );
 };
 

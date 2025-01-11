@@ -17,6 +17,8 @@ import countryList from "react-select-country-list";
 import ISO6391 from "iso-639-1";
 import Sidebar from "../../components/Sidebar";
 import NotificationsTab from "../../components/NotificationsTab";
+import AccountTab from "../../components/AccountTab";
+import AppTab from "../../components/AppTab";
 
 const TABS = ["App", "Account", "Notifications"];
 
@@ -76,65 +78,10 @@ const UserSettings = () => {
         </div>
 
         {/* Settings Content */}
-        {activeTab === "App" && (
-          <div className="max-w-2xl space-y-4">
-            {/* App Language Setting */}
-            <div className="flex items-center justify-between p-4 text-lg bg-white border border-gray-200 rounded-full">
-              <div className="flex items-center gap-3">
-                <img
-                  alt="bambuu"
-                  src="/svgs/translate.svg"
-                  className="w-6 h-6"
-                />
-                <span>App Language</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span>ENG</span>
-                <ChevronLeft className="w-5 h-5 rotate-180" />
-              </div>
-            </div>
-
-            {/* Delete Account */}
-            <div className="flex items-center justify-between p-4 text-lg bg-white border border-[#F04438] rounded-full">
-              <div className="flex items-center gap-3 text-[#F04438]">
-                <img
-                  alt="bambuu"
-                  src="/svgs/user-remove.svg"
-                  className="w-6 h-6"
-                />
-                <span>Delete Account</span>
-              </div>
-              <ChevronLeft className="w-5 h-5 rotate-180 text-[#F04438]" />
-            </div>
-          </div>
-        )}
+        {activeTab === "App" && <AppTab />}
 
         {/* Account Tab Content */}
-        {activeTab === "Account" && (
-          <div className="max-w-2xl space-y-4">
-            {/* App Language Setting */}
-            <div className="flex items-center justify-between p-4 text-lg bg-white border border-gray-200 rounded-full">
-              <div className="flex items-center gap-3">
-                <img
-                  alt="bambuu"
-                  src="/svgs/password-check.svg"
-                  className="w-6 h-6"
-                />{" "}
-                <span>Update Password</span>
-              </div>
-              <ChevronLeft className="w-5 h-5 rotate-180" />
-            </div>
-
-            {/* Delete Account */}
-            <div className="flex items-center justify-between p-4 text-lg bg-white border rounded-full">
-              <div className="flex items-center gap-3 text-black">
-                <img alt="bambuu" src="/svgs/crown.svg" className="w-6 h-6" />{" "}
-                <span>Manage Membership</span>
-              </div>
-              <ChevronLeft className="w-5 h-5 rotate-180" />
-            </div>
-          </div>
-        )}
+        {activeTab === "Account" && <AccountTab />}
 
         {/* Notifications Tab Content */}
         {activeTab === "Notifications" && <NotificationsTab />}

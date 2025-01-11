@@ -334,6 +334,52 @@ const ClassDetailsUser = ({ onClose }) => {
       setShowDeleteConfirmation(false);
     }
   };
+
+  //------------------------------------------------- Leaving Class---------------------------------------//
+  const [showLeaveConfirmation, setShowLeaveConfirmation] = useState(false);
+  const [isLeaving, setIsLeaving] = useState(false);
+
+  const handleLeaveClass = async () => {
+    setIsLeaving(true);
+    try {
+      // 1. Remove user from classMemberIds in the class document
+      const updatedMembers = classData.classMemberIds.filter(
+        (id) => id !== user.uid
+      );
+      await updateDoc(doc(db, "classes", classId), {
+        classMemberIds: updatedMembers,
+      });
+
+      // 2. Remove class from student's enrolledClasses
+      const studentRef = doc(db, "students", user.uid);
+      const studentDoc = await getDoc(studentRef);
+      const studentData = studentDoc.data();
+
+      if (studentData) {
+        await updateDoc(studentRef, {
+          enrolledClasses: studentData.enrolledClasses.filter(
+            (id) => id !== classId
+          ),
+        });
+      }
+
+      // 3. Update session storage
+      const updatedUser = JSON.parse(sessionStorage.getItem("user"));
+      updatedUser.enrolledClasses = (updatedUser.enrolledClasses || []).filter(
+        (id) => id !== classId
+      );
+      sessionStorage.setItem("user", JSON.stringify(updatedUser));
+
+      // Navigate back after successful leave
+      navigate(-1);
+    } catch (error) {
+      console.error("Error leaving class:", error);
+      alert("Failed to leave class. Please try again.");
+    } finally {
+      setIsLeaving(false);
+      setShowLeaveConfirmation(false);
+    }
+  };
   //---------------------------------------------------------------------------------------------------//
   const getClassTypeColor = (type) => {
     switch (type) {
@@ -616,7 +662,7 @@ const ClassDetailsUser = ({ onClose }) => {
                     ) : (
                       <button
                         className="w-full px-4 py-2 text-red-500 border border-red-500 rounded-full"
-                        // onClick={() => setShowLeaveConfirmation(true)}
+                        onClick={() => setShowLeaveConfirmation(true)}
                       >
                         Leave Class
                       </button>
@@ -748,6 +794,46 @@ const ClassDetailsUser = ({ onClose }) => {
               disabled={isDeleting}
             >
               {isDeleting ? "Deleting..." : "Delete"}
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={showLeaveConfirmation}
+        onRequestClose={() => setShowLeaveConfirmation(false)}
+        className="z-50 max-w-sm p-6 mx-auto mt-40 bg-white outline-none rounded-3xl font-urbanist"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        style={{
+          overlay: {
+            zIndex: 60,
+          },
+          content: {
+            border: "none",
+            padding: "24px",
+            maxWidth: "420px",
+            position: "relative",
+            zIndex: 61,
+          },
+        }}
+      >
+        <div className="text-center">
+          <h2 className="mb-4 text-xl font-semibold">
+            Are you sure you want to leave this class?
+          </h2>
+          <div className="flex flex-row gap-2">
+            <button
+              className="w-full py-2 font-medium border border-gray-300 rounded-full hover:bg-gray-50"
+              onClick={() => setShowLeaveConfirmation(false)}
+            >
+              No, Cancel
+            </button>
+            <button
+              className="w-full py-2 font-medium text-black bg-[#ff4d4d] rounded-full hover:bg-[#ff3333] border border-[#8b0000]"
+              onClick={handleLeaveClass}
+              disabled={isLeaving}
+            >
+              {isLeaving ? "Leaving..." : "Leave"}
             </button>
           </div>
         </div>

@@ -57,6 +57,7 @@ import UserPlans from "./pages/user/UserPlans";
 import VideoCall from "./pages/user/VideoCall";
 import { Video } from "lucide-react";
 import BammbuuPlusGroupsUser from "./pages/user/BammbuuPlusGroupsUser";
+import SingupSplash from "./pages/SignupSplash";
 
 const App = () => {
   const { user, streamClient } = useAuth(); // Use useAuth() inside the component
@@ -96,14 +97,7 @@ const App = () => {
               </PublicRoute>
             }
           />
-          <Route
-            path="/signup"
-            element={
-              <PublicRoute>
-                <Signup />
-              </PublicRoute>
-            }
-          />
+          <Route path="/signup" element={<Signup />} />
           <Route
             path="/forgot-password"
             element={
@@ -401,6 +395,15 @@ const App = () => {
             element={
               <ProtectedRoute requiredRole="tutor">
                 <AddGroupsTutor />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/onboarding"
+            element={
+              <ProtectedRoute requiredRole="student">
+                <SingupSplash />
               </ProtectedRoute>
             }
           />
