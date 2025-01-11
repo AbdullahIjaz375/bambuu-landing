@@ -319,10 +319,10 @@ const TutorEditProfile = () => {
           </div>
         </div>
 
-        <div className="max-w-2xl">
+        <div className="max-w-3xl">
           <div className="mb-8">
             <div
-              className="relative flex items-center justify-center w-24 h-24 mb-4 bg-gray-100 rounded-full cursor-pointer hover:bg-gray-200"
+              className="relative flex items-center justify-center w-32 h-32 mb-4 bg-gray-100 rounded-full cursor-pointer hover:bg-gray-200"
               onClick={() => document.getElementById("profileImage").click()}
             >
               {selectedImage ? (
@@ -346,38 +346,38 @@ const TutorEditProfile = () => {
 
           <div className="space-y-6">
             <div>
-              <label className="block mb-2 text-sm font-medium">Name</label>
+              <label className="block mb-1 text-lg font-medium">Name</label>
               <input
                 type="text"
                 name="name"
                 value={formData.name}
                 onChange={handleInputChange}
-                className="w-full p-3 border rounded-lg"
+                className="w-full p-3 text-xl border rounded-2xl"
                 placeholder="Enter your name"
               />
             </div>
 
             <div>
-              <label className="block mb-2 text-sm font-medium">Email</label>
+              <label className="block mb-1 text-lg font-medium">Email</label>
               <input
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                className="w-full p-3 border rounded-lg"
+                className="w-full p-3 text-xl border rounded-2xl"
                 disabled
               />
             </div>
 
             <div>
-              <label className="block mb-2 text-sm font-medium">
+              <label className="block mb-1 text-lg font-medium">
                 Native Language
               </label>
               <select
                 name="nativeLanguage"
                 value={formData.nativeLanguage}
                 onChange={handleInputChange}
-                className="w-full p-3 text-gray-600 border rounded-lg"
+                className="w-full p-3 text-xl border rounded-2xl"
               >
                 <option value="">Select your native language</option>
                 {LANGUAGES.map((language) => (
@@ -389,14 +389,14 @@ const TutorEditProfile = () => {
             </div>
 
             <div>
-              <label className="block mb-2 text-sm font-medium">
+              <label className="block mb-1 text-lg font-medium">
                 Teaching Language
               </label>
               <select
                 name="teachingLanguage"
                 value={formData.teachingLanguage}
                 onChange={handleInputChange}
-                className="w-full p-3 border rounded-lg"
+                className="w-full p-3 text-xl border rounded-2xl"
               >
                 <option value="">Select language you want to teach</option>
                 {TEACHINGLANGUAGES.map((lang) => (
@@ -408,7 +408,7 @@ const TutorEditProfile = () => {
             </div>
 
             <div>
-              <label className="block mb-2 text-sm font-medium">
+              <label className="block mb-2 text-lg font-medium">
                 Your Proficiency in {formData.teachingLanguage}
               </label>
               <div className="flex gap-2">
@@ -418,7 +418,7 @@ const TutorEditProfile = () => {
                       key={level}
                       type="button"
                       onClick={() => handleProficiencyChange(level)}
-                      className={`flex-1 py-2 px-4 rounded-full ${
+                      className={`flex-1 py-2 px-4 text-xl rounded-3xl border ${
                         formData.teachingLanguageProficiency === level
                           ? "bg-[#e6fde9] text-black"
                           : "bg-gray-100 text-gray-600"
@@ -432,12 +432,12 @@ const TutorEditProfile = () => {
             </div>
 
             <div>
-              <label className="block mb-2 text-sm font-medium">Country</label>
+              <label className="block mb-1 text-lg font-medium">Country</label>
               <select
                 name="country"
                 value={formData.country}
                 onChange={handleInputChange}
-                className="w-full p-3 border rounded-lg"
+                className="w-full p-3 text-xl border rounded-2xl"
               >
                 <option value="">Select your country</option>
                 {COUNTRIES.map((country) => (
@@ -449,12 +449,12 @@ const TutorEditProfile = () => {
             </div>
 
             <div>
-              <label className="block mb-2 text-sm font-medium">Bio</label>
+              <label className="block mb-1 text-lg font-medium">Bio</label>
               <textarea
                 name="bio"
                 value={formData.bio}
                 onChange={handleInputChange}
-                className="w-full p-3 border rounded-lg"
+                className="w-full p-3 text-xl border rounded-2xl"
                 placeholder="Tell us about yourself"
                 rows={5}
               />

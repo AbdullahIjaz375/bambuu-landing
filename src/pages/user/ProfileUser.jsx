@@ -87,7 +87,7 @@ const ProfileUser = () => {
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             {/* Profile Card */}
             <div className="bg-[#e6fde9] rounded-3xl p-8 flex flex-col items-center">
-              <div className="flex items-center justify-center w-24 h-24 mb-4 bg-green-500 rounded-full">
+              <div className="flex items-center justify-center w-32 h-32 mb-4 bg-white rounded-full">
                 <img
                   src={userData?.photoUrl || "/api/placeholder/96/96"}
                   alt="Profile"
@@ -95,32 +95,49 @@ const ProfileUser = () => {
                 />
               </div>
 
-              <h2 className="mb-2 text-3xl font-semibold">
+              <h2 className="mb-4 text-3xl font-semibold">
                 {userData?.name || "User"}
               </h2>
 
-              <div className="flex items-center gap-2 px-2 py-1 mb-6 text-xl bg-white rounded-2xl">
-                <span className="text-orange-500">🔥</span>
-                <span className="text-gray-600">App Streak</span>
+              <div className="flex items-center gap-2 px-3 py-1 mb-6 text-xl bg-white rounded-full">
+                <img alt="bambbuu" src="/svgs/fire.svg" className="w-6 h-6" />
+                <span className="font-semibold text-[#6D6D6D]">App Streak</span>
                 <span className="font-semibold text-green-600 ">
                   {userData?.currentStreak || 0}
                 </span>
               </div>
 
-              <div className="grid w-full grid-cols-3 gap-4 mb-6 text-lg">
-                <div className="flex items-center gap-2">
+              <div className="grid w-full grid-cols-3 gap-4 mb-6 text-xl">
+                <div className="flex items-center gap-1 ">
+                  <img
+                    alt="bambbuu"
+                    src="/svgs/language-circle.svg"
+                    className="w-6 h-6"
+                  />
                   <span className="font-semibold text-black">Native:</span>
                   <span className="font-medium text-gray-600">
                     {userData?.nativeLanguage || "-"}
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
+                  <img
+                    alt="bambbuu"
+                    src="/svgs/language-circle.svg"
+                    className="w-6 h-6"
+                  />
+
                   <span className="font-semibold text-black">Learning:</span>
                   <span className="font-medium text-gray-600">
                     {userData?.learningLanguage || "-"}
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
+                  <img
+                    alt="bambbuu"
+                    src="/svgs/location.svg"
+                    className="w-6 h-6"
+                  />
+
                   <span className="font-semibold text-black">From:</span>
                   <span className="font-medium text-gray-600">
                     {userData?.country || "-"}
@@ -128,7 +145,7 @@ const ProfileUser = () => {
                 </div>
               </div>
 
-              <div className="grid w-full grid-cols-2 gap-4 text-lg">
+              <div className="grid w-full grid-cols-2 gap-4 text-xl">
                 <div className="flex items-center gap-2">
                   <span className="font-semibold text-black">
                     Total Classes Joined:
@@ -149,48 +166,60 @@ const ProfileUser = () => {
             </div>
 
             {/* Navigation Options */}
-            <div className="space-y-4">
+            <div className="mt-2 space-y-4">
               <button
                 onClick={() => navigate("/userEditProfile")}
-                className="flex items-center justify-between w-full p-4 text-green-600 border border-green-500 rounded-full hover:bg-green-50"
+                className="flex items-center justify-between w-full px-6 py-4 text-green-600 border border-green-500 rounded-full hover:bg-green-50"
               >
-                <div className="flex items-center gap-2">
-                  <Edit className="w-5 h-5 " />
-                  <span className="text-black">Edit Profile</span>
+                <div className="flex items-center gap-3">
+                  <img alt="bammbuu" src="/svgs/edit.svg" className="w-6 h-6" />
+                  <span className="text-xl text-black">Edit Profile</span>
                 </div>
                 <ChevronRight className="text-black" />
               </button>
 
               <button
                 onClick={() => navigate("/userSettings")}
-                className="flex items-center justify-between w-full p-4 text-green-600 border border-green-500 rounded-full hover:bg-green-50"
+                className="flex items-center justify-between w-full px-6 py-4 text-green-600 border border-green-500 rounded-full hover:bg-green-50"
               >
-                <div className="flex items-center gap-2">
-                  <Settings className="w-5 h-5" />
-                  <span className="text-black">Settings</span>
+                <div className="flex items-center gap-3">
+                  <img
+                    alt="bammbuu"
+                    src="/svgs/setting.svg"
+                    className="w-6 h-6"
+                  />
+                  <span className="text-xl text-black">Settings</span>
                 </div>
                 <ChevronRight className="text-black" />
               </button>
 
               <button
                 onClick={() => navigate("/aboutBambuuUser")}
-                className="flex items-center justify-between w-full p-4 text-green-600 border border-green-500 rounded-full hover:bg-green-50"
+                className="flex items-center justify-between w-full px-6 py-4 text-green-600 border border-green-500 rounded-full hover:bg-green-50"
               >
-                <div className="flex items-center gap-2">
-                  <Globe className="w-5 h-5" />
+                <div className="flex items-center gap-3">
+                  <img
+                    alt="bammbuu"
+                    src="/svgs/speedometer.svg"
+                    className="w-6 h-6"
+                  />
 
-                  <span className="text-black">About bammbuu</span>
+                  <span className="text-xl text-black">About bammbuu</span>
                 </div>
                 <ChevronRight className="text-black" />
               </button>
 
               <button
                 onClick={() => navigate("/privacyPolicyUser")}
-                className="flex items-center justify-between w-full p-4 text-green-600 border border-green-500 rounded-full hover:bg-green-50"
+                className="flex items-center justify-between w-full px-6 py-4 text-green-600 border border-green-500 rounded-full hover:bg-green-50"
               >
-                <div className="flex items-center gap-2">
-                  <Settings className="w-5 h-5" />
-                  <span className="text-black">Privacy Policy</span>
+                <div className="flex items-center gap-3">
+                  <img
+                    alt="bammbuu"
+                    src="/svgs/document-text.svg"
+                    className="w-6 h-6"
+                  />
+                  <span className="text-xl text-black">Privacy Policy</span>
                 </div>
                 <ChevronRight className="text-black" />
               </button>
@@ -199,11 +228,15 @@ const ProfileUser = () => {
                 onClick={() => {
                   handleSignOut();
                 }}
-                className="flex items-center justify-between w-full p-4 text-red-600 border border-red-500 rounded-full hover:bg-red-50"
+                className="flex items-center justify-between w-full px-6 py-4 text-red-600 border border-red-500 rounded-full hover:bg-red-50"
               >
-                <div className="flex items-center gap-2">
-                  <LogOut className="w-5 h-5" />
-                  <span>Logout</span>
+                <div className="flex items-center gap-3">
+                  <img
+                    alt="bammbuu"
+                    src="/svgs/logout.svg"
+                    className="w-6 h-6"
+                  />
+                  <span className="text-xl">Logout</span>
                 </div>
               </button>
             </div>

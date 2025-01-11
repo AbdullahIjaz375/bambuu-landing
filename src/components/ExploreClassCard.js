@@ -223,7 +223,7 @@ const ExploreClassCard = ({
   return (
     <>
       <div
-        className="transition-transform transform cursor-pointer w-80 hover:scale-105"
+        className="w-80 hover:cursor-pointer"
         onClick={handleCardClick}
         role="button"
         tabIndex={0}

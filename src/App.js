@@ -56,6 +56,7 @@ import ExploreGroupsUser from "./pages/user/ExploreGroupsUser";
 import UserPlans from "./pages/user/UserPlans";
 import VideoCall from "./pages/user/VideoCall";
 import { Video } from "lucide-react";
+import BammbuuPlusGroupsUser from "./pages/user/BammbuuPlusGroupsUser";
 
 const App = () => {
   const { user, streamClient } = useAuth(); // Use useAuth() inside the component
@@ -411,7 +412,14 @@ const App = () => {
               </ProtectedRoute>
             }
           />
-
+          <Route
+            path="/bammbuuPlusGroupsUser"
+            element={
+              <ProtectedRoute requiredRole="student">
+                <BammbuuPlusGroupsUser />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/call/:classId"
             element={

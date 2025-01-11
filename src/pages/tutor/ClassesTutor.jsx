@@ -214,7 +214,7 @@ const ClassesTutor = () => {
                 : `No ${activeTab} classes found.`}
             </p>
           ) : (
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-3 lg:grid-cols-4">
+            <div className="flex flex-wrap gap-4">
               {filteredClasses.map((classItem) => (
                 <ClassCardTutor
                   key={classItem.id}

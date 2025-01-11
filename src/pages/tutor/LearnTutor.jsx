@@ -142,6 +142,12 @@ const LearnTutor = () => {
     setDate(newDate);
   };
 
+  const navigateMonth = (direction) => {
+    const newDate = new Date(date);
+    newDate.setMonth(date.getMonth() + (direction === "next" ? 1 : -1));
+    setDate(newDate);
+  };
+
   const isToday = (date) => {
     const today = new Date();
     return date.toDateString() === today.toDateString();
@@ -207,14 +213,14 @@ const LearnTutor = () => {
               <div className="flex items-center justify-center mb-6">
                 <div className="flex items-center justify-center gap-4">
                   <button
-                    onClick={() => navigateWeek("prev")}
+                    onClick={() => navigateMonth("prev")}
                     className="p-1 text-gray-600 hover:text-gray-800"
                   >
                     <ChevronLeft className="w-6 h-6" />
                   </button>
                   <h2 className="text-xl font-medium">{formatHeader(date)}</h2>
                   <button
-                    onClick={() => navigateWeek("next")}
+                    onClick={() => navigateMonth("next")}
                     className="p-1 text-gray-600 hover:text-gray-800"
                   >
                     <ChevronRight className="w-6 h-6" />
@@ -223,13 +229,17 @@ const LearnTutor = () => {
               </div>
 
               <div className="flex justify-between gap-2">
+                <button
+                  onClick={() => navigateWeek("prev")}
+                  className="p-1 text-gray-600 hover:text-gray-800"
+                >
+                  <ChevronLeft className="w-6 h-6 text-[#3D3D3D]" />
+                </button>
                 {weekDates.map((day) => (
                   <button
                     key={day.toISOString()}
-                    className={`flex flex-col items-center justify-center rounded-full py-4 px-6 transition-colors ${
-                      isToday(day)
-                        ? "bg-green-500 text-white"
-                        : "bg-white border hover:border-gray-300"
+                    className={`flex flex-col items-center justify-center border border-[#888888] rounded-full py-4 px-6 transition-colors ${
+                      isToday(day) ? "bg-[#14B82C] text-white" : "bg-white "
                     }`}
                     onClick={() => setDate(day)}
                   >
@@ -241,6 +251,12 @@ const LearnTutor = () => {
                     </span>
                   </button>
                 ))}
+                <button
+                  onClick={() => navigateWeek("next")}
+                  className="p-1 text-gray-600 hover:text-gray-800"
+                >
+                  <ChevronRight className="w-6 h-6 text-[#3D3D3D]" />
+                </button>
               </div>
             </div>
           </div>
@@ -296,7 +312,7 @@ const LearnTutor = () => {
               <div className="relative w-full mt-2">
                 <div className="flex gap-4 pb-4 overflow-x-auto scrollbar-hide">
                   {classes.map((classData) => (
-                    <div className="flex-none px-2 pt-3  w-[22rem]">
+                    <div className="flex-none px-1 pt-3 ">
                       <ClassCardTutor
                         {...classData}
                         isBammbuu={Boolean(classData.tutorId)}
@@ -346,10 +362,7 @@ const LearnTutor = () => {
               <div className="relative w-full">
                 <div className="flex gap-4 pt-2 pb-4 overflow-x-auto scrollbar-hide">
                   {groups.map((group) => (
-                    <div
-                      key={group.groupId}
-                      className="flex-none px-2 pt-2 w-[22rem]"
-                    >
+                    <div key={group.groupId} className="flex-none px-1 pt-2 ">
                       <GroupCardTutor group={group} />
                     </div>
                   ))}

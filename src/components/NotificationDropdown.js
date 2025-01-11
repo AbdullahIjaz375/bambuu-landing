@@ -33,6 +33,8 @@ const getNotificationSvg = (event) => {
 const NotificationDropdown = () => {
   const navigate = useNavigate();
   const user = JSON.parse(sessionStorage.getItem("user"));
+  const userType = sessionStorage.getItem("userType");
+
   const userId = user?.uid;
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -60,33 +62,46 @@ const NotificationDropdown = () => {
 
   const handleNavigateToPage = (notification) => {
     const { event, data } = notification;
-
+    const isTutor = userType === "tutor";
     switch (event) {
       case "SOMEONE_JOINED_YOUR_GROUP":
-        navigate(`/groupDetailsUser/${data.groupId}`);
+        navigate(
+          isTutor
+            ? `/groupDetailsTutor/${data.groupId}`
+            : `/groupDetailsUser/${data.groupId}`
+        );
         break;
       case "SOMEONE_JOINED_YOUR_CLASS":
-        navigate(`/classDetailsUser/${data.classId}`);
+        navigate(
+          isTutor
+            ? `/classDetailsTutor/${data.classId}`
+            : `/classDetailsUser/${data.classId}`
+        );
         break;
       case "CLASS_IS_STARTING":
-        navigate(`/classDetailsUser/${data.classId}`);
+        navigate(
+          isTutor
+            ? `/classDetailsTutor/${data.classId}`
+            : `/classDetailsUser/${data.classId}`
+        );
         break;
       case "RESOURCE_SENT_BY_TUTOR":
-        // navigate(`/resources/${data.resourceId}`);
-        navigate(`savedRecourcesUser`);
-
+        navigate(isTutor ? `/savedResourcesTutor` : `/savedResourcesUser`);
         break;
       case "PAYMENT_WAS_SUCCESSFUL":
       case "PAYMENT_COULD_NOT_GO_THROUGH":
       case "NEW_CREDITS_ADDED":
-        navigate("/billing");
         break;
       case "CLASS_SLOTS_COMPLETED":
       case "GROUP_CLASS_THRESHOLD_MET":
-        navigate(`/classDetailsUser/${data.classId}`);
+        navigate(
+          isTutor
+            ? `/classDetailsTutor/${data.classId}`
+            : `/classDetailsUser/${data.classId}`
+        );
         break;
       default:
-        navigate("/dashboard");
+        // navigate(isTutor ? "/tutorDashboard" : "/dashboard");
         break;
     }
   };

@@ -333,10 +333,7 @@ const GroupCard = ({ group }) => {
 
   return (
     <>
-      <div
-        className="max-w-md mt-1 transition-transform transform cursor-pointer hover:scale-105"
-        onClick={handleClick}
-      >
+      <div className="max-w-md mt-1 hover:cursor-pointer" onClick={handleClick}>
         <div
           className={`max-w-sm p-4  rounded-3xl ${
             isPremium

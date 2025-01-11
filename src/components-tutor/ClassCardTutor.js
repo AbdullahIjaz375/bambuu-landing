@@ -66,7 +66,7 @@ const ClassCardTutor = ({
   return (
     <>
       <div
-        className="max-w-md transition-transform transform cursor-pointer hover:scale-105  w-[22rem]"
+        className="max-w-md hover:cursor-pointer  w-[22rem]"
         onClick={handleClick}
         role="button"
         tabIndex={0}

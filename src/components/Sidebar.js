@@ -4,47 +4,72 @@ import { auth } from "../firebaseConfig";
 import { signOut } from "firebase/auth";
 import { toast } from "react-toastify";
 import { Menu, Avatar } from "@mantine/core";
-import {
-  BookOpen,
-  Users,
-  GraduationCap,
-  Languages,
-  BookmarkPlus,
-  Calendar,
-  Settings,
-  FileText,
-  Users2,
-  Home,
-} from "lucide-react";
-import { LuCrown, LuLogOut } from "react-icons/lu";
-import { FaAngleDown } from "react-icons/fa6";
+import { ChevronRight } from "lucide-react";
 
 const Sidebar = ({ user }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  // Define menu items for each user type
+  // Define menu items for each user type with both light and dark images
   const studentMenuItems = [
-    { path: "/learn", label: "Learn", icon: BookOpen },
-    { path: "/communityUser", label: "Community", icon: Users },
-    { path: "/superTutorUser", label: "SuperTutor", icon: GraduationCap },
+    {
+      path: "/learn",
+      label: "Learn",
+      lightImage: "/svgs/learn-light.svg",
+      darkImage: "/svgs/learn-dark.svg",
+    },
+    {
+      path: "/communityUser",
+      label: "Community",
+      lightImage: "/svgs/community-light.svg",
+      darkImage: "/svgs/community-dark.svg",
+    },
+    {
+      path: "/superTutorUser",
+      label: "SuperTutor",
+      lightImage: "/svgs/suprtutor-light.svg",
+      darkImage: "/svgs/supertutor-dark.svg",
+    },
     {
       path: "/languageExpertsUser",
       label: "Language Experts",
-      icon: Languages,
+      lightImage: "/svgs/language-expert-light.svg",
+      darkImage: "/svgs/language-expoert-dark.svg",
     },
     {
       path: "/savedRecourcesUser",
       label: "Saved Resources",
-      icon: BookmarkPlus,
+      lightImage: "/svgs/saved-resources-light.svg",
+      darkImage: "/svgs/saved-resources-dark.svg",
+    },
+    {
+      path: "/bammbuuPlusGroupsUser",
+      label: "bammbuu+ Groups",
+      lightImage: "/svgs/bambuu-plu-groups-light.svg",
+      darkImage: "/svgs/bambuu-plu-groups-dark.svg",
     },
   ];
 
   const tutorMenuItems = [
-    { path: "/learn", label: "Home", icon: Home },
-    { path: "/studentsTutor", label: "Students", icon: Users2 },
-    { path: "/savedRecourcesTutor", label: "Resources", icon: BookmarkPlus },
+    {
+      path: "/learn",
+      label: "Home",
+      lightImage: "/svgs/home-dark.svg",
+      darkImage: "/svgs/home-light.svg",
+    },
+    {
+      path: "/studentsTutor",
+      label: "Students",
+      lightImage: "/svgs/community-light.svg",
+      darkImage: "/svgs/community-dark.svg",
+    },
+    {
+      path: "/savedRecourcesTutor",
+      label: "Resources",
+      lightImage: "/svgs/saved-resources-light.svg",
+      darkImage: "/svgs/saved-resources-dark.svg",
+    },
   ];
 
   // Select menu items based on user type
@@ -55,7 +80,7 @@ const Sidebar = ({ user }) => {
     user?.userType === "tutor" ? "/profileTutor" : "/profileUser";
 
   return (
-    <div className="fixed top-2 left-2 flex flex-col h-[calc(100vh-1rem)] bg-[#e6fde9] w-64 py-6 rounded-3xl border-2 border-[#b9f9c2]">
+    <div className="fixed top-2 left-2 flex flex-col h-[calc(100vh-1rem)] bg-[#e6fde9] w-64 pt-6 pb-4 rounded-3xl border-2 border-[#b9f9c2]">
       {/* Logo */}
       <Link to="/" className="px-6 mb-8">
         <img alt="bambuu" src="/images/bambuu-new-logo.png" />
@@ -64,20 +89,23 @@ const Sidebar = ({ user }) => {
       {/* Navigation Menu */}
       <nav className="flex-1 px-4">
         {menuItems.map((item) => {
-          const Icon = item.icon;
           const isActive = location.pathname === item.path;
           return (
             <Link
               key={item.path}
               to={item.path}
-              className={`flex items-center gap-3 px-4 py-2 mb-2 transition-colors rounded-2xl
+              className={`flex text-lg items-center gap-3 pl-3 py-2 mb-2 transition-colors rounded-full
                 ${
                   isActive
-                    ? "bg-green-500 text-white"
-                    : "text-[#072f0f] hover:bg-green-500 hover:text-white"
+                    ? "bg-[#14B82C] text-white"
+                    : "text-[#042F0C] hover:bg-[#6fdb55]"
                 }`}
             >
-              <Icon size={20} />
+              <img
+                src={isActive ? item.lightImage : item.darkImage}
+                alt={item.label}
+                className="w-6 h-6"
+              />
               <span>{item.label}</span>
             </Link>
           );
@@ -85,26 +113,33 @@ const Sidebar = ({ user }) => {
       </nav>
 
       {/* User Profile Section */}
-      <div className="px-2">
+      <div className="px-3">
         {user ? (
           <Link
             to={profilePath}
-            className="flex items-center p-2 space-x-3 transition-colors bg-green-500 rounded-3xl hover:bg-green-600"
+            className="flex items-center justify-between p-2 transition-colors bg-white rounded-2xl "
           >
-            <div className="w-10 h-10 overflow-hidden bg-white rounded-full">
-              <img src={user.photoUrl} alt="Profile" className="w-10 h-10" />
+            <div className="flex flex-row items-center space-x-2">
+              {" "}
+              <div className="w-10 h-10 overflow-hidden bg-white rounded-full">
+                <img src={user.photoUrl} alt="Profile" className="w-10 h-10" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-lg font-semibold text-black">
+                  {user.name || "User"}
+                </span>
+                <span className="text-sm text-gray-700">
+                  {user.email
+                    ? user.email.length > 18
+                      ? user.email.substring(0, 18) + "..."
+                      : user.email
+                    : "email"}
+                </span>
+              </div>
             </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-medium text-black">
-                {user.name || "User"}
-              </span>
-              <span className="text-sm text-gray-700">
-                {user.email
-                  ? user.email.length > 20
-                    ? user.email.substring(0, 22) + "..."
-                    : user.email
-                  : "email"}
-              </span>
+
+            <div>
+              <ChevronRight className="text-[#14B82C]" />
             </div>
           </Link>
         ) : (

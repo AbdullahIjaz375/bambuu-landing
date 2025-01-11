@@ -90,10 +90,7 @@ const ClassCard = ({
   }, [adminId]);
   return (
     <>
-      <div
-        className="transition-transform transform cursor-pointer w-80 hover:scale-105"
-        onClick={handleClick}
-      >
+      <div className=" w-80 hover:cursor-pointer" onClick={handleClick}>
         <div
           className={`flex flex-col h-[26rem] border ${
             isPremium ? "border-[#14b82c]" : "border-[#ffc71f]"

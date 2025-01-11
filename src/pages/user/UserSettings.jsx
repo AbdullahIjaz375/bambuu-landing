@@ -10,11 +10,13 @@ import {
   UserMinus,
   RectangleEllipsis,
   Crown,
+  ChevronLeft,
 } from "lucide-react";
 import { Switch } from "@mantine/core";
 import countryList from "react-select-country-list";
 import ISO6391 from "iso-639-1";
 import Sidebar from "../../components/Sidebar";
+import NotificationsTab from "../../components/NotificationsTab";
 
 const TABS = ["App", "Account", "Notifications"];
 
@@ -79,22 +81,30 @@ const UserSettings = () => {
             {/* App Language Setting */}
             <div className="flex items-center justify-between p-4 text-lg bg-white border border-gray-200 rounded-full">
               <div className="flex items-center gap-3">
-                <Globe2 className="w-5 h-5" />
+                <img
+                  alt="bambuu"
+                  src="/svgs/translate.svg"
+                  className="w-6 h-6"
+                />
                 <span>App Language</span>
               </div>
               <div className="flex items-center gap-2">
                 <span>ENG</span>
-                <ArrowLeft className="w-5 h-5 rotate-180" />
+                <ChevronLeft className="w-5 h-5 rotate-180" />
               </div>
             </div>
 
             {/* Delete Account */}
-            <div className="flex items-center justify-between p-4 text-lg bg-white border border-red-200 rounded-full">
-              <div className="flex items-center gap-3 text-red-500">
-                <UserMinus className="w-5 h-5" />
+            <div className="flex items-center justify-between p-4 text-lg bg-white border border-[#F04438] rounded-full">
+              <div className="flex items-center gap-3 text-[#F04438]">
+                <img
+                  alt="bambuu"
+                  src="/svgs/user-remove.svg"
+                  className="w-6 h-6"
+                />
                 <span>Delete Account</span>
               </div>
-              <ArrowLeft className="w-5 h-5 rotate-180" />
+              <ChevronLeft className="w-5 h-5 rotate-180 text-[#F04438]" />
             </div>
           </div>
         )}
@@ -105,80 +115,29 @@ const UserSettings = () => {
             {/* App Language Setting */}
             <div className="flex items-center justify-between p-4 text-lg bg-white border border-gray-200 rounded-full">
               <div className="flex items-center gap-3">
-                <RectangleEllipsis className="w-5 h-5" />
+                <img
+                  alt="bambuu"
+                  src="/svgs/password-check.svg"
+                  className="w-6 h-6"
+                />{" "}
                 <span>Update Password</span>
               </div>
-              <ArrowLeft className="w-5 h-5 rotate-180" />
+              <ChevronLeft className="w-5 h-5 rotate-180" />
             </div>
 
             {/* Delete Account */}
             <div className="flex items-center justify-between p-4 text-lg bg-white border rounded-full">
               <div className="flex items-center gap-3 text-black">
-                <Crown className="w-5 h-5" />
+                <img alt="bambuu" src="/svgs/crown.svg" className="w-6 h-6" />{" "}
                 <span>Manage Membership</span>
               </div>
-              <ArrowLeft className="w-5 h-5 rotate-180" />
+              <ChevronLeft className="w-5 h-5 rotate-180" />
             </div>
           </div>
         )}
 
         {/* Notifications Tab Content */}
-        {activeTab === "Notifications" && (
-          <div className="max-w-2xl">
-            <h2 className="mb-6 text-xl font-medium">In-App Notification</h2>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-2xl">
-                <span className="text-lg">Class Reminder Notification</span>
-                <Switch
-                  checked={notifications.classReminder}
-                  onChange={() => handleNotificationChange("classReminder")}
-                  size="md"
-                  color="green"
-                />
-              </div>
-
-              <div className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-2xl">
-                <span className="text-lg">New Message Notification</span>
-                <Switch
-                  checked={notifications.newMessage}
-                  onChange={() => handleNotificationChange("newMessage")}
-                  size="md"
-                  color="green"
-                />
-              </div>
-
-              <div className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-2xl">
-                <span className="text-lg">Resource Assign Notification</span>
-                <Switch
-                  checked={notifications.resourceAssign}
-                  onChange={() => handleNotificationChange("resourceAssign")}
-                  size="md"
-                  color="green"
-                />
-              </div>
-
-              <div className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-2xl">
-                <span className="text-lg">Group Chat Notification</span>
-                <Switch
-                  checked={notifications.groupChat}
-                  onChange={() => handleNotificationChange("groupChat")}
-                  size="md"
-                  color="green"
-                />
-              </div>
-
-              <div className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-2xl">
-                <span className="text-lg">App Updates</span>
-                <Switch
-                  checked={notifications.appUpdates}
-                  onChange={() => handleNotificationChange("appUpdates")}
-                  size="md"
-                  color="green"
-                />
-              </div>
-            </div>
-          </div>
-        )}
+        {activeTab === "Notifications" && <NotificationsTab />}
       </div>
     </div>
   );

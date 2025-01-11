@@ -206,10 +206,7 @@ const LearnLanguageUser = () => {
               <div className="relative w-full">
                 <div className="flex gap-2 pb-4 overflow-x-auto scrollbar-hide">
                   {myClasses.map((classItem) => (
-                    <div
-                      key={classItem.id}
-                      className="flex-none px-2 pt-3 w-[22rem]"
-                    >
+                    <div key={classItem.id} className="flex-none px-1 pt-3 ">
                       <ClassCard
                         {...classItem}
                         isBammbuu={Boolean(classItem.tutorId)}
@@ -272,10 +269,7 @@ const LearnLanguageUser = () => {
               <div className="relative w-full">
                 <div className="flex gap-2 pb-4 overflow-x-auto scrollbar-hide">
                   {myGroups.map((group) => (
-                    <div
-                      key={group.id}
-                      className="flex-none px-2 pt-2 w-[22rem]"
-                    >
+                    <div key={group.id} className="flex-none px-1 pt-2">
                       <GroupCard group={group} />
                     </div>
                   ))}
@@ -331,10 +325,7 @@ const LearnLanguageUser = () => {
               <div className="relative w-full">
                 <div className="flex gap-2 pb-4 overflow-x-auto scrollbar-hide">
                   {exploreClasses.map((classItem) => (
-                    <div
-                      key={classItem.id}
-                      className="flex-none px-2 pt-3 w-[22rem]"
-                    >
+                    <div key={classItem.id} className="flex-none px-1 pt-3 ">
                       <ExploreClassCard
                         {...classItem}
                         isBammbuu={Boolean(classItem.tutorId)}
@@ -389,10 +380,7 @@ const LearnLanguageUser = () => {
               <div className="relative w-full">
                 <div className="flex gap-2 pb-4 overflow-x-auto scrollbar-hide">
                   {exploreGroups.map((group) => (
-                    <div
-                      key={group.id}
-                      className="flex-none px-2 pt-2 w-[22rem]"
-                    >
+                    <div key={group.id} className="flex-none px-1 pt-2">
                       <ExploreGroupCard group={group} />
                     </div>
                   ))}

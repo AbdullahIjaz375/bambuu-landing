@@ -3,58 +3,41 @@ import { Search, ArrowLeft } from "lucide-react";
 import Sidebar from "../../components/Sidebar";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import GroupCardTutor from "../../components-tutor/GroupCardTutor";
+import GroupCard from "../../components/GroupCard";
 import { collection, doc, getDoc } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import { ClipLoader } from "react-spinners";
 
-const GroupsTutor = () => {
-  const { user } = useAuth();
+const BammbuuPlusGroupsUser = () => {
+  const { user, setUser } = useAuth();
   const navigate = useNavigate();
   const [groups, setGroups] = useState([]);
   const [filteredGroups, setFilteredGroups] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingGroups, setLoadingGroups] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    const fetchGroups = async () => {
-      try {
-        setLoading(true);
-
-        // Get the tutor document
-        const tutorDoc = await getDoc(doc(db, "tutors", user.uid));
-
-        if (!tutorDoc.exists()) {
-          console.error("Tutor document not found");
-          setLoading(false);
-          return;
-        }
-
-        const tutorData = tutorDoc.data();
-        const tutorGroups = tutorData.tutorOfGroups || [];
-
-        // Fetch all groups from tutorOfGroups array
+    if (user && user.joinedGroups) {
+      const fetchGroups = async () => {
         const fetchedGroups = [];
-        for (const groupId of tutorGroups) {
+
+        for (let groupId of user.joinedGroups) {
           const groupRef = doc(db, "groups", groupId);
           const groupDoc = await getDoc(groupRef);
 
-          if (groupDoc.exists()) {
-            fetchedGroups.push({ id: groupId, ...groupDoc.data() });
+          if (groupDoc.exists() && groupDoc.data().isPremium === true) {
+            fetchedGroups.push({ id: groupDoc.id, ...groupDoc.data() });
           }
         }
-
         setGroups(fetchedGroups);
         setFilteredGroups(fetchedGroups);
-      } catch (error) {
-        console.error("Error fetching groups:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+        setLoadingGroups(false);
+        console.log("my groups", groups);
+      };
 
-    if (user) {
       fetchGroups();
+    } else {
+      setLoadingGroups(false);
     }
   }, [user]);
 
@@ -70,11 +53,15 @@ const GroupsTutor = () => {
   }, [searchQuery, groups]);
 
   const handleBack = () => {
-    navigate("/learn");
+    navigate(-1);
   };
 
   const handleCreateGroup = () => {
-    navigate("/addGroupsTutor");
+    navigate("/addGroupsUser"); // Update with your actual route
+  };
+
+  const handleJoinGroup = () => {
+    navigate("/learnLanguageUser"); // Update with your actual route
   };
 
   return (
@@ -90,7 +77,7 @@ const GroupsTutor = () => {
             >
               <ArrowLeft size="30" />
             </button>
-            <h1 className="text-4xl font-semibold">My Groups</h1>
+            <h1 className="text-4xl font-semibold">bammbuu+ Groups</h1>
           </div>
           <div className="flex flex-row items-center justify-center space-x-4">
             <button
@@ -98,6 +85,12 @@ const GroupsTutor = () => {
               className="px-6 py-3 text-[#042f0c] text-xl font-medium bg-white border border-[#5d5d5d] rounded-full"
             >
               Create New Group
+            </button>
+            <button
+              onClick={handleJoinGroup}
+              className="px-6 py-3 text-[#042f0c] text-xl font-medium bg-white border border-[#5d5d5d] rounded-full"
+            >
+              Join a Group
             </button>
           </div>
         </div>
@@ -113,14 +106,16 @@ const GroupsTutor = () => {
           />
         </div>
 
-        {loading ? (
+        {loadingGroups ? (
           <div className="flex items-center justify-center min-h-[50vh]">
             <ClipLoader color="#14B82C" size={50} />
           </div>
         ) : filteredGroups.length > 0 ? (
           <div className="flex flex-wrap gap-4">
             {filteredGroups.map((group) => (
-              <GroupCardTutor key={group.id} group={group} />
+              <div key={group.id} className="flex-none w-80">
+                <GroupCard group={group} />
+              </div>
             ))}
           </div>
         ) : (
@@ -128,7 +123,7 @@ const GroupsTutor = () => {
             <p className="text-xl text-gray-500">
               {searchQuery
                 ? "No groups found matching your search."
-                : "You haven't created any groups yet. Start by creating a new group!"}
+                : "You haven't joined any groups yet. Start by joining or creating a group!"}
             </p>
           </div>
         )}
@@ -137,4 +132,4 @@ const GroupsTutor = () => {
   );
 };
 
-export default GroupsTutor;
+export default BammbuuPlusGroupsUser;
