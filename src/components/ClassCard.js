@@ -195,9 +195,10 @@ const ClassCard = ({
                 <Users className="w-5 h-5 text-gray-600" />
 
                 {isPremium ? (
-                  <span className="text-[#454545] text-md">
-                    {classMemberIds.length}/1
-                  </span>
+                  // <span className="text-[#454545] text-md">
+                  //   {classMemberIds.length}/1
+                  // </span>
+                  <></>
                 ) : (
                   <span className="text-[#454545] text-md">
                     {classMemberIds.length}/{availableSpots}

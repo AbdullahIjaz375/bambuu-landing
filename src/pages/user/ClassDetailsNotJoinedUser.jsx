@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ArrowLeft, User, Clock, Calendar, MapPin } from "lucide-react";
+import { ArrowLeft, User, Clock, Calendar, MapPin, Users } from "lucide-react";
 import { doc, updateDoc, arrayUnion, getDoc } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import { ClipLoader } from "react-spinners";
@@ -9,6 +9,7 @@ import Modal from "react-modal";
 import { Timestamp } from "firebase/firestore";
 import { addMemberToStreamChannel } from "../../services/streamService";
 import { ChannelType } from "../../config/stream";
+import ClassInfoCard from "../../components/ClassInfoCard";
 Modal.setAppElement("#root");
 
 const ClassDetailsNotJoinedUser = ({ onClose }) => {
@@ -362,16 +363,14 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
     return slots;
   };
   const renderRecurrenceOptions = () => (
-    <div className="space-y-2">
-      <label className="block text-sm font-medium text-gray-700">
-        Class Type
-      </label>
+    <div className="space-y-4 ">
+      <label className="block text-xl font-semibold">Class Type</label>
       <div className="flex flex-wrap gap-3">
         {classData?.recurrenceTypes?.map((type) => (
           <label
             key={type}
             className={`
-              inline-flex items-center px-4 py-2 rounded-full cursor-pointer border
+              inline-flex text-lg items-center px-4 py-2 rounded-full cursor-pointer border
               ${
                 selectedRecurrenceType === type
                   ? "bg-green-50 text-black"
@@ -385,7 +384,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
               checked={selectedRecurrenceType === type}
               onChange={(e) => setSelectedRecurrenceType(e.target.value)}
             />
-            <span>{type}</span>
+            <span className="text-md">{type}</span>
           </label>
         ))}
       </div>
@@ -402,12 +401,10 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
 
     return (
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700">
-          Total Classes
-        </label>
+        <label className="block text-xl font-medium ">Total Classes</label>
         <input
           type="number"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+          className="w-full px-3 py-2 text-lg border border-gray-300 rounded-lg"
           placeholder="Enter total number of classes"
           value={totalClasses}
           onChange={(e) => setTotalClasses(e.target.value)}
@@ -477,89 +474,90 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
                     <h3 className="mb-2 text-2xl font-medium">
                       {classData.className}
                     </h3>
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="px-3 py-1 text-sm bg-yellow-200 rounded-full">
-                        {classData.language}
-                      </span>
-                      <span className="px-3 py-1 text-sm bg-yellow-200 rounded-full">
+                    <div className="flex items-center gap-4 mb-2">
+                      <div className="flex flex-row items-center space-x-1">
+                        <img
+                          src={
+                            classData.language === "English"
+                              ? "/svgs/xs-us.svg"
+                              : "/svgs/xs-spain.svg"
+                          }
+                          alt={
+                            classData.language === "English"
+                              ? "US Flag"
+                              : "Spain Flag"
+                          }
+                          className="w-5"
+                        />{" "}
+                        <span className=" text-md">{classData.language}</span>
+                      </div>
+
+                      <span className="px-3 py-[2px] bg-yellow-200 rounded-full text-md">
                         {classData.languageLevel}
                       </span>
                     </div>
-                    <div className="flex flex-row items-center justify-between mt-4 space-x-6">
-                      {" "}
-                      <div className="flex flex-col gap-2 mb-4">
+                    <div className="flex flex-col mt-4 space-y-4">
+                      {/* First Row */}
+                      <div className="flex items-center justify-between space-x-8">
                         <div className="flex items-center gap-2">
-                          <User />
-                          <span className="text-sm">
-                            {classData.adminName} (Teacher)
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Clock />
-                          <span className="text-sm">
-                            {classData.classDuration} minutes
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex flex-col gap-2 mb-4">
-                        <div className="flex items-center gap-2">
-                          <Calendar />
+                          <Calendar className="text-gray-600" size={18} />
                           <span className="text-sm">
                             {new Date(
                               classData.classDateTime.seconds * 1000
                             ).toLocaleString()}
                           </span>
                         </div>
+
                         <div className="flex items-center gap-2">
-                          <MapPin />
+                          <Clock className="text-gray-600" size={18} />
+                          <span className="text-sm">
+                            {classData.classDuration} minutes
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Second Row */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Users className="text-gray-600" size={18} />
+                          {classData.classType === "Group Premium" ||
+                          classData.classType === "Individual Premium" ? (
+                            <></>
+                          ) : (
+                            <span className="text-sm text-[#454545]">
+                              {classData.classMemberIds.length}/
+                              {classData.availableSpots}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <MapPin className="text-gray-600" size={18} />
                           <span className="text-sm">
                             {classData.classLocation}
                           </span>
                         </div>
-                      </div>{" "}
+                      </div>
                     </div>
 
-                    <p className="mb-6 text-gray-600">
+                    <p className="mt-4 mb-6 text-gray-600">
                       {classData.classDescription}
                     </p>
                   </div>
 
                   <div className="w-full space-y-4">
-                    {groupTutor && (
-                      <div className="flex flex-row items-center w-full max-w-lg gap-4 p-4 bg-white border border-green-500 rounded-xl">
-                        <img
-                          alt={`${groupTutor.name}'s profile`}
-                          src={groupTutor.photoUrl}
-                          className="object-cover w-28 h-28 rounded-xl"
-                        />
-                        <div className="flex flex-col items-start flex-1 gap-2">
-                          <h1 className="text-xl font-semibold">
-                            {groupTutor.name}
-                          </h1>
-                          <p className="text-sm text-left text-gray-600">
-                            {groupTutor?.bio
-                              ? groupTutor.bio
-                                  .split(" ")
-                                  .slice(0, 12)
-                                  .join(" ") + "..."
-                              : null}
-                          </p>
-                          <div className="flex items-center gap-6">
-                            <div className="flex items-center gap-1">
-                              <span className="text-gray-700">
-                                {groupTutor.teachingLanguage} (Teaching)
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <MapPin size={16} className="text-gray-500" />
-                              <span className="text-gray-700">
-                                {groupTutor.country}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
+                    <div className="space-y-1">
+                      {" "}
+                      {classData.classType === "Group Premium" ||
+                      classData.classType === "Individual Premium" ? (
+                        <h1 className="text-xl font-semibold">Instructor</h1>
+                      ) : (
+                        <h1 className="text-xl font-semibold">Group</h1>
+                      )}
+                      <ClassInfoCard
+                        classData={classData}
+                        groupTutor={groupTutor}
+                      />
+                    </div>
                     <button
                       className="w-full px-4 py-2 text-black bg-[#14b82c] border border-black rounded-full hover:bg-[#14b82c]"
                       onClick={handleBookClass}
