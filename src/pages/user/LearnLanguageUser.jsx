@@ -412,27 +412,31 @@ const LearnLanguageUser = () => {
             <h1 className="text-4xl font-semibold">Learn Language</h1>
           </div>
           <div className="flex flex-row items-center justify-center space-x-4">
-            <div className="flex max-w-2xl gap-3 p-1 mb-6">
-              <button
-                onClick={() => setActiveTab("myBambuu")}
-                className={`px-6 py-2.5 text-md font-medium rounded-full transition-all duration-200 ${
-                  activeTab === "myBambuu"
-                    ? "bg-[#ffbf00] text-[#042f0c] border border-[#042f0c]"
-                    : "bg-white text-[#042f0c] border border-gray-200 hover:bg-gray-50"
-                }`}
-              >
-                My Bambuuu
-              </button>
-              <button
-                onClick={() => setActiveTab("exploreBambuu")}
-                className={`px-6 py-2.5 text-md font-medium rounded-full transition-all duration-200 ${
-                  activeTab === "exploreBambuu"
-                    ? "bg-[#ffbf00] text-[#042f0c] border border-[#042f0c]"
-                    : "bg-white text-[#042f0c] border border-gray-200 hover:bg-gray-50"
-                }`}
-              >
-                Explore Bambuuu
-              </button>
+            <div className="flex justify-center">
+              <div className="inline-flex bg-gray-100 border border-gray-300 rounded-full">
+                <button
+                  onClick={() => setActiveTab("myBambuu")}
+                  className={`px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors
+            ${
+              activeTab === "myBambuu"
+                ? "bg-[#FFBF00] border border-[#042F0C]"
+                : "bg-transparent"
+            }`}
+                >
+                  My Bambuuu
+                </button>
+                <button
+                  onClick={() => setActiveTab("exploreBambuu")}
+                  className={`px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors
+            ${
+              activeTab === "exploreBambuu"
+                ? "bg-[#FFBF00] border border-[#042F0C]"
+                : "bg-transparent"
+            }`}
+                >
+                  Explore Bambuuu
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -9,6 +9,7 @@ import Modal from "react-modal";
 import { updateDoc } from "firebase/firestore";
 import { Timestamp } from "firebase/firestore"; // Import Timestamp
 import ClassInfoCard from "../../components/ClassInfoCard";
+import EditClassModal from "../../components/EditClassModal";
 
 Modal.setAppElement("#root");
 
@@ -381,6 +382,11 @@ const ClassDetailsUser = ({ onClose }) => {
       setShowLeaveConfirmation(false);
     }
   };
+
+  //-------------------------------------------------edit class----------------------------------------//
+
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
   //---------------------------------------------------------------------------------------------------//
   const getClassTypeColor = (type) => {
     switch (type) {
@@ -656,12 +662,20 @@ const ClassDetailsUser = ({ onClose }) => {
                     </button>
 
                     {user.uid === classData.adminId ? (
-                      <button
-                        className="w-full px-4 py-2 text-red-500 border border-red-500 rounded-full"
-                        onClick={() => setShowDeleteConfirmation(true)}
-                      >
-                        Delete Class
-                      </button>
+                      <>
+                        <button
+                          className="w-full px-4 py-2 text-black bg-white border border-black rounded-full"
+                          onClick={() => setIsEditModalOpen(true)}
+                        >
+                          Edit Class Details
+                        </button>
+                        <button
+                          className="w-full px-4 py-2 text-red-500 border border-red-500 rounded-full"
+                          onClick={() => setShowDeleteConfirmation(true)}
+                        >
+                          Delete Class
+                        </button>
+                      </>
                     ) : (
                       <button
                         className="w-full px-4 py-2 text-red-500 border border-red-500 rounded-full"
@@ -841,6 +855,13 @@ const ClassDetailsUser = ({ onClose }) => {
           </div>
         </div>
       </Modal>
+
+      <EditClassModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        classData={classData}
+        setClassData={setClassData}
+      />
     </>
   );
 };

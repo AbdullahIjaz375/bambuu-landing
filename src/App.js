@@ -53,11 +53,13 @@ import ClassDetailsNotJoinedUser from "./pages/user/ClassDetailsNotJoinedUser";
 import ClassDetailsTutor from "./pages/tutor/ClassDetailsTutor";
 import ExploreClassesUser from "./pages/user/ExploreClassesUser";
 import ExploreGroupsUser from "./pages/user/ExploreGroupsUser";
-import UserPlans from "./pages/user/UserPlans";
 import VideoCall from "./pages/user/VideoCall";
 import { Video } from "lucide-react";
 import BammbuuPlusGroupsUser from "./pages/user/BammbuuPlusGroupsUser";
 import SingupSplash from "./pages/SignupSplash";
+import EditGroupsUser from "./pages/user/EditGroupUser";
+import EditGroupsTutor from "./pages/tutor/EditGroupTutor";
+import EditClassPage from "./pages/tutor/EditClassDetails";
 
 const App = () => {
   const { user, streamClient } = useAuth(); // Use useAuth() inside the component
@@ -432,10 +434,26 @@ const App = () => {
             }
           />
           <Route
-            path="/plans"
+            path="/editGroup/:groupId"
             element={
               <ProtectedRoute requiredRole="student">
-                <UserPlans />
+                {<EditGroupsUser />}
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/editGroupTutor/:groupId"
+            element={
+              <ProtectedRoute requiredRole="tutor">
+                {<EditGroupsTutor />}
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/edit-class/:classId"
+            element={
+              <ProtectedRoute requiredRole="tutor">
+                {<EditClassPage />}
               </ProtectedRoute>
             }
           />

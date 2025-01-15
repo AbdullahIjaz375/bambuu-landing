@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Clock, Calendar, Users, User, X, MapPin } from "lucide-react";
 import Modal from "react-modal";
-
+import PlansModal from "./PlansModal";
 import { useAuth } from "../context/AuthContext";
 import { doc, updateDoc, arrayUnion, getDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -122,6 +122,7 @@ const ExploreClassCard = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isBookingConfirmationOpen, setIsBookingConfirmationOpen] =
     useState(false);
+  const [isPlansModalOpen, setIsPlansModalOpen] = useState(false);
 
   // Determine which user details to display based on isBammbuu flag
   const isPremium =
@@ -163,7 +164,8 @@ const ExploreClassCard = ({
         }
       );
     } else {
-      navigate(`/newClassDetailsUser/${classId}`);
+      // navigate(`/newClassDetailsUser/${classId}`);
+      setIsPlansModalOpen(true);
     }
   };
 
@@ -517,6 +519,10 @@ const ExploreClassCard = ({
           </div>
         </div>
       </Modal>
+      <PlansModal
+        isOpen={isPlansModalOpen}
+        onClose={() => setIsPlansModalOpen(false)}
+      />
     </>
   );
 };

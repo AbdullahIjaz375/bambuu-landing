@@ -240,27 +240,31 @@ const ClassesUser = () => {
         </div>
 
         <div className="flex flex-row items-center justify-between">
-          <div className="flex max-w-2xl gap-3 p-1 mb-6">
-            <button
-              onClick={() => setActiveTab("group")}
-              className={`px-6 py-2.5 text-md font-medium rounded-full transition-all duration-200 ${
-                activeTab === "group"
-                  ? "bg-[#ffbf00] text-[#042f0c] border border-[#042f0c]"
-                  : "bg-white text-[#042f0c] border border-gray-200 hover:bg-gray-50"
-              }`}
-            >
-              Group Conversation Classes
-            </button>
-            <button
-              onClick={() => setActiveTab("bammbuu")}
-              className={`px-6 py-2.5 text-md font-medium rounded-full transition-all duration-200 ${
-                activeTab === "bammbuu"
-                  ? "bg-[#ffbf00] text-[#042f0c] border border-[#042f0c]"
-                  : "bg-white text-[#042f0c] border border-gray-200 hover:bg-gray-50"
-              }`}
-            >
-              bammbuu+ Classes
-            </button>
+          <div className="flex justify-center">
+            <div className="inline-flex bg-gray-100 border border-gray-300 rounded-full">
+              <button
+                onClick={() => setActiveTab("group")}
+                className={`px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors
+            ${
+              activeTab === "group"
+                ? "bg-[#FFBF00] border border-[#042F0C]"
+                : "bg-transparent"
+            }`}
+              >
+                Group Conversation Classes
+              </button>
+              <button
+                onClick={() => setActiveTab("bammbuu")}
+                className={`px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors
+            ${
+              activeTab === "bammbuu"
+                ? "bg-[#FFBF00] border border-[#042F0C]"
+                : "bg-transparent"
+            }`}
+              >
+                bammbuu+ Classes
+              </button>
+            </div>
           </div>
 
           <div className="relative mb-6">

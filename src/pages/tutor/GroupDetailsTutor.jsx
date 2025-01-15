@@ -785,18 +785,40 @@ const GroupDetailsTutor = ({ onClose }) => {
                       {group.groupName}
                     </h3>
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="px-3 py-1 text-sm bg-yellow-200 rounded-full">
-                        {group.groupLearningLanguage}
-                      </span>
-                      <span className="px-3 py-1 text-sm bg-yellow-200 rounded-full">
-                        Advanced
-                      </span>
+                      <div className="flex flex-row items-center space-x-1">
+                        <img
+                          src={
+                            group.language === "English"
+                              ? "/svgs/xs-us.svg"
+                              : "/svgs/xs-spain.svg"
+                          }
+                          alt={
+                            group.language === "English"
+                              ? "US Flag"
+                              : "Spain Flag"
+                          }
+                          className="w-5"
+                        />{" "}
+                        <span className=" text-md">
+                          {group.groupLearningLanguage}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 mb-4">
-                      <User />
-                      <span className="text-sm">
-                        {group.groupAdminName} (Admin)
-                      </span>
+                    <div className="flex flex-row items-center mt-2 space-x-28">
+                      <div className="flex items-center gap-1 mb-4">
+                        <img
+                          src={group.groupAdminImageUrl}
+                          alt="admin"
+                          className="w-5 rounded-full"
+                        />{" "}
+                        <span className="text-sm text-gray-800">
+                          {group.groupAdminName} (Admin)
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1 mb-4">
+                        <Users className="w-5" />
+                        <span className="text-sm text-gray-800">2k+</span>
+                      </div>
                     </div>
                     <p className="mb-6 text-gray-600">
                       {group.groupDescription}
@@ -815,12 +837,20 @@ const GroupDetailsTutor = ({ onClose }) => {
                       View Group Chat
                     </button>
                     {user.uid === group.groupAdminId ? (
-                      <button
-                        className="w-full px-4 py-2 text-red-500 border border-red-500 rounded-full"
-                        onClick={() => setShowDeleteConfirmation(true)}
-                      >
-                        Delete Group
-                      </button>
+                      <>
+                        <button
+                          className="w-full px-4 py-2 mb-2 text-black bg-white border border-black rounded-full"
+                          onClick={() => navigate(`/editGroupTutor/${groupId}`)}
+                        >
+                          Edit Group Details
+                        </button>
+                        <button
+                          className="w-full px-4 py-2 text-red-500 border border-red-500 rounded-full"
+                          onClick={() => setShowDeleteConfirmation(true)}
+                        >
+                          Delete Group
+                        </button>
+                      </>
                     ) : (
                       <button
                         className="w-full px-4 py-2 text-red-500 border border-red-500 rounded-full"
@@ -837,28 +867,33 @@ const GroupDetailsTutor = ({ onClose }) => {
               <div className="flex flex-col flex-1 min-h-0">
                 {/* Previous code remains the same until the buttons section */}
                 <div className="flex flex-row items-center justify-between mb-6">
-                  <div className="flex gap-2">
-                    <button
-                      className={`px-6 py-2 rounded-full ${
-                        activeTab === "Classes"
-                          ? "bg-yellow-400 text-black"
-                          : "bg-white text-black"
-                      }`}
-                      onClick={() => setActiveTab("Classes")}
-                    >
-                      Classes
-                    </button>
-                    <button
-                      className={`px-6 py-2 rounded-full ${
-                        activeTab === "Members"
-                          ? "bg-yellow-400 text-black"
-                          : "bg-white text-black"
-                      }`}
-                      onClick={() => setActiveTab("Members")}
-                    >
-                      Members
-                    </button>
+                  <div className="flex justify-center">
+                    <div className="inline-flex bg-gray-100 border border-gray-300 rounded-full">
+                      <button
+                        onClick={() => setActiveTab("Classes")}
+                        className={`px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors
+            ${
+              activeTab === "Classes"
+                ? "bg-[#FFBF00] border border-[#042F0C]"
+                : "bg-transparent"
+            }`}
+                      >
+                        Classes
+                      </button>
+                      <button
+                        onClick={() => setActiveTab("Members")}
+                        className={`px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors
+            ${
+              activeTab === "Members"
+                ? "bg-[#FFBF00] border border-[#042F0C]"
+                : "bg-transparent"
+            }`}
+                      >
+                        Members
+                      </button>
+                    </div>
                   </div>
+
                   {user.uid === group.groupAdminId && (
                     <button
                       className="bg-[#14b82c] border border-[#19291c] text-[#19291c] px-6 py-2 rounded-full"

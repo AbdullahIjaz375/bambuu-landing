@@ -166,29 +166,32 @@ const ClassesTutor = () => {
           </div>
 
           <div className="flex flex-row items-center justify-between">
-            <div className="flex max-w-2xl gap-3 p-1 mb-6">
-              <button
-                onClick={() => setActiveTab("booked")}
-                className={`px-6 py-2.5 text-md font-medium rounded-full transition-all duration-200 ${
-                  activeTab === "booked"
-                    ? "bg-[#ffbf00] text-[#042f0c] border border-[#042f0c]"
-                    : "bg-white text-[#042f0c] border border-gray-200 hover:bg-gray-50"
-                }`}
-              >
-                Booked Classes
-              </button>
-              <button
-                onClick={() => setActiveTab("available")}
-                className={`px-6 py-2.5 text-md font-medium rounded-full transition-all duration-200 ${
-                  activeTab === "available"
-                    ? "bg-[#ffbf00] text-[#042f0c] border border-[#042f0c]"
-                    : "bg-white text-[#042f0c] border border-gray-200 hover:bg-gray-50"
-                }`}
-              >
-                Available Classes
-              </button>
+            <div className="flex justify-center">
+              <div className="inline-flex bg-gray-100 border border-gray-300 rounded-full">
+                <button
+                  onClick={() => setActiveTab("booked")}
+                  className={`px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors
+            ${
+              activeTab === "booked"
+                ? "bg-[#FFBF00] border border-[#042F0C]"
+                : "bg-transparent"
+            }`}
+                >
+                  Booked Classes
+                </button>
+                <button
+                  onClick={() => setActiveTab("available")}
+                  className={`px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors
+            ${
+              activeTab === "available"
+                ? "bg-[#FFBF00] border border-[#042F0C]"
+                : "bg-transparent"
+            }`}
+                >
+                  Available Classes
+                </button>
+              </div>
             </div>
-
             <div className="relative mb-6">
               <Search className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
               <input
