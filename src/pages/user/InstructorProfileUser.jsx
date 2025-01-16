@@ -138,7 +138,7 @@ const InstructorProfileUser = () => {
     const enrolledClasses = user?.enrolledClasses || [];
 
     return (
-      <div className="flex flex-wrap items-center gap-4 p-4">
+      <div className="flex flex-wrap items-center gap-4 p-4 ">
         {classes.map((classItem) => {
           const isEnrolled = enrolledClasses.includes(classItem.classId);
 
@@ -244,7 +244,7 @@ const InstructorProfileUser = () => {
             {" "}
             {/* min-h-0 is crucial for nested flex scroll */}
             {/* Left sidebar - Fixed height */}
-            <div className="w-1/4 p-6 bg-[#ffffea] rounded-3xl shrink-0">
+            <div className="w-1/4 p-6 bg-[#E6FDE9] rounded-3xl shrink-0">
               <div className="flex flex-col items-center justify-between h-full text-center">
                 <div className="flex flex-col items-center text-center">
                   <img
@@ -253,33 +253,64 @@ const InstructorProfileUser = () => {
                     className="w-32 h-32 mb-4 rounded-full"
                   />
                   <h3 className="mb-2 text-2xl font-medium">{tutor.name}</h3>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="px-3 py-1 text-sm bg-yellow-200 rounded-full">
-                      {tutor.teachingLanguage}
-                    </span>
-                    <span className="px-3 py-1 text-sm bg-yellow-200 rounded-full">
-                      {tutor.teachingLanguageProficiency}
-                    </span>
+
+                  <div className="flex flex-row items-center justify-center my-4 space-x-16">
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                      <div className="flex items-center gap-1 ">
+                        <img
+                          alt="bammbuu"
+                          src="/svgs/language.svg"
+                          className="h-5"
+                        />
+                        <span className="text-sm">
+                          <span className="font-semibold">Native :</span>
+                          {tutor.nativeLanguage}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1 ">
+                        <img
+                          alt="bammbuu"
+                          src="/svgs/location.svg"
+                          className="h-5"
+                        />
+                        <span className="text-sm">
+                          <span className="font-semibold">From :</span>{" "}
+                          {tutor.country}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                      <div className="flex items-center gap-1 ">
+                        <img
+                          alt="bammbuu"
+                          src="/svgs/language.svg"
+                          className="h-5"
+                        />
+                        <span className="text-sm">
+                          <span className="font-semibold">Teacing :</span>
+                          {tutor.teachingLanguage}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1 ">
+                        <img
+                          alt="bammbuu"
+                          src="/svgs/users.svg"
+                          className="h-5"
+                        />
+                        <span className="text-sm">
+                          <span className="font-semibold">Students :</span> 200k
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <User />
-                    <span className="text-sm">
-                      Native {tutor.nativeLanguage} Speaker
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <Users />
-                    <span className="text-sm">
-                      {tutor.tutorStudentIds?.length || 0} Students
-                    </span>
-                  </div>
+
                   <p className="mb-6 text-gray-600">{tutor.bio}</p>
                 </div>
 
                 <div className="w-full">
                   <button
                     onClick={sendMessageClicked}
-                    className="w-full px-4 py-2 mb-2 text-black border border-gray-300 rounded-full bg-[#fffbc5]"
+                    className="w-full px-4 py-2 mb-2 text-black border border-black rounded-full bg-[#fffbc5]"
                   >
                     Send Message
                   </button>

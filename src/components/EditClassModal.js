@@ -18,7 +18,17 @@ const EditClassModal = ({
 
   useEffect(() => {
     if (initialClassData) {
-      setClassData(initialClassData);
+      // Ensure classDateTime is properly converted to a Date object
+      const dateTime = initialClassData.classDateTime?.toDate?.()
+        ? initialClassData.classDateTime.toDate()
+        : initialClassData.classDateTime instanceof Date
+        ? initialClassData.classDateTime
+        : new Date();
+
+      setClassData({
+        ...initialClassData,
+        classDateTime: dateTime,
+      });
       setClassPreviewImage(initialClassData.imageUrl);
     }
   }, [initialClassData]);
@@ -32,6 +42,27 @@ const EditClassModal = ({
         setClassData((prev) => ({ ...prev, imageUrl: reader.result }));
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const getFormattedDate = (date) => {
+    if (!date) return "";
+    try {
+      return date instanceof Date ? date.toISOString().split("T")[0] : "";
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "";
+    }
+  };
+
+  // Safely format time for input value
+  const getFormattedTime = (date) => {
+    if (!date) return "";
+    try {
+      return date instanceof Date ? date.toTimeString().slice(0, 5) : "";
+    } catch (error) {
+      console.error("Error formatting time:", error);
+      return "";
     }
   };
 
@@ -50,6 +81,23 @@ const EditClassModal = ({
       classData.classDateTime &&
       (classData.classLocation !== "Physical" || classData.classAddress?.trim())
     );
+  };
+  const handleClassTypeSelect = (type) => {
+    const isIndividualPremium = classData.classType === "Individual Premium";
+    let newTypes;
+
+    if (isIndividualPremium) {
+      newTypes = classData.recurrenceTypes.includes(type)
+        ? classData.recurrenceTypes.filter((t) => t !== type)
+        : [...classData.recurrenceTypes, type];
+    } else {
+      newTypes = [type];
+    }
+
+    setClassData((prev) => ({
+      ...prev,
+      recurrenceTypes: newTypes,
+    }));
   };
 
   const handleUpdateClass = async () => {
@@ -191,24 +239,24 @@ const EditClassModal = ({
 
             <div>
               <label className="text-sm font-medium text-gray-700">
-                Class Type
+                Class Recurrence Type
               </label>
-              <div className="flex gap-2 mt-1">
-                {["One-time", "Daily", "Weekly", "Monthly"].map((type) => (
-                  <button
-                    key={type}
-                    onClick={() =>
-                      handleClassDataChange("selectedRecurrenceType", type)
-                    }
-                    className={`px-4 py-2 rounded-full text-sm ${
-                      classData.selectedRecurrenceType === type
-                        ? "bg-yellow-400 border border-yellow-500"
-                        : "border border-gray-200"
-                    }`}
-                  >
-                    {type}
-                  </button>
-                ))}
+              <div className="flex flex-wrap gap-2 mt-1">
+                {["None", "One-time", "Daily", "Weekly", "Monthly"].map(
+                  (type) => (
+                    <button
+                      key={type}
+                      onClick={() => handleClassTypeSelect(type)}
+                      className={`px-4 py-2 rounded-full text-sm ${
+                        classData.recurrenceTypes.includes(type)
+                          ? "bg-yellow-400 border border-yellow-500"
+                          : "border border-gray-200"
+                      }`}
+                    >
+                      {type}
+                    </button>
+                  )
+                )}
               </div>
             </div>
           </div>
@@ -305,10 +353,16 @@ const EditClassModal = ({
               </label>
               <input
                 type="date"
-                value={classData.classDateTime || ""}
-                onChange={(e) =>
-                  handleClassDataChange("classDateTime", e.target.value)
-                }
+                value={getFormattedDate(classData?.classDateTime)}
+                onChange={(e) => {
+                  const newDate = new Date(e.target.value);
+                  const currentTime = classData?.classDateTime || new Date();
+                  newDate.setHours(
+                    currentTime.getHours(),
+                    currentTime.getMinutes()
+                  );
+                  handleClassDataChange("classDateTime", newDate);
+                }}
                 className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
               />
             </div>
@@ -318,10 +372,15 @@ const EditClassModal = ({
               </label>
               <input
                 type="time"
-                value={classData.classTime || ""}
-                onChange={(e) =>
-                  handleClassDataChange("classTime", e.target.value)
-                }
+                value={getFormattedTime(classData?.classDateTime)}
+                onChange={(e) => {
+                  const [hours, minutes] = e.target.value.split(":");
+                  const newDate = new Date(
+                    classData?.classDateTime || new Date()
+                  );
+                  newDate.setHours(parseInt(hours), parseInt(minutes));
+                  handleClassDataChange("classDateTime", newDate);
+                }}
                 className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
               />
             </div>

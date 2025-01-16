@@ -460,34 +460,42 @@ const ClassDetailsTutor = ({ onClose }) => {
                         {classData.languageLevel}
                       </span>
                     </div>
-
                     <div className="flex flex-col mt-4 space-y-4">
                       {/* First Row */}
-                      <div className="flex items-center justify-between space-x-8">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="text-gray-600" size={18} />
+                      <div className="flex items-center justify-between space-x-12">
+                        <div className="flex items-center gap-1">
+                          <img alt="bammbuu" src="/svgs/clock.svg" />{" "}
                           <span className="text-sm">
                             {new Date(
                               classData.classDateTime.seconds * 1000
-                            ).toLocaleString()}
+                            ).toLocaleTimeString("en-US", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              // second: '2-digit' // uncomment if you want seconds
+                              hour12: true, // for AM/PM format
+                            })}
                           </span>
                         </div>
-
-                        <div className="flex items-center gap-2">
-                          <Clock className="text-gray-600" size={18} />
+                        <div className="flex items-center gap-1">
+                          <img alt="bammbuu" src="/svgs/calendar.svg" />
                           <span className="text-sm">
-                            {classData.classDuration} minutes
+                            {new Date(
+                              classData.classDateTime.seconds * 1000
+                            ).toLocaleDateString("en-US", {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            })}
                           </span>
                         </div>
-                      </div>
-
-                      {/* Second Row */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Users className="text-gray-600" size={18} />
+                        <div className="flex items-center gap-1">
+                          <img alt="bammbuu" src="/svgs/users.svg" />
                           {classData.classType === "Group Premium" ||
                           classData.classType === "Individual Premium" ? (
-                            <></>
+                            <>
+                              {" "}
+                              <span className="text-sm">2k+</span>
+                            </>
                           ) : (
                             <span className="text-sm text-[#454545]">
                               {classData.classMemberIds.length}/
@@ -495,8 +503,20 @@ const ClassDetailsTutor = ({ onClose }) => {
                             </span>
                           )}
                         </div>
-                        <div className="flex items-center gap-2">
-                          <MapPin className="text-gray-600" size={18} />
+                      </div>
+
+                      {/* Second Row */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1">
+                          <img alt="bammbuu" src="/svgs/repeate-music.svg" />
+                          <span className="text-sm">
+                            {classData.recurrenceTypes?.length > 0
+                              ? classData.recurrenceTypes.join(", ")
+                              : "None"}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <img alt="bammbuu" src="/svgs/location.svg" />
                           <span className="text-sm">
                             {classData.classLocation}
                           </span>

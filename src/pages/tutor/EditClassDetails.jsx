@@ -379,6 +379,7 @@ const EditClassPage = () => {
                   type="number"
                   placeholder="Enter slots number"
                   value={classData.availableSpots}
+                  disabled={classData.classType === "Individual Premium"}
                   onChange={(e) => {
                     const value = parseInt(e.target.value);
                     if (
@@ -419,7 +420,6 @@ const EditClassPage = () => {
             </div>
 
             {/* Date and Time */}
-            {/* Date and Time */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium text-gray-700">
@@ -427,10 +427,15 @@ const EditClassPage = () => {
                 </label>
                 <input
                   type="date"
-                  value={classData.classDateTime}
-                  onChange={(e) =>
-                    handleClassDataChange("classDateTime", e.target.value)
+                  value={
+                    classData.classDateTime
+                      ? classData.classDateTime.toISOString().split("T")[0]
+                      : ""
                   }
+                  onChange={(e) => {
+                    const date = new Date(e.target.value);
+                    handleClassDataChange("classDateTime", date);
+                  }}
                   className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
                 />
               </div>
@@ -440,10 +445,17 @@ const EditClassPage = () => {
                 </label>
                 <input
                   type="time"
-                  value={classData.classTime}
-                  onChange={(e) =>
-                    handleClassDataChange("classTime", e.target.value)
+                  value={
+                    classData.classDateTime
+                      ? classData.classDateTime.toTimeString().slice(0, 5)
+                      : ""
                   }
+                  onChange={(e) => {
+                    const [hours, minutes] = e.target.value.split(":");
+                    const newDate = new Date(classData.classDateTime);
+                    newDate.setHours(parseInt(hours), parseInt(minutes));
+                    handleClassDataChange("classDateTime", newDate);
+                  }}
                   className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
                 />
               </div>

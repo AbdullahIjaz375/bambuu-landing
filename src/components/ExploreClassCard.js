@@ -8,6 +8,7 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "../firebaseConfig";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useClassBooking } from "../hooks/useClassBooking";
 
 Modal.setAppElement("#root");
 
@@ -150,6 +151,8 @@ const ExploreClassCard = ({
     });
   };
 
+  const { handleClassBooking, isProcessing, iserror } = useClassBooking();
+
   const handleCardClick = () => {
     if (selectedRecurrenceType && selectedRecurrenceType !== "None") {
       toast.error(
@@ -164,8 +167,8 @@ const ExploreClassCard = ({
         }
       );
     } else {
-      // navigate(`/newClassDetailsUser/${classId}`);
-      setIsPlansModalOpen(true);
+      navigate(`/newClassDetailsUser/${classId}`);
+      // setIsPlansModalOpen(true);
     }
   };
 
@@ -173,6 +176,25 @@ const ExploreClassCard = ({
     e.stopPropagation(); // Prevent event bubbling
     setIsBookingConfirmationOpen(true);
   };
+
+  // const handleConfirmBooking = async () => {
+  //   const success = await handleClassBooking(
+  //     user,
+  //     classType,
+  //     user.subscriptions,
+  //     user.credits,
+  //     () => {
+  //       setIsBookingConfirmationOpen(false);
+  //       toast.success("Class booked successfully!");
+  //     },
+  //     (error) => {
+  //       toast.error(error);
+  //       setIsPlansModalOpen(true);
+  //     },
+  //     // This is your existing enrollment logic
+  //     () => enrollInClass(classId, user.uid, adminId)
+  //   );
+  // };
 
   const handleConfirmBooking = async () => {
     if (!user) {

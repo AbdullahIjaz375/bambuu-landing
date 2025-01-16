@@ -804,7 +804,7 @@ const GroupDetailsTutor = ({ onClose }) => {
                         </span>
                       </div>
                     </div>
-                    <div className="flex flex-row items-center mt-2 space-x-28">
+                    <div className="flex flex-row items-center mt-2 space-x-40">
                       <div className="flex items-center gap-1 mb-4">
                         <img
                           src={group.groupAdminImageUrl}
@@ -816,7 +816,7 @@ const GroupDetailsTutor = ({ onClose }) => {
                         </span>
                       </div>
                       <div className="flex items-center gap-1 mb-4">
-                        <Users className="w-5" />
+                        <img alt="bammbuu" src="/svgs/users.svg" />{" "}
                         <span className="text-sm text-gray-800">2k+</span>
                       </div>
                     </div>

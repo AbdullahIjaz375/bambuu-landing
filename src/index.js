@@ -30,6 +30,8 @@ import "stream-chat-react/dist/css/v2/index.css";
 import { messaging } from "./firebaseConfig"; // Add this
 import { getToken } from "firebase/messaging"; // Add this
 import "./index.css";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 if ("serviceWorker" in navigator && "PushManager" in window) {
   window.addEventListener("load", async () => {

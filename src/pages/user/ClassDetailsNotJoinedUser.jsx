@@ -10,6 +10,8 @@ import { Timestamp } from "firebase/firestore";
 import { addMemberToStreamChannel } from "../../services/streamService";
 import { ChannelType } from "../../config/stream";
 import ClassInfoCard from "../../components/ClassInfoCard";
+import { useClassBooking } from "../../hooks/useClassBooking";
+import PlansModal from "../../components/PlansModal";
 Modal.setAppElement("#root");
 
 const ClassDetailsNotJoinedUser = ({ onClose }) => {
@@ -292,20 +294,55 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
     setIsBookingConfirmationOpen(true);
   };
 
+  const [isPlansModalOpen, setIsPlansModalOpen] = useState(false);
+  const { handleClassBooking, isProcessing, iserror } = useClassBooking();
+
   const handleConfirmBooking = async () => {
     if (!user) {
       setError("Please log in to enroll in classes");
       return;
     }
 
-    const success = await enrollInClass(classId, user.uid, classData.adminId);
-
-    if (success) {
-      setIsBookingConfirmationOpen(false);
-      setIsModalOpen(false);
-      // You might want to show a success toast or message here
-    }
+    const success = await handleClassBooking(
+      user,
+      classData.classType, // Make sure this is available in your component props
+      user.subscriptions,
+      user.credits,
+      // Success callback
+      () => {
+        setIsBookingConfirmationOpen(false);
+        setIsModalOpen(false);
+        // toast.success("Successfully enrolled in class!");
+      },
+      // Failure callback
+      (errorMessage) => {
+        // toast.error(errorMessage);
+        if (
+          errorMessage.includes("subscription") ||
+          errorMessage.includes("credits")
+        ) {
+          setIsPlansModalOpen(true);
+        }
+      },
+      // Enrollment function
+      () => enrollInClass(classId, user.uid, classData.adminId)
+    );
   };
+
+  // const handleConfirmBooking = async () => {
+  //   if (!user) {
+  //     setError("Please log in to enroll in classes");
+  //     return;
+  //   }
+
+  //   const success = await enrollInClass(classId, user.uid, classData.adminId);
+
+  //   if (success) {
+  //     setIsBookingConfirmationOpen(false);
+  //     setIsModalOpen(false);
+  //     // You might want to show a success toast or message here
+  //   }
+  // };
 
   //-----------------------------------------------------------------//
 
@@ -498,31 +535,40 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
                     </div>
                     <div className="flex flex-col mt-4 space-y-4">
                       {/* First Row */}
-                      <div className="flex items-center justify-between space-x-8">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="text-gray-600" size={18} />
+                      <div className="flex items-center justify-between space-x-12">
+                        <div className="flex items-center gap-1">
+                          <img alt="bammbuu" src="/svgs/clock.svg" />{" "}
                           <span className="text-sm">
                             {new Date(
                               classData.classDateTime.seconds * 1000
-                            ).toLocaleString()}
+                            ).toLocaleTimeString("en-US", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              // second: '2-digit' // uncomment if you want seconds
+                              hour12: true, // for AM/PM format
+                            })}
                           </span>
                         </div>
-
-                        <div className="flex items-center gap-2">
-                          <Clock className="text-gray-600" size={18} />
+                        <div className="flex items-center gap-1">
+                          <img alt="bammbuu" src="/svgs/calendar.svg" />
                           <span className="text-sm">
-                            {classData.classDuration} minutes
+                            {new Date(
+                              classData.classDateTime.seconds * 1000
+                            ).toLocaleDateString("en-US", {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            })}
                           </span>
                         </div>
-                      </div>
-
-                      {/* Second Row */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Users className="text-gray-600" size={18} />
+                        <div className="flex items-center gap-1">
+                          <img alt="bammbuu" src="/svgs/users.svg" />
                           {classData.classType === "Group Premium" ||
                           classData.classType === "Individual Premium" ? (
-                            <></>
+                            <>
+                              {" "}
+                              <span className="text-sm">2k+</span>
+                            </>
                           ) : (
                             <span className="text-sm text-[#454545]">
                               {classData.classMemberIds.length}/
@@ -530,8 +576,18 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
                             </span>
                           )}
                         </div>
-                        <div className="flex items-center gap-2">
-                          <MapPin className="text-gray-600" size={18} />
+                      </div>
+
+                      {/* Second Row */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1">
+                          <img alt="bammbuu" src="/svgs/repeate-music.svg" />
+                          <span className="text-sm">
+                            {classData.selectedRecurrenceType || "None"}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <img alt="bammbuu" src="/svgs/location.svg" />
                           <span className="text-sm">
                             {classData.classLocation}
                           </span>
@@ -650,6 +706,10 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
           </div>
         </div>
       </Modal>
+      <PlansModal
+        isOpen={isPlansModalOpen}
+        onClose={() => setIsPlansModalOpen(false)}
+      />
     </>
   );
 };

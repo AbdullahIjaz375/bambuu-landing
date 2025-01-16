@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Slider from "react-slick";
 
 const splashContent = [
   {
@@ -33,6 +34,7 @@ const SplashScreen = () => {
       navigate("/login");
     } else {
       setCurrentStep((prev) => prev + 1);
+      sliderRef.current.slickNext();
     }
   };
 
@@ -40,6 +42,18 @@ const SplashScreen = () => {
     navigate("/login");
   };
 
+  const settings = {
+    dots: false,
+    infinite: false,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    swipe: true,
+    beforeChange: (oldIndex, newIndex) => setCurrentStep(newIndex),
+    arrows: false,
+  };
+
+  const sliderRef = React.useRef();
   const isLastStep = currentStep === splashContent.length - 1;
 
   return (
@@ -66,14 +80,22 @@ const SplashScreen = () => {
           </div>
         </div>
 
-        {/* Content */}
-        <div className="text-center space-y-4 min-h-[120px]">
-          <h2 className="text-3xl font-semibold text-black">
-            {splashContent[currentStep].title}
-          </h2>
-          <p className="px-4 text-lg text-center text-black">
-            {splashContent[currentStep].description}
-          </p>
+        {/* Slider Content */}
+        <div className="w-full">
+          <Slider ref={sliderRef} {...settings}>
+            {splashContent.map((content, index) => (
+              <div key={index} className="outline-none">
+                <div className="text-center space-y-4 min-h-[120px]">
+                  <h2 className="text-3xl font-semibold text-black">
+                    {content.title}
+                  </h2>
+                  <p className="px-4 text-lg text-center text-black">
+                    {content.description}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </Slider>
         </div>
 
         {/* Progress Dots */}

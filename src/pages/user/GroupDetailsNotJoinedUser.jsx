@@ -32,6 +32,8 @@ import { useParams } from "react-router-dom";
 import ClassCard from "../../components/ClassCard";
 import Modal from "react-modal";
 import ExploreClassCard from "../../components/ExploreClassCard";
+import PlansModal from "../../components/PlansModal";
+import { useGroupJoining } from "../../hooks/useGroupJoining";
 Modal.setAppElement("#root");
 
 const GroupDetailsNotJoinedUser = ({ onClose }) => {
@@ -237,9 +239,25 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
   };
   const [isJoining, setIsJoining] = useState(false);
 
+  const { handleGroupJoining, checkJoiningEligibility } = useGroupJoining();
+  const [isPlansModalOpen, setIsPlansModalOpen] = useState(false);
+
   const handleJoinConfirm = async () => {
     try {
       setIsJoining(true);
+
+      // First check eligibility
+      const eligibility = checkJoiningEligibility(
+        user,
+        group.isPremium ? "Premium" : "Standard",
+        user.subscriptions
+      );
+
+      if (!eligibility.canJoin) {
+        console.error("Cannot join group:", eligibility.message);
+        setIsPlansModalOpen(true);
+        return;
+      }
 
       // Get references to the group and user documents
       const groupRef = doc(db, "groups", groupId);
@@ -450,6 +468,10 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
           </div>
         </div>
       </div>
+      <PlansModal
+        isOpen={isPlansModalOpen}
+        onClose={() => setIsPlansModalOpen(false)}
+      />
     </>
   );
 };

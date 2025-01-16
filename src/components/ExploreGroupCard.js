@@ -16,6 +16,8 @@ import "react-time-picker/dist/TimePicker.css";
 import "react-clock/dist/Clock.css";
 
 import Modal from "react-modal";
+import { useGroupJoining } from "../hooks/useGroupJoining";
+import PlansModal from "./PlansModal";
 Modal.setAppElement("#root");
 
 const ExploreGroupDetailsModal = ({ group, onClose, onJoinClick }) => {
@@ -230,15 +232,11 @@ const GroupCard = ({ group }) => {
 
   const handleJoinClick = (e) => {
     e.stopPropagation(); // Prevent triggering the card click
-    if (handlePremiumAccess()) {
-      setShowJoinConfirmation(true);
-    }
+    setShowJoinConfirmation(true);
   };
 
   const handleClick = () => {
-    if (handlePremiumAccess()) {
-      navigate(`/newGroupDetailsUser/${groupId}`);
-    }
+    navigate(`/newGroupDetailsUser/${groupId}`);
   };
   // const handleJoinClick = (e) => {
   //   e.stopPropagation(); // Prevent triggering the card click
@@ -268,10 +266,25 @@ const GroupCard = ({ group }) => {
     };
     sessionStorage.setItem("user", JSON.stringify(updatedStoredUser));
   };
+  const { handleGroupJoining, checkJoiningEligibility } = useGroupJoining();
+  const [isPlansModalOpen, setIsPlansModalOpen] = useState(false);
 
   const handleJoinConfirm = async () => {
     try {
       setIsJoining(true);
+
+      // First check eligibility
+      const eligibility = checkJoiningEligibility(
+        user,
+        isPremium ? "Premium" : "Standard",
+        user.subscriptions
+      );
+
+      if (!eligibility.canJoin) {
+        console.error("Cannot join group:", eligibility.message);
+        setIsPlansModalOpen(true);
+        return;
+      }
 
       // Get references to the group and user documents
       const groupRef = doc(db, "groups", groupId);
@@ -451,6 +464,10 @@ const GroupCard = ({ group }) => {
           </div>
         </div>
       </Modal>
+      <PlansModal
+        isOpen={isPlansModalOpen}
+        onClose={() => setIsPlansModalOpen(false)}
+      />
     </>
   );
 };
