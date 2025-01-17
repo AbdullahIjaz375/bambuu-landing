@@ -5,47 +5,49 @@ import { signOut } from "firebase/auth";
 import { toast } from "react-toastify";
 import { Menu, Avatar } from "@mantine/core";
 import { ChevronRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const Sidebar = ({ user }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const { t } = useTranslation();
 
   // Define menu items for each user type with both light and dark images
   const studentMenuItems = [
     {
       path: "/learn",
-      label: "Learn",
+      translationKey: "sidebar.student.learn",
       lightImage: "/svgs/learn-light.svg",
       darkImage: "/svgs/learn-dark.svg",
     },
     {
       path: "/communityUser",
-      label: "Community",
+      translationKey: "sidebar.student.community",
       lightImage: "/svgs/community-light.svg",
       darkImage: "/svgs/community-dark.svg",
     },
     {
       path: "/superTutorUser",
-      label: "SuperTutor",
+      translationKey: "sidebar.student.superTutor",
       lightImage: "/svgs/suprtutor-light.svg",
       darkImage: "/svgs/supertutor-dark.svg",
     },
     {
       path: "/languageExpertsUser",
-      label: "Language Experts",
+      translationKey: "sidebar.student.languageExperts",
       lightImage: "/svgs/language-expert-light.svg",
       darkImage: "/svgs/language-expoert-dark.svg",
     },
     {
       path: "/savedRecourcesUser",
-      label: "Saved Resources",
+      translationKey: "sidebar.student.savedResources",
       lightImage: "/svgs/saved-resources-light.svg",
       darkImage: "/svgs/saved-resources-dark.svg",
     },
     {
       path: "/bammbuuPlusGroupsUser",
-      label: "bammbuu+ Groups",
+      translationKey: "sidebar.student.bambuuGroups",
       lightImage: "/svgs/bambuu-plu-groups-light.svg",
       darkImage: "/svgs/bambuu-plu-groups-dark.svg",
     },
@@ -54,19 +56,19 @@ const Sidebar = ({ user }) => {
   const tutorMenuItems = [
     {
       path: "/learn",
-      label: "Home",
+      translationKey: "sidebar.tutor.home",
       lightImage: "/svgs/home-dark.svg",
       darkImage: "/svgs/home-light.svg",
     },
     {
       path: "/studentsTutor",
-      label: "Students",
+      translationKey: "sidebar.tutor.students",
       lightImage: "/svgs/community-light.svg",
       darkImage: "/svgs/community-dark.svg",
     },
     {
       path: "/savedRecourcesTutor",
-      label: "Resources",
+      translationKey: "sidebar.tutor.resources",
       lightImage: "/svgs/saved-resources-light.svg",
       darkImage: "/svgs/saved-resources-dark.svg",
     },
@@ -75,7 +77,6 @@ const Sidebar = ({ user }) => {
   // Select menu items based on user type
   const menuItems =
     user?.userType === "tutor" ? tutorMenuItems : studentMenuItems;
-
   const profilePath =
     user?.userType === "tutor" ? "/profileTutor" : "/profileUser";
 
@@ -103,10 +104,10 @@ const Sidebar = ({ user }) => {
             >
               <img
                 src={isActive ? item.lightImage : item.darkImage}
-                alt={item.label}
+                alt={t(item.translationKey)}
                 className="w-6 h-6"
               />
-              <span>{item.label}</span>
+              <span>{t(item.translationKey)}</span>
             </Link>
           );
         })}
@@ -117,10 +118,9 @@ const Sidebar = ({ user }) => {
         {user ? (
           <Link
             to={profilePath}
-            className="flex items-center justify-between p-2 transition-colors bg-white rounded-2xl "
+            className="flex items-center justify-between p-2 transition-colors bg-white rounded-2xl"
           >
             <div className="flex flex-row items-center space-x-2">
-              {" "}
               <div className="w-10 h-10 overflow-hidden bg-white rounded-full">
                 <img src={user.photoUrl} alt="Profile" className="w-10 h-10" />
               </div>

@@ -11,6 +11,7 @@ import {
 import { Menu } from "@mantine/core";
 import { useAuth } from "../../context/AuthContext";
 import Sidebar from "../../components/Sidebar";
+import { useTranslation } from "react-i18next";
 import {
   doc,
   getDoc,
@@ -37,7 +38,7 @@ const SavedResources = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedResource, setSelectedResource] = useState(null);
-
+  const { t } = useTranslation();
   // Fetch saved resources from user data
   useEffect(() => {
     const fetchResources = async () => {
@@ -230,13 +231,15 @@ const SavedResources = () => {
         <div className="flex-1 p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl ml-[17rem] m-2">
           <div className="flex items-center justify-between pb-4 mb-6 border-b">
             <div className="flex items-center gap-4">
-              <h1 className="text-4xl font-semibold">Saved Resources</h1>
+              <h1 className="text-4xl font-semibold">
+                {t("saved-resources.title")}
+              </h1>
             </div>
             <div className="relative flex-1 max-w-2xl ml-8">
               <Search className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 left-4 top-1/2" />
               <input
                 type="text"
-                placeholder="Search resource by name"
+                placeholder={t("saved-resources.search.placeholder")}
                 className="w-full py-3 pl-12 pr-4 border border-gray-200 rounded-full bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -247,15 +250,19 @@ const SavedResources = () => {
           {filteredResources.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-[70vh]">
               <EmptyState
-                message={
-                  searchQuery ? "No results found." : "No resources yet."
-                }
+                message={t(
+                  searchQuery
+                    ? "saved-resources.empty-state.no-results"
+                    : "saved-resources.empty-state.no-resources"
+                )}
               />
             </div>
           ) : (
             <div className="space-y-8">
               <div>
-                <h2 className="mb-4 text-2xl font-bold">Favorite Resources</h2>
+                <h2 className="mb-4 text-2xl font-bold">
+                  {t("saved-resources.sections.favorites")}
+                </h2>
                 <div className="grid grid-cols-3 gap-4">
                   {filteredResources
                     .filter((r) => r.isFavorite)
@@ -267,7 +274,9 @@ const SavedResources = () => {
 
               <div>
                 <div className="flex flex-row items-center justify-between">
-                  <h2 className="mb-4 text-2xl font-bold">More Resources</h2>
+                  <h2 className="mb-4 text-2xl font-bold">
+                    {t("saved-resources.sections.more")}
+                  </h2>
                 </div>
                 <div className="grid grid-cols-3 gap-4">
                   {filteredResources
@@ -294,22 +303,24 @@ const SavedResources = () => {
           </div>
 
           <h2 className="mb-2 text-xl font-bold">
-            Are you sure you want to remove this resource?
+            {t("saved-resources.delete-modal.title")}
           </h2>
-          <p className="mb-6 text-gray-600">This is irreversible action!</p>
+          <p className="mb-6 text-gray-600">
+            {t("saved-resources.delete-modal.description")}
+          </p>
 
           <div className="flex gap-4">
             <button
               onClick={() => setIsModalOpen(false)}
               className="px-8 py-2 border border-black rounded-full hover:bg-gray-50"
             >
-              Cancel
+              {t("saved-resources.delete-modal.cancel")}
             </button>
             <button
               onClick={() => deleteResource(selectedResource)}
               className="px-8 py-2 text-black bg-red-500 border border-black rounded-full hover:bg-red-600"
             >
-              Yes, Remove
+              {t("saved-resources.delete-modal.confirm")}
             </button>
           </div>
         </div>

@@ -17,6 +17,8 @@ import {
   addDoc,
   updateDoc,
 } from "firebase/firestore";
+import { useTranslation } from "react-i18next";
+
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { ChannelType } from "../../config/stream";
 import { db, storage } from "../../firebaseConfig";
@@ -50,6 +52,8 @@ import EmptyState from "../../components/EmptyState";
 Modal.setAppElement("#root");
 
 const GroupDetailsTutor = ({ onClose }) => {
+  const { t } = useTranslation();
+
   const { user, setUser } = useAuth(); // Destructure setUser to update context
 
   const navigate = useNavigate();
@@ -626,7 +630,9 @@ const GroupDetailsTutor = ({ onClose }) => {
     if (classes.length === 0) {
       return (
         <div className="flex items-center justify-center h-96">
-          <EmptyState message="No classes available" />
+          <EmptyState
+            message={t("group-details-tutor.empty-states.no-classes")}
+          />
         </div>
       );
     }
@@ -668,7 +674,9 @@ const GroupDetailsTutor = ({ onClose }) => {
     if (members.length === 0) {
       return (
         <div className="flex items-center justify-center h-96">
-          <EmptyState message="No members available" />
+          <EmptyState
+            message={t("group-details-tutor.empty-states.no-members")}
+          />
         </div>
       );
     }
@@ -698,7 +706,10 @@ const GroupDetailsTutor = ({ onClose }) => {
                   {member.name}
                 </span>
                 {member.id === group.groupAdminId && (
-                  <span className="text-xs text-gray-500">Admin</span>
+                  <span className="text-xs text-gray-500">
+                    {" "}
+                    {t("group-details-tutor.member-status.admin")}
+                  </span>
                 )}
               </div>
             </div>
@@ -711,7 +722,7 @@ const GroupDetailsTutor = ({ onClose }) => {
                   }}
                   className="px-3 py-1 text-xs text-red-500 border border-red-500 rounded-full hover:bg-red-50"
                 >
-                  Remove
+                  {t("group-details-tutor.actions.remove-member")}
                 </button>
               )}
           </div>
@@ -739,7 +750,7 @@ const GroupDetailsTutor = ({ onClose }) => {
             onClick={onClose}
             className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
           >
-            Close
+            {t("group-details-tutor.error.close")}
           </button>
         </div>
       </div>
@@ -763,7 +774,9 @@ const GroupDetailsTutor = ({ onClose }) => {
                 >
                   <ArrowLeft size="30" />
                 </button>
-                <h1 className="text-4xl font-semibold">Group Details</h1>
+                <h1 className="text-4xl font-semibold">
+                  {t("group-details-tutor.title")}
+                </h1>
               </div>
             </div>
 
@@ -813,12 +826,18 @@ const GroupDetailsTutor = ({ onClose }) => {
                           className="w-5 rounded-full"
                         />{" "}
                         <span className="text-sm text-gray-800">
-                          {group.groupAdminName} (Admin)
+                          {group.groupAdminName} (
+                          {t("group-details-tutor.member-status.admin")})
                         </span>
                       </div>
                       <div className="flex items-center gap-1 mb-4">
                         <img alt="bammbuu" src="/svgs/users.svg" />{" "}
-                        <span className="text-sm text-gray-800">2k+</span>
+                        <span className="text-sm text-gray-800">
+                          {" "}
+                          {t("group-details-tutor.statistics.members", {
+                            count: 2,
+                          })}
+                        </span>
                       </div>
                     </div>
                     <p className="mb-6 text-gray-600">
@@ -835,7 +854,7 @@ const GroupDetailsTutor = ({ onClose }) => {
                           : "bg-[#ffffea] border-gray-300"
                       }`}
                     >
-                      View Group Chat
+                      {t("group-details-tutor.actions.view-chat")}
                     </button>
                     {user.uid === group.groupAdminId ? (
                       <>
@@ -843,13 +862,13 @@ const GroupDetailsTutor = ({ onClose }) => {
                           className="w-full px-4 py-2 mb-2 text-black bg-white border border-black rounded-full"
                           onClick={() => navigate(`/editGroupTutor/${groupId}`)}
                         >
-                          Edit Group Details
+                          {t("group-details-tutor.actions.edit-details")}
                         </button>
                         <button
                           className="w-full px-4 py-2 text-red-500 border border-red-500 rounded-full"
                           onClick={() => setShowDeleteConfirmation(true)}
                         >
-                          Delete Group
+                          {t("group-details-tutor.actions.delete-group")}
                         </button>
                       </>
                     ) : (
@@ -857,7 +876,7 @@ const GroupDetailsTutor = ({ onClose }) => {
                         className="w-full px-4 py-2 text-red-500 border border-red-500 rounded-full"
                         onClick={() => setShowLeaveConfirmation(true)}
                       >
-                        Leave Group
+                        {t("group-details-tutor.actions.leave-group")}
                       </button>
                     )}
                   </div>
@@ -879,7 +898,7 @@ const GroupDetailsTutor = ({ onClose }) => {
                 : "bg-transparent"
             }`}
                       >
-                        Classes
+                        {t("group-details-tutor.tabs.classes")}
                       </button>
                       <button
                         onClick={() => setActiveTab("Members")}
@@ -890,7 +909,7 @@ const GroupDetailsTutor = ({ onClose }) => {
                 : "bg-transparent"
             }`}
                       >
-                        Members
+                        {t("group-details-tutor.tabs.members")}
                       </button>
                     </div>
                   </div>
@@ -900,7 +919,7 @@ const GroupDetailsTutor = ({ onClose }) => {
                       className="bg-[#14b82c] border border-[#19291c] text-[#19291c] px-6 py-2 rounded-full"
                       onClick={handleAddClassButtonClick}
                     >
-                      + Create New Class
+                      + {t("group-details-tutor.actions.create-class")}
                     </button>
                   )}
                 </div>

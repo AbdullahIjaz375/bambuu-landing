@@ -4,6 +4,9 @@ import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
   signOut,
+  signInWithPopup,
+  GoogleAuthProvider,
+  FacebookAuthProvider,
 } from "firebase/auth";
 import { messaging } from "../firebaseConfig";
 import { useNavigate, Link } from "react-router-dom";
@@ -14,6 +17,7 @@ import { setDoc } from "firebase/firestore";
 import { doc } from "firebase/firestore";
 import { getToken } from "firebase/messaging";
 import Modal from "react-modal";
+import { updateDoc, serverTimestamp, getDoc } from "firebase/firestore";
 
 Modal.setAppElement("#root");
 
@@ -399,6 +403,7 @@ const Signup = () => {
         nativeLanguage: profileData.nativeLanguage,
         photoUrl: "",
         savedDocuments: [],
+        languagePreference: "en",
         tier: 1,
         uid: auth.currentUser.uid,
         fcmToken: fcmToken || "",
@@ -470,6 +475,187 @@ const Signup = () => {
   const handleBackToSignup = async () => {
     await resetStates();
   };
+
+  //------------------------------------------------google and fb---------------------------------//
+  const googleProvider = new GoogleAuthProvider();
+  const facebookProvider = new FacebookAuthProvider();
+
+  const handleGoogleLoginStudent = async () => {
+    const loadingToastId = toast.loading("Logging in...");
+
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+
+      const userRef = doc(db, "students", user.uid);
+      const userDoc = await getDoc(userRef);
+
+      const notificationPrefsRef = doc(
+        db,
+        "notification_preferences",
+        user.uid
+      );
+      const notificationPrefsDoc = await getDoc(notificationPrefsRef);
+
+      let isFirstTimeLogin = false;
+      const fcmToken = await getFCMToken(); // Call getFCMToken here
+
+      if (!userDoc.exists()) {
+        isFirstTimeLogin = true;
+        // Create new user document
+        const newUserData = {
+          email: user.email,
+          name: user.displayName || "",
+          uid: user.uid,
+          enrolledClasses: [],
+          joinedGroups: [],
+          adminOfClasses: [],
+          adminOfGroups: [],
+          lastLoggedIn: serverTimestamp(),
+          learningLanguage: "",
+          learningLanguageProficiency: "Beginner",
+          nativeLanguage: "",
+          country: "",
+          photoUrl: "",
+          savedDocuments: [],
+          tier: 1,
+          currentStreak: 1,
+          fcmToken: fcmToken || "", // Add FCM token
+          credits: 0,
+          languagePreference: "en",
+
+          subscriptions: [
+            {
+              endDate: null,
+              startDate: null,
+              type: "None",
+            },
+          ],
+        };
+
+        await setDoc(userRef, newUserData);
+
+        if (!notificationPrefsDoc.exists()) {
+          await setDoc(notificationPrefsRef, {
+            userId: user.uid,
+            appUpdates: true,
+            classReminder: true,
+            groupChat: true,
+            newMessages: true,
+            resourceAssign: true,
+          });
+        }
+
+        // Update session with new user data
+        updateUserData({
+          ...newUserData,
+          lastLoggedIn: new Date(),
+        });
+      } else {
+        // Update existing user
+        const userData = userDoc.data();
+        const lastLoggedIn = userData.lastLoggedIn
+          ? userData.lastLoggedIn.toDate()
+          : null;
+        const currentStreak = userData.currentStreak || 0;
+
+        const now = new Date();
+        let updatedStreak = currentStreak;
+
+        if (lastLoggedIn) {
+          const lastLoginDate = new Date(
+            lastLoggedIn.getFullYear(),
+            lastLoggedIn.getMonth(),
+            lastLoggedIn.getDate()
+          );
+          const currentDate = new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            now.getDate()
+          );
+
+          const differenceInDays =
+            (currentDate - lastLoginDate) / (1000 * 60 * 60 * 24);
+
+          if (differenceInDays === 1) {
+            updatedStreak = currentStreak + 1;
+          } else if (differenceInDays > 1) {
+            updatedStreak = 1;
+          }
+        } else {
+          updatedStreak = 1;
+        }
+
+        // Update Firestore
+        await updateDoc(userRef, {
+          lastLoggedIn: serverTimestamp(),
+          currentStreak: updatedStreak,
+          // userType: "student", // Ensure userType is stored in Firestore
+        });
+
+        // Update session with updated user data
+        updateUserData({
+          ...userData,
+          currentStreak: updatedStreak,
+          lastLoggedIn: now,
+          userType: "student",
+        });
+      }
+
+      toast.update(loadingToastId, {
+        render: "Logged in successfully!",
+        type: "success",
+        isLoading: false,
+        autoClose: 3000,
+      });
+
+      if (isFirstTimeLogin) {
+        navigate("/userEditProfile", { replace: true });
+      } else {
+        navigate("/learn", { replace: true });
+      }
+    } catch (error) {
+      console.error("Error during Google login:", error);
+      updateUserData(null);
+
+      toast.update(loadingToastId, {
+        render: `Login error: ${error.message}`,
+        type: "error",
+        isLoading: false,
+        autoClose: 5000,
+      });
+    }
+  };
+
+  const handleFacebookLogin = async () => {
+    const facebookProvider = new FacebookAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, facebookProvider);
+      const user = result.user;
+
+      // Check if user data already exists in Firestore
+      const userDoc = await getDoc(doc(db, "students", user.uid));
+      if (!userDoc.exists()) {
+        // Set initial data with empty values if it doesn't exist
+        await setDoc(doc(db, "students", user.uid), {
+          email: user.email,
+          nickname: "",
+          country: "",
+          learningLanguage: "",
+          nativeLanguage: "",
+          accountType: "user",
+          timeZone: "",
+          createdAt: new Date(),
+        });
+      }
+
+      navigate("/learn", { replace: true });
+    } catch (error) {
+      console.error("Error during Facebook login:", error);
+    }
+  };
+
+  //---------------------------------------------------------------------------------------------------//
 
   if (loading || loading1) {
     return (
@@ -797,27 +983,19 @@ const Signup = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="grid grid-cols-2 gap-4">
             <button
-              className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-full hover:bg-gray-50"
-              onClick={() => toast.info("Google signin coming soon!")}
+              onClick={handleGoogleLoginStudent}
+              className="flex items-center justify-center px-4 py-2 space-x-4 border border-gray-300 rounded-full hover:bg-gray-50"
             >
-              <img
-                alt="google"
-                src="/images/google-button.png"
-                className="w-5 h-5 mr-2"
-              />
+              <img alt="google" src="/svgs/login-insta.svg" />
               <span>Google</span>
             </button>
             <button
-              className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-full hover:bg-gray-50"
-              onClick={() => toast.info("Facebook signin coming soon!")}
+              onClick={handleFacebookLogin}
+              className="flex items-center justify-center px-4 py-2 space-x-4 border border-gray-300 rounded-full hover:bg-gray-50"
             >
-              <img
-                alt="facebook"
-                src="/images/fb-button.png"
-                className="w-5 h-5 mr-2"
-              />
+              <img alt="google" src="/svgs/login-fb.svg" />
               <span>Facebook</span>
             </button>
           </div>

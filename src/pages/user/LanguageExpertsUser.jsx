@@ -2,25 +2,36 @@ import React, { useEffect, useState, useMemo } from "react";
 import { Search, MapPin, Users } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import Sidebar from "../../components/Sidebar";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import { useNavigate } from "react-router-dom";
 import { ClipLoader } from "react-spinners";
 import EmptyState from "../../components/EmptyState";
+import { useTranslation } from "react-i18next";
+
 const LanguageExpertsPage = () => {
-  const [activeFilter, setActiveFilter] = useState("All");
+  const { t } = useTranslation();
+  const [activeFilter, setActiveFilter] = useState(
+    t("languageExperts.filters.all")
+  );
   const [searchQuery, setSearchQuery] = useState("");
-  const [allTutors, setAllTutors] = useState([]); // Store all tutors
+  const [allTutors, setAllTutors] = useState([]);
   const [featuredTutorIds, setFeaturedTutorIds] = useState(new Set());
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  // Define filters with translations
+  const filters = [
+    { key: "all", label: t("languageExperts.filters.all") },
+    { key: "english", label: t("languageExperts.filters.english") },
+    { key: "spanish", label: t("languageExperts.filters.spanish") },
+  ];
 
   useEffect(() => {
     const fetchTutors = async () => {
       try {
         setLoading(true);
-
-        // Fetch featured tutors
         const featuredSnapshot = await getDocs(
           collection(db, "featured_tutors")
         );
@@ -29,7 +40,6 @@ const LanguageExpertsPage = () => {
         );
         setFeaturedTutorIds(featuredIds);
 
-        // Fetch all tutors without filtering
         const tutorsSnapshot = await getDocs(collection(db, "tutors"));
         const tutorsData = tutorsSnapshot.docs.map((doc) => ({
           id: doc.id,
@@ -45,12 +55,13 @@ const LanguageExpertsPage = () => {
     };
 
     fetchTutors();
-  }, []); // Empty dependency array - only fetch once
+  }, []);
 
   const filteredTutors = useMemo(() => {
     return allTutors.filter((tutor) => {
       const matchesFilter =
-        activeFilter === "All" || tutor.teachingLanguage === activeFilter;
+        activeFilter === t("languageExperts.filters.all") ||
+        tutor.teachingLanguage === activeFilter;
       const matchesSearch =
         !searchQuery ||
         tutor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -58,9 +69,8 @@ const LanguageExpertsPage = () => {
 
       return matchesFilter && matchesSearch;
     });
-  }, [allTutors, activeFilter, searchQuery]);
+  }, [allTutors, activeFilter, searchQuery, t]);
 
-  // Separate featured and regular tutors using useMemo
   const { featuredTutors, regularTutors } = useMemo(() => {
     const featured = filteredTutors.filter((tutor) =>
       featuredTutorIds.has(tutor.uid)
@@ -70,8 +80,6 @@ const LanguageExpertsPage = () => {
     );
     return { featuredTutors: featured, regularTutors: regular };
   }, [filteredTutors, featuredTutorIds]);
-
-  const navigate = useNavigate();
 
   const handleBecomeTutor = () => {
     navigate("/becomeAnExpert");
@@ -104,19 +112,24 @@ const LanguageExpertsPage = () => {
             )}
             <div className="flex flex-col gap-1 mt-2">
               <div className="flex items-center gap-2">
-                <span className="text-sm">{tutor.nativeLanguage} (Native)</span>
+                <span className="text-sm">
+                  {tutor.nativeLanguage} (
+                  {t("languageExperts.tutorCard.native")})
+                </span>
                 <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
                 <MapPin className="w-4 h-auto" />
                 <span className="text-sm">{tutor.country}</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-sm">
-                  {tutor.teachingLanguage} (Teaching)
+                  {tutor.teachingLanguage} (
+                  {t("languageExperts.tutorCard.teaching")})
                 </span>
                 <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
                 <Users className="w-4 h-auto" />
                 <span className="text-sm">
-                  {tutor.tutorStudentIds?.length || 0} students
+                  {tutor.tutorStudentIds?.length || 0}{" "}
+                  {t("languageExperts.tutorCard.students")}
                 </span>
               </div>
             </div>
@@ -144,29 +157,31 @@ const LanguageExpertsPage = () => {
       <div className="flex-1 p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl ml-[17rem] m-2">
         <div className="flex items-center justify-between pb-4 mb-6 border-b">
           <div className="flex items-center gap-4">
-            <h1 className="text-4xl font-semibold">Language Experts</h1>
+            <h1 className="text-4xl font-semibold">
+              {t("languageExperts.title")}
+            </h1>
           </div>
           <button
             className="px-6 py-2.5 text-lg font-medium rounded-full transition-all duration-200 border bg-white text-black border-[#5d5d5d]"
             onClick={handleBecomeTutor}
           >
-            Become an Expert
+            {t("languageExperts.becomeExpert")}
           </button>
         </div>
 
         <div className="flex items-center justify-between mb-8">
           <div className="flex gap-3">
-            {["All", "English", "Spanish"].map((filter) => (
+            {filters.map((filter) => (
               <button
-                key={filter}
-                onClick={() => setActiveFilter(filter)}
+                key={filter.key}
+                onClick={() => setActiveFilter(filter.label)}
                 className={`px-4 py-2 rounded-full text-md ${
-                  activeFilter === filter
+                  activeFilter === filter.label
                     ? "bg-green-100 text-black"
                     : "bg-gray-100 text-gray-600"
                 }`}
               >
-                {filter}
+                {filter.label}
               </button>
             ))}
           </div>
@@ -174,7 +189,7 @@ const LanguageExpertsPage = () => {
             <Search className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 left-4 top-1/2" />
             <input
               type="text"
-              placeholder="Search resource by name"
+              placeholder={t("languageExperts.searchPlaceholder")}
               className="w-full py-3 pl-12 pr-4 border border-gray-200 rounded-full bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -183,7 +198,9 @@ const LanguageExpertsPage = () => {
         </div>
 
         <section className="mb-12">
-          <h2 className="mb-4 text-2xl font-medium">Featured Instructors</h2>
+          <h2 className="mb-4 text-2xl font-medium">
+            {t("languageExperts.featuredInstructors")}
+          </h2>
           {featuredTutors.length > 0 ? (
             <div className="grid grid-cols-3 gap-4">
               {featuredTutors.map((tutor) => (
@@ -191,16 +208,22 @@ const LanguageExpertsPage = () => {
               ))}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center ">
+            <div className="flex flex-col items-center justify-center">
               <EmptyState
-                message={searchQuery ? "No results found." : "No tutor yet."}
+                message={
+                  searchQuery
+                    ? t("languageExperts.noResults")
+                    : t("languageExperts.noTutor")
+                }
               />
             </div>
           )}
         </section>
 
         <section>
-          <h2 className="mb-4 text-2xl font-medium">More Instructors</h2>
+          <h2 className="mb-4 text-2xl font-medium">
+            {t("languageExperts.moreInstructors")}
+          </h2>
           {regularTutors.length > 0 ? (
             <div className="grid grid-cols-3 gap-4">
               {regularTutors.map((tutor) => (
@@ -208,9 +231,13 @@ const LanguageExpertsPage = () => {
               ))}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center ">
+            <div className="flex flex-col items-center justify-center">
               <EmptyState
-                message={searchQuery ? "No results found." : "No tutor yet."}
+                message={
+                  searchQuery
+                    ? t("languageExperts.noResults")
+                    : t("languageExperts.noTutor")
+                }
               />
             </div>
           )}

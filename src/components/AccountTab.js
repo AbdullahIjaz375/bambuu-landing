@@ -10,11 +10,14 @@ import Modal from "react-modal";
 import { ChevronLeft } from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useTranslation } from "react-i18next";
 
 Modal.setAppElement("#root");
 
 const AccountTab = () => {
   const { user } = useAuth();
+  const { t } = useTranslation();
+
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: "",
@@ -50,16 +53,10 @@ const AccountTab = () => {
     setError("");
 
     // Basic validation: check if new passwords match
+
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      setError("New password and Confirm password do not match.");
-      toast.error("New passwords do not match", {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
+      setError(t("account.errors.passwordMismatch"));
+      toast.error(t("account.errors.passwordMismatch"));
       return;
     }
 
@@ -69,14 +66,14 @@ const AccountTab = () => {
       // We assume 'user' is already signed in with email/password
       const auth = getAuth();
       if (!auth.currentUser) {
-        setError("No user is currently signed in.");
+        setError(t("account.errors.noUser"));
         return;
       }
 
       // 1) Re-authenticate user with current credentials
       const userEmail = user?.email; // 'user' is from your AuthContext
       if (!userEmail) {
-        setError("User email not found.");
+        setError(t("account.errors.noEmail"));
         return;
       }
 
@@ -89,14 +86,8 @@ const AccountTab = () => {
 
       // 2) Update the password
       await updatePassword(auth.currentUser, passwordForm.newPassword);
-      toast.success("Password updated successfully!", {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
+      toast.success(t("account.success.passwordUpdated"));
+
       // Optionally, close the modal and reset form
       setIsPasswordModalOpen(false);
       setPasswordForm({
@@ -136,7 +127,7 @@ const AccountTab = () => {
               src="/svgs/password-check.svg"
               className="w-6 h-6"
             />
-            <span>Update Password</span>
+            <span>{t("account.updatePassword")}</span>
           </div>
           <ChevronLeft className="w-5 h-5 rotate-180" />
         </div>
@@ -144,7 +135,7 @@ const AccountTab = () => {
         <div className="flex items-center justify-between p-4 text-lg bg-white border rounded-full">
           <div className="flex items-center gap-3 text-black">
             <img alt="crown" src="/svgs/crown.svg" className="w-6 h-6" />
-            <span>Manage Membership</span>
+            <span>{t("account.manageMembership")}</span>
           </div>
           <ChevronLeft className="w-5 h-5 rotate-180" />
         </div>
@@ -159,9 +150,11 @@ const AccountTab = () => {
       >
         <div className="flex flex-col items-center">
           <img alt="password" src="/svgs/update-password.svg" className="" />
-          <h2 className="mb-2 text-2xl font-semibold">Update Password</h2>
+          <h2 className="mb-2 text-2xl font-semibold">
+            {t("account.modal.title")}
+          </h2>
           <p className="mb-6 text-center text-gray-600">
-            Update your password with new and strong password.
+            {t("account.modal.description")}
           </p>
         </div>
 
@@ -175,7 +168,7 @@ const AccountTab = () => {
           <div className="space-y-4">
             <div className="space-y-1">
               <label className="block text-sm text-gray-700">
-                Current Password
+                {t("account.modal.currentPassword")}
               </label>
               <div className="relative">
                 <input
@@ -184,7 +177,7 @@ const AccountTab = () => {
                   value={passwordForm.currentPassword}
                   onChange={handlePasswordChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="Enter your current password"
+                  placeholder={t("account.modal.currentPasswordPlaceholder")}
                   required
                 />
                 <button
@@ -234,7 +227,7 @@ const AccountTab = () => {
 
             <div className="space-y-1">
               <label className="block text-sm text-gray-700">
-                New Password
+                {t("account.modal.newPassword")}
               </label>
               <div className="relative">
                 <input
@@ -243,7 +236,7 @@ const AccountTab = () => {
                   value={passwordForm.newPassword}
                   onChange={handlePasswordChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="Enter your new password"
+                  placeholder={t("account.modal.newPasswordPlaceholder")}
                   required
                 />
                 <button
@@ -293,7 +286,7 @@ const AccountTab = () => {
 
             <div className="space-y-1">
               <label className="block text-sm text-gray-700">
-                Confirm New Password
+                {t("account.modal.confirmPassword")}
               </label>
               <div className="relative">
                 <input
@@ -302,7 +295,7 @@ const AccountTab = () => {
                   value={passwordForm.confirmPassword}
                   onChange={handlePasswordChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="Re-enter your new password"
+                  placeholder={t("account.modal.confirmPasswordPlaceholder")}
                   required
                 />
                 <button
@@ -356,14 +349,16 @@ const AccountTab = () => {
               className="w-full py-2 font-medium border  rounded-full text-[#042F0C]  border-[#042F0C]"
               onClick={() => setIsPasswordModalOpen(false)}
             >
-              Cancel
+              {t("account.modal.cancel")}
             </button>
             <button
               type="submit"
               className="w-full py-2 px-2 font-medium text-[#042F0C] bg-[#14B82C] rounded-full border border-[#042F0C]"
               disabled={isLoading}
             >
-              {isLoading ? "Updating..." : "Update Password"}
+              {isLoading
+                ? t("account.modal.updating")
+                : t("account.modal.update")}
             </button>
           </div>
         </form>

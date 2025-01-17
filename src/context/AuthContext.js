@@ -178,6 +178,7 @@ import { auth, db } from "../firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { StreamChat } from "stream-chat";
+import i18n from "../i18n"; // Import i18n instance
 
 const AuthContext = createContext();
 const streamClient = StreamChat.getInstance(
@@ -190,6 +191,21 @@ export const AuthProvider = ({ children }) => {
     return storedUser ? JSON.parse(storedUser) : null;
   });
   const [loading, setLoading] = useState(true);
+
+  // Initialize language from session storage or user preferences
+  useEffect(() => {
+    const initializeLanguage = () => {
+      const storedUser = sessionStorage.getItem("user");
+      if (storedUser) {
+        const userData = JSON.parse(storedUser);
+        if (userData?.languagePreference) {
+          i18n.changeLanguage(userData.languagePreference);
+        }
+      }
+    };
+
+    initializeLanguage();
+  }, []);
 
   const connectStreamUser = async (userData) => {
     try {
@@ -226,11 +242,18 @@ export const AuthProvider = ({ children }) => {
     const userDoc = await getDoc(userRef);
 
     if (userDoc.exists()) {
-      return {
+      const userData = {
         ...userDoc.data(),
         uid,
         userType,
       };
+
+      // Set language when fetching latest data
+      if (userData.languagePreference) {
+        i18n.changeLanguage(userData.languagePreference);
+      }
+
+      return userData;
     }
     return null;
   };
@@ -248,14 +271,24 @@ export const AuthProvider = ({ children }) => {
         }
       }
 
+      // Update language when updating user data
+      if (userData.languagePreference) {
+        i18n.changeLanguage(userData.languagePreference);
+      }
+
       setUser(userData);
       sessionStorage.setItem("user", JSON.stringify(userData));
       sessionStorage.setItem("userType", userData.userType);
       await connectStreamUser(userData);
     } else {
+      const currentLanguage = i18n.language;
+
       await disconnectStreamUser();
       setUser(null);
       sessionStorage.clear();
+
+      // Update language when updating user data
+      i18n.changeLanguage(currentLanguage);
     }
   };
 

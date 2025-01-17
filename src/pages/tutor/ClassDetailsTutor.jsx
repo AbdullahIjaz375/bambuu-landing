@@ -10,6 +10,7 @@ import { deleteStreamChannel } from "../../services/streamService";
 import { ChannelType } from "../../config/stream";
 import ClassInfoCard from "../../components/ClassInfoCard";
 import EmptyState from "../../components/EmptyState";
+import { useTranslation } from "react-i18next";
 
 Modal.setAppElement("#root");
 
@@ -22,6 +23,7 @@ const ClassDetailsTutor = ({ onClose }) => {
   const [classData, setClassData] = useState(null);
   const [error, setError] = useState(null);
   const { classId } = useParams();
+  const { t } = useTranslation();
 
   const fetchClass = async () => {
     if (!classId) {
@@ -293,7 +295,9 @@ const ClassDetailsTutor = ({ onClose }) => {
     if (members.length === 0) {
       return (
         <div className="flex items-center justify-center h-96">
-          <EmptyState message="No members available" />
+          <EmptyState
+            message={t("class-details-tutor.empty-states.no-members")}
+          />
         </div>
       );
     }
@@ -324,7 +328,10 @@ const ClassDetailsTutor = ({ onClose }) => {
                     {member.name}
                   </span>
                   {member.id === classData.adminId && (
-                    <span className="text-xs text-gray-500">Teacher</span>
+                    <span className="text-xs text-gray-500">
+                      {" "}
+                      {t("class-details-tutor.member.teacher")}
+                    </span>
                   )}
                 </div>
               </div>
@@ -337,7 +344,7 @@ const ClassDetailsTutor = ({ onClose }) => {
                     }}
                     className="px-3 py-1 text-xs text-red-500 border border-red-500 rounded-full hover:bg-red-50"
                   >
-                    Remove
+                    {t("class-details-tutor.actions.remove-member")}
                   </button>
                 )}
             </div>
@@ -363,25 +370,32 @@ const ClassDetailsTutor = ({ onClose }) => {
         >
           <div className="text-center">
             <h2 className="mb-4 text-xl font-semibold">
-              Remove {selectedUser?.name} from group?
+              {t("class-details-tutor.confirmations.remove-member.title", {
+                name: selectedUser?.name,
+              })}
             </h2>
             <p className="mb-6 text-gray-600">
-              This action cannot be undone. The user will need to request to
-              join again.
+              {t("class-details-tutor.confirmations.remove-member.message")}
             </p>
             <div className="flex flex-row gap-2">
               <button
                 className="w-full py-2 font-medium border border-gray-300 rounded-full hover:bg-gray-50"
                 onClick={() => setShowRemoveConfirmation(false)}
               >
-                Cancel
+                {t("class-details-tutor.actions.cancel")}
               </button>
               <button
                 className="w-full py-2 font-medium text-black bg-[#ff4d4d] rounded-full hover:bg-[#ff3333] border border-[#8b0000]"
                 onClick={() => handleRemoveUser(selectedUser.id)}
                 disabled={isRemoving}
               >
-                {isRemoving ? "Removing..." : "Remove"}
+                {isRemoving
+                  ? t(
+                      "class-details-tutor.confirmations.remove-member.removing"
+                    )
+                  : t(
+                      "class-details-tutor.confirmations.remove-member.confirm"
+                    )}{" "}
               </button>
             </div>
           </div>
@@ -407,7 +421,7 @@ const ClassDetailsTutor = ({ onClose }) => {
             onClick={onClose}
             className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
           >
-            Close
+            {t("class-details-tutor.actions.close")}
           </button>
         </div>
       </div>
@@ -426,10 +440,13 @@ const ClassDetailsTutor = ({ onClose }) => {
                 <button
                   className="p-3 bg-gray-100 rounded-full"
                   onClick={() => navigate(-1)}
+                  aria-label={t("class-details-tutor.actions.back")}
                 >
                   <ArrowLeft size="30" />
                 </button>
-                <h1 className="text-4xl font-semibold">Class Details</h1>
+                <h1 className="text-4xl font-semibold">
+                  {t("class-details-tutor.title")}
+                </h1>
               </div>
             </div>
 
@@ -542,12 +559,12 @@ const ClassDetailsTutor = ({ onClose }) => {
                   <div className="w-full space-y-4">
                     <div className="space-y-1">
                       {" "}
-                      {classData.classType === "Group Premium" ||
-                      classData.classType === "Individual Premium" ? (
-                        <h1 className="text-xl font-semibold">Instructor</h1>
-                      ) : (
-                        <h1 className="text-xl font-semibold">Group</h1>
-                      )}
+                      <h1 className="text-xl font-semibold">
+                        {classData.classType === "Group Premium" ||
+                        classData.classType === "Individual Premium"
+                          ? t("class-details-tutor.class-info.instructor")
+                          : t("class-details-tutor.class-info.group")}
+                      </h1>
                       <ClassInfoCard
                         classData={classData}
                         groupTutor={groupTutor}
@@ -557,19 +574,19 @@ const ClassDetailsTutor = ({ onClose }) => {
                       className="w-full px-4 py-2 text-black bg-[#ffbf00] border border-black rounded-full hover:bg-[#ffbf00]"
                       onClick={handleJoinClass}
                     >
-                      Join Class
+                      {t("class-details-tutor.actions.join-class")}
                     </button>
                     <button
                       className="w-full px-4 py-2 text-black bg-white border border-black rounded-full"
                       onClick={() => navigate(`/edit-class/${classId}`)}
                     >
-                      Edit Class Details
+                      {t("class-details-tutor.actions.edit-class")}
                     </button>
                     <button
                       className="w-full px-4 py-2 text-red-500 border border-red-500 rounded-full"
                       onClick={() => setShowDeleteConfirmation(true)}
                     >
-                      Delete Class
+                      {t("class-details-tutor.actions.delete-class")}
                     </button>
                   </div>
                 </div>
@@ -581,7 +598,9 @@ const ClassDetailsTutor = ({ onClose }) => {
                     className="px-6 py-2 text-black bg-yellow-400 rounded-full"
                     onClick={() => setActiveTab("Members")}
                   >
-                    Members ({members.length})
+                    {t("class-details-tutor.tabs.members", {
+                      count: members.length,
+                    })}
                   </button>
                 </div>
                 <div className="flex-1 overflow-y-auto">{renderMembers()}</div>
@@ -610,14 +629,17 @@ const ClassDetailsTutor = ({ onClose }) => {
       >
         <div className="text-center">
           <h2 className="mb-4 text-xl font-semibold">
-            Are you sure you want to delete this class?
+            {t("class-details-tutor.confirmations.delete-class.title")}
           </h2>
+          <p className="mb-6 text-gray-600">
+            {t("class-details-tutor.confirmations.delete-class.message")}
+          </p>
           <div className="flex flex-row gap-2">
             <button
               className="w-full py-2 font-medium border border-gray-300 rounded-full hover:bg-gray-50"
               onClick={() => setShowDeleteConfirmation(false)}
             >
-              No, Cancel
+              {t("class-details-tutor.actions.cancel")}
             </button>
             <button
               className="w-full py-2 font-medium text-black bg-[#ff4d4d] rounded-full hover:bg-[#ff3333] border border-[#8b0000]"

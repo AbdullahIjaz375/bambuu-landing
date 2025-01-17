@@ -1,0 +1,409 @@
+{
+  "sidebar": {
+    "student": {
+      "learn": "Aprender",
+      "community": "Comunidad",
+      "superTutor": "SuperTutor",
+      "languageExperts": "Expertos en Idiomas",
+      "savedResources": "Recursos Guardados",
+      "bambuuGroups": "Grupos bammbuu+"
+    },
+    "tutor": {
+      "home": "Inicio",
+      "students": "Estudiantes",
+      "resources": "Recursos"
+    }
+  },
+  "settings": {
+    "appLanguage": "Idioma de la Aplicación",
+    "deleteAccount": "Eliminar Cuenta",
+    "deleteModal": {
+      "title": "¡Lamentamos Verte Partir!",
+      "description": "Antes de irte, nos gustaría saber por qué. ¡Tus comentarios nos ayudan a mejorar! ¿Podrías compartir una razón?",
+      "warning": "Es una acción irreversible",
+      "cancel": "Cancelar",
+      "confirm": "Eliminar Cuenta"
+    },
+    "languageModal": {
+      "title": "Seleccionar Idioma",
+      "description": "Elige tu idioma preferido para la aplicación",
+      "english": "Inglés",
+      "spanish": "Español",
+      "cancel": "Cancelar"
+    }
+  },
+  "feedback": {
+    "betterAlternative": "Encontré una mejor alternativa",
+    "technicalIssues": "Tengo problemas técnicos",
+    "notUsingEnough": "No uso la aplicación lo suficiente",
+    "pricingHigh": "El precio es muy alto",
+    "other": "Otro"
+  },
+  "toast": {
+    "languageUpdated": "Idioma actualizado correctamente",
+    "languageError": "Error al actualizar el idioma",
+    "userNotFound": "Usuario no encontrado"
+  },
+  "account": {
+    "updatePassword": "Actualizar Contraseña",
+    "manageMembership": "Administrar Membresía",
+    "modal": {
+      "title": "Actualizar Contraseña",
+      "description": "Actualiza tu contraseña con una nueva y segura.",
+      "currentPassword": "Contraseña Actual",
+      "currentPasswordPlaceholder": "Ingresa tu contraseña actual",
+      "newPassword": "Nueva Contraseña",
+      "newPasswordPlaceholder": "Ingresa tu nueva contraseña",
+      "confirmPassword": "Confirmar Nueva Contraseña",
+      "confirmPasswordPlaceholder": "Vuelve a ingresar tu nueva contraseña",
+      "cancel": "Cancelar",
+      "update": "Actualizar Contraseña",
+      "updating": "Actualizando..."
+    },
+    "errors": {
+      "passwordMismatch": "La nueva contraseña y la confirmación no coinciden.",
+      "noUser": "No hay ningún usuario conectado actualmente.",
+      "noEmail": "No se encontró el correo del usuario."
+    },
+    "success": {
+      "passwordUpdated": "¡Contraseña actualizada exitosamente!"
+    }
+  },
+  "notifications": {
+    "title": "Notificaciones en la Aplicación",
+    "types": {
+      "classReminder": "Notificación de Recordatorio de Clase",
+      "newMessage": "Notificación de Nuevo Mensaje",
+      "resourceAssign": "Notificación de Asignación de Recursos",
+      "groupChat": "Notificación de Chat Grupal",
+      "appUpdates": "Actualizaciones de la Aplicación"
+    },
+    "errors": {
+      "fetchError": "Error al obtener las preferencias de notificación",
+      "updateError": "Error al actualizar la preferencia de notificación"
+    }
+  },
+  "user-settings": {
+    "title": "Configuración",
+    "tabs": {
+      "app": "Aplicación",
+      "account": "Cuenta",
+      "notifications": "Notificaciones"
+    }
+  },
+  "saved-resources": {
+    "title": "Recursos Guardados",
+    "search": {
+      "placeholder": "Buscar recurso por nombre"
+    },
+    "sections": {
+      "favorites": "Recursos Favoritos",
+      "more": "Más Recursos"
+    },
+    "empty-state": {
+      "no-resources": "Aún no hay recursos.",
+      "no-results": "No se encontraron resultados."
+    },
+    "menu": {
+      "add-favorite": "Agregar a favoritos",
+      "remove-favorite": "Eliminar de favoritos",
+      "remove-resource": "Eliminar Recurso"
+    },
+    "delete-modal": {
+      "title": "¿Estás seguro de que quieres eliminar este recurso?",
+      "description": "¡Esta acción es irreversible!",
+      "cancel": "Cancelar",
+      "confirm": "Sí, Eliminar"
+    }
+  },
+  "bammbuu-groups": {
+    "title": "Grupos bammbuu+",
+    "buttons": {
+      "create": "Crear Nuevo Grupo",
+      "join": "Unirse a un Grupo"
+    },
+    "search": {
+      "placeholder": "Buscar grupos por nombre"
+    },
+    "empty-state": {
+      "no-groups": "Aún no hay grupos.",
+      "no-results": "No se encontraron resultados."
+    }
+  },
+  "languageExperts": {
+    "title": "Expertos en Idiomas",
+    "becomeExpert": "Conviértete en Experto",
+    "featuredInstructors": "Instructores Destacados",
+    "moreInstructors": "Más Instructores",
+    "searchPlaceholder": "Buscar recurso por nombre",
+    "noResults": "No se encontraron resultados.",
+    "noTutor": "Aún no hay tutores.",
+    "filters": {
+      "all": "Todos",
+      "english": "Inglés",
+      "spanish": "Español"
+    },
+    "tutorCard": {
+      "native": "Nativo",
+      "teaching": "Enseñando",
+      "students": "estudiantes"
+    }
+  },
+  "profile": {
+    "title": "Perfil",
+    "appStreak": "Racha de la App",
+    "native": "Nativo",
+    "learning": "Aprendiendo",
+    "from": "De",
+    "stats": {
+      "totalClassesJoined": "Total de Clases Unidas",
+      "totalGroupsJoined": "Total de Grupos Unidos"
+    },
+    "navigation": {
+      "editProfile": "Editar Perfil",
+      "settings": "Configuración",
+      "aboutBammbuu": "Acerca de bammbuu",
+      "privacyPolicy": "Política de Privacidad",
+      "logout": "Cerrar Sesión"
+    },
+    "toast": {
+      "logoutSuccess": "¡Sesión cerrada exitosamente!",
+      "logoutError": "Error durante el cierre de sesión"
+    }
+  },
+  "saved-resources-tutor": {
+    "title": "Recursos",
+    "search": {
+      "placeholder": "Buscar recurso por nombre"
+    },
+    "sections": {
+      "favorites": "Recursos Favoritos",
+      "more": "Más Recursos"
+    },
+    "empty-state": {
+      "no-results": "No se encontraron resultados.",
+      "no-resources": "Aún no hay recursos."
+    },
+    "buttons": {
+      "add-resource": "Agregar Recurso",
+      "uploading": "Subiendo..."
+    },
+    "menu": {
+      "assign": "Asignar Recurso",
+      "add-favorite": "Agregar a favoritos",
+      "remove-favorite": "Quitar de favoritos",
+      "delete": "Eliminar Recurso"
+    },
+    "assign-modal": {
+      "title": "Asignar Recurso",
+      "search-placeholder": "Buscar estudiante por nombre",
+      "selected-count": "{{count}} Estudiantes Seleccionados",
+      "buttons": {
+        "cancel": "Cancelar",
+        "assign": "Asignar"
+      }
+    },
+    "delete-modal": {
+      "title": "¿Estás seguro de que quieres eliminar este recurso?",
+      "subtitle": "¡Esta acción es irreversible!",
+      "buttons": {
+        "cancel": "Cancelar",
+        "confirm": "Sí, Eliminar"
+      }
+    }
+  },
+  "learn-tutor": {
+    "greeting": "¡Hola, {{name}}!",
+    "greeting-subtitle": "¿Cómo estás hoy?",
+    "search": {
+      "placeholder": "Buscar clases, instructores o grupos"
+    },
+    "tabs": {
+      "booked-classes": "Clases Reservadas",
+      "available-classes": "Clases Disponibles"
+    },
+    "actions": {
+      "new-class": "Nueva Clase",
+      "view-all": "Ver Todo",
+      "new-group": "Nuevo Grupo"
+    },
+    "calendar": {
+      "prev": "Anterior",
+      "next": "Siguiente"
+    },
+    "empty-states": {
+      "no-classes": "¡Aún no hay clases!",
+      "no-groups": "¡Aún no hay grupos!"
+    },
+    "sections": {
+      "my-groups": "Mis Grupos"
+    },
+    "modals": {
+      "class-type": {
+        "title": "Seleccionar Tipo de Clase",
+        "individual": "Individual",
+        "group": "Grupo"
+      },
+      "group-select": {
+        "title": "Seleccionar Grupo",
+        "no-groups": "No hay grupos disponibles"
+      }
+    }
+  },
+  "classes-tutor": {
+    "title": "Mis Clases",
+    "actions": {
+      "add-new": "Agregar Nueva Clase",
+      "back": "Volver"
+    },
+    "tabs": {
+      "booked": "Clases Reservadas",
+      "available": "Clases Disponibles"
+    },
+    "search": {
+      "placeholder": "Buscar clases por nombre, idioma o nivel"
+    },
+    "states": {
+      "loading": "Cargando...",
+      "error": "No se pueden obtener las clases en este momento. Por favor, inténtelo más tarde.",
+      "empty": {
+        "no-classes": "Aún no hay clases.",
+        "no-results": "No se encontraron resultados."
+      }
+    },
+    "modals": {
+      "class-type": {
+        "title": "Seleccionar Tipo de Clase",
+        "individual": "Individual",
+        "group": "Grupo"
+      },
+      "group-select": {
+        "title": "Seleccionar Grupo",
+        "no-groups": "No hay grupos disponibles"
+      }
+    }
+  },
+  "groups-tutor": {
+    "title": "Mis Grupos",
+    "actions": {
+      "create-new": "Crear Nuevo Grupo",
+      "back": "Volver"
+    },
+    "search": {
+      "placeholder": "Buscar grupos por nombre"
+    },
+    "states": {
+      "loading": "Cargando...",
+      "error": "No se pueden obtener los grupos en este momento. Por favor, inténtelo más tarde.",
+      "empty": {
+        "no-groups": "Aún no hay grupos.",
+        "no-results": "No se encontraron resultados."
+      }
+    }
+  },
+  "group-details-tutor": {
+    "title": "Detalles del Grupo",
+    "actions": {
+      "back": "Volver",
+      "view-chat": "Ver Chat del Grupo",
+      "edit-details": "Editar Detalles",
+      "delete-group": "Eliminar Grupo",
+      "leave-group": "Salir del Grupo",
+      "create-class": "Crear Nueva Clase",
+      "remove-member": "Eliminar"
+    },
+    "tabs": {
+      "classes": "Clases",
+      "members": "Miembros"
+    },
+    "member-status": {
+      "admin": "Administrador"
+    },
+    "empty-states": {
+      "no-classes": "No hay clases disponibles",
+      "no-members": "No hay miembros disponibles"
+    },
+    "loading": "Cargando...",
+    "error": {
+      "generic": "Ocurrió un error. Por favor, inténtelo de nuevo.",
+      "close": "Cerrar"
+    },
+    "statistics": {
+      "members": "{{count}}k+"
+    },
+    "flags": {
+      "us-alt": "Bandera de EE.UU.",
+      "spain-alt": "Bandera de España"
+    },
+    "confirmations": {
+      "delete": {
+        "title": "Eliminar Grupo",
+        "message": "¿Está seguro de que desea eliminar este grupo?",
+        "confirm": "Eliminar",
+        "cancel": "Cancelar"
+      },
+      "leave": {
+        "title": "Salir del Grupo",
+        "message": "¿Está seguro de que desea salir de este grupo?",
+        "confirm": "Salir",
+        "cancel": "Cancelar"
+      },
+      "remove-member": {
+        "title": "Eliminar Miembro",
+        "message": "¿Está seguro de que desea eliminar a este miembro?",
+        "confirm": "Eliminar",
+        "cancel": "Cancelar"
+      }
+    }
+  },
+  "class-details-tutor": {
+    "title": "Detalles de la Clase",
+    "actions": {
+      "back": "Volver",
+      "close": "Cerrar",
+      "join-class": "Unirse a la Clase",
+      "edit-class": "Editar Detalles de la Clase",
+      "delete-class": "Eliminar Clase",
+      "remove-member": "Eliminar",
+      "cancel": "Cancelar"
+    },
+    "member": {
+      "teacher": "Profesor",
+      "admin": "Administrador"
+    },
+    "tabs": {
+      "members": "Miembros ({{count}})"
+    },
+    "class-info": {
+      "instructor": "Instructor",
+      "group": "Grupo"
+    },
+    "empty-states": {
+      "no-members": "No hay miembros disponibles"
+    },
+    "loading": "Cargando...",
+    "errors": {
+      "no-class-id": "No se proporcionó ID de clase",
+      "class-not-found": "Clase no encontrada",
+      "fetch-failed": "Error al cargar los detalles de la clase"
+    },
+    "confirmations": {
+      "remove-member": {
+        "title": "¿Eliminar a {{name}} del grupo?",
+        "message": "Esta acción no se puede deshacer. El usuario deberá solicitar unirse nuevamente.",
+        "confirm": "Eliminar",
+        "removing": "Eliminando..."
+      },
+      "delete-class": {
+        "title": "¿Eliminar Clase?",
+        "message": "¿Estás seguro de que deseas eliminar esta clase? Esta acción no se puede deshacer.",
+        "confirm": "Eliminar",
+        "deleting": "Eliminando..."
+      }
+    },
+    "flags": {
+      "us-alt": "Bandera de EE.UU.",
+      "spain-alt": "Bandera de España"
+    }
+  }
+}

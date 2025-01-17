@@ -8,6 +8,7 @@ import { collection, doc, getDoc } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import { ClipLoader } from "react-spinners";
 import EmptyState from "../../components/EmptyState";
+import { useTranslation } from "react-i18next";
 
 const GroupsTutor = () => {
   const { user } = useAuth();
@@ -16,6 +17,7 @@ const GroupsTutor = () => {
   const [filteredGroups, setFilteredGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchGroups = async () => {
@@ -88,17 +90,20 @@ const GroupsTutor = () => {
             <button
               className="p-3 bg-gray-100 rounded-full"
               onClick={handleBack}
+              aria-label={t("groups-tutor.actions.back")}
             >
               <ArrowLeft size="30" />
             </button>
-            <h1 className="text-4xl font-semibold">My Groups</h1>
+            <h1 className="text-4xl font-semibold">
+              {t("groups-tutor.title")}
+            </h1>
           </div>
           <div className="flex flex-row items-center justify-center space-x-4">
             <button
               onClick={handleCreateGroup}
               className="px-6 py-3 text-[#042f0c] text-xl font-medium bg-white border border-[#5d5d5d] rounded-full"
             >
-              Create New Group
+              {t("groups-tutor.actions.create-new")}
             </button>
           </div>
         </div>
@@ -107,7 +112,7 @@ const GroupsTutor = () => {
           <Search className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
           <input
             type="text"
-            placeholder="Search groups by name"
+            placeholder={t("groups-tutor.search.placeholder")}
             className="w-full py-3 pl-10 pr-4 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-yellow-400"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -127,8 +132,12 @@ const GroupsTutor = () => {
         ) : (
           <div className="flex items-center justify-center min-h-[70vh]">
             <EmptyState
-              message={searchQuery ? "No results found." : "No groups yet."}
-            />{" "}
+              message={
+                searchQuery
+                  ? t("groups-tutor.states.empty.no-results")
+                  : t("groups-tutor.states.empty.no-groups")
+              }
+            />
           </div>
         )}
       </div>

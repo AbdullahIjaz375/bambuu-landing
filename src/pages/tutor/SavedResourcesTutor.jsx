@@ -14,6 +14,8 @@ import Sidebar from "../../components/Sidebar";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useTranslation } from "react-i18next";
+
 import {
   doc,
   getDoc,
@@ -34,6 +36,8 @@ import EmptyState from "../../components/EmptyState";
 Modal.setAppElement("#root");
 
 const SavedResourcesTutor = () => {
+  const { t } = useTranslation();
+
   const { user, setUser } = useAuth();
   const [resources, setResources] = useState([]);
   const [students, setStudents] = useState([]);
@@ -316,7 +320,7 @@ const SavedResourcesTutor = () => {
                 color="green"
                 className="font-urbanist"
               >
-                Assign Resource
+                {t("saved-resources-tutor.menu.assign")}
               </Menu.Item>
 
               <Menu.Item
@@ -327,8 +331,8 @@ const SavedResourcesTutor = () => {
                 className="font-urbanist"
               >
                 {resource.isFavorite
-                  ? "Remove from favorites"
-                  : "Add to favorites"}
+                  ? t("saved-resources-tutor.menu.remove-favorite")
+                  : t("saved-resources-tutor.menu.add-favorite")}
               </Menu.Item>
 
               <Menu.Item
@@ -339,7 +343,7 @@ const SavedResourcesTutor = () => {
                 className="font-urbanist"
                 color="red"
               >
-                Delete Resource
+                {t("saved-resources-tutor.menu.delete")}
               </Menu.Item>
             </Menu.Dropdown>
           </Menu>
@@ -351,7 +355,11 @@ const SavedResourcesTutor = () => {
   const EmptyStateCustom = () => (
     <div className="flex flex-col items-center justify-center h-[70vh]">
       <EmptyState
-        message={searchQuery ? "No results found." : "No resources yet."}
+        message={
+          searchQuery
+            ? t("saved-resources-tutor.empty-state.no-results")
+            : t("saved-resources-tutor.empty-state.no-resources")
+        }
       />
       <input
         type="file"
@@ -360,8 +368,6 @@ const SavedResourcesTutor = () => {
         accept=".pdf,.doc,.docx,.txt"
         className="hidden"
       />
-
-      {/* Update the Add Resource button */}
       <button
         disabled={isUploading}
         onClick={() => fileInputRef.current?.click()}
@@ -372,7 +378,9 @@ const SavedResourcesTutor = () => {
         ) : (
           <Plus />
         )}
-        {isUploading ? "Uploading..." : "Add Resource"}
+        {isUploading
+          ? t("saved-resources-tutor.buttons.uploading")
+          : t("saved-resources-tutor.buttons.add-resource")}
       </button>
     </div>
   );
@@ -394,13 +402,15 @@ const SavedResourcesTutor = () => {
       <div className="flex-1 p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl ml-[17rem] m-2">
         <div className="flex items-center justify-between pb-4 mb-6 border-b">
           <div className="flex items-center gap-4">
-            <h1 className="text-4xl font-semibold">Resources</h1>
+            <h1 className="text-4xl font-semibold">
+              {t("saved-resources-tutor.title")}
+            </h1>
           </div>
           <div className="relative flex-1 max-w-2xl ml-8">
             <Search className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 left-4 top-1/2" />
             <input
               type="text"
-              placeholder="Search resource by name"
+              placeholder={t("saved-resources-tutor.search.placeholder")}
               className="w-full py-3 pl-12 pr-4 border border-gray-200 rounded-full bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -413,7 +423,9 @@ const SavedResourcesTutor = () => {
         ) : (
           <div className="space-y-8">
             <div>
-              <h2 className="mb-4 text-2xl font-bold">Favorite Resources</h2>
+              <h2 className="mb-4 text-2xl font-bold">
+                {t("saved-resources-tutor.sections.favorites")}
+              </h2>
               <div className="grid grid-cols-3 gap-4">
                 {filteredResources
                   .filter((r) => r.isFavorite)
@@ -425,7 +437,9 @@ const SavedResourcesTutor = () => {
 
             <div>
               <div className="flex flex-row items-center justify-between">
-                <h2 className="mb-4 text-2xl font-bold">More Resources</h2>
+                <h2 className="mb-4 text-2xl font-bold">
+                  {t("saved-resources-tutor.sections.more")}
+                </h2>
                 <input
                   type="file"
                   ref={fileInputRef}
@@ -433,8 +447,6 @@ const SavedResourcesTutor = () => {
                   accept=".pdf,.doc,.docx,.txt"
                   className="hidden"
                 />
-
-                {/* Update the Add Resource button */}
                 <button
                   disabled={isUploading}
                   onClick={() => fileInputRef.current?.click()}
@@ -445,7 +457,9 @@ const SavedResourcesTutor = () => {
                   ) : (
                     <Plus />
                   )}
-                  {isUploading ? "Uploading..." : "Add Resource"}
+                  {isUploading
+                    ? t("saved-resources-tutor.buttons.uploading")
+                    : t("saved-resources-tutor.buttons.add-resource")}
                 </button>
               </div>
               <div className="grid grid-cols-3 gap-4">
@@ -477,7 +491,7 @@ const SavedResourcesTutor = () => {
           overlayClassName="fixed inset-0 bg-black bg-opacity-25"
         >
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold">Assign Resource</h2>
+            {t("saved-resources-tutor.assign-modal.title")}
             <button
               onClick={() => setIsAssignModalOpen(false)}
               className="p-1 rounded-full hover:bg-gray-100"
@@ -490,7 +504,9 @@ const SavedResourcesTutor = () => {
             <Search className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 left-3 top-1/2" />
             <input
               type="text"
-              placeholder="Search student by name"
+              placeholder={t(
+                "saved-resources-tutor.assign-modal.search-placeholder"
+              )}
               className="w-full py-3 pl-10 pr-4 border border-gray-200 rounded-full bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200"
               value={studentSearchQuery}
               onChange={(e) => setStudentSearchQuery(e.target.value)}
@@ -499,7 +515,9 @@ const SavedResourcesTutor = () => {
 
           {selectedStudents.length > 0 && (
             <div className="mb-2 text-sm text-gray-600">
-              {selectedStudents.length} Selected Students
+              {t("saved-resources-tutor.assign-modal.selected-count", {
+                count: selectedStudents.length,
+              })}
             </div>
           )}
 
@@ -530,7 +548,7 @@ const SavedResourcesTutor = () => {
               onClick={() => setIsAssignModalOpen(false)}
               className="flex-1 px-6 py-2 font-medium border border-black rounded-full"
             >
-              Cancel
+              {t("saved-resources-tutor.assign-modal.buttons.cancel")}
             </button>
             <button
               onClick={handleAssign}
@@ -542,7 +560,7 @@ const SavedResourcesTutor = () => {
                     : "bg-[#14b82c] hover:bg-[#129526]"
                 }`}
             >
-              Assign
+              {t("saved-resources-tutor.assign-modal.buttons.assign")}
             </button>
           </div>
         </Modal>
@@ -559,22 +577,25 @@ const SavedResourcesTutor = () => {
             </div>
 
             <h2 className="mb-2 text-xl font-bold">
-              Are you sure you want to delete this resource?
+              {t("saved-resources-tutor.delete-modal.title")}
             </h2>
-            <p className="mb-6 text-gray-600">This is irreversible action!</p>
+            <p className="mb-6 text-gray-600">
+              {" "}
+              {t("saved-resources-tutor.delete-modal.subtitle")}
+            </p>
 
             <div className="flex gap-4">
               <button
                 onClick={() => setIsModalOpen(false)}
                 className="px-8 py-2 border border-black rounded-full hover:bg-gray-50"
               >
-                Cancel
+                {t("saved-resources-tutor.delete-modal.buttons.cancel")}
               </button>
               <button
                 onClick={() => deleteResource(selectedResource)}
                 className="px-8 py-2 text-black bg-red-500 border border-black rounded-full hover:bg-red-600"
               >
-                Yes, Delete
+                {t("saved-resources-tutor.delete-modal.buttons.confirm")}
               </button>
             </div>
           </div>

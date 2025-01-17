@@ -8,6 +8,7 @@ import { collection, doc, getDoc } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import { ClipLoader } from "react-spinners";
 import EmptyState from "../../components/EmptyState";
+import { useTranslation } from "react-i18next";
 
 const BammbuuPlusGroupsUser = () => {
   const { user, setUser } = useAuth();
@@ -16,6 +17,7 @@ const BammbuuPlusGroupsUser = () => {
   const [filteredGroups, setFilteredGroups] = useState([]);
   const [loadingGroups, setLoadingGroups] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (user && user.joinedGroups) {
@@ -78,20 +80,22 @@ const BammbuuPlusGroupsUser = () => {
             >
               <ArrowLeft size="30" />
             </button>
-            <h1 className="text-4xl font-semibold">bammbuu+ Groups</h1>
+            <h1 className="text-4xl font-semibold">
+              {t("bammbuu-groups.title")}
+            </h1>
           </div>
           <div className="flex flex-row items-center justify-center space-x-4">
             <button
               onClick={handleCreateGroup}
               className="px-6 py-3 text-[#042f0c] text-xl font-medium bg-white border border-[#5d5d5d] rounded-full"
             >
-              Create New Group
+              {t("bammbuu-groups.buttons.create")}
             </button>
             <button
               onClick={handleJoinGroup}
               className="px-6 py-3 text-[#042f0c] text-xl font-medium bg-white border border-[#5d5d5d] rounded-full"
             >
-              Join a Group
+              {t("bammbuu-groups.buttons.join")}
             </button>
           </div>
         </div>
@@ -100,7 +104,7 @@ const BammbuuPlusGroupsUser = () => {
           <Search className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
           <input
             type="text"
-            placeholder="Search groups by name"
+            placeholder={t("bammbuu-groups.search.placeholder")}
             className="w-full py-3 pl-10 pr-4 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-yellow-400"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -122,7 +126,11 @@ const BammbuuPlusGroupsUser = () => {
         ) : (
           <div className="flex items-center justify-center min-h-[50vh]">
             <EmptyState
-              message={searchQuery ? "No results found." : "No groups yet."}
+              message={t(
+                searchQuery
+                  ? "bammbuu-groups.empty-state.no-results"
+                  : "bammbuu-groups.empty-state.no-groups"
+              )}
             />
           </div>
         )}

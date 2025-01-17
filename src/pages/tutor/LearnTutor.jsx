@@ -18,6 +18,8 @@ import { useAuth } from "../../context/AuthContext";
 import GroupCard from "../../components/GroupCard";
 import { useNavigate } from "react-router-dom";
 import { db } from "../../firebaseConfig";
+import { useTranslation } from "react-i18next";
+
 import {
   doc,
   getDoc,
@@ -35,10 +37,17 @@ import GroupCardTutor from "../../components-tutor/GroupCardTutor";
 import EmptyState from "../../components/EmptyState";
 
 const LearnTutor = () => {
+  const { t } = useTranslation();
+
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("Booked Classes");
-  const TABS = ["Booked Classes", "Available Classes"];
+  const [activeTab, setActiveTab] = useState(
+    t("learn-tutor.tabs.booked-classes")
+  );
+  const TABS = [
+    t("learn-tutor.tabs.booked-classes"),
+    t("learn-tutor.tabs.available-classes"),
+  ];
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [groups, setGroups] = useState([]);
@@ -189,15 +198,21 @@ const LearnTutor = () => {
         <div className="flex-1 p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl ml-[17rem] m-2">
           <div className="flex items-center justify-between mb-4 border-b border-[#e7e7e7] pb-4">
             <div className="flex flex-row items-center space-x-4">
-              <h1 className="text-3xl font-semibold">Hi, {user.name}!</h1>
-              <p className="text-[#616161] text-lg">How are you today? </p>
+              <h1 className="text-3xl font-semibold">
+                {" "}
+                {t("learn-tutor.greeting", { name: user.name })}
+              </h1>
+              <p className="text-[#616161] text-lg">
+                {" "}
+                {t("learn-tutor.greeting-subtitle")}
+              </p>
             </div>
             <div className="flex items-center gap-4">
               <div className="relative">
                 <div className="relative">
                   <input
                     type="search"
-                    placeholder="Search classes, instructors or groups"
+                    placeholder={t("learn-tutor.search.placeholder")}
                     className="py-2 pl-10 pr-4 border border-gray-200 rounded-full w-96"
                   />
                   <Search
@@ -284,14 +299,14 @@ const LearnTutor = () => {
                   className="px-3 py-2 text-[#042f0c] text-lg font-semibold bg-[#14b82c] border border-black rounded-full flex items-center"
                   onClick={() => setShowClassTypeModal(true)}
                 >
-                  <Plus /> New Class
+                  <Plus /> {t("learn-tutor.actions.new-class")}
                 </button>
 
                 <button
                   className="px-3 py-2 text-[#042f0c] text-lg font-semibold bg-[#e6fde9] border border-black rounded-full flex items-center"
                   onClick={() => navigate("/classesTutor")}
                 >
-                  View All
+                  {t("learn-tutor.actions.view-all")}
                 </button>
               </div>
             </div>
@@ -322,21 +337,23 @@ const LearnTutor = () => {
           <div className="w-full max-w-[160vh] mx-auto">
             <div className="flex flex-row items-center justify-between pt-4 ">
               <div>
-                <h2 className="text-3xl font-bold">My Groups</h2>
+                <h2 className="text-3xl font-bold">
+                  {t("learn-tutor.sections.my-groups")}
+                </h2>
               </div>
               <div className="flex flex-row items-center space-x-2">
                 <button
                   className="px-3 py-2 text-[#042f0c] text-lg font-semibold bg-[#14b82c] border border-black rounded-full flex items-center"
                   onClick={() => navigate("/addGroupsTutor")}
                 >
-                  <Plus /> New Group
+                  <Plus /> {t("learn-tutor.actions.new-group")}
                 </button>
 
                 <button
                   className="px-3 py-2 text-[#042f0c] text-lg font-semibold bg-[#e6fde9] border border-black rounded-full flex items-center"
                   onClick={() => navigate("/groupsTutor")}
                 >
-                  View All
+                  {t("learn-tutor.actions.view-all")}
                 </button>
               </div>
             </div>

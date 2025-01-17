@@ -1,0 +1,409 @@
+{
+  "sidebar": {
+    "student": {
+      "learn": "Learn",
+      "community": "Community",
+      "superTutor": "SuperTutor",
+      "languageExperts": "Language Experts",
+      "savedResources": "Saved Resources",
+      "bambuuGroups": "bammbuu+ Groups"
+    },
+    "tutor": {
+      "home": "Home",
+      "students": "Students",
+      "resources": "Resources"
+    }
+  },
+  "settings": {
+    "appLanguage": "App Language",
+    "deleteAccount": "Delete Account",
+    "deleteModal": {
+      "title": "We're Sad to See You Go!",
+      "description": "Before you leave, we'd love to understand why. Your feedback helps us improve! Could you share a reason?",
+      "warning": "It's an irreversible action",
+      "cancel": "Cancel",
+      "confirm": "Delete Account"
+    },
+    "languageModal": {
+      "title": "Select Language",
+      "description": "Choose your preferred language for the application",
+      "english": "English",
+      "spanish": "Spanish",
+      "cancel": "Cancel"
+    }
+  },
+  "feedback": {
+    "betterAlternative": "I found a better alternative",
+    "technicalIssues": "I'm having technical issues",
+    "notUsingEnough": "I'm not using this app enough",
+    "pricingHigh": "Pricing is too high",
+    "other": "Other"
+  },
+  "toast": {
+    "languageUpdated": "Language updated successfully",
+    "languageError": "Failed to update language",
+    "userNotFound": "User not found"
+  },
+  "account": {
+    "updatePassword": "Update Password",
+    "manageMembership": "Manage Membership",
+    "modal": {
+      "title": "Update Password",
+      "description": "Update your password with new and strong password.",
+      "currentPassword": "Current Password",
+      "currentPasswordPlaceholder": "Enter your current password",
+      "newPassword": "New Password",
+      "newPasswordPlaceholder": "Enter your new password",
+      "confirmPassword": "Confirm New Password",
+      "confirmPasswordPlaceholder": "Re-enter your new password",
+      "cancel": "Cancel",
+      "update": "Update Password",
+      "updating": "Updating..."
+    },
+    "errors": {
+      "passwordMismatch": "New password and Confirm password do not match.",
+      "noUser": "No user is currently signed in.",
+      "noEmail": "User email not found."
+    },
+    "success": {
+      "passwordUpdated": "Password updated successfully!"
+    }
+  },
+  "notifications": {
+    "title": "In-App Notification",
+    "types": {
+      "classReminder": "Class Reminder Notification",
+      "newMessage": "New Message Notification",
+      "resourceAssign": "Resource Assign Notification",
+      "groupChat": "Group Chat Notification",
+      "appUpdates": "App Updates"
+    },
+    "errors": {
+      "fetchError": "Error fetching notification preferences",
+      "updateError": "Error updating notification preference"
+    }
+  },
+  "user-settings": {
+    "title": "Settings",
+    "tabs": {
+      "app": "App",
+      "account": "Account",
+      "notifications": "Notifications"
+    }
+  },
+  "saved-resources": {
+    "title": "Saved Resources",
+    "search": {
+      "placeholder": "Search resource by name"
+    },
+    "sections": {
+      "favorites": "Favorite Resources",
+      "more": "More Resources"
+    },
+    "empty-state": {
+      "no-resources": "No resources yet.",
+      "no-results": "No results found."
+    },
+    "menu": {
+      "add-favorite": "Add to favorites",
+      "remove-favorite": "Remove from favorites",
+      "remove-resource": "Remove Resource"
+    },
+    "delete-modal": {
+      "title": "Are you sure you want to remove this resource?",
+      "description": "This is irreversible action!",
+      "cancel": "Cancel",
+      "confirm": "Yes, Remove"
+    }
+  },
+  "bammbuu-groups": {
+    "title": "bammbuu+ Groups",
+    "buttons": {
+      "create": "Create New Group",
+      "join": "Join a Group"
+    },
+    "search": {
+      "placeholder": "Search groups by name"
+    },
+    "empty-state": {
+      "no-groups": "No groups yet.",
+      "no-results": "No results found."
+    }
+  },
+  "languageExperts": {
+    "title": "Language Experts",
+    "becomeExpert": "Become an Expert",
+    "featuredInstructors": "Featured Instructors",
+    "moreInstructors": "More Instructors",
+    "searchPlaceholder": "Search resource by name",
+    "noResults": "No results found.",
+    "noTutor": "No tutor yet.",
+    "filters": {
+      "all": "All",
+      "english": "English",
+      "spanish": "Spanish"
+    },
+    "tutorCard": {
+      "native": "Native",
+      "teaching": "Teaching",
+      "students": "students"
+    }
+  },
+  "profile": {
+    "title": "Profile",
+    "appStreak": "App Streak",
+    "native": "Native",
+    "learning": "Learning",
+    "from": "From",
+    "stats": {
+      "totalClassesJoined": "Total Classes Joined",
+      "totalGroupsJoined": "Total Groups Joined"
+    },
+    "navigation": {
+      "editProfile": "Edit Profile",
+      "settings": "Settings",
+      "aboutBammbuu": "About bammbuu",
+      "privacyPolicy": "Privacy Policy",
+      "logout": "Logout"
+    },
+    "toast": {
+      "logoutSuccess": "Logged out successfully!",
+      "logoutError": "Error during logout"
+    }
+  },
+  "saved-resources-tutor": {
+    "title": "Resources",
+    "search": {
+      "placeholder": "Search resource by name"
+    },
+    "sections": {
+      "favorites": "Favorite Resources",
+      "more": "More Resources"
+    },
+    "empty-state": {
+      "no-results": "No results found.",
+      "no-resources": "No resources yet."
+    },
+    "buttons": {
+      "add-resource": "Add Resource",
+      "uploading": "Uploading..."
+    },
+    "menu": {
+      "assign": "Assign Resource",
+      "add-favorite": "Add to favorites",
+      "remove-favorite": "Remove from favorites",
+      "delete": "Delete Resource"
+    },
+    "assign-modal": {
+      "title": "Assign Resource",
+      "search-placeholder": "Search student by name",
+      "selected-count": "{{count}} Selected Students",
+      "buttons": {
+        "cancel": "Cancel",
+        "assign": "Assign"
+      }
+    },
+    "delete-modal": {
+      "title": "Are you sure you want to delete this resource?",
+      "subtitle": "This is irreversible action!",
+      "buttons": {
+        "cancel": "Cancel",
+        "confirm": "Yes, Delete"
+      }
+    }
+  },
+  "learn-tutor": {
+    "greeting": "Hi, {{name}}!",
+    "greeting-subtitle": "How are you today?",
+    "search": {
+      "placeholder": "Search classes, instructors or groups"
+    },
+    "tabs": {
+      "booked-classes": "Booked Classes",
+      "available-classes": "Available Classes"
+    },
+    "actions": {
+      "new-class": "New Class",
+      "view-all": "View All",
+      "new-group": "New Group"
+    },
+    "calendar": {
+      "prev": "Previous",
+      "next": "Next"
+    },
+    "empty-states": {
+      "no-classes": "No class yet!",
+      "no-groups": "No group yet!"
+    },
+    "sections": {
+      "my-groups": "My Groups"
+    },
+    "modals": {
+      "class-type": {
+        "title": "Select Class Type",
+        "individual": "Individual",
+        "group": "Group"
+      },
+      "group-select": {
+        "title": "Select Group",
+        "no-groups": "No groups available"
+      }
+    }
+  },
+  "classes-tutor": {
+    "title": "My Classes",
+    "actions": {
+      "add-new": "Add New Class",
+      "back": "Back"
+    },
+    "tabs": {
+      "booked": "Booked Classes",
+      "available": "Available Classes"
+    },
+    "search": {
+      "placeholder": "Search classes by name, language, or level"
+    },
+    "states": {
+      "loading": "Loading...",
+      "error": "Unable to fetch classes at this time. Please try again later.",
+      "empty": {
+        "no-classes": "No classes yet.",
+        "no-results": "No results found."
+      }
+    },
+    "modals": {
+      "class-type": {
+        "title": "Select Class Type",
+        "individual": "Individual",
+        "group": "Group"
+      },
+      "group-select": {
+        "title": "Select Group",
+        "no-groups": "No groups available"
+      }
+    }
+  },
+  "groups-tutor": {
+    "title": "My Groups",
+    "actions": {
+      "create-new": "Create New Group",
+      "back": "Back"
+    },
+    "search": {
+      "placeholder": "Search groups by name"
+    },
+    "states": {
+      "loading": "Loading...",
+      "error": "Unable to fetch groups at this time. Please try again later.",
+      "empty": {
+        "no-groups": "No groups yet.",
+        "no-results": "No results found."
+      }
+    }
+  },
+  "group-details-tutor": {
+    "title": "Group Details",
+    "actions": {
+      "back": "Back",
+      "view-chat": "View Group Chat",
+      "edit-details": "Edit Group Details",
+      "delete-group": "Delete Group",
+      "leave-group": "Leave Group",
+      "create-class": "Create New Class",
+      "remove-member": "Remove"
+    },
+    "tabs": {
+      "classes": "Classes",
+      "members": "Members"
+    },
+    "member-status": {
+      "admin": "Admin"
+    },
+    "empty-states": {
+      "no-classes": "No classes available",
+      "no-members": "No members available"
+    },
+    "loading": "Loading...",
+    "error": {
+      "generic": "An error occurred. Please try again.",
+      "close": "Close"
+    },
+    "statistics": {
+      "members": "{{count}}k+"
+    },
+    "flags": {
+      "us-alt": "US Flag",
+      "spain-alt": "Spain Flag"
+    },
+    "confirmations": {
+      "delete": {
+        "title": "Delete Group",
+        "message": "Are you sure you want to delete this group?",
+        "confirm": "Delete",
+        "cancel": "Cancel"
+      },
+      "leave": {
+        "title": "Leave Group",
+        "message": "Are you sure you want to leave this group?",
+        "confirm": "Leave",
+        "cancel": "Cancel"
+      },
+      "remove-member": {
+        "title": "Remove Member",
+        "message": "Are you sure you want to remove this member?",
+        "confirm": "Remove",
+        "cancel": "Cancel"
+      }
+    }
+  },
+  "class-details-tutor": {
+    "title": "Class Details",
+    "actions": {
+      "back": "Back",
+      "close": "Close",
+      "join-class": "Join Class",
+      "edit-class": "Edit Class Details",
+      "delete-class": "Delete Class",
+      "remove-member": "Remove",
+      "cancel": "Cancel"
+    },
+    "member": {
+      "teacher": "Teacher",
+      "admin": "Admin"
+    },
+    "tabs": {
+      "members": "Members ({{count}})"
+    },
+    "class-info": {
+      "instructor": "Instructor",
+      "group": "Group"
+    },
+    "empty-states": {
+      "no-members": "No members available"
+    },
+    "loading": "Loading...",
+    "errors": {
+      "no-class-id": "No class ID provided",
+      "class-not-found": "Class not found",
+      "fetch-failed": "Failed to fetch class details"
+    },
+    "confirmations": {
+      "remove-member": {
+        "title": "Remove {{name}} from group?",
+        "message": "This action cannot be undone. The user will need to request to join again.",
+        "confirm": "Remove",
+        "removing": "Removing..."
+      },
+      "delete-class": {
+        "title": "Delete Class?",
+        "message": "Are you sure you want to delete this class? This action cannot be undone.",
+        "confirm": "Delete",
+        "deleting": "Deleting..."
+      }
+    },
+    "flags": {
+      "us-alt": "US Flag",
+      "spain-alt": "Spain Flag"
+    }
+  }
+}

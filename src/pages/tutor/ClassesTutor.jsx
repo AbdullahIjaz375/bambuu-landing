@@ -12,8 +12,11 @@ import {
   GroupSelectModal,
 } from "../../components-tutor/AddClassFlow";
 import EmptyState from "../../components/EmptyState";
+import { useTranslation } from "react-i18next";
 
 const ClassesTutor = () => {
+  const { t } = useTranslation();
+
   const { user } = useAuth();
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -153,16 +156,19 @@ const ClassesTutor = () => {
               <button
                 className="p-3 bg-gray-100 rounded-full"
                 onClick={handleBack}
+                aria-label={t("classes-tutor.actions.back")}
               >
                 <ArrowLeft size="30" />
               </button>
-              <h1 className="text-4xl font-semibold">My Classes</h1>
+              <h1 className="text-4xl font-semibold">
+                {t("classes-tutor.title")}
+              </h1>
             </div>
             <button
               className="px-6 py-3 text-[#042f0c] text-xl font-medium bg-white border border-[#5d5d5d] rounded-full"
               onClick={() => setShowClassTypeModal(true)}
             >
-              Add New Class
+              {t("classes-tutor.actions.add-new")}
             </button>
           </div>
 
@@ -178,7 +184,7 @@ const ClassesTutor = () => {
                 : "bg-transparent"
             }`}
                 >
-                  Booked Classes
+                  {t("classes-tutor.tabs.booked")}
                 </button>
                 <button
                   onClick={() => setActiveTab("available")}
@@ -189,7 +195,7 @@ const ClassesTutor = () => {
                 : "bg-transparent"
             }`}
                 >
-                  Available Classes
+                  {t("classes-tutor.tabs.available")}
                 </button>
               </div>
             </div>
@@ -197,7 +203,7 @@ const ClassesTutor = () => {
               <Search className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
               <input
                 type="text"
-                placeholder="Search classes by name, language, or level"
+                placeholder={t("classes-tutor.search.placeholder")}
                 className="w-[40vh] py-3 pl-10 pr-4 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-yellow-400"
                 value={searchQuery}
                 onChange={handleSearchChange}
@@ -214,8 +220,12 @@ const ClassesTutor = () => {
           ) : filteredClasses.length === 0 ? (
             <div className="flex items-center justify-center min-h-[70vh]">
               <EmptyState
-                message={searchQuery ? "No results found." : "No classes yet."}
-              />{" "}
+                message={
+                  searchQuery
+                    ? t("classes-tutor.states.empty.no-results")
+                    : t("classes-tutor.states.empty.no-classes")
+                }
+              />
             </div>
           ) : (
             <div className="flex flex-wrap gap-4">
