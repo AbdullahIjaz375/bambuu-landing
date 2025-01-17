@@ -7,6 +7,7 @@ import { collection, getDocs } from "firebase/firestore";
 import { ClipLoader } from "react-spinners";
 import Sidebar from "../../components/Sidebar";
 import ExploreGroupCard from "../../components/ExploreGroupCard";
+import EmptyState from "../../components/EmptyState";
 
 const ExploreGroupsUser = () => {
   const { user } = useAuth();
@@ -103,17 +104,17 @@ const ExploreGroupsUser = () => {
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center min-h-[50vh]">
+          <div className="flex items-center justify-center min-h-[70vh]">
             <ClipLoader color="#14B82C" size={50} />
           </div>
         ) : error ? (
           <p className="text-center text-red-500">{error}</p>
         ) : filteredGroups.length === 0 ? (
-          <p className="text-center text-gray-500">
-            {searchQuery
-              ? "No groups found matching your search."
-              : "No available groups found."}
-          </p>
+          <div className="flex items-center justify-center min-h-[70vh]">
+            <EmptyState
+              message={searchQuery ? "No results found." : "No groups yet."}
+            />{" "}
+          </div>
         ) : (
           <div className="flex flex-wrap gap-4">
             {filteredGroups.map((group) => (

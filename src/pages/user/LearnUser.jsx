@@ -23,6 +23,7 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { ClipLoader } from "react-spinners";
 import { getToken } from "firebase/messaging";
 import { messaging } from "../../firebaseConfig";
+import EmptyState from "../../components/EmptyState";
 const LearnUser = () => {
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
@@ -504,14 +505,7 @@ const LearnUser = () => {
             </div>
           ) : classes.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
-              <img
-                alt="bambuu"
-                src="/images/no-class.png"
-                className="w-auto h-auto"
-              />
-              <p className="text-center text-gray-600">
-                You have not booked a class yet!
-              </p>
+              <EmptyState message="You have not booked a class yet!" />
               <button
                 className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
                 onClick={() => navigate("/learnLanguageUser")}
@@ -564,14 +558,8 @@ const LearnUser = () => {
             </div>
           ) : groups.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
-              <img
-                alt="No groups"
-                src="/images/no-class.png"
-                className="w-auto h-auto"
-              />
-              <p className="text-center text-gray-600">
-                You are not part of any group yet!
-              </p>
+              <EmptyState message="You are not part of any group yet!" />
+
               <div className="flex flex-row items-center justify-center space-x-4">
                 <button
                   onClick={() => navigate("/learnLanguageUser")}

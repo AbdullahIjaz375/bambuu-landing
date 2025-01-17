@@ -26,6 +26,7 @@ import {
 import { db } from "../../firebaseConfig";
 import Modal from "react-modal";
 import { ClipLoader } from "react-spinners";
+import EmptyState from "../../components/EmptyState";
 
 Modal.setAppElement("#root");
 
@@ -207,15 +208,6 @@ const SavedResources = () => {
     </div>
   );
 
-  const EmptyState = () => (
-    <div className="flex flex-col items-center justify-center h-[70vh]">
-      <div className="flex items-center justify-center w-16 h-16 mb-4 bg-yellow-100 rounded-full">
-        <img alt="empty state" src="/images/no_saved.png" />
-      </div>
-      <p className="text-gray-600">You've not saved any resources yet!</p>
-    </div>
-  );
-
   const filteredResources = resources.filter((resource) =>
     resource.documentName.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -253,7 +245,13 @@ const SavedResources = () => {
           </div>
 
           {filteredResources.length === 0 ? (
-            <EmptyState />
+            <div className="flex flex-col items-center justify-center h-[70vh]">
+              <EmptyState
+                message={
+                  searchQuery ? "No results found." : "No resources yet."
+                }
+              />
+            </div>
           ) : (
             <div className="space-y-8">
               <div>

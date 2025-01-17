@@ -34,6 +34,7 @@ import Modal from "react-modal";
 import ExploreClassCard from "../../components/ExploreClassCard";
 import PlansModal from "../../components/PlansModal";
 import { useGroupJoining } from "../../hooks/useGroupJoining";
+import EmptyState from "../../components/EmptyState";
 Modal.setAppElement("#root");
 
 const GroupDetailsNotJoinedUser = ({ onClose }) => {
@@ -149,8 +150,8 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
   const renderClasses = () => {
     if (classes.length === 0) {
       return (
-        <div className="flex items-center justify-center h-64">
-          <p className="text-gray-500">No classes available</p>
+        <div className="flex items-center justify-center h-96">
+          <EmptyState message="No classes available" />
         </div>
       );
     }

@@ -145,6 +145,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { ClipLoader } from "react-spinners";
 import ClassCard from "../../components/ClassCard";
 import Sidebar from "../../components/Sidebar";
+import EmptyState from "../../components/EmptyState";
 
 const ClassesUser = () => {
   const { user } = useAuth();
@@ -280,19 +281,23 @@ const ClassesUser = () => {
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center min-h-[50vh]">
+          <div className="flex items-center justify-center min-h-[70vh]">
             <ClipLoader color="#14B82C" size={50} />
           </div>
         ) : error ? (
           <p className="text-center text-red-500">{error}</p>
         ) : filteredClasses.length === 0 ? (
-          <p className="text-center text-gray-500">
-            {searchQuery
-              ? "No classes found matching your search."
-              : `No ${
-                  activeTab === "bammbuu" ? "bammbuu+" : "group"
-                } classes found.`}
-          </p>
+          <div className="flex items-center justify-center min-h-[70vh]">
+            <EmptyState
+              message={
+                searchQuery
+                  ? "No results found."
+                  : `No ${
+                      activeTab === "bammbuu" ? "bammbuu+" : "group"
+                    } classes found.`
+              }
+            />{" "}
+          </div>
         ) : (
           <div className="flex flex-wrap gap-4">
             {filteredClasses.map((classItem) => (

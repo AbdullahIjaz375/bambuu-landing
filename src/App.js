@@ -60,6 +60,7 @@ import SingupSplash from "./pages/SignupSplash";
 import EditGroupsUser from "./pages/user/EditGroupUser";
 import EditGroupsTutor from "./pages/tutor/EditGroupTutor";
 import EditClassPage from "./pages/tutor/EditClassDetails";
+import ProfileSetup from "./pages/user/ProfileSetupUser";
 
 const App = () => {
   const { user, streamClient } = useAuth(); // Use useAuth() inside the component
@@ -406,6 +407,14 @@ const App = () => {
             element={
               <ProtectedRoute requiredRole="student">
                 <SingupSplash />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile-setup"
+            element={
+              <ProtectedRoute requiredRole="student">
+                <ProfileSetup />
               </ProtectedRoute>
             }
           />

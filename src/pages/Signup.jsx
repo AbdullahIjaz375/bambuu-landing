@@ -586,7 +586,7 @@ const Signup = () => {
                   Your Proficiency in {profileData.learningLanguage || "[x]"}
                 </label>
                 <div className="flex gap-2">
-                  {["Beginner", "Intermediate", "Advanced"].map((level) => (
+                  {["Normal", "Intermediate", "Advanced"].map((level) => (
                     <button
                       key={level}
                       type="button"

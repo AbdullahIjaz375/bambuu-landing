@@ -10,6 +10,7 @@ import { updateDoc } from "firebase/firestore";
 import { Timestamp } from "firebase/firestore"; // Import Timestamp
 import ClassInfoCard from "../../components/ClassInfoCard";
 import EditClassModal from "../../components/EditClassModal";
+import EmptyState from "../../components/EmptyState";
 
 Modal.setAppElement("#root");
 
@@ -402,8 +403,8 @@ const ClassDetailsUser = ({ onClose }) => {
   const renderMembers = () => {
     if (members.length === 0) {
       return (
-        <div className="flex items-center justify-center h-64">
-          <p className="text-gray-500">No members available</p>
+        <div className="flex items-center justify-center h-96">
+          <EmptyState message="No members available" />
         </div>
       );
     }

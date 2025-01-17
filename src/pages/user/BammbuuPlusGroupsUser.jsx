@@ -7,6 +7,7 @@ import GroupCard from "../../components/GroupCard";
 import { collection, doc, getDoc } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import { ClipLoader } from "react-spinners";
+import EmptyState from "../../components/EmptyState";
 
 const BammbuuPlusGroupsUser = () => {
   const { user, setUser } = useAuth();
@@ -119,12 +120,10 @@ const BammbuuPlusGroupsUser = () => {
             ))}
           </div>
         ) : (
-          <div className="flex items-center justify-center min-h-[30vh]">
-            <p className="text-xl text-gray-500">
-              {searchQuery
-                ? "No groups found matching your search."
-                : "You haven't joined any groups yet. Start by joining or creating a group!"}
-            </p>
+          <div className="flex items-center justify-center min-h-[50vh]">
+            <EmptyState
+              message={searchQuery ? "No results found." : "No groups yet."}
+            />
           </div>
         )}
       </div>

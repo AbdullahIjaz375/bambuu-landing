@@ -22,6 +22,7 @@ import { doc, getDoc, collection, getDocs } from "firebase/firestore";
 import { ClipLoader } from "react-spinners";
 import ExploreClassCard from "../../components/ExploreClassCard";
 import ExploreGroupCard from "../../components/ExploreGroupCard";
+import EmptyState from "../../components/EmptyState";
 
 const LearnLanguageUser = () => {
   const { user, setUser } = useAuth();
@@ -193,14 +194,7 @@ const LearnLanguageUser = () => {
               </div>
             ) : myClasses.length === 0 ? (
               <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
-                <img
-                  alt="bambuu"
-                  src="/images/no-class.png"
-                  className="w-auto h-auto"
-                />
-                <p className="text-center text-gray-600">
-                  You have not booked a class yet!
-                </p>
+                <EmptyState message="You have not joined any class yet!" />
               </div>
             ) : (
               <div className="relative w-full">
@@ -248,14 +242,8 @@ const LearnLanguageUser = () => {
               </div>
             ) : myGroups.length === 0 ? (
               <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
-                <img
-                  alt="No groups"
-                  src="/images/no-class.png"
-                  className="w-auto h-auto"
-                />
-                <p className="text-center text-gray-600">
-                  You are not part of any group yet!
-                </p>
+                <EmptyState message="You are not part of any group yet!" />
+
                 <div className="flex flex-row items-center justify-center space-x-4">
                   <button
                     onClick={() => navigate("/groupsUser")}
@@ -312,14 +300,7 @@ const LearnLanguageUser = () => {
               </div>
             ) : exploreClasses.length === 0 ? (
               <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
-                <img
-                  alt="No classes"
-                  src="/images/no-class.png"
-                  className="w-auto h-auto"
-                />
-                <p className="text-center text-gray-600">
-                  No available classes to explore at the moment!
-                </p>
+                <EmptyState message="No available classes to explore at the moment!" />
               </div>
             ) : (
               <div className="relative w-full">
@@ -367,14 +348,7 @@ const LearnLanguageUser = () => {
               </div>
             ) : exploreGroups.length === 0 ? (
               <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
-                <img
-                  alt="No groups"
-                  src="/images/no-class.png"
-                  className="w-auto h-auto"
-                />
-                <p className="text-center text-gray-600">
-                  No available groups to explore at the moment!
-                </p>
+                <EmptyState message="No available groups to explore at the moment!" />
               </div>
             ) : (
               <div className="relative w-full">

@@ -6,6 +6,7 @@ import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import { useNavigate } from "react-router-dom";
 import { ClipLoader } from "react-spinners";
+import EmptyState from "../../components/EmptyState";
 const LanguageExpertsPage = () => {
   const [activeFilter, setActiveFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
@@ -191,10 +192,9 @@ const LanguageExpertsPage = () => {
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center ">
-              <div className="flex items-center justify-center w-16 h-16 mb-4 bg-yellow-100 rounded-full">
-                <img alt="empty state" src="/images/no_saved.png" />
-              </div>
-              <p className="text-gray-600">No tutors available </p>
+              <EmptyState
+                message={searchQuery ? "No results found." : "No tutor yet."}
+              />
             </div>
           )}
         </section>
@@ -209,10 +209,9 @@ const LanguageExpertsPage = () => {
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center ">
-              <div className="flex items-center justify-center w-16 h-16 mb-4 bg-yellow-100 rounded-full">
-                <img alt="empty state" src="/images/no_saved.png" />
-              </div>
-              <p className="text-gray-600">No tutors available </p>
+              <EmptyState
+                message={searchQuery ? "No results found." : "No tutor yet."}
+              />
             </div>
           )}
         </section>

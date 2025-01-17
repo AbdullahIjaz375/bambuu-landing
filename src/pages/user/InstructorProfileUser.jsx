@@ -24,6 +24,7 @@ import { useAuth } from "../../context/AuthContext";
 import ClassCard from "../../components/ClassCard";
 import ExploreClassCard from "../../components/ExploreClassCard";
 import { ChannelType } from "../../config/stream";
+import EmptyState from "../../components/EmptyState";
 const InstructorProfileUser = () => {
   const { tutorId } = useParams();
   const navigate = useNavigate();
@@ -127,8 +128,8 @@ const InstructorProfileUser = () => {
   const renderClasses = () => {
     if (classes.length === 0) {
       return (
-        <div className="flex items-center justify-center h-64">
-          <p className="text-gray-500">No classes available</p>
+        <div className="flex items-center justify-center h-96">
+          <EmptyState message="No classes available" />
         </div>
       );
     }
@@ -321,7 +322,7 @@ const InstructorProfileUser = () => {
             <div className="flex flex-col flex-1 min-h-0">
               {" "}
               {/* min-h-0 enables proper flex child height */}
-              <h2 className="mb-4 text-2xl font-semibold">Classes</h2>
+              <h2 className="ml-4 text-2xl font-semibold">Classes</h2>
               <div className="flex-1 pr-4 overflow-y-auto scrollbar-hide">
                 {renderClasses()}
               </div>

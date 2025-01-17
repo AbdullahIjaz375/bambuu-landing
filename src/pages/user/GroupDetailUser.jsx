@@ -39,6 +39,7 @@ import { useParams } from "react-router-dom";
 import ClassCard from "../../components/ClassCard";
 import Modal from "react-modal";
 import ExploreClassCard from "../../components/ExploreClassCard";
+import EmptyState from "../../components/EmptyState";
 Modal.setAppElement("#root");
 
 const GroupDetailsUser = ({ onClose }) => {
@@ -658,8 +659,8 @@ const GroupDetailsUser = ({ onClose }) => {
   const renderClasses = () => {
     if (classes.length === 0) {
       return (
-        <div className="flex items-center justify-center h-64">
-          <p className="text-gray-500">No classes available</p>
+        <div className="flex items-center justify-center h-96">
+          <EmptyState message="No classes available" />
         </div>
       );
     }
@@ -730,8 +731,8 @@ const GroupDetailsUser = ({ onClose }) => {
   const renderMembers = () => {
     if (members.length === 0) {
       return (
-        <div className="flex items-center justify-center h-64">
-          <p className="text-gray-500">No members available</p>
+        <div className="flex items-center justify-center h-96">
+          <EmptyState message="No members available" />
         </div>
       );
     }

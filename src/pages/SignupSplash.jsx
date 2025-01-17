@@ -29,7 +29,7 @@ const SingupSplash = () => {
   ];
 
   const handleSkip = () => {
-    navigate("/learn", { replace: true });
+    navigate("/profile-setup", { replace: true });
   };
 
   const handleNext = () => {
@@ -37,7 +37,7 @@ const SingupSplash = () => {
       setCurrentStep((prev) => prev + 1);
     } else {
       // Navigate to learn page on the last step
-      navigate("/learn", { replace: true });
+      navigate("/profile-setup", { replace: true });
     }
   };
 
