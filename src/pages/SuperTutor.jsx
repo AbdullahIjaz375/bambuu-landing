@@ -150,7 +150,7 @@ function SuperTutor() {
         <div className="flex flex-col flex-1 p-4">
           <div
             className="flex-1 p-4 overflow-y-auto bg-white rounded-md"
-            ref={chatContainerRef} // Attach the ref to the chat container
+            ref={chatContainerRef} // Attach the ref to the chat
           >
             {activeConversation ? (
               activeConversation.messages.map((message, index) => (
