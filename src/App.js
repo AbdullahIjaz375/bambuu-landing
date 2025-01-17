@@ -437,7 +437,7 @@ const App = () => {
           <Route
             path="/call/:classId"
             element={
-              <ProtectedRoute requiredRole="student">
+              <ProtectedRoute requiredRole={["student", "tutor"]}>
                 <VideoCall />
               </ProtectedRoute>
             }

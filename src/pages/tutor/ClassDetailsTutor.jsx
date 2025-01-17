@@ -166,6 +166,15 @@ const ClassDetailsTutor = ({ onClose }) => {
     }
   };
 
+  //---------------------------------------------video class start---------------------------------------------//
+
+  const [showVideoCall, setShowVideoCall] = useState(false);
+
+  const handleJoinClass = () => {
+    navigate(`/call/${classId}`);
+  };
+  //-----------------------------------------------------------------------------------------------------------//
+
   //-------------------------------------------------Deleting Class---------------------------------------//
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -544,7 +553,10 @@ const ClassDetailsTutor = ({ onClose }) => {
                         groupTutor={groupTutor}
                       />
                     </div>
-                    <button className="w-full px-4 py-2 text-black bg-[#ffbf00] border border-black rounded-full hover:bg-[#ffbf00]">
+                    <button
+                      className="w-full px-4 py-2 text-black bg-[#ffbf00] border border-black rounded-full hover:bg-[#ffbf00]"
+                      onClick={handleJoinClass}
+                    >
                       Join Class
                     </button>
                     <button
