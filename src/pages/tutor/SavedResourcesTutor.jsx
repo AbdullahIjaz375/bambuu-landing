@@ -29,6 +29,7 @@ import {
 } from "firebase/firestore";
 import { db, storage } from "../../firebaseConfig";
 import Modal from "react-modal";
+import EmptyState from "../../components/EmptyState";
 
 Modal.setAppElement("#root");
 
@@ -347,12 +348,11 @@ const SavedResourcesTutor = () => {
     </div>
   );
 
-  const EmptyState = () => (
+  const EmptyStateCustom = () => (
     <div className="flex flex-col items-center justify-center h-[70vh]">
-      <div className="flex items-center justify-center w-16 h-16 mb-4 bg-yellow-100 rounded-full">
-        <img alt="bambuu" src="/images/no_saved.png" />
-      </div>
-      <p className="text-gray-600">You've not saved any resources yet!</p>
+      <EmptyState
+        message={searchQuery ? "No results found." : "No resources yet."}
+      />
       <input
         type="file"
         ref={fileInputRef}
@@ -409,7 +409,7 @@ const SavedResourcesTutor = () => {
         </div>
 
         {filteredResources.length === 0 ? (
-          <EmptyState />
+          <EmptyStateCustom />
         ) : (
           <div className="space-y-8">
             <div>

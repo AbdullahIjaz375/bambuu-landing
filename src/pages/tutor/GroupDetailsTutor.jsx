@@ -46,6 +46,7 @@ import ClassCard from "../../components/ClassCard";
 import Modal from "react-modal";
 import ClassCardTutor from "../../components-tutor/ClassCardTutor";
 import { deleteStreamChannel } from "../../services/streamService";
+import EmptyState from "../../components/EmptyState";
 Modal.setAppElement("#root");
 
 const GroupDetailsTutor = ({ onClose }) => {
@@ -624,8 +625,8 @@ const GroupDetailsTutor = ({ onClose }) => {
   const renderClasses = () => {
     if (classes.length === 0) {
       return (
-        <div className="flex items-center justify-center h-64">
-          <p className="text-gray-500">No classes available</p>
+        <div className="flex items-center justify-center h-96">
+          <EmptyState message="No classes available" />
         </div>
       );
     }
@@ -666,8 +667,8 @@ const GroupDetailsTutor = ({ onClose }) => {
   const renderMembers = () => {
     if (members.length === 0) {
       return (
-        <div className="flex items-center justify-center h-64">
-          <p className="text-gray-500">No members available</p>
+        <div className="flex items-center justify-center h-96">
+          <EmptyState message="No members available" />
         </div>
       );
     }

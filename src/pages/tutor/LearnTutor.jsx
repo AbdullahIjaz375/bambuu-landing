@@ -32,6 +32,7 @@ import {
   GroupSelectModal,
 } from "../../components-tutor/AddClassFlow";
 import GroupCardTutor from "../../components-tutor/GroupCardTutor";
+import EmptyState from "../../components/EmptyState";
 
 const LearnTutor = () => {
   const { user, setUser } = useAuth();
@@ -301,12 +302,7 @@ const LearnTutor = () => {
               </div>
             ) : classes.length === 0 ? (
               <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
-                <img
-                  alt="bambuu"
-                  src="/images/no-class.png"
-                  className="w-auto h-auto"
-                />
-                <p className="text-center text-gray-600">No class yet!</p>
+                <EmptyState message="No class yet!" />
               </div>
             ) : (
               <div className="relative w-full mt-2">
@@ -351,12 +347,7 @@ const LearnTutor = () => {
               </div>
             ) : groups.length === 0 ? (
               <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
-                <img
-                  alt="No groups"
-                  src="/images/no-class.png"
-                  className="w-auto h-auto"
-                />
-                <p className="text-center text-gray-600">No group yet!</p>
+                <EmptyState message="No group yet!" />
               </div>
             ) : (
               <div className="relative w-full">

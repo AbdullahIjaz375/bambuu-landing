@@ -7,6 +7,7 @@ import GroupCardTutor from "../../components-tutor/GroupCardTutor";
 import { collection, doc, getDoc } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import { ClipLoader } from "react-spinners";
+import EmptyState from "../../components/EmptyState";
 
 const GroupsTutor = () => {
   const { user } = useAuth();
@@ -124,12 +125,10 @@ const GroupsTutor = () => {
             ))}
           </div>
         ) : (
-          <div className="flex items-center justify-center min-h-[30vh]">
-            <p className="text-xl text-gray-500">
-              {searchQuery
-                ? "No groups found matching your search."
-                : "You haven't created any groups yet. Start by creating a new group!"}
-            </p>
+          <div className="flex items-center justify-center min-h-[70vh]">
+            <EmptyState
+              message={searchQuery ? "No results found." : "No groups yet."}
+            />{" "}
           </div>
         )}
       </div>
