@@ -242,83 +242,92 @@ const CommunityUser = () => {
   }
 
   return (
-    <div className="flex min-h-screen bg-white">
-      <Sidebar user={user} />
-      <div className="flex-1 px-6 pt-4 bg-white border-2 border-[#e7e7e7] rounded-3xl ml-[17rem] m-2">
-        <div className="flex items-center justify-between pb-4 mb-6 border-b">
-          <div className="flex items-center gap-4">
-            <h1 className="text-4xl font-semibold">Community</h1>
-          </div>
-        </div>
-        <div className="flex-1 flex bg-white rounded-3xl m-2 h-[calc(100vh-145px)]">
-          <div className="p-4 bg-[#f6f6f6] w-96 rounded-2xl overflow-hidden flex flex-col">
-            <div className="flex gap-2 mb-4">
-              <button
-                className={`px-4 py-2 rounded-full text-md ${
-                  activeTab === "group"
-                    ? "bg-[#ffbf00] border border-[#042f0c] text-[#042f0c]"
-                    : "bg-gray-100 border"
-                }`}
-                onClick={() => setActiveTab("group")}
-              >
-                Group Chats
-              </button>
-              <button
-                className={`px-4 py-2 rounded-full text-sm ${
-                  activeTab === "bammbuuu"
-                    ? "bg-[#ffbf00] border border-[#042f0c] text-[#042f0c]"
-                    : "bg-gray-100 border"
-                }`}
-                onClick={() => setActiveTab("bammbuuu")}
-              >
-                bammbuuu+ Instructor
-              </button>
-            </div>
+    <div className="flex h-screen bg-white">
+      {/* Sidebar */}
+      <div className="flex-shrink-0 w-64 h-full">
+        <Sidebar user={user} />
+      </div>
 
-            <div className="relative mb-4">
-              <Search className="absolute w-5 h-5 text-[#5d5d5d] left-3 top-3" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={handleSearch}
-                placeholder={
-                  activeTab === "group" ? "Search groups" : "Search instructor"
-                }
-                className="w-full py-2 pl-10 pr-4 bg-gray-100 border border-[#d1d1d1] rounded-full"
-              />
-            </div>
-
-            <div className="flex-1 space-y-2 overflow-y-auto scrollbar-hide">
-              {activeTab === "bammbuuu"
-                ? bambuuInstructors.map((channel) => (
-                    <ChatItem
-                      key={channel.id}
-                      channel={channel}
-                      isInstructor={true}
-                    />
-                  ))
-                : groupChats.map((channel) => (
-                    <ChatItem
-                      key={channel.id}
-                      channel={channel}
-                      isInstructor={false}
-                    />
-                  ))}
+      {/* Main Content */}
+      <div className="flex-1 overflow-x-auto min-w-[calc(100%-16rem)] h-full">
+        <div className="flex-1 px-6 pt-4 bg-white border-2 border-[#e7e7e7] rounded-3xl m-2">
+          <div className="flex items-center justify-between pb-4 mb-6 border-b">
+            <div className="flex items-center gap-4">
+              <h1 className="text-4xl font-semibold">Community</h1>
             </div>
           </div>
-
-          <div className="flex-1 ml-4">
-            {selectedChannel ? (
-              <ChatComponent
-                channelId={selectedChannel.id}
-                type={selectedChannel.type}
-                onChannelLeave={handleChannelLeave}
-              />
-            ) : (
-              <div className="flex items-center justify-center h-full text-gray-500">
-                Select a chat to start messaging
+          <div className="flex-1 flex bg-white rounded-3xl m-2 h-[calc(100vh-125px)]">
+            <div className="p-4 bg-[#f6f6f6] w-96 rounded-2xl overflow-hidden flex flex-col">
+              <div className="flex gap-2 mb-4">
+                <button
+                  className={`px-4 py-2 rounded-full text-md ${
+                    activeTab === "group"
+                      ? "bg-[#ffbf00] border border-[#042f0c] text-[#042f0c]"
+                      : "bg-gray-100 border"
+                  }`}
+                  onClick={() => setActiveTab("group")}
+                >
+                  Group Chats
+                </button>
+                <button
+                  className={`px-4 py-2 rounded-full text-sm ${
+                    activeTab === "bammbuuu"
+                      ? "bg-[#ffbf00] border border-[#042f0c] text-[#042f0c]"
+                      : "bg-gray-100 border"
+                  }`}
+                  onClick={() => setActiveTab("bammbuuu")}
+                >
+                  bammbuuu+ Instructor
+                </button>
               </div>
-            )}
+
+              <div className="relative mb-4">
+                <Search className="absolute w-5 h-5 text-[#5d5d5d] left-3 top-3" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={handleSearch}
+                  placeholder={
+                    activeTab === "group"
+                      ? "Search groups"
+                      : "Search instructor"
+                  }
+                  className="w-full py-2 pl-10 pr-4 bg-gray-100 border border-[#d1d1d1] rounded-full"
+                />
+              </div>
+
+              <div className="flex-1 space-y-2 overflow-y-auto scrollbar-hide">
+                {activeTab === "bammbuuu"
+                  ? bambuuInstructors.map((channel) => (
+                      <ChatItem
+                        key={channel.id}
+                        channel={channel}
+                        isInstructor={true}
+                      />
+                    ))
+                  : groupChats.map((channel) => (
+                      <ChatItem
+                        key={channel.id}
+                        channel={channel}
+                        isInstructor={false}
+                      />
+                    ))}
+              </div>
+            </div>
+
+            <div className="flex-1 ml-4">
+              {selectedChannel ? (
+                <ChatComponent
+                  channelId={selectedChannel.id}
+                  type={selectedChannel.type}
+                  onChannelLeave={handleChannelLeave}
+                />
+              ) : (
+                <div className="flex items-center justify-center h-full text-gray-500">
+                  Select a chat to start messaging
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

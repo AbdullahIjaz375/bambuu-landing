@@ -65,107 +65,101 @@ const ClassCardTutor = ({
 
   return (
     <>
-      <div
-        className="max-w-md hover:cursor-pointer  w-[22rem]"
-        onClick={handleClick}
-        role="button"
-        tabIndex={0}
-        // onKeyDown={(e) => {
-        //   if (e.key === "Enter" || e.key === " ") {
-        //     handleCardClick(e);
-        //   }
-        // }}
-      >
-        <div
-          className={`flex flex-col items-center justify-center border ${
-            isPremium ? "border-[#14b82c]" : "border-[#ffc71f]"
-          } bg-white rounded-3xl p-2`}
-        >
-          <div className="relative w-full">
-            <img
-              alt={className}
-              src={imageUrl || "/images/default-class.png"}
-              className="object-cover w-full h-48 rounded-t-2xl"
-            />
-            {isPremium && (
-              <img
-                src="/images/bambuu-plus-tag.png"
-                alt="Premium"
-                className="absolute h-8 w-28 top-2 left-2"
-              />
-            )}
-          </div>
-
+      <>
+        <div className="hover:cursor-pointer" onClick={handleClick}>
           <div
-            className={`w-full space-y-2 ${
-              isPremium ? "bg-[#c3f3c9]" : "bg-[#c3f3c9]"
-            } rounded-b-3xl p-2`}
+            className={`flex flex-col h-auto sm:h-[25rem] border ${
+              isPremium ? "border-[#14b82c]" : "border-[#ffc71f]"
+            } bg-white rounded-3xl p-2`}
           >
-            <div className="flex items-start justify-between">
-              <span
-                className={`px-4 py-1 text-sm ${
-                  isPremium ? "bg-[#14b82c]" : "bg-[#14b82c]"
-                } text-white rounded-full`}
-              >
-                {classLocation}
-              </span>
-              {recurrenceType && (
-                <span
-                  className={`px-4 py-1 text-sm ${
-                    isPremium ? "bg-[#14b82c]" : "bg-[#14b82c]"
-                  } text-white rounded-full`}
-                >
-                  {recurrenceType}
-                </span>
+            <div className="relative w-full aspect-video sm:h-56">
+              <img
+                alt={className}
+                src={imageUrl || "/images/default-class.png"}
+                className="object-cover w-full h-full rounded-t-2xl"
+              />
+              {isPremium && (
+                <img
+                  src="/images/bambuu-plus-tag.png"
+                  alt="Premium"
+                  className="absolute w-24 h-6 sm:h-8 sm:w-28 top-2 left-2"
+                />
               )}
             </div>
 
-            <h2 className="text-xl font-bold text-gray-800">{className}</h2>
+            <div
+              className={`w-full flex-grow space-y-1 ${
+                isPremium ? "bg-[#c3f3c9]" : "bg-[#c3f3c9]"
+              } rounded-b-3xl p-2`}
+            >
+              <h2 className="ml-2 text-xl font-bold text-gray-800 sm:text-xl line-clamp-2">
+                {className}
+              </h2>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <span className="flex items-center">
-                  <span className="ml-2 text-[#042f0c]">{language}</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center ml-2 space-x-2">
+                  <img
+                    src={
+                      language === "English"
+                        ? "/svgs/xs-us.svg"
+                        : "/svgs/xs-spain.svg"
+                    }
+                    alt={language === "English" ? "US Flag" : "Spain Flag"}
+                    className="w-4 sm:w-auto"
+                  />
+                  <span className="flex items-center">
+                    <span className="text-sm sm:text-base text-[#042f0c]">
+                      {language}
+                    </span>
+                  </span>
+                </div>
+                <span className="px-2 sm:px-3 py-1 text-xs sm:text-sm bg-[#fff885] rounded-full">
+                  {languageLevel}
                 </span>
               </div>
-              <span className="px-3 py-1 text-sm bg-[#fff885] rounded-full">
-                {languageLevel}
-              </span>
             </div>
-          </div>
 
-          <div className="flex flex-col items-center justify-center w-full p-2 space-y-2">
-            <div className="flex flex-row items-center justify-between w-full">
-              <div className="flex flex-row items-center justify-center space-x-2">
-                <Clock className="w-5 h-5 text-gray-600" />
-                <span className="text-[#454545] text-md">
-                  {formatTime(classDateTime)} ({classDuration} min)
-                </span>
+            <div className="flex flex-col items-center justify-end w-full p-2 space-y-2">
+              <div className="flex flex-col items-start justify-between w-full gap-2 sm:flex-row sm:items-center sm:gap-0">
+                <div className="flex items-center space-x-2">
+                  <img alt="bammbuu" src="/svgs/clock.svg" />
+                  <span className="text-sm sm:text-md text-[#454545]">
+                    {formatTime(classDateTime)} ({classDuration} min)
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <img alt="bammbuu" src="/svgs/calendar.svg" />
+                  <span className="text-sm sm:text-md text-[#454545]">
+                    {formatDate(classDateTime)}
+                  </span>
+                </div>
               </div>
-              <div className="flex flex-row items-center justify-center space-x-2">
-                <Calendar className="w-5 h-5 text-gray-600" />
-                <span className="text-[#454545] text-md">
-                  {formatDate(classDateTime)}
-                </span>
-              </div>
-            </div>
-            <div className="flex flex-row items-center justify-between w-full">
-              <div className="flex flex-row items-center justify-center space-x-2">
-                <User className="w-5 h-5 text-gray-600" />
-                <span className="text-[#454545] text-md">
-                  {adminName || "TBD"}
-                </span>
-              </div>
-              <div className="flex flex-row items-center justify-center space-x-2">
-                <Users className="w-5 h-5 text-gray-600" />
-                <span className="text-[#454545] text-md">
-                  {classMemberIds.length}/{availableSpots}
-                </span>
+              <div className="flex flex-col items-start justify-between w-full gap-2 sm:flex-row sm:items-center sm:gap-0">
+                <div className="flex items-center space-x-1">
+                  {adminImageUrl ? (
+                    <img
+                      src={adminImageUrl}
+                      alt={adminName}
+                      className="object-cover w-4 h-4 rounded-full sm:w-5 sm:h-5"
+                    />
+                  ) : (
+                    <User className="w-4 h-4 text-gray-600 sm:w-5 sm:h-5" />
+                  )}
+                  <span className="text-sm sm:text-md text-[#454545]">
+                    {adminName || "TBD"}
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <img alt="bammbuu" src="/svgs/users.svg" />
+                  <span className="text-sm sm:text-md text-[#454545]">
+                    {classMemberIds.length}/{availableSpots}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </>
 
       <Modal
         isOpen={isModalOpen}

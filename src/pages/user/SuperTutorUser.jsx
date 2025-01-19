@@ -137,24 +137,27 @@ const SuperTutorUser = () => {
   const { user } = useAuth();
 
   return (
-    <div className="flex min-h-screen bg-white">
-      <Sidebar user={user} />
-
-      <div className="flex-1 p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl ml-[17rem] m-2">
-        <div className="flex items-center justify-between pb-4 mb-6 border-b">
-          <div className="flex items-center gap-4">
-            <img
-              alt="supertutor"
-              src="/images/panda.png"
-              className="w-auto h-auto"
-            />
-            <h1 className="text-4xl font-semibold">Super Tutor</h1>
+    <div className="flex h-screen bg-white">
+      <div className="flex-shrink-0 w-64 h-full ">
+        <Sidebar user={user} />
+      </div>
+      <div className="flex-1 overflow-x-auto min-w-[calc(100%-16rem)] h-full">
+        <div className="flex-1 p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl m-2">
+          <div className="flex items-center justify-between pb-4 mb-6 border-b">
+            <div className="flex items-center gap-4">
+              <img
+                alt="supertutor"
+                src="/svgs/supertutor-panda.svg"
+                className="w-auto h-auto"
+              />
+              <h1 className="text-4xl font-semibold">Super Tutor</h1>
+            </div>
+            <button className="p-3 text-xl font-medium text-black bg-gray-100 rounded-full">
+              <RotateCw />
+            </button>
           </div>
-          <button className="p-3 text-xl font-medium text-black bg-gray-100 rounded-full">
-            <RotateCw />
-          </button>
-        </div>
-        <SuperTutorChat />
+          <SuperTutorChat />
+        </div>{" "}
       </div>
     </div>
   );

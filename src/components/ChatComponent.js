@@ -353,7 +353,7 @@ const ChatComponent = ({ channelId, type, onChannelLeave }) => {
   return (
     <>
       <style>{customStyles}</style>
-      <div className="flex flex-col w-full h-screen max-h-[calc(100vh-145px)] overflow-hidden rounded-2xl border border-gray-200 bg-white">
+      <div className="flex flex-col w-full h-screen max-h-[calc(100vh-125px)] overflow-hidden rounded-2xl border border-gray-200 bg-white">
         <Chat client={streamClient}>
           <Channel channel={channel}>
             <Window>

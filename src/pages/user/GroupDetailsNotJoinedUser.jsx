@@ -35,6 +35,8 @@ import ExploreClassCard from "../../components/ExploreClassCard";
 import PlansModal from "../../components/PlansModal";
 import { useGroupJoining } from "../../hooks/useGroupJoining";
 import EmptyState from "../../components/EmptyState";
+import ClassInfoCard from "../../components/ClassInfoCard";
+import GroupInfoCard from "../../components/GroupInfoCard";
 Modal.setAppElement("#root");
 
 const GroupDetailsNotJoinedUser = ({ onClose }) => {
@@ -161,7 +163,7 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
     const enrolledClasses = user?.enrolledClasses || [];
 
     return (
-      <div className="flex flex-wrap items-center gap-4 p-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
         {classes.map((classItem) => {
           const isEnrolled = enrolledClasses.includes(classItem.classId);
 
@@ -362,10 +364,10 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
               </div>
             </div>
 
-            <div className="flex flex-1 min-h-0 gap-6">
+            <div className="flex flex-1 h-screen gap-6 overflow-hidden">
               {/* Left sidebar */}
               <div
-                className={`w-1/4 p-6 rounded-3xl ${
+                className={`w-1/4 h-[90vh]  p-6 rounded-3xl shrink-0 ${
                   group.isPremium ? "bg-[#e6fce8]" : "bg-[#ffffea]"
                 }`}
               >
@@ -375,81 +377,77 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
                     <img
                       src={group.imageUrl}
                       alt={group.groupName}
-                      className="w-32 h-32 mb-4 rounded-full"
+                      className="w-24 h-24 mb-4 rounded-full md:w-32 md:h-32"
                     />
-                    <h3 className="mb-2 text-2xl font-medium">
+                    <h3 className="mb-2 text-xl font-semibold md:text-2xl">
                       {group.groupName}
                     </h3>
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="px-3 py-1 text-sm bg-yellow-200 rounded-full">
-                        {group.groupLearningLanguage}
-                      </span>
-                      <span className="px-3 py-1 text-sm bg-yellow-200 rounded-full">
-                        Advanced
-                      </span>
+                      <div className="flex flex-row items-center space-x-1">
+                        <img
+                          src={
+                            group.language === "English"
+                              ? "/svgs/xs-us.svg"
+                              : "/svgs/xs-spain.svg"
+                          }
+                          alt={
+                            group.language === "English"
+                              ? "US Flag"
+                              : "Spain Flag"
+                          }
+                          className="w-4 md:w-5"
+                        />
+                        <span className="text-sm md:text-md">
+                          {group.groupLearningLanguage}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 mb-4">
-                      <User />
-                      <span className="text-sm">
-                        {group.groupAdminName} (Admin)
-                      </span>
+                    <div className="flex flex-col items-center mt-2 md:flex-row md:space-x-40">
+                      <div className="flex items-center gap-1 mb-2 md:mb-4">
+                        <img
+                          src={group.groupAdminImageUrl}
+                          alt="admin"
+                          className="w-4 rounded-full md:w-5"
+                        />
+                        <span className="text-xs text-gray-800 md:text-sm">
+                          {group.groupAdminName} (Admin)
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1 mb-2 md:mb-4">
+                        <img
+                          alt="bammbuu"
+                          src="/svgs/users.svg"
+                          className="w-4 md:w-5"
+                        />
+                        <span className="text-xs text-gray-800 md:text-sm">
+                          2k+
+                        </span>
+                      </div>
                     </div>
-                    <p className="mb-6 text-gray-600">
+
+                    <p className="mb-6 text-sm text-gray-600 md:text-base">
                       {group.groupDescription}
                     </p>
                   </div>
 
                   <div className="w-full space-y-4">
-                    {groupTutor && (
-                      <div className="flex flex-row items-center w-full max-w-lg gap-4 p-4 bg-white border border-green-500 rounded-xl">
-                        <img
-                          alt={`${groupTutor.name}'s profile`}
-                          src={groupTutor.photoUrl}
-                          className="object-cover w-28 h-28 rounded-xl"
-                        />
-                        <div className="flex flex-col items-start flex-1 gap-2">
-                          <h1 className="text-xl font-semibold">
-                            {groupTutor.name}
-                          </h1>
-                          <p className="text-sm text-left text-gray-600">
-                            {groupTutor?.bio
-                              ? groupTutor.bio
-                                  .split(" ")
-                                  .slice(0, 12)
-                                  .join(" ") + "..."
-                              : null}
-                          </p>
-                          <div className="flex items-center gap-6">
-                            <div className="flex items-center gap-1">
-                              <span className="text-gray-700">
-                                {groupTutor.teachingLanguage} (Teaching)
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <MapPin size={16} className="text-gray-500" />
-                              <span className="text-gray-700">
-                                {groupTutor.country}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
+                    {" "}
+                    {group.isPremium ? <GroupInfoCard group={group} /> : <></>}
                   </div>
                 </div>
               </div>
 
               {/* Main content */}
-              <div className="flex flex-col flex-1 min-h-0">
-                {loading ? (
-                  <div className="flex items-center justify-center flex-1">
-                    <ClipLoader color="#FFB800" size={40} />
-                  </div>
-                ) : (
-                  <div className="flex-1 overflow-y-auto">
-                    {renderClasses()}
-                  </div>
-                )}
+              <div className="flex-1 h-[90vh] overflow-y-auto scrollbar-hide">
+                <div className="h-full overflow-y-auto scrollbar-hide">
+                  {loading ? (
+                    <div className="flex items-center justify-center h-full">
+                      <ClipLoader color="#FFB800" size={40} />
+                    </div>
+                  ) : (
+                    <div className="pr-4">{renderClasses()}</div>
+                  )}
+                </div>
               </div>
             </div>
             <div className="flex flex-row items-center justify-between mt-2">

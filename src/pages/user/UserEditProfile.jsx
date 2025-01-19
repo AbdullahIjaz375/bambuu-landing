@@ -577,170 +577,185 @@ const UserEditProfile = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-white">
-      <Sidebar user={user} />
-
-      <div className="flex-1 p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl ml-[17rem] m-2">
-        <div className="flex items-center justify-between pb-4 mb-6 border-b">
-          <div className="flex items-center gap-4">
-            <button
-              className="p-3 bg-gray-100 rounded-full"
-              onClick={() => navigate(-1)}
-            >
-              <ArrowLeft size="30" />
-            </button>
-            <h1 className="text-4xl font-semibold">Edit Profile</h1>
-          </div>
-        </div>
-
-        <div className="max-w-3xl">
-          <div className="mb-8">
-            <div
-              className="relative flex items-center justify-center w-32 h-32 mb-4 bg-gray-100 rounded-full cursor-pointer hover:bg-gray-200"
-              onClick={() => document.getElementById("profileImage").click()}
-            >
-              {selectedImage ? (
-                <img
-                  src={selectedImage}
-                  alt="Profile"
-                  className="object-cover w-full h-full rounded-full"
-                />
-              ) : (
-                <ImagePlus className="w-8 h-8 text-gray-400" />
-              )}
-              <input
-                id="profileImage"
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="hidden"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-6">
-            <div>
-              <label className="block mb-1 text-lg font-medium text-[#3D3D3D]">
-                Name
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                className="w-full p-3 text-xl border rounded-2xl"
-                placeholder="Enter your name"
-              />
-            </div>
-
-            <div>
-              <label className="block mb-1 text-lg font-medium text-[#3D3D3D]">
-                Email
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                className="w-full p-3 text-xl border rounded-2xl"
-                disabled
-              />
-            </div>
-
-            <div>
-              <label className="block mb-1 text-lg font-medium text-[#3D3D3D]">
-                Native Language
-              </label>
-              <select
-                name="nativeLanguage"
-                value={formData.nativeLanguage}
-                onChange={handleInputChange}
-                className="w-full p-3 text-xl text-gray-600 border rounded-2xl"
-              >
-                <option value="">Select your native language</option>
-                {LANGUAGES.map((language) => (
-                  <option key={language.code} value={language.name}>
-                    {language.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block mb-1 text-lg font-medium text-[#3D3D3D]">
-                Learning Language
-              </label>
-              <select
-                name="learningLanguage"
-                value={formData.learningLanguage}
-                onChange={handleInputChange}
-                className="w-full p-3 text-xl border rounded-2xl"
-              >
-                <option value="">Select language you want to learn</option>
-                {TEACHINGLANGUAGES.map((lang) => (
-                  <option key={lang.code} value={lang}>
-                    {lang}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block mb-1 text-lg font-medium text-[#3D3D3D]">
-                Your Proficiency in {formData.learningLanguage}
-              </label>
-              <div className="flex gap-2 text-xl">
-                {["Normal", "Intermediate", "Advance"].map((level) => (
+    <div className="flex h-screen bg-white">
+      <div className="flex-shrink-0 w-64 h-full">
+        <Sidebar user={user} />
+      </div>
+      <div className="flex-1 overflow-x-auto min-w-[calc(100%-16rem)] h-full">
+        <div className="flex flex-col h-full">
+          <div className="flex-1 p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl m-2">
+            {/* Fixed Header Section */}
+            <div className="sticky top-0 z-10 bg-white">
+              <div className="flex items-center justify-between pb-4 mb-6 border-b">
+                <div className="flex items-center gap-4">
                   <button
-                    key={level}
-                    type="button"
-                    onClick={() => handleProficiencyChange(level)}
-                    className={`flex-1 py-2 px-4 rounded-3xl border ${
-                      formData.learningLanguageProficiency === level
-                        ? "bg-[#e6fde9] text-black"
-                        : "bg-gray-100 text-gray-600"
-                    }`}
+                    className="p-3 bg-gray-100 rounded-full"
+                    onClick={() => navigate(-1)}
                   >
-                    {level}
+                    <ArrowLeft size="30" />
                   </button>
-                ))}
+                  <h1 className="text-4xl font-semibold">Edit Profile</h1>
+                </div>
               </div>
             </div>
 
-            <div>
-              <label className="block mb-1 text-lg font-medium text-[#3D3D3D]">
-                Country
-              </label>
-              <select
-                name="country"
-                value={formData.country}
-                onChange={handleInputChange}
-                className="w-full p-3 text-xl border rounded-2xl"
-              >
-                <option value="">Select your country</option>
-                {COUNTRIES.map((country) => (
-                  <option key={country} value={country}>
-                    {country}
-                  </option>
-                ))}
-              </select>
+            {/* Scrollable Content */}
+            <div className="overflow-y-auto">
+              <div className="max-w-3xl">
+                <div className="mb-8">
+                  <div
+                    className="relative flex items-center justify-center w-32 h-32 mb-4 bg-gray-100 rounded-full cursor-pointer hover:bg-gray-200"
+                    onClick={() =>
+                      document.getElementById("profileImage").click()
+                    }
+                  >
+                    {selectedImage ? (
+                      <img
+                        src={selectedImage}
+                        alt="Profile"
+                        className="object-cover w-full h-full rounded-full"
+                      />
+                    ) : (
+                      <ImagePlus className="w-8 h-8 text-gray-400" />
+                    )}
+                    <input
+                      id="profileImage"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="hidden"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  <div>
+                    <label className="block mb-1 text-lg font-medium text-[#3D3D3D]">
+                      Name
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      className="w-full p-3 text-xl border rounded-2xl"
+                      placeholder="Enter your name"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block mb-1 text-lg font-medium text-[#3D3D3D]">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      className="w-full p-3 text-xl border rounded-2xl"
+                      disabled
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block mb-1 text-lg font-medium text-[#3D3D3D]">
+                      Native Language
+                    </label>
+                    <select
+                      name="nativeLanguage"
+                      value={formData.nativeLanguage}
+                      onChange={handleInputChange}
+                      className="w-full p-3 text-xl text-gray-600 border rounded-2xl"
+                    >
+                      <option value="">Select your native language</option>
+                      {LANGUAGES.map((language) => (
+                        <option key={language.code} value={language.name}>
+                          {language.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block mb-1 text-lg font-medium text-[#3D3D3D]">
+                      Learning Language
+                    </label>
+                    <select
+                      name="learningLanguage"
+                      value={formData.learningLanguage}
+                      onChange={handleInputChange}
+                      className="w-full p-3 text-xl border rounded-2xl"
+                    >
+                      <option value="">
+                        Select language you want to learn
+                      </option>
+                      {TEACHINGLANGUAGES.map((lang) => (
+                        <option key={lang.code} value={lang}>
+                          {lang}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block mb-1 text-lg font-medium text-[#3D3D3D]">
+                      Your Proficiency in {formData.learningLanguage}
+                    </label>
+                    <div className="flex gap-2 text-xl">
+                      {["Beginner", "Intermediate", "Advance"].map((level) => (
+                        <button
+                          key={level}
+                          type="button"
+                          onClick={() => handleProficiencyChange(level)}
+                          className={`flex-1 py-2 px-4 rounded-3xl border ${
+                            formData.learningLanguageProficiency === level
+                              ? "bg-[#e6fde9] text-black"
+                              : "bg-gray-100 text-gray-600"
+                          }`}
+                        >
+                          {level}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block mb-1 text-lg font-medium text-[#3D3D3D]">
+                      Country
+                    </label>
+                    <select
+                      name="country"
+                      value={formData.country}
+                      onChange={handleInputChange}
+                      className="w-full p-3 text-xl border rounded-2xl"
+                    >
+                      <option value="">Select your country</option>
+                      {COUNTRIES.map((country) => (
+                        <option key={country} value={country}>
+                          {country}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-between mt-12">
+                <button
+                  onClick={() => navigate("/profile")}
+                  className="px-8 py-3 text-[#042f0c] border border-[#5d5d5d] rounded-full"
+                >
+                  Discard Changes
+                </button>
+                <button
+                  onClick={handleSaveChanges}
+                  disabled={loading}
+                  className="px-8 py-3 text-[#042f0c] bg-[#14b82c] border border-[#5d5d5d] rounded-full disabled:bg-[#b9f9c2] disabled:text-[#b0b0b0] disabled:border-[#b0b0b0]"
+                >
+                  {loading ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="flex justify-between mt-12">
-          <button
-            onClick={() => navigate("/profile")}
-            className="px-8 py-3 text-[#042f0c] border border-[#5d5d5d] rounded-full"
-          >
-            Discard Changes
-          </button>
-          <button
-            onClick={handleSaveChanges}
-            disabled={loading}
-            className="px-8 py-3 text-[#042f0c] bg-[#14b82c] border border-[#5d5d5d] rounded-full disabled:bg-[#b9f9c2] disabled:text-[#b0b0b0] disabled:border-[#b0b0b0]"
-          >
-            {loading ? "Saving..." : "Save Changes"}
-          </button>
         </div>
       </div>
     </div>

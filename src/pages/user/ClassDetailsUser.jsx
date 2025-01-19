@@ -540,36 +540,44 @@ const ClassDetailsUser = ({ onClose }) => {
   return (
     <>
       <div className="flex min-h-screen">
-        <div className="flex flex-1 m-6 border rounded-3xl">
-          <div className="flex flex-col w-full p-6 mx-4 bg-white rounded-3xl">
-            <div className="flex items-center justify-between pb-4 mb-6 border-b">
-              <div className="flex items-center gap-4">
+        <div className="flex flex-1 m-2 border sm:m-4 md:m-6 rounded-3xl">
+          <div className="flex flex-col w-full p-3 mx-2 bg-white sm:p-4 md:p-6 sm:mx-4 rounded-3xl">
+            {/* Header */}
+            <div className="flex items-center justify-between pb-4 mb-4 border-b md:mb-6">
+              <div className="flex items-center gap-2 md:gap-4">
                 <button
-                  className="p-3 bg-gray-100 rounded-full"
+                  className="p-2 bg-gray-100 rounded-full md:p-3"
                   onClick={() => navigate(-1)}
                 >
-                  <ArrowLeft size="30" />
+                  <ArrowLeft size={24} />
                 </button>
-                <h1 className="text-4xl font-semibold">Class Details</h1>
+                <h1 className="text-2xl font-semibold md:text-4xl">
+                  Class Details
+                </h1>
               </div>
             </div>
 
-            <div className="flex flex-1 min-h-0 gap-6">
+            {/* Main Content */}
+            <div className="flex flex-col flex-1 min-h-0 gap-4 lg:flex-row md:gap-6">
+              {/* Left Panel */}
               <div
-                className={`w-1/4 p-6 rounded-3xl ${getClassTypeColor(
+                className={`w-full lg:w-[27%] p-4 md:p-6 rounded-3xl ${getClassTypeColor(
                   classData.classType
                 )}`}
               >
                 <div className="flex flex-col items-center justify-between h-full text-center">
+                  {/* Class Info */}
                   <div className="flex flex-col items-center text-center">
                     <img
                       src={classData.imageUrl}
                       alt={classData.className}
-                      className="w-32 h-32 mb-4 rounded-full"
+                      className="w-24 h-24 mb-4 rounded-full md:w-32 md:h-32"
                     />
-                    <h3 className="mb-2 text-3xl font-medium">
+                    <h3 className="mb-2 text-xl font-medium md:text-3xl">
                       {classData.className}
                     </h3>
+
+                    {/* Language Info */}
                     <div className="flex items-center gap-4 mb-2">
                       <div className="flex flex-row items-center space-x-1">
                         <img
@@ -584,98 +592,82 @@ const ClassDetailsUser = ({ onClose }) => {
                               : "Spain Flag"
                           }
                           className="w-5"
-                        />{" "}
-                        <span className=" text-md">{classData.language}</span>
+                        />
+                        <span className="text-sm md:text-md">
+                          {classData.language}
+                        </span>
                       </div>
-
-                      <span className="px-3 py-[2px] bg-yellow-200 rounded-full text-md">
+                      <span className="px-3 py-1 text-sm bg-yellow-200 rounded-full md:text-md">
                         {classData.languageLevel}
                       </span>
                     </div>
-                    <div className="flex flex-col mt-4 space-y-4">
-                      {/* First Row */}
-                      <div className="flex items-center justify-between space-x-12">
-                        <div className="flex items-center gap-1">
-                          <img alt="bammbuu" src="/svgs/clock.svg" />{" "}
-                          <span className="text-sm">
+
+                    {/* Class Details Grid */}
+                    <div className="flex flex-col w-full mt-4 space-y-4">
+                      <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                        <div className="flex items-center justify-center gap-1 sm:justify-start">
+                          <img alt="time" src="/svgs/clock.svg" />
+                          <span className="text-xs sm:text-sm">
                             {new Date(
                               classData.classDateTime.seconds * 1000
                             ).toLocaleTimeString("en-US", {
                               hour: "2-digit",
                               minute: "2-digit",
-                              // second: '2-digit' // uncomment if you want seconds
-                              hour12: true, // for AM/PM format
+                              hour12: true,
                             })}
                           </span>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <img alt="bammbuu" src="/svgs/calendar.svg" />
-                          <span className="text-sm">
+                        <div className="flex items-center justify-center gap-1 sm:justify-start">
+                          <img alt="date" src="/svgs/calendar.svg" />
+                          <span className="text-xs sm:text-sm">
                             {new Date(
                               classData.classDateTime.seconds * 1000
-                            ).toLocaleDateString("en-US", {
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                            })}
+                            ).toLocaleDateString()}
                           </span>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <img alt="bammbuu" src="/svgs/users.svg" />
-                          {classData.classType === "Group Premium" ||
-                          classData.classType === "Individual Premium" ? (
-                            <>
-                              {" "}
-                              <span className="text-sm">2k+</span>
-                            </>
-                          ) : (
-                            <span className="text-sm text-[#454545]">
-                              {classData.classMemberIds.length}/
-                              {classData.availableSpots}
-                            </span>
-                          )}
+                        <div className="flex items-center justify-center gap-1 sm:justify-start">
+                          <img alt="participants" src="/svgs/users.svg" />
+                          <span className="text-xs sm:text-sm">
+                            {classData.classType.includes("Premium")
+                              ? "2k+"
+                              : `${classData.classMemberIds.length}/${classData.availableSpots}`}
+                          </span>
                         </div>
                       </div>
 
-                      {/* Second Row */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1">
-                          <img alt="bammbuu" src="/svgs/repeate-music.svg" />
-                          <span className="text-sm">
-                            {classData.classType === "Individual Premium" ? (
-                              <> {classData.selectedRecurrenceType || "None"}</>
-                            ) : (
-                              <span className="text-sm text-[#454545]">
-                                {classData.recurrenceTypes?.length > 0
-                                  ? classData.recurrenceTypes.join(", ")
-                                  : "None"}{" "}
-                              </span>
-                            )}
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <div className="flex items-center justify-center gap-1 sm:justify-start">
+                          <img alt="recurrence" src="/svgs/repeate-music.svg" />
+                          <span className="text-xs sm:text-sm">
+                            {classData.classType === "Individual Premium"
+                              ? classData.selectedRecurrenceType || "None"
+                              : classData.recurrenceTypes?.length > 0
+                              ? classData.recurrenceTypes.join(", ")
+                              : "None"}
                           </span>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <img alt="bammbuu" src="/svgs/location.svg" />
-                          <span className="text-sm">
+                        <div className="flex items-center justify-center gap-1 sm:justify-start">
+                          <img alt="location" src="/svgs/location.svg" />
+                          <span className="text-xs sm:text-sm">
                             {classData.classLocation}
                           </span>
                         </div>
                       </div>
                     </div>
 
-                    <p className="mt-4 mb-6 text-gray-600">
+                    <p className="mt-4 mb-6 text-sm text-gray-600 md:text-base">
                       {classData.classDescription}
                     </p>
                   </div>
 
-                  <div className="w-full space-y-4">
+                  {/* Bottom Actions */}
+                  <div className="w-full space-y-3">
                     <div className="space-y-1">
-                      {" "}
-                      {classData.classType === "Group Premium" ||
-                      classData.classType === "Individual Premium" ? (
-                        <h1 className="text-xl font-semibold">Instructor</h1>
-                      ) : (
-                        <h1 className="text-xl font-semibold">Group</h1>
-                      )}
+                      <h1 className="text-lg font-semibold md:text-xl">
+                        {classData.classType.includes("Premium")
+                          ? "Instructor"
+                          : "Group"}
+                      </h1>
                       <ClassInfoCard
                         classData={classData}
                         groupTutor={groupTutor}
@@ -716,180 +708,199 @@ const ClassDetailsUser = ({ onClose }) => {
                 </div>
               </div>
 
+              {/* Right Panel */}
               <div className="flex flex-col flex-1 min-h-0">
-                {classData.classType === "Group Premium" ? (
+                {classData.classType === "Individual Premium" ? (
+                  <div className="w-full space-y-4 md:space-y-6">
+                    <div className="w-full space-y-4">
+                      <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
+                        <h2 className="text-lg font-semibold md:text-xl">
+                          Recurring Class Slots
+                        </h2>
+                        <button
+                          className="px-4 py-2 text-sm bg-yellow-200 rounded-full hover:bg-yellow-300 border border-[#042F0C]"
+                          onClick={() => setIsModalOpen(true)}
+                        >
+                          + More Slots
+                        </button>
+                      </div>
+
+                      <div className="space-y-3 overflow-y-auto">
+                        {classData.recurringSlots.map((slot, index) => {
+                          const status = getCurrentStatus(slot);
+                          return (
+                            <div
+                              key={index}
+                              className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:px-4 border rounded-2xl sm:rounded-full ${
+                                status === "current"
+                                  ? "border-green-500"
+                                  : "border-gray-200"
+                              }`}
+                            >
+                              <div className="flex items-center gap-2 md:gap-4">
+                                <span className="text-base font-medium text-gray-500 md:text-lg">
+                                  {String(index + 1).padStart(2, "0")}.
+                                </span>
+                                <span className="text-sm font-medium md:text-lg">
+                                  {formatDate(slot)}
+                                </span>
+                              </div>
+                              <div className="mt-2 sm:mt-0">
+                                {getStatusBadge(status)}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
                   <>
-                    {/* Group Premium UI */}
-                    <div className="flex flex-row items-center justify-between mb-6">
+                    <div className="flex flex-col items-start justify-between mb-4 sm:flex-row sm:items-center md:mb-6">
                       <button
-                        className="px-6 py-2 text-black bg-yellow-400 rounded-full"
+                        className="px-4 py-2 text-black bg-yellow-400 rounded-full"
                         onClick={() => setActiveTab("Members")}
                       >
                         Members ({members.length})
                       </button>
                     </div>
                     <div className="flex-1 overflow-y-auto">
-                      {renderMembers()}
-                    </div>
-                  </>
-                ) : classData.classType === "Individual Premium" ? (
-                  <>
-                    <div className="w-full space-y-6">
-                      {" "}
-                      <div className="w-full space-y-4">
-                        <div className="flex items-center justify-between">
-                          <h2 className="text-xl font-semibold">
-                            Recurring Class Slots
-                          </h2>
-                          <button
-                            className="px-4 py-2 text-sm bg-yellow-200 rounded-full hover:bg-yellow-300 border border-[#042F0C]"
-                            onClick={() => setIsModalOpen(true)}
+                      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+                        {members.map((member) => (
+                          <div
+                            key={member.id}
+                            className="flex items-center justify-between px-3 py-2 border border-gray-200 md:px-4 md:py-3 hover:bg-gray-50 rounded-2xl md:rounded-3xl"
                           >
-                            + More Slots
-                          </button>
-                        </div>
-
-                        <div className="space-y-3">
-                          {classData.recurringSlots.map((slot, index) => {
-                            const status = getCurrentStatus(slot);
-                            return (
-                              <div
-                                key={index}
-                                className={`flex items-center justify-between px-4 py-3 border rounded-full ${
-                                  status === "current"
-                                    ? "border-green-500"
-                                    : "border-gray-200"
-                                }`}
-                              >
-                                <div className="flex items-center gap-4">
-                                  <span className="text-lg font-medium text-gray-500">
-                                    {String(index + 1).padStart(2, "0")}.
-                                  </span>
-                                  <span className="text-lg font-medium">
-                                    {formatDate(slot)}
-                                  </span>
-                                </div>
-                                {getStatusBadge(status)}
+                            <div className="flex items-center gap-2 md:gap-3">
+                              <div className="relative">
+                                <img
+                                  src={
+                                    member.photoUrl || "/api/placeholder/40/40"
+                                  }
+                                  alt={member.name}
+                                  className="object-cover w-8 h-8 rounded-full md:w-9 md:h-9"
+                                />
+                                {member.id === classData.adminId && (
+                                  <div className="absolute flex items-center justify-center w-4 h-4 bg-yellow-400 rounded-full -top-1 -right-1">
+                                    <span className="text-xs text-black">
+                                      ★
+                                    </span>
+                                  </div>
+                                )}
                               </div>
-                            );
-                          })}
-                        </div>
+                              <div className="flex flex-col">
+                                <span className="text-sm font-medium text-gray-900">
+                                  {member.name}
+                                </span>
+                                {member.id === classData.adminId && (
+                                  <span className="text-xs text-gray-500">
+                                    Teacher
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </>
-                ) : (
-                  <>
-                    <div className="flex flex-row items-center justify-between mb-6">
-                      <button
-                        className="px-6 py-2 text-black bg-yellow-400 rounded-full"
-                        onClick={() => setActiveTab("Members")}
-                      >
-                        Members ({members.length})
-                      </button>
-                    </div>
-                    <div className="flex-1 overflow-y-auto">
-                      {renderMembers()}
-                    </div>
-                  </>
-                )}{" "}
+                )}
               </div>
             </div>
           </div>
         </div>
+        <AddSlotsModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          classData={classData}
+          setClassData={setClassData}
+        />
+        {/* Delete Confirmation Modal */}
+        <Modal
+          isOpen={showDeleteConfirmation}
+          onRequestClose={() => setShowDeleteConfirmation(false)}
+          className="z-50 max-w-sm p-6 mx-auto mt-40 bg-white outline-none rounded-3xl font-urbanist"
+          overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          style={{
+            overlay: {
+              zIndex: 60,
+            },
+            content: {
+              border: "none",
+              padding: "24px",
+              maxWidth: "420px",
+              position: "relative",
+              zIndex: 61,
+            },
+          }}
+        >
+          <div className="text-center">
+            <h2 className="mb-4 text-xl font-semibold">
+              Are you sure you want to delete this class?
+            </h2>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <button
+                className="w-full py-2 font-medium border border-gray-300 rounded-full hover:bg-gray-50"
+                onClick={() => setShowDeleteConfirmation(false)}
+              >
+                No, Cancel
+              </button>
+              <button
+                className="w-full py-2 font-medium text-black bg-[#ff4d4d] rounded-full hover:bg-[#ff3333] border border-[#8b0000]"
+                onClick={handleDeleteClass}
+                disabled={isDeleting}
+              >
+                {isDeleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </Modal>
+        <Modal
+          isOpen={showLeaveConfirmation}
+          onRequestClose={() => setShowLeaveConfirmation(false)}
+          className="z-50 max-w-sm p-6 mx-auto mt-40 bg-white outline-none rounded-3xl font-urbanist"
+          overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          style={{
+            overlay: {
+              zIndex: 60,
+            },
+            content: {
+              border: "none",
+              padding: "24px",
+              maxWidth: "420px",
+              position: "relative",
+              zIndex: 61,
+            },
+          }}
+        >
+          <div className="text-center">
+            <h2 className="mb-4 text-xl font-semibold">
+              Are you sure you want to leave this class?
+            </h2>
+            <div className="flex flex-row gap-2">
+              <button
+                className="w-full py-2 font-medium border border-gray-300 rounded-full hover:bg-gray-50"
+                onClick={() => setShowLeaveConfirmation(false)}
+              >
+                No, Cancel
+              </button>
+              <button
+                className="w-full py-2 font-medium text-black bg-[#ff4d4d] rounded-full hover:bg-[#ff3333] border border-[#8b0000]"
+                onClick={handleLeaveClass}
+                disabled={isLeaving}
+              >
+                {isLeaving ? "Leaving..." : "Leave"}
+              </button>
+            </div>
+          </div>
+        </Modal>
+        <EditClassModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          classData={classData}
+          setClassData={setClassData}
+        />{" "}
       </div>
-      <AddSlotsModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        classData={classData}
-        setClassData={setClassData}
-      />
-
-      <Modal
-        isOpen={showDeleteConfirmation}
-        onRequestClose={() => setShowDeleteConfirmation(false)}
-        className="z-50 max-w-sm p-6 mx-auto mt-40 bg-white outline-none rounded-3xl font-urbanist"
-        overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-        style={{
-          overlay: {
-            zIndex: 60,
-          },
-          content: {
-            border: "none",
-            padding: "24px",
-            maxWidth: "420px",
-            position: "relative",
-            zIndex: 61,
-          },
-        }}
-      >
-        <div className="text-center">
-          <h2 className="mb-4 text-xl font-semibold">
-            Are you sure you want to delete this class?
-          </h2>
-          <div className="flex flex-row gap-2">
-            <button
-              className="w-full py-2 font-medium border border-gray-300 rounded-full hover:bg-gray-50"
-              onClick={() => setShowDeleteConfirmation(false)}
-            >
-              No, Cancel
-            </button>
-            <button
-              className="w-full py-2 font-medium text-black bg-[#ff4d4d] rounded-full hover:bg-[#ff3333] border border-[#8b0000]"
-              onClick={handleDeleteClass}
-              disabled={isDeleting}
-            >
-              {isDeleting ? "Deleting..." : "Delete"}
-            </button>
-          </div>
-        </div>
-      </Modal>
-
-      <Modal
-        isOpen={showLeaveConfirmation}
-        onRequestClose={() => setShowLeaveConfirmation(false)}
-        className="z-50 max-w-sm p-6 mx-auto mt-40 bg-white outline-none rounded-3xl font-urbanist"
-        overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-        style={{
-          overlay: {
-            zIndex: 60,
-          },
-          content: {
-            border: "none",
-            padding: "24px",
-            maxWidth: "420px",
-            position: "relative",
-            zIndex: 61,
-          },
-        }}
-      >
-        <div className="text-center">
-          <h2 className="mb-4 text-xl font-semibold">
-            Are you sure you want to leave this class?
-          </h2>
-          <div className="flex flex-row gap-2">
-            <button
-              className="w-full py-2 font-medium border border-gray-300 rounded-full hover:bg-gray-50"
-              onClick={() => setShowLeaveConfirmation(false)}
-            >
-              No, Cancel
-            </button>
-            <button
-              className="w-full py-2 font-medium text-black bg-[#ff4d4d] rounded-full hover:bg-[#ff3333] border border-[#8b0000]"
-              onClick={handleLeaveClass}
-              disabled={isLeaving}
-            >
-              {isLeaving ? "Leaving..." : "Leave"}
-            </button>
-          </div>
-        </div>
-      </Modal>
-
-      <EditClassModal
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        classData={classData}
-        setClassData={setClassData}
-      />
     </>
   );
 };

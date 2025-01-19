@@ -670,7 +670,7 @@ const GroupDetailsUser = ({ onClose }) => {
     const enrolledClasses = user?.enrolledClasses || [];
 
     return (
-      <div className="flex flex-wrap items-center gap-4 p-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
         {classes.map((classItem) => {
           const isEnrolled = enrolledClasses.includes(classItem.classId);
 
@@ -817,36 +817,37 @@ const GroupDetailsUser = ({ onClose }) => {
   return (
     <>
       <div className="flex min-h-screen">
-        <div className="flex flex-1 m-6 border rounded-3xl">
-          <div className="flex flex-col w-full p-6 mx-4 bg-white rounded-3xl">
-            <div className="flex items-center justify-between pb-4 mb-6 border-b">
-              <div className="flex items-center gap-4">
+        <div className="flex flex-1 m-2 border md:m-6 rounded-xl md:rounded-3xl">
+          <div className="flex flex-col w-full p-3 mx-2 bg-white md:p-6 md:mx-4 rounded-xl md:rounded-3xl">
+            <div className="flex items-center justify-between pb-2 mb-3 border-b md:pb-4 md:mb-6">
+              <div className="flex items-center gap-2 md:gap-4">
                 <button
-                  className="p-3 bg-gray-100 rounded-full"
+                  className="p-2 bg-gray-100 rounded-full md:p-3"
                   onClick={handleBack}
                 >
-                  <ArrowLeft size="30" />
+                  <ArrowLeft size={20} className="md:w-8 md:h-8" />
                 </button>
-                <h1 className="text-4xl font-semibold">Group Details</h1>
+                <h1 className="text-xl font-semibold md:text-4xl">
+                  Group Details
+                </h1>
               </div>
             </div>
 
-            <div className="flex flex-1 min-h-0 gap-6">
+            <div className="flex flex-col flex-1 min-h-0 gap-4 lg:flex-row md:gap-6">
               {/* Left sidebar */}
               <div
-                className={`w-1/4 p-6 rounded-3xl ${
+                className={`w-full lg:w-1/4 p-4 md:p-6 rounded-xl md:rounded-3xl ${
                   group.isPremium ? "bg-[#e6fce8]" : "bg-[#ffffea]"
                 }`}
               >
-                {" "}
                 <div className="flex flex-col items-center justify-between h-full text-center">
                   <div className="flex flex-col items-center text-center">
                     <img
                       src={group.imageUrl}
                       alt={group.groupName}
-                      className="w-32 h-32 mb-4 rounded-full"
+                      className="w-24 h-24 mb-4 rounded-full md:w-32 md:h-32"
                     />
-                    <h3 className="mb-2 text-2xl font-semibold">
+                    <h3 className="mb-2 text-xl font-semibold md:text-2xl">
                       {group.groupName}
                     </h3>
                     <div className="flex items-center gap-2 mb-2">
@@ -862,73 +863,43 @@ const GroupDetailsUser = ({ onClose }) => {
                               ? "US Flag"
                               : "Spain Flag"
                           }
-                          className="w-5"
-                        />{" "}
-                        <span className=" text-md">
+                          className="w-4 md:w-5"
+                        />
+                        <span className="text-sm md:text-md">
                           {group.groupLearningLanguage}
                         </span>
                       </div>
                     </div>
-                    <div className="flex flex-row items-center mt-2 space-x-40">
-                      <div className="flex items-center gap-1 mb-4">
+                    <div className="flex flex-col items-center mt-2 md:flex-row md:space-x-40">
+                      <div className="flex items-center gap-1 mb-2 md:mb-4">
                         <img
                           src={group.groupAdminImageUrl}
                           alt="admin"
-                          className="w-5 rounded-full"
-                        />{" "}
-                        <span className="text-sm text-gray-800">
+                          className="w-4 rounded-full md:w-5"
+                        />
+                        <span className="text-xs text-gray-800 md:text-sm">
                           {group.groupAdminName} (Admin)
                         </span>
                       </div>
-                      <div className="flex items-center gap-1 mb-4">
-                        <img alt="bammbuu" src="/svgs/users.svg" />
-                        <span className="text-sm text-gray-800">2k+ </span>
+                      <div className="flex items-center gap-1 mb-2 md:mb-4">
+                        <img
+                          alt="bammbuu"
+                          src="/svgs/users.svg"
+                          className="w-4 md:w-5"
+                        />
+                        <span className="text-xs text-gray-800 md:text-sm">
+                          2k+
+                        </span>
                       </div>
                     </div>
 
-                    <p className="mb-6 text-gray-600">
+                    <p className="mb-6 text-sm text-gray-600 md:text-base">
                       {group.groupDescription}
                     </p>
                   </div>
-                  <div className="w-full space-y-4">
-                    {" "}
-                    {/* {groupTutor && (
-                      <div className="flex flex-row items-center w-full max-w-lg gap-4 p-4 bg-white border border-green-500 rounded-xl">
-                        <img
-                          alt={`${groupTutor.name}'s profile`}
-                          src={groupTutor.photoUrl}
-                          className="object-cover w-28 h-28 rounded-xl"
-                        />
-                        <div className="flex flex-col items-start flex-1 gap-2">
-                          <h1 className="text-xl font-semibold">
-                            {groupTutor.name}
-                          </h1>
-                          <p className="text-sm text-left text-gray-600">
-                            {groupTutor?.bio
-                              ? groupTutor.bio
-                                  .split(" ")
-                                  .slice(0, 12)
-                                  .join(" ") + "..."
-                              : null}
-                          </p>
-                          <div className="flex items-center gap-6">
-                            <div className="flex items-center gap-1">
-                              <span className="text-gray-700">
-                                {groupTutor.teachingLanguage} (Teaching)
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <MapPin size={16} className="text-gray-500" />
-                              <span className="text-gray-700">
-                                {groupTutor.country}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )} */}
+                  <div className="w-full space-y-2 md:space-y-4">
                     <button
-                      className={`w-full px-4 py-2  text-black border  rounded-full ${
+                      className={`w-full px-3 md:px-4 py-2 text-sm md:text-base text-black border rounded-full ${
                         group.isPremium
                           ? "bg-[#bffcc4] border-[#0a0d0b]"
                           : "bg-[#ffffea] border-gray-300"
@@ -940,13 +911,13 @@ const GroupDetailsUser = ({ onClose }) => {
                     {user.uid === group.groupAdminId ? (
                       <>
                         <button
-                          className="w-full px-4 py-2 text-black bg-white border border-black rounded-full"
+                          className="w-full px-3 py-2 text-sm text-black bg-white border border-black rounded-full md:px-4 md:text-base"
                           onClick={() => navigate(`/editGroup/${groupId}`)}
                         >
                           Edit Group Details
                         </button>
                         <button
-                          className="w-full px-4 py-2 text-red-500 border border-red-500 rounded-full"
+                          className="w-full px-3 py-2 text-sm text-red-500 border border-red-500 rounded-full md:px-4 md:text-base"
                           onClick={() => setShowDeleteConfirmation(true)}
                         >
                           Delete Group
@@ -954,50 +925,49 @@ const GroupDetailsUser = ({ onClose }) => {
                       </>
                     ) : (
                       <button
-                        className="w-full px-4 py-2 text-red-500 border border-red-500 rounded-full"
+                        className="w-full px-3 py-2 text-sm text-red-500 border border-red-500 rounded-full md:px-4 md:text-base"
                         onClick={() => setShowLeaveConfirmation(true)}
                       >
                         Leave Group
                       </button>
                     )}
-                  </div>{" "}
+                  </div>
                 </div>
               </div>
 
               {/* Main content */}
               <div className="flex flex-col flex-1 min-h-0">
-                {/* Previous code remains the same until the buttons section */}
-                <div className="flex flex-row items-center justify-between mb-6">
-                  <div className="flex justify-center">
+                <div className="flex flex-col items-center justify-between gap-4 mb-4 md:flex-row md:mb-6 md:gap-0">
+                  <div className="flex justify-center w-full md:w-auto">
                     <div className="inline-flex bg-gray-100 border border-gray-300 rounded-full">
                       <button
                         onClick={() => setActiveTab("Classes")}
-                        className={`px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors
-            ${
-              activeTab === "Classes"
-                ? "bg-[#FFBF00] border border-[#042F0C]"
-                : "bg-transparent"
-            }`}
+                        className={`px-4 md:px-6 py-2 rounded-full text-[#042F0C] text-sm md:text-md font-medium transition-colors
+                        ${
+                          activeTab === "Classes"
+                            ? "bg-[#FFBF00] border border-[#042F0C]"
+                            : "bg-transparent"
+                        }`}
                       >
-                        Classes{" "}
+                        Classes
                       </button>
                       <button
                         onClick={() => setActiveTab("Members")}
-                        className={`px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors
-            ${
-              activeTab === "Members"
-                ? "bg-[#FFBF00] border border-[#042F0C]"
-                : "bg-transparent"
-            }`}
+                        className={`px-4 md:px-6 py-2 rounded-full text-[#042F0C] text-sm md:text-md font-medium transition-colors
+                        ${
+                          activeTab === "Members"
+                            ? "bg-[#FFBF00] border border-[#042F0C]"
+                            : "bg-transparent"
+                        }`}
                       >
-                        Members{" "}
+                        Members
                       </button>
                     </div>
                   </div>
 
                   {user.uid === group.groupAdminId && (
                     <button
-                      className="bg-[#14b82c] border border-[#19291c] text-[#19291c] px-6 py-2 rounded-full"
+                      className="w-full md:w-auto bg-[#14b82c] border border-[#19291c] text-[#19291c] px-4 md:px-6 py-2 rounded-full text-sm md:text-base"
                       onClick={handleAddClassButtonClick}
                     >
                       + Create New Class

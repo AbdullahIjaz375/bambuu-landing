@@ -67,6 +67,15 @@ const ProfileTutor = () => {
     }
   };
 
+  const handleItemClick = (path) => {
+    if (path === "/privacyPolicytutor") {
+      window.open("https://bammbuu.com/privacy-policy", "_blank");
+    } else if (path === "/aboutBambuututor") {
+      window.open("https://bammbuu.com/about-bammbuu", "_blank");
+    } else {
+      navigate(path);
+    }
+  };
   const navigationItems = [
     {
       path: "/tutorEditProfile",
@@ -91,26 +100,21 @@ const ProfileTutor = () => {
   ];
 
   return (
-    <div className="flex min-h-screen bg-white">
-      {/* Sidebar */}
-      <Sidebar user={user} />
+    <div className="flex h-screen bg-white">
+      <div className="flex-shrink-0 w-64 h-full">
+        <Sidebar user={userData} />
+      </div>
 
-      {/* Main Content */}
-
-      {loading ? (
-        <div className="flex w-full items-center justify-center min-h-[50vh]">
-          <ClipLoader color="#14B82C" size={50} />
-        </div>
-      ) : (
-        <div className="flex-1 p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl ml-[17rem] m-2">
-          {/* Header */}
+      <div className="flex-1 overflow-x-auto min-w-[calc(100%-16rem)] h-full">
+        <div className="h-[calc(100vh-1rem)] p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl m-2 overflow-y-auto">
           <div className="flex items-center justify-between pb-4 mb-6 border-b">
             <div className="flex items-center gap-4">
               <h1 className="text-4xl font-semibold">{t("profile.title")}</h1>
             </div>
           </div>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            {/* Profile Card */}
+
+          <div className="grid grid-cols-2 gap-6">
+            {/* Profile Info Card */}
             <div className="bg-[#e6fde9] rounded-3xl p-8 flex flex-col items-center">
               <div className="flex items-center justify-center w-32 h-32 mb-4 bg-white rounded-full">
                 <img
@@ -135,42 +139,43 @@ const ProfileTutor = () => {
               </div>
 
               <div className="grid w-full grid-cols-3 gap-4 mb-6 text-xl">
-                <div className="flex items-center gap-1">
+                {/* Language and Location Info */}
+                <div className="flex items-center min-w-0 gap-1">
                   <img
                     alt="bambbuu"
                     src="/svgs/language-circle.svg"
-                    className="w-6 h-6"
+                    className="flex-shrink-0 w-6 h-6"
                   />
-                  <span className="font-semibold text-black">
+                  <span className="font-semibold text-black whitespace-nowrap">
                     {t("profile.native")}:
                   </span>
-                  <span className="font-medium text-gray-600">
+                  <span className="font-medium text-gray-600 truncate">
                     {userData?.nativeLanguage || "-"}
                   </span>
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center min-w-0 gap-1">
                   <img
                     alt="bambbuu"
                     src="/svgs/language-circle.svg"
-                    className="w-6 h-6"
+                    className="flex-shrink-0 w-6 h-6"
                   />
-                  <span className="font-semibold text-black">
+                  <span className="font-semibold text-black whitespace-nowrap">
                     {t("profile.learning")}:
                   </span>
-                  <span className="font-medium text-gray-600">
+                  <span className="font-medium text-gray-600 truncate">
                     {userData?.learningLanguage || "-"}
                   </span>
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center min-w-0 gap-1">
                   <img
                     alt="bambbuu"
                     src="/svgs/location.svg"
-                    className="w-6 h-6"
+                    className="flex-shrink-0 w-6 h-6"
                   />
-                  <span className="font-semibold text-black">
+                  <span className="font-semibold text-black whitespace-nowrap">
                     {t("profile.from")}:
                   </span>
-                  <span className="font-medium text-gray-600">
+                  <span className="font-medium text-gray-600 truncate">
                     {userData?.country || "-"}
                   </span>
                 </div>
@@ -178,7 +183,7 @@ const ProfileTutor = () => {
 
               <div className="grid w-full grid-cols-2 gap-4 text-xl">
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-black">
+                  <span className="font-semibold text-black whitespace-nowrap">
                     {t("profile.stats.totalClassesJoined")}:
                   </span>
                   <span className="font-medium text-gray-600">
@@ -186,7 +191,7 @@ const ProfileTutor = () => {
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-black">
+                  <span className="font-semibold text-black whitespace-nowrap">
                     {t("profile.stats.totalGroupsJoined")}:
                   </span>
                   <span className="font-medium text-gray-600">
@@ -196,19 +201,19 @@ const ProfileTutor = () => {
               </div>
             </div>
 
-            {/* Navigation Options */}
+            {/* Navigation Buttons */}
             <div className="mt-2 space-y-4">
               {navigationItems.map((item) => (
                 <button
                   key={item.path}
-                  onClick={() => navigate(item.path)}
+                  onClick={() => handleItemClick(item.path)}
                   className="flex items-center justify-between w-full px-6 py-4 text-green-600 border border-green-500 rounded-full hover:bg-green-50"
                 >
                   <div className="flex items-center gap-3">
-                    <img alt="bammbuu" src={item.icon} className="w-6 h-6" />
+                    <img alt="bambbuu" src={item.icon} className="w-6 h-6" />
                     <span className="text-xl text-black">{item.label}</span>
                   </div>
-                  <ChevronRight className="text-black" />
+                  <ChevronRight className="w-5 h-5 text-black" />
                 </button>
               ))}
 
@@ -218,7 +223,7 @@ const ProfileTutor = () => {
               >
                 <div className="flex items-center gap-3">
                   <img
-                    alt="bammbuu"
+                    alt="bambbuu"
                     src="/svgs/logout.svg"
                     className="w-6 h-6"
                   />
@@ -226,11 +231,12 @@ const ProfileTutor = () => {
                     {t("profile.navigation.logout")}
                   </span>
                 </div>
+                <ChevronRight className="w-5 h-5 text-red-600" />
               </button>
             </div>
-          </div>{" "}
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

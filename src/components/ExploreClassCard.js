@@ -247,7 +247,7 @@ const ExploreClassCard = ({
   return (
     <>
       <div
-        className="w-80 hover:cursor-pointer"
+        className="w-full max-w-sm mx-auto hover:cursor-pointer"
         onClick={handleCardClick}
         role="button"
         tabIndex={0}
@@ -258,7 +258,7 @@ const ExploreClassCard = ({
         }}
       >
         <div
-          className={`flex flex-col items-center justify-center  bg-white rounded-3xl p-2 ${
+          className={`flex flex-col items-center justify-center bg-white rounded-3xl p-2 ${
             isPremium ? "border border-[#14b82c]" : "border border-[#f2a105]"
           }`}
         >
@@ -266,7 +266,7 @@ const ExploreClassCard = ({
             <img
               alt={className}
               src={imageUrl || "/images/default-class.png"}
-              className="object-cover w-full h-56 rounded-t-2xl"
+              className="object-cover w-full h-48 rounded-t-2xl"
             />
             {isPremium && (
               <img
@@ -278,22 +278,11 @@ const ExploreClassCard = ({
           </div>
 
           <div className="w-full space-y-2 bg-[#c3f3c9] rounded-b-3xl p-2">
-            <div className="flex items-start justify-between">
-              {/* <span className="px-4 py-1 text-sm bg-[#14b82c] text-white rounded-full">
-                {physicalClass ? "Physical" : "Online"}
-              </span>
-              {recurrenceType && (
-                <span className="px-4 py-1 text-sm bg-[#14b82c] text-white rounded-full">
-                  {recurrenceType}
-                </span>
-              )} */}
-            </div>
-
-            <h2 className="ml-2 text-xl font-bold text-gray-800">
+            <h2 className="text-lg font-bold text-gray-800 truncate">
               {className}
             </h2>
 
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between">
               <div className="flex items-center space-x-2">
                 <img
                   src={
@@ -303,10 +292,7 @@ const ExploreClassCard = ({
                   }
                   alt={language === "English" ? "US Flag" : "Spain Flag"}
                 />
-
-                <span className="flex items-center">
-                  <span className="text-[#042f0c]">{language}</span>
-                </span>
+                <span className="text-[#042f0c]">{language}</span>
               </div>
               <span className="px-3 py-1 text-sm bg-[#fff885] rounded-full">
                 {languageLevel}
@@ -315,22 +301,23 @@ const ExploreClassCard = ({
           </div>
 
           <div className="flex flex-col items-center justify-center w-full p-2 space-y-2">
-            <div className="flex flex-row items-center justify-between w-full">
-              <div className="flex flex-row items-center justify-center space-x-2">
-                <Clock className="w-5 h-5 text-gray-600" />
-                <span className="text-[#454545] text-md">
+            <div className="flex flex-wrap items-center justify-between w-full">
+              <div className="flex items-center space-x-2">
+                <img alt="user" src="/svgs/clock.svg" />
+                <span className="text-[#454545] text-sm">
                   {formatTime(classDateTime)} ({classDuration} min)
                 </span>
               </div>
-              <div className="flex flex-row items-center justify-center space-x-2">
-                <Calendar className="w-5 h-5 text-gray-600" />
-                <span className="text-[#454545] text-md">
+              <div className="flex items-center space-x-2">
+                <img alt="user" src="/svgs/calendar.svg" />
+                <span className="text-[#454545] text-sm">
                   {formatDate(classDateTime)}
                 </span>
               </div>
             </div>
-            <div className="flex flex-row items-center justify-between w-full">
-              <div className="flex flex-row items-center justify-center space-x-2">
+
+            <div className="flex flex-wrap items-center justify-between w-full">
+              <div className="flex items-center space-x-2">
                 {profileUrl ? (
                   <img
                     src={profileUrl}
@@ -340,16 +327,16 @@ const ExploreClassCard = ({
                 ) : (
                   <User className="w-5 h-5 text-gray-600" />
                 )}
-                <span className="text-[#454545] text-md">
+                <span className="text-[#454545] text-sm">
                   {adminName || "TBD"}
                 </span>
               </div>
-              <div className="flex flex-row items-center justify-center space-x-2">
-                <Users className="w-5 h-5 text-gray-600" />
+              <div className="flex items-center space-x-2">
+                <img alt="user" src="/svgs/users.svg" />
                 {isPremium ? (
-                  <span className="text-[#454545] text-md"></span>
+                  <span className="text-[#454545] text-sm"></span>
                 ) : (
-                  <span className="text-[#454545] text-md">
+                  <span className="text-[#454545] text-sm">
                     {classMemberIds.length}/{availableSpots}
                   </span>
                 )}
@@ -357,7 +344,7 @@ const ExploreClassCard = ({
             </div>
             <button
               onClick={handleCardClick}
-              className="w-full py-2 font-medium text-black bg-[#14b82c] rounded-full hover:bg-[#119924] border border-[#042f0c]"
+              className="w-full py-2 font-medium text-[#042F0C] border-[#042F0C] border bg-[#14b82c] rounded-full hover:bg-[#119924]"
             >
               Book Class
             </button>

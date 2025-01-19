@@ -78,24 +78,30 @@ const ExploreClassesUser = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-white">
-      <Sidebar user={user} />
+    <div className="flex h-screen bg-white">
+      <div className="flex-shrink-0 w-64 h-full">
+        <Sidebar user={user} />
+      </div>
 
-      <div className="flex-1 p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl ml-[17rem] m-2">
-        <div className="flex items-center justify-between pb-4 mb-6 border-b">
-          <div className="flex items-center gap-4">
-            <button
-              className="p-3 bg-gray-100 rounded-full"
-              onClick={handleBack}
-            >
-              <ArrowLeft size="30" />
-            </button>
-            <h1 className="text-4xl font-semibold">Explore Classes</h1>
+      <div className="flex-1 overflow-x-auto min-w-[calc(100%-16rem)] h-full">
+        <div className="h-[calc(100vh-1rem)] p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl m-2 overflow-y-auto">
+          {/* Header */}
+          <div className="flex items-center justify-between pb-4 mb-6 border-b">
+            <div className="flex items-center gap-4">
+              <button
+                className="flex-shrink-0 p-3 transition-colors bg-gray-100 rounded-full hover:bg-gray-200"
+                onClick={handleBack}
+              >
+                <ArrowLeft className="w-6 h-6" />
+              </button>
+              <h1 className="text-4xl font-semibold whitespace-nowrap">
+                Explore Classes
+              </h1>
+            </div>
           </div>
-        </div>
 
-        <div className="flex flex-row items-center justify-between">
-          <div className="relative w-full mb-6">
+          {/* Search Section */}
+          <div className="relative mb-6">
             <Search className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
             <input
               type="text"
@@ -105,32 +111,37 @@ const ExploreClassesUser = () => {
               onChange={handleSearchChange}
             />
           </div>
-        </div>
 
-        {loading ? (
-          <div className="flex items-center justify-center min-h-[70vh]">
-            <ClipLoader color="#14B82C" size={50} />
-          </div>
-        ) : error ? (
-          <p className="text-center text-red-500">{error}</p>
-        ) : filteredClasses.length === 0 ? (
-          <div className="flex items-center justify-center min-h-[70vh]">
-            <EmptyState
-              message={searchQuery ? "No results found." : "No classes yet."}
-            />{" "}
-          </div>
-        ) : (
-          <div className="flex flex-wrap gap-4">
-            {filteredClasses.map((classItem) => (
-              <div key={classItem.id} className="flex-none w-80">
-                <ExploreClassCard
-                  {...classItem}
-                  isBammbuu={isBambbuuPlusClass(classItem.classType)}
+          {/* Content */}
+          <div className="min-w-0">
+            {loading ? (
+              <div className="flex items-center justify-center min-h-[60vh]">
+                <ClipLoader color="#14B82C" size={50} />
+              </div>
+            ) : error ? (
+              <p className="text-center text-red-500">{error}</p>
+            ) : filteredClasses.length === 0 ? (
+              <div className="flex items-center justify-center min-h-[60vh]">
+                <EmptyState
+                  message={
+                    searchQuery ? "No results found." : "No classes yet."
+                  }
                 />
               </div>
-            ))}
+            ) : (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {filteredClasses.map((classItem) => (
+                  <div key={classItem.id}>
+                    <ExploreClassCard
+                      {...classItem}
+                      isBammbuu={isBambbuuPlusClass(classItem.classType)}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

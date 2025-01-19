@@ -137,14 +137,19 @@ const SavedResources = () => {
     setIsModalOpen(true);
   };
 
-  const ResourceCard = ({ resource }) => (
+  const ResourceCard = ({
+    resource,
+    toggleFavorite,
+    openDeleteModal,
+    handleCardClick,
+  }) => (
     <div className="relative group cursor-pointer transition-transform hover:scale-[1.02]">
       <div
         className="flex items-center p-4 bg-[#f0fdf1] rounded-2xl border border-[#16bc2e]"
         onClick={() => handleCardClick(resource.documentUrl)}
       >
-        <div className="flex items-center flex-1 gap-3">
-          <div className="flex items-center justify-center w-10 h-10 bg-[#fffbc5] rounded-3xl">
+        <div className="flex items-center flex-1 min-w-0 gap-3">
+          <div className="flex items-center justify-center w-10 h-10 bg-[#fffbc5] rounded-3xl flex-shrink-0">
             <img
               src={
                 resource.documentType.toLowerCase() === "pdf"
@@ -155,8 +160,10 @@ const SavedResources = () => {
               className="w-6 h-auto"
             />
           </div>
-          <div className="flex-1">
-            <h3 className="text-xl font-semibold">{resource.documentName}</h3>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-xl font-semibold truncate">
+              {resource.documentName}
+            </h3>
             <div className="flex items-center gap-2 mt-1">
               <span className="text-md text-[#3d3d3d]">
                 {resource.createdAt?.toDate().toLocaleDateString()}
@@ -164,7 +171,7 @@ const SavedResources = () => {
             </div>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-shrink-0 gap-2">
           <Menu shadow="md" width={160} position="bottom-end">
             <Menu.Target>
               <button
@@ -226,105 +233,125 @@ const SavedResources = () => {
 
   return (
     <>
-      <div className="flex min-h-screen bg-white">
-        <Sidebar user={user} />
-        <div className="flex-1 p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl ml-[17rem] m-2">
-          <div className="flex items-center justify-between pb-4 mb-6 border-b">
-            <div className="flex items-center gap-4">
-              <h1 className="text-4xl font-semibold">
-                {t("saved-resources.title")}
-              </h1>
-            </div>
-            <div className="relative flex-1 max-w-2xl ml-8">
-              <Search className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 left-4 top-1/2" />
-              <input
-                type="text"
-                placeholder={t("saved-resources.search.placeholder")}
-                className="w-full py-3 pl-12 pr-4 border border-gray-200 rounded-full bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-          </div>
+      <div className="flex h-screen bg-white">
+        <div className="flex-shrink-0 w-64 h-full">
+          <Sidebar user={user} />
+        </div>
 
-          {filteredResources.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-[70vh]">
-              <EmptyState
-                message={t(
-                  searchQuery
-                    ? "saved-resources.empty-state.no-results"
-                    : "saved-resources.empty-state.no-resources"
-                )}
-              />
-            </div>
-          ) : (
-            <div className="space-y-8">
-              <div>
-                <h2 className="mb-4 text-2xl font-bold">
-                  {t("saved-resources.sections.favorites")}
-                </h2>
-                <div className="grid grid-cols-3 gap-4">
-                  {filteredResources
-                    .filter((r) => r.isFavorite)
-                    .map((resource) => (
-                      <ResourceCard key={resource.docId} resource={resource} />
-                    ))}
-                </div>
+        <div className="flex-1 overflow-x-auto min-w-[calc(100%-16rem)] h-full">
+          <div className="h-[calc(100vh-1rem)] p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl m-2 overflow-y-auto">
+            {/* Header */}
+            <div className="flex items-center justify-between pb-4 mb-6 border-b">
+              <div className="flex items-center gap-4">
+                <h1 className="text-4xl font-semibold whitespace-nowrap">
+                  {t("saved-resources.title")}
+                </h1>
               </div>
+              <div className="relative flex-1 max-w-2xl ml-8">
+                <Search className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 left-4 top-1/2" />
+                <input
+                  type="text"
+                  placeholder={t("saved-resources.search.placeholder")}
+                  className="w-full py-3 pl-12 pr-4 border border-gray-200 rounded-full bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+            </div>
 
-              <div>
-                <div className="flex flex-row items-center justify-between">
+            {/* Content */}
+            {filteredResources.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-[70vh]">
+                <EmptyState
+                  message={t(
+                    searchQuery
+                      ? "saved-resources.empty-state.no-results"
+                      : "saved-resources.empty-state.no-resources"
+                  )}
+                />
+              </div>
+            ) : (
+              <div className="space-y-8">
+                {/* Favorites Section */}
+                <div>
                   <h2 className="mb-4 text-2xl font-bold">
-                    {t("saved-resources.sections.more")}
+                    {t("saved-resources.sections.favorites")}
                   </h2>
+                  <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                    {filteredResources
+                      .filter((r) => r.isFavorite)
+                      .map((resource) => (
+                        <ResourceCard
+                          key={resource.docId}
+                          resource={resource}
+                          toggleFavorite={toggleFavorite}
+                          openDeleteModal={openDeleteModal}
+                          handleCardClick={handleCardClick}
+                        />
+                      ))}
+                  </div>
                 </div>
-                <div className="grid grid-cols-3 gap-4">
-                  {filteredResources
-                    .filter((r) => !r.isFavorite)
-                    .map((resource) => (
-                      <ResourceCard key={resource.docId} resource={resource} />
-                    ))}
+
+                {/* More Resources Section */}
+                <div>
+                  <div className="flex flex-row items-center justify-between">
+                    <h2 className="mb-4 text-2xl font-bold">
+                      {t("saved-resources.sections.more")}
+                    </h2>
+                  </div>
+                  <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                    {filteredResources
+                      .filter((r) => !r.isFavorite)
+                      .map((resource) => (
+                        <ResourceCard
+                          key={resource.docId}
+                          resource={resource}
+                          toggleFavorite={toggleFavorite}
+                          openDeleteModal={openDeleteModal}
+                          handleCardClick={handleCardClick}
+                        />
+                      ))}
+                  </div>
                 </div>
               </div>
+            )}
+          </div>
+        </div>
+
+        {/* Delete Modal */}
+        <Modal
+          isOpen={isModalOpen}
+          onRequestClose={() => setIsModalOpen(false)}
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white shadow-lg rounded-3xl p-6 w-[400px] font-urbanist"
+          overlayClassName="fixed inset-0 bg-black bg-opacity-50 z-50"
+        >
+          <div className="flex flex-col items-center">
+            <div className="flex items-center justify-center w-16 h-16 mb-4 bg-yellow-100 rounded-full">
+              <img alt="empty state" src="/images/no_saved.png" />
             </div>
-          )}
-        </div>
+            <h2 className="mb-2 text-xl font-bold">
+              {t("saved-resources.delete-modal.title")}
+            </h2>
+            <p className="mb-6 text-center text-gray-600">
+              {t("saved-resources.delete-modal.description")}
+            </p>
+            <div className="flex gap-4">
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="px-8 py-2 transition-colors border border-black rounded-full hover:bg-gray-50"
+              >
+                {t("saved-resources.delete-modal.cancel")}
+              </button>
+              <button
+                onClick={() => deleteResource(selectedResource)}
+                className="px-8 py-2 text-white transition-colors bg-red-500 border border-red-500 rounded-full hover:bg-red-600"
+              >
+                {t("saved-resources.delete-modal.confirm")}
+              </button>
+            </div>
+          </div>
+        </Modal>
       </div>
-
-      <Modal
-        isOpen={isModalOpen}
-        onRequestClose={() => setIsModalOpen(false)}
-        className="absolute p-6 transform -translate-x-1/2 -translate-y-1/2 bg-white shadow-lg rounded-3xl top-1/2 left-1/2 font-urbanist"
-        overlayClassName="fixed inset-0 bg-black bg-opacity-50"
-      >
-        <div className="flex flex-col items-center">
-          <div className="flex items-center justify-center w-16 h-16 mb-4 bg-yellow-100 rounded-full">
-            <img alt="empty state" src="/images/no_saved.png" />
-          </div>
-
-          <h2 className="mb-2 text-xl font-bold">
-            {t("saved-resources.delete-modal.title")}
-          </h2>
-          <p className="mb-6 text-gray-600">
-            {t("saved-resources.delete-modal.description")}
-          </p>
-
-          <div className="flex gap-4">
-            <button
-              onClick={() => setIsModalOpen(false)}
-              className="px-8 py-2 border border-black rounded-full hover:bg-gray-50"
-            >
-              {t("saved-resources.delete-modal.cancel")}
-            </button>
-            <button
-              onClick={() => deleteResource(selectedResource)}
-              className="px-8 py-2 text-black bg-red-500 border border-black rounded-full hover:bg-red-600"
-            >
-              {t("saved-resources.delete-modal.confirm")}
-            </button>
-          </div>
-        </div>
-      </Modal>
     </>
   );
 };

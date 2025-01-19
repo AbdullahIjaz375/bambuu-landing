@@ -397,210 +397,219 @@ const SavedResourcesTutor = () => {
   }
 
   return (
-    <div className="flex min-h-screen bg-white">
-      <Sidebar user={user} />
-      <div className="flex-1 p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl ml-[17rem] m-2">
-        <div className="flex items-center justify-between pb-4 mb-6 border-b">
-          <div className="flex items-center gap-4">
-            <h1 className="text-4xl font-semibold">
-              {t("saved-resources-tutor.title")}
-            </h1>
-          </div>
-          <div className="relative flex-1 max-w-2xl ml-8">
-            <Search className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 left-4 top-1/2" />
-            <input
-              type="text"
-              placeholder={t("saved-resources-tutor.search.placeholder")}
-              className="w-full py-3 pl-12 pr-4 border border-gray-200 rounded-full bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-        </div>
+    <div className="flex h-screen bg-white">
+      <div className="flex-shrink-0 w-64 h-full">
+        <Sidebar user={user} />
+      </div>
 
-        {filteredResources.length === 0 ? (
-          <EmptyStateCustom />
-        ) : (
-          <div className="space-y-8">
-            <div>
-              <h2 className="mb-4 text-2xl font-bold">
-                {t("saved-resources-tutor.sections.favorites")}
-              </h2>
-              <div className="grid grid-cols-3 gap-4">
-                {filteredResources
-                  .filter((r) => r.isFavorite)
-                  .map((resource) => (
-                    <ResourceCard key={resource.docId} resource={resource} />
-                  ))}
-              </div>
+      <div className="flex-1 overflow-x-auto min-w-[calc(100%-16rem)] h-full">
+        <div className="h-[calc(100vh-1rem)] p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl m-2 overflow-y-auto">
+          {/* Header */}
+          <div className="flex flex-col justify-between gap-4 pb-4 mb-6 border-b md:flex-row md:items-center">
+            <div className="flex items-center gap-4">
+              <h1 className="text-4xl font-semibold whitespace-nowrap">
+                {t("saved-resources-tutor.title")}
+              </h1>
             </div>
+            <div className="relative flex-1 max-w-2xl">
+              <Search className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 left-4 top-1/2" />
+              <input
+                type="text"
+                placeholder={t("saved-resources-tutor.search.placeholder")}
+                className="w-full py-3 pl-12 pr-4 border border-gray-200 rounded-full bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+          </div>
 
-            <div>
-              <div className="flex flex-row items-center justify-between">
+          {/* Content */}
+          {filteredResources.length === 0 ? (
+            <EmptyStateCustom />
+          ) : (
+            <div className="space-y-8">
+              {/* Favorites Section */}
+              <div>
                 <h2 className="mb-4 text-2xl font-bold">
-                  {t("saved-resources-tutor.sections.more")}
+                  {t("saved-resources-tutor.sections.favorites")}
                 </h2>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileUpload}
-                  accept=".pdf,.doc,.docx,.txt"
-                  className="hidden"
-                />
-                <button
-                  disabled={isUploading}
-                  onClick={() => fileInputRef.current?.click()}
-                  className="px-3 py-2 mb-2 text-[#042f0c] text-lg font-semibold bg-[#14b82c] border border-black rounded-full flex items-center"
-                >
-                  {isUploading ? (
-                    <div className="w-5 h-5 mr-2 border-2 border-white rounded-full animate-spin border-t-transparent" />
-                  ) : (
-                    <Plus />
-                  )}
-                  {isUploading
-                    ? t("saved-resources-tutor.buttons.uploading")
-                    : t("saved-resources-tutor.buttons.add-resource")}
-                </button>
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {filteredResources
+                    .filter((r) => r.isFavorite)
+                    .map((resource) => (
+                      <ResourceCard key={resource.docId} resource={resource} />
+                    ))}
+                </div>
               </div>
-              <div className="grid grid-cols-3 gap-4">
-                {filteredResources
-                  .filter((r) => !r.isFavorite)
-                  .map((resource) => (
-                    <ResourceCard key={resource.docId} resource={resource} />
-                  ))}
+
+              {/* More Resources Section */}
+              <div>
+                <div className="flex flex-col items-start justify-between mb-4 sm:flex-row sm:items-center">
+                  <h2 className="mb-2 text-2xl font-bold sm:mb-0">
+                    {t("saved-resources-tutor.sections.more")}
+                  </h2>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileUpload}
+                    accept=".pdf,.doc,.docx,.txt"
+                    className="hidden"
+                  />
+                  <button
+                    disabled={isUploading}
+                    onClick={() => fileInputRef.current?.click()}
+                    className="px-3 py-2 text-[#042f0c] text-lg font-semibold bg-[#14b82c] border border-black rounded-full flex items-center w-full sm:w-auto justify-center sm:justify-start"
+                  >
+                    {isUploading ? (
+                      <div className="w-5 h-5 mr-2 border-2 border-white rounded-full animate-spin border-t-transparent" />
+                    ) : (
+                      <Plus className="mr-2" />
+                    )}
+                    {isUploading
+                      ? t("saved-resources-tutor.buttons.uploading")
+                      : t("saved-resources-tutor.buttons.add-resource")}
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {filteredResources
+                    .filter((r) => !r.isFavorite)
+                    .map((resource) => (
+                      <ResourceCard key={resource.docId} resource={resource} />
+                    ))}
+                </div>
               </div>
-            </div>
-          </div>
-        )}
-        <ToastContainer
-          position="top-right"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="light"
-        />
-        <Modal
-          isOpen={isAssignModalOpen}
-          onRequestClose={() => setIsAssignModalOpen(false)}
-          className="absolute font-urbanist top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-3xl p-6 w-96 max-h-[90vh] overflow-hidden"
-          overlayClassName="fixed inset-0 bg-black bg-opacity-25"
-        >
-          <div className="flex items-center justify-between mb-6">
-            {t("saved-resources-tutor.assign-modal.title")}
-            <button
-              onClick={() => setIsAssignModalOpen(false)}
-              className="p-1 rounded-full hover:bg-gray-100"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          <div className="relative mb-4">
-            <Search className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 left-3 top-1/2" />
-            <input
-              type="text"
-              placeholder={t(
-                "saved-resources-tutor.assign-modal.search-placeholder"
-              )}
-              className="w-full py-3 pl-10 pr-4 border border-gray-200 rounded-full bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200"
-              value={studentSearchQuery}
-              onChange={(e) => setStudentSearchQuery(e.target.value)}
-            />
-          </div>
-
-          {selectedStudents.length > 0 && (
-            <div className="mb-2 text-sm text-gray-600">
-              {t("saved-resources-tutor.assign-modal.selected-count", {
-                count: selectedStudents.length,
-              })}
             </div>
           )}
+        </div>
+      </div>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
+      <Modal
+        isOpen={isAssignModalOpen}
+        onRequestClose={() => setIsAssignModalOpen(false)}
+        className="absolute font-urbanist top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-3xl p-6 w-96 max-h-[90vh] overflow-hidden"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-25"
+      >
+        <div className="flex items-center justify-between mb-6">
+          {t("saved-resources-tutor.assign-modal.title")}
+          <button
+            onClick={() => setIsAssignModalOpen(false)}
+            className="p-1 rounded-full hover:bg-gray-100"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
 
-          <div className="overflow-y-auto max-h-[300px] mb-4 scrollbar-hide">
-            {filteredStudents.map((student) => (
-              <div
-                key={student.id}
-                onClick={() => toggleStudent(student.id)}
-                className={`flex items-center p-3 rounded-xl cursor-pointer mb-2 
+        <div className="relative mb-4">
+          <Search className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 left-3 top-1/2" />
+          <input
+            type="text"
+            placeholder={t(
+              "saved-resources-tutor.assign-modal.search-placeholder"
+            )}
+            className="w-full py-3 pl-10 pr-4 border border-gray-200 rounded-full bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200"
+            value={studentSearchQuery}
+            onChange={(e) => setStudentSearchQuery(e.target.value)}
+          />
+        </div>
+
+        {selectedStudents.length > 0 && (
+          <div className="mb-2 text-sm text-gray-600">
+            {t("saved-resources-tutor.assign-modal.selected-count", {
+              count: selectedStudents.length,
+            })}
+          </div>
+        )}
+
+        <div className="overflow-y-auto max-h-[300px] mb-4 scrollbar-hide">
+          {filteredStudents.map((student) => (
+            <div
+              key={student.id}
+              onClick={() => toggleStudent(student.id)}
+              className={`flex items-center p-3 rounded-xl cursor-pointer mb-2 
                   ${
                     selectedStudents.includes(student.id)
                       ? "bg-[#f0fdf1]"
                       : "hover:bg-gray-50"
                   }`}
-              >
-                <img
-                  src={student.photoUrl}
-                  alt={student.name}
-                  className="w-8 h-8 mr-3 rounded-full"
-                />
-                <span className="font-medium">{student.name}</span>
-              </div>
-            ))}
-          </div>
-
-          <div className="flex gap-3">
-            <button
-              onClick={() => setIsAssignModalOpen(false)}
-              className="flex-1 px-6 py-2 font-medium border border-black rounded-full"
             >
-              {t("saved-resources-tutor.assign-modal.buttons.cancel")}
-            </button>
-            <button
-              onClick={handleAssign}
-              disabled={selectedStudents.length === 0}
-              className={`flex-1 py-2 border border-black px-6 rounded-full font-medium text-black
+              <img
+                src={student.photoUrl}
+                alt={student.name}
+                className="w-8 h-8 mr-3 rounded-full"
+              />
+              <span className="font-medium">{student.name}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            onClick={() => setIsAssignModalOpen(false)}
+            className="flex-1 px-6 py-2 font-medium border border-black rounded-full"
+          >
+            {t("saved-resources-tutor.assign-modal.buttons.cancel")}
+          </button>
+          <button
+            onClick={handleAssign}
+            disabled={selectedStudents.length === 0}
+            className={`flex-1 py-2 border border-black px-6 rounded-full font-medium text-black
                 ${
                   selectedStudents.length === 0
                     ? "bg-gray-300 cursor-not-allowed"
                     : "bg-[#14b82c] hover:bg-[#129526]"
                 }`}
+          >
+            {t("saved-resources-tutor.assign-modal.buttons.assign")}
+          </button>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={isModalOpen}
+        onRequestClose={() => setIsModalOpen(false)}
+        className="absolute p-6 transform -translate-x-1/2 -translate-y-1/2 bg-white shadow-lg rounded-3xl top-1/2 left-1/2 font-urbanist"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-50"
+      >
+        <div className="flex flex-col items-center">
+          <div className="flex items-center justify-center w-16 h-16 mb-4 bg-yellow-100 rounded-full">
+            <img alt="empty state" src="/images/no_saved.png" />
+          </div>
+
+          <h2 className="mb-2 text-xl font-bold">
+            {t("saved-resources-tutor.delete-modal.title")}
+          </h2>
+          <p className="mb-6 text-gray-600">
+            {" "}
+            {t("saved-resources-tutor.delete-modal.subtitle")}
+          </p>
+
+          <div className="flex gap-4">
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="px-8 py-2 border border-black rounded-full hover:bg-gray-50"
             >
-              {t("saved-resources-tutor.assign-modal.buttons.assign")}
+              {t("saved-resources-tutor.delete-modal.buttons.cancel")}
+            </button>
+            <button
+              onClick={() => deleteResource(selectedResource)}
+              className="px-8 py-2 text-black bg-red-500 border border-black rounded-full hover:bg-red-600"
+            >
+              {t("saved-resources-tutor.delete-modal.buttons.confirm")}
             </button>
           </div>
-        </Modal>
-
-        <Modal
-          isOpen={isModalOpen}
-          onRequestClose={() => setIsModalOpen(false)}
-          className="absolute p-6 transform -translate-x-1/2 -translate-y-1/2 bg-white shadow-lg rounded-3xl top-1/2 left-1/2 font-urbanist"
-          overlayClassName="fixed inset-0 bg-black bg-opacity-50"
-        >
-          <div className="flex flex-col items-center">
-            <div className="flex items-center justify-center w-16 h-16 mb-4 bg-yellow-100 rounded-full">
-              <img alt="empty state" src="/images/no_saved.png" />
-            </div>
-
-            <h2 className="mb-2 text-xl font-bold">
-              {t("saved-resources-tutor.delete-modal.title")}
-            </h2>
-            <p className="mb-6 text-gray-600">
-              {" "}
-              {t("saved-resources-tutor.delete-modal.subtitle")}
-            </p>
-
-            <div className="flex gap-4">
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="px-8 py-2 border border-black rounded-full hover:bg-gray-50"
-              >
-                {t("saved-resources-tutor.delete-modal.buttons.cancel")}
-              </button>
-              <button
-                onClick={() => deleteResource(selectedResource)}
-                className="px-8 py-2 text-black bg-red-500 border border-black rounded-full hover:bg-red-600"
-              >
-                {t("saved-resources-tutor.delete-modal.buttons.confirm")}
-              </button>
-            </div>
-          </div>
-        </Modal>
-      </div>
+        </div>
+      </Modal>
     </div>
   );
 };

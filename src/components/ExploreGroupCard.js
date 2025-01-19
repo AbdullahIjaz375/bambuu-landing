@@ -197,6 +197,7 @@ const GroupCard = ({ group }) => {
     memberIds = [],
     imageUrl,
     isPremium,
+    groupAdminImageUrl,
     groupDescription,
     id: groupId,
   } = group;
@@ -346,72 +347,81 @@ const GroupCard = ({ group }) => {
 
   return (
     <>
-      <div className="max-w-md mt-1 hover:cursor-pointer" onClick={handleClick}>
+      <div
+        className="w-full max-w-sm mx-auto hover:cursor-pointer"
+        onClick={handleClick}
+      >
         <div
-          className={`max-w-sm p-4  rounded-3xl ${
+          className={`flex flex-col items-center p-4 rounded-3xl h-[340px] ${
             isPremium
               ? "bg-[#e8feeb] border border-[#14b82c]"
               : "bg-white border border-[#ffc310]"
           }`}
         >
-          {/* Rest of your existing GroupCard code */}
-          <div className="flex flex-col items-center">
-            <div className="relative w-40 h-40 mb-4">
-              {/* Bambuu+ Tag */}
-              {isPremium && (
-                <div className="absolute z-10 -translate-x-1/2 left-1/2 -top-3">
-                  <div className="px-3 py-1 text-sm font-medium text-green-600 bg-white border border-green-300 rounded-full whitespace-nowrap">
-                    bammbuu+
-                  </div>
-                </div>
+          {/* Group Image */}
+          <div className="relative w-32 h-32 mb-4">
+            {isPremium && (
+              <div className="absolute z-10 -translate-x-1/2 left-1/2 -top-3">
+                <img alt="bammbuu" src="/svgs/bammbuu-plus-grp-tag.svg" />
+              </div>
+            )}
+            <img
+              src={imageUrl}
+              alt={groupName}
+              className="object-cover w-full h-full rounded-full"
+            />
+          </div>
+
+          {/* Group Name */}
+          <h2 className="mb-2 text-xl font-bold text-center text-gray-900 truncate">
+            {groupName}
+          </h2>
+
+          {/* Language and Level */}
+          <div className="flex flex-wrap items-center justify-center gap-2 mb-4">
+            <div className="flex items-center gap-2">
+              {groupLearningLanguage === "Spanish" ? (
+                <img src="/svgs/xs-spain.svg" alt="Spanish flag" />
+              ) : (
+                <img src="/svgs/xs-us.svg" alt="US flag" />
               )}
-              {/* Group Image */}
-              <div className="w-full h-full overflow-hidden rounded-full">
-                <img
-                  src={imageUrl}
-                  alt={groupName}
-                  className="object-cover w-full h-full"
-                />
-              </div>
-            </div>
-
-            <h2 className="mb-2 text-2xl font-medium text-gray-900">
-              {groupName}
-            </h2>
-
-            <div className="flex items-center gap-2 mb-2">
-              <div className="flex items-center gap-2">
-                {groupLearningLanguage === "Spanish" ? (
-                  <img src="/images/spain-small.png" alt="Spanish flag" />
-                ) : (
-                  <img src="/images/usa-small.png" alt="US flag" />
-                )}
-                <span className="text-md text-green-900 truncate max-w-[120px]">
-                  {groupLearningLanguage}
-                </span>
-              </div>
-              <span className="px-3 py-1 text-gray-800 bg-[#fff885] rounded-full">
-                {level}
+              <span className="text-md text-green-900 truncate max-w-[120px]">
+                {groupLearningLanguage}
               </span>
             </div>
+            <span className="px-3 py-1 text-xs text-gray-800 bg-[#fff885] rounded-full">
+              {level}
+            </span>
+          </div>
 
-            <div className="flex items-center justify-between w-full">
-              <div className="flex items-center gap-2">
-                <User />
-                <span className="text-gray-700 text-md">
-                  {groupAdminName}{" "}
-                  <span className="text-gray-500">(Admin)</span>
-                </span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Users className="w-4 h-4 text-gray-600" />
-                <span className="text-gray-700 text-md">
-                  {memberIds.length} members
-                </span>
-              </div>
+          {/* Admin and Members */}
+          <div className="flex flex-wrap items-center justify-between w-full gap-4">
+            <div className="flex items-center gap-2">
+              {groupAdminImageUrl ? (
+                <img
+                  src={groupAdminImageUrl}
+                  alt={groupAdminName}
+                  className="object-cover w-5 h-5 rounded-full"
+                />
+              ) : (
+                <User className="w-5 h-5 text-gray-600" />
+              )}{" "}
+              <span className="text-xs text-gray-700 truncate">
+                {groupAdminName} <span className="text-gray-500">(Admin)</span>
+              </span>
             </div>
+            <div className="flex items-center gap-1">
+              <img alt="user" src="/svgs/users.svg" />
+              <span className="text-xs text-gray-700">
+                {memberIds.length} members
+              </span>
+            </div>
+          </div>
+
+          {/* Join Button */}
+          <div className="w-full ">
             <button
-              className="w-full mt-2 py-2 font-medium text-black bg-[#ffbf00] rounded-full hover:bg-[#ffbf00] border border-black"
+              className="w-full mt-4 py-2 font-medium text-black bg-[#ffbf00] rounded-full hover:bg-[#e5ae00] border border-black"
               onClick={handleJoinClick}
             >
               Join Group
@@ -419,6 +429,8 @@ const GroupCard = ({ group }) => {
           </div>
         </div>
       </div>
+
+      {/* Details Modal */}
       {showDetailsModal && (
         <ExploreGroupDetailsModal
           group={group}
@@ -426,23 +438,13 @@ const GroupCard = ({ group }) => {
           onJoinClick={handleJoinClick}
         />
       )}
+
+      {/* Join Confirmation Modal */}
       <Modal
         isOpen={showJoinConfirmation}
         onRequestClose={() => setShowJoinConfirmation(false)}
         className="z-50 max-w-sm p-6 mx-auto mt-40 bg-white outline-none rounded-3xl font-urbanist"
         overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-        style={{
-          overlay: {
-            zIndex: 60, // Higher than the details modal
-          },
-          content: {
-            border: "none",
-            padding: "24px",
-            maxWidth: "420px",
-            position: "relative", // Needed for z-index to work
-            zIndex: 61, // Higher than the overlay
-          },
-        }}
       >
         <div className="text-center">
           <h2 className="mb-4 text-xl font-semibold">
@@ -459,11 +461,13 @@ const GroupCard = ({ group }) => {
               className="w-full py-2 font-medium text-black bg-[#14b82c] rounded-full hover:bg-[#119924] border border-[#042f0c]"
               onClick={handleJoinConfirm}
             >
-              {isJoining ? "Joining...." : "Yes, Join"}
+              {isJoining ? "Joining..." : "Yes, Join"}
             </button>
           </div>
         </div>
       </Modal>
+
+      {/* Plans Modal */}
       <PlansModal
         isOpen={isPlansModalOpen}
         onClose={() => setIsPlansModalOpen(false)}

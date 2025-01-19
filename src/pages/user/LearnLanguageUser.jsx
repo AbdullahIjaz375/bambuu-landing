@@ -368,55 +368,267 @@ const LearnLanguageUser = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-white">
-      {/* Sidebar */}
-      <Sidebar user={user} />
+    <div className="flex h-screen bg-white">
+      <div className="flex-shrink-0 w-64 h-full">
+        <Sidebar user={user} />
+      </div>
 
-      {/* Main Content */}
-      <div className="flex-1 p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl ml-[17rem] m-2">
-        {/* Header */}
-        <div className="flex items-center justify-between pb-4 mb-6 border-b">
-          <div className="flex items-center gap-4">
-            <button
-              className="p-3 bg-gray-100 rounded-full"
-              onClick={handleBack}
-            >
-              <ArrowLeft size="30" />
-            </button>
-            <h1 className="text-4xl font-semibold">Learn Language</h1>
-          </div>
-          <div className="flex flex-row items-center justify-center space-x-4">
-            <div className="flex justify-center">
+      <div className="flex-1 overflow-x-auto min-w-[calc(100%-16rem)] h-full">
+        <div className="h-[calc(100vh-1rem)] p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl m-2 overflow-y-auto">
+          {/* Header */}
+          <div className="flex flex-col justify-between gap-4 pb-4 mb-6 border-b sm:flex-row sm:items-center">
+            <div className="flex items-center gap-4">
+              <button
+                className="flex-shrink-0 p-3 transition-colors bg-gray-100 rounded-full hover:bg-gray-200"
+                onClick={handleBack}
+              >
+                <ArrowLeft className="w-6 h-6" />
+              </button>
+              <h1 className="text-4xl font-semibold whitespace-nowrap">
+                Learn Language
+              </h1>
+            </div>
+            <div className="flex justify-center w-full sm:w-auto">
               <div className="inline-flex bg-gray-100 border border-gray-300 rounded-full">
                 <button
                   onClick={() => setActiveTab("myBambuu")}
-                  className={`px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors
-            ${
-              activeTab === "myBambuu"
-                ? "bg-[#FFBF00] border border-[#042F0C]"
-                : "bg-transparent"
-            }`}
+                  className={`px-4 sm:px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap
+                  ${
+                    activeTab === "myBambuu"
+                      ? "bg-[#FFBF00] border border-[#042F0C]"
+                      : "bg-transparent"
+                  }`}
                 >
-                  My Bambuuu
+                  My bammbuuu
                 </button>
                 <button
                   onClick={() => setActiveTab("exploreBambuu")}
-                  className={`px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors
-            ${
-              activeTab === "exploreBambuu"
-                ? "bg-[#FFBF00] border border-[#042F0C]"
-                : "bg-transparent"
-            }`}
+                  className={`px-4 sm:px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap
+                  ${
+                    activeTab === "exploreBambuu"
+                      ? "bg-[#FFBF00] border border-[#042F0C]"
+                      : "bg-transparent"
+                  }`}
                 >
-                  Explore Bambuuu
+                  Explore bammbuuu
                 </button>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Content */}
-        {renderContent()}
+          {/* Content */}
+          <div className="space-y-8">
+            {activeTab === "myBambuu" ? (
+              <>
+                {/* My Classes Section */}
+                <div className="w-full max-w-[160vh] mx-auto">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-2xl font-bold">My Classes</h2>
+                    {myClasses.length > 0 && (
+                      <button
+                        className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+                        onClick={() => navigate("/classesUser")}
+                      >
+                        View All
+                      </button>
+                    )}
+                  </div>
+
+                  {loading ? (
+                    <div className="flex items-center justify-center h-48">
+                      <ClipLoader color="#14B82C" size={50} />
+                    </div>
+                  ) : error ? (
+                    <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
+                      <p className="text-center text-red-500">{error}</p>
+                      <button
+                        className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+                        onClick={() => window.location.reload()}
+                      >
+                        Try Again
+                      </button>
+                    </div>
+                  ) : myClasses.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
+                      <EmptyState message="You have not joined any class yet!" />
+                    </div>
+                  ) : (
+                    <div className="relative w-full">
+                      <div className="flex gap-2 pb-4 overflow-x-auto scrollbar-hide">
+                        {myClasses.map((classItem) => (
+                          <div
+                            key={classItem.id}
+                            className="flex-none px-1 pt-3 w-72"
+                          >
+                            <ClassCard
+                              {...classItem}
+                              isBammbuu={Boolean(classItem.tutorId)}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* My Groups Section */}
+                <div className="w-full max-w-[160vh] mx-auto">
+                  <div className="flex items-center justify-between mb-1">
+                    <h2 className="text-2xl font-bold">My Groups</h2>
+                    {myGroups.length > 0 && (
+                      <button
+                        className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+                        onClick={() => navigate("/groupsUser")}
+                      >
+                        View All
+                      </button>
+                    )}
+                  </div>
+
+                  {loadingGroups ? (
+                    <div className="flex items-center justify-center h-48">
+                      <ClipLoader color="#14B82C" size={50} />
+                    </div>
+                  ) : errorGroups ? (
+                    <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
+                      <p className="text-center text-red-500">{errorGroups}</p>
+                      <button
+                        className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+                        onClick={() => window.location.reload()}
+                      >
+                        Try Again
+                      </button>
+                    </div>
+                  ) : myGroups.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
+                      <EmptyState message="You are not part of any group yet!" />
+                      <button
+                        onClick={() => navigate("/groupsUser")}
+                        className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+                      >
+                        Create a Group
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="relative w-full">
+                      <div className="flex gap-2 pb-4 overflow-x-auto scrollbar-hide">
+                        {myGroups.map((group) => (
+                          <div
+                            key={group.id}
+                            className="flex-none px-1 pt-2 w-72"
+                          >
+                            <GroupCard group={group} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Explore Classes Section */}
+                <div className="w-full max-w-[160vh] mx-auto">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-2xl font-bold">Explore Classes</h2>
+                    {exploreClasses.length > 0 && (
+                      <button
+                        className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+                        onClick={() => navigate("/exploreClassesUser")}
+                      >
+                        View All
+                      </button>
+                    )}
+                  </div>
+
+                  {loadingExplore ? (
+                    <div className="flex items-center justify-center h-48">
+                      <ClipLoader color="#14B82C" size={50} />
+                    </div>
+                  ) : errorExplore ? (
+                    <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
+                      <p className="text-center text-red-500">{errorExplore}</p>
+                      <button
+                        className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+                        onClick={() => window.location.reload()}
+                      >
+                        Try Again
+                      </button>
+                    </div>
+                  ) : exploreClasses.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
+                      <EmptyState message="No available classes to explore at the moment!" />
+                    </div>
+                  ) : (
+                    <div className="relative w-full">
+                      <div className="flex gap-2 pb-4 overflow-x-auto scrollbar-hide">
+                        {exploreClasses.map((classItem) => (
+                          <div
+                            key={classItem.id}
+                            className="flex-none px-1 pt-3 w-72"
+                          >
+                            <ExploreClassCard
+                              {...classItem}
+                              isBammbuu={Boolean(classItem.tutorId)}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Explore Groups Section */}
+                <div className="w-full max-w-[160vh] mx-auto">
+                  <div className="flex items-center justify-between mb-1">
+                    <h2 className="text-2xl font-bold">Explore Groups</h2>
+                    {exploreGroups.length > 0 && (
+                      <button
+                        className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+                        onClick={() => navigate("/exploreGroupsUser")}
+                      >
+                        View All
+                      </button>
+                    )}
+                  </div>
+
+                  {loadingExplore ? (
+                    <div className="flex items-center justify-center h-48">
+                      <ClipLoader color="#14B82C" size={50} />
+                    </div>
+                  ) : errorExplore ? (
+                    <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
+                      <p className="text-center text-red-500">{errorExplore}</p>
+                      <button
+                        className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+                        onClick={() => window.location.reload()}
+                      >
+                        Try Again
+                      </button>
+                    </div>
+                  ) : exploreGroups.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
+                      <EmptyState message="No available groups to explore at the moment!" />
+                    </div>
+                  ) : (
+                    <div className="relative w-full">
+                      <div className="flex gap-2 pb-4 overflow-x-auto scrollbar-hide">
+                        {exploreGroups.map((group) => (
+                          <div
+                            key={group.id}
+                            className="flex-none px-1 pt-2 w-72"
+                          >
+                            <ExploreGroupCard group={group} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -147,99 +147,110 @@ const ClassesTutor = () => {
 
   return (
     <>
-      <div className="flex min-h-screen bg-white">
-        <Sidebar user={user} />
+      <div className="flex h-screen bg-white">
+        <div className="flex-shrink-0 w-64 h-full">
+          <Sidebar user={user} />
+        </div>
 
-        <div className="flex-1 p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl ml-[17rem] m-2">
-          <div className="flex items-center justify-between pb-4 mb-6 border-b">
-            <div className="flex items-center gap-4">
+        <div className="flex-1 overflow-x-auto min-w-[calc(100%-16rem)] h-full">
+          <div className="h-[calc(100vh-1rem)] p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl m-2 overflow-y-auto">
+            {/* Header */}
+            <div className="flex items-center justify-between pb-4 mb-6 border-b">
+              <div className="flex items-center gap-4">
+                <button
+                  className="flex-shrink-0 p-3 transition-colors bg-gray-100 rounded-full hover:bg-gray-200"
+                  onClick={handleBack}
+                  aria-label={t("classes-tutor.actions.back")}
+                >
+                  <ArrowLeft className="w-6 h-6" />
+                </button>
+                <h1 className="text-4xl font-semibold whitespace-nowrap">
+                  {t("classes-tutor.title")}
+                </h1>
+              </div>
               <button
-                className="p-3 bg-gray-100 rounded-full"
-                onClick={handleBack}
-                aria-label={t("classes-tutor.actions.back")}
+                className="px-6 py-3 text-[#042f0c] text-xl font-medium bg-white border border-[#5d5d5d] rounded-full whitespace-nowrap"
+                onClick={() => setShowClassTypeModal(true)}
               >
-                <ArrowLeft size="30" />
+                {t("classes-tutor.actions.add-new")}
               </button>
-              <h1 className="text-4xl font-semibold">
-                {t("classes-tutor.title")}
-              </h1>
             </div>
-            <button
-              className="px-6 py-3 text-[#042f0c] text-xl font-medium bg-white border border-[#5d5d5d] rounded-full"
-              onClick={() => setShowClassTypeModal(true)}
-            >
-              {t("classes-tutor.actions.add-new")}
-            </button>
-          </div>
 
-          <div className="flex flex-row items-center justify-between">
-            <div className="flex justify-center">
-              <div className="inline-flex bg-gray-100 border border-gray-300 rounded-full">
-                <button
-                  onClick={() => setActiveTab("booked")}
-                  className={`px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors
-            ${
-              activeTab === "booked"
-                ? "bg-[#FFBF00] border border-[#042F0C]"
-                : "bg-transparent"
-            }`}
-                >
-                  {t("classes-tutor.tabs.booked")}
-                </button>
-                <button
-                  onClick={() => setActiveTab("available")}
-                  className={`px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors
-            ${
-              activeTab === "available"
-                ? "bg-[#FFBF00] border border-[#042F0C]"
-                : "bg-transparent"
-            }`}
-                >
-                  {t("classes-tutor.tabs.available")}
-                </button>
+            {/* Filter and Search Section */}
+            <div className="flex flex-col gap-4 mb-6 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex justify-center lg:justify-start">
+                <div className="inline-flex bg-gray-100 border border-gray-300 rounded-full">
+                  <button
+                    onClick={() => setActiveTab("booked")}
+                    className={`px-4 lg:px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap
+                    ${
+                      activeTab === "booked"
+                        ? "bg-[#FFBF00] border border-[#042F0C]"
+                        : "bg-transparent"
+                    }`}
+                  >
+                    {t("classes-tutor.tabs.booked")}
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("available")}
+                    className={`px-4 lg:px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap
+                    ${
+                      activeTab === "available"
+                        ? "bg-[#FFBF00] border border-[#042F0C]"
+                        : "bg-transparent"
+                    }`}
+                  >
+                    {t("classes-tutor.tabs.available")}
+                  </button>
+                </div>
+              </div>
+
+              <div className="relative">
+                <Search className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
+                <input
+                  type="text"
+                  placeholder={t("classes-tutor.search.placeholder")}
+                  className="w-full lg:w-[40vh] py-3 pl-10 pr-4 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                />
               </div>
             </div>
-            <div className="relative mb-6">
-              <Search className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
-              <input
-                type="text"
-                placeholder={t("classes-tutor.search.placeholder")}
-                className="w-[40vh] py-3 pl-10 pr-4 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                value={searchQuery}
-                onChange={handleSearchChange}
-              />
+
+            {/* Content Section */}
+            <div className="min-w-0">
+              {loading ? (
+                <div className="flex items-center justify-center min-h-[60vh]">
+                  <ClipLoader color="#14B82C" size={50} />
+                </div>
+              ) : error ? (
+                <p className="text-center text-red-500">{error}</p>
+              ) : filteredClasses.length === 0 ? (
+                <div className="flex items-center justify-center min-h-[60vh]">
+                  <EmptyState
+                    message={
+                      searchQuery
+                        ? t("classes-tutor.states.empty.no-results")
+                        : t("classes-tutor.states.empty.no-classes")
+                    }
+                  />
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {filteredClasses.map((classItem) => (
+                    <ClassCardTutor
+                      key={classItem.id}
+                      {...classItem}
+                      classId={classItem.id}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           </div>
-
-          {loading ? (
-            <div className="flex items-center justify-center min-h-[70vh]">
-              <ClipLoader color="#14B82C" size={50} />
-            </div>
-          ) : error ? (
-            <p className="text-center text-red-500">{error}</p>
-          ) : filteredClasses.length === 0 ? (
-            <div className="flex items-center justify-center min-h-[70vh]">
-              <EmptyState
-                message={
-                  searchQuery
-                    ? t("classes-tutor.states.empty.no-results")
-                    : t("classes-tutor.states.empty.no-classes")
-                }
-              />
-            </div>
-          ) : (
-            <div className="flex flex-wrap gap-4">
-              {filteredClasses.map((classItem) => (
-                <ClassCardTutor
-                  key={classItem.id}
-                  {...classItem}
-                  classId={classItem.id}
-                />
-              ))}
-            </div>
-          )}
         </div>
       </div>
+
       <ClassTypeModal
         isOpen={showClassTypeModal}
         onClose={() => setShowClassTypeModal(false)}

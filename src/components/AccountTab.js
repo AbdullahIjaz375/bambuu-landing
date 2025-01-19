@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   getAuth,
   updatePassword,
@@ -11,12 +11,15 @@ import { ChevronLeft } from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useTranslation } from "react-i18next";
+import PlansModal from "./PlansModal";
 
 Modal.setAppElement("#root");
 
 const AccountTab = () => {
   const { user } = useAuth();
   const { t } = useTranslation();
+  const [isPlansModalOpen, setIsPlansModalOpen] = useState(false);
+  const [userType, setUserType] = useState(null);
 
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [passwordForm, setPasswordForm] = useState({
@@ -39,6 +42,10 @@ const AccountTab = () => {
       [name]: value,
     }));
   };
+  useEffect(() => {
+    const sessionUser = JSON.parse(sessionStorage.getItem("user") || "{}");
+    setUserType(sessionUser.userType);
+  }, []);
 
   const togglePasswordVisibility = (field) => {
     setShowPasswords((prev) => ({
@@ -131,14 +138,20 @@ const AccountTab = () => {
           </div>
           <ChevronLeft className="w-5 h-5 rotate-180" />
         </div>
-
-        <div className="flex items-center justify-between p-4 text-lg bg-white border rounded-full">
-          <div className="flex items-center gap-3 text-black">
-            <img alt="crown" src="/svgs/crown.svg" className="w-6 h-6" />
-            <span>{t("account.manageMembership")}</span>
+        {userType === "student" && (
+          <div
+            className="flex items-center justify-between p-4 text-lg bg-white border rounded-full"
+            onClick={() => {
+              setIsPlansModalOpen(true);
+            }}
+          >
+            <div className="flex items-center gap-3 text-black">
+              <img alt="crown" src="/svgs/crown.svg" className="w-6 h-6" />
+              <span>{t("account.manageMembership")}</span>
+            </div>
+            <ChevronLeft className="w-5 h-5 rotate-180" />
           </div>
-          <ChevronLeft className="w-5 h-5 rotate-180" />
-        </div>
+        )}
       </div>
 
       <Modal
@@ -363,6 +376,10 @@ const AccountTab = () => {
           </div>
         </form>
       </Modal>
+      <PlansModal
+        isOpen={isPlansModalOpen}
+        onClose={() => setIsPlansModalOpen(false)}
+      />
     </>
   );
 };

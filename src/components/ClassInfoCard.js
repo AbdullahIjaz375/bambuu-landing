@@ -56,23 +56,27 @@ const ClassInfoCard = ({ classData, groupTutor }) => {
     }
   }, [classData]);
 
+  const baseCardClass =
+    "flex flex-row items-center w-full max-w-md gap-3 p-2 bg-white border rounded-2xl";
+  const imgClass = "object-cover rounded-md";
+
   if (classData?.classType?.includes("Group Premium") && groupTutor) {
     return (
-      <div className="flex flex-row items-center w-full max-w-lg gap-4 p-2 bg-white border border-green-500 rounded-2xl">
+      <div className={`${baseCardClass} border-green-500`}>
         <img
           alt={`${groupTutor.name}'s profile`}
-          src={groupTutor.photoUrl || "/api/placeholder/112/112"}
-          className="object-cover h-28 w-28 rounded-xl"
+          src={groupTutor.photoUrl || "/api/placeholder/80/80"}
+          className={`${imgClass} w-20 h-20`}
         />
-        <div className="flex flex-col items-start flex-1 gap-2">
-          <h1 className="text-xl font-semibold">{groupTutor.name}</h1>
-          <p className="text-sm text-left text-gray-600">
+        <div className="flex flex-col items-start flex-1 gap-1">
+          <h1 className="text-lg font-medium">{groupTutor.name}</h1>
+          <p className="text-xs text-left text-gray-600">
             {groupTutor?.bio
               ? groupTutor.bio.split(" ").slice(0, 12).join(" ") + "..."
               : ""}
           </p>
-          <div className="flex items-center gap-6">
-            <div className="flex flex-col gap-1 text-left">
+          <div className="flex items-center gap-4 text-xs">
+            <div className="flex flex-col gap-0.5">
               <span className="text-gray-700">
                 {groupTutor.teachingLanguage} (Teaching)
               </span>
@@ -80,13 +84,13 @@ const ClassInfoCard = ({ classData, groupTutor }) => {
                 {groupTutor.nativeLanguage} (Native)
               </span>
             </div>
-            <div className="flex flex-col gap-1">
-              <div className="flex flex-row items-center gap-1">
-                <MapPin size={16} className="text-gray-500" />
+            <div className="flex flex-col gap-0.5">
+              <div className="flex items-center gap-1">
+                <MapPin size={12} className="text-gray-500" />
                 <span className="text-gray-700">{groupTutor.country}</span>
               </div>
-              <div className="flex flex-row items-center gap-1">
-                <Users size={16} className="text-gray-500" />
+              <div className="flex items-center gap-1">
+                <Users size={12} className="text-gray-500" />
                 <span className="text-gray-700">200k</span>
               </div>
             </div>
@@ -98,21 +102,21 @@ const ClassInfoCard = ({ classData, groupTutor }) => {
 
   if (classData?.classType?.includes("Individual Premium") && tutorInfo) {
     return (
-      <div className="flex flex-row items-center w-full max-w-lg gap-4 p-2 bg-white border border-green-500 rounded-2xl">
+      <div className={`${baseCardClass} border-green-500`}>
         <img
           alt={`${tutorInfo.name}'s profile`}
-          src={tutorInfo.photoUrl || "/api/placeholder/112/112"}
-          className="object-cover w-28 h-28 rounded-xl"
+          src={tutorInfo.photoUrl || "/api/placeholder/80/80"}
+          className={`${imgClass} w-20 h-20`}
         />
-        <div className="flex flex-col items-start flex-1 gap-2">
-          <h1 className="text-xl font-semibold">{tutorInfo.name}</h1>
-          <p className="text-sm text-left text-gray-600">
+        <div className="flex flex-col items-start flex-1 gap-1">
+          <h1 className="text-lg font-medium">{tutorInfo.name}</h1>
+          <p className="text-xs text-left text-gray-600">
             {tutorInfo?.bio
               ? tutorInfo.bio.split(" ").slice(0, 12).join(" ") + "..."
               : ""}
           </p>
-          <div className="flex items-center gap-6">
-            <div className="flex flex-col gap-1 text-left">
+          <div className="flex items-center gap-4 text-xs">
+            <div className="flex flex-col gap-0.5">
               <span className="text-gray-700">
                 {tutorInfo.teachingLanguage} (Teaching)
               </span>
@@ -120,13 +124,13 @@ const ClassInfoCard = ({ classData, groupTutor }) => {
                 {tutorInfo.nativeLanguage} (Native)
               </span>
             </div>
-            <div className="flex flex-col gap-1">
-              <div className="flex flex-row items-center gap-1">
-                <MapPin size={16} className="text-gray-500" />
+            <div className="flex flex-col gap-0.5">
+              <div className="flex items-center gap-1">
+                <MapPin size={12} className="text-gray-500" />
                 <span className="text-gray-700">{tutorInfo.country}</span>
               </div>
-              <div className="flex flex-row items-center gap-1">
-                <Users size={16} className="text-gray-500" />
+              <div className="flex items-center gap-1">
+                <Users size={12} className="text-gray-500" />
                 <span className="text-gray-700">200k</span>
               </div>
             </div>
@@ -138,9 +142,9 @@ const ClassInfoCard = ({ classData, groupTutor }) => {
 
   if (groupInfo) {
     return (
-      <div className="flex flex-row items-center w-full max-w-lg gap-4 p-2 bg-white border border-yellow-500 rounded-2xl">
+      <div className={`${baseCardClass} border-yellow-500`}>
         <img
-          className="object-cover w-16 h-16 rounded-xl"
+          className={`${imgClass} w-12 h-12`}
           src={
             classData.language === "English"
               ? "/svgs/us-big.svg"
@@ -148,10 +152,10 @@ const ClassInfoCard = ({ classData, groupTutor }) => {
           }
           alt={classData.language === "English" ? "US Flag" : "Spain Flag"}
         />
-        <div className="flex flex-col items-start flex-1 gap-2">
-          <h1 className="text-xl font-semibold">{groupInfo.groupName}</h1>
-          <div className="flex items-center gap-6">
-            <div className="flex flex-row items-center space-x-1">
+        <div className="flex flex-col items-start flex-1 gap-1">
+          <h1 className="text-lg font-medium">{groupInfo.groupName}</h1>
+          <div className="flex items-center gap-4 text-xs">
+            <div className="flex items-center gap-1">
               <img
                 src={
                   classData.language === "English"
@@ -161,20 +165,20 @@ const ClassInfoCard = ({ classData, groupTutor }) => {
                 alt={
                   classData.language === "English" ? "US Flag" : "Spain Flag"
                 }
-                className="w-4"
+                className="w-3"
               />
-              <span className="text-md">{classData.language}</span>
+              <span>{classData.language}</span>
             </div>
             <div className="flex items-center gap-1">
               <img
                 src={adminInfo?.photoUrl || "/api/placeholder/24/24"}
                 alt={`${classData.adminName}'s profile`}
-                className="w-5 h-5 rounded-full"
+                className="w-4 h-4 rounded-full"
               />
-              <span className="text-sm">{classData.adminName} (Admin)</span>
+              <span className="text-xs ">{classData.adminName}</span>
             </div>
-            <div className="flex flex-row items-center gap-1">
-              <Users size={16} className="text-gray-500" />
+            <div className="flex items-center gap-1">
+              <Users size={12} className="text-gray-500" />
               <span className="text-gray-700">2k+</span>
             </div>
           </div>
