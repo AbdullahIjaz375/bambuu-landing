@@ -994,7 +994,7 @@ const GroupDetailsUser = ({ onClose }) => {
       <Modal
         isOpen={isAddClassModalOpen}
         onRequestClose={() => setAddClassModalOpen(false)}
-        className="w-[1000px] p-8 mx-auto bg-white rounded-3xl outline-none font-urbanist"
+        className="max-w-[90vw] w-[1000px] max-h-[90vh] p-4 md:p-6 lg:p-8 mx-auto bg-white rounded-3xl outline-none font-urbanist overflow-y-auto scrollbar-hide"
         overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
       >
         <div className="relative">

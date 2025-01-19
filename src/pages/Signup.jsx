@@ -691,22 +691,23 @@ const Signup = () => {
 
   if (isEmailVerified && !hasProfile) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-white">
-        <div className="w-full max-w-md p-8 bg-white  border border-[#e7e7e7] rounded-3xl">
-          <div className="space-y-4">
+      <div className="flex items-center justify-center min-h-screen p-4 bg-white">
+        <div className="w-full max-w-md p-6 my-4 bg-white border border-gray-200 rounded-3xl">
+          <div className="space-y-3">
             <div className="flex justify-center">
               <img alt="babuu" src="/svgs/signup.svg" />
             </div>
 
-            <h2 className="text-3xl font-bold text-center">Complete Profile</h2>
-            <p className="text-center text-gray-600">
+            <h2 className="text-2xl font-bold text-center md:text-3xl">
+              Complete Profile
+            </h2>
+            <p className="text-sm text-center text-gray-600 md:text-base">
               Add your personal details to gets started.
             </p>
 
-            <form onSubmit={handleProfileSubmit} className="mt-6 space-y-6">
+            <form onSubmit={handleProfileSubmit} className="space-y-4">
               <div className="space-y-1">
                 <label className="block text-sm font-medium">Name</label>
-
                 <input
                   type="text"
                   value={profileData.name}
@@ -760,7 +761,7 @@ const Signup = () => {
                 >
                   <option value="">Select language you want to learn</option>
                   {TEACHINGLANGUAGES.map((lang) => (
-                    <option key={lang.code} value={lang}>
+                    <option key={lang} value={lang}>
                       {lang}
                     </option>
                   ))}
@@ -772,14 +773,14 @@ const Signup = () => {
                   Your Proficiency in {profileData.learningLanguage || "[x]"}
                 </label>
                 <div className="flex gap-2">
-                  {["Normal", "Intermediate", "Advanced"].map((level) => (
+                  {["Beginner", "Intermediate", "Advanced"].map((level) => (
                     <button
                       key={level}
                       type="button"
                       onClick={() =>
                         setProfileData({ ...profileData, proficiency: level })
                       }
-                      className={`flex-1 py-2 px-4 rounded-full border ${
+                      className={`flex-1 py-1.5 px-2 text-sm rounded-full border ${
                         profileData.proficiency === level
                           ? "border-green-500 bg-green-50 text-green-600"
                           : "border-gray-200 text-gray-600"
@@ -793,14 +794,10 @@ const Signup = () => {
 
               <div className="space-y-1">
                 <label className="block text-sm font-medium">Country</label>
-
                 <select
                   value={profileData.country}
                   onChange={(e) =>
-                    setProfileData({
-                      ...profileData,
-                      country: e.target.value,
-                    })
+                    setProfileData({ ...profileData, country: e.target.value })
                   }
                   className="w-full px-4 py-2 text-gray-600 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
                   required
@@ -816,7 +813,7 @@ const Signup = () => {
 
               <button
                 type="submit"
-                className="w-full py-3 mt-8 text-black bg-[#14B82C] border border-black rounded-full  focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                className="w-full py-2.5 mt-4 text-black bg-[#14B82C] border border-black rounded-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
               >
                 Submit
               </button>

@@ -4,7 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import { doc, updateDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "../../firebaseConfig";
-import { ImagePlus, ArrowLeft } from "lucide-react";
+import { ImagePlus, ArrowLeft, Camera } from "lucide-react";
 
 import Sidebar from "../../components/Sidebar";
 
@@ -342,6 +342,9 @@ const TutorEditProfile = () => {
                     ) : (
                       <ImagePlus className="w-8 h-8 text-gray-400" />
                     )}
+                    <div className="absolute right-0 p-1 bg-black rounded-full shadow-lg bottom-1">
+                      <img src="/svgs/camera.svg" />
+                    </div>
                     <input
                       id="profileImage"
                       type="file"

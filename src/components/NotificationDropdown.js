@@ -140,11 +140,13 @@ const NotificationDropdown = () => {
         onClick={() => setIsOpen(!isOpen)}
         className="rounded-full hover:bg-gray-100 border border-[#ffbf00] p-2 relative"
       >
-        <Bell className="w-6 h-6" />
+        <img
+          alt="bammbuu"
+          src="/svgs/notification-bell.svg"
+          className="w-[31px]"
+        />
         {unreadCount > 0 && (
-          <span className="absolute flex items-center justify-center w-5 h-5 text-xs text-white bg-red-500 rounded-full -top-1 -right-1">
-            {unreadCount}
-          </span>
+          <span className="absolute w-2 h-2 bg-amber-400 rounded-full top-2 right-1/2 translate-x-[6px]" />
         )}
       </button>
 

@@ -139,7 +139,7 @@ const InstructorProfileUser = () => {
     const enrolledClasses = user?.enrolledClasses || [];
 
     return (
-      <div className="flex flex-wrap items-center gap-4 p-4 ">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
         {classes.map((classItem) => {
           const isEnrolled = enrolledClasses.includes(classItem.classId);
 
@@ -225,105 +225,110 @@ const InstructorProfileUser = () => {
 
   return (
     <div className="flex h-screen">
-      <div className="flex flex-1 m-6 border rounded-3xl">
-        <div className="flex flex-col w-full p-6 mx-4 bg-white rounded-3xl">
+      <div className="flex flex-1 m-2 border sm:m-6 rounded-3xl">
+        <div className="flex flex-col w-full p-3 mx-2 bg-white sm:p-6 sm:mx-4 rounded-3xl">
           {/* Header */}
           <div className="flex items-center justify-between pb-4 mb-6 border-b">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
               <button
-                className="p-3 bg-gray-100 rounded-full"
+                className="p-2 bg-gray-100 rounded-full sm:p-3"
                 onClick={handleBack}
               >
-                <ArrowLeft size="30" />
+                <ArrowLeft size={24} />
               </button>
-              <h1 className="text-4xl font-semibold">Instructor Profile</h1>
+              <h1 className="text-2xl font-semibold sm:text-4xl">
+                Instructor Profile
+              </h1>
             </div>
           </div>
 
           {/* Content Container */}
-          <div className="flex flex-1 min-h-0 gap-2">
-            {" "}
-            {/* min-h-0 is crucial for nested flex scroll */}
-            {/* Left sidebar - Fixed height */}
-            <div className="w-1/4 p-6 bg-[#E6FDE9] rounded-3xl shrink-0">
+          <div className="flex flex-col flex-1 min-h-0 gap-4 lg:flex-row">
+            {/* Left sidebar - Now responsive */}
+            <div className="w-full lg:w-1/4 p-4 sm:p-6 bg-[#E6FDE9] rounded-3xl shrink-0 overflow-y-auto ">
               <div className="flex flex-col items-center justify-between h-full text-center">
-                <div className="flex flex-col items-center text-center">
+                <div className="flex flex-col items-center w-full text-center">
                   <img
                     src={tutor.photoUrl || "/api/placeholder/128/128"}
                     alt={tutor.name}
-                    className="w-32 h-32 mb-4 rounded-full"
+                    className="w-24 h-24 mb-4 rounded-full sm:w-32 sm:h-32"
                   />
-                  <h3 className="mb-2 text-2xl font-medium">{tutor.name}</h3>
+                  <h3 className="mb-2 text-xl font-medium sm:text-2xl">
+                    {tutor.name}
+                  </h3>
 
-                  <div className="flex flex-row items-center justify-center my-4 space-x-16">
+                  <div className="flex flex-col items-center justify-center my-4 space-y-4 sm:flex-row sm:space-y-0 sm:space-x-8">
                     <div className="flex flex-col items-center justify-center space-y-2">
-                      <div className="flex items-center gap-1 ">
+                      <div className="flex items-center gap-1">
                         <img
-                          alt="bammbuu"
+                          alt="language"
                           src="/svgs/language.svg"
-                          className="h-5"
+                          className="h-4 sm:h-5"
                         />
-                        <span className="text-sm">
-                          <span className="font-semibold">Native :</span>
+                        <span className="text-xs sm:text-sm">
+                          <span className="font-semibold">Native:</span>{" "}
                           {tutor.nativeLanguage}
                         </span>
                       </div>
-                      <div className="flex items-center gap-1 ">
+                      <div className="flex items-center gap-1">
                         <img
-                          alt="bammbuu"
+                          alt="location"
                           src="/svgs/location.svg"
-                          className="h-5"
+                          className="h-4 sm:h-5"
                         />
-                        <span className="text-sm">
-                          <span className="font-semibold">From :</span>{" "}
+                        <span className="text-xs sm:text-sm">
+                          <span className="font-semibold">From:</span>{" "}
                           {tutor.country}
                         </span>
                       </div>
                     </div>
                     <div className="flex flex-col items-center justify-center space-y-2">
-                      <div className="flex items-center gap-1 ">
+                      <div className="flex items-center gap-1">
                         <img
-                          alt="bammbuu"
+                          alt="teaching"
                           src="/svgs/language.svg"
-                          className="h-5"
+                          className="h-4 sm:h-5"
                         />
-                        <span className="text-sm">
-                          <span className="font-semibold">Teacing :</span>
+                        <span className="text-xs sm:text-sm">
+                          <span className="font-semibold">Teaching:</span>{" "}
                           {tutor.teachingLanguage}
                         </span>
                       </div>
-                      <div className="flex items-center gap-1 ">
+                      <div className="flex items-center gap-1">
                         <img
-                          alt="bammbuu"
+                          alt="students"
                           src="/svgs/users.svg"
-                          className="h-5"
+                          className="h-4 sm:h-5"
                         />
-                        <span className="text-sm">
-                          <span className="font-semibold">Students :</span> 200k
+                        <span className="text-xs sm:text-sm">
+                          <span className="font-semibold">Students:</span> 200k
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  <p className="mb-6 text-gray-600">{tutor.bio}</p>
+                  <div className="px-2 mb-6 overflow-y-auto max-h-40 scrollbar-hide">
+                    <p className="text-sm text-gray-600">{tutor.bio}</p>
+                  </div>
                 </div>
 
-                <div className="w-full">
+                <div className="w-full mt-4">
                   <button
                     onClick={sendMessageClicked}
-                    className="w-full px-4 py-2 mb-2 text-black border border-black rounded-full bg-[#fffbc5]"
+                    className="w-full px-4 py-2 mb-2 text-black border border-black rounded-full bg-[#fffbc5] hover:bg-[#fff9a0]"
                   >
                     Send Message
                   </button>
                 </div>
               </div>
             </div>
+
             {/* Main content - Scrollable */}
             <div className="flex flex-col flex-1 min-h-0">
-              {" "}
-              {/* min-h-0 enables proper flex child height */}
-              <h2 className="ml-4 text-2xl font-semibold">Classes</h2>
-              <div className="flex-1 pr-4 overflow-y-auto scrollbar-hide">
+              <h2 className="ml-4 text-xl font-semibold sm:text-2xl">
+                Classes
+              </h2>
+              <div className="flex-1 pr-2 overflow-y-auto sm:pr-4 scrollbar-hide">
                 {renderClasses()}
               </div>
             </div>

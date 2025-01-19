@@ -254,7 +254,11 @@ const LearnUser = () => {
                   : "You have no upcoming classes"}
               </p>
             </div>
-            <div className="flex items-center flex-shrink-0 gap-4">
+            <div className="flex items-center flex-shrink-0 gap-2">
+              <div className="flex flex-col items-center justify-center rounded-full bg-[#E6FDE9]  border border-[#14B82C] p-2 ">
+                <h1 className="text-xs font-semibold">{user.credits}</h1>
+                <h1 className="text-[10px]">Credits</h1>
+              </div>
               <NotificationDropdown />
             </div>
           </div>

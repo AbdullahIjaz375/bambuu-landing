@@ -602,30 +602,31 @@ const UserEditProfile = () => {
             {/* Scrollable Content */}
             <div className="overflow-y-auto">
               <div className="max-w-3xl">
-                <div className="mb-8">
-                  <div
-                    className="relative flex items-center justify-center w-32 h-32 mb-4 bg-gray-100 rounded-full cursor-pointer hover:bg-gray-200"
-                    onClick={() =>
-                      document.getElementById("profileImage").click()
-                    }
-                  >
-                    {selectedImage ? (
-                      <img
-                        src={selectedImage}
-                        alt="Profile"
-                        className="object-cover w-full h-full rounded-full"
-                      />
-                    ) : (
-                      <ImagePlus className="w-8 h-8 text-gray-400" />
-                    )}
-                    <input
-                      id="profileImage"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                      className="hidden"
+                <div
+                  className="relative flex items-center justify-center w-32 h-32 mb-4 bg-gray-100 rounded-full cursor-pointer hover:bg-gray-200"
+                  onClick={() =>
+                    document.getElementById("profileImage").click()
+                  }
+                >
+                  {selectedImage ? (
+                    <img
+                      src={selectedImage}
+                      alt="Profile"
+                      className="object-cover w-full h-full rounded-full"
                     />
+                  ) : (
+                    <ImagePlus className="w-8 h-8 text-gray-400" />
+                  )}
+                  <div className="absolute right-0 p-1 bg-black rounded-full shadow-lg bottom-1">
+                    <img src="/svgs/camera.svg" />
                   </div>
+                  <input
+                    id="profileImage"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
                 </div>
 
                 <div className="space-y-6">

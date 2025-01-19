@@ -269,324 +269,347 @@ const AddClassTutor = () => {
   }, [classData, classImage]);
 
   return (
-    <div className="flex min-h-screen bg-white">
-      <Sidebar user={user} />
-
-      <div className="flex-1 p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl ml-[17rem] m-2">
-        <div className="flex items-center justify-between pb-4 mb-6 border-b">
-          <div className="flex items-center gap-4">
-            <button
-              className="p-3 bg-gray-100 rounded-full"
-              onClick={() => navigate(-1)}
-            >
-              <ArrowLeft size="30" />
-            </button>
-            <h1 className="text-4xl font-semibold">Create New Class</h1>
-          </div>
-        </div>
-
-        <div className="max-w-6xl">
-          <div className="space-y-6">
-            {/* Image Upload */}
-            <div className="flex justify-start mb-8">
-              <div
-                className="relative flex items-center justify-center border border-gray-300 border-dashed rounded-full cursor-pointer w-28 h-28 bg-gray-50"
-                onClick={() => document.getElementById("classImage").click()}
-              >
-                {classPreviewImage ? (
-                  <img
-                    src={classPreviewImage}
-                    alt="Preview"
-                    className="object-cover w-full h-full rounded-full"
-                  />
-                ) : (
-                  <Camera size={24} className="text-gray-400" />
-                )}
-              </div>
-              <input
-                id="classImage"
-                type="file"
-                accept="image/*"
-                onChange={handleClassImageChange}
-                className="hidden"
-              />
-            </div>
-
-            <div className="flex flex-row items-start justify-between space-x-4">
-              <div>
-                <label className="text-sm font-medium text-gray-700">
-                  Class name
-                </label>
-                <input
-                  type="text"
-                  placeholder="Class name"
-                  value={classData.className}
-                  onChange={(e) =>
-                    handleClassDataChange("className", e.target.value)
-                  }
-                  className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
-                />
-              </div>
-
-              {/* Language */}
-              <div>
-                <label className="text-sm font-medium text-gray-700">
-                  Class Language
-                </label>
-                <div className="flex gap-2 mt-1">
+    <div className="flex h-screen bg-white">
+      <div className="flex-shrink-0 w-64 h-full">
+        <Sidebar user={user} />
+      </div>
+      <div className="flex-1 overflow-x-auto min-w-[calc(100%-16rem)] h-full">
+        <div className="flex flex-col h-full">
+          <div className="flex-1 p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl m-2">
+            {/* Fixed Header Section */}
+            <div className="sticky top-0 z-10 bg-white">
+              <div className="flex items-center justify-between pb-4 mb-6 border-b">
+                <div className="flex items-center gap-4">
                   <button
-                    onClick={() => handleClassDataChange("language", "English")}
-                    className={`px-4 py-2 rounded-full text-sm ${
-                      classData.language === "English"
-                        ? "bg-yellow-400 border border-yellow-500"
-                        : "border border-gray-200"
-                    }`}
+                    className="p-3 bg-gray-100 rounded-full"
+                    onClick={() => navigate(-1)}
                   >
-                    English
+                    <ArrowLeft size="30" />
                   </button>
-                  <button
-                    onClick={() => handleClassDataChange("language", "Spanish")}
-                    className={`px-4 py-2 rounded-full text-sm ${
-                      classData.language === "Spanish"
-                        ? "bg-yellow-400 border border-yellow-500"
-                        : "border border-gray-200"
-                    }`}
-                  >
-                    Spanish
-                  </button>
-                  <button
-                    onClick={() =>
-                      handleClassDataChange(
-                        "language",
-                        "English-Spanish Exchange"
-                      )
-                    }
-                    className={`px-4 py-2 rounded-full text-sm ${
-                      classData.language === "English-Spanish Exchange"
-                        ? "bg-yellow-400 border border-yellow-500"
-                        : "border border-gray-200"
-                    }`}
-                  >
-                    English-Spanish Exchange
-                  </button>
+                  <h1 className="text-4xl font-semibold">Create New Class</h1>
                 </div>
               </div>
             </div>
-            {/* Description */}
-            <div>
-              <label className="text-sm font-medium text-gray-700">
-                Class Description
-              </label>
-              <textarea
-                placeholder="Enter short description of class (max 200 letter)"
-                value={classData.classDescription}
-                onChange={(e) =>
-                  handleClassDataChange("classDescription", e.target.value)
-                }
-                maxLength={200}
-                rows={3}
-                className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
-              />
-            </div>
-            <div className="flex flex-row items-start justify-between space-x-4">
-              {/* Class Level */}
-              <div>
-                <label className="text-sm font-medium text-gray-700">
-                  Class Level
-                </label>
-                <div className="flex gap-2 mt-1">
-                  {["Beginner", "Intermediate", "Advanced"].map((level) => (
-                    <button
-                      key={level}
+            <div className="overflow-y-auto">
+              <div className="max-w-6xl">
+                <div className="space-y-6">
+                  {/* Image Upload */}
+                  <div className="flex justify-start mb-8">
+                    <div
+                      className="relative flex items-center justify-center border border-gray-300 border-dashed rounded-full cursor-pointer w-28 h-28 bg-gray-50"
                       onClick={() =>
-                        handleClassDataChange("languageLevel", level)
+                        document.getElementById("classImage").click()
                       }
-                      className={`px-4 py-2 rounded-full text-sm ${
-                        classData.languageLevel === level
-                          ? "bg-yellow-400 border border-yellow-500"
-                          : "border border-gray-200"
-                      }`}
                     >
-                      {level}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Class Type */}
-              <div>
-                <label className="text-sm font-medium text-gray-700">
-                  Class Recurrence Type
-                </label>
-                <div className="flex flex-wrap gap-2 mt-1">
-                  {["None", "One-time", "Daily", "Weekly", "Monthly"].map(
-                    (type) => (
-                      <button
-                        key={type}
-                        onClick={() => handleClassTypeSelect(type)}
-                        className={`px-4 py-2 rounded-full text-sm ${
-                          classData.recurrenceTypes.includes(type)
-                            ? "bg-yellow-400 border border-yellow-500"
-                            : "border border-gray-200"
-                        }`}
-                      >
-                        {type}
-                      </button>
-                    )
-                  )}
-                </div>
-              </div>
-            </div>
-            <div className="flex flex-row items-start justify-between space-x-4">
-              {/* Class Location */}
-              <div className="flex flex-row items-center space-x-10">
-                <div>
-                  <label className="text-sm font-medium text-gray-700">
-                    Class Location
-                  </label>
-                  <div className="flex gap-2 mt-1">
-                    <button
-                      onClick={() =>
-                        handleClassDataChange("classLocation", "Physical")
-                      }
-                      className={`px-4 py-2 rounded-full text-sm ${
-                        classData.classLocation === "Physical"
-                          ? "bg-yellow-400 border border-yellow-500"
-                          : "border border-gray-200"
-                      }`}
-                    >
-                      Physical
-                    </button>
-                    <button
-                      onClick={() =>
-                        handleClassDataChange("classLocation", "Virtual")
-                      }
-                      className={`px-4 py-2 rounded-full text-sm ${
-                        classData.classLocation === "Virtual"
-                          ? "bg-yellow-400 border border-yellow-500"
-                          : "border border-gray-200"
-                      }`}
-                    >
-                      Virtual
-                    </button>
+                      {classPreviewImage ? (
+                        <img
+                          src={classPreviewImage}
+                          alt="Preview"
+                          className="object-cover w-full h-full rounded-full"
+                        />
+                      ) : (
+                        <Camera size={24} className="text-gray-400" />
+                      )}
+                    </div>
+                    <input
+                      id="classImage"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleClassImageChange}
+                      className="hidden"
+                    />
                   </div>
-                </div>
-                {/* Class Address (shown only when Physical is selected) */}
-                {classData.classLocation === "Physical" && (
+
+                  <div className="flex flex-row items-start justify-between space-x-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">
+                        Class name
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Class name"
+                        value={classData.className}
+                        onChange={(e) =>
+                          handleClassDataChange("className", e.target.value)
+                        }
+                        className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                      />
+                    </div>
+
+                    {/* Language */}
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">
+                        Class Language
+                      </label>
+                      <div className="flex gap-2 mt-1">
+                        <button
+                          onClick={() =>
+                            handleClassDataChange("language", "English")
+                          }
+                          className={`px-4 py-2 rounded-full text-sm ${
+                            classData.language === "English"
+                              ? "bg-yellow-400 border border-yellow-500"
+                              : "border border-gray-200"
+                          }`}
+                        >
+                          English
+                        </button>
+                        <button
+                          onClick={() =>
+                            handleClassDataChange("language", "Spanish")
+                          }
+                          className={`px-4 py-2 rounded-full text-sm ${
+                            classData.language === "Spanish"
+                              ? "bg-yellow-400 border border-yellow-500"
+                              : "border border-gray-200"
+                          }`}
+                        >
+                          Spanish
+                        </button>
+                        <button
+                          onClick={() =>
+                            handleClassDataChange(
+                              "language",
+                              "English-Spanish Exchange"
+                            )
+                          }
+                          className={`px-4 py-2 rounded-full text-sm ${
+                            classData.language === "English-Spanish Exchange"
+                              ? "bg-yellow-400 border border-yellow-500"
+                              : "border border-gray-200"
+                          }`}
+                        >
+                          English-Spanish Exchange
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  {/* Description */}
                   <div>
                     <label className="text-sm font-medium text-gray-700">
-                      Class Address
+                      Class Description
                     </label>
-                    <input
-                      type="text"
-                      placeholder="Enter physical class address"
-                      value={classData.classAddress}
+                    <textarea
+                      placeholder="Enter short description of class (max 200 letter)"
+                      value={classData.classDescription}
                       onChange={(e) =>
-                        handleClassDataChange("classAddress", e.target.value)
+                        handleClassDataChange(
+                          "classDescription",
+                          e.target.value
+                        )
                       }
+                      maxLength={200}
+                      rows={3}
                       className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
                     />
                   </div>
-                )}
-              </div>
-            </div>
+                  <div className="flex flex-row items-start justify-between space-x-4">
+                    {/* Class Level */}
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">
+                        Class Level
+                      </label>
+                      <div className="flex gap-2 mt-1">
+                        {["Beginner", "Intermediate", "Advanced"].map(
+                          (level) => (
+                            <button
+                              key={level}
+                              onClick={() =>
+                                handleClassDataChange("languageLevel", level)
+                              }
+                              className={`px-4 py-2 rounded-full text-sm ${
+                                classData.languageLevel === level
+                                  ? "bg-yellow-400 border border-yellow-500"
+                                  : "border border-gray-200"
+                              }`}
+                            >
+                              {level}
+                            </button>
+                          )
+                        )}
+                      </div>
+                    </div>
 
-            <div className="flex flex-row items-start justify-between space-x-4">
-              {/* Available Slots */}
-              <div>
-                <label className="text-sm font-medium text-gray-700">
-                  Available Slots
-                </label>
-                <input
-                  type="number"
-                  placeholder="Enter slots number"
-                  value={classData.availableSpots}
-                  onChange={(e) => {
-                    const value = parseInt(e.target.value);
-                    if (
-                      classData.classType === "Individual Premium" &&
-                      value > 1
-                    ) {
-                      handleClassDataChange("availableSpots", 1);
-                    } else {
-                      handleClassDataChange("availableSpots", value);
-                    }
-                  }}
-                  className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
-                />
-              </div>
+                    {/* Class Type */}
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">
+                        Class Recurrence Type
+                      </label>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {["None", "One-time", "Daily", "Weekly", "Monthly"].map(
+                          (type) => (
+                            <button
+                              key={type}
+                              onClick={() => handleClassTypeSelect(type)}
+                              className={`px-4 py-2 rounded-full text-sm ${
+                                classData.recurrenceTypes.includes(type)
+                                  ? "bg-yellow-400 border border-yellow-500"
+                                  : "border border-gray-200"
+                              }`}
+                            >
+                              {type}
+                            </button>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-row items-start justify-between space-x-4">
+                    {/* Class Location */}
+                    <div className="flex flex-row items-center space-x-10">
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">
+                          Class Location
+                        </label>
+                        <div className="flex gap-2 mt-1">
+                          <button
+                            onClick={() =>
+                              handleClassDataChange("classLocation", "Physical")
+                            }
+                            className={`px-4 py-2 rounded-full text-sm ${
+                              classData.classLocation === "Physical"
+                                ? "bg-yellow-400 border border-yellow-500"
+                                : "border border-gray-200"
+                            }`}
+                          >
+                            Physical
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleClassDataChange("classLocation", "Virtual")
+                            }
+                            className={`px-4 py-2 rounded-full text-sm ${
+                              classData.classLocation === "Virtual"
+                                ? "bg-yellow-400 border border-yellow-500"
+                                : "border border-gray-200"
+                            }`}
+                          >
+                            Virtual
+                          </button>
+                        </div>
+                      </div>
+                      {/* Class Address (shown only when Physical is selected) */}
+                      {classData.classLocation === "Physical" && (
+                        <div>
+                          <label className="text-sm font-medium text-gray-700">
+                            Class Address
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="Enter physical class address"
+                            value={classData.classAddress}
+                            onChange={(e) =>
+                              handleClassDataChange(
+                                "classAddress",
+                                e.target.value
+                              )
+                            }
+                            className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
 
-              {/* Class Duration */}
-              <div>
-                <label className="text-sm font-medium text-gray-700">
-                  Class Duration
-                </label>
-                <div className="flex gap-2 mt-1">
-                  {[30, 60, 90, 120].map((duration) => (
-                    <button
-                      key={duration}
-                      onClick={() =>
-                        handleClassDataChange("classDuration", duration)
-                      }
-                      className={`px-4 py-2 rounded-full text-sm ${
-                        classData.classDuration === duration
-                          ? "bg-yellow-400 border border-yellow-500"
-                          : "border border-gray-200"
-                      }`}
-                    >
-                      {duration} min
-                    </button>
-                  ))}
+                  <div className="flex flex-row items-start justify-between space-x-4">
+                    {/* Available Slots */}
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">
+                        Available Slots
+                      </label>
+                      <input
+                        type="number"
+                        placeholder="Enter slots number"
+                        value={classData.availableSpots}
+                        onChange={(e) => {
+                          const value = parseInt(e.target.value);
+                          if (
+                            classData.classType === "Individual Premium" &&
+                            value > 1
+                          ) {
+                            handleClassDataChange("availableSpots", 1);
+                          } else {
+                            handleClassDataChange("availableSpots", value);
+                          }
+                        }}
+                        className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                      />
+                    </div>
+
+                    {/* Class Duration */}
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">
+                        Class Duration
+                      </label>
+                      <div className="flex gap-2 mt-1">
+                        {[30, 60, 90, 120].map((duration) => (
+                          <button
+                            key={duration}
+                            onClick={() =>
+                              handleClassDataChange("classDuration", duration)
+                            }
+                            className={`px-4 py-2 rounded-full text-sm ${
+                              classData.classDuration === duration
+                                ? "bg-yellow-400 border border-yellow-500"
+                                : "border border-gray-200"
+                            }`}
+                          >
+                            {duration} min
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  {/* Date and Time */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">
+                        Class Date
+                      </label>
+                      <input
+                        type="date"
+                        value={classData.classDateTime}
+                        onChange={(e) =>
+                          handleClassDataChange("classDateTime", e.target.value)
+                        }
+                        className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">
+                        Class Starting Time
+                      </label>
+                      <input
+                        type="time"
+                        className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-            {/* Date and Time */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium text-gray-700">
-                  Class Date
-                </label>
-                <input
-                  type="date"
-                  value={classData.classDateTime}
-                  onChange={(e) =>
-                    handleClassDataChange("classDateTime", e.target.value)
-                  }
-                  className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700">
-                  Class Starting Time
-                </label>
-                <input
-                  type="time"
-                  className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
 
-        {/* Buttons */}
-        <div className="flex justify-between pt-4">
-          <button
-            onClick={() => setAddClassModalOpen(false)}
-            className="px-8 py-3 font-medium border border-gray-200 rounded-full text-md"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSaveClass}
-            disabled={!isFormValid || isCreating}
-            className={`px-8 py-3 rounded-full text-md font-medium min-w-[120px] flex items-center justify-center ${
-              isFormValid && !isCreating
-                ? "bg-[#a6fab6] border border-[#042f0c] cursor-pointer hover:bg-[#95e1a4]"
-                : "bg-gray-200 border border-gray-300 cursor-not-allowed"
-            }`}
-          >
-            {isCreating ? "Creating..." : "Create Class"}
-          </button>
+              {/* Buttons */}
+              <div className="flex justify-between pt-4">
+                <button
+                  onClick={() => setAddClassModalOpen(false)}
+                  className="px-8 py-3 font-medium border border-gray-200 rounded-full text-md"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveClass}
+                  disabled={!isFormValid || isCreating}
+                  className={`px-8 py-3 rounded-full text-md font-medium min-w-[120px] flex items-center justify-center ${
+                    isFormValid && !isCreating
+                      ? "bg-[#a6fab6] border border-[#042f0c] cursor-pointer hover:bg-[#95e1a4]"
+                      : "bg-gray-200 border border-gray-300 cursor-not-allowed"
+                  }`}
+                >
+                  {isCreating ? "Creating..." : "Create Class"}
+                </button>
+              </div>
+            </div>{" "}
+          </div>
         </div>
       </div>
     </div>
