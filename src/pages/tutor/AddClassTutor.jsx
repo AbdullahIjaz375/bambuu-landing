@@ -311,6 +311,9 @@ const AddClassTutor = () => {
                         <Camera size={24} className="text-gray-400" />
                       )}
                     </div>
+                    <div className="absolute right-0 p-1 bg-black rounded-full shadow-lg bottom-1">
+                      <img src="/svgs/camera.svg" />
+                    </div>
                     <input
                       id="classImage"
                       type="file"
@@ -332,7 +335,7 @@ const AddClassTutor = () => {
                         onChange={(e) =>
                           handleClassDataChange("className", e.target.value)
                         }
-                        className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                        className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                       />
                     </div>
 
@@ -400,35 +403,40 @@ const AddClassTutor = () => {
                       }
                       maxLength={200}
                       rows={3}
-                      className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                      className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                     />
                   </div>
                   <div className="flex flex-row items-start justify-between space-x-4">
                     {/* Class Level */}
-                    <div>
-                      <label className="text-sm font-medium text-gray-700">
-                        Class Level
-                      </label>
-                      <div className="flex gap-2 mt-1">
-                        {["Beginner", "Intermediate", "Advanced"].map(
-                          (level) => (
-                            <button
-                              key={level}
-                              onClick={() =>
-                                handleClassDataChange("languageLevel", level)
-                              }
-                              className={`px-4 py-2 rounded-full text-sm ${
-                                classData.languageLevel === level
-                                  ? "bg-yellow-400 border border-yellow-500"
-                                  : "border border-gray-200"
-                              }`}
-                            >
-                              {level}
-                            </button>
-                          )
-                        )}
+
+                    {classType !== "individual" ? (
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">
+                          Class Level
+                        </label>
+                        <div className="flex gap-2 mt-1">
+                          {["Beginner", "Intermediate", "Advanced"].map(
+                            (level) => (
+                              <button
+                                key={level}
+                                onClick={() =>
+                                  handleClassDataChange("languageLevel", level)
+                                }
+                                className={`px-4 py-2 rounded-full text-sm ${
+                                  classData.languageLevel === level
+                                    ? "bg-yellow-400 border border-yellow-500"
+                                    : "border border-gray-200"
+                                }`}
+                              >
+                                {level}
+                              </button>
+                            )
+                          )}
+                        </div>
                       </div>
-                    </div>
+                    ) : (
+                      <></>
+                    )}
 
                     {/* Class Type */}
                     <div>
@@ -504,7 +512,7 @@ const AddClassTutor = () => {
                                 e.target.value
                               )
                             }
-                            className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                            className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                           />
                         </div>
                       )}
@@ -532,7 +540,7 @@ const AddClassTutor = () => {
                             handleClassDataChange("availableSpots", value);
                           }
                         }}
-                        className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                        className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                       />
                     </div>
 
@@ -572,7 +580,7 @@ const AddClassTutor = () => {
                         onChange={(e) =>
                           handleClassDataChange("classDateTime", e.target.value)
                         }
-                        className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                        className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                       />
                     </div>
                     <div>
@@ -581,7 +589,7 @@ const AddClassTutor = () => {
                       </label>
                       <input
                         type="time"
-                        className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                        className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                       />
                     </div>
                   </div>

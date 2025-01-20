@@ -123,7 +123,7 @@ const StudentsTutor = () => {
                 <input
                   type="text"
                   placeholder="Search student"
-                  className="w-full py-2 pl-10 pr-4 bg-gray-100 border border-[#d1d1d1] rounded-full"
+                  className="w-full py-2 pl-12 pr-4 border border-gray-200 rounded-3xl  focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                   value={searchQuery}
                   onChange={handleSearchChange}
                 />

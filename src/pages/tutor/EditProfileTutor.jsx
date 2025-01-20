@@ -365,7 +365,7 @@ const TutorEditProfile = () => {
                       name="name"
                       value={formData.name}
                       onChange={handleInputChange}
-                      className="w-full p-3 text-xl border rounded-2xl"
+                      className="w-full p-3 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                       placeholder="Enter your name"
                     />
                   </div>
@@ -379,7 +379,7 @@ const TutorEditProfile = () => {
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="w-full p-3 text-xl border rounded-2xl"
+                      className="w-full p-3 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                       disabled
                     />
                   </div>
@@ -392,7 +392,7 @@ const TutorEditProfile = () => {
                       name="nativeLanguage"
                       value={formData.nativeLanguage}
                       onChange={handleInputChange}
-                      className="w-full p-3 text-xl border rounded-2xl"
+                      className="w-full p-3 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                     >
                       <option value="">Select your native language</option>
                       {LANGUAGES.map((language) => (
@@ -411,7 +411,7 @@ const TutorEditProfile = () => {
                       name="teachingLanguage"
                       value={formData.teachingLanguage}
                       onChange={handleInputChange}
-                      className="w-full p-3 text-xl border rounded-2xl"
+                      className="w-full p-3 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                     >
                       <option value="">
                         Select language you want to teach

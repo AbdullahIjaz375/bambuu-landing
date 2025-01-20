@@ -46,13 +46,13 @@ const UserSettings = () => {
           </div>
 
           {/* Tabs Navigation */}
-          <div className="flex mb-8 bg-gray-100 border border-[#888888] rounded-full w-fit">
+          <div className="flex mb-8 bg-gray-100 border border-[#888888] rounded-full  w-fit">
             <div className="flex">
               {TABS.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-12 py-2 rounded-full text-lg font-medium transition-all whitespace-nowrap
+                  className={`px-12 py-1 rounded-full text-lg font-medium transition-all whitespace-nowrap
                     ${
                       activeTab === tab.id
                         ? "bg-[#ffbf00] text-[#042f0c] border border-[#042f0c]"
@@ -66,7 +66,7 @@ const UserSettings = () => {
           </div>
 
           {/* Settings Content */}
-          <div className="min-w-0">
+          <div className="max-w-lg">
             {activeTab === "App" && <AppTab />}
             {activeTab === "Account" && <AccountTab />}
             {activeTab === "Notifications" && <NotificationsTab />}

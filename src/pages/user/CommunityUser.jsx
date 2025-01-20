@@ -151,8 +151,13 @@ const CommunityUser = () => {
 
   const filterChannels = (channelsToFilter) => {
     return channelsToFilter.filter((channel) => {
+      // First check if the channel has a valid name
+      if (!channel.data.name || channel.data.name.trim() === "") {
+        return false;
+      }
+
       const searchTerm = searchQuery.toLowerCase();
-      const channelName = (channel.data.name || "").toLowerCase();
+      const channelName = channel.data.name.toLowerCase();
       const channelDescription = (channel.data.description || "").toLowerCase();
 
       return (
@@ -163,15 +168,22 @@ const CommunityUser = () => {
   };
 
   const groupChats = filterChannels(
-    channels.filter((channel) => channel.type === "standard_group")
+    channels.filter(
+      (channel) =>
+        channel.type === "standard_group" &&
+        channel.data.name &&
+        channel.data.name.trim() !== ""
+    )
   );
 
   const bambuuInstructors = filterChannels(
     channels.filter(
       (channel) =>
-        channel.type === "premium_group" ||
-        channel.type === "premium_individual_class" ||
-        channel.type === "one_to_one_chat"
+        (channel.type === "premium_group" ||
+          channel.type === "premium_individual_class" ||
+          channel.type === "one_to_one_chat") &&
+        channel.data.name &&
+        channel.data.name.trim() !== ""
     )
   );
 
@@ -292,7 +304,7 @@ const CommunityUser = () => {
                       ? "Search groups"
                       : "Search instructor"
                   }
-                  className="w-full py-2 pl-10 pr-4 bg-gray-100 border border-[#d1d1d1] rounded-full"
+                  className="w-full py-2 pl-12 pr-4 border border-gray-200 rounded-3xl  focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                 />
               </div>
 

@@ -133,7 +133,7 @@ const EditGroupsUser = () => {
 
             {/* Scrollable Content */}
             <div className="overflow-y-auto">
-              <div className="max-w-3xl">
+              <div className="max-w-3xl ml-2">
                 <div className="mb-6">
                   <div
                     className="relative flex items-center justify-center mb-4 bg-gray-100 rounded-full cursor-pointer w-28 h-28 hover:bg-gray-200"
@@ -156,6 +156,9 @@ const EditGroupsUser = () => {
                     ) : (
                       <ImagePlus className="w-8 h-8 text-gray-400" />
                     )}
+                    <div className="absolute right-0 p-1 bg-black rounded-full shadow-lg bottom-1">
+                      <img src="/svgs/camera.svg" />
+                    </div>
                     <input
                       id="groupImage"
                       type="file"
@@ -168,7 +171,7 @@ const EditGroupsUser = () => {
 
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-[#3d3d3d] mb-1 text-md font-semibold">
+                    <label className="block text-[#3d3d3d] mb-1 text-lg font-semibold">
                       Group Name
                     </label>
                     <input
@@ -176,12 +179,12 @@ const EditGroupsUser = () => {
                       placeholder="Group name"
                       value={groupName}
                       onChange={(e) => setGroupName(e.target.value)}
-                      className="w-full p-2 border rounded-xl focus:ring-2 focus:ring-blue-200 focus:outline-none"
+                      className="w-full p-3 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block mb-1 text-[#3d3d3d] text-md font-semibold">
+                    <label className="block mb-1 text-[#3d3d3d] text-lg font-semibold">
                       Group Description
                     </label>
                     <textarea
@@ -189,12 +192,12 @@ const EditGroupsUser = () => {
                       value={groupDescription}
                       onChange={(e) => setGroupDescription(e.target.value)}
                       rows="4"
-                      className="w-full p-2 border rounded-xl focus:ring-2 focus:ring-blue-200 focus:outline-none"
+                      className="w-full p-3 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block mb-1 text-[#3d3d3d] text-md font-semibold">
+                    <label className="block mb-1 text-[#3d3d3d] text-lg font-semibold">
                       Learning Language
                     </label>
                     <div className="flex flex-wrap gap-2">
@@ -205,8 +208,8 @@ const EditGroupsUser = () => {
                             onClick={() => setLearningLanguage(lang)}
                             className={`px-4 py-2 text-md rounded-full ${
                               learningLanguage === lang
-                                ? "bg-[#e6fde9] text-black"
-                                : "bg-gray-100 text-gray-600"
+                                ? "bg-[#14B82C] text-black border border-[#042F0C]"
+                                : "bg-white text-gray-600 border"
                             }`}
                           >
                             {lang}

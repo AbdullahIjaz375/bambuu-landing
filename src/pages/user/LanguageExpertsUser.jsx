@@ -194,10 +194,10 @@ const LanguageExpertsPage = () => {
                 <button
                   key={filter.key}
                   onClick={() => setActiveFilter(filter.label)}
-                  className={`px-3 md:px-4 py-2 rounded-full text-sm md:text-md ${
+                  className={`px-3 md:px-5 py-2 rounded-full text-sm md:text-md ${
                     activeFilter === filter.label
-                      ? "bg-green-100 text-black"
-                      : "bg-gray-100 text-gray-600"
+                      ? "bg-[#B9F9C2] text-[#12551E]"
+                      : "bg-[#EDEDED] text-[#5D5D5D]"
                   }`}
                 >
                   {filter.label}
@@ -209,7 +209,7 @@ const LanguageExpertsPage = () => {
               <input
                 type="text"
                 placeholder={t("languageExperts.searchPlaceholder")}
-                className="w-full py-2 pl-12 pr-4 border border-gray-200 rounded-full md:py-3 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200"
+                className="w-full py-3 pl-12 pr-4 border border-gray-200 rounded-3xl  focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />

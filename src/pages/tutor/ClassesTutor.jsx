@@ -210,7 +210,7 @@ const ClassesTutor = () => {
                 <input
                   type="text"
                   placeholder={t("classes-tutor.search.placeholder")}
-                  className="w-full lg:w-[40vh] py-3 pl-10 pr-4 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                  className="w-full lg:w-[40vh] py-3 pl-12 pr-4 border border-gray-200 rounded-3xl  focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                   value={searchQuery}
                   onChange={handleSearchChange}
                 />

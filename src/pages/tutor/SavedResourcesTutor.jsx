@@ -32,6 +32,7 @@ import {
 import { db, storage } from "../../firebaseConfig";
 import Modal from "react-modal";
 import EmptyState from "../../components/EmptyState";
+import { ClipLoader } from "react-spinners";
 
 Modal.setAppElement("#root");
 
@@ -274,9 +275,9 @@ const SavedResourcesTutor = () => {
   );
 
   const ResourceCard = ({ resource }) => (
-    <div className="relative group cursor-pointer transition-transform hover:scale-[1.02]">
+    <div className="relative cursor-pointer group">
       <div
-        className="flex items-center p-4 bg-[#f0fdf1] rounded-2xl border border-[#16bc2e]"
+        className="flex items-center p-2 bg-[#f0fdf1] rounded-2xl border border-[#16bc2e]"
         onClick={() => handleCardClick(resource.documentUrl)}
       >
         <div className="flex items-center flex-1 gap-3">
@@ -284,8 +285,8 @@ const SavedResourcesTutor = () => {
             <img
               src={
                 resource.documentType.toLowerCase() === "pdf"
-                  ? "/images/pdf.png"
-                  : "/images/document.png"
+                  ? "/svgs/png-logo.svg"
+                  : "/svgs/word-logo.svg"
               }
               alt={resource.documentType}
               className="w-6 h-auto"
@@ -295,19 +296,19 @@ const SavedResourcesTutor = () => {
             <h3 className="text-xl font-semibold">{resource.documentName}</h3>
             <div className="flex items-center gap-2 mt-1">
               <span className="text-md text-[#3d3d3d]">
-                {resource.createdAt?.toDate().toLocaleDateString()}
+                Uploaded: {resource.createdAt?.toDate().toLocaleDateString()}
               </span>
             </div>
           </div>
         </div>
         <div className="flex gap-2">
-          <Menu shadow="md" width={160} position="bottom-end">
+          <Menu shadow="md" width={180} radius="lg" position="bottom-end">
             <Menu.Target>
               <button
                 onClick={(e) => e.stopPropagation()}
-                className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100"
+                className="flex items-center justify-center w-8 h-8"
               >
-                <EllipsisVertical />
+                <EllipsisVertical className="text-gray-400" />
               </button>
             </Menu.Target>
 
@@ -390,7 +391,7 @@ const SavedResourcesTutor = () => {
       <div className="flex min-h-screen bg-white">
         <Sidebar user={user} />
         <div className="flex items-center justify-center flex-1">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#16bc2e] border-t-transparent"></div>
+          <ClipLoader color="#FFB800" size={40} />
         </div>
       </div>
     );
@@ -416,7 +417,7 @@ const SavedResourcesTutor = () => {
               <input
                 type="text"
                 placeholder={t("saved-resources-tutor.search.placeholder")}
-                className="w-full py-3 pl-12 pr-4 border border-gray-200 rounded-full bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200"
+                className="w-full py-3 pl-12 pr-4 border border-gray-200 rounded-3xl  focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -517,7 +518,7 @@ const SavedResourcesTutor = () => {
             placeholder={t(
               "saved-resources-tutor.assign-modal.search-placeholder"
             )}
-            className="w-full py-3 pl-10 pr-4 border border-gray-200 rounded-full bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200"
+            className="w-full py-3 pl-12 pr-4 border border-gray-200 rounded-3xl  focus:border-[#14B82C] focus:ring-0 focus:outline-none"
             value={studentSearchQuery}
             onChange={(e) => setStudentSearchQuery(e.target.value)}
           />

@@ -1,11 +1,13 @@
 import React from "react";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 
 import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
 
 const VideoCall = () => {
-  const { classId } = useParams();
+  const location = useLocation();
+  const classId = location.state?.classId;
 
+  console.log("Class ID:", classId);
   const user = JSON.parse(sessionStorage.getItem("user"));
 
   const userId = user.uid;

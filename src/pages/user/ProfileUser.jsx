@@ -364,7 +364,7 @@ const ProfileUser = () => {
                 <span className="font-semibold text-[#6D6D6D]">
                   {t("profile.appStreak")}
                 </span>
-                <span className="font-semibold text-green-600">
+                <span className="font-bold text-green-600 ">
                   {userData?.currentStreak || 0}
                 </span>
               </div>

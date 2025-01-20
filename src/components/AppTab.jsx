@@ -110,6 +110,7 @@ import { getFirestore, doc, updateDoc, getDoc } from "firebase/firestore";
 import { useAuth } from "../context/AuthContext";
 import { useTranslation } from "react-i18next";
 import "../i18n";
+import { useNavigate } from "react-router-dom";
 
 Modal.setAppElement("#root");
 
@@ -119,6 +120,9 @@ const AppTab = () => {
   const [selectedReason, setSelectedReason] = useState("");
   const { user, setUser } = useAuth();
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
+  const userr = sessionStorage.getItem("user");
+  const userType = userr ? JSON.parse(userr).userType : null;
 
   // Update i18n language when user preference changes
   useEffect(() => {
@@ -190,13 +194,17 @@ const AppTab = () => {
     }
   };
 
+  const getDeleteAccountRoute = (type) => {
+    return type === "student" ? "/deleteAccount" : "/deleteAccountTutor";
+  };
+
   return (
     <>
       <ToastContainer />
 
       <div className="max-w-2xl space-y-4">
         <div
-          className="flex items-center justify-between p-4 text-lg bg-white border border-gray-200 rounded-full cursor-pointer"
+          className="flex items-center justify-between p-3 text-lg bg-white border border-gray-200 rounded-full cursor-pointer"
           onClick={() => setIsLanguageModalOpen(true)}
         >
           <div className="flex items-center gap-3">
@@ -210,8 +218,8 @@ const AppTab = () => {
         </div>
 
         <div
-          className="flex items-center justify-between p-4 text-lg bg-white border border-[#F04438] rounded-full cursor-pointer"
-          onClick={() => setIsDeleteModalOpen(true)}
+          className="flex items-center justify-between p-3 text-lg bg-white border border-[#F04438] rounded-full cursor-pointer"
+          onClick={() => navigate(getDeleteAccountRoute(userType))}
         >
           <div className="flex items-center gap-3 text-[#F04438]">
             <img alt="bambuu" src="/svgs/user-remove.svg" className="w-6 h-6" />

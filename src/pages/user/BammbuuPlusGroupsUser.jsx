@@ -33,6 +33,7 @@ const BammbuuPlusGroupsUser = () => {
         setGroups(fetchedGroups);
         setFilteredGroups(fetchedGroups);
         setLoadingGroups(false);
+        console.log(groups);
       };
       fetchGroups();
     } else {

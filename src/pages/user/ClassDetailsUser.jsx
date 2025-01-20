@@ -14,6 +14,79 @@ import EmptyState from "../../components/EmptyState";
 
 Modal.setAppElement("#root");
 
+const TimeRestrictedJoinButton = ({
+  classDateTime,
+  classDuration = 60,
+  navigate,
+  classId,
+  location,
+}) => {
+  const [isButtonVisible, setIsButtonVisible] = useState(false);
+  const [timeStatus, setTimeStatus] = useState("");
+
+  useEffect(() => {
+    const checkTime = () => {
+      const now = new Date().getTime();
+      const classTime = new Date(classDateTime.seconds * 1000).getTime();
+      const classEndTime = classTime + classDuration * 60 * 1000; // Convert minutes to milliseconds
+
+      // 5 minutes in milliseconds
+      const fiveMinutes = 5 * 60 * 1000;
+
+      // Time windows
+      const joinWindowStart = classTime - fiveMinutes;
+      const joinWindowEnd = classEndTime + fiveMinutes;
+
+      setIsButtonVisible(now >= joinWindowStart && now <= joinWindowEnd);
+
+      // Set status for potential UI feedback
+      if (now < joinWindowStart) {
+        setTimeStatus("upcoming");
+      } else if (now > joinWindowEnd) {
+        setTimeStatus("ended");
+      } else {
+        setTimeStatus("active");
+      }
+    };
+
+    // Initial check
+    checkTime();
+
+    // Update every minute
+    const interval = setInterval(checkTime, 60000);
+
+    return () => clearInterval(interval);
+  }, [classDateTime, classDuration]);
+
+  // const handleJoinClass = () => {
+  //   navigate(`/call/${classId}`);
+  // };
+  const handleJoinClass = () => {
+    navigate(`/call`, { state: { classId } });
+  };
+
+  if (!isButtonVisible) {
+    return <></>;
+  }
+
+  if (location?.toLowerCase() === "virtual") {
+    return (
+      <button
+        className="w-full px-4 py-2 text-black bg-[#ffbf00] border border-black rounded-full hover:bg-[#ffbf00]"
+        onClick={handleJoinClass}
+      >
+        Join Class
+      </button>
+    );
+  }
+
+  return (
+    <div className="w-full px-4 py-2 text-black bg-gray-200 border border-black rounded-full cursor-not-allowed">
+      Class in Progress (Physical Location)
+    </div>
+  );
+};
+
 const modalStyles = {
   overlay: {
     backgroundColor: "rgba(0, 0, 0, 0.5)",
@@ -603,57 +676,91 @@ const ClassDetailsUser = ({ onClose }) => {
                     </div>
 
                     {/* Class Details Grid */}
-                    <div className="flex flex-col w-full mt-4 space-y-4">
-                      <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-                        <div className="flex items-center justify-center gap-1 sm:justify-start">
-                          <img alt="time" src="/svgs/clock.svg" />
-                          <span className="text-xs sm:text-sm">
-                            {new Date(
-                              classData.classDateTime.seconds * 1000
-                            ).toLocaleTimeString("en-US", {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                              hour12: true,
-                            })}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-center gap-1 sm:justify-start">
-                          <img alt="date" src="/svgs/calendar.svg" />
-                          <span className="text-xs sm:text-sm">
-                            {new Date(
-                              classData.classDateTime.seconds * 1000
-                            ).toLocaleDateString()}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-center gap-1 sm:justify-start">
-                          <img alt="participants" src="/svgs/users.svg" />
-                          <span className="text-xs sm:text-sm">
-                            {classData.classType.includes("Premium")
-                              ? "2k+"
-                              : `${classData.classMemberIds.length}/${classData.availableSpots}`}
-                          </span>
-                        </div>
-                      </div>
 
-                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                        <div className="flex items-center justify-center gap-1 sm:justify-start">
-                          <img alt="recurrence" src="/svgs/repeate-music.svg" />
-                          <span className="text-xs sm:text-sm">
-                            {classData.classType === "Individual Premium"
-                              ? classData.selectedRecurrenceType || "None"
-                              : classData.recurrenceTypes?.length > 0
-                              ? classData.recurrenceTypes.join(", ")
-                              : "None"}
-                          </span>
+                    {classData.classType === "Individual Premium" ? (
+                      <>
+                        {" "}
+                        <div className="flex flex-col w-full mt-4 space-y-4">
+                          <div className="grid grid-cols-1 gap-28 sm:grid-cols-2 lg:grid-cols-2">
+                            <div className="flex items-center justify-center gap-1 sm:justify-start">
+                              <img alt="time" src="/svgs/clock.svg" />
+                              <span className="text-xs sm:text-sm">
+                                {new Date(
+                                  classData.classDateTime.seconds * 1000
+                                ).toLocaleTimeString("en-US", {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  hour12: true,
+                                })}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-center gap-1 sm:justify-start">
+                              <img alt="date" src="/svgs/calendar.svg" />
+                              <span className="text-xs sm:text-sm">
+                                {new Date(
+                                  classData.classDateTime.seconds * 1000
+                                ).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex items-center justify-center gap-1 sm:justify-start">
-                          <img alt="location" src="/svgs/location.svg" />
-                          <span className="text-xs sm:text-sm">
-                            {classData.classLocation}
-                          </span>
+                      </>
+                    ) : (
+                      <div className="flex flex-col w-full mt-4 space-y-4">
+                        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                          <div className="flex items-center justify-center gap-1 sm:justify-start">
+                            <img alt="time" src="/svgs/clock.svg" />
+                            <span className="text-xs sm:text-sm">
+                              {new Date(
+                                classData.classDateTime.seconds * 1000
+                              ).toLocaleTimeString("en-US", {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: true,
+                              })}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-center gap-1 sm:justify-start">
+                            <img alt="date" src="/svgs/calendar.svg" />
+                            <span className="text-xs sm:text-sm">
+                              {new Date(
+                                classData.classDateTime.seconds * 1000
+                              ).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-center gap-1 sm:justify-start">
+                            <img alt="participants" src="/svgs/users.svg" />
+                            <span className="text-xs sm:text-sm">
+                              {classData.classType.includes("Premium")
+                                ? "2k+"
+                                : `${classData.classMemberIds.length}/${classData.availableSpots}`}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                          <div className="flex items-center justify-center gap-1 sm:justify-start">
+                            <img
+                              alt="recurrence"
+                              src="/svgs/repeate-music.svg"
+                            />
+                            <span className="text-xs sm:text-sm">
+                              {classData.classType === "Individual Premium"
+                                ? classData.selectedRecurrenceType || "None"
+                                : classData.recurrenceTypes?.length > 0
+                                ? classData.recurrenceTypes.join(", ")
+                                : "None"}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-center gap-1 sm:justify-start">
+                            <img alt="location" src="/svgs/location.svg" />
+                            <span className="text-xs sm:text-sm">
+                              {classData.classLocation}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    )}
 
                     <p className="mt-4 mb-6 text-sm text-gray-600 md:text-base">
                       {classData.classDescription}
@@ -674,12 +781,20 @@ const ClassDetailsUser = ({ onClose }) => {
                       />
                     </div>
 
-                    <button
+                    {/* <button
                       className="w-full px-4 py-2 text-black bg-[#ffbf00] border border-black rounded-full hover:bg-[#ffbf00]"
                       onClick={handleJoinClass}
                     >
                       Join Class
-                    </button>
+                    </button> */}
+
+                    <TimeRestrictedJoinButton
+                      classDateTime={classData.classDateTime}
+                      classDuration={classData.classDuration || 60} // Use class duration from data or default to 60 minutes
+                      navigate={navigate}
+                      classId={classId}
+                      location={classData.location}
+                    />
 
                     {user.uid === classData.adminId ? (
                       <>
@@ -690,7 +805,7 @@ const ClassDetailsUser = ({ onClose }) => {
                           Edit Class Details
                         </button>
                         <button
-                          className="w-full px-4 py-2 text-red-500 border border-red-500 rounded-full"
+                          className="w-full px-4 py-2 text-red-500 bg-white border border-red-500 rounded-full"
                           onClick={() => setShowDeleteConfirmation(true)}
                         >
                           Delete Class

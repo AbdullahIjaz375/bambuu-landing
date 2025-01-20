@@ -69,7 +69,7 @@ const TutorSettings = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-12 py-2 rounded-full text-lg font-medium transition-all ${
+                className={`px-12 py-1 rounded-full text-lg font-medium transition-all ${
                   activeTab === tab.id
                     ? "bg-[#ffbf00] text-[#042f0c] border border-[#042f0c]"
                     : "text-[#042f0c] hover:text-black"
@@ -79,15 +79,16 @@ const TutorSettings = () => {
               </button>
             ))}
           </div>
+          <div className="max-w-lg">
+            {/* Settings Content */}
+            {activeTab === "App" && <AppTab />}
 
-          {/* Settings Content */}
-          {activeTab === "App" && <AppTab />}
+            {/* Account Tab Content */}
+            {activeTab === "Account" && <AccountTab />}
 
-          {/* Account Tab Content */}
-          {activeTab === "Account" && <AccountTab />}
-
-          {/* Notifications Tab Content */}
-          {activeTab === "Notifications" && <NotificationsTab />}
+            {/* Notifications Tab Content */}
+            {activeTab === "Notifications" && <NotificationsTab />}
+          </div>
         </div>
       </div>{" "}
     </div>

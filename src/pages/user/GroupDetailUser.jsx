@@ -8,7 +8,11 @@ import {
   Camera,
   MapPin,
   ArrowLeft,
+  EllipsisVertical,
+  Heart,
 } from "lucide-react";
+import { Menu } from "@mantine/core";
+
 import {
   doc,
   getDoc,
@@ -40,6 +44,7 @@ import ClassCard from "../../components/ClassCard";
 import Modal from "react-modal";
 import ExploreClassCard from "../../components/ExploreClassCard";
 import EmptyState from "../../components/EmptyState";
+import GroupInfoCard from "../../components/GroupInfoCard";
 Modal.setAppElement("#root");
 
 const GroupDetailsUser = ({ onClose }) => {
@@ -729,7 +734,18 @@ const GroupDetailsUser = ({ onClose }) => {
 
   // Update the renderMembers function to include remove button for admin
   const renderMembers = () => {
-    if (members.length === 0) {
+    // Combine admin and members, ensuring admin is included even if not in members list
+    const allMembers = members.slice(); // Create a copy of members array
+
+    // Add admin if not already in the list
+    if (groupTutor && !allMembers.find((m) => m.id === groupTutor.id)) {
+      allMembers.unshift({
+        ...groupTutor,
+        isAdmin: true,
+      });
+    }
+
+    if (allMembers.length === 0) {
       return (
         <div className="flex items-center justify-center h-96">
           <EmptyState message="No members available" />
@@ -738,45 +754,64 @@ const GroupDetailsUser = ({ onClose }) => {
     }
 
     return (
-      <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
-        {members.map((member) => (
+      <div className="grid grid-cols-1 gap-2 md:grid-cols-4">
+        {allMembers.map((member) => (
           <div
             key={member.id}
-            className="flex items-center justify-between px-4 py-3 border border-gray-200 hover:bg-gray-50 rounded-3xl"
+            className="flex items-center justify-between px-4 py-2 border border-gray-200 hover:bg-gray-50 rounded-3xl"
           >
             <div className="flex items-center gap-3">
-              <div className="relative">
-                <img
-                  src={member.photoUrl || "/api/placeholder/40/40"}
-                  alt={member.name}
-                  className="object-cover rounded-full w-9 h-9"
-                />
-                {member.id === group.groupAdminId && (
-                  <div className="absolute flex items-center justify-center w-4 h-4 bg-yellow-400 rounded-full -top-1 -right-1">
-                    <span className="text-xs text-black">★</span>
-                  </div>
-                )}
-              </div>
-              <div className="flex flex-col">
+              <img
+                src={member.photoUrl || "/api/placeholder/40/40"}
+                alt={member.name}
+                className="object-cover rounded-full w-9 h-9"
+              />
+
+              <div className="flex flex-row items-center justify-between w-full space-x-16">
                 <span className="text-sm font-medium text-gray-900">
                   {member.name}
                 </span>
                 {member.id === group.groupAdminId && (
-                  <span className="text-xs text-gray-500">Admin</span>
+                  <span className="p-1 text-xs text-right text-gray-500 bg-gray-200 rounded-full">
+                    Admin
+                  </span>
                 )}
               </div>
             </div>
             {user.uid === group.groupAdminId &&
               member.id !== group.groupAdminId && (
-                <button
-                  onClick={() => {
-                    setSelectedUser(member);
-                    setShowRemoveConfirmation(true);
-                  }}
-                  className="px-3 py-1 text-xs text-red-500 border border-red-500 rounded-full hover:bg-red-50"
-                >
-                  Remove
-                </button>
+                // <button
+                //   onClick={() => {
+                //   setSelectedUser(member);
+                //   setShowRemoveConfirmation(true);
+                // }}
+                //   className="px-3 py-1 text-xs text-red-500 border border-red-500 rounded-full hover:bg-red-50"
+                // >
+                //   Remove
+                // </button>
+
+                <Menu shadow="md" width={180} position="bottom-end" radius="lg">
+                  <Menu.Target>
+                    <button
+                      onClick={(e) => e.stopPropagation()}
+                      className="flex items-center justify-center w-8 h-8 "
+                    >
+                      <EllipsisVertical className="text-gray-400" />
+                    </button>
+                  </Menu.Target>
+
+                  <Menu.Dropdown>
+                    <Menu.Item
+                      onClick={() => {
+                        setSelectedUser(member);
+                        setShowRemoveConfirmation(true);
+                      }}
+                      className="text-red-500 font-urbanist"
+                    >
+                      Remove from group
+                    </Menu.Item>
+                  </Menu.Dropdown>
+                </Menu>
               )}
           </div>
         ))}
@@ -896,41 +931,45 @@ const GroupDetailsUser = ({ onClose }) => {
                     <p className="mb-6 text-sm text-gray-600 md:text-base">
                       {group.groupDescription}
                     </p>
-                  </div>
-                  <div className="w-full space-y-2 md:space-y-4">
-                    <button
-                      className={`w-full px-3 md:px-4 py-2 text-sm md:text-base text-black border rounded-full ${
-                        group.isPremium
-                          ? "bg-[#bffcc4] border-[#0a0d0b]"
-                          : "bg-[#ffffea] border-gray-300"
-                      }`}
-                      onClick={() => navigate("/communityUser")}
-                    >
-                      View Group Chat
-                    </button>
-                    {user.uid === group.groupAdminId ? (
-                      <>
-                        <button
-                          className="w-full px-3 py-2 text-sm text-black bg-white border border-black rounded-full md:px-4 md:text-base"
-                          onClick={() => navigate(`/editGroup/${groupId}`)}
-                        >
-                          Edit Group Details
-                        </button>
+                  </div>{" "}
+                  <div className="space-y-4">
+                    {" "}
+                    {group.isPremium ? <GroupInfoCard group={group} /> : <></>}
+                    <div className="w-full space-y-2 md:space-y-4">
+                      <button
+                        className={`w-full px-3 md:px-4 py-2 text-sm md:text-base text-black border rounded-full ${
+                          group.isPremium
+                            ? "bg-[#bffcc4] border-[#0a0d0b]"
+                            : "bg-[#FFFBC5] border-black"
+                        }`}
+                        onClick={() => navigate("/communityUser")}
+                      >
+                        View Group Chat
+                      </button>
+                      {user.uid === group.groupAdminId ? (
+                        <>
+                          <button
+                            className="w-full px-3 py-2 text-sm text-black bg-white border border-black rounded-full md:px-4 md:text-base"
+                            onClick={() => navigate(`/editGroup/${groupId}`)}
+                          >
+                            Edit Group Details
+                          </button>
+                          <button
+                            className="w-full px-3 py-2 text-sm text-red-500 bg-white border border-red-500 rounded-full md:px-4 md:text-base"
+                            onClick={() => setShowDeleteConfirmation(true)}
+                          >
+                            Delete Group
+                          </button>
+                        </>
+                      ) : (
                         <button
                           className="w-full px-3 py-2 text-sm text-red-500 border border-red-500 rounded-full md:px-4 md:text-base"
-                          onClick={() => setShowDeleteConfirmation(true)}
+                          onClick={() => setShowLeaveConfirmation(true)}
                         >
-                          Delete Group
+                          Leave Group
                         </button>
-                      </>
-                    ) : (
-                      <button
-                        className="w-full px-3 py-2 text-sm text-red-500 border border-red-500 rounded-full md:px-4 md:text-base"
-                        onClick={() => setShowLeaveConfirmation(true)}
-                      >
-                        Leave Group
-                      </button>
-                    )}
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1349,6 +1388,10 @@ const GroupDetailsUser = ({ onClose }) => {
         }}
       >
         <div className="text-center">
+          <div className="flex items-center justify-center">
+            {" "}
+            <img src="/svgs/empty-big.svg" alt="bammbuu" />
+          </div>
           <h2 className="mb-4 text-xl font-semibold">
             Are you sure you want to leave this group?
           </h2>
@@ -1388,6 +1431,11 @@ const GroupDetailsUser = ({ onClose }) => {
         }}
       >
         <div className="text-center">
+          <div className="flex items-center justify-center">
+            {" "}
+            <img src="/svgs/empty-big.svg" alt="bammbuu" />
+          </div>
+
           <h2 className="mb-4 text-xl font-semibold">
             Remove {selectedUser?.name} from group?
           </h2>
@@ -1432,6 +1480,10 @@ const GroupDetailsUser = ({ onClose }) => {
         }}
       >
         <div className="text-center">
+          <div className="flex items-center justify-center">
+            {" "}
+            <img src="/svgs/empty-big.svg" alt="bammbuu" />
+          </div>
           <h2 className="mb-4 text-xl font-semibold">
             Are you sure you want to delete this group?
           </h2>

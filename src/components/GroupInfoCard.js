@@ -25,15 +25,15 @@ const GroupInfoCard = ({ group }) => {
   }, [group]);
 
   const baseCardClass =
-    "flex flex-row items-center w-full max-w-md gap-3 p-2 bg-white border rounded-2xl";
-  const imgClass = "object-cover rounded-md";
+    "flex flex-row items-center w-full max-w-md gap-3 p-2 bg-white border rounded-3xl";
+  const imgClass = "object-cover rounded-2xl";
 
   return (
     <div className={`${baseCardClass} border-green-500`}>
       <img
         alt={`${tutorInfo?.name || "Tutor"}'s profile`}
         src={tutorInfo?.photoUrl || "/api/placeholder/80/80"}
-        className={`${imgClass} w-24 h-24 rounded-xl`}
+        className={`${imgClass} w-28 h-28 rounded-xl`}
       />
       <div className="flex flex-col items-start flex-1 gap-1">
         <h1 className="text-lg font-medium">{tutorInfo?.name}</h1>

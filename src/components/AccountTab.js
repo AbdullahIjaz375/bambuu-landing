@@ -125,7 +125,7 @@ const AccountTab = () => {
 
       <div className="max-w-2xl space-y-4">
         <div
-          className="flex items-center justify-between p-4 text-lg bg-white border border-gray-200 rounded-full cursor-pointer"
+          className="flex items-center justify-between p-3 text-lg bg-white border border-gray-200 rounded-full cursor-pointer"
           onClick={() => setIsPasswordModalOpen(true)}
         >
           <div className="flex items-center gap-3">
@@ -140,7 +140,7 @@ const AccountTab = () => {
         </div>
         {userType === "student" && (
           <div
-            className="flex items-center justify-between p-4 text-lg bg-white border rounded-full"
+            className="flex items-center justify-between p-3 text-lg bg-white border rounded-full"
             onClick={() => {
               setIsPlansModalOpen(true);
             }}

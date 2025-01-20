@@ -89,7 +89,7 @@ const NotificationsTab = () => {
         {notificationTypes.map((type) => (
           <div
             key={type}
-            className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-full"
+            className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-full"
           >
             <span className="text-lg">{t(`notifications.types.${type}`)}</span>
             <Switch

@@ -61,6 +61,8 @@ import EditGroupsUser from "./pages/user/EditGroupUser";
 import EditGroupsTutor from "./pages/tutor/EditGroupTutor";
 import EditClassPage from "./pages/tutor/EditClassDetails";
 import ProfileSetup from "./pages/user/ProfileSetupUser";
+import DeleteAccout from "./pages/user/DeleteAccout";
+import TutorDeleteAccount from "./pages/tutor/TutorDeleteAccount";
 
 const App = () => {
   const { user, streamClient } = useAuth(); // Use useAuth() inside the component
@@ -435,7 +437,7 @@ const App = () => {
             }
           />
           <Route
-            path="/call/:classId"
+            path="/call"
             element={
               <ProtectedRoute requiredRole={["student", "tutor"]}>
                 <VideoCall />
@@ -463,6 +465,24 @@ const App = () => {
             element={
               <ProtectedRoute requiredRole="tutor">
                 {<EditClassPage />}
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/deleteAccountTutor"
+            element={
+              <ProtectedRoute requiredRole={["tutor"]}>
+                <TutorDeleteAccount />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/deleteAccount"
+            element={
+              <ProtectedRoute requiredRole={["student"]}>
+                <DeleteAccout />
               </ProtectedRoute>
             }
           />

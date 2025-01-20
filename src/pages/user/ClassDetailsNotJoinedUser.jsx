@@ -541,7 +541,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
                           <img alt="bammbuu" src="/svgs/clock.svg" />{" "}
                           <span className="text-sm">
                             {new Date(
-                              classData.classDateTime.seconds * 1000
+                              classData?.classDateTime?.seconds * 1000
                             ).toLocaleTimeString("en-US", {
                               hour: "2-digit",
                               minute: "2-digit",
@@ -554,7 +554,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
                           <img alt="bammbuu" src="/svgs/calendar.svg" />
                           <span className="text-sm">
                             {new Date(
-                              classData.classDateTime.seconds * 1000
+                              classData?.classDateTime?.seconds * 1000
                             ).toLocaleDateString("en-US", {
                               year: "numeric",
                               month: "long",

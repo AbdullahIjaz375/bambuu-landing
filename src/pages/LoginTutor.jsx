@@ -175,11 +175,11 @@ const LoginTutor = () => {
                 value={email}
                 onChange={handleEmailChange}
                 placeholder="Enter your email"
-                className={`w-full px-4 py-2 rounded-full border ${
-                  emailError ? "border-red-500" : "border-gray-300"
-                } focus:outline-none focus:ring-2 ${
-                  emailError ? "focus:ring-red-500" : "focus:ring-green-500"
-                }`}
+                className={`w-full p-2 border rounded-3xl ${
+                  emailError
+                    ? "border-red-500 focus:border-red-500"
+                    : "border-gray-300 focus:border-green-500"
+                } focus:ring-0 focus:outline-none`}
                 required
               />
               {emailError && (
@@ -209,11 +209,11 @@ const LoginTutor = () => {
                 value={password}
                 onChange={handlePasswordChange}
                 placeholder="Enter your password"
-                className={`w-full px-4 py-2 rounded-full border ${
-                  passwordError ? "border-red-500" : "border-gray-300"
-                } focus:outline-none focus:ring-2 ${
-                  passwordError ? "focus:ring-red-500" : "focus:ring-green-500"
-                }`}
+                className={`w-full p-2 border rounded-3xl ${
+                  passwordError
+                    ? "border-red-500 focus:border-red-500"
+                    : "border-gray-300 focus:border-green-500"
+                } focus:ring-0 focus:outline-none`}
                 required
               />
               <button

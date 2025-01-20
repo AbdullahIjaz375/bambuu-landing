@@ -58,7 +58,7 @@ const ClassInfoCard = ({ classData, groupTutor }) => {
 
   const baseCardClass =
     "flex flex-row items-center w-full max-w-md gap-3 p-2 bg-white border rounded-2xl";
-  const imgClass = "object-cover rounded-md";
+  const imgClass = "object-cover rounded-2xl";
 
   if (classData?.classType?.includes("Group Premium") && groupTutor) {
     return (
@@ -106,7 +106,7 @@ const ClassInfoCard = ({ classData, groupTutor }) => {
         <img
           alt={`${tutorInfo.name}'s profile`}
           src={tutorInfo.photoUrl || "/api/placeholder/80/80"}
-          className={`${imgClass} w-20 h-20`}
+          className={`${imgClass} w-28 h-28`}
         />
         <div className="flex flex-col items-start flex-1 gap-1">
           <h1 className="text-lg font-medium">{tutorInfo.name}</h1>

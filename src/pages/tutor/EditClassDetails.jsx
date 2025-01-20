@@ -239,7 +239,7 @@ const EditClassPage = () => {
                         onChange={(e) =>
                           handleClassDataChange("className", e.target.value)
                         }
-                        className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                        className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                       />
                     </div>
 
@@ -285,7 +285,7 @@ const EditClassPage = () => {
                       }
                       maxLength={200}
                       rows={3}
-                      className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                      className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                     />
                   </div>
 
@@ -380,7 +380,7 @@ const EditClassPage = () => {
                                 e.target.value
                               )
                             }
-                            className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                            className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                           />
                         </div>
                       )}
@@ -409,7 +409,7 @@ const EditClassPage = () => {
                             handleClassDataChange("availableSpots", value);
                           }
                         }}
-                        className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                        className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                       />
                     </div>
 
@@ -456,7 +456,7 @@ const EditClassPage = () => {
                           const date = new Date(e.target.value);
                           handleClassDataChange("classDateTime", date);
                         }}
-                        className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                        className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                       />
                     </div>
                     <div>
@@ -476,7 +476,7 @@ const EditClassPage = () => {
                           newDate.setHours(parseInt(hours), parseInt(minutes));
                           handleClassDataChange("classDateTime", newDate);
                         }}
-                        className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                        className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                       />
                     </div>
                   </div>

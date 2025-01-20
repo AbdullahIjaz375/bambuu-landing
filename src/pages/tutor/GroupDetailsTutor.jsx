@@ -997,7 +997,7 @@ const GroupDetailsTutor = ({ onClose }) => {
                   onChange={(e) =>
                     handleClassDataChange("className", e.target.value)
                   }
-                  className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                  className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                 />
               </div>
 
@@ -1058,7 +1058,7 @@ const GroupDetailsTutor = ({ onClose }) => {
                 }
                 maxLength={200}
                 rows={3}
-                className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
               />
             </div>
             <div className="flex flex-row items-start justify-between space-x-4">
@@ -1157,7 +1157,7 @@ const GroupDetailsTutor = ({ onClose }) => {
                       onChange={(e) =>
                         handleClassDataChange("classAddress", e.target.value)
                       }
-                      className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                      className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                     />
                   </div>
                 )}
@@ -1180,7 +1180,7 @@ const GroupDetailsTutor = ({ onClose }) => {
                       parseInt(e.target.value)
                     )
                   }
-                  className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                  className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                 />
               </div>
 
@@ -1220,7 +1220,7 @@ const GroupDetailsTutor = ({ onClose }) => {
                   onChange={(e) =>
                     handleClassDataChange("classDateTime", e.target.value)
                   }
-                  className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                  className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                 />
               </div>
               <div>
@@ -1229,7 +1229,7 @@ const GroupDetailsTutor = ({ onClose }) => {
                 </label>
                 <input
                   type="time"
-                  className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                  className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                 />
               </div>
             </div>
