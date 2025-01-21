@@ -54,10 +54,13 @@ const StudentsTutor = () => {
           watch: true,
           state: true,
         });
-
-        setChannels(channels);
-        if (channels.length > 0 && !selectedChannel) {
-          setSelectedChannel(channels[0]);
+        // Filter out channels with null or empty names before setting state
+        const validChannels = channels.filter(
+          (channel) => channel.data.name && channel.data.name.trim() !== ""
+        );
+        setChannels(validChannels);
+        if (validChannels.length > 0 && !selectedChannel) {
+          setSelectedChannel(validChannels[0]);
         }
       } catch (error) {
         console.error("Error loading channels:", error);
@@ -79,7 +82,12 @@ const StudentsTutor = () => {
 
   // Filter channels based on search query
   const filteredChannels = channels.filter((channel) => {
-    const channelName = channel.data.name?.toLowerCase() || "";
+    // First ensure the channel has a valid name
+    if (!channel.data.name || channel.data.name.trim() === "") {
+      return false;
+    }
+
+    const channelName = channel.data.name.toLowerCase();
     const channelDescription = channel.data.description?.toLowerCase() || "";
     const query = searchQuery.toLowerCase();
 

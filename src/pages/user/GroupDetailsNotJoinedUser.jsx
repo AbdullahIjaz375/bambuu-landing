@@ -10,6 +10,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { doc, getDoc, updateDoc, arrayUnion } from "firebase/firestore";
+import { useTranslation } from "react-i18next";
 
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { ChannelType } from "../../config/stream";
@@ -47,6 +48,7 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
   const [classes, setClasses] = useState([]);
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
 
   //------------------------------------------fetching groups-----------------------------------------//
 
@@ -360,7 +362,9 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
                 >
                   <ArrowLeft size="30" />
                 </button>
-                <h1 className="text-4xl font-semibold">Group Details</h1>
+                <h1 className="text-4xl font-semibold">
+                  {t("group-details.title")}
+                </h1>
               </div>
             </div>
 
@@ -410,7 +414,8 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
                           className="w-4 rounded-full md:w-5"
                         />
                         <span className="text-xs text-gray-800 md:text-sm">
-                          {group.groupAdminName} (Admin)
+                          {group.groupAdminName}{" "}
+                          {t("group-details.admin-label")}
                         </span>
                       </div>
                       <div className="flex items-center gap-1 mb-2 md:mb-4">
@@ -420,7 +425,7 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
                           className="w-4 md:w-5"
                         />
                         <span className="text-xs text-gray-800 md:text-sm">
-                          2k+
+                          {t("group-details.members")}
                         </span>
                       </div>
                     </div>
@@ -455,13 +460,15 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
                 className="px-8 py-2 text-lg text-black border border-black rounded-full "
                 onClick={handleBack}
               >
-                Cancel
+                {t("group-details.buttons.cancel")}
               </button>
               <button
                 className="px-8 text-lg py-2 text-black bg-[#ffbf00] border border-black rounded-full "
                 onClick={handleJoinConfirm}
               >
-                {isJoining ? "Joining...." : "Yes, Join"}
+                {isJoining
+                  ? t("group-details.buttons.join.loading")
+                  : t("group-details.buttons.join.default")}
               </button>
             </div>
           </div>

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Modal from "react-modal";
 import { X } from "lucide-react";
 import { useAuth } from "../../src/context/AuthContext";
+import { useTranslation } from "react-i18next";
 
 Modal.setAppElement("#root");
 
@@ -28,6 +29,7 @@ const customStyles = {
 const PlansModal = ({ isOpen, onClose }) => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("subscriptions");
+  const { t } = useTranslation();
 
   const handlePurchase = async (plan, userId) => {
     try {
@@ -53,24 +55,24 @@ const PlansModal = ({ isOpen, onClose }) => {
     const [isLoading, setIsLoading] = useState(false);
     const features = [
       {
-        title: "SuperTutor",
-        description: "Gemini based AI tutor",
+        title: t("plans-modal.features.supertutor.title"),
+        description: t("plans-modal.features.supertutor.description"),
       },
       {
-        title: "Language Experts",
-        description: "You'll have direct access to our language experts",
+        title: t("plans-modal.features.experts.title"),
+        description: t("plans-modal.features.experts.description"),
       },
       {
-        title: "Saved Resources",
-        description: "You can save resources in the app",
+        title: t("plans-modal.features.resources.title"),
+        description: t("plans-modal.features.resources.description"),
       },
       {
         title: plan.title.includes("Group")
-          ? "bammbuu+ Group Classes"
-          : "11 Classes",
+          ? t("plans-modal.features.classes.group.title")
+          : t("plans-modal.features.classes.private.title"),
         description: plan.title.includes("Group")
-          ? "You can book bammbuu+ group classes"
-          : "You can book 11 classes with language experts",
+          ? t("plans-modal.features.classes.group.description")
+          : t("plans-modal.features.classes.private.description"),
       },
     ];
 
@@ -87,7 +89,7 @@ const PlansModal = ({ isOpen, onClose }) => {
       <div className="flex flex-col h-full border-[#B0B0B0] bg-white border rounded-3xl">
         {plan.isPopular && (
           <div className="px-4 py-1.5 text-sm font-semibold bg-[#FFBF00] rounded-t-3xl text-center">
-            Most Popular
+            {t("plans-modal.popular-badge")}
           </div>
         )}
         <div className="flex flex-col flex-grow p-6 space-y-6 text-center">
@@ -132,7 +134,9 @@ const PlansModal = ({ isOpen, onClose }) => {
             disabled={isLoading}
             className="w-full py-3 text-[#042F0C] transition-colors bg-[#14B82C] rounded-full border border-[#042F0C] disabled:opacity-50"
           >
-            {isLoading ? "Loading..." : "Subscribe Now"}
+            {isLoading
+              ? t("plans-modal.buttons.loading")
+              : t("plans-modal.buttons.subscribe")}
           </button>
         </div>
       </div>
@@ -180,19 +184,19 @@ const PlansModal = ({ isOpen, onClose }) => {
 
   const subscriptionPlans = [
     {
-      title: "bammbuu+ Instructor-Led Group Classes",
-      description: "Unlimited instructor-led group conversation classes",
+      title: t("plans-modal.subscription-plans.group.title"),
+      description: t("plans-modal.subscription-plans.group.description"),
       price: 49.99,
-      period: "month",
+      period: t("plans-modal.pricing.month"),
       isPopular: true,
       type: "monthly_subscription",
       stripeLink: "https://buy.stripe.com/test_14keVY9UVgHjapq4gi",
     },
     {
-      title: "Unlimited Class Credits",
-      description: "11 private instructor classes",
+      title: t("plans-modal.subscription-plans.unlimited.title"),
+      description: t("plans-modal.subscription-plans.unlimited.description"),
       price: 149.99,
-      period: "month",
+      period: t("plans-modal.pricing.month"),
       isPopular: false,
       type: "yearly_subscription",
       stripeLink: "https://buy.stripe.com/test_7sIaFIaYZ2QteFGaEH",
@@ -201,16 +205,16 @@ const PlansModal = ({ isOpen, onClose }) => {
 
   const creditPlans = [
     {
-      title: "3 Class Credits",
-      description: "bammbuu+ classes only",
+      title: t("plans-modal.credit-plans.three.title"),
+      description: t("plans-modal.credit-plans.three.description"),
       price: 59.99,
       isPopular: false,
       type: "3_credits",
       stripeLink: "https://buy.stripe.com/test_28o1581op4YB556000",
     },
     {
-      title: "5 Class Credits",
-      description: "bammbuu+ classes only",
+      title: t("plans-modal.credit-plans.five.title"),
+      description: t("plans-modal.credit-plans.five.description"),
       price: 99.99,
       isPopular: true,
       type: "5_credits",
@@ -227,7 +231,7 @@ const PlansModal = ({ isOpen, onClose }) => {
     >
       <div className="relative font-urbanist">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-medium">Membership</h2>
+          <h2 className="text-2xl font-medium">{t("plans-modal.title")}</h2>
           <button
             onClick={onClose}
             className="p-1 text-gray-400 hover:text-gray-600"
@@ -247,7 +251,7 @@ const PlansModal = ({ isOpen, onClose }) => {
                 }`}
               onClick={() => setActiveTab("subscriptions")}
             >
-              Subscriptions
+              {t("plans-modal.tabs.subscriptions")}
             </button>
             <button
               className={`px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors
@@ -258,7 +262,7 @@ const PlansModal = ({ isOpen, onClose }) => {
                 }`}
               onClick={() => setActiveTab("credits")}
             >
-              Class Credits
+              {t("plans-modal.tabs.credits")}
             </button>
           </div>
         </div>

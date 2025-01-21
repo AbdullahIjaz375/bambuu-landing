@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { X, Camera } from "lucide-react";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../../src/firebaseConfig";
+import { useTranslation } from "react-i18next";
+
 import Modal from "react-modal";
 
 const EditClassModal = ({
@@ -15,6 +17,7 @@ const EditClassModal = ({
     initialClassData?.imageUrl
   );
   const [isUpdating, setIsUpdating] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (initialClassData) {
@@ -162,7 +165,7 @@ const EditClassModal = ({
           <div className="flex flex-row items-start justify-between space-x-4">
             <div>
               <label className="text-sm font-medium text-gray-700">
-                Class name
+                {t("createClass.className")}
               </label>
               <input
                 type="text"
@@ -176,7 +179,7 @@ const EditClassModal = ({
 
             <div>
               <label className="text-sm font-medium text-gray-700">
-                Class Language
+                {t("createClass.language.label")}
               </label>
               <div className="flex gap-2 mt-1">
                 {["English", "Spanish", "English-Spanish Exchange"].map(
@@ -200,7 +203,7 @@ const EditClassModal = ({
 
           <div>
             <label className="text-sm font-medium text-gray-700">
-              Class Description
+              {t("createClass.description.label")}
             </label>
             <textarea
               value={classData.classDescription || ""}
@@ -216,7 +219,7 @@ const EditClassModal = ({
           <div className="flex flex-row items-start justify-between space-x-4">
             <div>
               <label className="text-sm font-medium text-gray-700">
-                Class Level
+                {t("createClass.level.label")}
               </label>
               <div className="flex gap-2 mt-1">
                 {["Beginner", "Intermediate", "Advanced"].map((level) => (
@@ -239,7 +242,7 @@ const EditClassModal = ({
 
             <div>
               <label className="text-sm font-medium text-gray-700">
-                Class Recurrence Type
+                {t("createClass.type.label")}
               </label>
               <div className="flex flex-wrap gap-2 mt-1">
                 {["None", "One-time", "Daily", "Weekly", "Monthly"].map(
@@ -264,7 +267,7 @@ const EditClassModal = ({
           <div className="flex flex-row items-start justify-between space-x-4">
             <div>
               <label className="text-sm font-medium text-gray-700">
-                Class Location
+                {t("createClass.location.label")}
               </label>
               <div className="flex gap-2 mt-1">
                 {["Physical", "Virtual"].map((location) => (
@@ -288,9 +291,10 @@ const EditClassModal = ({
             {classData.classLocation === "Physical" && (
               <div>
                 <label className="text-sm font-medium text-gray-700">
-                  Class Address
+                  {t("createClass.location.address")}
                 </label>
                 <input
+                  placeholder={t("createClass.location.address.placeholder")}
                   type="text"
                   value={classData.classAddress || ""}
                   onChange={(e) =>
@@ -306,11 +310,12 @@ const EditClassModal = ({
             {classData.classType !== "Individual Premium" && (
               <div>
                 <label className="text-sm font-medium text-gray-700">
-                  Available Slots
+                  {t("createClass.slots.label")}
                 </label>
                 <input
                   type="number"
                   value={classData.availableSpots || ""}
+                  placeholder={t("createClass.slots.placeholder")}
                   onChange={(e) =>
                     handleClassDataChange(
                       "availableSpots",
@@ -324,7 +329,7 @@ const EditClassModal = ({
 
             <div>
               <label className="text-sm font-medium text-gray-700">
-                Class Duration
+                {t("createClass.duration.label")}
               </label>
               <div className="flex gap-2 mt-1">
                 {[30, 60, 90, 120].map((duration) => (
@@ -339,7 +344,7 @@ const EditClassModal = ({
                         : "border border-gray-200"
                     }`}
                   >
-                    {duration} min
+                    {duration} {t("createClass.duration.minutes")}
                   </button>
                 ))}
               </div>
@@ -349,7 +354,7 @@ const EditClassModal = ({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium text-gray-700">
-                Class Date
+                {t("createClass.schedule.date")}
               </label>
               <input
                 type="date"
@@ -368,7 +373,7 @@ const EditClassModal = ({
             </div>
             <div>
               <label className="text-sm font-medium text-gray-700">
-                Class Starting Time
+                {t("createClass.schedule.time")}
               </label>
               <input
                 type="time"
@@ -391,7 +396,7 @@ const EditClassModal = ({
               onClick={onClose}
               className="px-8 py-2.5 border border-gray-200 rounded-full text-sm font-medium"
             >
-              Cancel
+              {t("createClass.buttons.cancel")}
             </button>
             <button
               onClick={handleUpdateClass}

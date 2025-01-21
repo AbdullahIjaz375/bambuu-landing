@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import Slider from "react-slick";
 import Sidebar from "../../components/Sidebar";
+import { useTranslation } from "react-i18next";
 import ClassCard from "../../components/ClassCard";
 import { useAuth } from "../../context/AuthContext";
 import GroupCard from "../../components/GroupCard";
@@ -28,7 +29,7 @@ import CalendarUser from "../../components/CalenderUser";
 const LearnUser = () => {
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
-
+  const { t } = useTranslation();
   const settings = {
     dots: false,
     infinite: false,
@@ -246,18 +247,23 @@ const LearnUser = () => {
           {/* Header with Welcome and Notification */}
           <div className="flex items-center justify-between mb-4 border-b border-[#e7e7e7] pb-4">
             <div className="flex flex-row items-center space-x-4">
-              <h1 className="text-3xl font-semibold">Hi, {user.name}!</h1>
+              <h1 className="text-3xl font-semibold">
+                {t("learnUser.welcome.greeting", { name: user.name })}
+              </h1>{" "}
               <p className="text-[#616161] text-lg whitespace-nowrap">
-                How are you today?{" "}
+                {t("learnUser.welcome.question")}{" "}
                 {nextClass
-                  ? `Your next class "${nextClass.className}" is ${nextClass.timeUntil}`
-                  : "You have no upcoming classes"}
+                  ? t("learnUser.welcome.nextClass.upcoming", {
+                      className: nextClass.className,
+                      timeUntil: nextClass.timeUntil,
+                    })
+                  : t("learnUser.welcome.nextClass.none")}
               </p>
             </div>
             <div className="flex items-center flex-shrink-0 gap-2">
               <div className="flex flex-col items-center justify-center rounded-full bg-[#E6FDE9]  border border-[#14B82C] p-2 ">
                 <h1 className="text-xs font-semibold">{user.credits}</h1>
-                <h1 className="text-[10px]">Credits</h1>
+                <h1 className="text-[10px]">{t("learnUser.credits.label")}</h1>
               </div>
               <NotificationDropdown />
             </div>
@@ -270,12 +276,14 @@ const LearnUser = () => {
             <div className="flex flex-col w-[60%]">
               <div className="">
                 <div className="flex items-center justify-between gap-4 mb-6">
-                  <h2 className="text-2xl font-bold">Learn a Language</h2>
+                  <h2 className="text-2xl font-bold">
+                    {t("learnUser.languageLearning.title")}
+                  </h2>
                   <button
                     className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
                     onClick={() => navigate("/learnLanguageUser")}
                   >
-                    View All
+                    {t("learnUser.languageLearning.viewAll")}
                   </button>
                 </div>
               </div>
@@ -293,7 +301,10 @@ const LearnUser = () => {
                       />
                     </div>
                     <div className="flex flex-col items-start justify-between space-y-2">
-                      <span className="text-xl font-bold">Spanish</span>
+                      <span className="text-xl font-bold">
+                        {" "}
+                        {t("learnUser.languageLearning.languages.spanish")}
+                      </span>
                       <div className="flex items-center">
                         <div className="flex -space-x-3">
                           {students.map((_, i) => (
@@ -319,7 +330,10 @@ const LearnUser = () => {
                       />
                     </div>
                     <div className="flex flex-col items-start justify-between space-y-2">
-                      <span className="text-xl font-bold">English</span>
+                      <span className="text-xl font-bold">
+                        {" "}
+                        {t("learnUser.languageLearning.languages.english")}
+                      </span>
                       <div className="flex items-center">
                         <div className="flex -space-x-3">
                           {students.map((_, i) => (
@@ -346,7 +360,7 @@ const LearnUser = () => {
                     </div>
                     <div className="flex flex-col items-start justify-between space-y-2">
                       <span className="text-xl font-bold whitespace-nowrap">
-                        English-Spanish Exchange
+                        {t("learnUser.languageLearning.languages.exchange")}
                       </span>
                       <div className="flex items-center">
                         <div className="flex -space-x-3">
@@ -370,13 +384,15 @@ const LearnUser = () => {
           {/* My Classes Section */}
           <div className="w-full max-w-[160vh] mx-auto mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-bold">My Classes</h2>
+              <h2 className="text-2xl font-bold">
+                {t("learnUser.classes.title")}
+              </h2>
               {classes.length > 0 && (
                 <button
                   className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
                   onClick={() => navigate("/classesUser")}
                 >
-                  View All
+                  {t("learnUser.classes.viewAll")}
                 </button>
               )}
             </div>
@@ -392,7 +408,7 @@ const LearnUser = () => {
                   className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
                   onClick={() => window.location.reload()}
                 >
-                  Try Again
+                  {t("learnUser.classes.error.tryAgain")}
                 </button>
               </div>
             ) : classes.length === 0 ? (
@@ -402,7 +418,7 @@ const LearnUser = () => {
                   className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
                   onClick={() => navigate("/learnLanguageUser")}
                 >
-                  Book a Class
+                  {t("learnUser.classes.empty.action")}
                 </button>
               </div>
             ) : (
@@ -427,13 +443,15 @@ const LearnUser = () => {
           {/* My Groups Section */}
           <div className="w-full max-w-[160vh] mx-auto">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-bold">My Groups</h2>
+              <h2 className="text-2xl font-bold">
+                {t("learnUser.groups.title")}
+              </h2>
               {groups.length > 0 && (
                 <button
                   className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
                   onClick={() => navigate("/groupsUser")}
                 >
-                  View All
+                  {t("learnUser.groups.viewAll")}
                 </button>
               )}
             </div>
@@ -449,7 +467,7 @@ const LearnUser = () => {
                   className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
                   onClick={() => window.location.reload()}
                 >
-                  Try Again
+                  {t("learnUser.groups.error.tryAgain")}
                 </button>
               </div>
             ) : groups.length === 0 ? (
@@ -460,13 +478,13 @@ const LearnUser = () => {
                     onClick={() => navigate("/learnLanguageUser")}
                     className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
                   >
-                    Join a Group
+                    {t("learnUser.groups.empty.joinAction")}
                   </button>
                   <button
                     onClick={() => navigate("/groupsUser")}
                     className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
                   >
-                    Create a Group
+                    {t("learnUser.groups.empty.createAction")}
                   </button>
                 </div>
               </div>

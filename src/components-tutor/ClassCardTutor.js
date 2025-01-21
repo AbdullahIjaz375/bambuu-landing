@@ -113,9 +113,11 @@ const ClassCardTutor = ({
                     </span>
                   </span>
                 </div>
-                <span className="px-2 sm:px-3 py-1 text-xs sm:text-sm bg-[#fff885] rounded-full">
-                  {languageLevel}
-                </span>
+                {languageLevel !== "None" && (
+                  <span className="px-2 sm:px-3 py-1 text-xs sm:text-sm bg-[#fff885] rounded-full">
+                    {languageLevel}
+                  </span>
+                )}
               </div>
             </div>
 

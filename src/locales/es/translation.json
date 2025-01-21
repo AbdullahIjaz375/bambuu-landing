@@ -405,5 +405,406 @@
       "us-alt": "Bandera de EE.UU.",
       "spain-alt": "Bandera de España"
     }
+  },
+
+  "groupDetails": {
+    "title": "Detalles del Grupo",
+    "adminLabel": "(Administrador)",
+    "members": "Miembros",
+    "classes": "Clases",
+    "buttons": {
+      "viewChat": "Ver Chat del Grupo",
+      "editDetails": "Editar Detalles del Grupo",
+      "deleteGroup": "Eliminar Grupo",
+      "leaveGroup": "Salir del Grupo",
+      "createClass": "+ Crear Nueva Clase",
+      "back": "Atrás"
+    },
+    "stats": {
+      "members": "2k+"
+    }
+  },
+  "createClass": {
+    "title": "Crear Nueva Clase",
+    "className": "Nombre de la clase",
+    "classNamePlaceholder": "Nombre de la clase",
+    "language": {
+      "label": "Idioma de la Clase",
+      "english": "Inglés",
+      "spanish": "Español",
+      "exchange": "Intercambio Inglés-Español"
+    },
+    "description": {
+      "label": "Descripción de la Clase",
+      "placeholder": "Ingrese una breve descripción de la clase (máximo 200 letras)"
+    },
+    "level": {
+      "label": "Nivel de la Clase",
+      "beginner": "Principiante",
+      "intermediate": "Intermedio",
+      "advanced": "Avanzado"
+    },
+    "type": {
+      "label": "Tipo de Clase",
+      "oneTime": "Una vez",
+      "daily": "Diario",
+      "weekly": "Semanal",
+      "monthly": "Mensual"
+    },
+    "location": {
+      "label": "Ubicación de la Clase",
+      "physical": "Presencial",
+      "virtual": "Virtual",
+      "address": "Dirección de la Clase",
+      "addressPlaceholder": "Ingrese la dirección física de la clase"
+    },
+    "slots": {
+      "label": "Cupos Disponibles",
+      "placeholder": "Ingrese número de cupos"
+    },
+    "duration": {
+      "label": "Duración de la Clase",
+      "minutes": "min"
+    },
+    "schedule": {
+      "date": "Fecha de la Clase",
+      "time": "Hora de Inicio"
+    },
+    "buttons": {
+      "cancel": "Cancelar",
+      "create": "Crear Clase",
+      "creating": "Creando..."
+    }
+  },
+  "leaveGroup": {
+    "title": "¿Estás seguro de que quieres salir de este grupo?",
+    "buttons": {
+      "no": "No, Cancelar",
+      "yes": "Sí, Salir",
+      "leaving": "Saliendo..."
+    }
+  },
+  "removeUser": {
+    "title": "¿Eliminar a {userName} del grupo?",
+    "description": "Esta acción no se puede deshacer. El usuario deberá solicitar unirse nuevamente.",
+    "buttons": {
+      "cancel": "Cancelar",
+      "remove": "Eliminar",
+      "removing": "Eliminando..."
+    }
+  },
+  "deleteGroup": {
+    "title": "¿Estás seguro de que quieres eliminar este grupo?",
+    "buttons": {
+      "cancel": "No, Cancelar",
+      "delete": "Eliminar",
+      "deleting": "Eliminando..."
+    }
+  },
+  "learnUser": {
+    "welcome": {
+      "greeting": "¡Hola, {{name}}!",
+      "question": "¿Cómo estás hoy?",
+      "nextClass": {
+        "upcoming": "Tu próxima clase \"{{className}}\" es {{timeUntil}}",
+        "none": "No tienes clases próximas"
+      }
+    },
+    "credits": {
+      "label": "Créditos"
+    },
+    "languageLearning": {
+      "title": "Aprende un Idioma",
+      "viewAll": "Ver Todo",
+      "languages": {
+        "spanish": "Español",
+        "english": "Inglés",
+        "exchange": "Intercambio Inglés-Español"
+      }
+    },
+    "classes": {
+      "title": "Mis Clases",
+      "viewAll": "Ver Todo",
+      "empty": {
+        "message": "¡Aún no has reservado ninguna clase!",
+        "action": "Reservar una Clase"
+      },
+      "error": {
+        "tryAgain": "Intentar de Nuevo"
+      }
+    },
+    "groups": {
+      "title": "Mis Grupos",
+      "viewAll": "Ver Todo",
+      "empty": {
+        "message": "¡Aún no eres parte de ningún grupo!",
+        "joinAction": "Unirse a un Grupo",
+        "createAction": "Crear un Grupo"
+      },
+      "error": {
+        "tryAgain": "Intentar de Nuevo"
+      }
+    }
+  },
+  "learnLanguage": {
+    "title": "Aprender Idioma",
+    "tabs": {
+      "myBambuu": "Mi bammbuu",
+      "exploreBambuu": "Explorar bammbuu"
+    },
+    "myClasses": {
+      "title": "Mis Clases",
+      "viewAll": "Ver Todo",
+      "empty": "¡Aún no te has unido a ninguna clase!",
+      "error": {
+        "tryAgain": "Intentar de Nuevo"
+      }
+    },
+    "myGroups": {
+      "title": "Mis Grupos",
+      "viewAll": "Ver Todo",
+      "empty": "¡Aún no eres parte de ningún grupo!",
+      "createGroup": "Crear un Grupo",
+      "error": {
+        "tryAgain": "Intentar de Nuevo"
+      }
+    },
+    "exploreClasses": {
+      "title": "Explorar Clases",
+      "viewAll": "Ver Todo",
+      "empty": "¡No hay clases disponibles para explorar en este momento!",
+      "error": {
+        "tryAgain": "Intentar de Nuevo"
+      }
+    },
+    "exploreGroups": {
+      "title": "Explorar Grupos",
+      "viewAll": "Ver Todo",
+      "empty": "¡No hay grupos disponibles para explorar en este momento!",
+      "error": {
+        "tryAgain": "Intentar de Nuevo"
+      }
+    }
+  },
+  "exploreClasses": {
+    "title": "Explorar Clases",
+    "search": {
+      "placeholder": "Buscar clases por nombre"
+    },
+    "empty": {
+      "noResults": "No se encontraron resultados.",
+      "noClasses": "Aún no hay clases."
+    }
+  },
+  "exploreGroups": {
+    "title": "Explorar Grupos",
+    "search": {
+      "placeholder": "Buscar grupos por nombre o categoría"
+    },
+    "empty": {
+      "noResults": "No se encontraron resultados.",
+      "noGroups": "Aún no hay grupos."
+    }
+  },
+
+  "group-details": {
+    "title": "Detalles del Grupo",
+    "members": "2k+",
+    "admin-label": "(Administrador)",
+    "buttons": {
+      "cancel": "Cancelar",
+      "join": {
+        "default": "Sí, Unirse",
+        "loading": "Uniéndose...."
+      }
+    },
+    "languages": {
+      "english": "Inglés",
+      "spanish": "Español"
+    },
+    "alt-text": {
+      "us-flag": "Bandera de EE.UU.",
+      "spain-flag": "Bandera de España",
+      "admin-image": "administrador",
+      "members-icon": "bammbuu"
+    }
+  },
+  "plans-modal": {
+    "title": "Membresía",
+    "tabs": {
+      "subscriptions": "Suscripciones",
+      "credits": "Créditos de Clase"
+    },
+    "popular-badge": "Más Popular",
+    "pricing": {
+      "per": "/{period}",
+      "month": "mes"
+    },
+    "features": {
+      "supertutor": {
+        "title": "SuperTutor",
+        "description": "Tutor de IA basado en Gemini"
+      },
+      "experts": {
+        "title": "Expertos en Idiomas",
+        "description": "Tendrás acceso directo a nuestros expertos en idiomas"
+      },
+      "resources": {
+        "title": "Recursos Guardados",
+        "description": "Puedes guardar recursos en la aplicación"
+      },
+      "classes": {
+        "group": {
+          "title": "Clases Grupales bammbuu+",
+          "description": "Puedes reservar clases grupales bammbuu+"
+        },
+        "private": {
+          "title": "11 Clases",
+          "description": "Puedes reservar 11 clases con expertos en idiomas"
+        }
+      }
+    },
+    "subscription-plans": {
+      "group": {
+        "title": "Clases Grupales con Instructor bammbuu+",
+        "description": "Clases de conversación grupales ilimitadas con instructor"
+      },
+      "unlimited": {
+        "title": "Créditos de Clase Ilimitados",
+        "description": "11 clases privadas con instructor"
+      }
+    },
+    "credit-plans": {
+      "three": {
+        "title": "3 Créditos de Clase",
+        "description": "Solo clases bammbuu+"
+      },
+      "five": {
+        "title": "5 Créditos de Clase",
+        "description": "Solo clases bammbuu+"
+      }
+    },
+    "buttons": {
+      "subscribe": "Suscribirse Ahora",
+      "buy": "Comprar Ahora",
+      "loading": "Cargando..."
+    },
+    "credits-warning": "Con los créditos de clase solo puedes reservar clases bammbuu+, otros beneficios premium no están incluidos."
+  },
+  "class-details": {
+    "title": "Detalles de la Clase",
+    "flags": {
+      "us": "Bandera de EE.UU.",
+      "spain": "Bandera de España"
+    },
+    "labels": {
+      "instructor": "Instructor",
+      "group": "Grupo",
+      "teacher": "Profesor"
+    },
+    "members": {
+      "title": "Miembros",
+      "count": "Miembros ({{count}})"
+    },
+    "slots": {
+      "title": "Horarios de Clases Recurrentes",
+      "add-button": "+ Más Horarios"
+    },
+    "buttons": {
+      "join": "Unirse a la Clase",
+      "edit": "Editar Detalles de la Clase",
+      "delete": "Eliminar Clase",
+      "leave": "Abandonar Clase"
+    },
+    "modals": {
+      "delete": {
+        "title": "¿Estás seguro de que quieres eliminar esta clase?",
+        "cancel": "No, Cancelar",
+        "confirm": "Eliminar",
+        "loading": "Eliminando..."
+      },
+      "leave": {
+        "title": "¿Estás seguro de que quieres abandonar esta clase?",
+        "cancel": "No, Cancelar",
+        "confirm": "Abandonar",
+        "loading": "Abandonando..."
+      }
+    },
+    "status": {
+      "none": "Ninguno"
+    },
+    "alt-text": {
+      "time": "hora",
+      "date": "fecha",
+      "participants": "participantes",
+      "recurrence": "recurrencia",
+      "location": "ubicación"
+    },
+    "class-types": {
+      "individual-premium": "Premium Individual"
+    }
+  },
+  "instructor-profile": {
+    "title": "Perfil del Instructor",
+    "details": {
+      "native": {
+        "label": "Nativo",
+        "alt": "idioma"
+      },
+      "from": {
+        "label": "De",
+        "alt": "ubicación"
+      },
+      "teaching": {
+        "label": "Enseñando",
+        "alt": "enseñanza"
+      },
+      "students": {
+        "label": "Estudiantes",
+        "alt": "estudiantes",
+        "count": "200k"
+      }
+    },
+    "sections": {
+      "classes": "Clases"
+    },
+    "buttons": {
+      "send-message": "Enviar Mensaje"
+    },
+    "alt-text": {
+      "profile-image": "foto de perfil de {{name}}"
+    }
+  },
+  "edit-group": {
+    "title": "Editar Grupo",
+    "form": {
+      "group-image": {
+        "alt": "Grupo",
+        "upload-label": "Subir imagen del grupo"
+      },
+      "name": {
+        "label": "Nombre del Grupo",
+        "placeholder": "Nombre del grupo"
+      },
+      "description": {
+        "label": "Descripción del Grupo",
+        "placeholder": "Ingrese una breve descripción del grupo. (máximo 200 letras)"
+      },
+      "language": {
+        "label": "Idioma de Aprendizaje",
+        "options": {
+          "english": "Inglés",
+          "spanish": "Español",
+          "exchange": "Intercambio Inglés-Español"
+        }
+      }
+    },
+    "buttons": {
+      "cancel": "Cancelar",
+      "update": {
+        "default": "Actualizar Grupo",
+        "loading": "Actualizando..."
+      }
+    }
   }
 }

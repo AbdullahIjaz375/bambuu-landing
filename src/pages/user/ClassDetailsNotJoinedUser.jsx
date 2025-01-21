@@ -219,23 +219,29 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
         throw new Error("Class is full");
       }
 
-      // Calculate recurring slots if applicable
-      let recurringSlots = [];
-      if (selectedRecurrenceType !== "One-time") {
-        recurringSlots = calculateRecurringSlots(
-          classData.classDateTime.seconds * 1000,
-          selectedRecurrenceType,
-          parseInt(totalClasses)
-        );
-      }
+      // Use the pre-calculated slots from state
+      const slotsTimestamps = slots.map(
+        (slot) => new Timestamp(Math.floor(slot.getTime() / 1000), 0)
+      );
 
       // Prepare the update data
       const updateData = {
         classMemberIds: arrayUnion(userId),
         selectedRecurrenceType,
+        languageLevel: languageLevel,
         recurringSlots:
-          selectedRecurrenceType === "One-time" ? [] : recurringSlots,
+          selectedRecurrenceType === "One-time" ? [] : slotsTimestamps,
       };
+
+      // Prepare the update data
+
+      // Only update classDateTime if we have slots
+      if (slots.length > 0) {
+        updateData.classDateTime = new Timestamp(
+          Math.floor(slots[0].getTime() / 1000),
+          0
+        );
+      }
 
       // Prepare updates array
       const updates = [
@@ -330,27 +336,11 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
     );
   };
 
-  // const handleConfirmBooking = async () => {
-  //   if (!user) {
-  //     setError("Please log in to enroll in classes");
-  //     return;
-  //   }
-
-  //   const success = await enrollInClass(classId, user.uid, classData.adminId);
-
-  //   if (success) {
-  //     setIsBookingConfirmationOpen(false);
-  //     setIsModalOpen(false);
-  //     // You might want to show a success toast or message here
-  //   }
-  // };
-
-  //-----------------------------------------------------------------//
-
   const [selectedRecurrenceType, setSelectedRecurrenceType] = useState(
     classData?.recurrenceTypes?.[0] || ""
   );
   const [totalClasses, setTotalClasses] = useState("");
+  const [languageLevel, setLanguageLevel] = useState("Beginner");
 
   const calculateRecurringSlots = (
     startDateTimeMillis, // Expect milliseconds
@@ -408,10 +398,10 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
           <label
             key={type}
             className={`
-              inline-flex text-lg items-center px-4 py-2 rounded-full cursor-pointer border
+              inline-flex text-lg items-center px-4 py-1.5 rounded-full cursor-pointer border border-black
               ${
                 selectedRecurrenceType === type
-                  ? "bg-green-50 text-black"
+                  ? "bg-[#e6fce8] text-black"
                   : "bg-gray-50 text-gray-500"
               }`}
           >
@@ -423,6 +413,36 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
               onChange={(e) => setSelectedRecurrenceType(e.target.value)}
             />
             <span className="text-md">{type}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+  const languageLevels = ["Beginner", "Intermediate", "Advanced"];
+
+  const renderLanguageLevel = () => (
+    <div className="space-y-4 ">
+      <label className="block text-xl font-semibold">Language Level</label>
+      <div className="flex flex-wrap gap-3">
+        {languageLevels?.map((level) => (
+          <label
+            key={level}
+            className={`
+              inline-flex text-lg items-center px-4 py-1.5 rounded-full cursor-pointer border border-black
+              ${
+                languageLevel === level
+                  ? "bg-[#e6fce8] text-black"
+                  : "bg-gray-50 text-gray-500"
+              }`}
+          >
+            <input
+              type="radio"
+              className="hidden"
+              value={level}
+              checked={languageLevel === level}
+              onChange={(e) => setLanguageLevel(e.target.value)}
+            />
+            <span className="text-md">{level}</span>
           </label>
         ))}
       </div>
@@ -442,7 +462,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
         <label className="block text-xl font-medium ">Total Classes</label>
         <input
           type="number"
-          className="w-full px-3 py-2 text-lg border border-gray-300 rounded-lg"
+          className="w-full p-3 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
           placeholder="Enter total number of classes"
           value={totalClasses}
           onChange={(e) => setTotalClasses(e.target.value)}
@@ -451,7 +471,121 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
       </div>
     );
   };
-  //--------------------------------------------------------------------------//
+  //----------------------------------class slots----------------------------------------//
+
+  const [slots, setSlots] = useState([]);
+
+  useEffect(() => {
+    if (!classData?.classDateTime || !selectedRecurrenceType || !totalClasses)
+      return;
+
+    const calculateSlots = () => {
+      const currentTime = new Date();
+      let baseDate = new Date(classData?.classDateTime.seconds * 1000);
+      const slots = [];
+
+      // Extract time components for comparison
+      const classTimeStr = baseDate.toTimeString().split(" ")[0]; // HH:MM:SS
+      const currentTimeStr = currentTime.toTimeString().split(" ")[0];
+
+      // Compare dates and times
+      const isToday = baseDate.toDateString() === currentTime.toDateString();
+      const hasTimePassed = isToday && currentTimeStr > classTimeStr;
+
+      // If class is today and time has passed, or class date is in the past,
+      // adjust the base date according to recurrence type
+      if (hasTimePassed || baseDate < currentTime) {
+        const classHours = baseDate.getHours();
+        const classMinutes = baseDate.getMinutes();
+        const classSeconds = baseDate.getSeconds();
+
+        switch (selectedRecurrenceType) {
+          case "Daily":
+            // Move to next day, keeping the same time
+            baseDate = new Date(
+              currentTime.getFullYear(),
+              currentTime.getMonth(),
+              currentTime.getDate() + 1,
+              classHours,
+              classMinutes,
+              classSeconds
+            );
+            break;
+
+          case "Weekly":
+            // Calculate days until next occurrence
+            let daysUntilNext =
+              (7 - currentTime.getDay() + baseDate.getDay()) % 7;
+            if (daysUntilNext === 0 && hasTimePassed) {
+              daysUntilNext = 7; // If today's instance passed, move to next week
+            }
+
+            baseDate = new Date(
+              currentTime.getFullYear(),
+              currentTime.getMonth(),
+              currentTime.getDate() + daysUntilNext,
+              classHours,
+              classMinutes,
+              classSeconds
+            );
+            break;
+
+          case "Monthly":
+            let nextMonth = currentTime.getMonth();
+            let nextYear = currentTime.getFullYear();
+
+            // If we're past the class date this month, move to next month
+            if (
+              currentTime.getDate() > baseDate.getDate() ||
+              (currentTime.getDate() === baseDate.getDate() && hasTimePassed)
+            ) {
+              nextMonth++;
+              if (nextMonth > 11) {
+                nextMonth = 0;
+                nextYear++;
+              }
+            }
+
+            baseDate = new Date(
+              nextYear,
+              nextMonth,
+              baseDate.getDate(),
+              classHours,
+              classMinutes,
+              classSeconds
+            );
+            break;
+          default:
+        }
+      }
+
+      // Generate subsequent slots based on the adjusted base date
+      for (let i = 0; i < totalClasses; i++) {
+        const slotDate = new Date(baseDate);
+
+        switch (selectedRecurrenceType) {
+          case "Daily":
+            slotDate.setDate(baseDate.getDate() + i);
+            break;
+          case "Weekly":
+            slotDate.setDate(baseDate.getDate() + i * 7);
+            break;
+          case "Monthly":
+            slotDate.setMonth(baseDate.getMonth() + i);
+            break;
+          default:
+        }
+
+        slots.push(slotDate);
+      }
+
+      setSlots(slots);
+    };
+
+    calculateSlots();
+  }, [classData?.classDateTime, selectedRecurrenceType, totalClasses]);
+
+  //----------------------------------------------------------------------------------------//
 
   if (loading) {
     return (
@@ -624,45 +758,95 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
                   </div>
                 </div>
               </div>
+              <div className="flex flex-row space-x-4">
+                <div className="flex flex-col flex-1 min-h-0 ">
+                  {classData.classType === "Group Premium" ? (
+                    <>
+                      {/* Group Premium UI */}
+                      <div className="flex flex-row items-center justify-between mb-6">
+                        <button
+                          className="px-6 py-2 text-black bg-yellow-400 rounded-full"
+                          onClick={() => setActiveTab("Members")}
+                        >
+                          Members ({members.length})
+                        </button>
+                      </div>
+                      <div className="flex-1 overflow-y-auto">
+                        {renderMembers()}
+                      </div>
+                    </>
+                  ) : classData.classType === "Individual Premium" ? (
+                    <>
+                      <div className="w-full max-w-md space-y-6">
+                        {renderLanguageLevel()}
+                        {renderRecurrenceOptions()}
+                        {renderTotalClassesInput()}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex flex-row items-center justify-between mb-6">
+                        <button
+                          className="px-6 py-2 text-black bg-yellow-400 rounded-full"
+                          onClick={() => setActiveTab("Members")}
+                        >
+                          Members ({members.length})
+                        </button>
+                      </div>
+                      <div className="flex-1 overflow-y-auto">
+                        {renderMembers()}
+                      </div>
+                    </>
+                  )}
+                </div>
 
-              <div className="flex flex-col flex-1 min-h-0">
-                {classData.classType === "Group Premium" ? (
-                  <>
-                    {/* Group Premium UI */}
-                    <div className="flex flex-row items-center justify-between mb-6">
-                      <button
-                        className="px-6 py-2 text-black bg-yellow-400 rounded-full"
-                        onClick={() => setActiveTab("Members")}
-                      >
-                        Members ({members.length})
-                      </button>
-                    </div>
-                    <div className="flex-1 overflow-y-auto">
-                      {renderMembers()}
-                    </div>
-                  </>
-                ) : classData.classType === "Individual Premium" ? (
-                  <>
-                    <div className="w-full max-w-md space-y-6">
-                      {renderRecurrenceOptions()}
-                      {renderTotalClassesInput()}
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="flex flex-row items-center justify-between mb-6">
-                      <button
-                        className="px-6 py-2 text-black bg-yellow-400 rounded-full"
-                        onClick={() => setActiveTab("Members")}
-                      >
-                        Members ({members.length})
-                      </button>
-                    </div>
-                    <div className="flex-1 overflow-y-auto">
-                      {renderMembers()}
-                    </div>
-                  </>
-                )}
+                <div className="space-y-4 w-96">
+                  <h3 className="text-xl font-semibold">Class Schedule</h3>
+                  <div className="space-y-2">
+                    {totalClasses && slots.length > 0 ? (
+                      slots.map((slot, index) => (
+                        <div key={index}>
+                          <div className="flex flex-col items-start justify-between p-3 border border-green-500 sm:flex-row sm:items-center sm:px-4 rounded-2xl sm:rounded-full">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-medium">
+                                Class {index + 1}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <div className="flex items-center gap-2">
+                                <Clock size={16} className="text-gray-500" />
+                                <span className="text-sm">
+                                  {slot.toLocaleTimeString("en-US", {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    hour12: true,
+                                  })}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Calendar size={16} className="text-gray-500" />
+                                <span className="text-sm">
+                                  {slot.toLocaleDateString("en-US", {
+                                    weekday: "short",
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                  })}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-sm text-gray-500">
+                        {selectedRecurrenceType !== "One-time"
+                          ? "Please enter the number of classes to see the schedule"
+                          : "One-time class scheduled for:"}
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           </div>

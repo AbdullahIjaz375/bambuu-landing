@@ -38,6 +38,8 @@ import { useAuth } from "../../context/AuthContext";
 import "react-datepicker/dist/react-datepicker.css";
 import "react-datepicker/dist/react-datepicker-cssmodules.css";
 import "react-time-picker/dist/TimePicker.css";
+import { useTranslation } from "react-i18next";
+
 import "react-clock/dist/Clock.css";
 import { useParams } from "react-router-dom";
 import ClassCard from "../../components/ClassCard";
@@ -55,7 +57,7 @@ const GroupDetailsUser = ({ onClose }) => {
   const [classes, setClasses] = useState([]);
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const { t } = useTranslation();
   //------------------------------------------fetching groups-----------------------------------------//
 
   const { groupId } = useParams();
@@ -863,7 +865,7 @@ const GroupDetailsUser = ({ onClose }) => {
                   <ArrowLeft size={20} className="md:w-8 md:h-8" />
                 </button>
                 <h1 className="text-xl font-semibold md:text-4xl">
-                  Group Details
+                  {t("groupDetails.title")}
                 </h1>
               </div>
             </div>
@@ -910,7 +912,7 @@ const GroupDetailsUser = ({ onClose }) => {
                         <img
                           src={group.groupAdminImageUrl}
                           alt="admin"
-                          className="w-4 rounded-full md:w-5"
+                          className="w-6 h-6 rounded-full "
                         />
                         <span className="text-xs text-gray-800 md:text-sm">
                           {group.groupAdminName} (Admin)
@@ -923,7 +925,7 @@ const GroupDetailsUser = ({ onClose }) => {
                           className="w-4 md:w-5"
                         />
                         <span className="text-xs text-gray-800 md:text-sm">
-                          2k+
+                          {t("groupDetails.stats.members")}
                         </span>
                       </div>
                     </div>
@@ -944,7 +946,7 @@ const GroupDetailsUser = ({ onClose }) => {
                         }`}
                         onClick={() => navigate("/communityUser")}
                       >
-                        View Group Chat
+                        {t("groupDetails.buttons.viewChat")}
                       </button>
                       {user.uid === group.groupAdminId ? (
                         <>
@@ -952,13 +954,13 @@ const GroupDetailsUser = ({ onClose }) => {
                             className="w-full px-3 py-2 text-sm text-black bg-white border border-black rounded-full md:px-4 md:text-base"
                             onClick={() => navigate(`/editGroup/${groupId}`)}
                           >
-                            Edit Group Details
+                            {t("groupDetails.buttons.editDetails")}
                           </button>
                           <button
                             className="w-full px-3 py-2 text-sm text-red-500 bg-white border border-red-500 rounded-full md:px-4 md:text-base"
                             onClick={() => setShowDeleteConfirmation(true)}
                           >
-                            Delete Group
+                            {t("groupDetails.buttons.deleteGroup")}
                           </button>
                         </>
                       ) : (
@@ -966,7 +968,7 @@ const GroupDetailsUser = ({ onClose }) => {
                           className="w-full px-3 py-2 text-sm text-red-500 border border-red-500 rounded-full md:px-4 md:text-base"
                           onClick={() => setShowLeaveConfirmation(true)}
                         >
-                          Leave Group
+                          {t("groupDetails.buttons.leaveGroup")}
                         </button>
                       )}
                     </div>
@@ -988,7 +990,7 @@ const GroupDetailsUser = ({ onClose }) => {
                             : "bg-transparent"
                         }`}
                       >
-                        Classes
+                        {t("groupDetails.classes")}
                       </button>
                       <button
                         onClick={() => setActiveTab("Members")}
@@ -999,7 +1001,7 @@ const GroupDetailsUser = ({ onClose }) => {
                             : "bg-transparent"
                         }`}
                       >
-                        Members
+                        {t("groupDetails.members")}
                       </button>
                     </div>
                   </div>
@@ -1009,7 +1011,7 @@ const GroupDetailsUser = ({ onClose }) => {
                       className="w-full md:w-auto bg-[#14b82c] border border-[#19291c] text-[#19291c] px-4 md:px-6 py-2 rounded-full text-sm md:text-base"
                       onClick={handleAddClassButtonClick}
                     >
-                      + Create New Class
+                      {t("groupDetails.buttons.createClass")}
                     </button>
                   )}
                 </div>
@@ -1038,7 +1040,7 @@ const GroupDetailsUser = ({ onClose }) => {
       >
         <div className="relative">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-medium">Create New Class</h2>
+            <h2 className="text-2xl font-medium">{t("createClass.title")}</h2>
             <button
               onClick={() => setAddClassModalOpen(false)}
               className="rounded-full hover:bg-gray-100"
@@ -1078,7 +1080,7 @@ const GroupDetailsUser = ({ onClose }) => {
             <div className="flex flex-row items-start justify-between space-x-4">
               <div>
                 <label className="text-sm font-medium text-gray-700">
-                  Class name
+                  {t("createClass.className")}
                 </label>
                 <input
                   type="text"
@@ -1094,7 +1096,7 @@ const GroupDetailsUser = ({ onClose }) => {
               {/* Language */}
               <div>
                 <label className="text-sm font-medium text-gray-700">
-                  Class Language
+                  {t("createClass.language.label")}
                 </label>
                 <div className="flex gap-2 mt-1">
                   <button
@@ -1105,7 +1107,7 @@ const GroupDetailsUser = ({ onClose }) => {
                         : "border border-gray-200"
                     }`}
                   >
-                    English
+                    {t("createClass.language.english")}
                   </button>
                   <button
                     onClick={() => handleClassDataChange("language", "Spanish")}
@@ -1115,7 +1117,7 @@ const GroupDetailsUser = ({ onClose }) => {
                         : "border border-gray-200"
                     }`}
                   >
-                    Spanish
+                    {t("createClass.language.spanish")}
                   </button>
                   <button
                     onClick={() =>
@@ -1130,7 +1132,7 @@ const GroupDetailsUser = ({ onClose }) => {
                         : "border border-gray-200"
                     }`}
                   >
-                    English-Spanish Exchange
+                    {t("createClass.language.exchange")}
                   </button>
                 </div>
               </div>
@@ -1138,10 +1140,10 @@ const GroupDetailsUser = ({ onClose }) => {
             {/* Description */}
             <div>
               <label className="text-sm font-medium text-gray-700">
-                Class Description
+                {t("createClass.description.label")}
               </label>
               <textarea
-                placeholder="Enter short description of class (max 200 letter)"
+                placeholder={t("createClass.description.placeholder")}
                 value={classData.classDescription}
                 onChange={(e) =>
                   handleClassDataChange("classDescription", e.target.value)
@@ -1155,7 +1157,7 @@ const GroupDetailsUser = ({ onClose }) => {
               {/* Class Level */}
               <div>
                 <label className="text-sm font-medium text-gray-700">
-                  Class Level
+                  {t("createClass.level.label")}
                 </label>
                 <div className="flex gap-2 mt-1">
                   {["Beginner", "Intermediate", "Advanced"].map((level) => (
@@ -1179,7 +1181,7 @@ const GroupDetailsUser = ({ onClose }) => {
               {/* Class Type */}
               <div>
                 <label className="text-sm font-medium text-gray-700">
-                  Class Type
+                  {t("createClass.type.label")}
                 </label>
                 <div className="flex flex-wrap gap-2 mt-1">
                   {["One-time", "Daily", "Weekly", "Monthly"].map((type) => (
@@ -1205,7 +1207,7 @@ const GroupDetailsUser = ({ onClose }) => {
               <div className="flex flex-row items-center space-x-10">
                 <div>
                   <label className="text-sm font-medium text-gray-700">
-                    Class Location
+                    {t("createClass.location.label")}
                   </label>
                   <div className="flex gap-2 mt-1">
                     <button
@@ -1218,7 +1220,7 @@ const GroupDetailsUser = ({ onClose }) => {
                           : "border border-gray-200"
                       }`}
                     >
-                      Physical
+                      {t("createClass.location.physical")}
                     </button>
                     <button
                       onClick={() =>
@@ -1230,7 +1232,7 @@ const GroupDetailsUser = ({ onClose }) => {
                           : "border border-gray-200"
                       }`}
                     >
-                      Virtual
+                      {t("createClass.location.virtual")}
                     </button>
                   </div>
                 </div>
@@ -1238,11 +1240,13 @@ const GroupDetailsUser = ({ onClose }) => {
                 {classData.classLocation === "Physical" && (
                   <div>
                     <label className="text-sm font-medium text-gray-700">
-                      Class Address
+                      {t("createClass.location.address")}
                     </label>
                     <input
                       type="text"
-                      placeholder="Enter physical class address"
+                      placeholder={t(
+                        "createClass.location.address.placeholder"
+                      )}
                       value={classData.classAddress}
                       onChange={(e) =>
                         handleClassDataChange("classAddress", e.target.value)
@@ -1279,11 +1283,11 @@ const GroupDetailsUser = ({ onClose }) => {
               {/* Available Slots */}
               <div>
                 <label className="text-sm font-medium text-gray-700">
-                  Available Slots
+                  {t("createClass.slots.label")}
                 </label>
                 <input
                   type="number"
-                  placeholder="Enter slots number"
+                  placeholder={t("createClass.slots.placeholder")}
                   value={classData.availableSpots}
                   onChange={(e) =>
                     handleClassDataChange(
@@ -1298,7 +1302,7 @@ const GroupDetailsUser = ({ onClose }) => {
               {/* Class Duration */}
               <div>
                 <label className="text-sm font-medium text-gray-700">
-                  Class Duration
+                  {t("createClass.duration.label")}
                 </label>
                 <div className="flex gap-2 mt-1">
                   {[30, 60, 90, 120].map((duration) => (
@@ -1313,7 +1317,7 @@ const GroupDetailsUser = ({ onClose }) => {
                           : "border border-gray-200"
                       }`}
                     >
-                      {duration} min
+                      {duration} {t("createClass.duration.minutes")}
                     </button>
                   ))}
                 </div>
@@ -1323,7 +1327,7 @@ const GroupDetailsUser = ({ onClose }) => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium text-gray-700">
-                  Class Date
+                  {t("createClass.schedule.date")}
                 </label>
                 <input
                   type="date"
@@ -1336,7 +1340,7 @@ const GroupDetailsUser = ({ onClose }) => {
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">
-                  Class Starting Time
+                  {t("createClass.schedule.time")}
                 </label>
                 <input
                   type="time"
@@ -1351,7 +1355,7 @@ const GroupDetailsUser = ({ onClose }) => {
                 onClick={() => setAddClassModalOpen(false)}
                 className="px-8 py-2.5 border border-gray-200 rounded-full text-sm font-medium"
               >
-                Cancel
+                {t("createClass.buttons.cancel")}
               </button>
               <button
                 onClick={handleSaveClass}
@@ -1362,7 +1366,9 @@ const GroupDetailsUser = ({ onClose }) => {
                     : "bg-gray-200 border border-gray-300 cursor-not-allowed"
                 }`}
               >
-                {isCreating ? "Creating..." : "Create Class"}
+                {isCreating
+                  ? t("createClass.buttons.creating")
+                  : t("createClass.buttons.create")}
               </button>
             </div>
           </div>
@@ -1393,20 +1399,22 @@ const GroupDetailsUser = ({ onClose }) => {
             <img src="/svgs/empty-big.svg" alt="bammbuu" />
           </div>
           <h2 className="mb-4 text-xl font-semibold">
-            Are you sure you want to leave this group?
+            {t("leaveGroup.title")}
           </h2>
           <div className="flex flex-row gap-2">
             <button
               className="w-full py-2 font-medium border border-gray-300 rounded-full hover:bg-gray-50"
               onClick={() => setShowLeaveConfirmation(false)}
             >
-              No, Cancel
+              {t("leaveGroup.buttons.no")}
             </button>
             <button
               className="w-full py-2 font-medium text-black bg-[#ff4d4d] rounded-full hover:bg-[#ff3333] border border-[#8b0000]"
               onClick={handleLeaveGroup}
             >
-              {isLeaving ? "Leaving..." : "Yes, Leave"}
+              {isLeaving
+                ? t("leaveGroup.buttons.leaving")
+                : t("leaveGroup.buttons.yes")}
             </button>
           </div>
         </div>
@@ -1437,25 +1445,24 @@ const GroupDetailsUser = ({ onClose }) => {
           </div>
 
           <h2 className="mb-4 text-xl font-semibold">
-            Remove {selectedUser?.name} from group?
+            {t("removeUser.title", { userName: selectedUser?.name })}
           </h2>
-          <p className="mb-6 text-gray-600">
-            This action cannot be undone. The user will need to request to join
-            again.
-          </p>
+          <p className="mb-6 text-gray-600">{t("removeUser.description")}</p>
           <div className="flex flex-row gap-2">
             <button
               className="w-full py-2 font-medium border border-gray-300 rounded-full hover:bg-gray-50"
               onClick={() => setShowRemoveConfirmation(false)}
             >
-              Cancel
+              {t("removeUser.buttons.cancel")}
             </button>
             <button
               className="w-full py-2 font-medium text-black bg-[#ff4d4d] rounded-full hover:bg-[#ff3333] border border-[#8b0000]"
               onClick={() => handleRemoveUser(selectedUser.id)}
               disabled={isRemoving}
             >
-              {isRemoving ? "Removing..." : "Remove"}
+              {isRemoving
+                ? t("removeUser.buttons.removing")
+                : t("removeUser.buttons.remove")}
             </button>
           </div>
         </div>
@@ -1485,21 +1492,23 @@ const GroupDetailsUser = ({ onClose }) => {
             <img src="/svgs/empty-big.svg" alt="bammbuu" />
           </div>
           <h2 className="mb-4 text-xl font-semibold">
-            Are you sure you want to delete this group?
+            {t("deleteGroup.title")}
           </h2>
           <div className="flex flex-row gap-2">
             <button
               className="w-full py-2 font-medium border border-gray-300 rounded-full hover:bg-gray-50"
               onClick={() => setShowDeleteConfirmation(false)}
             >
-              No, Cancel
+              {t("deleteGroup.buttons.cancel")}
             </button>
             <button
               className="w-full py-2 font-medium text-black bg-[#ff4d4d] rounded-full hover:bg-[#ff3333] border border-[#8b0000]"
               onClick={handleDeleteGroup}
               disabled={isDeleting}
             >
-              {isDeleting ? "Deleting..." : "Delete"}
+              {isDeleting
+                ? t("deleteGroup.buttons.deleting")
+                : t("deleteGroup.buttons.delete")}
             </button>
           </div>
         </div>

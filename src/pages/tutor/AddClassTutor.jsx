@@ -58,7 +58,7 @@ const AddClassTutor = () => {
     className: "",
     classDescription: "",
     language: "English",
-    languageLevel: "Beginner",
+    languageLevel: "None",
     availableSpots: 1,
     classDuration: 60,
     classDateTime: new Date(),
@@ -141,7 +141,7 @@ const AddClassTutor = () => {
         classDuration: classData.classDuration,
         classDateTime: serverTimestamp(),
         recurrenceTypes: classData.recurrenceTypes,
-        selectedRecurrenceType: "",
+        selectedRecurrenceType: "None",
         recurringSlots: [],
         classLocation: classData.classLocation,
         classType: classData.classType,
@@ -311,9 +311,7 @@ const AddClassTutor = () => {
                         <Camera size={24} className="text-gray-400" />
                       )}
                     </div>
-                    <div className="absolute right-0 p-1 bg-black rounded-full shadow-lg bottom-1">
-                      <img src="/svgs/camera.svg" />
-                    </div>
+
                     <input
                       id="classImage"
                       type="file"

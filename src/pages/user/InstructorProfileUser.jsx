@@ -16,6 +16,8 @@ import {
   where,
   getDocs,
 } from "firebase/firestore";
+import { useTranslation } from "react-i18next";
+
 import { createStreamChannel } from "../../services/streamService";
 import { db } from "../../firebaseConfig";
 import { ClipLoader } from "react-spinners";
@@ -29,6 +31,7 @@ const InstructorProfileUser = () => {
   const { tutorId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   const [tutor, setTutor] = useState(null);
   const [classes, setClasses] = useState([]);
@@ -237,7 +240,7 @@ const InstructorProfileUser = () => {
                 <ArrowLeft size={24} />
               </button>
               <h1 className="text-2xl font-semibold sm:text-4xl">
-                Instructor Profile
+                {t("instructor-profile.title")}
               </h1>
             </div>
           </div>
@@ -266,7 +269,9 @@ const InstructorProfileUser = () => {
                           className="h-4 sm:h-5"
                         />
                         <span className="text-xs sm:text-sm">
-                          <span className="font-semibold">Native:</span>{" "}
+                          <span className="font-semibold">
+                            {t("instructor-profile.details.native.label")}:
+                          </span>{" "}
                           {tutor.nativeLanguage}
                         </span>
                       </div>
@@ -277,7 +282,9 @@ const InstructorProfileUser = () => {
                           className="h-4 sm:h-5"
                         />
                         <span className="text-xs sm:text-sm">
-                          <span className="font-semibold">From:</span>{" "}
+                          <span className="font-semibold">
+                            {t("instructor-profile.details.from.label")}:
+                          </span>{" "}
                           {tutor.country}
                         </span>
                       </div>
@@ -290,7 +297,9 @@ const InstructorProfileUser = () => {
                           className="h-4 sm:h-5"
                         />
                         <span className="text-xs sm:text-sm">
-                          <span className="font-semibold">Teaching:</span>{" "}
+                          <span className="font-semibold">
+                            {t("instructor-profile.details.teaching.label")}:
+                          </span>{" "}
                           {tutor.teachingLanguage}
                         </span>
                       </div>
@@ -301,7 +310,12 @@ const InstructorProfileUser = () => {
                           className="h-4 sm:h-5"
                         />
                         <span className="text-xs sm:text-sm">
-                          <span className="font-semibold">Students:</span> 200k
+                          <span className="text-xs sm:text-sm">
+                            <span className="font-semibold">
+                              {t("instructor-profile.details.students.label")}:
+                            </span>{" "}
+                            {t("instructor-profile.details.students.count")}
+                          </span>{" "}
                         </span>
                       </div>
                     </div>
@@ -317,7 +331,7 @@ const InstructorProfileUser = () => {
                     onClick={sendMessageClicked}
                     className="w-full px-4 py-2 mb-2 text-black border border-black rounded-full bg-[#fffbc5] hover:bg-[#fff9a0]"
                   >
-                    Send Message
+                    {t("instructor-profile.buttons.send-message")}
                   </button>
                 </div>
               </div>
@@ -326,7 +340,7 @@ const InstructorProfileUser = () => {
             {/* Main content - Scrollable */}
             <div className="flex flex-col flex-1 min-h-0">
               <h2 className="ml-4 text-xl font-semibold sm:text-2xl">
-                Classes
+                {t("instructor-profile.sections.classes")}
               </h2>
               <div className="flex-1 pr-2 overflow-y-auto sm:pr-4 scrollbar-hide">
                 {renderClasses()}

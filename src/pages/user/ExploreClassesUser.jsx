@@ -8,6 +8,7 @@ import { ClipLoader } from "react-spinners";
 import Sidebar from "../../components/Sidebar";
 import ExploreClassCard from "../../components/ExploreClassCard";
 import EmptyState from "../../components/EmptyState";
+import { useTranslation } from "react-i18next";
 
 const ExploreClassesUser = () => {
   const { user } = useAuth();
@@ -16,6 +17,7 @@ const ExploreClassesUser = () => {
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleBack = () => {
     navigate(-1);
@@ -95,7 +97,7 @@ const ExploreClassesUser = () => {
                 <ArrowLeft className="w-6 h-6" />
               </button>
               <h1 className="text-4xl font-semibold whitespace-nowrap">
-                Explore Classes
+                {t("exploreClasses.title")}
               </h1>
             </div>
           </div>
@@ -105,7 +107,7 @@ const ExploreClassesUser = () => {
             <Search className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
             <input
               type="text"
-              placeholder="Search classes by name"
+              placeholder={t("exploreClasses.search.placeholder")}
               className="w-full py-3 pl-10 pr-4 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-yellow-400"
               value={searchQuery}
               onChange={handleSearchChange}
@@ -124,7 +126,9 @@ const ExploreClassesUser = () => {
               <div className="flex items-center justify-center min-h-[60vh]">
                 <EmptyState
                   message={
-                    searchQuery ? "No results found." : "No classes yet."
+                    searchQuery
+                      ? t("exploreClasses.empty.noResults")
+                      : t("exploreClasses.empty.noClasses")
                   }
                 />
               </div>

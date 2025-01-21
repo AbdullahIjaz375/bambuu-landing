@@ -823,7 +823,7 @@ const GroupDetailsTutor = ({ onClose }) => {
                         <img
                           src={group.groupAdminImageUrl}
                           alt="admin"
-                          className="w-5 rounded-full"
+                          className="w-6 h-6 rounded-full"
                         />{" "}
                         <span className="text-sm text-gray-800">
                           {group.groupAdminName} (

@@ -4,6 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "../../firebaseConfig";
+import { useTranslation } from "react-i18next";
 
 import Sidebar from "../../components/Sidebar";
 import { ArrowLeft, ImagePlus } from "lucide-react";
@@ -15,6 +16,7 @@ const EditGroupsUser = () => {
   const { groupId } = useParams();
   const [loading, setLoading] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
+  const { t } = useTranslation();
 
   // Form state
   const [groupName, setGroupName] = useState("");
@@ -126,7 +128,10 @@ const EditGroupsUser = () => {
                   >
                     <ArrowLeft size="30" />
                   </button>
-                  <h1 className="text-4xl font-semibold">Edit Group</h1>
+                  <h1 className="text-4xl font-semibold">
+                    {" "}
+                    {t("edit-group.title")}
+                  </h1>
                 </div>
               </div>
             </div>
@@ -172,11 +177,11 @@ const EditGroupsUser = () => {
                 <div className="space-y-6">
                   <div>
                     <label className="block text-[#3d3d3d] mb-1 text-lg font-semibold">
-                      Group Name
+                      {t("edit-group.form.name.label")}
                     </label>
                     <input
                       type="text"
-                      placeholder="Group name"
+                      placeholder={t("edit-group.form.name.placeholder")}
                       value={groupName}
                       onChange={(e) => setGroupName(e.target.value)}
                       className="w-full p-3 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
@@ -185,10 +190,10 @@ const EditGroupsUser = () => {
 
                   <div>
                     <label className="block mb-1 text-[#3d3d3d] text-lg font-semibold">
-                      Group Description
+                      {t("edit-group.form.description.label")}
                     </label>
                     <textarea
-                      placeholder="Enter short description of group. (max 200 letter)"
+                      placeholder={t("edit-group.form.description.placeholder")}
                       value={groupDescription}
                       onChange={(e) => setGroupDescription(e.target.value)}
                       rows="4"
@@ -198,7 +203,7 @@ const EditGroupsUser = () => {
 
                   <div>
                     <label className="block mb-1 text-[#3d3d3d] text-lg font-semibold">
-                      Learning Language
+                      {t("edit-group.form.language.label")}
                     </label>
                     <div className="flex flex-wrap gap-2">
                       {["English", "Spanish", "English-Spanish Exchange"].map(
@@ -226,7 +231,7 @@ const EditGroupsUser = () => {
                   onClick={() => navigate("/groupsUser")}
                   className="px-10 py-3 text-[#042f0c] text-xl font-medium bg-white border border-[#5d5d5d] rounded-full"
                 >
-                  Cancel
+                  {t("edit-group.buttons.cancel")}
                 </button>
                 <button
                   onClick={handleUpdateGroup}
@@ -238,7 +243,9 @@ const EditGroupsUser = () => {
                   }
                   className="px-10 py-3 text-[#042f0c] text-xl font-medium bg-[#14b82c] border border-[#5d5d5d] disabled:bg-[#b9f9c2] disabled:text-[#b0b0b0] disabled:border-[#b0b0b0] rounded-full"
                 >
-                  {loading ? "Updating..." : "Update Group"}
+                  {loading
+                    ? t("edit-group.buttons.update.loading")
+                    : t("edit-group.buttons.update.default")}
                 </button>
               </div>
             </div>

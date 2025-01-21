@@ -12,6 +12,7 @@ import {
   User,
   ArrowLeft,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import Sidebar from "../../components/Sidebar";
 import ClassCard from "../../components/ClassCard";
 import { useAuth } from "../../context/AuthContext";
@@ -36,6 +37,7 @@ const LearnLanguageUser = () => {
   const [loadingGroups, setLoadingGroups] = useState(true);
   const [error, setError] = useState(null);
   const [errorGroups, setErrorGroups] = useState(null);
+  const { t } = useTranslation();
 
   // States for Explore Classes and Groups
   const [exploreClasses, setExploreClasses] = useState([]);
@@ -385,7 +387,7 @@ const LearnLanguageUser = () => {
                 <ArrowLeft className="w-6 h-6" />
               </button>
               <h1 className="text-4xl font-semibold whitespace-nowrap">
-                Learn Language
+                {t("learnLanguage.title")}
               </h1>
             </div>
             <div className="flex justify-center w-full sm:w-auto">
@@ -399,7 +401,7 @@ const LearnLanguageUser = () => {
                       : "bg-transparent"
                   }`}
                 >
-                  My bammbuuu
+                  {t("learnLanguage.tabs.myBambuu")}
                 </button>
                 <button
                   onClick={() => setActiveTab("exploreBambuu")}
@@ -410,7 +412,7 @@ const LearnLanguageUser = () => {
                       : "bg-transparent"
                   }`}
                 >
-                  Explore bammbuuu
+                  {t("learnLanguage.tabs.exploreBambuu")}
                 </button>
               </div>
             </div>
@@ -423,13 +425,15 @@ const LearnLanguageUser = () => {
                 {/* My Classes Section */}
                 <div className="w-full max-w-[160vh] mx-auto">
                   <div className="flex items-center justify-between">
-                    <h2 className="text-2xl font-bold">My Classes</h2>
+                    <h2 className="text-2xl font-bold">
+                      {t("learnLanguage.myClasses.title")}
+                    </h2>
                     {myClasses.length > 0 && (
                       <button
                         className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
                         onClick={() => navigate("/classesUser")}
                       >
-                        View All
+                        {t("learnLanguage.myClasses.viewAll")}
                       </button>
                     )}
                   </div>
@@ -445,7 +449,7 @@ const LearnLanguageUser = () => {
                         className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
                         onClick={() => window.location.reload()}
                       >
-                        Try Again
+                        {t("learnLanguage.myClasses.error.tryAgain")}
                       </button>
                     </div>
                   ) : myClasses.length === 0 ? (
@@ -474,13 +478,15 @@ const LearnLanguageUser = () => {
                 {/* My Groups Section */}
                 <div className="w-full max-w-[160vh] mx-auto">
                   <div className="flex items-center justify-between mb-1">
-                    <h2 className="text-2xl font-bold">My Groups</h2>
+                    <h2 className="text-2xl font-bold">
+                      {t("learnLanguage.myGroups.title")}
+                    </h2>
                     {myGroups.length > 0 && (
                       <button
                         className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
                         onClick={() => navigate("/groupsUser")}
                       >
-                        View All
+                        {t("learnLanguage.myGroups.viewAll")}
                       </button>
                     )}
                   </div>
@@ -496,7 +502,7 @@ const LearnLanguageUser = () => {
                         className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
                         onClick={() => window.location.reload()}
                       >
-                        Try Again
+                        {t("learnLanguage.myGroups.error.tryAgain")}
                       </button>
                     </div>
                   ) : myGroups.length === 0 ? (
@@ -506,7 +512,7 @@ const LearnLanguageUser = () => {
                         onClick={() => navigate("/groupsUser")}
                         className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
                       >
-                        Create a Group
+                        {t("learnLanguage.myGroups.createGroup")}
                       </button>
                     </div>
                   ) : (
@@ -530,13 +536,15 @@ const LearnLanguageUser = () => {
                 {/* Explore Classes Section */}
                 <div className="w-full max-w-[160vh] mx-auto">
                   <div className="flex items-center justify-between">
-                    <h2 className="text-2xl font-bold">Explore Classes</h2>
+                    <h2 className="text-2xl font-bold">
+                      {t("learnLanguage.exploreClasses.title")}
+                    </h2>
                     {exploreClasses.length > 0 && (
                       <button
                         className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
                         onClick={() => navigate("/exploreClassesUser")}
                       >
-                        View All
+                        {t("learnLanguage.exploreClasses.viewAll")}
                       </button>
                     )}
                   </div>
@@ -552,7 +560,7 @@ const LearnLanguageUser = () => {
                         className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
                         onClick={() => window.location.reload()}
                       >
-                        Try Again
+                        {t("learnLanguage.exploreClasses.error.tryAgain")}
                       </button>
                     </div>
                   ) : exploreClasses.length === 0 ? (
@@ -581,13 +589,15 @@ const LearnLanguageUser = () => {
                 {/* Explore Groups Section */}
                 <div className="w-full max-w-[160vh] mx-auto">
                   <div className="flex items-center justify-between mb-1">
-                    <h2 className="text-2xl font-bold">Explore Groups</h2>
+                    <h2 className="text-2xl font-bold">
+                      {t("learnLanguage.exploreGroups.title")}
+                    </h2>
                     {exploreGroups.length > 0 && (
                       <button
                         className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
                         onClick={() => navigate("/exploreGroupsUser")}
                       >
-                        View All
+                        {t("learnLanguage.exploreGroups.title")}
                       </button>
                     )}
                   </div>
@@ -603,7 +613,7 @@ const LearnLanguageUser = () => {
                         className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
                         onClick={() => window.location.reload()}
                       >
-                        Try Again
+                        {t("learnLanguage.exploreGroups.error.tryAgain")}
                       </button>
                     </div>
                   ) : exploreGroups.length === 0 ? (

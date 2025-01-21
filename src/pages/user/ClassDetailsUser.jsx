@@ -11,6 +11,7 @@ import { Timestamp } from "firebase/firestore"; // Import Timestamp
 import ClassInfoCard from "../../components/ClassInfoCard";
 import EditClassModal from "../../components/EditClassModal";
 import EmptyState from "../../components/EmptyState";
+import { useTranslation } from "react-i18next";
 
 Modal.setAppElement("#root");
 
@@ -82,7 +83,7 @@ const TimeRestrictedJoinButton = ({
 
   return (
     <div className="w-full px-4 py-2 text-black bg-gray-200 border border-black rounded-full cursor-not-allowed">
-      Class in Progress (Physical Location)
+      Class in Progress
     </div>
   );
 };
@@ -220,6 +221,7 @@ const ClassDetailsUser = ({ onClose }) => {
   const [classData, setClassData] = useState(null);
   const [error, setError] = useState(null);
   const { classId } = useParams();
+  const { t } = useTranslation();
 
   const fetchClass = async () => {
     if (!classId) {
@@ -625,7 +627,7 @@ const ClassDetailsUser = ({ onClose }) => {
                   <ArrowLeft size={24} />
                 </button>
                 <h1 className="text-2xl font-semibold md:text-4xl">
-                  Class Details
+                  {t("class-details.title")}
                 </h1>
               </div>
             </div>
@@ -802,13 +804,13 @@ const ClassDetailsUser = ({ onClose }) => {
                           className="w-full px-4 py-2 text-black bg-white border border-black rounded-full"
                           onClick={() => setIsEditModalOpen(true)}
                         >
-                          Edit Class Details
+                          {t("class-details.buttons.edit")}
                         </button>
                         <button
                           className="w-full px-4 py-2 text-red-500 bg-white border border-red-500 rounded-full"
                           onClick={() => setShowDeleteConfirmation(true)}
                         >
-                          Delete Class
+                          {t("class-details.buttons.delete")}
                         </button>
                       </>
                     ) : (
@@ -816,7 +818,7 @@ const ClassDetailsUser = ({ onClose }) => {
                         className="w-full px-4 py-2 text-red-500 border border-red-500 rounded-full"
                         onClick={() => setShowLeaveConfirmation(true)}
                       >
-                        Leave Class
+                        {t("class-details.buttons.leave")}
                       </button>
                     )}
                   </div>
@@ -830,13 +832,13 @@ const ClassDetailsUser = ({ onClose }) => {
                     <div className="w-full space-y-4">
                       <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
                         <h2 className="text-lg font-semibold md:text-xl">
-                          Recurring Class Slots
+                          {t("class-details.slots.title")}
                         </h2>
                         <button
                           className="px-4 py-2 text-sm bg-yellow-200 rounded-full hover:bg-yellow-300 border border-[#042F0C]"
                           onClick={() => setIsModalOpen(true)}
                         >
-                          + More Slots
+                          {t("class-details.slots.add-button")}
                         </button>
                       </div>
 
@@ -876,7 +878,9 @@ const ClassDetailsUser = ({ onClose }) => {
                         className="px-4 py-2 text-black bg-yellow-400 rounded-full"
                         onClick={() => setActiveTab("Members")}
                       >
-                        Members ({members.length})
+                        {t("class-details.members.count", {
+                          count: members.length,
+                        })}
                       </button>
                     </div>
                     <div className="flex-1 overflow-y-auto">
@@ -909,7 +913,7 @@ const ClassDetailsUser = ({ onClose }) => {
                                 </span>
                                 {member.id === classData.adminId && (
                                   <span className="text-xs text-gray-500">
-                                    Teacher
+                                    {t("class-details.labels.teacher")}
                                   </span>
                                 )}
                               </div>
@@ -951,21 +955,23 @@ const ClassDetailsUser = ({ onClose }) => {
         >
           <div className="text-center">
             <h2 className="mb-4 text-xl font-semibold">
-              Are you sure you want to delete this class?
+              {t("class-details.modals.delete.title")}
             </h2>
             <div className="flex flex-col gap-2 sm:flex-row">
               <button
                 className="w-full py-2 font-medium border border-gray-300 rounded-full hover:bg-gray-50"
                 onClick={() => setShowDeleteConfirmation(false)}
               >
-                No, Cancel
+                {t("class-details.modals.delete.cancel")}
               </button>
               <button
                 className="w-full py-2 font-medium text-black bg-[#ff4d4d] rounded-full hover:bg-[#ff3333] border border-[#8b0000]"
                 onClick={handleDeleteClass}
                 disabled={isDeleting}
               >
-                {isDeleting ? "Deleting..." : "Delete"}
+                {isDeleting
+                  ? t("class-details.modals.delete.loading")
+                  : t("class-details.modals.delete.confirm")}
               </button>
             </div>
           </div>
@@ -990,21 +996,23 @@ const ClassDetailsUser = ({ onClose }) => {
         >
           <div className="text-center">
             <h2 className="mb-4 text-xl font-semibold">
-              Are you sure you want to leave this class?
+              {t("class-details.modals.leave.title")}
             </h2>
             <div className="flex flex-row gap-2">
               <button
                 className="w-full py-2 font-medium border border-gray-300 rounded-full hover:bg-gray-50"
                 onClick={() => setShowLeaveConfirmation(false)}
               >
-                No, Cancel
+                {t("class-details.modals.leave.cancel")}
               </button>
               <button
                 className="w-full py-2 font-medium text-black bg-[#ff4d4d] rounded-full hover:bg-[#ff3333] border border-[#8b0000]"
                 onClick={handleLeaveClass}
                 disabled={isLeaving}
               >
-                {isLeaving ? "Leaving..." : "Leave"}
+                {isLeaving
+                  ? t("class-details.modals.leave.loading")
+                  : t("class-details.modals.leave.confirm")}
               </button>
             </div>
           </div>
