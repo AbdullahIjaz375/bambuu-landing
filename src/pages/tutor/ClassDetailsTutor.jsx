@@ -11,7 +11,8 @@ import { ChannelType } from "../../config/stream";
 import ClassInfoCard from "../../components/ClassInfoCard";
 import EmptyState from "../../components/EmptyState";
 import { useTranslation } from "react-i18next";
-
+import { ClassContext } from "../../context/ClassContext";
+import { useContext } from "react";
 Modal.setAppElement("#root");
 
 const ClassDetailsTutor = ({ onClose }) => {
@@ -24,6 +25,7 @@ const ClassDetailsTutor = ({ onClose }) => {
   const [error, setError] = useState(null);
   const { classId } = useParams();
   const { t } = useTranslation();
+  const { setTutorSelectedClassId } = useContext(ClassContext);
 
   const fetchClass = async () => {
     if (!classId) {
@@ -173,7 +175,8 @@ const ClassDetailsTutor = ({ onClose }) => {
   const [showVideoCall, setShowVideoCall] = useState(false);
 
   const handleJoinClass = () => {
-    navigate(`/call`, { state: { classId } });
+    setTutorSelectedClassId(classId);
+    navigate("/callTutor");
   };
   //-----------------------------------------------------------------------------------------------------------//
 

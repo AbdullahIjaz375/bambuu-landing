@@ -1,142 +1,8 @@
-// import React from "react";
-// import { useLocation, useParams } from "react-router-dom";
-
-// import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
-
-// const VideoCall = () => {
-//   const location = useLocation();
-//   const classId = location.state?.classId;
-
-//   console.log("Class ID:", classId);
-//   const user = JSON.parse(sessionStorage.getItem("user"));
-
-//   const userId = user.uid;
-//   const userName = user.name;
-
-//   const myMeeting = async (element) => {
-//     const appId = parseInt(process.env.REACT_APP_ZEGO_APP_ID);
-//     const serverSecret = process.env.REACT_APP_ZEGO_SERVER_SECRET;
-
-//     const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
-//       appId,
-//       serverSecret,
-//       classId,
-//       userId,
-//       userName
-//     );
-
-//     const zp = ZegoUIKitPrebuilt.create(kitToken);
-//     zp.joinRoom({
-//       container: element,
-//       turnOnMicrophoneWhenJoining: true,
-//       turnOnCameraWhenJoining: true,
-//       showMyCameraToggleButton: true,
-//       showMyMicrophoneToggleButton: true,
-//       showAudioVideoSettingsButton: true,
-//       showScreenSharingButton: true,
-//       showTextChat: true,
-//       showUserList: true,
-//       maxUsers: 50,
-//       layout: "Auto",
-//       showLayoutButton: true,
-//       scenario: {
-//         mode: "GroupCall",
-//         config: {
-//           role: "Host",
-//         },
-//       },
-//     });
-//   };
-
-//   return (
-//     <div
-//       className="myCallContainer"
-//       ref={myMeeting}
-//       style={{ width: "100vw", height: "100vh" }}
-//     ></div>
-//   );
-// };
-
-// export default VideoCall;
-
-// import React, { useEffect } from "react";
-// import { useLocation } from "react-router-dom";
-// import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
-
-// const VideoCall = () => {
-//   const location = useLocation();
-//   const classId = location.state?.classId;
-
-//   // Add useEffect for page refresh
-//   useEffect(() => {
-//     const hasRefreshed = sessionStorage.getItem("hasRefreshed");
-//     if (!hasRefreshed) {
-//       sessionStorage.setItem("hasRefreshed", "true");
-//       window.location.reload();
-//       return;
-//     }
-//     // Clean up the refresh flag when component unmounts
-//     return () => {
-//       sessionStorage.removeItem("hasRefreshed");
-//     };
-//   }, []);
-
-//   console.log("Class ID:", classId);
-//   const user = JSON.parse(sessionStorage.getItem("user"));
-
-//   const userId = user.uid;
-//   const userName = user.name;
-
-//   const myMeeting = async (element) => {
-//     const appId = parseInt(process.env.REACT_APP_ZEGO_APP_ID);
-//     const serverSecret = process.env.REACT_APP_ZEGO_SERVER_SECRET;
-
-//     const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
-//       appId,
-//       serverSecret,
-//       classId,
-//       userId,
-//       userName
-//     );
-
-//     const zp = ZegoUIKitPrebuilt.create(kitToken);
-//     zp.joinRoom({
-//       container: element,
-//       turnOnMicrophoneWhenJoining: true,
-//       turnOnCameraWhenJoining: true,
-//       showMyCameraToggleButton: true,
-//       showMyMicrophoneToggleButton: true,
-//       showAudioVideoSettingsButton: true,
-//       showScreenSharingButton: true,
-//       showTextChat: true,
-//       showUserList: true,
-//       maxUsers: 50,
-//       layout: "Auto",
-//       showLayoutButton: true,
-//       scenario: {
-//         mode: "GroupCall",
-//         config: {
-//           role: "Host",
-//         },
-//       },
-//     });
-//   };
-
-//   return (
-//     <div
-//       className="myCallContainer"
-//       ref={myMeeting}
-//       style={{ width: "100vw", height: "100vh" }}
-//     ></div>
-//   );
-// };
-
-// export default VideoCall;
-
-// VideoCall.js
-
 // import React, { useEffect, useState, useContext } from "react";
-// import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
+// import {
+//   ZegoUIKitPrebuilt,
+//   ZegoMenuBarButtonName,
+// } from "@zegocloud/zego-uikit-prebuilt";
 // import { ClassContext } from "../../context/ClassContext";
 // import { db } from "../../firebaseConfig";
 // import {
@@ -151,16 +17,17 @@
 
 // Modal.setAppElement("#root");
 
-// const VideoCall = () => {
-//   const { selectedClassId, setSelectedClassId } = useContext(ClassContext);
+// const VideoCallTutor = () => {
+//   const { tutorSelectedClassId } = useContext(ClassContext);
 //   const [isModalOpen, setIsModalOpen] = useState(false);
 //   const [numRooms, setNumRooms] = useState(2);
 //   const [roomDuration, setRoomDuration] = useState(15);
 //   const [availableSlots, setAvailableSlots] = useState(5);
-//   const [classId, setClassId] = useState(null);
 
+//   useEffect(() => {
+//     console.log("In VideoCall:", tutorSelectedClassId);
+//   }, [tutorSelectedClassId]);
 //   const [breakoutRooms, setBreakoutRooms] = useState([]);
-//   console.log(selectedClassId);
 //   const user = JSON.parse(sessionStorage.getItem("user"));
 
 //   useEffect(() => {
@@ -173,27 +40,17 @@
 //     return () => sessionStorage.removeItem("hasRefreshed");
 //   }, []);
 
-//   useEffect(() => {
-//     // Try context first, then localStorage
-//     const id = selectedClassId || localStorage.getItem("currentClassId");
-//     setClassId(id);
-//     if (!selectedClassId && id) {
-//       setSelectedClassId(id);
-//     }
-//   }, [selectedClassId, setSelectedClassId]);
-
 //   const createBreakoutRooms = async () => {
 //     try {
 //       const classRef = collection(db, "classes");
-//       const q = query(classRef, where("classId", "==", selectedClassId));
+//       const q = query(classRef, where("classId", "==", tutorSelectedClassId));
 //       const querySnapshot = await getDocs(q);
 //       const classData = querySnapshot.docs[0].data();
-//       const classDateTime = classData.classDateTime;
-
+//       // const classDateTime = classData.classDateTime; // You can use this if needed
 //       const breakoutRef = collection(
 //         db,
 //         "conference_call",
-//         selectedClassId,
+//         tutorSelectedClassId,
 //         "breakout_rooms"
 //       );
 
@@ -207,6 +64,7 @@
 //           roomMembers: [],
 //         });
 
+//         // Store additional sub-collections or sub-documents if you need them
 //         await addDoc(collection(breakoutRef, roomRef.id), {
 //           roomId: roomRef.id,
 //         });
@@ -223,7 +81,7 @@
 //       const breakoutRef = collection(
 //         db,
 //         "conference_call",
-//         selectedClassId,
+//         tutorSelectedClassId,
 //         "breakout_rooms"
 //       );
 //       const querySnapshot = await getDocs(breakoutRef);
@@ -242,23 +100,12 @@
 //     const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
 //       appId,
 //       serverSecret,
-//       "56gt76hyb",
+//       tutorSelectedClassId, // your roomID or some identifier
 //       user.uid,
 //       user.name
 //     );
 
 //     const zp = ZegoUIKitPrebuilt.create(kitToken);
-
-//     const bottomButtons = [
-//       {
-//         text: "Create Breakout Room",
-//         onClick: () => setIsModalOpen(true),
-//       },
-//       {
-//         text: "View Breakout Rooms",
-//         onClick: fetchBreakoutRooms,
-//       },
-//     ];
 
 //     zp.joinRoom({
 //       container: element,
@@ -279,28 +126,25 @@
 //           role: "Host",
 //         },
 //       },
-//       topMenuBarButtons: [
-//         {
-//           name: "CreateBreakoutRoom",
-//           text: "Create Breakout Room",
-//           icon: [], // You can add an icon array if needed
-//           onClick: () => setIsModalOpen(true),
-//         },
-//         {
-//           name: "ViewBreakoutRooms",
-//           text: "View Breakout Rooms",
-//           icon: [],
-//           onClick: fetchBreakoutRooms,
-//         },
-//       ],
-//       bottomMenuButtons: [
-//         {
-//           name: "CreateBreakoutRoom",
-//           text: "Breakout Room",
-//           icon: [],
-//           onClick: () => setIsModalOpen(true),
-//         },
-//       ],
+
+//       bottomMenuBarConfig: {
+//         isVisible: true,
+//         maxButtons: 10, // see "2. Check for Overflow" below
+//         // Your custom button:
+//         buttons: ["toggleCameraButton", "toggleMicrophoneButton"],
+//         extendButtons: [
+//           {
+//             icon: <img alt="button" src="/svgs/users/svg" />, // or a component, or an SVG
+//             text: "Create Breakout Room",
+//             onClick: () => setIsModalOpen(true),
+//           },
+//           {
+//             icon: <img alt="button" src="/svgs/users/svg" />, // or a component, or an SVG
+//             text: "View Breakout Rooms",
+//             onClick: fetchBreakoutRooms,
+//           },
+//         ],
+//       },
 //     });
 //   };
 
@@ -379,13 +223,10 @@
 //   );
 // };
 
-// export default VideoCall;
-// VideoCall.js
-import React, { useEffect, useState, useContext } from "react";
-import {
-  ZegoUIKitPrebuilt,
-  ZegoMenuBarButtonName,
-} from "@zegocloud/zego-uikit-prebuilt";
+// export default VideoCallTutor;
+
+import React, { useEffect, useState, useContext, useRef } from "react";
+import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt"; // No longer using ZegoMenuBarButtonName
 import { ClassContext } from "../../context/ClassContext";
 import { db } from "../../firebaseConfig";
 import {
@@ -395,25 +236,50 @@ import {
   query,
   where,
   Timestamp,
+  doc,
+  updateDoc,
+  getDoc,
 } from "firebase/firestore";
 import Modal from "react-modal";
 
 Modal.setAppElement("#root");
 
-const VideoCall = () => {
-  const { selectedClassId } = useContext(ClassContext);
+const VideoCallTutor = () => {
+  const { tutorSelectedClassId } = useContext(ClassContext);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [numRooms, setNumRooms] = useState(2);
   const [roomDuration, setRoomDuration] = useState(15);
   const [availableSlots, setAvailableSlots] = useState(5);
+  const [classData, setClassData] = useState(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
 
-  useEffect(() => {
-    console.log("In VideoCall:", selectedClassId);
-  }, [selectedClassId]);
   const [breakoutRooms, setBreakoutRooms] = useState([]);
   const user = JSON.parse(sessionStorage.getItem("user"));
 
+  const callContainerRef = useRef(null);
+
   useEffect(() => {
+    const fetchClassData = async () => {
+      try {
+        const classDocRef = doc(db, "classes", tutorSelectedClassId); // Reference to the document
+        const classDoc = await getDoc(classDocRef); // Fetch the document
+        if (classDoc.exists()) {
+          setClassData(classDoc.data());
+          console.log(classDoc.data());
+        } else {
+          console.log("No such document!");
+          setClassData(null);
+        }
+      } catch (error) {
+        console.error("Error fetching class data:", error);
+      }
+    };
+    fetchClassData();
+  }, [tutorSelectedClassId]);
+
+  useEffect(() => {
+    // Only reload once to fix known refresh issue
     const hasRefreshed = sessionStorage.getItem("hasRefreshed");
     if (!hasRefreshed) {
       sessionStorage.setItem("hasRefreshed", "true");
@@ -423,37 +289,38 @@ const VideoCall = () => {
     return () => sessionStorage.removeItem("hasRefreshed");
   }, []);
 
+  useEffect(() => {
+    console.log("In VideoCallTutor: selectedClassId =", tutorSelectedClassId);
+  }, [tutorSelectedClassId]);
+
   const createBreakoutRooms = async () => {
     try {
-      const classRef = collection(db, "classes");
-      const q = query(classRef, where("classId", "==", selectedClassId));
-      const querySnapshot = await getDocs(q);
-      const classData = querySnapshot.docs[0].data();
-      // const classDateTime = classData.classDateTime; // You can use this if needed
-      const breakoutRef = collection(
-        db,
-        "conference_call",
-        selectedClassId,
-        "breakout_rooms"
+      if (!classData) return;
+      const classStartTimestamp = classData.classDateTime;
+      const classEndTime = new Date(
+        (classStartTimestamp.seconds + classData.classDuration * 60) * 1000
       );
 
+      const conferenceDocRef = doc(
+        db,
+        "conference_calls",
+        tutorSelectedClassId
+      );
+      const breakoutRoomsRef = collection(conferenceDocRef, "breakout_rooms");
+
       for (let i = 0; i < numRooms; i++) {
-        const roomRef = await addDoc(breakoutRef, {
+        const newRoomRef = await addDoc(breakoutRoomsRef, {
           availableSlots,
-          classEndTime: Timestamp.fromDate(
-            new Date(Date.now() + roomDuration * 60000)
-          ),
+          classEndTime: Timestamp.fromDate(classEndTime),
           roomDuration,
           roomMembers: [],
+          createdAt: Timestamp.now(),
         });
-
-        // Store additional sub-collections or sub-documents if you need them
-        await addDoc(collection(breakoutRef, roomRef.id), {
-          roomId: roomRef.id,
-        });
+        await updateDoc(newRoomRef, { roomId: newRoomRef.id });
       }
 
       setIsModalOpen(false);
+      fetchBreakoutRooms();
     } catch (error) {
       console.error("Error creating breakout rooms:", error);
     }
@@ -463,35 +330,41 @@ const VideoCall = () => {
     try {
       const breakoutRef = collection(
         db,
-        "conference_call",
-        selectedClassId,
+        "conference_calls",
+        tutorSelectedClassId,
         "breakout_rooms"
       );
       const querySnapshot = await getDocs(breakoutRef);
       setBreakoutRooms(
         querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
       );
+      setIsViewModalOpen(true);
     } catch (error) {
       console.error("Error fetching breakout rooms:", error);
     }
   };
 
-  const myMeeting = async (element) => {
+  const startZegoCall = () => {
+    if (!callContainerRef.current) return;
+
     const appId = parseInt(process.env.REACT_APP_ZEGO_APP_ID);
     const serverSecret = process.env.REACT_APP_ZEGO_SERVER_SECRET;
 
+    // Generate kit token
     const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
       appId,
       serverSecret,
-      selectedClassId, // your roomID or some identifier
+      tutorSelectedClassId, // your roomID
       user.uid,
       user.name
     );
 
+    // Create instance
     const zp = ZegoUIKitPrebuilt.create(kitToken);
 
+    // Join with your config
     zp.joinRoom({
-      container: element,
+      container: callContainerRef.current,
       turnOnMicrophoneWhenJoining: true,
       turnOnCameraWhenJoining: true,
       showMyCameraToggleButton: true,
@@ -509,51 +382,64 @@ const VideoCall = () => {
           role: "Host",
         },
       },
-
-      // ---- THIS IS THE IMPORTANT PART FOR CUSTOM BUTTONS ----
-      topMenuBarConfig: {
-        isVisible: true,
-        buttons: [
-          // Custom Buttons
-          {
-            icon: "", // Optionally provide an icon URL or component
-            text: "Create Breakout Room",
-            onClick: () => setIsModalOpen(true),
-          },
-          {
-            icon: "",
-            text: "View Breakout Rooms",
-            onClick: fetchBreakoutRooms,
-          },
-        ],
-      },
+      // If you want to control bottom menu bar visibility or built-in button set:
       bottomMenuBarConfig: {
         isVisible: true,
+        maxButtons: 6,
+        // you can list built-in buttons as strings here
         buttons: [
-          // Custom Button
-          {
-            icon: "",
-            text: "Breakout Room",
-            onClick: () => setIsModalOpen(true),
-          },
+          "toggleCameraButton",
+          "toggleMicrophoneButton",
+          "switchAudioOutputButton",
+          "leaveButton",
         ],
       },
     });
   };
 
+  useEffect(() => {
+    // Initialize the call UI as soon as the component mounts.
+    startZegoCall();
+  }, []);
+
   return (
     <>
+      {/* Our custom controls above (or anywhere outside) the ZEGOCLOUD UI container */}
+      <div style={{ padding: "10px", backgroundColor: "#f1f1f1" }}>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          style={{ marginRight: "10px" }}
+        >
+          Create Breakout Room
+        </button>
+        <button onClick={fetchBreakoutRooms}>View Breakout Rooms</button>
+      </div>
+
+      {/* ZEGOCLOUD UI container */}
       <div
-        className="myCallContainer"
-        ref={myMeeting}
-        style={{ width: "100vw", height: "100vh" }}
+        ref={callContainerRef}
+        style={{ width: "100vw", height: "95.3vh" }}
       />
 
+      {/* Breakout Room Modal */}
       <Modal
         isOpen={isModalOpen}
         onRequestClose={() => setIsModalOpen(false)}
-        className="fixed inset-0 flex items-center justify-center"
-        overlayClassName="fixed inset-0 bg-black bg-opacity-50"
+        style={{
+          overlay: {
+            zIndex: 9999,
+            backgroundColor: "rgba(0,0,0,0.5)",
+          },
+          content: {
+            zIndex: 10000,
+            top: "50%",
+            left: "50%",
+            right: "auto",
+            bottom: "auto",
+            marginRight: "-50%",
+            transform: "translate(-50%, -50%)",
+          },
+        }}
       >
         <div className="p-8 bg-white rounded-lg w-96">
           <h2 className="mb-6 text-xl font-bold">Create Breakout Rooms</h2>
@@ -612,8 +498,48 @@ const VideoCall = () => {
           </div>
         </div>
       </Modal>
+
+      <Modal
+        isOpen={isViewModalOpen}
+        onRequestClose={() => setIsViewModalOpen(false)}
+        style={{
+          overlay: { zIndex: 9999, backgroundColor: "rgba(0,0,0,0.5)" },
+          content: {
+            zIndex: 10000,
+            top: "50%",
+            left: "50%",
+            right: "auto",
+            bottom: "auto",
+            marginRight: "-50%",
+            transform: "translate(-50%, -50%)",
+          },
+        }}
+      >
+        <div className="p-8 bg-white rounded-lg w-96">
+          <h2 className="mb-6 text-xl font-bold">Breakout Rooms</h2>
+          <div className="space-y-4">
+            {breakoutRooms.map((room) => (
+              <div key={room.id} className="p-4 border rounded-lg">
+                <p className="font-medium">Room ID: {room.id}</p>
+                <p>Available Slots: {room.availableSlots}</p>
+                <p>Duration: {room.roomDuration} minutes</p>
+                <p>Members: {room.roomMembers.length}</p>
+                <p>Ends at: {room.classEndTime.toDate().toLocaleString()}</p>
+              </div>
+            ))}
+          </div>
+          <div className="flex justify-end mt-6">
+            <button
+              onClick={() => setIsViewModalOpen(false)}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </Modal>
     </>
   );
 };
 
-export default VideoCall;
+export default VideoCallTutor;

@@ -58,7 +58,7 @@ const AddClassTutor = () => {
     className: "",
     classDescription: "",
     language: "English",
-    languageLevel: "None",
+    languageLevel: "Beginner",
     availableSpots: 1,
     classDuration: 60,
     classDateTime: new Date(),
@@ -136,7 +136,8 @@ const AddClassTutor = () => {
         className: classData.className,
         classDescription: classData.classDescription,
         language: classData.language,
-        languageLevel: classData.languageLevel,
+        languageLevel:
+          classType === "individual" ? "None" : classData.languageLevel,
         availableSpots: classData.availableSpots,
         classDuration: classData.classDuration,
         classDateTime: serverTimestamp(),
