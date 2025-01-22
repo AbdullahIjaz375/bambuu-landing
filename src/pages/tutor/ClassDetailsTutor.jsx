@@ -173,7 +173,7 @@ const ClassDetailsTutor = ({ onClose }) => {
   const [showVideoCall, setShowVideoCall] = useState(false);
 
   const handleJoinClass = () => {
-    navigate(`/call/${classId}`);
+    navigate(`/call`, { state: { classId } });
   };
   //-----------------------------------------------------------------------------------------------------------//
 

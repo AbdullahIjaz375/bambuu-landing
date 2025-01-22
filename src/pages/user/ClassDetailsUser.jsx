@@ -66,11 +66,7 @@ const TimeRestrictedJoinButton = ({
     navigate(`/call`, { state: { classId } });
   };
 
-  if (!isButtonVisible) {
-    return <></>;
-  }
-
-  if (location?.toLowerCase() === "virtual") {
+  if (location?.toLowerCase() === "virtual" && isButtonVisible) {
     return (
       <button
         className="w-full px-4 py-2 text-black bg-[#ffbf00] border border-black rounded-full hover:bg-[#ffbf00]"
@@ -81,14 +77,16 @@ const TimeRestrictedJoinButton = ({
     );
   }
 
-  return (
-    <div
-      className="w-full px-4 py-2 text-black bg-gray-200 border border-black rounded-full"
-      onClick={handleJoinClass}
-    >
-      Class in Progress
-    </div>
-  );
+  if (location?.toLowerCase() === "physical" && isButtonVisible) {
+    return (
+      <button className="w-full px-4 py-2 text-black bg-[#ffbf00] border border-black rounded-full hover:bg-[#ffbf00]">
+        Class in progress
+      </button>
+    );
+  }
+
+  // If not within time window or invalid location, return empty fragment
+  return <></>;
 };
 
 const modalStyles = {
@@ -798,7 +796,7 @@ const ClassDetailsUser = ({ onClose }) => {
                       classDuration={classData.classDuration || 60} // Use class duration from data or default to 60 minutes
                       navigate={navigate}
                       classId={classId}
-                      location={classData.location}
+                      location={classData.classLocation}
                     />
 
                     {user.uid === classData.adminId ? (
