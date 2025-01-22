@@ -82,7 +82,10 @@ const TimeRestrictedJoinButton = ({
   }
 
   return (
-    <div className="w-full px-4 py-2 text-black bg-gray-200 border border-black rounded-full">
+    <div
+      className="w-full px-4 py-2 text-black bg-gray-200 border border-black rounded-full"
+      onClick={handleJoinClass}
+    >
       Class in Progress
     </div>
   );
