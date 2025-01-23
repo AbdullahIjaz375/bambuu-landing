@@ -13,6 +13,8 @@ import ClassInfoCard from "../../components/ClassInfoCard";
 import { useClassBooking } from "../../hooks/useClassBooking";
 import PlansModal from "../../components/PlansModal";
 import EmptyState from "../../components/EmptyState";
+import { toast } from "react-toastify";
+
 Modal.setAppElement("#root");
 
 const ClassDetailsNotJoinedUser = ({ onClose }) => {
@@ -191,7 +193,12 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
     }
   };
 
-  const enrollInClass = async (classId, userId, tutorId) => {
+  const enrollInClass = async (
+    classId,
+    userId,
+    tutorId,
+    shouldDeductCredits = false
+  ) => {
     setIsEnrolling(true);
     setError(null);
 
@@ -206,17 +213,18 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
       const classData = classDoc.data();
 
       if (!classData) {
-        throw new Error("Class not found");
+        toast.error("Class not found");
+        return false;
       }
 
-      // Check if user is already enrolled
       if (classData.classMemberIds?.includes(userId)) {
-        throw new Error("You are already enrolled in this class");
+        toast.warning("You are already enrolled in this class");
+        return false;
       }
 
-      // Check if class is full
       if (classData.classMemberIds?.length >= classData.availableSpots) {
-        throw new Error("Class is full");
+        toast.error("Class is full");
+        return false;
       }
 
       // Use the pre-calculated slots from state
@@ -281,6 +289,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
         const updatedUser = {
           ...user,
           enrolledClasses: [...(user.enrolledClasses || []), classId],
+          credits: shouldDeductCredits ? user.credits - 1 : user.credits,
         };
         setUser(updatedUser);
         updateSessionStorage(classId);
@@ -332,7 +341,8 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
         }
       },
       // Enrollment function
-      () => enrollInClass(classId, user.uid, classData.adminId)
+      (useCredits) =>
+        enrollInClass(classId, user.uid, classData.adminId, useCredits)
     );
   };
 
@@ -799,54 +809,60 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
                     </>
                   )}
                 </div>
-
-                <div className="space-y-4 w-96">
-                  <h3 className="text-xl font-semibold">Class Schedule</h3>
-                  <div className="space-y-2">
-                    {totalClasses && slots.length > 0 ? (
-                      slots.map((slot, index) => (
-                        <div key={index}>
-                          <div className="flex flex-col items-start justify-between p-3 border border-green-500 sm:flex-row sm:items-center sm:px-4 rounded-2xl sm:rounded-full">
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm font-medium">
-                                Class {index + 1}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-4">
+                {classData.classType === "Individual Premium" ? (
+                  <div className="space-y-4 w-96">
+                    <h3 className="text-xl font-semibold">Class Schedule</h3>
+                    <div className="space-y-2">
+                      {totalClasses && slots.length > 0 ? (
+                        slots.map((slot, index) => (
+                          <div key={index}>
+                            <div className="flex flex-col items-start justify-between p-3 border border-green-500 sm:flex-row sm:items-center sm:px-4 rounded-2xl sm:rounded-full">
                               <div className="flex items-center gap-2">
-                                <Clock size={16} className="text-gray-500" />
-                                <span className="text-sm">
-                                  {slot.toLocaleTimeString("en-US", {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                    hour12: true,
-                                  })}
+                                <span className="text-sm font-medium">
+                                  Class {index + 1}
                                 </span>
                               </div>
-                              <div className="flex items-center gap-2">
-                                <Calendar size={16} className="text-gray-500" />
-                                <span className="text-sm">
-                                  {slot.toLocaleDateString("en-US", {
-                                    weekday: "short",
-                                    month: "short",
-                                    day: "numeric",
-                                    year: "numeric",
-                                  })}
-                                </span>
+                              <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-2">
+                                  <Clock size={16} className="text-gray-500" />
+                                  <span className="text-sm">
+                                    {slot.toLocaleTimeString("en-US", {
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                      hour12: true,
+                                    })}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Calendar
+                                    size={16}
+                                    className="text-gray-500"
+                                  />
+                                  <span className="text-sm">
+                                    {slot.toLocaleDateString("en-US", {
+                                      weekday: "short",
+                                      month: "short",
+                                      day: "numeric",
+                                      year: "numeric",
+                                    })}
+                                  </span>
+                                </div>
                               </div>
                             </div>
                           </div>
+                        ))
+                      ) : (
+                        <div className="text-sm text-gray-500">
+                          {selectedRecurrenceType !== "One-time"
+                            ? "Please enter the number of classes to see the schedule"
+                            : "One-time class scheduled for:"}
                         </div>
-                      ))
-                    ) : (
-                      <div className="text-sm text-gray-500">
-                        {selectedRecurrenceType !== "One-time"
-                          ? "Please enter the number of classes to see the schedule"
-                          : "One-time class scheduled for:"}
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <></>
+                )}
               </div>
             </div>
           </div>

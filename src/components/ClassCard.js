@@ -96,11 +96,11 @@ const ClassCard = ({
             isPremium ? "border-[#14b82c]" : "border-[#ffc71f]"
           } bg-white rounded-3xl p-2`}
         >
-          <div className="relative w-full aspect-video sm:h-56">
+          <div className="relative w-full aspect-video sm:h-80">
             <img
               alt={className}
               src={imageUrl || "/images/default-class.png"}
-              className="object-cover w-full h-full rounded-t-2xl"
+              className="object-cover w-full h-full rounded-t-2xl rounded-b-3xl"
             />
             {isPremium && (
               <img
@@ -109,79 +109,75 @@ const ClassCard = ({
                 className="absolute w-24 h-6 sm:h-8 sm:w-28 top-2 left-2"
               />
             )}
-          </div>
 
-          <div
-            className={`w-full flex-grow space-y-1 ${
-              isPremium ? "bg-[#c3f3c9]" : "bg-[#c3f3c9]"
-            } rounded-b-3xl p-2`}
-          >
-            <h2 className="ml-2 text-xl font-bold text-gray-800 sm:text-xl line-clamp-2">
-              {className}
-            </h2>
+            <div className="absolute bottom-0 left-0 right-0 bg-[#B9F9C2BF]/75 backdrop-blur-sm rounded-b-2xl p-2 space-y-1">
+              <h2 className="ml-2 text-xl font-bold text-gray-800 sm:text-xl line-clamp-2">
+                {className}
+              </h2>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center ml-2 space-x-2">
-                <img
-                  src={
-                    language === "English"
-                      ? "/svgs/xs-us.svg"
-                      : "/svgs/xs-spain.svg"
-                  }
-                  alt={language === "English" ? "US Flag" : "Spain Flag"}
-                  className="w-4 sm:w-auto"
-                />
-                <span className="flex items-center">
-                  <span className="text-sm sm:text-base text-[#042f0c]">
-                    {language}
-                  </span>
-                </span>
-              </div>
-              {languageLevel !== "None" && (
-                <span className="px-2 sm:px-3 py-1 text-xs sm:text-sm bg-[#fff885] rounded-full">
-                  {languageLevel}
-                </span>
-              )}
-            </div>
-          </div>
-
-          <div className="flex flex-col items-center justify-end w-full p-2 space-y-2">
-            <div className="flex flex-col items-start justify-between w-full gap-2 sm:flex-row sm:items-center sm:gap-0">
-              <div className="flex items-center space-x-2">
-                <img alt="bammbuu" src="/svgs/clock.svg" />
-                <span className="text-sm sm:text-md text-[#454545]">
-                  {formatTime(classDateTime)} ({classDuration} min)
-                </span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <img alt="bammbuu" src="/svgs/calendar.svg" />
-                <span className="text-sm sm:text-md text-[#454545]">
-                  {formatDate(classDateTime)}
-                </span>
-              </div>
-            </div>
-            <div className="flex flex-col items-start justify-between w-full gap-2 sm:flex-row sm:items-center sm:gap-0">
-              <div className="flex items-center space-x-1">
-                {profileUrl ? (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center ml-2 space-x-2">
                   <img
-                    src={profileUrl}
-                    alt={adminName}
-                    className="object-cover w-4 h-4 rounded-full sm:w-5 sm:h-5"
+                    src={
+                      language === "English"
+                        ? "/svgs/xs-us.svg"
+                        : "/svgs/xs-spain.svg"
+                    }
+                    alt={language === "English" ? "US Flag" : "Spain Flag"}
+                    className="w-4 sm:w-auto"
                   />
-                ) : (
-                  <User className="w-4 h-4 text-gray-600 sm:w-5 sm:h-5" />
-                )}
-                <span className="text-sm sm:text-md text-[#454545]">
-                  {adminName || "TBD"}
-                </span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <img alt="bammbuu" src="/svgs/users.svg" />
-                {!isPremium && (
-                  <span className="text-sm sm:text-md text-[#454545]">
-                    {classMemberIds.length}/{availableSpots}
+                  <span className="flex items-center">
+                    <span className="text-sm sm:text-base text-[#042f0c]">
+                      {language}
+                    </span>
+                  </span>
+                </div>
+                {languageLevel !== "None" && (
+                  <span className="px-2 sm:px-3 py-1 text-xs sm:text-sm bg-[#fff885] rounded-full">
+                    {languageLevel}
                   </span>
                 )}
+              </div>
+            </div>
+
+            <div className="flex flex-col items-center justify-end w-full p-2 space-y-2">
+              <div className="flex flex-col items-start justify-between w-full gap-2 sm:flex-row sm:items-center sm:gap-0">
+                <div className="flex items-center space-x-2">
+                  <img alt="bammbuu" src="/svgs/clock.svg" />
+                  <span className="text-sm sm:text-md text-[#454545]">
+                    {formatTime(classDateTime)} ({classDuration} min)
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <img alt="bammbuu" src="/svgs/calendar.svg" />
+                  <span className="text-sm sm:text-md text-[#454545]">
+                    {formatDate(classDateTime)}
+                  </span>
+                </div>
+              </div>
+              <div className="flex flex-col items-start justify-between w-full gap-2 sm:flex-row sm:items-center sm:gap-0">
+                <div className="flex items-center space-x-1">
+                  {profileUrl ? (
+                    <img
+                      src={profileUrl}
+                      alt={adminName}
+                      className="object-cover w-4 h-4 rounded-full sm:w-5 sm:h-5"
+                    />
+                  ) : (
+                    <User className="w-4 h-4 text-gray-600 sm:w-5 sm:h-5" />
+                  )}
+                  <span className="text-sm sm:text-md text-[#454545]">
+                    {adminName || "TBD"}
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <img alt="bammbuu" src="/svgs/users.svg" />
+                  {!isPremium && (
+                    <span className="text-sm sm:text-md text-[#454545]">
+                      {classMemberIds.length}/{availableSpots}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </div>

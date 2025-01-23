@@ -959,7 +959,7 @@ const GroupDetailsModal = ({ group, onClose }) => {
                   Class Duration
                 </label>
                 <div className="flex gap-2 mt-1">
-                  {[30, 60, 90, 120].map((duration) => (
+                  {[30, 60].map((duration) => (
                     <button
                       key={duration}
                       onClick={() =>

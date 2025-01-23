@@ -163,7 +163,7 @@ const SuperTutorUser = () => {
                     className="w-6"
                     data-tooltip-id="image-tooltip"
                     data-tooltip-place="right" // or "bottom", "left", "right"
-                    data-tooltip-content="LLM models, including Bammbuu, can sometimes provide inaccurate or incomplete information."
+                    data-tooltip-content="LLM models, including bammbuu, can sometimes provide inaccurate or incomplete information."
                   />
                   <Tooltip id="image-tooltip" />
                 </div>

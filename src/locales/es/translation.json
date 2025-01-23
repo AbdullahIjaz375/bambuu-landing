@@ -659,8 +659,8 @@
           "description": "Puedes reservar clases grupales bammbuu+"
         },
         "private": {
-          "title": "11 Clases",
-          "description": "Puedes reservar 11 clases con expertos en idiomas"
+          "title": "1:1 Clases",
+          "description": "Puedes reservar 1:1 clases con expertos en idiomas"
         }
       }
     },
@@ -689,7 +689,7 @@
       "buy": "Comprar Ahora",
       "loading": "Cargando..."
     },
-    "credits-warning": "Con los créditos de clase solo puedes reservar clases bammbuu+, otros beneficios premium no están incluidos."
+    "credits-warning": "Con los créditos de clase solo puedes reservar clases bammbuu+ 1:1, otros beneficios premium no están incluidos."
   },
   "class-details": {
     "title": "Detalles de la Clase",

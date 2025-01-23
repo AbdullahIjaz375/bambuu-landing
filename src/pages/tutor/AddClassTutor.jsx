@@ -20,6 +20,7 @@ import {
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "../../firebaseConfig";
+import { NumberInput } from "@mantine/core";
 
 const AddClassTutor = () => {
   const { user, setUser } = useAuth();
@@ -59,7 +60,7 @@ const AddClassTutor = () => {
     classDescription: "",
     language: "English",
     languageLevel: "Beginner",
-    availableSpots: 1,
+    availableSpots: 5,
     classDuration: 60,
     classDateTime: new Date(),
     recurrenceType: "One-time",
@@ -138,7 +139,8 @@ const AddClassTutor = () => {
         language: classData.language,
         languageLevel:
           classType === "individual" ? "None" : classData.languageLevel,
-        availableSpots: classData.availableSpots,
+        availableSpots:
+          classType === "individual" ? 1 : classData.availableSpots,
         classDuration: classData.classDuration,
         classDateTime: serverTimestamp(),
         recurrenceTypes: classData.recurrenceTypes,
@@ -368,21 +370,26 @@ const AddClassTutor = () => {
                         >
                           Spanish
                         </button>
-                        <button
-                          onClick={() =>
-                            handleClassDataChange(
-                              "language",
-                              "English-Spanish Exchange"
-                            )
-                          }
-                          className={`px-4 py-2 rounded-full text-sm ${
-                            classData.language === "English-Spanish Exchange"
-                              ? "bg-yellow-400 border border-yellow-500"
-                              : "border border-gray-200"
-                          }`}
-                        >
-                          English-Spanish Exchange
-                        </button>
+
+                        {classType === "individual" ? (
+                          <></>
+                        ) : (
+                          <button
+                            onClick={() =>
+                              handleClassDataChange(
+                                "language",
+                                "English-Spanish Exchange"
+                              )
+                            }
+                            className={`px-4 py-2 rounded-full text-sm ${
+                              classData.language === "English-Spanish Exchange"
+                                ? "bg-yellow-400 border border-yellow-500"
+                                : "border border-gray-200"
+                            }`}
+                          >
+                            English-Spanish Exchange
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -520,28 +527,30 @@ const AddClassTutor = () => {
 
                   <div className="flex flex-row items-start justify-between space-x-4">
                     {/* Available Slots */}
-                    <div>
-                      <label className="text-sm font-medium text-gray-700">
-                        Available Slots
-                      </label>
-                      <input
-                        type="number"
-                        placeholder="Enter slots number"
-                        value={classData.availableSpots}
-                        onChange={(e) => {
-                          const value = parseInt(e.target.value);
-                          if (
-                            classData.classType === "Individual Premium" &&
-                            value > 1
-                          ) {
-                            handleClassDataChange("availableSpots", 1);
-                          } else {
-                            handleClassDataChange("availableSpots", value);
+
+                    {classType !== "individual" ? (
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">
+                          Available Slots
+                        </label>
+                        <NumberInput
+                          placeholder="Enter slots number"
+                          value={classData.availableSpots || ""}
+                          min={5}
+                          size="md"
+                          clampBehavior="strict"
+                          onChange={(value) =>
+                            handleClassDataChange("availableSpots", value)
                           }
-                        }}
-                        className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
-                      />
-                    </div>
+                          classNames={{
+                            input:
+                              "mt-1 w-full rounded-3xl border font-urbanist border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300",
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <></>
+                    )}
 
                     {/* Class Duration */}
                     <div>
@@ -549,7 +558,7 @@ const AddClassTutor = () => {
                         Class Duration
                       </label>
                       <div className="flex gap-2 mt-1">
-                        {[30, 60, 90, 120].map((duration) => (
+                        {[30, 60].map((duration) => (
                           <button
                             key={duration}
                             onClick={() =>

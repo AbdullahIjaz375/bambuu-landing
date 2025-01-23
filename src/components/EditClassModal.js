@@ -5,6 +5,7 @@ import { db } from "../../src/firebaseConfig";
 import { useTranslation } from "react-i18next";
 
 import Modal from "react-modal";
+import { NumberInput } from "@mantine/core";
 
 const EditClassModal = ({
   isOpen,
@@ -312,17 +313,20 @@ const EditClassModal = ({
                 <label className="text-sm font-medium text-gray-700">
                   {t("createClass.slots.label")}
                 </label>
-                <input
-                  type="number"
-                  value={classData.availableSpots || ""}
+
+                <NumberInput
                   placeholder={t("createClass.slots.placeholder")}
-                  onChange={(e) =>
-                    handleClassDataChange(
-                      "availableSpots",
-                      parseInt(e.target.value)
-                    )
+                  value={classData.availableSpots || ""}
+                  min={5}
+                  size="md"
+                  clampBehavior="strict"
+                  onChange={(value) =>
+                    handleClassDataChange("availableSpots", value)
                   }
-                  className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                  classNames={{
+                    input:
+                      "mt-1 w-full rounded-lg border font-urbanist border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300",
+                  }}
                 />
               </div>
             )}
@@ -332,7 +336,7 @@ const EditClassModal = ({
                 {t("createClass.duration.label")}
               </label>
               <div className="flex gap-2 mt-1">
-                {[30, 60, 90, 120].map((duration) => (
+                {[30, 60].map((duration) => (
                   <button
                     key={duration}
                     onClick={() =>

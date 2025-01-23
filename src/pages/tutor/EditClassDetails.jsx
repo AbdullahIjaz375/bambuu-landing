@@ -7,6 +7,7 @@ import { doc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "../../firebaseConfig";
 import { ClipLoader } from "react-spinners";
+import { NumberInput } from "@mantine/core";
 
 const EditClassPage = () => {
   const { user } = useAuth();
@@ -389,36 +390,36 @@ const EditClassPage = () => {
 
                   {/* Available Spots and Duration */}
                   <div className="flex flex-row items-start justify-between space-x-4">
-                    <div>
-                      <label className="text-sm font-medium text-gray-700">
-                        Available Spots
-                      </label>
-                      <input
-                        type="number"
-                        placeholder="Enter slots number"
-                        value={classData.availableSpots}
-                        disabled={classData.classType === "Individual Premium"}
-                        onChange={(e) => {
-                          const value = parseInt(e.target.value);
-                          if (
-                            classData.classType === "Individual Premium" &&
-                            value > 1
-                          ) {
-                            handleClassDataChange("availableSpots", 1);
-                          } else {
-                            handleClassDataChange("availableSpots", value);
+                    {classData.classType !== "Individual Premium" ? (
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">
+                          Available Slots
+                        </label>
+                        <NumberInput
+                          placeholder="Enter slots number"
+                          value={classData.availableSpots || ""}
+                          min={5}
+                          size="md"
+                          clampBehavior="strict"
+                          onChange={(value) =>
+                            handleClassDataChange("availableSpots", value)
                           }
-                        }}
-                        className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
-                      />
-                    </div>
+                          classNames={{
+                            input:
+                              "mt-1 w-full rounded-3xl border font-urbanist border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300",
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <></>
+                    )}
 
                     <div>
                       <label className="text-sm font-medium text-gray-700">
                         Class Duration
                       </label>
                       <div className="flex gap-2 mt-1">
-                        {[30, 60, 90, 120].map((duration) => (
+                        {[30, 60].map((duration) => (
                           <button
                             key={duration}
                             onClick={() =>

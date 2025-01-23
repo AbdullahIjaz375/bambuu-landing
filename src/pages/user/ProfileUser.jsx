@@ -68,9 +68,9 @@ const ProfileUser = () => {
 
   const handleItemClick = (path) => {
     if (path === "/privacyPolicyUser") {
-      window.open("https://bammbuu.com/privacy-policy", "_blank");
+      window.open("https://bammbuu.co/privacy-policy", "_blank");
     } else if (path === "/aboutBambuuUser") {
-      window.open("https://bammbuu.com/about-bammbuu", "_blank");
+      window.open("https://bammbuu.co/about-bammbuu", "_blank");
     } else {
       navigate(path);
     }
@@ -87,7 +87,7 @@ const ProfileUser = () => {
       label: t("profile.navigation.settings"),
     },
     {
-      path: "/aboutBambuuUser",
+      // path: "/aboutBambuuUser",
       icon: "/svgs/speedometer.svg",
       label: t("profile.navigation.aboutBammbuu"),
     },
@@ -101,7 +101,7 @@ const ProfileUser = () => {
   return (
     <div className="flex h-screen bg-white">
       <div className="flex-shrink-0 w-64 h-full">
-        <Sidebar user={userData} />
+        <Sidebar user={user} />
       </div>
 
       <div className="flex-1 overflow-x-auto min-w-[calc(100%-16rem)] h-full">
@@ -117,14 +117,14 @@ const ProfileUser = () => {
             <div className="bg-[#e6fde9] rounded-3xl p-8 flex flex-col items-center">
               <div className="flex items-center justify-center w-32 h-32 mb-4 bg-white rounded-full">
                 <img
-                  src={userData?.photoUrl || "/api/placeholder/96/96"}
+                  src={user?.photoUrl || "/api/placeholder/96/96"}
                   alt="Profile"
                   className="object-cover w-full h-full rounded-full"
                 />
               </div>
 
               <h2 className="mb-4 text-3xl font-semibold">
-                {userData?.name || "User"}
+                {user?.name || "User"}
               </h2>
 
               <div className="flex items-center gap-2 px-3 py-1 mb-6 text-xl bg-white rounded-full">
@@ -133,7 +133,7 @@ const ProfileUser = () => {
                   {t("profile.appStreak")}
                 </span>
                 <span className="font-bold text-green-600 ">
-                  {userData?.currentStreak || 0}
+                  {user?.currentStreak || 0}
                 </span>
               </div>
 
@@ -149,7 +149,7 @@ const ProfileUser = () => {
                     {t("profile.native")}:
                   </span>
                   <span className="font-medium text-gray-600 truncate">
-                    {userData?.nativeLanguage || "-"}
+                    {user?.nativeLanguage || "-"}
                   </span>
                 </div>
                 <div className="flex items-center min-w-0 gap-1">
@@ -162,7 +162,7 @@ const ProfileUser = () => {
                     {t("profile.learning")}:
                   </span>
                   <span className="font-medium text-gray-600 truncate">
-                    {userData?.learningLanguage || "-"}
+                    {user?.learningLanguage || "-"}
                   </span>
                 </div>
                 <div className="flex items-center min-w-0 gap-1">
@@ -175,7 +175,7 @@ const ProfileUser = () => {
                     {t("profile.from")}:
                   </span>
                   <span className="font-medium text-gray-600 truncate">
-                    {userData?.country || "-"}
+                    {user?.country || "-"}
                   </span>
                 </div>
               </div>
@@ -186,7 +186,7 @@ const ProfileUser = () => {
                     {t("profile.stats.totalClassesJoined")}:
                   </span>
                   <span className="font-medium text-gray-600">
-                    {userData?.enrolledClasses?.length || 0}
+                    {user?.enrolledClasses?.length || 0}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -194,7 +194,7 @@ const ProfileUser = () => {
                     {t("profile.stats.totalGroupsJoined")}:
                   </span>
                   <span className="font-medium text-gray-600">
-                    {userData?.joinedGroups?.length || 0}
+                    {user?.joinedGroups?.length || 0}
                   </span>
                 </div>
               </div>

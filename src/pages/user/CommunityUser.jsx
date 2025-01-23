@@ -616,9 +616,9 @@ const CommunityUser = () => {
             alt={channel.data.name}
             className="object-cover w-12 h-12 rounded-full"
           />
-          {!channel.data.disabled && (
+          {/* {!channel.data.disabled && (
             <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full" />
-          )}
+          )} */}
         </div>
         <div className="flex-1">
           <div className="flex items-center justify-between">

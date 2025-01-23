@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { doc, updateDoc, increment } from "firebase/firestore";
+import {
+  doc,
+  updateDoc,
+  increment,
+  getDoc,
+  arrayUnion,
+  Timestamp,
+} from "firebase/firestore";
 import { db } from "../firebaseConfig";
 
 export const useClassBooking = () => {
@@ -12,7 +19,6 @@ export const useClassBooking = () => {
     subscriptions,
     credits = 0
   ) => {
-    // If class is not premium, allow booking
     if (classType !== "Individual Premium" && classType !== "Group Premium") {
       return {
         canBook: true,
@@ -22,7 +28,6 @@ export const useClassBooking = () => {
       };
     }
 
-    // Check for valid subscriptions
     const currentDate = new Date();
     const validSubscriptions =
       subscriptions?.filter((sub) => {
@@ -31,7 +36,6 @@ export const useClassBooking = () => {
         return endDate > currentDate;
       }) || [];
 
-    // Check subscription type based on class type
     const hasValidSubscription = validSubscriptions.some((sub) => {
       if (classType === "Group Premium") {
         return sub.type === "bammbuu+ Instructor-led group Classes";
@@ -41,7 +45,6 @@ export const useClassBooking = () => {
       return false;
     });
 
-    // If has valid subscription, allow booking with subscription
     if (hasValidSubscription) {
       return {
         canBook: true,
@@ -51,7 +54,6 @@ export const useClassBooking = () => {
       };
     }
 
-    // If has credits, allow booking with credits
     if (credits > 0) {
       return {
         canBook: true,
@@ -61,7 +63,6 @@ export const useClassBooking = () => {
       };
     }
 
-    // No valid subscription or credits
     return {
       canBook: false,
       useSubscription: false,
@@ -96,16 +97,8 @@ export const useClassBooking = () => {
         return false;
       }
 
-      // If using credits, decrement them
-      if (eligibility.useCredits) {
-        const userRef = doc(db, "students", user.uid);
-        await updateDoc(userRef, {
-          credits: increment(-1),
-        });
-      }
-
-      // Proceed with enrollment
-      const enrollmentSuccess = await handleEnrollment();
+      // Pass useCredits flag to enrollment function
+      const enrollmentSuccess = await handleEnrollment(eligibility.useCredits);
 
       if (enrollmentSuccess) {
         onSuccess?.();
@@ -126,6 +119,6 @@ export const useClassBooking = () => {
     handleClassBooking,
     checkBookingEligibility,
     isProcessing,
-    iserror: error, // Rename during return
+    error,
   };
 };

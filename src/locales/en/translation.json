@@ -657,8 +657,8 @@
           "description": "You can book bammbuu+ group classes"
         },
         "private": {
-          "title": "11 Classes",
-          "description": "You can book 11 classes with language experts"
+          "title": "1:1 Classes",
+          "description": "You can book 1:1 classes with language experts"
         }
       }
     },
@@ -687,7 +687,7 @@
       "buy": "Buy Now",
       "loading": "Loading..."
     },
-    "credits-warning": "With class credits you can only book bammbuu+ classes other premium perks are not included."
+    "credits-warning": "With class credits you can only book bammbuu+ 1:1 classes other premium perks are not included."
   },
   "class-details": {
     "title": "Class Details",

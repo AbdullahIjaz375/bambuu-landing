@@ -153,23 +153,27 @@ const ExploreClassCard = ({
 
   const { handleClassBooking, isProcessing, iserror } = useClassBooking();
 
+  // const handleCardClick = () => {
+  //   if (selectedRecurrenceType && selectedRecurrenceType !== "None") {
+  //     toast.error(
+  //       "This class is currently full. Please check back later or explore other available classes.",
+  //       {
+  //         position: "top-right",
+  //         autoClose: 3000,
+  //         hideProgressBar: false,
+  //         closeOnClick: true,
+  //         pauseOnHover: true,
+  //         draggable: true,
+  //       }
+  //     );
+  //   } else {
+  //     navigate(`/newClassDetailsUser/${classId}`);
+  //     // setIsPlansModalOpen(true);
+  //   }
+  // };
+
   const handleCardClick = () => {
-    if (selectedRecurrenceType && selectedRecurrenceType !== "None") {
-      toast.error(
-        "This class is currently full. Please check back later or explore other available classes.",
-        {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        }
-      );
-    } else {
-      navigate(`/newClassDetailsUser/${classId}`);
-      // setIsPlansModalOpen(true);
-    }
+    navigate(`/newClassDetailsUser/${classId}`);
   };
 
   const handleBookClass = (e) => {
@@ -258,98 +262,98 @@ const ExploreClassCard = ({
         }}
       >
         <div
-          className={`flex flex-col items-center justify-center bg-white rounded-3xl p-2 ${
-            isPremium ? "border border-[#14b82c]" : "border border-[#f2a105]"
-          }`}
+          className={`flex flex-col h-auto sm:h-[28rem] border ${
+            isPremium ? "border-[#14b82c]" : "border-[#ffc71f]"
+          } bg-white rounded-3xl p-2`}
         >
-          <div className="relative w-full">
+          <div className="relative w-full aspect-video sm:h-80">
             <img
               alt={className}
               src={imageUrl || "/images/default-class.png"}
-              className="object-cover w-full h-48 rounded-t-2xl"
+              className="object-cover w-full h-full rounded-t-2xl rounded-b-3xl"
             />
             {isPremium && (
               <img
                 src="/images/bambuu-plus-tag.png"
                 alt="Bammbuu+"
-                className="absolute h-8 w-28 top-2 left-2"
+                className="absolute w-24 h-6 sm:h-8 sm:w-28 top-2 left-2"
               />
             )}
-          </div>
 
-          <div className="w-full space-y-2 bg-[#c3f3c9] rounded-b-3xl p-2">
-            <h2 className="text-lg font-bold text-gray-800 truncate">
-              {className}
-            </h2>
+            <div className="absolute bottom-0 left-0 right-0 bg-[#B9F9C2BF]/75 backdrop-blur-sm rounded-b-2xl p-2 space-y-1">
+              <h2 className="ml-2 text-xl font-bold text-gray-800 sm:text-xl line-clamp-2">
+                {className}
+              </h2>
 
-            <div className="flex flex-wrap items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <img
-                  src={
-                    language === "English"
-                      ? "/svgs/xs-us.svg"
-                      : "/svgs/xs-spain.svg"
-                  }
-                  alt={language === "English" ? "US Flag" : "Spain Flag"}
-                />
-                <span className="text-[#042f0c]">{language}</span>
-              </div>
-              {languageLevel !== "None" && (
-                <span className="px-2 sm:px-3 py-1 text-xs sm:text-sm bg-[#fff885] rounded-full">
-                  {languageLevel}
-                </span>
-              )}
-            </div>
-          </div>
-
-          <div className="flex flex-col items-center justify-center w-full p-2 space-y-2">
-            <div className="flex flex-wrap items-center justify-between w-full">
-              <div className="flex items-center space-x-2">
-                <img alt="user" src="/svgs/clock.svg" />
-                <span className="text-[#454545] text-sm">
-                  {formatTime(classDateTime)} ({classDuration} min)
-                </span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <img alt="user" src="/svgs/calendar.svg" />
-                <span className="text-[#454545] text-sm">
-                  {formatDate(classDateTime)}
-                </span>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-between w-full">
-              <div className="flex items-center space-x-2">
-                {profileUrl ? (
+              <div className="flex flex-wrap items-center justify-between">
+                <div className="flex items-center space-x-2">
                   <img
-                    src={profileUrl}
-                    alt={adminName}
-                    className="object-cover w-5 h-5 rounded-full"
+                    src={
+                      language === "English"
+                        ? "/svgs/xs-us.svg"
+                        : "/svgs/xs-spain.svg"
+                    }
+                    alt={language === "English" ? "US Flag" : "Spain Flag"}
                   />
-                ) : (
-                  <User className="w-5 h-5 text-gray-600" />
-                )}
-                <span className="text-[#454545] text-sm">
-                  {adminName || "TBD"}
-                </span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <img alt="user" src="/svgs/users.svg" />
-                {isPremium ? (
-                  <span className="text-[#454545] text-sm"></span>
-                ) : (
-                  <span className="text-[#454545] text-sm">
-                    {classMemberIds.length}/{availableSpots}
+                  <span className="text-[#042f0c]">{language}</span>
+                </div>
+                {languageLevel !== "None" && (
+                  <span className="px-2 sm:px-3 py-1 text-xs sm:text-sm bg-[#fff885] rounded-full">
+                    {languageLevel}
                   </span>
                 )}
               </div>
             </div>
-            <button
-              onClick={handleCardClick}
-              className="w-full py-2 font-medium text-[#042F0C] border-[#042F0C] border bg-[#14b82c] rounded-full hover:bg-[#119924]"
-            >
-              Book Class
-            </button>
+
+            <div className="flex flex-col items-center justify-center w-full p-2 space-y-2">
+              <div className="flex flex-wrap items-center justify-between w-full">
+                <div className="flex items-center space-x-2">
+                  <img alt="user" src="/svgs/clock.svg" />
+                  <span className="text-[#454545] text-sm">
+                    {formatTime(classDateTime)} ({classDuration} min)
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <img alt="user" src="/svgs/calendar.svg" />
+                  <span className="text-[#454545] text-sm">
+                    {formatDate(classDateTime)}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between w-full">
+                <div className="flex items-center space-x-2">
+                  {profileUrl ? (
+                    <img
+                      src={profileUrl}
+                      alt={adminName}
+                      className="object-cover w-5 h-5 rounded-full"
+                    />
+                  ) : (
+                    <User className="w-5 h-5 text-gray-600" />
+                  )}
+                  <span className="text-[#454545] text-sm">
+                    {adminName || "TBD"}
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <img alt="user" src="/svgs/users.svg" />
+                  {isPremium ? (
+                    <span className="text-[#454545] text-sm"></span>
+                  ) : (
+                    <span className="text-[#454545] text-sm">
+                      {classMemberIds.length}/{availableSpots}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <button
+                onClick={handleCardClick}
+                className="w-full py-2 font-medium text-[#042F0C] border-[#042F0C] border bg-[#14b82c] rounded-full hover:bg-[#119924]"
+              >
+                Book Class
+              </button>
+            </div>
           </div>
         </div>
       </div>

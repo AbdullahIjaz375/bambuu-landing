@@ -72,11 +72,11 @@ const ClassCardTutor = ({
               isPremium ? "border-[#14b82c]" : "border-[#ffc71f]"
             } bg-white rounded-3xl p-2`}
           >
-            <div className="relative w-full aspect-video sm:h-56">
+            <div className="relative w-full aspect-video sm:h-80">
               <img
                 alt={className}
                 src={imageUrl || "/images/default-class.png"}
-                className="object-cover w-full h-full rounded-t-2xl"
+                className="object-cover w-full h-full rounded-t-2xl rounded-b-3xl"
               />
               {isPremium && (
                 <img
@@ -85,39 +85,35 @@ const ClassCardTutor = ({
                   className="absolute w-24 h-6 sm:h-8 sm:w-28 top-2 left-2"
                 />
               )}
-            </div>
 
-            <div
-              className={`w-full flex-grow space-y-1 ${
-                isPremium ? "bg-[#c3f3c9]" : "bg-[#c3f3c9]"
-              } rounded-b-3xl p-2`}
-            >
-              <h2 className="ml-2 text-xl font-bold text-gray-800 sm:text-xl line-clamp-2">
-                {className}
-              </h2>
+              <div className="absolute bottom-0 left-0 right-0 bg-[#B9F9C2BF]/75 backdrop-blur-sm rounded-b-2xl p-2 space-y-1">
+                <h2 className="ml-2 text-xl font-bold text-gray-800 sm:text-xl line-clamp-2">
+                  {className}
+                </h2>
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center ml-2 space-x-2">
-                  <img
-                    src={
-                      language === "English"
-                        ? "/svgs/xs-us.svg"
-                        : "/svgs/xs-spain.svg"
-                    }
-                    alt={language === "English" ? "US Flag" : "Spain Flag"}
-                    className="w-4 sm:w-auto"
-                  />
-                  <span className="flex items-center">
-                    <span className="text-sm sm:text-base text-[#042f0c]">
-                      {language}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center ml-2 space-x-2">
+                    <img
+                      src={
+                        language === "English"
+                          ? "/svgs/xs-us.svg"
+                          : "/svgs/xs-spain.svg"
+                      }
+                      alt={language === "English" ? "US Flag" : "Spain Flag"}
+                      className="w-4 sm:w-auto"
+                    />
+                    <span className="flex items-center">
+                      <span className="text-sm sm:text-base text-[#042f0c]">
+                        {language}
+                      </span>
                     </span>
-                  </span>
+                  </div>
+                  {languageLevel !== "None" && (
+                    <span className="px-2 sm:px-3 py-1 text-xs sm:text-sm bg-[#fff885] rounded-full">
+                      {languageLevel}
+                    </span>
+                  )}
                 </div>
-                {languageLevel !== "None" && (
-                  <span className="px-2 sm:px-3 py-1 text-xs sm:text-sm bg-[#fff885] rounded-full">
-                    {languageLevel}
-                  </span>
-                )}
               </div>
             </div>
 

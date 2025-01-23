@@ -55,17 +55,10 @@ const PlansModal = ({ isOpen, onClose }) => {
     const [isLoading, setIsLoading] = useState(false);
     const features = [
       {
-        title: t("plans-modal.features.supertutor.title"),
-        description: t("plans-modal.features.supertutor.description"),
-      },
-      {
         title: t("plans-modal.features.experts.title"),
         description: t("plans-modal.features.experts.description"),
       },
-      {
-        title: t("plans-modal.features.resources.title"),
-        description: t("plans-modal.features.resources.description"),
-      },
+
       {
         title: plan.title.includes("Group")
           ? t("plans-modal.features.classes.group.title")
@@ -73,6 +66,14 @@ const PlansModal = ({ isOpen, onClose }) => {
         description: plan.title.includes("Group")
           ? t("plans-modal.features.classes.group.description")
           : t("plans-modal.features.classes.private.description"),
+      },
+      {
+        title: t("plans-modal.features.resources.title"),
+        description: t("plans-modal.features.resources.description"),
+      },
+      {
+        title: t("plans-modal.features.supertutor.title"),
+        description: t("plans-modal.features.supertutor.description"),
       },
     ];
 
@@ -296,8 +297,7 @@ const PlansModal = ({ isOpen, onClose }) => {
                 <line x1="12" y1="8" x2="12" y2="12" />
                 <line x1="12" y1="16" x2="12" y2="16" />
               </svg>
-              With class credits you can only book bammbuu+ classes other
-              premium perks are not included.
+              {t("plans-modal.credits-warning")}
             </div>
           </>
         )}

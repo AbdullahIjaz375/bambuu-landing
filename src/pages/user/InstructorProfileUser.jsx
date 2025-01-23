@@ -254,7 +254,7 @@ const InstructorProfileUser = () => {
                   <img
                     src={tutor.photoUrl || "/api/placeholder/128/128"}
                     alt={tutor.name}
-                    className="w-24 h-24 mb-4 rounded-full sm:w-32 sm:h-32"
+                    className="object-cover w-24 h-24 mb-4 rounded-full sm:w-32 sm:h-32"
                   />
                   <h3 className="mb-2 text-xl font-medium sm:text-2xl">
                     {tutor.name}

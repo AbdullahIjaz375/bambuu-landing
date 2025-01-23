@@ -524,7 +524,7 @@ const CalendarUser = ({ onDateSelect }) => {
       <Modal
         isOpen={isModalOpen}
         onRequestClose={() => setIsModalOpen(false)}
-        className="p-10 mx-auto mt-20 bg-white shadow-xl rounded-3xl max-w-7xl font-urbanist"
+        className="p-10 mx-auto mt-10 bg-white shadow-xl rounded-3xl max-w-7xl font-urbanist"
         overlayClassName="fixed inset-0 bg-black bg-opacity-50"
       >
         <div className="flex items-center justify-between mb-6">

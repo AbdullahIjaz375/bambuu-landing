@@ -484,7 +484,7 @@ const TutorEditProfile = () => {
               </div>
               <div className="flex justify-between mt-12">
                 <button
-                  onClick={() => navigate("/profile")}
+                  onClick={() => navigate(-1)}
                   className="px-8 py-3 text-[#042f0c] border border-[#5d5d5d] rounded-full"
                 >
                   Discard Changes

@@ -221,7 +221,7 @@ const EditGroupsTutor = () => {
                 </div>
                 <div className="flex justify-between gap-4 mt-8">
                   <button
-                    onClick={() => navigate("/groupsUser")}
+                    onClick={() => navigate(-1)}
                     className="px-10 py-3 text-[#042f0c] text-xl font-medium bg-white border border-[#5d5d5d] rounded-full"
                   >
                     Cancel

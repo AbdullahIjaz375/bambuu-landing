@@ -638,7 +638,7 @@ const GroupDetailsTutor = ({ onClose }) => {
     }
 
     return (
-      <div className="flex flex-wrap items-center p-4 space-x-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {classes.map((classItem) => (
           <ClassCardTutor
             key={classItem.classId}
@@ -1170,17 +1170,19 @@ const GroupDetailsTutor = ({ onClose }) => {
                 <label className="text-sm font-medium text-gray-700">
                   Available Slots
                 </label>
-                <input
-                  type="number"
+                <NumberInput
                   placeholder="Enter slots number"
-                  value={classData.availableSpots}
-                  onChange={(e) =>
-                    handleClassDataChange(
-                      "availableSpots",
-                      parseInt(e.target.value)
-                    )
+                  value={classData.availableSpots || ""}
+                  min={5}
+                  size="md"
+                  clampBehavior="strict"
+                  onChange={(value) =>
+                    handleClassDataChange("availableSpots", value)
                   }
-                  className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
+                  classNames={{
+                    input:
+                      "mt-1 w-full rounded-3xl border font-urbanist border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300",
+                  }}
                 />
               </div>
 
@@ -1190,7 +1192,7 @@ const GroupDetailsTutor = ({ onClose }) => {
                   Class Duration
                 </label>
                 <div className="flex gap-2 mt-1">
-                  {[30, 60, 90, 120].map((duration) => (
+                  {[30, 60].map((duration) => (
                     <button
                       key={duration}
                       onClick={() =>
