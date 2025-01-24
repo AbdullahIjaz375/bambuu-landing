@@ -703,7 +703,7 @@ const UserEditProfile = () => {
                       Your Proficiency in {formData.learningLanguage}
                     </label>
                     <div className="flex gap-2 text-xl">
-                      {["Beginner", "Intermediate", "Advance"].map((level) => (
+                      {["Beginner", "Intermediate", "Advanced"].map((level) => (
                         <button
                           key={level}
                           type="button"

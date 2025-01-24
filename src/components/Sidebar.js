@@ -228,14 +228,16 @@ const Sidebar = ({ user }) => {
       darkImage: "/svgs/saved-resources-dark.svg",
     },
   ];
-
+  const truncateEmail = (email) => {
+    return email && email.length > 20 ? `${email.slice(0, 20)}...` : email;
+  };
   const menuItems =
     user?.userType === "tutor" ? tutorMenuItems : studentMenuItems;
   const profilePath =
     user?.userType === "tutor" ? "/profileTutor" : "/profileUser";
 
   return (
-    <div className="sticky top-2 left-2 flex flex-col h-[calc(100vh-1rem)] min-w-[16rem] max-w-[16rem] bg-[#e6fde9] pt-6 pb-4 rounded-3xl border-2 border-[#b9f9c2] overflow-y-auto">
+    <div className="sticky ml-2 top-2 left-2 flex flex-col h-[calc(100vh-1rem)] min-w-[15.5rem] max-w-[15.5rem] bg-[#e6fde9] pt-6 pb-4 rounded-3xl border-2 border-[#b9f9c2] overflow-y-auto">
       {/* Logo */}
       <Link to="/" className="px-6 mb-8">
         <img
@@ -292,7 +294,7 @@ const Sidebar = ({ user }) => {
                   {user.name || "User"}
                 </span>
                 <span className="text-xs text-gray-700 truncate lg:text-sm">
-                  {user.email || "email"}
+                  {truncateEmail(user.email) || "email"}
                 </span>
               </div>
             </div>

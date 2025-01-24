@@ -45,10 +45,7 @@ const LearnTutor = () => {
   const [activeTab, setActiveTab] = useState(
     t("learn-tutor.tabs.booked-classes")
   );
-  const TABS = [
-    t("learn-tutor.tabs.booked-classes"),
-    t("learn-tutor.tabs.available-classes"),
-  ];
+
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [groups, setGroups] = useState([]);
@@ -170,20 +167,34 @@ const LearnTutor = () => {
 
             <div className="w-full max-w-[160vh] mx-auto">
               <div className="flex flex-row items-center justify-between pt-4">
-                <div className="flex bg-gray-100 border border-[#888888] rounded-full w-fit">
-                  {TABS.map((tab) => (
-                    <button
-                      key={tab}
-                      onClick={() => setActiveTab(tab)}
-                      className={`px-12 py-2 rounded-full text-lg font-medium transition-all ${
-                        activeTab === tab
-                          ? "bg-[#ffbf00] text-[#042f0c] border border-[#042f0c]"
-                          : "text-[#042f0c] hover:text-black"
-                      }`}
-                    >
-                      {tab}
-                    </button>
-                  ))}
+                <div className="relative inline-flex p-1 bg-gray-100 border border-gray-300 rounded-full">
+                  <div
+                    className="absolute top-0 left-0 h-full bg-[#FFBF00] border border-[#042F0C] rounded-full transition-all duration-300 ease-in-out"
+                    style={{
+                      transform: `translateX(${
+                        activeTab === t("learn-tutor.tabs.booked-classes")
+                          ? "0"
+                          : "100%"
+                      })`,
+                      width: "50%",
+                    }}
+                  />
+                  <button
+                    onClick={() =>
+                      setActiveTab(t("learn-tutor.tabs.booked-classes"))
+                    }
+                    className="relative z-10 px-4 sm:px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap"
+                  >
+                    {t("learn-tutor.tabs.booked-classes")}
+                  </button>
+                  <button
+                    onClick={() =>
+                      setActiveTab(t("learn-tutor.tabs.available-classes"))
+                    }
+                    className="relative z-10 px-4 sm:px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap"
+                  >
+                    {t("learn-tutor.tabs.available-classes")}
+                  </button>
                 </div>
                 <div className="flex flex-row items-center space-x-2">
                   <button

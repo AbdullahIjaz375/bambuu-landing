@@ -387,6 +387,15 @@ const GroupDetailsUser = ({ onClose }) => {
       const classAddress =
         classData.classLocation === "Virtual" ? "" : classData.classAddress;
 
+      // Parse the date and time inputs to create a combined datetime
+      const dateValue = new Date(classData.classDateTime);
+      const timeValue = document.querySelector('input[type="time"]').value;
+      const [hours, minutes] = timeValue.split(":").map(Number);
+
+      // Set the time components on the date object
+      dateValue.setHours(hours);
+      dateValue.setMinutes(minutes);
+
       const newClass = {
         classId: classId,
         adminId: user.uid,
@@ -399,7 +408,7 @@ const GroupDetailsUser = ({ onClose }) => {
         languageLevel: classData.languageLevel,
         availableSpots: classData.availableSpots,
         classDuration: classData.classDuration,
-        classDateTime: serverTimestamp(),
+        classDateTime: dateValue, // Use the combined date and time value
         recurrenceTypes: classData.recurrenceTypes,
         selectedRecurrenceType: "",
         recurringSlots: [],
@@ -882,7 +891,7 @@ const GroupDetailsUser = ({ onClose }) => {
                     <img
                       src={group.imageUrl}
                       alt={group.groupName}
-                      className="w-24 h-24 mb-4 rounded-full md:w-32 md:h-32"
+                      className="object-cover w-24 h-24 mb-4 rounded-full md:w-32 md:h-32"
                     />
                     <h3 className="mb-2 text-xl font-semibold md:text-2xl">
                       {group.groupName}
@@ -980,26 +989,25 @@ const GroupDetailsUser = ({ onClose }) => {
               <div className="flex flex-col flex-1 min-h-0">
                 <div className="flex flex-col items-center justify-between gap-4 mb-4 md:flex-row md:mb-6 md:gap-0">
                   <div className="flex justify-center w-full md:w-auto">
-                    <div className="inline-flex bg-gray-100 border border-gray-300 rounded-full">
+                    <div className="relative inline-flex p-1 bg-gray-100 border border-gray-300 rounded-full">
+                      <div
+                        className="absolute top-0 left-0 h-full bg-[#FFBF00] border border-[#042F0C] rounded-full transition-all duration-300 ease-in-out"
+                        style={{
+                          transform: `translateX(${
+                            activeTab === "Classes" ? "0" : "100%"
+                          })`,
+                          width: "50%",
+                        }}
+                      />
                       <button
                         onClick={() => setActiveTab("Classes")}
-                        className={`px-4 md:px-6 py-2 rounded-full text-[#042F0C] text-sm md:text-md font-medium transition-colors
-                        ${
-                          activeTab === "Classes"
-                            ? "bg-[#FFBF00] border border-[#042F0C]"
-                            : "bg-transparent"
-                        }`}
+                        className="relative z-10 px-4 sm:px-8 py-1 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap"
                       >
                         {t("groupDetails.classes")}
                       </button>
                       <button
                         onClick={() => setActiveTab("Members")}
-                        className={`px-4 md:px-6 py-2 rounded-full text-[#042F0C] text-sm md:text-md font-medium transition-colors
-                        ${
-                          activeTab === "Members"
-                            ? "bg-[#FFBF00] border border-[#042F0C]"
-                            : "bg-transparent"
-                        }`}
+                        className="relative z-10 px-4 sm:px-8 py-1 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap"
                       >
                         {t("groupDetails.members")}
                       </button>
@@ -1256,27 +1264,6 @@ const GroupDetailsUser = ({ onClose }) => {
                   </div>
                 )}
               </div>
-
-              {/* Class Type */}
-              {/* <div>
-                <label className="text-sm font-medium text-gray-700">
-                  Class Type
-                </label>
-                <div className="flex gap-2 mt-1">
-                  <button
-                    onClick={() =>
-                      handleClassDataChange("classType", "Group Premium")
-                    }
-                    className={`px-4 py-2 rounded-full text-sm ${
-                      classData.classType === "Group Premium"
-                        ? "bg-yellow-400 border border-yellow-500"
-                        : "border border-gray-200"
-                    }`}
-                  >
-                    Group Premium
-                  </button>
-                </div>
-              </div> */}
             </div>
 
             <div className="flex flex-row items-start justify-between space-x-4">
@@ -1448,7 +1435,8 @@ const GroupDetailsUser = ({ onClose }) => {
           </div>
 
           <h2 className="mb-4 text-xl font-semibold">
-            {t("removeUser.title", { userName: selectedUser?.name })}
+            {/* {t("removeUser.title", { userName: selectedUser?.name })}{" "} */}
+            Remove {selectedUser?.name} from group?
           </h2>
           <p className="mb-6 text-gray-600">{t("removeUser.description")}</p>
           <div className="flex flex-row gap-2">

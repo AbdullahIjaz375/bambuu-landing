@@ -223,26 +223,25 @@ const StudentsTutor = () => {
           <div className="flex-1 flex bg-white rounded-3xl m-2 h-[calc(100vh-125px)]">
             <div className="p-4 bg-[#f6f6f6] w-96 rounded-2xl overflow-hidden flex flex-col">
               <div className="flex justify-center w-full mb-4 sm:w-auto">
-                <div className="inline-flex bg-gray-100 border border-gray-300 rounded-full">
+                <div className="relative inline-flex p-1 bg-gray-100 border border-gray-300 rounded-full">
+                  <div
+                    className="absolute top-0 left-0 h-full bg-[#FFBF00] border border-[#042F0C] rounded-full transition-all duration-300 ease-in-out"
+                    style={{
+                      transform: `translateX(${
+                        activeTab === "students" ? "0" : "100%"
+                      })`,
+                      width: "50%",
+                    }}
+                  />
                   <button
                     onClick={() => setActiveTab("students")}
-                    className={`px-8 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap
-                    ${
-                      activeTab === "students"
-                        ? "bg-[#FFBF00] border border-[#042F0C]"
-                        : "bg-transparent"
-                    }`}
+                    className="relative z-10 px-4 sm:px-8 py-1 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap"
                   >
                     Student Chats
                   </button>
                   <button
                     onClick={() => setActiveTab("groups")}
-                    className={`px-8 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap
-                    ${
-                      activeTab === "groups"
-                        ? "bg-[#FFBF00] border border-[#042F0C]"
-                        : "bg-transparent"
-                    }`}
+                    className="relative z-10 px-4 sm:px-8 py-1 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap"
                   >
                     Group Chats
                   </button>

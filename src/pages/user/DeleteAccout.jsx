@@ -73,7 +73,15 @@ const DeleteAccout = () => {
                   ))}
                 </div>
                 <div className="flex flex-row gap-2">
-                  <button className="w-full py-3 font-medium text-white bg-red-500 rounded-full hover:bg-red-600">
+                  <button
+                    className="w-full py-3 font-medium text-black bg-white border border-black rounded-full hover:bg-gray-100"
+                    onClick={() => {
+                      navigate(-1);
+                    }}
+                  >
+                    Cancel{" "}
+                  </button>
+                  <button className="w-full py-3 font-medium text-black bg-red-500 border border-black rounded-full hover:bg-red-600">
                     {t("settings.deleteModal.confirm")}
                   </button>
                 </div>

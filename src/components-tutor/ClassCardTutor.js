@@ -97,10 +97,12 @@ const ClassCardTutor = ({
                       src={
                         language === "English"
                           ? "/svgs/xs-us.svg"
-                          : "/svgs/xs-spain.svg"
+                          : language === "Spanish"
+                          ? "/svgs/xs-spain.svg"
+                          : "/svgs/eng-spanish-xs.svg"
                       }
                       alt={language === "English" ? "US Flag" : "Spain Flag"}
-                      className="w-4 sm:w-auto"
+                      className="w-4 h-4 sm:w-auto"
                     />
                     <span className="flex items-center">
                       <span className="text-sm sm:text-base text-[#042f0c]">

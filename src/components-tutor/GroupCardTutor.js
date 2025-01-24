@@ -33,8 +33,12 @@ const GroupCardTutor = ({ group }) => {
           <div className="relative w-40 h-40 mb-4">
             {/* Bambuu+ Tag */}
             {isPremium && (
-              <div className="absolute -translate-x-1/2 left-1/2 -top-3">
-                <img alt="bammbuu" src="/svgs/bammbuu-plus-grp-tag.svg" />
+              <div className="absolute z-10 -translate-x-1/2 w-28 left-1/2 -top-3">
+                <img
+                  alt="bammbuu"
+                  src="/svgs/bammbuu-plus-grp-tag.svg"
+                  className="w-28"
+                />
               </div>
             )}
             {/* Group Image */}

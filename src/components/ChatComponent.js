@@ -21,6 +21,8 @@ import { LogOut, Trash2 } from "lucide-react";
 import Modal from "react-modal";
 Modal.setAppElement("#root");
 
+const INIT_TIMEOUT = 10000; // Increased timeout to 10s
+
 // Add custom styles to override Stream Chat default styling
 const customStyles = `
   .str-chat__message-textarea-container {
@@ -249,6 +251,7 @@ const ChatComponent = ({ channelId, type, onChannelLeave }) => {
   const [channel, setChannel] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+
   // Add this at the beginning of the ChatComponent
   useEffect(() => {
     if (streamClient?.disconnected) {
@@ -270,19 +273,10 @@ const ChatComponent = ({ channelId, type, onChannelLeave }) => {
         setIsLoading(true);
         setError(null);
 
-        if (!type) {
-          throw new Error("Channel type is required");
-        }
+        if (!type) throw new Error("Channel type is required");
 
-        // Check if client is connected, if not, reconnect
         if (streamClient.disconnected) {
-          await streamClient.connectUser(
-            {
-              id: user.uid,
-              // Include any other user data you need
-            },
-            user.streamToken // Make sure you have this from your auth context
-          );
+          await streamClient.connectUser({ id: user.uid }, user.streamToken);
         }
 
         const channel = streamClient.channel(type, channelId);
@@ -291,26 +285,6 @@ const ChatComponent = ({ channelId, type, onChannelLeave }) => {
       } catch (error) {
         console.error("Error loading channel:", error);
         setError(error.message);
-
-        // If we get a disconnect error, try to reconnect
-        if (error.message.includes("disconnect")) {
-          try {
-            await streamClient.connectUser(
-              {
-                id: user.uid,
-              },
-              user.streamToken
-            );
-            // Retry channel creation after reconnecting
-            const channel = streamClient.channel(type, channelId);
-            await channel.watch();
-            setChannel(channel);
-            setError(null);
-          } catch (reconnectError) {
-            console.error("Error reconnecting:", reconnectError);
-            setError(reconnectError.message);
-          }
-        }
       } finally {
         setIsLoading(false);
       }
@@ -318,7 +292,6 @@ const ChatComponent = ({ channelId, type, onChannelLeave }) => {
 
     initChannel();
 
-    // Cleanup function
     return () => {
       if (channel) {
         channel.stopWatching().catch(console.error);

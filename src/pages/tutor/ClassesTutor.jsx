@@ -179,28 +179,27 @@ const ClassesTutor = () => {
             {/* Filter and Search Section */}
             <div className="flex flex-col gap-4 mb-6 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex justify-center lg:justify-start">
-                <div className="inline-flex bg-gray-100 border border-gray-300 rounded-full">
+                <div className="relative inline-flex p-1 bg-gray-100 border border-gray-300 rounded-full">
+                  <div
+                    className="absolute top-0 left-0 h-full bg-[#FFBF00] border border-[#042F0C] rounded-full transition-all duration-300 ease-in-out"
+                    style={{
+                      transform: `translateX(${
+                        activeTab === "booked" ? "0" : "100%"
+                      })`,
+                      width: "50%",
+                    }}
+                  />
                   <button
                     onClick={() => setActiveTab("booked")}
-                    className={`px-4 lg:px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap
-                    ${
-                      activeTab === "booked"
-                        ? "bg-[#FFBF00] border border-[#042F0C]"
-                        : "bg-transparent"
-                    }`}
+                    className="relative z-10 px-4 sm:px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap"
                   >
-                    {t("classes-tutor.tabs.booked")}
+                    {t("learn-tutor.tabs.booked-classes")}
                   </button>
                   <button
                     onClick={() => setActiveTab("available")}
-                    className={`px-4 lg:px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap
-                    ${
-                      activeTab === "available"
-                        ? "bg-[#FFBF00] border border-[#042F0C]"
-                        : "bg-transparent"
-                    }`}
+                    className="relative z-10 px-4 sm:px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap"
                   >
-                    {t("classes-tutor.tabs.available")}
+                    {t("learn-tutor.tabs.available-classes")}
                   </button>
                 </div>
               </div>

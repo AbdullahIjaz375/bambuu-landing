@@ -381,7 +381,7 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
                     <img
                       src={group.imageUrl}
                       alt={group.groupName}
-                      className="w-24 h-24 mb-4 rounded-full md:w-32 md:h-32"
+                      className="object-cover w-24 h-24 mb-4 rounded-full md:w-32 md:h-32"
                     />
                     <h3 className="mb-2 text-xl font-semibold md:text-2xl">
                       {group.groupName}

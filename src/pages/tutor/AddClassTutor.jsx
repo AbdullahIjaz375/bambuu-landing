@@ -128,6 +128,15 @@ const AddClassTutor = () => {
       const classAddress =
         classData.classLocation === "Virtual" ? "" : classData.classAddress;
 
+      // Parse the date and time inputs to create a combined datetime
+      const dateValue = new Date(classData.classDateTime);
+      const timeValue = document.querySelector('input[type="time"]').value;
+      const [hours, minutes] = timeValue.split(":").map(Number);
+
+      // Set the time components on the date object
+      dateValue.setHours(hours);
+      dateValue.setMinutes(minutes);
+
       const newClass = {
         classId: classId,
         adminId: user.uid,
@@ -142,7 +151,7 @@ const AddClassTutor = () => {
         availableSpots:
           classType === "individual" ? 1 : classData.availableSpots,
         classDuration: classData.classDuration,
-        classDateTime: serverTimestamp(),
+        classDateTime: dateValue,
         recurrenceTypes: classData.recurrenceTypes,
         selectedRecurrenceType: "None",
         recurringSlots: [],

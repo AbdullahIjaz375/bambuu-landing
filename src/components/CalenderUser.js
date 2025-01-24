@@ -302,7 +302,7 @@ const CalendarUser = ({ onDateSelect }) => {
     const week = [];
     const first = current.getDate() - current.getDay() + 1;
 
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < 8; i++) {
       const day = new Date(current.getTime());
       day.setDate(first + i);
       week.push(day);
@@ -406,26 +406,25 @@ const CalendarUser = ({ onDateSelect }) => {
             </button>
           </div>
 
-          <div className="flex self-center bg-white border border-gray-200 rounded-full sm:self-auto">
+          <div className="relative inline-flex p-1 bg-gray-100 border border-gray-300 rounded-full">
+            <div
+              className="absolute top-0 left-0 h-full bg-[#DBFDDF] border border-[#042F0C] rounded-full transition-all duration-300 ease-in-out"
+              style={{
+                transform: `translateX(${view === "weekly" ? "0" : "100%"})`,
+                width: "50%",
+              }}
+            />
             <button
               onClick={() => handleViewChange("weekly")}
-              className={`px-3 sm:px-4 py-1 rounded-full text-xs sm:text-sm transition-colors ${
-                view === "weekly"
-                  ? "bg-[#DBFDDF] text-[#042F0C] border border-[#042F0C]"
-                  : "text-gray-600"
-              }`}
+              className="relative z-10 px-4   rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap"
             >
-              Weekly
+              Weekly{" "}
             </button>
             <button
               onClick={() => handleViewChange("monthly")}
-              className={`px-3 sm:px-4 py-1 rounded-full text-xs sm:text-sm transition-colors ${
-                view === "monthly"
-                  ? "bg-[#DBFDDF] text-[#042F0C] border border-[#042F0C]"
-                  : "text-gray-600"
-              }`}
+              className="relative z-10 px-4   rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap"
             >
-              Monthly
+              Monthly{" "}
             </button>
           </div>
         </div>

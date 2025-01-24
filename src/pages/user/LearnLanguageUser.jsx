@@ -391,26 +391,25 @@ const LearnLanguageUser = () => {
               </h1>
             </div>
             <div className="flex justify-center w-full sm:w-auto">
-              <div className="inline-flex bg-gray-100 border border-gray-300 rounded-full">
+              <div className="relative inline-flex p-1 bg-gray-100 border border-gray-300 rounded-full">
+                <div
+                  className="absolute top-0 left-0 h-full bg-[#FFBF00] border border-[#042F0C] rounded-full transition-all duration-300 ease-in-out"
+                  style={{
+                    transform: `translateX(${
+                      activeTab === "myBambuu" ? "0" : "100%"
+                    })`,
+                    width: "50%",
+                  }}
+                />
                 <button
                   onClick={() => setActiveTab("myBambuu")}
-                  className={`px-4 sm:px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap
-                  ${
-                    activeTab === "myBambuu"
-                      ? "bg-[#FFBF00] border border-[#042F0C]"
-                      : "bg-transparent"
-                  }`}
+                  className="relative z-10 px-4 sm:px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap"
                 >
                   {t("learnLanguage.tabs.myBambuu")}
                 </button>
                 <button
                   onClick={() => setActiveTab("exploreBambuu")}
-                  className={`px-4 sm:px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap
-                  ${
-                    activeTab === "exploreBambuu"
-                      ? "bg-[#FFBF00] border border-[#042F0C]"
-                      : "bg-transparent"
-                  }`}
+                  className="relative z-10 px-4 sm:px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap"
                 >
                   {t("learnLanguage.tabs.exploreBambuu")}
                 </button>

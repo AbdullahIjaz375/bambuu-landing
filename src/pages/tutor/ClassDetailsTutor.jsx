@@ -475,7 +475,9 @@ const ClassDetailsTutor = ({ onClose }) => {
                           src={
                             classData.language === "English"
                               ? "/svgs/xs-us.svg"
-                              : "/svgs/xs-spain.svg"
+                              : classData.language === "Spanish"
+                              ? "/svgs/xs-spain.svg"
+                              : "/svgs/eng-spanish-xs.svg"
                           }
                           alt={
                             classData.language === "English"

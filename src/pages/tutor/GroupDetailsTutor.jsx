@@ -345,6 +345,15 @@ const GroupDetailsTutor = ({ onClose }) => {
       const classAddress =
         classData.classLocation === "Virtual" ? "" : classData.classAddress;
 
+      // Parse the date and time inputs to create a combined datetime
+      const dateValue = new Date(classData.classDateTime);
+      const timeValue = document.querySelector('input[type="time"]').value;
+      const [hours, minutes] = timeValue.split(":").map(Number);
+
+      // Set the time components on the date object
+      dateValue.setHours(hours);
+      dateValue.setMinutes(minutes);
+
       const newClass = {
         classId: classId,
         adminId: user.uid,
@@ -357,7 +366,7 @@ const GroupDetailsTutor = ({ onClose }) => {
         languageLevel: classData.languageLevel,
         availableSpots: classData.availableSpots,
         classDuration: classData.classDuration,
-        classDateTime: serverTimestamp(),
+        classDateTime: dateValue,
         recurrenceTypes: classData.recurrenceTypes,
         selectedRecurrenceType: "",
         recurringSlots: [],
@@ -793,7 +802,7 @@ const GroupDetailsTutor = ({ onClose }) => {
                     <img
                       src={group.imageUrl}
                       alt={group.groupName}
-                      className="w-32 h-32 mb-4 rounded-full"
+                      className="object-cover w-32 h-32 mb-4 rounded-full"
                     />
                     <h3 className="mb-2 text-2xl font-medium">
                       {group.groupName}
@@ -888,26 +897,25 @@ const GroupDetailsTutor = ({ onClose }) => {
                 {/* Previous code remains the same until the buttons section */}
                 <div className="flex flex-row items-center justify-between mb-6">
                   <div className="flex justify-center">
-                    <div className="inline-flex bg-gray-100 border border-gray-300 rounded-full">
+                    <div className="relative inline-flex p-1 bg-gray-100 border border-gray-300 rounded-full">
+                      <div
+                        className="absolute top-0 left-0 h-full bg-[#FFBF00] border border-[#042F0C] rounded-full transition-all duration-300 ease-in-out"
+                        style={{
+                          transform: `translateX(${
+                            activeTab === "Classes" ? "0" : "100%"
+                          })`,
+                          width: "50%",
+                        }}
+                      />
                       <button
                         onClick={() => setActiveTab("Classes")}
-                        className={`px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors
-            ${
-              activeTab === "Classes"
-                ? "bg-[#FFBF00] border border-[#042F0C]"
-                : "bg-transparent"
-            }`}
+                        className="relative z-10 px-4 sm:px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap"
                       >
                         {t("group-details-tutor.tabs.classes")}
                       </button>
                       <button
                         onClick={() => setActiveTab("Members")}
-                        className={`px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors
-            ${
-              activeTab === "Members"
-                ? "bg-[#FFBF00] border border-[#042F0C]"
-                : "bg-transparent"
-            }`}
+                        className="relative z-10 px-4 sm:px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap"
                       >
                         {t("group-details-tutor.tabs.members")}
                       </button>

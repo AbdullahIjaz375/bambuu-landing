@@ -45,15 +45,19 @@ const GroupsUser = () => {
 
   useEffect(() => {
     if (searchQuery.trim()) {
-      const filtered = groups.filter((group) =>
-        group.groupName.toLowerCase().includes(searchQuery.toLowerCase())
+      const filtered = groups.filter(
+        (group) =>
+          group.groupName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (group.groupLearningLanguage &&
+            group.groupLearningLanguage
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase()))
       );
       setFilteredGroups(filtered);
     } else {
       setFilteredGroups(groups);
     }
   }, [searchQuery, groups]);
-
   const handleBack = () => {
     navigate(-1);
   };
@@ -63,7 +67,7 @@ const GroupsUser = () => {
   };
 
   const handleJoinGroup = () => {
-    navigate("/learnLanguageUser"); // Update with your actual route
+    navigate("/exploreGroupsUser"); // Update with your actual route
   };
 
   return (

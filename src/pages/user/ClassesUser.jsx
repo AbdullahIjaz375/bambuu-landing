@@ -111,29 +111,30 @@ const ClassesUser = () => {
           {/* Filter and Search Section */}
           <div className="flex flex-col gap-4 mb-6 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex justify-center lg:justify-start">
-              <div className="inline-flex bg-gray-100 border border-gray-300 rounded-full">
-                <button
-                  onClick={() => setActiveTab("group")}
-                  className={`px-4 lg:px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap
-                  ${
-                    activeTab === "group"
-                      ? "bg-[#FFBF00] border border-[#042F0C]"
-                      : "bg-transparent"
-                  }`}
-                >
-                  Group Conversation Classes
-                </button>
-                <button
-                  onClick={() => setActiveTab("bammbuu")}
-                  className={`px-4 lg:px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap
-                  ${
-                    activeTab === "bammbuu"
-                      ? "bg-[#FFBF00] border border-[#042F0C]"
-                      : "bg-transparent"
-                  }`}
-                >
-                  bammbuu+ Classes
-                </button>
+              <div className="flex justify-center w-full sm:w-auto">
+                <div className="relative inline-flex p-1 bg-gray-100 border border-gray-300 rounded-full">
+                  <div
+                    className="absolute top-0 left-0 h-full bg-[#FFBF00] border border-[#042F0C] rounded-full transition-all duration-300 ease-in-out"
+                    style={{
+                      transform: `translateX(${
+                        activeTab === "group" ? "0" : "100%"
+                      })`,
+                      width: "50%",
+                    }}
+                  />
+                  <button
+                    onClick={() => setActiveTab("group")}
+                    className="relative z-10 px-4 sm:px-4 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap"
+                  >
+                    Group Conversation Classes
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("bammbuu")}
+                    className="relative z-10 px-4 sm:px-8 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap"
+                  >
+                    bammbuu+ Classes
+                  </button>
+                </div>
               </div>
             </div>
 

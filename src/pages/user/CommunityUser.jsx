@@ -378,6 +378,7 @@ const CommunityUser = () => {
   const [activeTab, setActiveTab] = useState("group");
   const [searchQuery, setSearchQuery] = useState("");
   const [unreadCounts, setUnreadCounts] = useState({});
+  const [groupLanguages, setGroupLanguages] = useState({});
 
   const handleChannelLeave = (channelId) => {
     setChannels((prevChannels) =>
@@ -471,6 +472,23 @@ const CommunityUser = () => {
           })
         );
 
+        const groupIds = channels
+          .filter((channel) => channel.type === "standard_group")
+          .map((channel) => channel.id);
+
+        const groupLanguagesData = {};
+        await Promise.all(
+          groupIds.map(async (groupId) => {
+            const groupRef = doc(db, "groups", groupId);
+            const groupDoc = await getDoc(groupRef);
+            if (groupDoc.exists()) {
+              groupLanguagesData[groupId] =
+                groupDoc.data().groupLearningLanguage;
+            }
+          })
+        );
+        setGroupLanguages(groupLanguagesData);
+
         setUnreadCounts(counts);
         setChannels(channels);
         if (channels.length > 0 && !selectedChannel) {
@@ -552,27 +570,29 @@ const CommunityUser = () => {
   );
 
   const ChatItem = ({ channel, isInstructor }) => {
-    const [groupLanguage, setGroupLanguage] = useState(null);
+    // const [groupLanguage, setGroupLanguage] = useState(null);
+    const groupLanguage = groupLanguages[channel.id];
+
     const latestMessage =
       channel.state.messages[channel.state.messages.length - 1];
 
-    useEffect(() => {
-      const fetchGroupLanguage = async () => {
-        if (!isInstructor) {
-          try {
-            const groupRef = doc(db, "groups", channel.id);
-            const groupDoc = await getDoc(groupRef);
-            if (groupDoc.exists()) {
-              setGroupLanguage(groupDoc.data().groupLearningLanguage);
-            }
-          } catch (error) {
-            console.error("Error fetching group language:", error);
-          }
-        }
-      };
+    // useEffect(() => {
+    //   const fetchGroupLanguage = async () => {
+    //     if (!isInstructor) {
+    //       try {
+    //         const groupRef = doc(db, "groups", channel.id);
+    //         const groupDoc = await getDoc(groupRef);
+    //         if (groupDoc.exists()) {
+    //           setGroupLanguage(groupDoc.data().groupLearningLanguage);
+    //         }
+    //       } catch (error) {
+    //         console.error("Error fetching group language:", error);
+    //       }
+    //     }
+    //   };
 
-      fetchGroupLanguage();
-    }, [channel.id, isInstructor]);
+    //   fetchGroupLanguage();
+    // }, [channel.id, isInstructor]);
 
     const getMessagePreview = (message) => {
       if (!message) return "No messages yet";
@@ -638,7 +658,7 @@ const CommunityUser = () => {
                           ? "/svgs/xs-us.svg"
                           : groupLanguage === "Spanish"
                           ? "/svgs/xs-spain.svg"
-                          : "/svgs/default-flag.svg" // Optional: fallback flag
+                          : "/svgs/eng-spanish-xs.svg" // Optional: fallback flag
                       }
                       alt={
                         groupLanguage === "English"
@@ -647,7 +667,7 @@ const CommunityUser = () => {
                           ? "Spain Flag"
                           : "Default Flag"
                       }
-                      className="w-4 sm:w-auto"
+                      className="w-4 h-4 sm:w-auto"
                     />
                     <span>{groupLanguage}</span>
                   </div>
@@ -700,7 +720,7 @@ const CommunityUser = () => {
           <div className="flex-1 flex bg-white rounded-3xl m-2 h-[calc(100vh-125px)]">
             <div className="p-4 bg-[#f6f6f6] w-96 rounded-2xl overflow-hidden flex flex-col">
               <div className="flex justify-center w-full mb-4 sm:w-auto">
-                <div className="inline-flex bg-gray-100 border border-gray-300 rounded-full">
+                {/* <div className="inline-flex bg-gray-100 border border-gray-300 rounded-full">
                   <button
                     onClick={() => setActiveTab("group")}
                     className={`px-4  py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap
@@ -720,6 +740,31 @@ const CommunityUser = () => {
                       ? "bg-[#FFBF00] border border-[#042F0C]"
                       : "bg-transparent"
                   }`}
+                  >
+                    bammbuuu+ Instructor
+                  </button>
+                </div> */}
+
+                <div className="relative inline-flex p-1 bg-gray-100 border border-gray-300 rounded-full">
+                  <div
+                    className="absolute top-0 left-0 h-full transition-all duration-300 ease-in-out border border-gray-800 rounded-full bg-amber-400"
+                    style={{
+                      transform:
+                        activeTab === "group"
+                          ? "translateX(0)"
+                          : "translateX(66.67%)",
+                      width: activeTab === "group" ? "40%" : "60%",
+                    }}
+                  />
+                  <button
+                    onClick={() => setActiveTab("group")}
+                    className="relative z-10 w-2/5 px-6 py-1 font-medium text-gray-800 transition-colors rounded-full text-md whitespace-nowrap"
+                  >
+                    Group Chats
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("bammbuuu")}
+                    className="relative z-10 w-3/5 px-6 py-1 font-medium text-gray-800 transition-colors rounded-full text-md whitespace-nowrap"
                   >
                     bammbuuu+ Instructor
                   </button>

@@ -33,8 +33,12 @@ const GroupCard = ({ group }) => {
           <div className="relative w-40 h-40 mb-4">
             {/* Bambuu+ Tag */}
             {isPremium && (
-              <div className="absolute z-10 -translate-x-1/2 left-1/2 -top-3">
-                <img alt="bammbuu" src="/svgs/bammbuu-plus-grp-tag.svg" />
+              <div className="absolute z-10 -translate-x-1/2 w-28 left-1/2 -top-3">
+                <img
+                  alt="bammbuu"
+                  src="/svgs/bammbuu-plus-grp-tag.svg"
+                  className="w-28"
+                />
               </div>
             )}
             {/* Group Image */}
@@ -80,7 +84,7 @@ const GroupCard = ({ group }) => {
                   <img
                     src={groupAdminImageUrl}
                     alt={groupAdminName}
-                    className="w-8 h-8 rounded-full"
+                    className="object-cover w-5 h-5 rounded-full"
                   />
                 ) : (
                   <div className="flex items-center justify-center w-8 h-8 bg-gray-200 rounded-full">
@@ -96,7 +100,7 @@ const GroupCard = ({ group }) => {
               <img
                 src="/svgs/users.svg"
                 alt={groupAdminName}
-                className="w-5 h-5 rounded-full"
+                className="object-cover w-5 h-5 rounded-full"
               />{" "}
               <span className="text-gray-700">{memberIds.length}</span>
             </div>

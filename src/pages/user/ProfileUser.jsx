@@ -55,6 +55,10 @@ const ProfileUser = () => {
     fetchUserData();
   }, [user]);
 
+  const hasBambbuuPlus = user?.subscriptions?.some(
+    (sub) => sub.type === "bammbuu+ Instructor-led group Classes"
+  );
+
   const handleSignOut = async () => {
     try {
       await signOut(auth);
@@ -115,12 +119,23 @@ const ProfileUser = () => {
           <div className="grid grid-cols-2 gap-6">
             {/* Profile Info Card */}
             <div className="bg-[#e6fde9] rounded-3xl p-8 flex flex-col items-center">
-              <div className="flex items-center justify-center w-32 h-32 mb-4 bg-white rounded-full">
-                <img
-                  src={user?.photoUrl || "/api/placeholder/96/96"}
-                  alt="Profile"
-                  className="object-cover w-full h-full rounded-full"
-                />
+              <div className="relative flex items-center justify-center w-32 h-32 mb-4">
+                {hasBambbuuPlus && (
+                  <div className="absolute z-10 -top-1 -right-1">
+                    <img alt="bambbuu" src="/svgs/bambuu-plus-user.svg" />
+                  </div>
+                )}
+                <div
+                  className={`w-32 h-32 bg-white rounded-full ${
+                    hasBambbuuPlus ? "ring-4 ring-green-500" : ""
+                  }`}
+                >
+                  <img
+                    src={user?.photoUrl || "/api/placeholder/96/96"}
+                    alt="Profile"
+                    className="object-cover w-full h-full rounded-full"
+                  />
+                </div>
               </div>
 
               <h2 className="mb-4 text-3xl font-semibold">

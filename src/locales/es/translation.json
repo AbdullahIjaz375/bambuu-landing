@@ -117,7 +117,7 @@
     }
   },
   "bammbuu-groups": {
-    "title": "Grupos bammbuu+",
+    "title": "Grupos de Conversación Guiados por un Instructor",
     "buttons": {
       "create": "Crear Nuevo Grupo",
       "join": "Unirse a un Grupo"

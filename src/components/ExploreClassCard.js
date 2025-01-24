@@ -291,9 +291,12 @@ const ExploreClassCard = ({
                     src={
                       language === "English"
                         ? "/svgs/xs-us.svg"
-                        : "/svgs/xs-spain.svg"
+                        : language === "Spanish"
+                        ? "/svgs/xs-spain.svg"
+                        : "/svgs/eng-spanish-xs.svg"
                     }
                     alt={language === "English" ? "US Flag" : "Spain Flag"}
+                    className="w-4 h-4"
                   />
                   <span className="text-[#042f0c]">{language}</span>
                 </div>
