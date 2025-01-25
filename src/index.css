@@ -54,4 +54,42 @@
   display: none !important;
 }
 
-/* //-----------------------------channel header-----------------------------// */
+/* //-----------------------------messages chat-----------------------------// */
+/* Outgoing (my messages) */
+.str-chat__message--me .str-chat__message-text {
+  /* Background & text */
+  background-color: #14b82c !important;
+  color: #ffff !important;
+
+  /* Border style */
+  border: 1px solid #12551e !important; /* or your desired color */
+
+  /* Round corners */
+  border-radius: 12px !important;
+
+  /* Make one corner NOT rounded.
+     For example, top-right corner is square. */
+  border-bottom-right-radius: 0 !important;
+
+  /* Optional: add spacing inside bubble */
+  padding: 8px !important;
+}
+
+.str-chat__message--other .str-chat__message-text {
+  /* Background & text */
+  background-color: #f6f6f6 !important;
+  color: black !important;
+
+  /* Border style */
+  border: 1px solid #d1d1d1 !important; /* or your desired color */
+
+  /* Round corners */
+  border-radius: 12px !important;
+
+  /* Make one corner NOT rounded.
+     For example, top-left corner is square. */
+  border-bottom-left-radius: 0 !important;
+
+  /* Optional: add spacing inside bubble */
+  padding: 8px !important;
+}
