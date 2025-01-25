@@ -578,6 +578,16 @@ const ClassDetailsUser = ({ onClose }) => {
     }
   };
 
+  const isClassOngoing = () => {
+    if (!classData?.classDateTime) return false;
+    const now = new Date();
+    const classStart = new Date(classData?.classDateTime.seconds * 1000);
+    const classEnd = new Date(
+      classStart.getTime() + classData?.classDuration * 60 * 1000
+    );
+    return now >= classStart && now <= classEnd;
+  };
+
   //---------------------------------------------video class start---------------------------------------------//
 
   const [showVideoCall, setShowVideoCall] = useState(false);
@@ -678,6 +688,11 @@ const ClassDetailsUser = ({ onClose }) => {
                       <span className="px-3 py-1 text-sm bg-yellow-200 rounded-full md:text-md">
                         {classData.languageLevel}
                       </span>
+                      {isClassOngoing() && (
+                        <span className=" px-2 sm:px-3 py-1 text-xs sm:text-sm bg-[#B9F9C2BF]/75 backdrop-blur-sm rounded-full ">
+                          Ongoing
+                        </span>
+                      )}
                     </div>
 
                     {/* Class Details Grid */}

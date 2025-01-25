@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Search, ArrowLeft } from "lucide-react";
 import Sidebar from "../../components/Sidebar";
 import { useAuth } from "../../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import GroupCard from "../../components/GroupCard";
 import { collection, doc, getDoc } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
@@ -11,6 +11,8 @@ import EmptyState from "../../components/EmptyState";
 
 const GroupsUser = () => {
   const { user, setUser } = useAuth();
+  const [searchParams] = useSearchParams();
+  const language = searchParams.get("language")?.toLowerCase() || null;
   const navigate = useNavigate();
   const [groups, setGroups] = useState([]);
   const [filteredGroups, setFilteredGroups] = useState([]);
@@ -30,8 +32,13 @@ const GroupsUser = () => {
             fetchedGroups.push({ id: groupDoc.id, ...groupDoc.data() });
           }
         }
+        const filteredByLanguage = language
+          ? fetchedGroups.filter(
+              (group) => group.groupLearningLanguage?.toLowerCase() === language
+            )
+          : fetchedGroups;
 
-        setGroups(fetchedGroups);
+        setGroups(filteredByLanguage);
         setFilteredGroups(fetchedGroups);
         setLoadingGroups(false);
         console.log("my groups", groups);

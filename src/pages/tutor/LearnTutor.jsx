@@ -183,7 +183,7 @@ const LearnTutor = () => {
                     onClick={() =>
                       setActiveTab(t("learn-tutor.tabs.booked-classes"))
                     }
-                    className="relative z-10 px-4 sm:px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap"
+                    className="relative z-1 px-4 sm:px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap"
                   >
                     {t("learn-tutor.tabs.booked-classes")}
                   </button>
@@ -191,7 +191,7 @@ const LearnTutor = () => {
                     onClick={() =>
                       setActiveTab(t("learn-tutor.tabs.available-classes"))
                     }
-                    className="relative z-10 px-4 sm:px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap"
+                    className="relative z-1 px-4 sm:px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap"
                   >
                     {t("learn-tutor.tabs.available-classes")}
                   </button>

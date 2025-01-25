@@ -65,6 +65,7 @@ import DeleteAccout from "./pages/user/DeleteAccout";
 import TutorDeleteAccount from "./pages/tutor/TutorDeleteAccount";
 import { ClassProvider } from "./context/ClassContext";
 import VideoCallTutor from "./pages/tutor/VideoCallTutor";
+import LanguagesUser from "./pages/user/LanguagesUser";
 
 const App = () => {
   const { user, streamClient } = useAuth(); // Use useAuth() inside the component
@@ -428,6 +429,15 @@ const App = () => {
               element={
                 <ProtectedRoute requiredRole="student">
                   <LearnLanguageUser />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/languages"
+              element={
+                <ProtectedRoute requiredRole="student">
+                  <LanguagesUser />
                 </ProtectedRoute>
               }
             />

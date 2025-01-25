@@ -281,7 +281,7 @@ const LearnUser = () => {
                   </h2>
                   <button
                     className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
-                    onClick={() => navigate("/learnLanguageUser")}
+                    onClick={() => navigate("/languages")}
                   >
                     {t("learnUser.languageLearning.viewAll")}
                   </button>
@@ -292,7 +292,12 @@ const LearnUser = () => {
               <div className="w-full max-w-[calc(100vw-68rem)] overflow-hidden">
                 <div className="flex gap-2 pb-4 overflow-x-auto scrollbar-hide">
                   {/* Spanish Card */}
-                  <div className="flex items-center gap-6 p-6 bg-[#fff0f1] rounded-3xl border border-[#d58287] w-[250px] sm:w-[300px] md:w-[350px] lg:w-[400px] flex-shrink-0">
+                  <div
+                    className="flex items-center hover:cursor-pointer gap-6 p-6 bg-[#fff0f1] rounded-3xl border border-[#d58287] w-[250px] sm:w-[300px] md:w-[350px] lg:w-[400px] flex-shrink-0"
+                    onClick={() => {
+                      navigate("/learnLanguageUser?language=Spanish");
+                    }}
+                  >
                     <div className="flex-shrink-0 w-16 h-16 overflow-hidden rounded-full">
                       <img
                         src="/svgs/spain-big.svg"
@@ -321,7 +326,12 @@ const LearnUser = () => {
                   </div>
 
                   {/* English Card */}
-                  <div className="flex items-center gap-6 p-6 bg-[#edf2ff] rounded-3xl border border-[#768bbd] w-[250px] sm:w-[300px] md:w-[350px] lg:w-[400px] flex-shrink-0">
+                  <div
+                    className="flex items-center hover:cursor-pointer gap-6 p-6 bg-[#edf2ff] rounded-3xl border border-[#768bbd] w-[250px] sm:w-[300px] md:w-[350px] lg:w-[400px] flex-shrink-0"
+                    onClick={() => {
+                      navigate("/learnLanguageUser?language=English");
+                    }}
+                  >
                     <div className="flex-shrink-0 w-16 h-16 overflow-hidden rounded-full">
                       <img
                         src="/svgs/us-big.svg"
@@ -350,7 +360,14 @@ const LearnUser = () => {
                   </div>
 
                   {/* English-Spanish Exchange Card */}
-                  <div className="flex items-center gap-6 p-6 bg-[#edf2ff] rounded-3xl border border-[#768bbd] w-[250px] sm:w-[300px] md:w-[350px] lg:w-[400px] flex-shrink-0">
+                  <div
+                    className="flex items-center hover:cursor-pointer gap-6 p-6 bg-[#FFFFEA] rounded-3xl border border-[#FFED46] w-[250px] sm:w-[300px] md:w-[350px] lg:w-[400px] flex-shrink-0"
+                    onClick={() => {
+                      navigate(
+                        "/learnLanguageUser?language=English-Spanish Exchange"
+                      );
+                    }}
+                  >
                     <div className="flex-shrink-0 w-16 h-16 overflow-hidden rounded-full">
                       <img
                         src="/svgs/eng-spanish.svg"

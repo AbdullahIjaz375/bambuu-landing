@@ -59,21 +59,21 @@ const GroupCard = ({ group }) => {
           {/* Language */}
           <div className="flex items-center gap-2 mb-6">
             <div className="w-6 h-6 overflow-hidden rounded-full">
-              {groupLearningLanguage === "Spanish" ? (
-                <img
-                  src="/svgs/xs-spain.svg"
-                  alt="Spanish flag"
-                  className="object-cover w-full h-full"
-                />
-              ) : (
-                <img
-                  src="/svgs/xs-us.svg"
-                  alt="US flag"
-                  className="object-cover w-full h-full"
-                />
-              )}
+              <img
+                src={
+                  groupLearningLanguage === "English"
+                    ? "/svgs/xs-us.svg"
+                    : groupLearningLanguage === "Spanish"
+                    ? "/svgs/xs-spain.svg"
+                    : "/svgs/eng-spanish-xs.svg"
+                }
+                alt={
+                  groupLearningLanguage === "English" ? "US Flag" : "Spain Flag"
+                }
+                className="w-5 h-5 sm:w-auto"
+              />
             </div>
-            <span className="text-lg font-medium">{groupLearningLanguage}</span>
+            <span className="font-medium text-md">{groupLearningLanguage}</span>
           </div>
 
           {/* Admin and Member Count */}

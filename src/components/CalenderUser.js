@@ -416,13 +416,13 @@ const CalendarUser = ({ onDateSelect }) => {
             />
             <button
               onClick={() => handleViewChange("weekly")}
-              className="relative z-10 px-4   rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap"
+              className="relative z-1 px-4   rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap"
             >
               Weekly{" "}
             </button>
             <button
               onClick={() => handleViewChange("monthly")}
-              className="relative z-10 px-4   rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap"
+              className="relative z-1 px-4   rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap"
             >
               Monthly{" "}
             </button>

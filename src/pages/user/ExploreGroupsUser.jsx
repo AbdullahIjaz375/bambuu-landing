@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Search, ArrowLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { db } from "../../firebaseConfig";
 import { collection, getDocs } from "firebase/firestore";
@@ -17,6 +17,8 @@ const ExploreGroupsUser = () => {
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const language = searchParams.get("language")?.toLowerCase() || null;
   const { t } = useTranslation();
 
   const handleBack = () => {
@@ -33,18 +35,20 @@ const ExploreGroupsUser = () => {
       setLoading(true);
 
       try {
-        // Fetch all groups
         const groupsSnapshot = await getDocs(collection(db, "groups"));
-        const allGroups = groupsSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+        const allGroups = groupsSnapshot.docs
+          .map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }))
+          .filter((group) => !user?.joinedGroups?.includes(group.id))
+          .filter(
+            (group) =>
+              !language ||
+              group.groupLearningLanguage?.toLowerCase() === language
+          );
 
-        // Filter out groups that the user has already joined
-        const availableGroups = allGroups.filter(
-          (group) => !user?.joinedGroups?.includes(group.id)
-        );
-        setExploreGroups(availableGroups);
+        setExploreGroups(allGroups);
       } catch (error) {
         console.error("Error fetching groups:", error);
         setError(
@@ -56,7 +60,7 @@ const ExploreGroupsUser = () => {
     };
 
     fetchGroups();
-  }, [user]);
+  }, [user, language]);
 
   const filteredGroups = exploreGroups.filter((group) => {
     const searchTerm = searchQuery.toLowerCase().trim();

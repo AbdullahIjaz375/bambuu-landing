@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Search, ArrowLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { db } from "../../firebaseConfig";
 import { collection, getDocs } from "firebase/firestore";
@@ -15,6 +15,8 @@ const ExploreClassesUser = () => {
   const [exploreClasses, setExploreClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchParams] = useSearchParams();
+  const language = searchParams.get("language")?.toLowerCase() || null;
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -33,19 +35,18 @@ const ExploreClassesUser = () => {
       setLoading(true);
 
       try {
-        // Fetch all classes
         const classesSnapshot = await getDocs(collection(db, "classes"));
-        const allClasses = classesSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+        const allClasses = classesSnapshot.docs
+          .map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }))
+          .filter((cls) => !user.enrolledClasses?.includes(cls.id))
+          .filter(
+            (cls) => !language || cls.language?.toLowerCase() === language
+          );
 
-        // Filter out classes the user is already enrolled in
-        const nonEnrolledClasses = allClasses.filter(
-          (cls) => !user.enrolledClasses?.includes(cls.id)
-        );
-
-        setExploreClasses(nonEnrolledClasses);
+        setExploreClasses(allClasses);
       } catch (error) {
         console.error("Error fetching classes:", error);
         setError(
@@ -57,7 +58,7 @@ const ExploreClassesUser = () => {
     };
 
     fetchClasses();
-  }, [user]);
+  }, [user, language]);
 
   const isBambbuuPlusClass = (classType) => {
     return classType === "Individual Premium" || classType === "Group Premium";

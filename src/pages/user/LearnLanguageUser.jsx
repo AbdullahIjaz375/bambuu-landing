@@ -17,7 +17,7 @@ import Sidebar from "../../components/Sidebar";
 import ClassCard from "../../components/ClassCard";
 import { useAuth } from "../../context/AuthContext";
 import GroupCard from "../../components/GroupCard";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { db } from "../../firebaseConfig";
 import { doc, getDoc, collection, getDocs } from "firebase/firestore";
 import { ClipLoader } from "react-spinners";
@@ -26,6 +26,8 @@ import ExploreGroupCard from "../../components/ExploreGroupCard";
 import EmptyState from "../../components/EmptyState";
 
 const LearnLanguageUser = () => {
+  const [searchParams] = useSearchParams();
+  const language = searchParams.get("language")?.toLowerCase() || null;
   const { user, setUser } = useAuth();
   const [activeTab, setActiveTab] = useState("myBambuu");
   const navigate = useNavigate();
@@ -62,7 +64,10 @@ const LearnLanguageUser = () => {
           const classDoc = await getDoc(classRef);
 
           if (classDoc.exists()) {
-            classesData.push({ id: classId, ...classDoc.data() });
+            const classData = { id: classId, ...classDoc.data() };
+            if (!language || classData.language?.toLowerCase() === language) {
+              classesData.push(classData);
+            }
           }
         }
         setMyClasses(classesData);
@@ -77,7 +82,7 @@ const LearnLanguageUser = () => {
     };
 
     fetchMyClasses();
-  }, [user]);
+  }, [user, language]);
 
   // Fetch My Groups
   useEffect(() => {
@@ -94,9 +99,14 @@ const LearnLanguageUser = () => {
         for (let groupId of groupsToFetch) {
           const groupRef = doc(db, "groups", groupId);
           const groupDoc = await getDoc(groupRef);
-
           if (groupDoc.exists()) {
-            fetchedGroups.push({ id: groupDoc.id, ...groupDoc.data() });
+            const groupData = { id: groupDoc.id, ...groupDoc.data() };
+            if (
+              !language ||
+              groupData.groupLearningLanguage?.toLowerCase() === language
+            ) {
+              fetchedGroups.push(groupData);
+            }
           }
         }
 
@@ -111,7 +121,7 @@ const LearnLanguageUser = () => {
     };
 
     fetchMyGroups();
-  }, [user]);
+  }, [user, language]);
 
   // Fetch Explore Classes and Groups
   useEffect(() => {
@@ -120,32 +130,27 @@ const LearnLanguageUser = () => {
 
       setLoadingExplore(true);
       try {
-        // Fetch all classes
         const classesSnapshot = await getDocs(collection(db, "classes"));
-        const allClasses = classesSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-
-        // Filter out enrolled classes
-        const otherClasses = allClasses.filter(
-          (cls) => !user?.enrolledClasses?.includes(cls.id)
-        );
-        setExploreClasses(otherClasses);
-
-        // Fetch all groups
         const groupsSnapshot = await getDocs(collection(db, "groups"));
-        const allGroups = groupsSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
 
-        // Filter out joined groups
-        const otherGroups = allGroups.filter(
-          (group) => !user?.joinedGroups?.includes(group.id)
-        );
-        setExploreGroups(otherGroups);
-        console.log(exploreClasses);
+        const allClasses = classesSnapshot.docs
+          .map((doc) => ({ id: doc.id, ...doc.data() }))
+          .filter((cls) => !user?.enrolledClasses?.includes(cls.id))
+          .filter(
+            (cls) => !language || cls.language?.toLowerCase() === language
+          );
+
+        const allGroups = groupsSnapshot.docs
+          .map((doc) => ({ id: doc.id, ...doc.data() }))
+          .filter((group) => !user?.joinedGroups?.includes(group.id))
+          .filter(
+            (group) =>
+              !language ||
+              group.groupLearningLanguage?.toLowerCase() === language
+          );
+
+        setExploreClasses(allClasses);
+        setExploreGroups(allGroups);
         setErrorExplore(null);
       } catch (error) {
         console.error("Error fetching explore content:", error);
@@ -156,217 +161,10 @@ const LearnLanguageUser = () => {
     };
 
     fetchExploreContent();
-  }, [activeTab, user]);
+  }, [activeTab, user, language]);
 
   const handleBack = () => {
     navigate(-1);
-  };
-
-  const renderContent = () => {
-    if (activeTab === "myBambuu") {
-      return (
-        <>
-          {/* My Classes Section */}
-          <div className="w-full max-w-[160vh] mx-auto">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold">My Classes</h2>
-              {myClasses.length > 0 && (
-                <button
-                  className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
-                  onClick={() => navigate("/classesUser")}
-                >
-                  View All
-                </button>
-              )}
-            </div>
-
-            {loading ? (
-              <div className="flex items-center justify-center h-48">
-                <ClipLoader color="#14B82C" size={50} />
-              </div>
-            ) : error ? (
-              <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
-                <p className="text-center text-red-500">{error}</p>
-                <button
-                  className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
-                  onClick={() => window.location.reload()}
-                >
-                  Try Again
-                </button>
-              </div>
-            ) : myClasses.length === 0 ? (
-              <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
-                <EmptyState message="You have not joined any class yet!" />
-              </div>
-            ) : (
-              <div className="relative w-full">
-                <div className="flex gap-2 pb-4 overflow-x-auto scrollbar-hide">
-                  {myClasses.map((classItem) => (
-                    <div key={classItem.id} className="flex-none px-1 pt-3 ">
-                      <ClassCard
-                        {...classItem}
-                        isBammbuu={Boolean(classItem.tutorId)}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* My Groups Section */}
-          <div className="w-full max-w-[160vh] mx-auto">
-            <div className="flex items-center justify-between mb-1">
-              <h2 className="text-2xl font-bold">My Groups</h2>
-              {myGroups.length > 0 && (
-                <button
-                  className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
-                  onClick={() => navigate("/groupsUser")}
-                >
-                  View All
-                </button>
-              )}
-            </div>
-
-            {loadingGroups ? (
-              <div className="flex items-center justify-center h-48">
-                <ClipLoader color="#14B82C" size={50} />
-              </div>
-            ) : errorGroups ? (
-              <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
-                <p className="text-center text-red-500">{errorGroups}</p>
-                <button
-                  className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
-                  onClick={() => window.location.reload()}
-                >
-                  Try Again
-                </button>
-              </div>
-            ) : myGroups.length === 0 ? (
-              <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
-                <EmptyState message="You are not part of any group yet!" />
-
-                <div className="flex flex-row items-center justify-center space-x-4">
-                  <button
-                    onClick={() => navigate("/groupsUser")}
-                    className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
-                  >
-                    Create a Group
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="relative w-full">
-                <div className="flex gap-2 pb-4 overflow-x-auto scrollbar-hide">
-                  {myGroups.map((group) => (
-                    <div key={group.id} className="flex-none px-1 pt-2">
-                      <GroupCard group={group} />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </>
-      );
-    } else {
-      return (
-        <>
-          {/* Explore Classes Section */}
-          <div className="w-full max-w-[160vh] mx-auto">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold">Explore Classes</h2>
-              {exploreClasses.length > 0 && (
-                <button
-                  className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
-                  onClick={() => navigate("/exploreClassesUser")}
-                >
-                  View All
-                </button>
-              )}
-            </div>
-
-            {loadingExplore ? (
-              <div className="flex items-center justify-center h-48">
-                <ClipLoader color="#14B82C" size={50} />
-              </div>
-            ) : errorExplore ? (
-              <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
-                <p className="text-center text-red-500">{errorExplore}</p>
-                <button
-                  className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
-                  onClick={() => window.location.reload()}
-                >
-                  Try Again
-                </button>
-              </div>
-            ) : exploreClasses.length === 0 ? (
-              <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
-                <EmptyState message="No available classes to explore at the moment!" />
-              </div>
-            ) : (
-              <div className="relative w-full">
-                <div className="flex gap-2 pb-4 overflow-x-auto scrollbar-hide">
-                  {exploreClasses.map((classItem) => (
-                    <div key={classItem.id} className="flex-none px-1 pt-3 ">
-                      <ExploreClassCard
-                        {...classItem}
-                        isBammbuu={Boolean(classItem.tutorId)}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Explore Groups Section */}
-          <div className="w-full max-w-[160vh] mx-auto mt-8">
-            <div className="flex items-center justify-between mb-1">
-              <h2 className="text-2xl font-bold">Explore Groups</h2>
-              {exploreGroups.length > 0 && (
-                <button
-                  className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
-                  onClick={() => navigate("/exploreGroupsUser")}
-                >
-                  View All
-                </button>
-              )}
-            </div>
-
-            {loadingExplore ? (
-              <div className="flex items-center justify-center h-48">
-                <ClipLoader color="#14B82C" size={50} />
-              </div>
-            ) : errorExplore ? (
-              <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
-                <p className="text-center text-red-500">{errorExplore}</p>
-                <button
-                  className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
-                  onClick={() => window.location.reload()}
-                >
-                  Try Again
-                </button>
-              </div>
-            ) : exploreGroups.length === 0 ? (
-              <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
-                <EmptyState message="No available groups to explore at the moment!" />
-              </div>
-            ) : (
-              <div className="relative w-full">
-                <div className="flex gap-2 pb-4 overflow-x-auto scrollbar-hide">
-                  {exploreGroups.map((group) => (
-                    <div key={group.id} className="flex-none px-1 pt-2">
-                      <ExploreGroupCard group={group} />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </>
-      );
-    }
   };
 
   return (
@@ -430,7 +228,13 @@ const LearnLanguageUser = () => {
                     {myClasses.length > 0 && (
                       <button
                         className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
-                        onClick={() => navigate("/classesUser")}
+                        onClick={() =>
+                          navigate(
+                            `/classesUser${
+                              language ? `?language=${language}` : ""
+                            }`
+                          )
+                        }
                       >
                         {t("learnLanguage.myClasses.viewAll")}
                       </button>
@@ -483,7 +287,13 @@ const LearnLanguageUser = () => {
                     {myGroups.length > 0 && (
                       <button
                         className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
-                        onClick={() => navigate("/groupsUser")}
+                        onClick={() =>
+                          navigate(
+                            `/groupsUser${
+                              language ? `?language=${language}` : ""
+                            }`
+                          )
+                        }
                       >
                         {t("learnLanguage.myGroups.viewAll")}
                       </button>
@@ -541,7 +351,13 @@ const LearnLanguageUser = () => {
                     {exploreClasses.length > 0 && (
                       <button
                         className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
-                        onClick={() => navigate("/exploreClassesUser")}
+                        onClick={() =>
+                          navigate(
+                            `/exploreClassesUser${
+                              language ? `?language=${language}` : ""
+                            }`
+                          )
+                        }
                       >
                         {t("learnLanguage.exploreClasses.viewAll")}
                       </button>
@@ -594,7 +410,13 @@ const LearnLanguageUser = () => {
                     {exploreGroups.length > 0 && (
                       <button
                         className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
-                        onClick={() => navigate("/exploreGroupsUser")}
+                        onClick={() =>
+                          navigate(
+                            `/exploreGroupsUser${
+                              language ? `?language=${language}` : ""
+                            }`
+                          )
+                        }
                       >
                         {t("learnLanguage.exploreGroups.title")}
                       </button>

@@ -282,7 +282,9 @@ const ProfileSetupClassCard = ({
                   src={
                     language === "English"
                       ? "/svgs/xs-us.svg"
-                      : "/svgs/xs-spain.svg"
+                      : language === "Spanish"
+                      ? "/svgs/xs-spain.svg"
+                      : "/svgs/eng-spanish-xs.svg"
                   }
                   alt={language === "English" ? "US Flag" : "Spain Flag"}
                 />

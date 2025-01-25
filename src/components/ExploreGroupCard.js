@@ -384,11 +384,19 @@ const GroupCard = ({ group }) => {
           {/* Language and Level */}
           <div className="flex flex-wrap items-center justify-center gap-2 mb-4">
             <div className="flex items-center gap-2">
-              {groupLearningLanguage === "Spanish" ? (
-                <img src="/svgs/xs-spain.svg" alt="Spanish flag" />
-              ) : (
-                <img src="/svgs/xs-us.svg" alt="US flag" />
-              )}
+              <img
+                src={
+                  groupLearningLanguage === "English"
+                    ? "/svgs/xs-us.svg"
+                    : groupLearningLanguage === "Spanish"
+                    ? "/svgs/xs-spain.svg"
+                    : "/svgs/eng-spanish-xs.svg"
+                }
+                alt={
+                  groupLearningLanguage === "English" ? "US Flag" : "Spain Flag"
+                }
+                className="w-4 h-4 sm:w-auto"
+              />
               <span className="text-md text-green-900 truncate max-w-[120px]">
                 {groupLearningLanguage}
               </span>

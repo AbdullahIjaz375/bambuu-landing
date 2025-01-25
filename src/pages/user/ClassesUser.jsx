@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Search, ArrowLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { db } from "../../firebaseConfig";
 import { doc, getDoc } from "firebase/firestore";
@@ -11,6 +11,8 @@ import EmptyState from "../../components/EmptyState";
 
 const ClassesUser = () => {
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const language = searchParams.get("language")?.toLowerCase() || null;
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -39,7 +41,9 @@ const ClassesUser = () => {
 
           if (classDoc.exists()) {
             const classData = classDoc.data();
-            classesData.push({ id: classId, ...classData });
+            if (!language || classData.language?.toLowerCase() === language) {
+              classesData.push({ id: classId, ...classData });
+            }
           }
         }
         setClasses(classesData);

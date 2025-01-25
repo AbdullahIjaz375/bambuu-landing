@@ -346,20 +346,19 @@ const ProfileSetupGroupCard = ({ group }) => {
             <div className="relative w-40 h-40 mb-4">
               {/* Bambuu+ Tag */}
               {isPremium && (
-                <div className="absolute z-10 -translate-x-1/2 left-1/2 -top-3">
-                  <div className="px-3 py-1 text-sm font-medium text-green-600 bg-white border border-green-300 rounded-full whitespace-nowrap">
-                    bammbuu+
-                  </div>
+                <div className="absolute z-10 -translate-x-1/2 w-28 left-1/2 -top-3">
+                  <img
+                    alt="bammbuu"
+                    src="/svgs/bammbuu-plus-grp-tag.svg"
+                    className="w-28"
+                  />
                 </div>
               )}
-              {/* Group Image */}
-              <div className="w-full h-full overflow-hidden rounded-full">
-                <img
-                  src={imageUrl}
-                  alt={groupName}
-                  className="object-cover w-full h-full"
-                />
-              </div>
+              <img
+                src={imageUrl}
+                alt={groupName}
+                className="object-cover w-full h-full rounded-full"
+              />
             </div>
 
             <h2 className="mb-2 text-2xl font-medium text-gray-900">
@@ -368,11 +367,21 @@ const ProfileSetupGroupCard = ({ group }) => {
 
             <div className="flex items-center gap-2 mb-2">
               <div className="flex items-center gap-2">
-                {groupLearningLanguage === "Spanish" ? (
-                  <img src="/images/spain-small.png" alt="Spanish flag" />
-                ) : (
-                  <img src="/images/usa-small.png" alt="US flag" />
-                )}
+                <img
+                  src={
+                    groupLearningLanguage === "English"
+                      ? "/svgs/xs-us.svg"
+                      : groupLearningLanguage === "Spanish"
+                      ? "/svgs/xs-spain.svg"
+                      : "/svgs/eng-spanish-xs.svg"
+                  }
+                  alt={
+                    groupLearningLanguage === "English"
+                      ? "US Flag"
+                      : "Spain Flag"
+                  }
+                  className="w-4 h-4 sm:w-auto"
+                />
                 <span className="text-md text-green-900 truncate max-w-[120px]">
                   {groupLearningLanguage}
                 </span>

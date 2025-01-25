@@ -56,6 +56,14 @@ const ClassCard = ({
     navigate(`/classDetailsUser/${classId}`);
   };
 
+  const isClassOngoing = () => {
+    if (!classDateTime) return false;
+    const now = new Date();
+    const classStart = new Date(classDateTime.seconds * 1000);
+    const classEnd = new Date(classStart.getTime() + classDuration * 60 * 1000);
+    return now >= classStart && now <= classEnd;
+  };
+
   const [profileUrl, setProfileUrl] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -108,6 +116,11 @@ const ClassCard = ({
                 alt="Premium"
                 className="absolute w-24 h-6 sm:h-8 sm:w-28 top-2 left-2"
               />
+            )}
+            {isClassOngoing() && (
+              <span className="absolute px-2 sm:px-3 py-1 text-xs sm:text-sm bg-[#B9F9C2BF]/75 backdrop-blur-sm rounded-full top-2 right-2">
+                Ongoing
+              </span>
             )}
 
             <div className="absolute bottom-0 left-0 right-0 bg-[#B9F9C2BF]/75 backdrop-blur-sm rounded-b-2xl p-2 space-y-1">

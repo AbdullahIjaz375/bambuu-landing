@@ -900,16 +900,18 @@ const GroupDetailsUser = ({ onClose }) => {
                       <div className="flex flex-row items-center space-x-1">
                         <img
                           src={
-                            group.language === "English"
+                            group.groupLearningLanguage === "English"
                               ? "/svgs/xs-us.svg"
-                              : "/svgs/xs-spain.svg"
+                              : group.groupLearningLanguage === "Spanish"
+                              ? "/svgs/xs-spain.svg"
+                              : "/svgs/eng-spanish-xs.svg"
                           }
                           alt={
-                            group.language === "English"
+                            group.groupLearningLanguage === "English"
                               ? "US Flag"
                               : "Spain Flag"
                           }
-                          className="w-4 md:w-5"
+                          className="w-5 h-5 sm:w-auto"
                         />
                         <span className="text-sm md:text-md">
                           {group.groupLearningLanguage}

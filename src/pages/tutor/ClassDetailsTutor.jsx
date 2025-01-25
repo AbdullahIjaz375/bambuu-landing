@@ -176,8 +176,9 @@ const ClassDetailsTutor = ({ onClose }) => {
 
   const handleJoinClass = () => {
     setTutorSelectedClassId(classId);
-    navigate("/callTutor");
+    navigate(`/callTutor`, { state: { classId } });
   };
+
   //-----------------------------------------------------------------------------------------------------------//
 
   //-------------------------------------------------Deleting Class---------------------------------------//
@@ -292,6 +293,17 @@ const ClassDetailsTutor = ({ onClose }) => {
       setShowDeleteConfirmation(false);
     }
   };
+
+  const isClassOngoing = () => {
+    if (!classData?.classDateTime) return false;
+    const now = new Date();
+    const classStart = new Date(classData?.classDateTime.seconds * 1000);
+    const classEnd = new Date(
+      classStart.getTime() + classData?.classDuration * 60 * 1000
+    );
+    return now >= classStart && now <= classEnd;
+  };
+
   //---------------------------------------------------------------------------------------------------//
 
   const renderMembers = () => {
@@ -491,6 +503,11 @@ const ClassDetailsTutor = ({ onClose }) => {
                       <span className="px-3 py-[2px] bg-yellow-200 rounded-full text-md">
                         {classData.languageLevel}
                       </span>
+                      {isClassOngoing() && (
+                        <span className=" px-2 sm:px-3 py-1 text-xs sm:text-sm bg-[#B9F9C2BF]/75 backdrop-blur-sm rounded-full ">
+                          Ongoing
+                        </span>
+                      )}
                     </div>
                     <div className="flex flex-col mt-4 space-y-4">
                       {/* First Row */}
