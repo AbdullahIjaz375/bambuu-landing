@@ -1,6 +1,6 @@
 // src/Login.js
 import React, { useState, useEffect } from "react";
-import { auth, db } from "../firebaseConfig";
+import { auth, db, messaging } from "../firebaseConfig";
 import {
   GoogleAuthProvider,
   signInWithPopup,
@@ -163,6 +163,22 @@ const Login = () => {
           // userType: "student", // Ensure userType is stored in Firestore
         });
 
+        // Request notification permission and retrieve FCM token
+        const permission = await Notification.requestPermission();
+        if (permission === "granted") {
+          const fcmToken = await getToken(messaging, {
+            vapidKey: process.env.REACT_APP_FIREBASE_VAPID_KEY,
+          });
+          console.log("FCM Token:", fcmToken);
+
+          // Optionally store the token in Firestore
+          await updateDoc(userRef, {
+            fcmToken: fcmToken,
+          });
+        } else {
+          console.warn("Notification permission not granted");
+        }
+
         // Update session with updated user data
         updateUserData({
           ...userData,
@@ -254,8 +270,23 @@ const Login = () => {
       await updateDoc(userRef, {
         lastLoggedIn: serverTimestamp(),
         currentStreak: updatedStreak,
-        // userType: "student", // Ensure userType is stored in Firestore
       });
+
+      // Request notification permission and retrieve FCM token
+      const permission = await Notification.requestPermission();
+      if (permission === "granted") {
+        const fcmToken = await getToken(messaging, {
+          vapidKey: process.env.REACT_APP_FIREBASE_VAPID_KEY,
+        });
+        console.log("FCM Token:", fcmToken);
+
+        // Optionally store the token in Firestore
+        await updateDoc(userRef, {
+          fcmToken: fcmToken,
+        });
+      } else {
+        console.warn("Notification permission not granted");
+      }
 
       // Store complete user data
       const sessionUserData = {

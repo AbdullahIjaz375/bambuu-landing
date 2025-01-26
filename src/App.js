@@ -1,5 +1,5 @@
 // src/App.js
-import React from "react";
+import React, { useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -66,12 +66,32 @@ import TutorDeleteAccount from "./pages/tutor/TutorDeleteAccount";
 import { ClassProvider } from "./context/ClassContext";
 import VideoCallTutor from "./pages/tutor/VideoCallTutor";
 import LanguagesUser from "./pages/user/LanguagesUser";
+import { messaging } from "./firebaseConfig";
+import { toast } from "react-toastify";
+import { onMessage } from "firebase/messaging";
 
 const App = () => {
   const { user, streamClient } = useAuth(); // Use useAuth() inside the component
+
+  useEffect(() => {
+    // This listener gets triggered when a new message arrives in the foreground.
+    const unsubscribe = onMessage(messaging, (payload) => {
+      console.log("Foreground message received:", payload);
+      if (payload.notification) {
+        const { title, body } = payload.notification;
+
+        // For example, show a toast. Or you could show a custom in-app alert.
+        toast.info(`${title} - ${body}`);
+      }
+    });
+
+    // Clean up the listener on unmount
+    return () => unsubscribe();
+  }, []);
   if (!streamClient) {
     return <div>Loading...</div>;
   }
+
   return (
     <Chat client={streamClient}>
       <ClassProvider>
