@@ -127,7 +127,7 @@ const EditClassPage = () => {
         ...classData,
         classAddress,
         imageUrl,
-        updatedAt: serverTimestamp(),
+        // updatedAt: serverTimestamp(),
       };
 
       // Update the class document

@@ -94,7 +94,7 @@ const AddGroupsTutor = () => {
         groupAdminImageUrl: user.photoUrl || null,
         memberIds: [],
         classIds: [],
-        createdAt: new Date().toISOString(),
+        // createdAt: new Date().toISOString(),
         isPremium: true,
         imageUrl,
       };

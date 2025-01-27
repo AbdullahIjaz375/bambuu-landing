@@ -404,7 +404,6 @@ const Signup = () => {
         photoUrl: "",
         savedDocuments: [],
         languagePreference: "en",
-        tier: 1,
         uid: auth.currentUser.uid,
         fcmToken: fcmToken || "",
         credits: 0,
@@ -432,6 +431,13 @@ const Signup = () => {
         doc(db, "notification_preferences", auth.currentUser.uid),
         notificationPreferences
       );
+
+      await setDoc(doc(db, "user_accounts", auth.currentUser.uid), {
+        uid: auth.currentUser.uid,
+        email: auth.currentUser.email,
+        sign_up_method: "email", // or dynamically detect sign-up method
+        created_at: serverTimestamp(),
+      });
 
       // Update the user data in context
       const sessionUserData = {
@@ -518,7 +524,6 @@ const Signup = () => {
           country: "",
           photoUrl: "",
           savedDocuments: [],
-          tier: 1,
           currentStreak: 1,
           fcmToken: fcmToken || "", // Add FCM token
           credits: 0,
@@ -545,6 +550,13 @@ const Signup = () => {
             resourceAssign: true,
           });
         }
+
+        await setDoc(doc(db, "user_accounts", auth.currentUser.uid), {
+          uid: auth.currentUser.uid,
+          email: auth.currentUser.email,
+          sign_up_method: "google", // or dynamically detect sign-up method
+          created_at: serverTimestamp(),
+        });
 
         // Update session with new user data
         updateUserData({
@@ -645,7 +657,7 @@ const Signup = () => {
           nativeLanguage: "",
           accountType: "user",
           timeZone: "",
-          createdAt: new Date(),
+          // createdAt: new Date(),
         });
       }
 

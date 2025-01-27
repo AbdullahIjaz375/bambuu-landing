@@ -230,7 +230,7 @@ const SavedResourcesTutor = () => {
         documentName: file.name.split(".")[0],
         documentType: fileType,
         documentUrl: downloadURL,
-        createdAt: Timestamp.now(),
+        // createdAt: Timestamp.now(),
         isFavorite: false,
       };
 

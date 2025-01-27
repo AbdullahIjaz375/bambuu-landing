@@ -160,7 +160,7 @@ const AddClassTutor = () => {
         classAddress: classAddress,
         imageUrl,
         classMemberIds: [],
-        createdAt: serverTimestamp(),
+        // createdAt: serverTimestamp(),
       };
 
       // Update the class document
@@ -211,7 +211,7 @@ const AddClassTutor = () => {
           const currentClassIds = groupDoc.data().classIds || [];
           await updateDoc(groupRef, {
             classIds: [...currentClassIds, classId],
-            updatedAt: serverTimestamp(),
+            // updatedAt: serverTimestamp(),
           });
         }
       }

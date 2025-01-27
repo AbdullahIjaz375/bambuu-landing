@@ -397,7 +397,7 @@ const GroupDetailsTutor = ({ onClose }) => {
           const currentClassIds = groupDoc.data().classIds || [];
           await updateDoc(groupRef, {
             classIds: [...currentClassIds, classId],
-            updatedAt: serverTimestamp(),
+            // updatedAt: serverTimestamp(),
           });
         }
       }

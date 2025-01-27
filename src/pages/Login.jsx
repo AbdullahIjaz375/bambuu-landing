@@ -352,7 +352,7 @@ const Login = () => {
           nativeLanguage: "",
           accountType: "user",
           timeZone: "",
-          createdAt: new Date(),
+          // createdAt: new Date(),
         });
       }
 
