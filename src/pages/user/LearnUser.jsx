@@ -270,17 +270,21 @@ const LearnUser = () => {
           </div>
 
           {/* Calendar and Language Learning Section */}
-          <div className="flex flex-row items-start justify-between w-full gap-8 mb-4">
-            <CalendarUser />
+          <div className="flex flex-col items-start justify-between w-full gap-4 p-4 mb-4 lg:flex-row lg:gap-8">
+            {/* Calendar section with responsive width */}
+            <div className="w-full lg:w-[60%] mb-4 lg:mb-0">
+              <CalendarUser />
+            </div>
 
-            <div className="flex flex-col w-[60%]">
-              <div className="">
-                <div className="flex items-center justify-between gap-4 mb-6">
-                  <h2 className="text-2xl font-bold">
+            {/* Content section */}
+            <div className="w-full lg:w-[40%]">
+              <div className="mb-6">
+                <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+                  <h2 className="text-xl font-bold sm:text-2xl">
                     {t("learnUser.languageLearning.title")}
                   </h2>
                   <button
-                    className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+                    className="w-full sm:w-auto px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
                     onClick={() => navigate("/languages")}
                   >
                     {t("learnUser.languageLearning.viewAll")}
@@ -288,17 +292,17 @@ const LearnUser = () => {
                 </div>
               </div>
 
-              {/* Card Container */}
-              <div className="w-full max-w-[calc(100vw-68rem)] overflow-hidden">
+              {/* Card Container with responsive overflow handling */}
+              <div className="w-full overflow-hidden">
                 <div className="flex gap-2 pb-4 overflow-x-auto scrollbar-hide">
                   {/* Spanish Card */}
                   <div
-                    className="flex items-center hover:cursor-pointer gap-6 p-6 bg-[#fff0f1] rounded-3xl border border-[#d58287] w-[250px] sm:w-[300px] md:w-[350px] lg:w-[400px] flex-shrink-0"
-                    onClick={() => {
-                      navigate("/learnLanguageUser?language=Spanish");
-                    }}
+                    className="flex items-center hover:cursor-pointer gap-4 p-4 sm:gap-6 sm:p-6 bg-[#fff0f1] rounded-3xl border border-[#d58287] w-[250px] sm:w-[300px] md:w-[350px] lg:w-[400px] flex-shrink-0"
+                    onClick={() =>
+                      navigate("/learnLanguageUser?language=Spanish")
+                    }
                   >
-                    <div className="flex-shrink-0 w-16 h-16 overflow-hidden rounded-full">
+                    <div className="flex-shrink-0 w-12 h-12 overflow-hidden rounded-full sm:w-16 sm:h-16">
                       <img
                         src="/svgs/spain-big.svg"
                         alt="Spanish"
@@ -306,8 +310,7 @@ const LearnUser = () => {
                       />
                     </div>
                     <div className="flex flex-col items-start justify-between space-y-2">
-                      <span className="text-xl font-bold">
-                        {" "}
+                      <span className="text-lg font-bold sm:text-xl">
                         {t("learnUser.languageLearning.languages.spanish")}
                       </span>
                       <div className="flex items-center">
@@ -315,9 +318,9 @@ const LearnUser = () => {
                           {students.map((_, i) => (
                             <div
                               key={i}
-                              className="flex items-center justify-center w-8 h-8 bg-white border-2 border-white rounded-full"
+                              className="flex items-center justify-center w-6 h-6 bg-white border-2 border-white rounded-full sm:w-8 sm:h-8"
                             >
-                              <User className="w-5 h-5 text-gray-600" />
+                              <User className="w-4 h-4 text-gray-600 sm:w-5 sm:h-5" />
                             </div>
                           ))}
                         </div>
@@ -327,12 +330,12 @@ const LearnUser = () => {
 
                   {/* English Card */}
                   <div
-                    className="flex items-center hover:cursor-pointer gap-6 p-6 bg-[#edf2ff] rounded-3xl border border-[#768bbd] w-[250px] sm:w-[300px] md:w-[350px] lg:w-[400px] flex-shrink-0"
-                    onClick={() => {
-                      navigate("/learnLanguageUser?language=English");
-                    }}
+                    className="flex items-center hover:cursor-pointer gap-4 p-4 sm:gap-6 sm:p-6 bg-[#edf2ff] rounded-3xl border border-[#768bbd] w-[250px] sm:w-[300px] md:w-[350px] lg:w-[400px] flex-shrink-0"
+                    onClick={() =>
+                      navigate("/learnLanguageUser?language=English")
+                    }
                   >
-                    <div className="flex-shrink-0 w-16 h-16 overflow-hidden rounded-full">
+                    <div className="flex-shrink-0 w-12 h-12 overflow-hidden rounded-full sm:w-16 sm:h-16">
                       <img
                         src="/svgs/us-big.svg"
                         alt="English"
@@ -340,8 +343,7 @@ const LearnUser = () => {
                       />
                     </div>
                     <div className="flex flex-col items-start justify-between space-y-2">
-                      <span className="text-xl font-bold">
-                        {" "}
+                      <span className="text-lg font-bold sm:text-xl">
                         {t("learnUser.languageLearning.languages.english")}
                       </span>
                       <div className="flex items-center">
@@ -349,9 +351,9 @@ const LearnUser = () => {
                           {students.map((_, i) => (
                             <div
                               key={i}
-                              className="flex items-center justify-center w-8 h-8 bg-white border-2 border-white rounded-full"
+                              className="flex items-center justify-center w-6 h-6 bg-white border-2 border-white rounded-full sm:w-8 sm:h-8"
                             >
-                              <User className="w-5 h-5 text-gray-600" />
+                              <User className="w-4 h-4 text-gray-600 sm:w-5 sm:h-5" />
                             </div>
                           ))}
                         </div>
@@ -359,16 +361,16 @@ const LearnUser = () => {
                     </div>
                   </div>
 
-                  {/* English-Spanish Exchange Card */}
+                  {/* Exchange Card */}
                   <div
-                    className="flex items-center hover:cursor-pointer gap-6 p-6 bg-[#FFFFEA] rounded-3xl border border-[#FFED46] w-[250px] sm:w-[300px] md:w-[350px] lg:w-[400px] flex-shrink-0"
-                    onClick={() => {
+                    className="flex items-center hover:cursor-pointer gap-4 p-4 sm:gap-6 sm:p-6 bg-[#FFFFEA] rounded-3xl border border-[#FFED46] w-[250px] sm:w-[300px] md:w-[350px] lg:w-[400px] flex-shrink-0"
+                    onClick={() =>
                       navigate(
                         "/learnLanguageUser?language=English-Spanish Exchange"
-                      );
-                    }}
+                      )
+                    }
                   >
-                    <div className="flex-shrink-0 w-16 h-16 overflow-hidden rounded-full">
+                    <div className="flex-shrink-0 w-12 h-12 overflow-hidden rounded-full sm:w-16 sm:h-16">
                       <img
                         src="/svgs/eng-spanish.svg"
                         alt="English-Spanish Exchange"
@@ -376,7 +378,7 @@ const LearnUser = () => {
                       />
                     </div>
                     <div className="flex flex-col items-start justify-between space-y-2">
-                      <span className="text-xl font-bold whitespace-nowrap">
+                      <span className="text-lg font-bold sm:text-xl whitespace-nowrap">
                         {t("learnUser.languageLearning.languages.exchange")}
                       </span>
                       <div className="flex items-center">
@@ -384,9 +386,9 @@ const LearnUser = () => {
                           {students.map((_, i) => (
                             <div
                               key={i}
-                              className="flex items-center justify-center w-8 h-8 bg-white border-2 border-white rounded-full"
+                              className="flex items-center justify-center w-6 h-6 bg-white border-2 border-white rounded-full sm:w-8 sm:h-8"
                             >
-                              <User className="w-5 h-5 text-gray-600" />
+                              <User className="w-4 h-4 text-gray-600 sm:w-5 sm:h-5" />
                             </div>
                           ))}
                         </div>

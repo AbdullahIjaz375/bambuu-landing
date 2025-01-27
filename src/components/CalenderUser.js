@@ -386,7 +386,7 @@ const CalendarUser = ({ onDateSelect }) => {
 
   return (
     <>
-      <div className="w-full max-w-4xl p-2 sm:p-4 bg-white border border-[#FFBF00] rounded-3xl">
+      {/* <div className="w-full max-w-4xl p-2 sm:p-4 bg-white border border-[#FFBF00] rounded-3xl">
         <div className="flex flex-col justify-between gap-4 mb-4 sm:flex-row sm:items-center sm:mb-6">
           <div className="flex items-center gap-2 sm:gap-4">
             <button
@@ -510,6 +510,140 @@ const CalendarUser = ({ onDateSelect }) => {
                       {day.getDate()}
                     </span>
                     <span className="text-xs">
+                      {day.toLocaleString("default", { weekday: "short" })}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div> */}
+
+      <div className="w-full max-w-4xl p-2 bg-white border sm:p-4 border-amber-400 rounded-3xl scrollbar-hide">
+        <div className="flex flex-col justify-between gap-4 mb-4 sm:flex-row sm:items-center sm:mb-6">
+          <div className="flex items-center gap-2 sm:gap-4">
+            <button
+              onClick={() => navigateMonth("prev")}
+              className="p-1 text-gray-600 hover:text-gray-800"
+            >
+              <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+            </button>
+            <h2 className="text-lg font-medium text-gray-800 sm:text-2xl">
+              {formatHeader(date)}
+            </h2>
+            <button
+              onClick={() => navigateMonth("next")}
+              className="p-1 text-gray-600 hover:text-gray-800"
+            >
+              <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
+            </button>
+          </div>
+
+          <div className="relative inline-flex p-1 bg-gray-100 border border-gray-300 rounded-full">
+            <div
+              className="absolute top-0 left-0 h-full transition-all duration-300 ease-in-out border border-green-900 rounded-full bg-green-50"
+              style={{
+                transform: `translateX(${view === "weekly" ? "0" : "100%"})`,
+                width: "50%",
+              }}
+            />
+            <button
+              onClick={() => handleViewChange("weekly")}
+              className="relative px-4 py-1 text-sm font-medium text-green-900 transition-colors rounded-full z-1 sm:text-base"
+            >
+              Weekly
+            </button>
+            <button
+              onClick={() => handleViewChange("monthly")}
+              className="relative px-4 py-1 text-sm font-medium text-green-900 transition-colors rounded-full z-1 sm:text-base"
+            >
+              Monthly
+            </button>
+          </div>
+        </div>
+
+        <div
+          className={`overflow-hidden transition-all duration-300 ease-in-out  ${
+            view === "monthly" ? "max-h-96" : "max-h-24"
+          }`}
+        >
+          {view === "weekly" ? (
+            <div className="flex items-center justify-between gap-1 pb-2 overflow-x-auto scrollbar-hide sm:gap-2">
+              <button
+                onClick={() => navigateWeek("prev")}
+                className="p-1 text-gray-600 hover:text-gray-800 shrink-0"
+              >
+                <ChevronLeft className="w-5 h-5 text-gray-800 sm:w-6 sm:h-6" />
+              </button>
+
+              <div className="flex justify-between flex-1 gap-1 sm:gap-2">
+                {weekDates.map((day) => (
+                  <button
+                    key={day.toISOString()}
+                    className={`flex flex-col items-center justify-center rounded-full 
+                    py-1 sm:py-3 px-1 sm:px-4 transition-colors shrink-0
+                    ${
+                      isToday(day)
+                        ? "bg-green-500 text-white"
+                        : "bg-white border border-gray-400"
+                    }`}
+                    onClick={() => handleDateSelect(day)}
+                  >
+                    <span className="text-sm font-medium sm:text-xl">
+                      {day.getDate()}
+                    </span>
+                    <span className="text-xs sm:text-sm">
+                      {day.toLocaleString("default", { weekday: "short" })}
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={() => navigateWeek("next")}
+                className="p-1 text-gray-600 hover:text-gray-800 shrink-0"
+              >
+                <ChevronRight className="w-5 h-5 text-gray-800 sm:w-6 sm:h-6" />
+              </button>
+            </div>
+          ) : (
+            <div
+              className={`transform transition-all duration-300 ease-in-out ${
+                isTransitioning ? "opacity-0 scale-95" : "opacity-100 scale-100"
+              }`}
+            >
+              <div className="grid grid-cols-7 gap-1 mb-2">
+                {weekDayLabels.map((day) => (
+                  <div
+                    key={day}
+                    className="py-1 text-xs font-medium text-center text-gray-600 sm:text-sm"
+                  >
+                    {day}
+                  </div>
+                ))}
+              </div>
+              <div className="grid grid-cols-7 gap-1 p-1 sm:gap-2 sm:p-2">
+                {monthDates.map(({ date: day, isCurrentMonth }) => (
+                  <button
+                    key={day.toISOString()}
+                    className={`
+                    flex flex-col items-center justify-center rounded-full
+                    py-1 sm:py-2 px-1 sm:px-2 transition-colors text-center
+                    ${
+                      isToday(day)
+                        ? "bg-green-500 text-white"
+                        : isCurrentMonth
+                        ? "bg-white border border-gray-400 hover:bg-gray-50"
+                        : "text-gray-400 border border-gray-200 hover:bg-gray-50"
+                    }
+                  `}
+                    onClick={() => handleDateSelect(day)}
+                  >
+                    <span className="text-xs font-medium sm:text-base">
+                      {day.getDate()}
+                    </span>
+                    <span className="hidden text-xs sm:block">
                       {day.toLocaleString("default", { weekday: "short" })}
                     </span>
                   </button>
