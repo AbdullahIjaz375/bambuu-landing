@@ -148,8 +148,7 @@ const EditClassPage = () => {
         classDescription: !!classData.classDescription.trim(),
         language: !!classData.language,
         languageLevel: !!classData.languageLevel,
-        availableSpots:
-          !!classData.availableSpots && classData.availableSpots > 0,
+
         classDuration: !!classData.classDuration,
         classDateTime: !!classData.classDateTime,
         recurrenceType: !!classData.recurrenceTypes,
@@ -292,30 +291,34 @@ const EditClassPage = () => {
 
                   {/* Class Level and Recurrence Type */}
                   <div className="flex flex-row items-start justify-between space-x-4">
-                    <div>
-                      <label className="text-sm font-medium text-gray-700">
-                        Class Level
-                      </label>
-                      <div className="flex gap-2 mt-1">
-                        {["Beginner", "Intermediate", "Advanced"].map(
-                          (level) => (
-                            <button
-                              key={level}
-                              onClick={() =>
-                                handleClassDataChange("languageLevel", level)
-                              }
-                              className={`px-4 py-2 rounded-full text-sm ${
-                                classData.languageLevel === level
-                                  ? "bg-yellow-400 border border-yellow-500"
-                                  : "border border-gray-200"
-                              }`}
-                            >
-                              {level}
-                            </button>
-                          )
-                        )}
+                    {classData.classType !== "Individual Premium" ? (
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">
+                          Class Level
+                        </label>
+                        <div className="flex gap-2 mt-1">
+                          {["Beginner", "Intermediate", "Advanced"].map(
+                            (level) => (
+                              <button
+                                key={level}
+                                onClick={() =>
+                                  handleClassDataChange("languageLevel", level)
+                                }
+                                className={`px-4 py-2 rounded-full text-sm ${
+                                  classData.languageLevel === level
+                                    ? "bg-yellow-400 border border-yellow-500"
+                                    : "border border-gray-200"
+                                }`}
+                              >
+                                {level}
+                              </button>
+                            )
+                          )}
+                        </div>
                       </div>
-                    </div>
+                    ) : (
+                      <></>
+                    )}
 
                     <div>
                       <label className="text-sm font-medium text-gray-700">
