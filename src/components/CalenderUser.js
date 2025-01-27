@@ -245,6 +245,7 @@ const CalendarUser = ({ onDateSelect }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
   useEffect(() => {
     if (date) {
@@ -298,17 +299,36 @@ const CalendarUser = ({ onDateSelect }) => {
     }
   };
 
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const getWeekDates = (current) => {
     const week = [];
     const first = current.getDate() - current.getDay() + 1;
+    const daysToShow = windowWidth >= 1724 ? 9 : 7;
 
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < daysToShow; i++) {
       const day = new Date(current.getTime());
       day.setDate(first + i);
       week.push(day);
     }
     return week;
   };
+
+  // const getWeekDates = (current) => {
+  //   const week = [];
+  //   const first = current.getDate() - current.getDay() + 1;
+
+  //   for (let i = 0; i < 7; i++) {
+  //     const day = new Date(current.getTime());
+  //     day.setDate(first + i);
+  //     week.push(day);
+  //   }
+  //   return week;
+  // };
 
   const getMonthDates = (current) => {
     const year = current.getFullYear();
@@ -520,23 +540,23 @@ const CalendarUser = ({ onDateSelect }) => {
         </div>
       </div> */}
 
-      <div className="w-full max-w-4xl p-2 bg-white border sm:p-4 border-amber-400 rounded-3xl scrollbar-hide">
+      <div className="w-full max-w-4xl p-3 bg-white border border-amber-400 rounded-3xl scrollbar-hide">
         <div className="flex flex-col justify-between gap-4 mb-4 sm:flex-row sm:items-center sm:mb-6">
-          <div className="flex items-center gap-2 sm:gap-4">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => navigateMonth("prev")}
               className="p-1 text-gray-600 hover:text-gray-800"
             >
-              <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+              <ChevronLeft className="w-5 h-5" />
             </button>
-            <h2 className="text-lg font-medium text-gray-800 sm:text-2xl">
+            <h2 className="text-lg font-medium text-gray-800 sm:text-xl">
               {formatHeader(date)}
             </h2>
             <button
               onClick={() => navigateMonth("next")}
               className="p-1 text-gray-600 hover:text-gray-800"
             >
-              <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
+              <ChevronRight className="w-5 h-5" />
             </button>
           </div>
 
@@ -550,13 +570,13 @@ const CalendarUser = ({ onDateSelect }) => {
             />
             <button
               onClick={() => handleViewChange("weekly")}
-              className="relative px-4 py-1 text-sm font-medium text-green-900 transition-colors rounded-full z-1 sm:text-base"
+              className="relative px-3 py-1 text-sm font-medium text-green-900 transition-colors rounded-full z-1 "
             >
               Weekly
             </button>
             <button
               onClick={() => handleViewChange("monthly")}
-              className="relative px-4 py-1 text-sm font-medium text-green-900 transition-colors rounded-full z-1 sm:text-base"
+              className="relative px-3 py-1 text-sm font-medium text-green-900 transition-colors rounded-full z-1 "
             >
               Monthly
             </button>
@@ -569,12 +589,12 @@ const CalendarUser = ({ onDateSelect }) => {
           }`}
         >
           {view === "weekly" ? (
-            <div className="flex items-center justify-between gap-1 pb-2 overflow-x-auto scrollbar-hide sm:gap-2">
+            <div className="flex items-center justify-between gap-1 pb-2 overflow-x-auto scrollbar-hide ">
               <button
                 onClick={() => navigateWeek("prev")}
                 className="p-1 text-gray-600 hover:text-gray-800 shrink-0"
               >
-                <ChevronLeft className="w-5 h-5 text-gray-800 sm:w-6 sm:h-6" />
+                <ChevronLeft className="w-5 h-5 text-gray-800 " />
               </button>
 
               <div className="flex justify-between flex-1 gap-1 sm:gap-2">
@@ -582,7 +602,7 @@ const CalendarUser = ({ onDateSelect }) => {
                   <button
                     key={day.toISOString()}
                     className={`flex flex-col items-center justify-center rounded-full 
-                    py-1 sm:py-3 px-1 sm:px-4 transition-colors shrink-0
+                    py-1 sm:py-3 px-1 lg:px-3 transition-colors shrink-0
                     ${
                       isToday(day)
                         ? "bg-green-500 text-white"
@@ -590,7 +610,7 @@ const CalendarUser = ({ onDateSelect }) => {
                     }`}
                     onClick={() => handleDateSelect(day)}
                   >
-                    <span className="text-sm font-medium sm:text-xl">
+                    <span className="text-sm font-medium sm:text-lg">
                       {day.getDate()}
                     </span>
                     <span className="text-xs sm:text-sm">
@@ -604,7 +624,7 @@ const CalendarUser = ({ onDateSelect }) => {
                 onClick={() => navigateWeek("next")}
                 className="p-1 text-gray-600 hover:text-gray-800 shrink-0"
               >
-                <ChevronRight className="w-5 h-5 text-gray-800 sm:w-6 sm:h-6" />
+                <ChevronRight className="w-5 h-5 text-gray-800 " />
               </button>
             </div>
           ) : (

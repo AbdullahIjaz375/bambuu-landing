@@ -679,6 +679,11 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
                       <span className="px-3 py-[2px] bg-yellow-200 rounded-full text-md">
                         {classData.languageLevel}
                       </span>
+                      {classData.classType === "Individual Premium" && (
+                        <span className="px-3 py-[2px] bg-yellow-200 rounded-full text-sm">
+                          1 to 1 Class
+                        </span>
+                      )}
                     </div>
                     <div className="flex flex-col mt-4 space-y-4">
                       {/* First Row */}

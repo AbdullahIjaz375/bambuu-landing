@@ -281,9 +281,17 @@ const ExploreClassCard = ({
             )}
 
             <div className="absolute bottom-0 left-0 right-0 bg-[#B9F9C2BF]/75 backdrop-blur-sm rounded-b-2xl p-2 space-y-1">
-              <h2 className="ml-2 text-xl font-bold text-gray-800 sm:text-xl line-clamp-2">
-                {className}
-              </h2>
+              <div className="flex items-center justify-between">
+                {" "}
+                <h2 className="ml-2 text-xl font-bold text-gray-800 sm:text-xl line-clamp-2">
+                  {className}
+                </h2>
+                {classType === "Individual Premium" && (
+                  <span className="px-2 py-1 text-xs  bg-[#fff885] rounded-full">
+                    1 to 1 Class
+                  </span>
+                )}
+              </div>
 
               <div className="flex flex-wrap items-center justify-between">
                 <div className="flex items-center space-x-2">
