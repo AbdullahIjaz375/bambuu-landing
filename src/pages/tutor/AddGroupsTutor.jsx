@@ -212,7 +212,7 @@ const AddGroupsTutor = () => {
                         Learning Language
                       </label>
                       <div className="flex flex-wrap gap-2">
-                        {["English", "Spanish", "English-Spanish Exchange"].map(
+                        {["English", "Spanish", "English-Spanish"].map(
                           (lang) => (
                             <button
                               key={lang}

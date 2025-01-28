@@ -281,7 +281,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
           });
         } catch (streamError) {
           console.error("Error adding to stream channel:", streamError);
-          throw new Error("Failed to join class chat");
+          toast.error("Failed to join class chat");
         }
       }
       // Update context and session storage

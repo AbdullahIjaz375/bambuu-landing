@@ -418,7 +418,59 @@ const ClassDetailsTutor = ({ onClose }) => {
       </>
     );
   };
+  const getCurrentStatus = (timestamp) => {
+    const now = new Date();
+    const slotDate = new Date(timestamp.seconds * 1000);
 
+    if (slotDate < now) {
+      return "completed";
+    } else if (
+      slotDate.getDate() === now.getDate() &&
+      slotDate.getMonth() === now.getMonth() &&
+      slotDate.getFullYear() === now.getFullYear()
+    ) {
+      return "current";
+    } else {
+      return "upcoming";
+    }
+  };
+
+  const formatDate = (timestamp) => {
+    const date = new Date(timestamp.seconds * 1000);
+    return new Intl.DateTimeFormat("en-US", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    }).format(date);
+  };
+
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case "completed":
+        return (
+          <span className="px-2 py-1 text-sm text-green-600 bg-green-100 rounded-full">
+            Completed
+          </span>
+        );
+      case "current":
+        return (
+          <span className="px-2 py-1 text-sm text-green-600 bg-green-100 rounded-full">
+            Current Class
+          </span>
+        );
+      case "upcoming":
+        return (
+          <span className="px-2 py-1 text-sm text-gray-600 bg-gray-100 rounded-full">
+            Upcoming
+          </span>
+        );
+      default:
+        return null;
+    }
+  };
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -625,7 +677,49 @@ const ClassDetailsTutor = ({ onClose }) => {
                     })}
                   </button>
                 </div>
-                <div className="flex-1 overflow-y-auto">{renderMembers()}</div>
+
+                <div className="overflow-y-auto ">{renderMembers()}</div>
+                {classData.classType === "Individual Premium" ? (
+                  <>
+                    <div className="pt-6 space-y-4">
+                      <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
+                        <h2 className="text-lg font-semibold md:text-xl">
+                          {t("class-details.slots.title")}
+                        </h2>
+                      </div>
+
+                      <div className="space-y-3 overflow-y-auto">
+                        {classData.recurringSlots.map((slot, index) => {
+                          const status = getCurrentStatus(slot);
+                          return (
+                            <div
+                              key={index}
+                              className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:px-4 border rounded-2xl sm:rounded-full ${
+                                status === "current"
+                                  ? "border-green-500"
+                                  : "border-gray-200"
+                              }`}
+                            >
+                              <div className="flex items-center gap-2 md:gap-4">
+                                <span className="text-base font-medium text-gray-500 md:text-lg">
+                                  {String(index + 1).padStart(2, "0")}.
+                                </span>
+                                <span className="text-sm font-medium md:text-lg">
+                                  {formatDate(slot)}
+                                </span>
+                              </div>
+                              <div className="mt-2 sm:mt-0">
+                                {getStatusBadge(status)}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <></>
+                )}
               </div>
             </div>
           </div>

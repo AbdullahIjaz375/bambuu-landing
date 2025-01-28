@@ -813,7 +813,9 @@ const GroupDetailsTutor = ({ onClose }) => {
                           src={
                             group.language === "English"
                               ? "/svgs/xs-us.svg"
-                              : "/svgs/xs-spain.svg"
+                              : group.language === "Spanish"
+                              ? "/svgs/xs-spain.svg"
+                              : "/svgs/eng-spanish-xs.svg"
                           }
                           alt={
                             group.language === "English"

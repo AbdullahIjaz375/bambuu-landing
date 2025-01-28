@@ -275,21 +275,19 @@ const AddGroupsUser = () => {
                       Learning Language
                     </label>
                     <div className="flex flex-wrap gap-2">
-                      {["English", "Spanish", "English-Spanish Exchange"].map(
-                        (lang) => (
-                          <button
-                            key={lang}
-                            onClick={() => setLearningLanguage(lang)}
-                            className={`px-4 py-2 text-md rounded-full ${
-                              learningLanguage === lang
-                                ? "bg-[#14B82C] text-black border border-[#042F0C]"
-                                : "bg-white text-gray-600 border"
-                            }`}
-                          >
-                            {lang}
-                          </button>
-                        )
-                      )}
+                      {["English", "Spanish", "English-Spanish"].map((lang) => (
+                        <button
+                          key={lang}
+                          onClick={() => setLearningLanguage(lang)}
+                          className={`px-4 py-2 text-md rounded-full ${
+                            learningLanguage === lang
+                              ? "bg-[#14B82C] text-black border border-[#042F0C]"
+                              : "bg-white text-gray-600 border"
+                          }`}
+                        >
+                          {lang}
+                        </button>
+                      ))}
                     </div>
                   </div>
                 </div>

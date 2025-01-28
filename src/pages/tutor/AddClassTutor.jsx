@@ -387,11 +387,11 @@ const AddClassTutor = () => {
                             onClick={() =>
                               handleClassDataChange(
                                 "language",
-                                "English-Spanish Exchange"
+                                "English-Spanish"
                               )
                             }
                             className={`px-4 py-2 rounded-full text-sm ${
-                              classData.language === "English-Spanish Exchange"
+                              classData.language === "English-Spanish"
                                 ? "bg-yellow-400 border border-yellow-500"
                                 : "border border-gray-200"
                             }`}
