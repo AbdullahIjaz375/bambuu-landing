@@ -40,7 +40,8 @@
     "socket.io-client": "^4.8.1",
     "stream-chat": "^8.48.0",
     "stream-chat-react": "^12.8.1",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "zegocloud_client_sdk_web": "github:ZEGOCLOUD/zego_uikit_prebuilt_call_web"
   },
   "scripts": {
     "start": "react-scripts start",

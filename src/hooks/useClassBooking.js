@@ -40,7 +40,7 @@ export const useClassBooking = () => {
       if (classType === "Group Premium") {
         return sub.type === "bammbuu+ Instructor-led group Classes";
       } else if (classType === "Individual Premium") {
-        return sub.type === "Unlimited Class Credits";
+        return sub.type === "Unlimited Credits";
       }
       return false;
     });

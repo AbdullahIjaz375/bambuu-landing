@@ -200,7 +200,7 @@ const PlansModal = ({ isOpen, onClose }) => {
       period: t("plans-modal.pricing.month"),
       isPopular: false,
       type: "yearly_subscription",
-      stripeLink: "https://buy.stripe.com/test_7sIaFIaYZ2QteFGaEH",
+      stripeLink: "https://buy.stripe.com/test_00g29c2st3Ux5568wA",
     },
   ];
 

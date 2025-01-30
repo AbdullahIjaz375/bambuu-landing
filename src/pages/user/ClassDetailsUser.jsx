@@ -11,6 +11,8 @@ import { Timestamp } from "firebase/firestore"; // Import Timestamp
 import ClassInfoCard from "../../components/ClassInfoCard";
 import EditClassModal from "../../components/EditClassModal";
 import EmptyState from "../../components/EmptyState";
+import { ClassContext } from "../../context/ClassContext";
+import { useContext } from "react";
 import { useTranslation } from "react-i18next";
 
 Modal.setAppElement("#root");
@@ -24,6 +26,7 @@ const TimeRestrictedJoinButton = ({
 }) => {
   const [isButtonVisible, setIsButtonVisible] = useState(false);
   const [timeStatus, setTimeStatus] = useState("");
+  const { setSelectedClassId } = useContext(ClassContext);
 
   useEffect(() => {
     const checkTime = () => {
@@ -63,7 +66,11 @@ const TimeRestrictedJoinButton = ({
   //   navigate(`/call/${classId}`);
   // };
   const handleJoinClass = () => {
-    navigate(`/call`, { state: { classId } });
+    setSelectedClassId(classId);
+
+    // navigate(`/call`, { state: { classId } });
+    const callUrl = `/call`; // Update this URL as needed
+    window.open(callUrl, "_blank");
   };
 
   if (location?.toLowerCase() === "virtual" && isButtonVisible) {

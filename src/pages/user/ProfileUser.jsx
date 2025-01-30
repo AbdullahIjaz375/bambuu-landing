@@ -73,8 +73,6 @@ const ProfileUser = () => {
   const handleItemClick = (path) => {
     if (path === "/privacyPolicyUser") {
       window.open("https://bammbuu.co/privacy-policy", "_blank");
-    } else if (path === "/aboutBambuuUser") {
-      window.open("https://bammbuu.co/about-bammbuu", "_blank");
     } else {
       navigate(path);
     }
@@ -91,7 +89,7 @@ const ProfileUser = () => {
       label: t("profile.navigation.settings"),
     },
     {
-      // path: "/aboutBambuuUser",
+      path: "/aboutBambuuUser",
       icon: "/svgs/speedometer.svg",
       label: t("profile.navigation.aboutBammbuu"),
     },

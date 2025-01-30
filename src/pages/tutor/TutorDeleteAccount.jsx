@@ -146,6 +146,10 @@ const TutorDeleteAccount = () => {
 
       // Store deletion reason
       await setDoc(doc(db, "delete_reasons", userId), {
+        country: user.country,
+        email: user.email,
+        name: user.name,
+        teachingLanguage: user.teachingLanguage,
         reason: selectedReason,
         deletedAt: new Date().toISOString(),
       });

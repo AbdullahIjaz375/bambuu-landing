@@ -70,8 +70,6 @@ const ProfileTutor = () => {
   const handleItemClick = (path) => {
     if (path === "/privacyPolicytutor") {
       window.open("https://bammbuu.co/privacy-policy", "_blank");
-    } else if (path === "/aboutBambuututor") {
-      window.open("https://bammbuu.co/about-bammbuu", "_blank");
     } else {
       navigate(path);
     }
@@ -88,7 +86,7 @@ const ProfileTutor = () => {
       label: t("profile.navigation.settings"),
     },
     {
-      // path: "/aboutBambuututor",
+      path: "/aboutBambuututor",
       icon: "/svgs/speedometer.svg",
       label: t("profile.navigation.aboutBammbuu"),
     },

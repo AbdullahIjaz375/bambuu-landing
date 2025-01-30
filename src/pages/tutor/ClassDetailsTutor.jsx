@@ -176,7 +176,10 @@ const ClassDetailsTutor = ({ onClose }) => {
 
   const handleJoinClass = () => {
     setTutorSelectedClassId(classId);
-    navigate(`/callTutor`, { state: { classId } });
+    // navigate(`/callTutor`, { state: { classId } });
+    // Open the new tab with the video call URL
+    const callUrl = `/callTutor`; // Update this URL as needed
+    window.open(callUrl, "_blank");
   };
 
   //-----------------------------------------------------------------------------------------------------------//
