@@ -128,7 +128,10 @@ const AddSlotsModal = ({ isOpen, onClose, classData, setClassData }) => {
 
     const updatedSlots = [...currentSlots];
     const lastSlot = updatedSlots[updatedSlots.length - 1];
-    const lastSlotDate = new Date(lastSlot.seconds * 1000); // Convert Firestore timestamp to Date
+    const lastSlotDate = new Date(lastSlot.createdAt.seconds * 1000); // Convert Firestore timestamp to Date
+
+    // Get the paymentMethod from the last slot (or default to "Subscription" if not available)
+    const paymentMethod = lastSlot.paymentMethod || "Subscription";
 
     for (let i = 1; i <= numToAdd; i++) {
       const nextSlot = new Date(lastSlotDate); // Clone lastSlotDate
@@ -140,8 +143,13 @@ const AddSlotsModal = ({ isOpen, onClose, classData, setClassData }) => {
         nextSlot.setMonth(lastSlotDate.getMonth() + i);
       }
 
-      // Create Firestore Timestamp object
-      updatedSlots.push(Timestamp.fromDate(nextSlot));
+      // Create a new slot object with paymentMethod and createdAt
+      const newSlot = {
+        paymentMethod: paymentMethod, // Use the paymentMethod from the last slot
+        createdAt: Timestamp.fromDate(nextSlot), // Add slot time
+      };
+
+      updatedSlots.push(newSlot);
     }
 
     return updatedSlots;
@@ -595,15 +603,6 @@ const ClassDetailsUser = ({ onClose }) => {
     return now >= classStart && now <= classEnd;
   };
 
-  //---------------------------------------------video class start---------------------------------------------//
-
-  const [showVideoCall, setShowVideoCall] = useState(false);
-
-  const handleJoinClass = () => {
-    navigate(`/call/${classId}`);
-  };
-  //-----------------------------------------------------------------------------------------------------------//
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -852,7 +851,8 @@ const ClassDetailsUser = ({ onClose }) => {
 
               {/* Right Panel */}
               <div className="flex flex-col flex-1 min-h-0">
-                {classData.classType === "Individual Premium" ? (
+                {classData.classType === "Individual Premium" &&
+                classData.selectedRecurrenceType !== "One-time" ? (
                   <div className="w-full space-y-4 md:space-y-6">
                     <div className="w-full space-y-4">
                       <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
@@ -884,7 +884,7 @@ const ClassDetailsUser = ({ onClose }) => {
                                   {String(index + 1).padStart(2, "0")}.
                                 </span>
                                 <span className="text-sm font-medium md:text-lg">
-                                  {formatDate(slot)}
+                                  {formatDate(slot.createdAt)}
                                 </span>
                               </div>
                               <div className="mt-2 sm:mt-0">

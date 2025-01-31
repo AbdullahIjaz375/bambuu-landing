@@ -102,7 +102,10 @@ export const useClassBooking = () => {
 
       if (enrollmentSuccess) {
         onSuccess?.();
-        return true;
+        return {
+          success: true,
+          method: eligibility.useCredits ? "credits" : "subscription",
+        };
       } else {
         throw new Error("Enrollment failed");
       }

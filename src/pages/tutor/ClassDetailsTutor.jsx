@@ -708,7 +708,7 @@ const ClassDetailsTutor = ({ onClose }) => {
                                   {String(index + 1).padStart(2, "0")}.
                                 </span>
                                 <span className="text-sm font-medium md:text-lg">
-                                  {formatDate(slot)}
+                                  {formatDate(slot.createdAt)}
                                 </span>
                               </div>
                               <div className="mt-2 sm:mt-0">

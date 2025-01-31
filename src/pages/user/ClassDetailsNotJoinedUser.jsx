@@ -228,9 +228,10 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
       }
 
       // Use the pre-calculated slots from state
-      const slotsTimestamps = slots.map(
-        (slot) => new Timestamp(Math.floor(slot.getTime() / 1000), 0)
-      );
+      const slotsTimestamps = slots.map((slot) => ({
+        bookingMethod: shouldDeductCredits ? "Credits" : "Subscription", // Add booking method
+        createdAt: new Timestamp(Math.floor(slot.getTime() / 1000), 0), // Add slot time
+      }));
 
       // Prepare the update data
       const updateData = {
@@ -319,7 +320,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
       return;
     }
 
-    const success = await handleClassBooking(
+    const { success, method } = await handleClassBooking(
       user,
       classData.classType, // Make sure this is available in your component props
       user.subscriptions,
@@ -734,9 +735,15 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1">
                           <img alt="bammbuu" src="/svgs/repeate-music.svg" />
-                          <span className="text-sm">
-                            {classData.selectedRecurrenceType || "None"}
-                          </span>
+                          {classData.classType === "Individual Premium" ? (
+                            <span className="text-sm">
+                              {classData.selectedRecurrenceType || "None"}
+                            </span>
+                          ) : (
+                            <span className="text-sm">
+                              {classData.recurrenceTypes[0]}
+                            </span>
+                          )}
                         </div>
                         <div className="flex items-center gap-1">
                           <img alt="bammbuu" src="/svgs/location.svg" />

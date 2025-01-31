@@ -210,7 +210,8 @@ const VideoCall = () => {
       for (let i = 0; i < numRooms; i++) {
         const newRoomRef = await addDoc(breakoutRoomsRef, {
           availableSlots,
-          classEndTime: Timestamp.fromDate(endTime),
+          classEndTime: null, // Initialize classEndTime as null
+          startedAt: null, // Initialize startedAt as null
           roomDuration,
           roomMembers: [],
           createdAt: Timestamp.now(),
@@ -334,13 +335,69 @@ const VideoCall = () => {
   // -----------------------------------------
   //   If user clicks on a breakout room
   // -----------------------------------------
-  const handleJoinBreakoutRoom = (room) => {
-    // If the breakout room's end time is in the future, join it
+  // const handleJoinBreakoutRoom = (room) => {
+  //   // If the breakout room's end time is in the future, join it
+  //   const now = new Date();
+  //   const endTime = room.classEndTime?.toDate?.() || null;
+  //   if (!endTime || endTime < now) {
+  //     alert("This breakout room is expired or has no valid end time.");
+  //     return;
+  //   }
+
+  //   // Check available slots
+  //   if (room.roomMembers.length >= room.availableSlots) {
+  //     alert("This breakout room is full.");
+  //     return;
+  //   }
+
+  //   // If user is already in this room, don't rejoin
+  //   if (room.roomMembers.includes(user.uid)) {
+  //     alert("You are already in this room.");
+  //     return;
+  //   }
+
+  //   updateRoomMembers(room.id, true);
+
+  //   // Switch to that breakout room
+  //   joinRoom(room.id);
+
+  //   // Calculate how long until it ends
+  //   const remainingMs = endTime - now;
+  //   // Once the time is up, automatically bring the user back to the main room
+  //   setTimeout(() => {
+  //     // (Optional) Only force them back if they are still in that breakout
+  //     // E.g.: if (activeRoomId === room.id) joinMainClass();
+  //     joinMainClass();
+  //   }, remainingMs);
+  // };
+
+  const handleJoinBreakoutRoom = async (room) => {
     const now = new Date();
     const endTime = room.classEndTime?.toDate?.() || null;
-    if (!endTime || endTime < now) {
-      alert("This breakout room is expired or has no valid end time.");
-      return;
+
+    // If the room has not started yet, set the startedAt and classEndTime
+    if (!room.startedAt) {
+      const startedAt = Timestamp.now();
+      const classEndTime = Timestamp.fromDate(
+        new Date(startedAt.toDate().getTime() + room.roomDuration * 60 * 1000)
+      );
+
+      const breakoutRoomRef = doc(
+        db,
+        "conference_calls",
+        selectedClassId,
+        "breakout_rooms",
+        room.id
+      );
+
+      await updateDoc(breakoutRoomRef, {
+        startedAt,
+        classEndTime,
+      });
+
+      // Update the local state to reflect the changes
+      room.startedAt = startedAt;
+      room.classEndTime = classEndTime;
     }
 
     // Check available slots
@@ -361,11 +418,9 @@ const VideoCall = () => {
     joinRoom(room.id);
 
     // Calculate how long until it ends
-    const remainingMs = endTime - now;
+    const remainingMs = room.classEndTime.toDate() - now;
     // Once the time is up, automatically bring the user back to the main room
     setTimeout(() => {
-      // (Optional) Only force them back if they are still in that breakout
-      // E.g.: if (activeRoomId === room.id) joinMainClass();
       joinMainClass();
     }, remainingMs);
   };
@@ -579,54 +634,64 @@ const VideoCall = () => {
 
           <div className="flex-1 p-6 overflow-y-auto">
             <div className="space-y-4">
-              {breakoutRooms.map((room) => (
-                <div
-                  key={room.id}
-                  className="p-4 transition-colors border rounded-xl bg-gray-50 hover:bg-gray-100"
-                >
-                  <div className="space-y-2">
-                    <p className="font-medium text-gray-900">
-                      Room ID: {room.id}
-                    </p>
-                    <p className="text-gray-600">
-                      Available Slots: {room.availableSlots}
-                    </p>
-                    <p className="text-gray-600">
-                      Duration: {room.roomDuration} minutes
-                    </p>
-                    <p className="text-gray-600">
-                      Members: {room.roomMembers.length}
-                    </p>
-                    <p className="text-gray-600">
-                      Ends at: {room.classEndTime.toDate().toLocaleString()}
-                    </p>
-                  </div>
-                  <button
-                    className={`px-3 py-1 mt-3 text-sm font-medium rounded ${
-                      room.roomMembers.length >= room.availableSlots ||
-                      new Date() > new Date(room.classEndTime.toDate())
-                        ? "bg-gray-400 cursor-not-allowed"
-                        : room.roomMembers.includes(user.uid)
-                        ? "bg-green-500 cursor-not-allowed"
-                        : "bg-blue-600 hover:bg-blue-700"
-                    } text-white`}
-                    onClick={() => {
-                      handleJoinBreakoutRoom(room);
-                      setIsViewModalOpen(false);
-                    }}
-                    disabled={
-                      room.roomMembers.length >= room.availableSlots ||
-                      new Date() > new Date(room.classEndTime.toDate())
-                    }
+              {breakoutRooms.map((room) => {
+                const isRoomExpired =
+                  room.startedAt &&
+                  new Date() > new Date(room.classEndTime.toDate());
+
+                return (
+                  <div
+                    key={room.id}
+                    className="p-4 transition-colors border rounded-xl bg-gray-50 hover:bg-gray-100"
                   >
-                    {room.roomMembers.length >= room.availableSlots
-                      ? "Room Full"
-                      : new Date() > new Date(room.classEndTime.toDate())
-                      ? "Room Expired"
-                      : "Join"}
-                  </button>
-                </div>
-              ))}
+                    <div className="space-y-2">
+                      {/* <p className="font-medium text-gray-900">
+                        Room ID: {room.id}
+                      </p> */}
+                      <p className="text-gray-600">
+                        Available Slots: {room.availableSlots}
+                      </p>
+                      <p className="text-gray-600">
+                        Duration: {room.roomDuration} minutes
+                      </p>
+                      <p className="text-gray-600">
+                        Members: {room.roomMembers.length}
+                      </p>
+                      <p className="text-gray-600">
+                        {room.startedAt
+                          ? `Ends at: ${room.classEndTime
+                              .toDate()
+                              .toLocaleString()}`
+                          : "Not started yet"}
+                      </p>
+                    </div>
+                    <button
+                      className={`px-3 py-1 mt-3 text-sm font-medium rounded ${
+                        room.roomMembers.length >= room.availableSlots ||
+                        isRoomExpired
+                          ? "bg-gray-400 cursor-not-allowed"
+                          : room.roomMembers.includes(user.uid)
+                          ? "bg-green-500 cursor-not-allowed"
+                          : "bg-blue-600 hover:bg-blue-700"
+                      } text-white`}
+                      onClick={() => {
+                        handleJoinBreakoutRoom(room);
+                        setIsViewModalOpen(false);
+                      }}
+                      disabled={
+                        room.roomMembers.length >= room.availableSlots ||
+                        isRoomExpired
+                      }
+                    >
+                      {room.roomMembers.length >= room.availableSlots
+                        ? "Room Full"
+                        : isRoomExpired
+                        ? "Room Expired"
+                        : "Join"}
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
