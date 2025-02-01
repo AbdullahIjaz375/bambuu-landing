@@ -634,7 +634,7 @@ const VideoCall = () => {
 
           <div className="flex-1 p-6 overflow-y-auto">
             <div className="space-y-4">
-              {breakoutRooms.map((room) => {
+              {breakoutRooms.map((room, index) => {
                 const isRoomExpired =
                   room.startedAt &&
                   new Date() > new Date(room.classEndTime.toDate());
@@ -645,9 +645,9 @@ const VideoCall = () => {
                     className="p-4 transition-colors border rounded-xl bg-gray-50 hover:bg-gray-100"
                   >
                     <div className="space-y-2">
-                      {/* <p className="font-medium text-gray-900">
-                        Room ID: {room.id}
-                      </p> */}
+                      <p className="font-semibold text-gray-900">
+                        Breakout Room {index + 1}{" "}
+                      </p>
                       <p className="text-gray-600">
                         Available Slots: {room.availableSlots}
                       </p>

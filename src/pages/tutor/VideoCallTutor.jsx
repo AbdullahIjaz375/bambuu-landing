@@ -1037,9 +1037,8 @@ const VideoCallTutor = () => {
                     className="p-4 transition-colors border rounded-xl bg-gray-50 hover:bg-gray-100"
                   >
                     <div className="space-y-2">
-                      <p className="font-medium text-gray-900">
+                      <p className="font-semibold text-gray-900">
                         Breakout Room {index + 1}{" "}
-                        {/* Dynamically generate room name */}
                       </p>
                       <p className="text-gray-600">
                         Available Slots: {room.availableSlots}
