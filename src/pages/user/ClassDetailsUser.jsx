@@ -526,8 +526,14 @@ const ClassDetailsUser = ({ onClose }) => {
       const updatedMembers = classData.classMemberIds.filter(
         (id) => id !== user.uid
       );
+
+      const updatedAvailableSpots = classData.availableSpots + 1;
+
       await updateDoc(doc(db, "classes", classId), {
         classMemberIds: updatedMembers,
+        selectedRecurrenceType: "None",
+        recurringSlots: [],
+        availableSpots: updatedAvailableSpots,
       });
 
       // 2. Remove class from student's enrolledClasses
@@ -864,6 +870,7 @@ const ClassDetailsUser = ({ onClose }) => {
                                 : "None"}
                             </span>
                           </div>
+
                           <div className="flex items-center justify-center gap-1 sm:justify-start">
                             <img alt="location" src="/svgs/location.svg" />
                             <span className="text-xs sm:text-sm">

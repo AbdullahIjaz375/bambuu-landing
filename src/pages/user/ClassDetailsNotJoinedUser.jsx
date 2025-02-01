@@ -222,7 +222,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
         return false;
       }
 
-      if (classData.classMemberIds?.length >= classData.availableSpots) {
+      if (classData.availableSpots <= 0) {
         toast.error("Class is full");
         return false;
       }
@@ -249,6 +249,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
         languageLevel: languageLevel,
         recurringSlots:
           selectedRecurrenceType === "One-time" ? [] : slotsTimestamps,
+        availableSpots: classData.availableSpots - 1, // Decrement available slots
       };
 
       // Prepare the update data
@@ -761,8 +762,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
                         </div>
                         <div className="flex items-center gap-1">
                           <img alt="bammbuu" src="/svgs/users.svg" />
-                          {classData.classType === "Group Premium" ||
-                          classData.classType === "Individual Premium" ? (
+                          {classData.classType === "Individual Premium" ? (
                             <>
                               {" "}
                               <span className="text-sm">2k+</span>
