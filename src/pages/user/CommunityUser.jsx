@@ -7,6 +7,7 @@ import Sidebar from "../../components/Sidebar";
 import { ClipLoader } from "react-spinners";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
+import { useParams } from "react-router-dom";
 
 const CommunityUser = () => {
   const { user } = useAuth();
@@ -17,6 +18,7 @@ const CommunityUser = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [unreadCounts, setUnreadCounts] = useState({});
   const [groupLanguages, setGroupLanguages] = useState({});
+  const { channelId: urlChannelId } = useParams(); // Extract channelId from URL
 
   const handleChannelLeave = (channelId) => {
     setChannels((prevChannels) =>
@@ -129,7 +131,19 @@ const CommunityUser = () => {
 
         setUnreadCounts(counts);
         setChannels(channels);
-        if (channels.length > 0 && !selectedChannel) {
+        if (urlChannelId) {
+          const channelToSelect = channels.find(
+            (channel) => channel.id === urlChannelId
+          );
+          if (channelToSelect) {
+            setSelectedChannel(channelToSelect);
+            await channelToSelect.markRead();
+            setUnreadCounts((prev) => ({
+              ...prev,
+              [channelToSelect.id]: 0,
+            }));
+          }
+        } else if (channels.length > 0 && !selectedChannel) {
           setSelectedChannel(channels[0]);
         }
       } catch (error) {

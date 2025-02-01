@@ -194,6 +194,39 @@ const ClassDetailsTutor = ({ onClose }) => {
       const userType = JSON.parse(sessionStorage.getItem("user")).userType;
       const userCollection = userType === "tutor" ? "tutors" : "students";
 
+      // 1. Refund credits for each upcoming slot that used credits
+      if (
+        classData.classType === "Individual Premium" &&
+        classData.recurringSlots.length > 0
+      ) {
+        const now = new Date();
+
+        // Count how many future slots have bookingMethod === "credits"
+        const futureCreditSlotsCount = classData.recurringSlots.filter(
+          (slot) => {
+            const slotDate = new Date(slot.createdAt.seconds * 1000);
+            return slotDate > now && slot.bookingMethod === "credits";
+          }
+        ).length;
+
+        // If there are any future slots using credits, refund that many credits to each class member
+        if (futureCreditSlotsCount > 0) {
+          await Promise.all(
+            classData.classMemberIds.map(async (memberId) => {
+              const studentRef = doc(db, "students", memberId);
+              const studentDoc = await getDoc(studentRef);
+              const studentData = studentDoc.data();
+
+              if (studentData) {
+                await updateDoc(studentRef, {
+                  credits: (studentData.credits || 0) + futureCreditSlotsCount,
+                });
+              }
+            })
+          );
+        }
+      }
+
       // 1. Update students
       if (classData.classMemberIds?.length > 0) {
         await Promise.all(

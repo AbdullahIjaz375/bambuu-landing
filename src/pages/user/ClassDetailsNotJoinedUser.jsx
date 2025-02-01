@@ -233,6 +233,15 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
         createdAt: new Timestamp(Math.floor(slot.getTime() / 1000), 0), // Add slot time
       }));
 
+      // Calculate the number of credits to deduct
+      const creditsToDeduct = slots.length;
+
+      // Check if the user has enough credits
+      if (shouldDeductCredits && user.credits < creditsToDeduct) {
+        toast.error("Insufficient credits to enroll in this class");
+        return false;
+      }
+
       // Prepare the update data
       const updateData = {
         classMemberIds: arrayUnion(userId),
@@ -257,6 +266,9 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
         updateDoc(classRef, updateData),
         updateDoc(userRef, {
           enrolledClasses: arrayUnion(classId),
+          credits: shouldDeductCredits
+            ? user.credits - creditsToDeduct
+            : user.credits,
         }),
       ];
       console.log(classData.type);
@@ -285,12 +297,15 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
           toast.error("Failed to join class chat");
         }
       }
+
       // Update context and session storage
       if (user) {
         const updatedUser = {
           ...user,
           enrolledClasses: [...(user.enrolledClasses || []), classId],
-          credits: shouldDeductCredits ? user.credits - 1 : user.credits,
+          credits: shouldDeductCredits
+            ? user.credits - creditsToDeduct
+            : user.credits,
         };
         setUser(updatedUser);
         updateSessionStorage(classId);
@@ -350,7 +365,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
   const [selectedRecurrenceType, setSelectedRecurrenceType] = useState(
     classData?.recurrenceTypes?.[0] || ""
   );
-  const [totalClasses, setTotalClasses] = useState("");
+  const [totalClasses, setTotalClasses] = useState("1");
   const [languageLevel, setLanguageLevel] = useState("Beginner");
 
   const calculateRecurringSlots = (
@@ -510,84 +525,114 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
         const classMinutes = baseDate.getMinutes();
         const classSeconds = baseDate.getSeconds();
 
-        switch (selectedRecurrenceType) {
-          case "Daily":
-            // Move to next day, keeping the same time
-            baseDate = new Date(
-              currentTime.getFullYear(),
-              currentTime.getMonth(),
-              currentTime.getDate() + 1,
-              classHours,
-              classMinutes,
-              classSeconds
-            );
-            break;
+        if (selectedRecurrenceType === "One-time") {
+          // For one-time classes, move to the next available slot at the same time
+          baseDate = new Date(
+            currentTime.getFullYear(),
+            currentTime.getMonth(),
+            currentTime.getDate() + 1,
+            classHours,
+            classMinutes,
+            classSeconds
+          );
+        } else
+          switch (selectedRecurrenceType) {
+            case "Daily":
+            case "Daily (Weekdays)":
+              // Move to next day, keeping the same time
+              baseDate = new Date(
+                currentTime.getFullYear(),
+                currentTime.getMonth(),
+                currentTime.getDate() + 1,
+                classHours,
+                classMinutes,
+                classSeconds
+              );
+              break;
 
-          case "Weekly":
-            // Calculate days until next occurrence
-            let daysUntilNext =
-              (7 - currentTime.getDay() + baseDate.getDay()) % 7;
-            if (daysUntilNext === 0 && hasTimePassed) {
-              daysUntilNext = 7; // If today's instance passed, move to next week
-            }
-
-            baseDate = new Date(
-              currentTime.getFullYear(),
-              currentTime.getMonth(),
-              currentTime.getDate() + daysUntilNext,
-              classHours,
-              classMinutes,
-              classSeconds
-            );
-            break;
-
-          case "Monthly":
-            let nextMonth = currentTime.getMonth();
-            let nextYear = currentTime.getFullYear();
-
-            // If we're past the class date this month, move to next month
-            if (
-              currentTime.getDate() > baseDate.getDate() ||
-              (currentTime.getDate() === baseDate.getDate() && hasTimePassed)
-            ) {
-              nextMonth++;
-              if (nextMonth > 11) {
-                nextMonth = 0;
-                nextYear++;
+            case "Weekly":
+              // Calculate days until next occurrence
+              let daysUntilNext =
+                (7 - currentTime.getDay() + baseDate.getDay()) % 7;
+              if (daysUntilNext === 0 && hasTimePassed) {
+                daysUntilNext = 7; // If today's instance passed, move to next week
               }
-            }
 
-            baseDate = new Date(
-              nextYear,
-              nextMonth,
-              baseDate.getDate(),
-              classHours,
-              classMinutes,
-              classSeconds
-            );
-            break;
-          default:
-        }
+              baseDate = new Date(
+                currentTime.getFullYear(),
+                currentTime.getMonth(),
+                currentTime.getDate() + daysUntilNext,
+                classHours,
+                classMinutes,
+                classSeconds
+              );
+              break;
+
+            case "Monthly":
+              let nextMonth = currentTime.getMonth();
+              let nextYear = currentTime.getFullYear();
+
+              // If we're past the class date this month, move to next month
+              if (
+                currentTime.getDate() > baseDate.getDate() ||
+                (currentTime.getDate() === baseDate.getDate() && hasTimePassed)
+              ) {
+                nextMonth++;
+                if (nextMonth > 11) {
+                  nextMonth = 0;
+                  nextYear++;
+                }
+              }
+
+              baseDate = new Date(
+                nextYear,
+                nextMonth,
+                baseDate.getDate(),
+                classHours,
+                classMinutes,
+                classSeconds
+              );
+              break;
+            default:
+          }
       }
 
       // Generate subsequent slots based on the adjusted base date
-      for (let i = 0; i < totalClasses; i++) {
-        const slotDate = new Date(baseDate);
+      if (selectedRecurrenceType === "One-time") {
+        slots.push(baseDate);
+      } else {
+        for (let i = 0; i < totalClasses; i++) {
+          const slotDate = new Date(baseDate);
 
-        switch (selectedRecurrenceType) {
-          case "Daily":
-            slotDate.setDate(baseDate.getDate() + i);
-            break;
-          case "Weekly":
-            slotDate.setDate(baseDate.getDate() + i * 7);
-            break;
-          case "Monthly":
-            slotDate.setMonth(baseDate.getMonth() + i);
-            break;
-          default:
+          switch (selectedRecurrenceType) {
+            case "Daily":
+              slotDate.setDate(baseDate.getDate() + i);
+              break;
+            case "Daily (Weekdays)":
+              // Skip weekends
+              let daysAdded = 0;
+              let currentDate = new Date(baseDate);
+              while (daysAdded < i + 1) {
+                if (currentDate.getDay() !== 0 && currentDate.getDay() !== 6) {
+                  daysAdded++;
+                }
+                if (daysAdded < i + 1) {
+                  currentDate.setDate(currentDate.getDate() + 1);
+                }
+              }
+              slotDate.setTime(currentDate.getTime());
+              break;
+            case "Weekly":
+              slotDate.setDate(baseDate.getDate() + i * 7);
+              break;
+            case "Monthly":
+              slotDate.setMonth(baseDate.getMonth() + i);
+              break;
+            default:
+          }
+
+          slots.push(slotDate);
         }
-
-        slots.push(slotDate);
       }
 
       setSlots(slots);
@@ -827,51 +872,42 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
                   <div className="space-y-4 w-96">
                     <h3 className="text-xl font-semibold">Class Schedule</h3>
                     <div className="space-y-2">
-                      {totalClasses && slots.length > 0 ? (
-                        slots.map((slot, index) => (
-                          <div key={index}>
-                            <div className="flex flex-col items-start justify-between p-3 border border-green-500 sm:flex-row sm:items-center sm:px-4 rounded-2xl sm:rounded-full">
+                      {slots.map((slot, index) => (
+                        <div key={index}>
+                          <div className="flex flex-col items-start justify-between p-3 border border-green-500 sm:flex-row sm:items-center sm:px-4 rounded-2xl sm:rounded-full">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-medium">
+                                {selectedRecurrenceType === "One-time"
+                                  ? "Class Time"
+                                  : `Class ${index + 1}`}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-4">
                               <div className="flex items-center gap-2">
-                                <span className="text-sm font-medium">
-                                  Class {index + 1}
+                                <Clock size={16} className="text-gray-500" />
+                                <span className="text-sm">
+                                  {slot.toLocaleTimeString("en-US", {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    hour12: true,
+                                  })}
                                 </span>
                               </div>
-                              <div className="flex items-center gap-4">
-                                <div className="flex items-center gap-2">
-                                  <Clock size={16} className="text-gray-500" />
-                                  <span className="text-sm">
-                                    {slot.toLocaleTimeString("en-US", {
-                                      hour: "2-digit",
-                                      minute: "2-digit",
-                                      hour12: true,
-                                    })}
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <Calendar
-                                    size={16}
-                                    className="text-gray-500"
-                                  />
-                                  <span className="text-sm">
-                                    {slot.toLocaleDateString("en-US", {
-                                      weekday: "short",
-                                      month: "short",
-                                      day: "numeric",
-                                      year: "numeric",
-                                    })}
-                                  </span>
-                                </div>
+                              <div className="flex items-center gap-2">
+                                <Calendar size={16} className="text-gray-500" />
+                                <span className="text-sm">
+                                  {slot.toLocaleDateString("en-US", {
+                                    weekday: "short",
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                  })}
+                                </span>
                               </div>
                             </div>
                           </div>
-                        ))
-                      ) : (
-                        <div className="text-sm text-gray-500">
-                          {selectedRecurrenceType !== "One-time"
-                            ? "Please enter the number of classes to see the schedule"
-                            : "One-time class scheduled for:"}
                         </div>
-                      )}
+                      ))}
                     </div>
                   </div>
                 ) : (

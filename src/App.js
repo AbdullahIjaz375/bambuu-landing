@@ -162,7 +162,7 @@ const App = () => {
             />
 
             <Route
-              path="/communityUser"
+              path="/communityUser/:channelId?"
               element={
                 <ProtectedRoute requiredRole="student">
                   <CommunityUser />

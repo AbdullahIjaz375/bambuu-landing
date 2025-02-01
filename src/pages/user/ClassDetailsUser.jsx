@@ -14,7 +14,9 @@ import EmptyState from "../../components/EmptyState";
 import { ClassContext } from "../../context/ClassContext";
 import { useContext } from "react";
 import { useTranslation } from "react-i18next";
-
+import PlansModal from "../../components/PlansModal";
+import { useClassBooking } from "../../hooks/useClassBooking";
+import { toast } from "react-toastify";
 Modal.setAppElement("#root");
 
 const TimeRestrictedJoinButton = ({
@@ -122,31 +124,64 @@ const modalStyles = {
 
 const AddSlotsModal = ({ isOpen, onClose, classData, setClassData }) => {
   const [numClasses, setNumClasses] = useState("");
+  const [error, setError] = useState(null);
+  const { user, setUser } = useAuth();
+  const [isPlansModalOpen, setIsPlansModalOpen] = useState(false);
+  const { handleClassBooking, isProcessing } = useClassBooking();
 
-  const calculateNextSlots = (currentSlots, numToAdd, recurrenceType) => {
+  const isWeekday = (date) => {
+    const day = date.getDay();
+    return day !== 0 && day !== 6; // 0 is Sunday, 6 is Saturday
+  };
+
+  const getNextWeekday = (date) => {
+    const next = new Date(date);
+    do {
+      next.setDate(next.getDate() + 1);
+    } while (!isWeekday(next));
+    return next;
+  };
+
+  const calculateNextSlots = (
+    currentSlots,
+    numToAdd,
+    recurrenceType,
+    useCredits
+  ) => {
     if (!numToAdd || numToAdd <= 0) return currentSlots;
 
     const updatedSlots = [...currentSlots];
     const lastSlot = updatedSlots[updatedSlots.length - 1];
-    const lastSlotDate = new Date(lastSlot.createdAt.seconds * 1000); // Convert Firestore timestamp to Date
-
-    // Get the paymentMethod from the last slot (or default to "Subscription" if not available)
-    const paymentMethod = lastSlot.paymentMethod || "Subscription";
+    const lastSlotDate = new Date(lastSlot.createdAt.seconds * 1000);
 
     for (let i = 1; i <= numToAdd; i++) {
-      const nextSlot = new Date(lastSlotDate); // Clone lastSlotDate
-      if (recurrenceType === "Daily") {
-        nextSlot.setDate(lastSlotDate.getDate() + i);
-      } else if (recurrenceType === "Weekly") {
-        nextSlot.setDate(lastSlotDate.getDate() + i * 7);
-      } else if (recurrenceType === "Monthly") {
-        nextSlot.setMonth(lastSlotDate.getMonth() + i);
+      const nextSlot = new Date(lastSlotDate);
+      switch (recurrenceType) {
+        case "Daily":
+          nextSlot.setDate(lastSlotDate.getDate() + i);
+          break;
+        case "Daily (Weekdays)":
+          // For weekdays, we need to skip weekends
+          nextSlot.setDate(lastSlotDate.getDate() + i);
+          if (!isWeekday(nextSlot)) {
+            i++;
+            continue; // Skip this iteration if it's a weekend
+          }
+          break;
+        case "Weekly":
+          nextSlot.setDate(lastSlotDate.getDate() + i * 7);
+          break;
+        case "Monthly":
+          nextSlot.setMonth(lastSlotDate.getMonth() + i);
+          break;
+        default:
+          continue;
       }
 
-      // Create a new slot object with paymentMethod and createdAt
+      // Create new slot with the correct structure
       const newSlot = {
-        paymentMethod: paymentMethod, // Use the paymentMethod from the last slot
-        createdAt: Timestamp.fromDate(nextSlot), // Add slot time
+        bookingMethod: useCredits ? "Credits" : "Subscription",
+        createdAt: Timestamp.fromDate(nextSlot),
       };
 
       updatedSlots.push(newSlot);
@@ -155,76 +190,127 @@ const AddSlotsModal = ({ isOpen, onClose, classData, setClassData }) => {
     return updatedSlots;
   };
 
-  const handleDone = async () => {
-    if (!numClasses || isNaN(numClasses) || numClasses <= 0) {
-      alert("Please enter a valid number of slots.");
-      return;
+  const updateUserSessionStorage = (newCredits) => {
+    const storedUser = JSON.parse(sessionStorage.getItem("user"));
+    if (storedUser) {
+      const updatedUser = {
+        ...storedUser,
+        credits: newCredits,
+      };
+      sessionStorage.setItem("user", JSON.stringify(updatedUser));
     }
+  };
 
-    // Ensure classData and recurringSlots exist
-    if (!classData || !classData.recurringSlots) {
-      alert("Recurring slots data is not available.");
-      return;
-    }
-
-    // Calculate the new slots
-    const updatedSlots = calculateNextSlots(
-      classData.recurringSlots,
-      parseInt(numClasses),
-      classData.selectedRecurrenceType // Assuming this is part of your classData
-    );
-
-    console.log(updatedSlots);
-
-    // Update local state
-    setClassData((prevData) => ({
-      ...prevData,
-      recurringSlots: updatedSlots,
-    }));
-
-    // Update Firebase
+  const handleAddSlots = async (useCredits) => {
     try {
-      const classRef = doc(db, "classes", classData.id); // Use the class ID to reference the document
+      const numToAdd = parseInt(numClasses);
+
+      // Calculate new slots with useCredits flag
+      const updatedSlots = calculateNextSlots(
+        classData.recurringSlots,
+        numToAdd,
+        classData.selectedRecurrenceType,
+        useCredits
+      );
+
+      // Update class document
+      const classRef = doc(db, "classes", classData.id);
       await updateDoc(classRef, { recurringSlots: updatedSlots });
-      console.log("Slots updated successfully in Firebase.");
+
+      // If using credits, update user's credit balance
+      if (useCredits) {
+        const userRef = doc(db, "students", user.uid);
+        const newCredits = user.credits - numToAdd;
+        await updateDoc(userRef, { credits: newCredits });
+
+        // Update user context and session storage
+        setUser({ ...user, credits: newCredits });
+        updateUserSessionStorage(newCredits);
+      }
+
+      // Update local state
+      setClassData((prevData) => ({
+        ...prevData,
+        recurringSlots: updatedSlots,
+      }));
+
+      return true;
     } catch (error) {
-      console.error("Error updating slots in Firebase:", error);
-      alert("Failed to update slots. Please try again.");
+      console.error("Error adding slots:", error);
+      return false;
+    }
+  };
+
+  const handleConfirm = async () => {
+    if (!numClasses || isNaN(numClasses) || numClasses <= 0) {
+      setError("Please enter a valid number of slots.");
+      return;
     }
 
-    onClose();
+    const { success, method } = await handleClassBooking(
+      user,
+      classData.classType,
+      user.subscriptions,
+      user.credits,
+      // Success callback
+      () => {
+        onClose();
+        toast.success("Successfully added slots!");
+      },
+      // Failure callback
+      (errorMessage) => {
+        if (
+          errorMessage.includes("subscription") ||
+          errorMessage.includes("credits")
+        ) {
+          setIsPlansModalOpen(true);
+        }
+        setError(errorMessage);
+      },
+      // Add slots function
+      (useCredits) => handleAddSlots(useCredits)
+    );
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onRequestClose={onClose}
-      style={modalStyles}
-      contentLabel="Add Additional Class Slots"
-    >
-      <div className="space-y-6 font-urbanist">
-        <h2 className="text-lg font-medium text-gray-700">
-          Additional class slots
-        </h2>
+    <>
+      <Modal
+        isOpen={isOpen}
+        onRequestClose={onClose}
+        style={modalStyles}
+        contentLabel="Add Additional Class Slots"
+      >
+        <div className="space-y-6 font-urbanist">
+          <h2 className="text-lg font-medium text-gray-700">
+            Additional class slots
+          </h2>
 
-        <div className="space-y-4">
-          <input
-            type="number"
-            value={numClasses}
-            onChange={(e) => setNumClasses(e.target.value)}
-            placeholder="Enter number of classes you want to add"
-            className="w-full px-4 py-3 text-gray-600 border border-gray-200 rounded-2xl focus:outline-none focus:border-gray-400"
-          />
+          <div className="space-y-4">
+            <input
+              type="number"
+              value={numClasses}
+              onChange={(e) => setNumClasses(e.target.value)}
+              placeholder="Enter number of classes you want to add"
+              className="w-full px-4 py-3 text-gray-600 border border-gray-200 rounded-2xl focus:outline-none focus:border-gray-400"
+            />
+            {error && <p className="text-sm text-red-500">{error}</p>}
+          </div>
+
+          <button
+            onClick={handleConfirm}
+            disabled={isProcessing}
+            className="w-full py-2 text-[#042F0C] bg-[#14B82C] rounded-full hover:bg-[#30a842] border border-[#042F0C]"
+          >
+            {isProcessing ? "Processing..." : "Done"}
+          </button>
         </div>
+      </Modal>
 
-        <button
-          onClick={handleDone}
-          className="w-full py-2 text-[#042F0C] bg-[#14B82C] rounded-full hover:bg-[#30a842] border border-[#042F0C]"
-        >
-          Done
-        </button>
-      </div>
-    </Modal>
+      <PlansModal
+        isOpen={isPlansModalOpen}
+        onClose={() => setIsPlansModalOpen(false)}
+      />
+    </>
   );
 };
 

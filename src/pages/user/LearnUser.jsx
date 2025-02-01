@@ -203,7 +203,7 @@ const LearnUser = () => {
 
   //--------------------------------------learning language----------------------------------//
 
-  const students = Array(8).fill(null); // 8 student icons per language
+  const students = Array(12).fill(null); // 8 student icons per language
 
   //----------------------------------updating FCMtoken--------------------------------------//
 
@@ -278,7 +278,7 @@ const LearnUser = () => {
 
             {/* Content section */}
             <div className="w-full lg:w-[60%]">
-              <div className="mb-6">
+              <div className="mb-3">
                 <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                   <h2 className="text-xl font-bold sm:text-2xl">
                     {t("learnUser.languageLearning.title")}
@@ -297,12 +297,12 @@ const LearnUser = () => {
                 <div className="flex gap-2 pb-4 overflow-x-auto scrollbar-hide">
                   {/* Spanish Card */}
                   <div
-                    className="flex items-center hover:cursor-pointer gap-2 p-3 bg-[#fff0f1] rounded-3xl border border-[#d58287] w-[250px] sm:w-[300px]   flex-shrink-0"
+                    className="flex items-center hover:cursor-pointer gap-2 p-4 bg-[#fff0f1] rounded-3xl border border-[#d58287] w-[250px] sm:w-[380px]   flex-shrink-0"
                     onClick={() =>
                       navigate("/learnLanguageUser?language=Spanish")
                     }
                   >
-                    <div className="flex-shrink-0 w-12 h-12 overflow-hidden rounded-full sm:w-16 sm:h-16">
+                    <div className="flex-shrink-0 w-12 h-12 overflow-hidden rounded-full sm:w-20 sm:h-20">
                       <img
                         src="/svgs/spain-big.svg"
                         alt="Spanish"
@@ -310,7 +310,7 @@ const LearnUser = () => {
                       />
                     </div>
                     <div className="flex flex-col items-start justify-between space-y-2">
-                      <span className="text-lg font-semibold ">
+                      <span className="text-xl font-semibold ">
                         {t("learnUser.languageLearning.languages.spanish")}
                       </span>
                       <div className="flex items-center">
@@ -330,12 +330,12 @@ const LearnUser = () => {
 
                   {/* English Card */}
                   <div
-                    className="flex items-center hover:cursor-pointer gap-2 p-3 bg-[#edf2ff] rounded-3xl border border-[#768bbd] w-[250px] sm:w-[300px]   flex-shrink-0"
+                    className="flex items-center hover:cursor-pointer gap-2 p-4 bg-[#edf2ff] rounded-3xl border border-[#768bbd] w-[250px] sm:w-[380px]   flex-shrink-0"
                     onClick={() =>
                       navigate("/learnLanguageUser?language=English")
                     }
                   >
-                    <div className="flex-shrink-0 w-12 h-12 overflow-hidden rounded-full sm:w-16 sm:h-16">
+                    <div className="flex-shrink-0 w-12 h-12 overflow-hidden rounded-full sm:w-20 sm:h-20">
                       <img
                         src="/svgs/us-big.svg"
                         alt="English"
@@ -343,7 +343,7 @@ const LearnUser = () => {
                       />
                     </div>
                     <div className="flex flex-col items-start justify-between space-y-2">
-                      <span className="text-lg font-semibold ">
+                      <span className="text-xl font-semibold ">
                         {t("learnUser.languageLearning.languages.english")}
                       </span>
                       <div className="flex items-center">
@@ -363,14 +363,14 @@ const LearnUser = () => {
 
                   {/* Exchange Card */}
                   <div
-                    className="flex items-center hover:cursor-pointer gap-2 p-3 bg-[#FFFFEA] rounded-3xl border border-[#FFED46] w-[250px] sm:w-[300px]   flex-shrink-0"
+                    className="flex items-center hover:cursor-pointer gap-2 p-4 bg-[#FFFFEA] rounded-3xl border border-[#FFED46] w-[250px] sm:w-[380px]   flex-shrink-0"
                     onClick={() =>
                       navigate(
                         "/learnLanguageUser?language=English-Spanish Exchange"
                       )
                     }
                   >
-                    <div className="flex-shrink-0 w-12 h-12 overflow-hidden rounded-full sm:w-16 sm:h-16">
+                    <div className="flex-shrink-0 w-12 h-12 overflow-hidden rounded-full sm:w-20 sm:h-20">
                       <img
                         src="/svgs/eng-spanish.svg"
                         alt="English-Spanish Exchange"
@@ -378,7 +378,7 @@ const LearnUser = () => {
                       />
                     </div>
                     <div className="flex flex-col items-start justify-between space-y-2">
-                      <span className="text-lg font-semibold whitespace-nowrap">
+                      <span className="text-xl font-semibold whitespace-nowrap">
                         {t("learnUser.languageLearning.languages.exchange")}
                       </span>
                       <div className="flex items-center">

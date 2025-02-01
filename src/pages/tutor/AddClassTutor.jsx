@@ -459,21 +459,26 @@ const AddClassTutor = () => {
                         Class Recurrence Type
                       </label>
                       <div className="flex flex-wrap gap-2 mt-1">
-                        {["None", "One-time", "Daily", "Weekly", "Monthly"].map(
-                          (type) => (
-                            <button
-                              key={type}
-                              onClick={() => handleClassTypeSelect(type)}
-                              className={`px-4 py-2 rounded-full text-sm ${
-                                classData.recurrenceTypes.includes(type)
-                                  ? "bg-yellow-400 border border-yellow-500"
-                                  : "border border-gray-200"
-                              }`}
-                            >
-                              {type}
-                            </button>
-                          )
-                        )}
+                        {[
+                          "None",
+                          "One-time",
+                          "Daily",
+                          "Daily (Weekdays)",
+                          "Weekly",
+                          "Monthly",
+                        ].map((type) => (
+                          <button
+                            key={type}
+                            onClick={() => handleClassTypeSelect(type)}
+                            className={`px-4 py-2 rounded-full text-sm ${
+                              classData.recurrenceTypes.includes(type)
+                                ? "bg-yellow-400 border border-yellow-500"
+                                : "border border-gray-200"
+                            }`}
+                          >
+                            {type}
+                          </button>
+                        ))}
                       </div>
                     </div>
                   </div>

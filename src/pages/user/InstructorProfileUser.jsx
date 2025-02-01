@@ -78,7 +78,7 @@ const InstructorProfileUser = () => {
       await createStreamChannel(channelData);
 
       // Navigate to community page on success
-      navigate("/communityUser");
+      navigate(`/communityUser/${channelId}`);
     } catch (error) {
       console.error("Error creating chat channel:", error);
       // You might want to show an error message to the user here
@@ -142,7 +142,7 @@ const InstructorProfileUser = () => {
     const enrolledClasses = user?.enrolledClasses || [];
 
     return (
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 mt-2 ml-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {classes.map((classItem) => {
           const isEnrolled = enrolledClasses.includes(classItem.classId);
 
