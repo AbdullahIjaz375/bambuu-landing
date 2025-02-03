@@ -3,6 +3,7 @@ import { X, Camera } from "lucide-react";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../../src/firebaseConfig";
 import { useTranslation } from "react-i18next";
+import { Timestamp } from "firebase/firestore";
 
 import Modal from "react-modal";
 import { NumberInput } from "@mantine/core";
@@ -36,6 +37,28 @@ const EditClassModal = ({
       setClassPreviewImage(initialClassData.imageUrl);
     }
   }, [initialClassData]);
+
+  const handleDateChange = (e) => {
+    const newDate = new Date(e.target.value);
+    const currentTime = classData?.classDateTime || new Date();
+    newDate.setHours(currentTime.getHours(), currentTime.getMinutes());
+    if (!isNaN(newDate.getTime())) {
+      handleClassDataChange("classDateTime", newDate);
+    } else {
+      console.error("Invalid date");
+    }
+  };
+
+  const handleTimeChange = (e) => {
+    const [hours, minutes] = e.target.value.split(":");
+    const newDate = new Date(classData?.classDateTime || new Date());
+    newDate.setHours(parseInt(hours), parseInt(minutes));
+    if (!isNaN(newDate.getTime())) {
+      handleClassDataChange("classDateTime", newDate);
+    } else {
+      console.error("Invalid time");
+    }
+  };
 
   const handleClassImageChange = (e) => {
     const file = e.target.files[0];
@@ -110,10 +133,14 @@ const EditClassModal = ({
       const classRef = doc(db, "classes", classData.id);
       await updateDoc(classRef, {
         ...classData,
+        classDateTime: Timestamp.fromDate(classData.classDateTime),
         lastUpdated: new Date(),
       });
 
-      setParentClassData(classData);
+      setParentClassData({
+        ...classData,
+        classDateTime: Timestamp.fromDate(classData.classDateTime),
+      });
       onClose();
     } catch (error) {
       console.error("Error updating class:", error);
@@ -363,15 +390,7 @@ const EditClassModal = ({
               <input
                 type="date"
                 value={getFormattedDate(classData?.classDateTime)}
-                onChange={(e) => {
-                  const newDate = new Date(e.target.value);
-                  const currentTime = classData?.classDateTime || new Date();
-                  newDate.setHours(
-                    currentTime.getHours(),
-                    currentTime.getMinutes()
-                  );
-                  handleClassDataChange("classDateTime", newDate);
-                }}
+                onChange={handleDateChange}
                 className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
               />
             </div>
@@ -382,14 +401,7 @@ const EditClassModal = ({
               <input
                 type="time"
                 value={getFormattedTime(classData?.classDateTime)}
-                onChange={(e) => {
-                  const [hours, minutes] = e.target.value.split(":");
-                  const newDate = new Date(
-                    classData?.classDateTime || new Date()
-                  );
-                  newDate.setHours(parseInt(hours), parseInt(minutes));
-                  handleClassDataChange("classDateTime", newDate);
-                }}
+                onChange={handleTimeChange}
                 className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
               />
             </div>
