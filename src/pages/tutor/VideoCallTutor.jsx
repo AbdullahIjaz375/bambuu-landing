@@ -1,465 +1,3 @@
-// import React, { useEffect, useState, useContext, useRef } from "react";
-// import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt"; // No longer using ZegoMenuBarButtonName
-// import { ClassContext } from "../../context/ClassContext";
-// import { db } from "../../firebaseConfig";
-// import {
-//   collection,
-//   addDoc,
-//   getDocs,
-//   query,
-//   where,
-//   Timestamp,
-//   doc,
-//   updateDoc,
-//   getDoc,
-// } from "firebase/firestore";
-// import Modal from "react-modal";
-// import { CopyPlus, Grid, Users } from "lucide-react";
-
-// Modal.setAppElement("#root");
-
-// const canCreateBreakoutRooms = (classId) => {
-//   try {
-//     // Get user from session storage
-//     const user = JSON.parse(sessionStorage.getItem("user"));
-//     if (!user) return false;
-
-//     const { userType, adminOfClasses = [], tutorOfClasses = [] } = user;
-
-//     // Check permissions based on user type
-//     if (userType === "student") {
-//       return adminOfClasses.includes(classId);
-//     } else if (userType === "tutor") {
-//       return tutorOfClasses.includes(classId);
-//     }
-
-//     return false;
-//   } catch (error) {
-//     console.error("Error checking breakout room permissions:", error);
-//     return false;
-//   }
-// };
-
-// const buttonClass = `
-// flex items-center justify-center
-// bg-[#313443] hover:bg-[#404352]
-// text-white rounded-lg
-// w-10 h-10
-// transition-colors duration-200
-// shadow-md
-// `;
-
-// const containerClass = `
-// fixed bottom-4 left-12
-// flex gap-2
-// z-[1000]
-// `;
-
-// // Tooltip styles
-// const tooltipClass = `
-// group relative
-// cursor-pointer
-// `;
-
-// const tooltipTextClass = `
-// invisible group-hover:visible
-// absolute -top-8 left-1/2 -translate-x-1/2
-// bg-black/75 text-white
-// text-xs py-1 px-2 rounded
-// whitespace-nowrap
-// `;
-
-// const VideoCallTutor = () => {
-//   const { tutorSelectedClassId } = useContext(ClassContext);
-//   const [isModalOpen, setIsModalOpen] = useState(false);
-//   const [numRooms, setNumRooms] = useState(2);
-//   const [roomDuration, setRoomDuration] = useState(15);
-//   const [availableSlots, setAvailableSlots] = useState(5);
-//   const [classData, setClassData] = useState(null);
-//   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-//   const [isCallJoined, setIsCallJoined] = useState(false);
-//   const [breakoutRooms, setBreakoutRooms] = useState([]);
-//   const user = JSON.parse(sessionStorage.getItem("user"));
-//   const [hasBreakoutPermission, setHasBreakoutPermission] = useState(false);
-//   const [isCreating, setIsCreating] = useState(false);
-
-//   const callContainerRef = useRef(null);
-
-//   useEffect(() => {
-//     // Check permissions when component mounts or classId changes
-//     const checkPermissions = () => {
-//       const hasPermission = canCreateBreakoutRooms(tutorSelectedClassId);
-//       setHasBreakoutPermission(hasPermission);
-//     };
-
-//     checkPermissions();
-//   }, [tutorSelectedClassId]);
-
-//   useEffect(() => {
-//     const fetchClassData = async () => {
-//       try {
-//         const classDocRef = doc(db, "classes", tutorSelectedClassId); // Reference to the document
-//         const classDoc = await getDoc(classDocRef); // Fetch the document
-//         if (classDoc.exists()) {
-//           setClassData(classDoc.data());
-//           console.log(classDoc.data());
-//         } else {
-//           console.log("No such document!");
-//           setClassData(null);
-//         }
-//       } catch (error) {
-//         console.error("Error fetching class data:", error);
-//       }
-//     };
-//     fetchClassData();
-//   }, [tutorSelectedClassId]);
-
-//   useEffect(() => {
-//     console.log("In VideoCallTutor: selectedClassId =", tutorSelectedClassId);
-//   }, [tutorSelectedClassId]);
-
-//   const createBreakoutRooms = async () => {
-//     setIsCreating(true);
-
-//     try {
-//       if (!classData) return;
-//       const currentTime = new Date();
-//       const endTime = new Date(
-//         currentTime.getTime() + roomDuration * 60 * 1000
-//       );
-
-//       const conferenceDocRef = doc(
-//         db,
-//         "conference_calls",
-//         tutorSelectedClassId
-//       );
-//       const breakoutRoomsRef = collection(conferenceDocRef, "breakout_rooms");
-
-//       for (let i = 0; i < numRooms; i++) {
-//         const newRoomRef = await addDoc(breakoutRoomsRef, {
-//           availableSlots,
-//           classEndTime: Timestamp.fromDate(endTime), // Using the new end time
-//           roomDuration,
-//           roomMembers: [],
-//           createdAt: Timestamp.now(),
-//         });
-//         await updateDoc(newRoomRef, { roomId: newRoomRef.id });
-//       }
-
-//       setIsModalOpen(false);
-//       fetchBreakoutRooms();
-//     } catch (error) {
-//       console.error("Error creating breakout rooms:", error);
-//     } finally {
-//       setIsCreating(false);
-//     }
-//   };
-
-//   const fetchBreakoutRooms = async () => {
-//     try {
-//       const breakoutRef = collection(
-//         db,
-//         "conference_calls",
-//         tutorSelectedClassId,
-//         "breakout_rooms"
-//       );
-//       const querySnapshot = await getDocs(breakoutRef);
-//       setBreakoutRooms(
-//         querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
-//       );
-//       setIsViewModalOpen(true);
-//     } catch (error) {
-//       console.error("Error fetching breakout rooms:", error);
-//     }
-//   };
-
-//   const startZegoCall = () => {
-//     if (!callContainerRef.current) return;
-
-//     const appId = parseInt(process.env.REACT_APP_ZEGO_APP_ID);
-//     const serverSecret = process.env.REACT_APP_ZEGO_SERVER_SECRET;
-
-//     // Generate kit token
-//     const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
-//       appId,
-//       serverSecret,
-//       tutorSelectedClassId, // your roomID
-//       user.uid,
-//       user.name
-//     );
-
-//     // Create instance
-//     const zp = ZegoUIKitPrebuilt.create(kitToken);
-
-//     // Join with your config
-//     zp.joinRoom({
-//       container: callContainerRef.current,
-//       turnOnMicrophoneWhenJoining: true,
-//       turnOnCameraWhenJoining: true,
-//       showMyCameraToggleButton: true,
-//       showMyMicrophoneToggleButton: true,
-//       showAudioVideoSettingsButton: true,
-//       showScreenSharingButton: true,
-//       showTextChat: true,
-//       showUserList: true,
-//       maxUsers: 50,
-//       layout: "Auto",
-//       showLayoutButton: true,
-//       scenario: {
-//         mode: "GroupCall",
-//         config: {
-//           role: "Host",
-//         },
-//       },
-//       // If you want to control bottom menu bar visibility or built-in button set:
-//       bottomMenuBarConfig: {
-//         isVisible: true,
-//         maxButtons: 6,
-//         // you can list built-in buttons as strings here
-//         buttons: [
-//           "toggleCameraButton",
-//           "toggleMicrophoneButton",
-//           "switchAudioOutputButton",
-//           "leaveButton",
-//         ],
-//       },
-// onJoinRoom: () => {
-//   setIsCallJoined(true);
-// },
-//     });
-//   };
-
-//   useEffect(() => {
-//     // Initialize the call UI as soon as the component mounts.
-//     startZegoCall();
-//   }, []);
-
-//   return (
-//     <>
-//       {/* Our custom controls above (or anywhere outside) the ZEGOCLOUD UI container */}
-//       {isCallJoined && (
-//         <div className={containerClass}>
-//           {/* Create Breakout Room - only shown to admins/tutors */}
-//           {hasBreakoutPermission && (
-//             <div className={tooltipClass}>
-//               <button
-//                 onClick={() => setIsModalOpen(true)}
-//                 className={buttonClass}
-//                 aria-label="Create Breakout Room"
-//               >
-//                 <CopyPlus size={20} />
-//               </button>
-//               <span className={tooltipTextClass}>Create Breakout Room</span>
-//             </div>
-//           )}
-
-//           {/* View Breakout Rooms - shown to everyone */}
-//           <div className={tooltipClass}>
-//             <button
-//               onClick={fetchBreakoutRooms}
-//               className={buttonClass}
-//               aria-label="View Breakout Rooms"
-//             >
-//               <Users size={20} />
-//             </button>
-//             <span className={tooltipTextClass}>View Breakout Rooms</span>
-//           </div>
-//         </div>
-//       )}
-
-//       {/* ZEGOCLOUD UI container */}
-//       <div ref={callContainerRef} style={{ width: "100vw", height: "100vh" }} />
-
-//       {/* Breakout Room Modal */}
-// <Modal
-//   isOpen={isModalOpen}
-//   onRequestClose={() => setIsModalOpen(false)}
-//   style={{
-//     overlay: {
-//       zIndex: 9999,
-//       backgroundColor: "rgba(0,0,0,0.5)",
-//     },
-//     content: {
-//       position: "absolute",
-//       zIndex: 10000,
-//       top: "50%",
-//       left: "50%",
-//       right: "auto",
-//       bottom: "auto",
-//       marginRight: "-50%",
-//       transform: "translate(-50%, -50%)",
-//       padding: 0,
-//       border: "none",
-//       background: "transparent",
-//       maxHeight: "90vh",
-//       maxWidth: "90vw",
-//       overflow: "visible",
-//     },
-//   }}
-// >
-//   <div className="p-8 bg-white rounded-lg w-96 font-urbanist">
-//     <h2 className="mb-6 text-xl font-bold">Create Breakout Rooms</h2>
-
-//     <div className="space-y-4">
-//       <div>
-//         <label className="block mb-1 text-sm font-medium text-gray-700">
-//           Number of Rooms
-//         </label>
-//         <input
-//           type="number"
-//           value={numRooms}
-//           onChange={(e) => setNumRooms(parseInt(e.target.value))}
-//           className="w-full px-3 py-2 border border-gray-300 rounded-md"
-//         />
-//       </div>
-
-//       <div>
-//         <label className="block mb-1 text-sm font-medium text-gray-700">
-//           Room Duration (minutes)
-//         </label>
-//         <input
-//           type="number"
-//           value={roomDuration}
-//           onChange={(e) => setRoomDuration(parseInt(e.target.value))}
-//           className="w-full px-3 py-2 border border-gray-300 rounded-md"
-//         />
-//       </div>
-
-//       <div>
-//         <label className="block mb-1 text-sm font-medium text-gray-700">
-//           Available Slots
-//         </label>
-//         <input
-//           type="number"
-//           value={availableSlots}
-//           onChange={(e) => setAvailableSlots(parseInt(e.target.value))}
-//           className="w-full px-3 py-2 border border-gray-300 rounded-md"
-//         />
-//       </div>
-//     </div>
-
-//     <div className="flex justify-end mt-6 space-x-3">
-//       <button
-//         onClick={() => setIsModalOpen(false)}
-//         className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
-//       >
-//         Cancel
-//       </button>
-//       <button
-//         onClick={createBreakoutRooms}
-//         disabled={isCreating}
-//         className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[100px]"
-//       >
-//         {isCreating ? (
-//           <>
-//             <svg
-//               className="w-4 h-4 mr-2 animate-spin"
-//               viewBox="0 0 24 24"
-//             >
-//               <circle
-//                 className="opacity-25"
-//                 cx="12"
-//                 cy="12"
-//                 r="10"
-//                 stroke="currentColor"
-//                 strokeWidth="4"
-//                 fill="none"
-//               />
-//               <path
-//                 className="opacity-75"
-//                 fill="currentColor"
-//                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-//               />
-//             </svg>
-//             Creating...
-//           </>
-//         ) : (
-//           "Create Rooms"
-//         )}{" "}
-//       </button>
-//     </div>
-//   </div>
-// </Modal>
-
-// <Modal
-//   isOpen={isViewModalOpen}
-//   onRequestClose={() => setIsViewModalOpen(false)}
-//   style={{
-//     overlay: {
-//       zIndex: 9999,
-//       backgroundColor: "rgba(0,0,0,0.5)",
-//       overflow: "hidden",
-//     },
-//     content: {
-//       position: "absolute",
-//       zIndex: 10000,
-//       top: "50%",
-//       left: "50%",
-//       right: "auto",
-//       bottom: "auto",
-//       marginRight: "-50%",
-//       transform: "translate(-50%, -50%)",
-//       padding: 0,
-//       border: "none",
-//       background: "transparent",
-//       maxHeight: "90vh",
-//       maxWidth: "90vw",
-//       overflow: "visible",
-//     },
-//   }}
-// >
-//   <div className="bg-white rounded-2xl shadow-xl w-full sm:w-96 max-h-[90vh] flex flex-col font-urbanist">
-//     <div className="p-6 border-b">
-//       <h2 className="text-xl font-bold text-gray-900">Breakout Rooms</h2>
-//     </div>
-
-//     <div className="flex-1 p-6 overflow-y-auto">
-//       <div className="space-y-4">
-//         {breakoutRooms.map((room) => (
-//           <div
-//             key={room.id}
-//             className="p-4 transition-colors border rounded-xl bg-gray-50 hover:bg-gray-100"
-//           >
-//             <div className="space-y-2">
-//               <p className="font-medium text-gray-900">
-//                 Room ID: {room.id}
-//               </p>
-//               <p className="text-gray-600">
-//                 Available Slots: {room.availableSlots}
-//               </p>
-//               <p className="text-gray-600">
-//                 Duration: {room.roomDuration} minutes
-//               </p>
-//               <p className="text-gray-600">
-//                 Members: {room.roomMembers.length}
-//               </p>
-//               <p className="text-gray-600">
-//                 Ends at: {room.classEndTime.toDate().toLocaleString()}
-//               </p>
-//             </div>
-//           </div>
-//         ))}
-//       </div>
-//     </div>
-
-//     <div className="p-6 border-t bg-gray-50 rounded-b-2xl">
-//       <div className="flex justify-end">
-//         <button
-//           onClick={() => setIsViewModalOpen(false)}
-//           className="px-4 py-2 text-sm font-medium text-gray-700 transition-colors bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300"
-//         >
-//           Close
-//         </button>
-//       </div>
-//     </div>
-//   </div>
-// </Modal>
-//     </>
-//   );
-// };
-
-// export default VideoCallTutor;
-
 import React, { useEffect, useState, useRef, useContext } from "react";
 import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
 import Modal from "react-modal";
@@ -476,7 +14,7 @@ import {
   arrayRemove,
 } from "firebase/firestore";
 import { ClassContext } from "../../context/ClassContext";
-import { CopyPlus, Users } from "lucide-react";
+import { CopyPlus, LogOut, Users } from "lucide-react";
 
 /* Utility to check breakout room creation permissions */
 const canCreateBreakoutRooms = (classId) => {
@@ -510,6 +48,8 @@ const VideoCallTutor = () => {
   const [roomDuration, setRoomDuration] = useState(15);
   const [availableSlots, setAvailableSlots] = useState(5);
   const [isCallJoined, setIsCallJoined] = useState(false);
+  const [isRoomJoined, setIsRoomJoined] = useState(false);
+
   const [isInMainCall, setIsInMainCall] = useState(false);
 
   // Viewing breakout rooms
@@ -565,7 +105,14 @@ const VideoCallTutor = () => {
   //   Create Breakout Rooms
   // -----------------------------
 
-  const updateRoomMembers = (roomId, isJoining = true) => {
+  const updateRoomMembers = async (roomId, isJoining = true) => {
+    console.log(`updateRoomMembers called with:`, {
+      roomId,
+      isJoining,
+      tutorSelectedClassId,
+      userId: user?.uid,
+    });
+
     try {
       const breakoutRoomRef = doc(
         db,
@@ -575,11 +122,28 @@ const VideoCallTutor = () => {
         roomId
       );
 
-      updateDoc(breakoutRoomRef, {
+      // First verify the document exists and log its current state
+      const roomDoc = await getDoc(breakoutRoomRef);
+      if (!roomDoc.exists()) {
+        return;
+      }
+
+      // Then update the members
+      await updateDoc(breakoutRoomRef, {
         roomMembers: isJoining ? arrayUnion(user.uid) : arrayRemove(user.uid),
       });
+
+      // Verify the update by getting the latest state
+      const updatedDoc = await getDoc(breakoutRoomRef);
+
+      await fetchBreakoutRooms();
     } catch (error) {
-      console.error("Error updating room members:", error);
+      console.error("Error in updateRoomMembers:", {
+        error,
+        roomId,
+        isJoining,
+        userId: user?.uid,
+      });
     }
   };
 
@@ -632,7 +196,7 @@ const VideoCallTutor = () => {
       setBreakoutRooms(
         querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
       );
-      setIsViewModalOpen(true);
+      // setIsViewModalOpen(true);
     } catch (error) {
       console.error("Error fetching breakout rooms:", error);
     }
@@ -700,14 +264,35 @@ const VideoCallTutor = () => {
         ],
       },
       onJoinRoom: () => {
-        setIsCallJoined(true);
         if (roomId === tutorSelectedClassId) {
+          setIsCallJoined(true);
           setIsInMainCall(true);
+        } else {
+          setIsRoomJoined(true);
         }
       },
-      onLeaveRoom: () => {
+      onLeaveRoom: async () => {
+        console.log("onLeaveRoom triggered", {
+          roomId,
+          isMainRoom: roomId === tutorSelectedClassId,
+          activeRoomId,
+        });
+
         // Reset flags when leaving any room
         setIsCallJoined(false);
+        setIsRoomJoined(false);
+        setIsInMainCall(false);
+        if (roomId !== tutorSelectedClassId) {
+          try {
+            await updateRoomMembers(roomId, false);
+          } catch (error) {
+            console.error("Failed to remove user from breakout room:", {
+              error,
+              roomId,
+              userId: user.uid,
+            });
+          }
+        }
         setIsInMainCall(false);
       },
     });
@@ -721,6 +306,10 @@ const VideoCallTutor = () => {
 
   // Convenience method to switch back to the main class
   const joinMainClass = () => {
+    // If we're in a breakout room, remove the user before joining main class
+    if (activeRoomId !== tutorSelectedClassId) {
+      updateRoomMembers(activeRoomId, false);
+    }
     joinRoom(tutorSelectedClassId);
   };
 
@@ -797,12 +386,6 @@ const VideoCallTutor = () => {
       return;
     }
 
-    // If user is already in this room, don't rejoin
-    if (room.roomMembers.includes(user.uid)) {
-      alert("You are already in this room.");
-      return;
-    }
-
     updateRoomMembers(room.id, true);
 
     // Switch to that breakout room
@@ -841,6 +424,25 @@ const VideoCallTutor = () => {
       {/* The container where Zego’s UI will appear */}
       <div ref={callContainerRef} style={{ width: "100vw", height: "100vh" }} />
 
+      {/* Button to leave breakout room and return to main call */}
+      {activeRoomId !== tutorSelectedClassId &&
+        isCallJoined &&
+        isRoomJoined && (
+          <div className="fixed bottom-4 left-12 flex gap-2 z-[1000]">
+            <button
+              onClick={joinMainClass}
+              className="flex items-center justify-center
+               bg-[#313443] hover:bg-[#404352]
+               text-white rounded-lg w-10 h-10
+               transition-colors duration-200
+               shadow-md"
+              aria-label="Leave Breakout Room"
+            >
+              <LogOut size={20} />
+            </button>
+          </div>
+        )}
+
       {/* If you want custom floating buttons */}
       {activeRoomId === tutorSelectedClassId &&
         isCallJoined &&
@@ -863,7 +465,10 @@ const VideoCallTutor = () => {
 
             {/* View/Join Breakout Rooms */}
             <button
-              onClick={fetchBreakoutRooms}
+              onClick={() => {
+                fetchBreakoutRooms();
+                setIsViewModalOpen(true);
+              }}
               className="flex items-center justify-center
                        bg-[#313443] hover:bg-[#404352]
                        text-white rounded-lg w-10 h-10
@@ -1063,7 +668,7 @@ const VideoCallTutor = () => {
                         isRoomExpired
                           ? "bg-gray-400 cursor-not-allowed"
                           : room.roomMembers.includes(user.uid)
-                          ? "bg-green-500 cursor-not-allowed"
+                          ? "bg-green-500"
                           : "bg-blue-600 hover:bg-blue-700"
                       } text-white`}
                       onClick={() => {
