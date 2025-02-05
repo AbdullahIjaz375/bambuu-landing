@@ -141,6 +141,26 @@ const EditClassPage = () => {
     }
   };
 
+  const handleDateChange = (e) => {
+    const date = new Date(e.target.value);
+    const existingDateTime = classData.classDateTime;
+
+    // Preserve the time component
+    date.setHours(existingDateTime.getHours(), existingDateTime.getMinutes());
+
+    handleClassDataChange("classDateTime", date);
+  };
+
+  const handleTimeChange = (e) => {
+    const [hours, minutes] = e.target.value.split(":");
+    const newDate = new Date(classData.classDateTime);
+
+    // Update the time component
+    newDate.setHours(parseInt(hours), parseInt(minutes));
+
+    handleClassDataChange("classDateTime", newDate);
+  };
+
   useEffect(() => {
     const validateForm = () => {
       const requiredFields = {
@@ -456,10 +476,7 @@ const EditClassPage = () => {
                                 .split("T")[0]
                             : ""
                         }
-                        onChange={(e) => {
-                          const date = new Date(e.target.value);
-                          handleClassDataChange("classDateTime", date);
-                        }}
+                        onChange={handleDateChange}
                         className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                       />
                     </div>
@@ -474,12 +491,7 @@ const EditClassPage = () => {
                             ? classData.classDateTime.toTimeString().slice(0, 5)
                             : ""
                         }
-                        onChange={(e) => {
-                          const [hours, minutes] = e.target.value.split(":");
-                          const newDate = new Date(classData.classDateTime);
-                          newDate.setHours(parseInt(hours), parseInt(minutes));
-                          handleClassDataChange("classDateTime", newDate);
-                        }}
+                        onChange={handleTimeChange}
                         className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                       />
                     </div>
