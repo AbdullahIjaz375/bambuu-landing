@@ -936,7 +936,7 @@ const GroupDetailsUser = ({ onClose }) => {
                           className="w-4 md:w-5"
                         />
                         <span className="text-xs text-gray-800 md:text-sm">
-                          {t("groupDetails.stats.members")}
+                          {group?.memberIds.length}
                         </span>
                       </div>
                     </div>

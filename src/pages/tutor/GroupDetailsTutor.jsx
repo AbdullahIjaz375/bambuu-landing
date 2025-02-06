@@ -845,9 +845,7 @@ const GroupDetailsTutor = ({ onClose }) => {
                         <img alt="bammbuu" src="/svgs/users.svg" />{" "}
                         <span className="text-sm text-gray-800">
                           {" "}
-                          {t("group-details-tutor.statistics.members", {
-                            count: 2,
-                          })}
+                          {group?.memberIds?.length}
                         </span>
                       </div>
                     </div>

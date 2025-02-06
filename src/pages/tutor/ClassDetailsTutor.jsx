@@ -631,7 +631,9 @@ const ClassDetailsTutor = ({ onClose }) => {
                           classData.classType === "Individual Premium" ? (
                             <>
                               {" "}
-                              <span className="text-sm">2k+</span>
+                              <span className="text-sm">
+                                {classData.classMemberIds.length}
+                              </span>
                             </>
                           ) : (
                             <span className="text-sm text-[#454545]">

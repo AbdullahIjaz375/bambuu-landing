@@ -799,7 +799,7 @@ const ClassDetailsUser = ({ onClose }) => {
                       <>
                         {" "}
                         <div className="flex flex-col w-full mt-4 space-y-4">
-                          <div className="grid grid-cols-1 gap-28 sm:grid-cols-2 lg:grid-cols-2">
+                          <div className="grid grid-cols-1 gap-16 sm:grid-cols-3 lg:grid-cols-3">
                             <div className="flex items-center justify-center gap-1 sm:justify-start">
                               <img alt="time" src="/svgs/clock.svg" />
                               <span className="text-xs sm:text-sm">
@@ -820,12 +820,18 @@ const ClassDetailsUser = ({ onClose }) => {
                                 ).toLocaleDateString()}
                               </span>
                             </div>
+                            <div className="flex items-center justify-center gap-1 sm:justify-start">
+                              <img alt="participants" src="/svgs/users.svg" />
+                              <span className="text-xs sm:text-sm">
+                                {classData.classMemberIds.length}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </>
                     ) : (
                       <div className="flex flex-col w-full mt-4 space-y-4">
-                        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                        <div className="grid grid-cols-1 gap-16 sm:grid-cols-2 lg:grid-cols-3">
                           <div className="flex items-center justify-center gap-1 sm:justify-start">
                             <img alt="time" src="/svgs/clock.svg" />
                             <span className="text-xs sm:text-sm">
@@ -849,9 +855,7 @@ const ClassDetailsUser = ({ onClose }) => {
                           <div className="flex items-center justify-center gap-1 sm:justify-start">
                             <img alt="participants" src="/svgs/users.svg" />
                             <span className="text-xs sm:text-sm">
-                              {classData.classType.includes("Premium")
-                                ? "2k+"
-                                : `${classData.classMemberIds.length}/${classData.availableSpots}`}
+                              {classData.classMemberIds.length}
                             </span>
                           </div>
                         </div>
