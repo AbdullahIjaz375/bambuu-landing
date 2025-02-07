@@ -365,9 +365,7 @@ const LearnUser = () => {
                   <div
                     className="flex items-center hover:cursor-pointer gap-2 p-4 bg-[#FFFFEA] rounded-3xl border border-[#FFED46] w-[250px] sm:w-[380px]   flex-shrink-0"
                     onClick={() =>
-                      navigate(
-                        "/learnLanguageUser?language=English-Spanish Exchange"
-                      )
+                      navigate("/learnLanguageUser?language=English-Spanish")
                     }
                   >
                     <div className="flex-shrink-0 w-12 h-12 overflow-hidden rounded-full sm:w-20 sm:h-20">

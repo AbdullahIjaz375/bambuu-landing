@@ -481,6 +481,17 @@ const VideoCallTutor = () => {
           </div>
         )}
 
+      <div className="fixed top-8 left-8 flex gap-2 z-[1000]">
+        {activeRoomId === tutorSelectedClassId ? (
+          <></>
+        ) : (
+          <div className="px-4 py-2 text-white bg-green-600 rounded-xl">
+            Breakout Room{" "}
+            {breakoutRooms.findIndex((room) => room.id === activeRoomId) + 1}
+          </div>
+        )}
+      </div>
+
       {/* ------------------------
           Modal: Create Breakout Rooms 
       ------------------------ */}
