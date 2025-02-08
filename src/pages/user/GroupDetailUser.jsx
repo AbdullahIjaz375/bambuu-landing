@@ -396,6 +396,16 @@ const GroupDetailsUser = ({ onClose }) => {
       dateValue.setHours(hours);
       dateValue.setMinutes(minutes);
 
+      const utcDate = new Date(
+        Date.UTC(
+          dateValue.getFullYear(),
+          dateValue.getMonth(),
+          dateValue.getDate(),
+          dateValue.getHours(),
+          dateValue.getMinutes()
+        )
+      );
+
       const newClass = {
         classId: classId,
         adminId: user.uid,
@@ -408,7 +418,7 @@ const GroupDetailsUser = ({ onClose }) => {
         languageLevel: classData.languageLevel,
         availableSpots: classData.availableSpots,
         classDuration: classData.classDuration,
-        classDateTime: dateValue, // Use the combined date and time value
+        classDateTime: utcDate, // Use the combined date and time value
         recurrenceTypes: classData.recurrenceTypes,
         selectedRecurrenceType: "",
         recurringSlots: [],

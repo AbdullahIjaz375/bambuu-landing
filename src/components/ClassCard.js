@@ -35,20 +35,30 @@ const ClassCard = ({
 
   const formatTime = (timestamp) => {
     if (!timestamp) return "TBD";
+
+    // Convert Firebase timestamp to a Date object
     const date = new Date(timestamp.seconds * 1000);
+
+    // Format the time in UTC
     return date.toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
+      timeZone: "UTC", // Ensure the time is displayed in UTC
     });
   };
 
   const formatDate = (timestamp) => {
     if (!timestamp) return "TBD";
+
+    // Convert Firebase timestamp to a Date object
     const date = new Date(timestamp.seconds * 1000);
+
+    // Format the date in UTC
     return date.toLocaleDateString("en-US", {
       day: "2-digit",
       month: "short",
       year: "numeric",
+      timeZone: "UTC", // Ensure the date is displayed in UTC
     });
   };
 

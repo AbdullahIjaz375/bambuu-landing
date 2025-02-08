@@ -123,9 +123,22 @@ const EditClassPage = () => {
       const classAddress =
         classData.classLocation === "Virtual" ? "" : classData.classAddress;
 
+      const dateValue = new Date(classData.classDateTime);
+      const utcDate = new Date(
+        Date.UTC(
+          dateValue.getFullYear(),
+          dateValue.getMonth(),
+          dateValue.getDate(),
+          dateValue.getHours(),
+          dateValue.getMinutes()
+        )
+      );
+
       const updatedClass = {
         ...classData,
         classAddress,
+        classDateTime: utcDate, // Use the UTC date
+
         imageUrl,
         // updatedAt: serverTimestamp(),
       };

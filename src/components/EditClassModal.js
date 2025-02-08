@@ -131,9 +131,20 @@ const EditClassModal = ({
     setIsUpdating(true);
     try {
       const classRef = doc(db, "classes", classData.id);
+      const dateValue = new Date(classData.classDateTime);
+      const utcDate = new Date(
+        Date.UTC(
+          dateValue.getFullYear(),
+          dateValue.getMonth(),
+          dateValue.getDate(),
+          dateValue.getHours(),
+          dateValue.getMinutes()
+        )
+      );
       await updateDoc(classRef, {
         ...classData,
-        classDateTime: Timestamp.fromDate(classData.classDateTime),
+        classDateTime: utcDate, // Use the UTC date
+
         lastUpdated: new Date(),
       });
 

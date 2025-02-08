@@ -137,6 +137,16 @@ const AddClassTutor = () => {
       dateValue.setHours(hours);
       dateValue.setMinutes(minutes);
 
+      const utcDate = new Date(
+        Date.UTC(
+          dateValue.getFullYear(),
+          dateValue.getMonth(),
+          dateValue.getDate(),
+          dateValue.getHours(),
+          dateValue.getMinutes()
+        )
+      );
+
       const newClass = {
         classId: classId,
         adminId: user.uid,
@@ -151,7 +161,7 @@ const AddClassTutor = () => {
         availableSpots:
           classType === "individual" ? 1 : classData.availableSpots,
         classDuration: classData.classDuration,
-        classDateTime: dateValue,
+        classDateTime: utcDate,
         recurrenceTypes: classData.recurrenceTypes,
         selectedRecurrenceType: "None",
         recurringSlots: [],

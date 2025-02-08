@@ -745,6 +745,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
                               minute: "2-digit",
                               // second: '2-digit' // uncomment if you want seconds
                               hour12: true, // for AM/PM format
+                              timeZone: "UTC", // Ensure the time is displayed in UTC
                             })}
                           </span>
                         </div>
@@ -757,6 +758,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
                               year: "numeric",
                               month: "long",
                               day: "numeric",
+                              timeZone: "UTC", // Ensure the time is displayed in UTC
                             })}
                           </span>
                         </div>

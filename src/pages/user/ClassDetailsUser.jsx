@@ -809,15 +809,18 @@ const ClassDetailsUser = ({ onClose }) => {
                                   hour: "2-digit",
                                   minute: "2-digit",
                                   hour12: true,
+                                  timeZone: "UTC", // Ensure the time is displayed in UTC
                                 })}
                               </span>
                             </div>
                             <div className="flex items-center justify-center gap-1 sm:justify-start">
                               <img alt="date" src="/svgs/calendar.svg" />
-                              <span className="text-xs sm:text-sm">
+                              <span className="text-sm">
                                 {new Date(
-                                  classData.classDateTime.seconds * 1000
-                                ).toLocaleDateString()}
+                                  classData?.classDateTime?.seconds * 1000
+                                ).toLocaleDateString("en-US", {
+                                  timeZone: "UTC", // Ensure the time is displayed in UTC
+                                })}
                               </span>
                             </div>
                             <div className="flex items-center justify-center gap-1 sm:justify-start">
@@ -841,6 +844,7 @@ const ClassDetailsUser = ({ onClose }) => {
                                 hour: "2-digit",
                                 minute: "2-digit",
                                 hour12: true,
+                                timeZone: "UTC", // Ensure the time is displayed in UTC
                               })}
                             </span>
                           </div>
@@ -848,8 +852,10 @@ const ClassDetailsUser = ({ onClose }) => {
                             <img alt="date" src="/svgs/calendar.svg" />
                             <span className="text-xs sm:text-sm">
                               {new Date(
-                                classData.classDateTime.seconds * 1000
-                              ).toLocaleDateString()}
+                                classData?.classDateTime?.seconds * 1000
+                              ).toLocaleDateString("en-US", {
+                                timeZone: "UTC", // Ensure the time is displayed in UTC
+                              })}
                             </span>
                           </div>
                           <div className="flex items-center justify-center gap-1 sm:justify-start">
