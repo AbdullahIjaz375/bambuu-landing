@@ -107,6 +107,15 @@ const AddClassTutor = () => {
     }));
   };
 
+  function formatToYYYYMMDD(date) {
+    // If no date, return empty string
+    if (!date) return "";
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const dd = String(date.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
   const handleSaveClass = async () => {
     if (!isFormValid || isCreating) return;
     setIsCreating(true);
@@ -137,14 +146,12 @@ const AddClassTutor = () => {
       dateValue.setHours(hours);
       dateValue.setMinutes(minutes);
 
-      const utcDate = new Date(
-        Date.UTC(
-          dateValue.getFullYear(),
-          dateValue.getMonth(),
-          dateValue.getDate(),
-          dateValue.getHours(),
-          dateValue.getMinutes()
-        )
+      const localDate = new Date(
+        dateValue.getFullYear(),
+        dateValue.getMonth(),
+        dateValue.getDate(),
+        dateValue.getHours(),
+        dateValue.getMinutes()
       );
 
       const newClass = {
@@ -161,7 +168,7 @@ const AddClassTutor = () => {
         availableSpots:
           classType === "individual" ? 1 : classData.availableSpots,
         classDuration: classData.classDuration,
-        classDateTime: utcDate,
+        classDateTime: localDate,
         recurrenceTypes: classData.recurrenceTypes,
         selectedRecurrenceType: "None",
         recurringSlots: [],
@@ -602,7 +609,7 @@ const AddClassTutor = () => {
                   </div>
                   {/* Date and Time */}
                   <div className="grid grid-cols-2 gap-4">
-                    <div>
+                    {/* <div>
                       <label className="text-sm font-medium text-gray-700">
                         Class Date
                       </label>
@@ -614,7 +621,37 @@ const AddClassTutor = () => {
                         }
                         className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                       />
+                    </div> */}
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">
+                        Class Date
+                      </label>
+                      <input
+                        type="date"
+                        value={formatToYYYYMMDD(classData.classDateTime)}
+                        className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
+                        onChange={(e) => {
+                          // parse the user input as local, not UTC
+                          const [year, month, day] = e.target.value
+                            .split("-")
+                            .map(Number);
+                          const newLocalDate = new Date(year, month - 1, day);
+                          // preserve the time from the existing Date if you want
+                          newLocalDate.setHours(
+                            classData.classDateTime.getHours()
+                          );
+                          newLocalDate.setMinutes(
+                            classData.classDateTime.getMinutes()
+                          );
+
+                          setClassData((prev) => ({
+                            ...prev,
+                            classDateTime: newLocalDate,
+                          }));
+                        }}
+                      />
                     </div>
+
                     <div>
                       <label className="text-sm font-medium text-gray-700">
                         Class Starting Time

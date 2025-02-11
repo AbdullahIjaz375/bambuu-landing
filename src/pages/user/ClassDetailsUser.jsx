@@ -809,7 +809,6 @@ const ClassDetailsUser = ({ onClose }) => {
                                   hour: "2-digit",
                                   minute: "2-digit",
                                   hour12: true,
-                                  timeZone: "UTC", // Ensure the time is displayed in UTC
                                 })}
                               </span>
                             </div>
@@ -844,7 +843,6 @@ const ClassDetailsUser = ({ onClose }) => {
                                 hour: "2-digit",
                                 minute: "2-digit",
                                 hour12: true,
-                                timeZone: "UTC", // Ensure the time is displayed in UTC
                               })}
                             </span>
                           </div>

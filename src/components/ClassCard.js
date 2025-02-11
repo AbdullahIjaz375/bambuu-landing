@@ -43,7 +43,6 @@ const ClassCard = ({
     return date.toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
-      timeZone: "UTC", // Ensure the time is displayed in UTC
     });
   };
 
@@ -58,7 +57,7 @@ const ClassCard = ({
       day: "2-digit",
       month: "short",
       year: "numeric",
-      timeZone: "UTC", // Ensure the date is displayed in UTC
+      timeZone: "utc",
     });
   };
 

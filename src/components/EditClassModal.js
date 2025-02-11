@@ -132,18 +132,16 @@ const EditClassModal = ({
     try {
       const classRef = doc(db, "classes", classData.id);
       const dateValue = new Date(classData.classDateTime);
-      const utcDate = new Date(
-        Date.UTC(
-          dateValue.getFullYear(),
-          dateValue.getMonth(),
-          dateValue.getDate(),
-          dateValue.getHours(),
-          dateValue.getMinutes()
-        )
+      const localDate = new Date(
+        dateValue.getFullYear(),
+        dateValue.getMonth(),
+        dateValue.getDate(),
+        dateValue.getHours(),
+        dateValue.getMinutes()
       );
       await updateDoc(classRef, {
         ...classData,
-        classDateTime: utcDate, // Use the UTC date
+        classDateTime: localDate, // Use the UTC date
 
         lastUpdated: new Date(),
       });
@@ -400,9 +398,13 @@ const EditClassModal = ({
               </label>
               <input
                 type="date"
-                value={getFormattedDate(classData?.classDateTime)}
+                value={
+                  classData.classDateTime
+                    ? classData.classDateTime.toISOString().split("T")[0]
+                    : ""
+                }
                 onChange={handleDateChange}
-                className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                className="w-full p-2 border border-gray-300 rounded-lg focus:border-[#14B82C] focus:ring-0 focus:outline-none"
               />
             </div>
             <div>

@@ -396,14 +396,12 @@ const GroupDetailsUser = ({ onClose }) => {
       dateValue.setHours(hours);
       dateValue.setMinutes(minutes);
 
-      const utcDate = new Date(
-        Date.UTC(
-          dateValue.getFullYear(),
-          dateValue.getMonth(),
-          dateValue.getDate(),
-          dateValue.getHours(),
-          dateValue.getMinutes()
-        )
+      const localDate = new Date(
+        dateValue.getFullYear(),
+        dateValue.getMonth(),
+        dateValue.getDate(),
+        dateValue.getHours(),
+        dateValue.getMinutes()
       );
 
       const newClass = {
@@ -418,7 +416,7 @@ const GroupDetailsUser = ({ onClose }) => {
         languageLevel: classData.languageLevel,
         availableSpots: classData.availableSpots,
         classDuration: classData.classDuration,
-        classDateTime: utcDate, // Use the combined date and time value
+        classDateTime: localDate, // Use the combined date and time value
         recurrenceTypes: classData.recurrenceTypes,
         selectedRecurrenceType: "",
         recurringSlots: [],
@@ -505,6 +503,15 @@ const GroupDetailsUser = ({ onClose }) => {
       year: "numeric",
     });
   };
+
+  function formatToYYYYMMDD(date) {
+    // If no date, return empty string
+    if (!date) return "";
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const dd = String(date.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  }
 
   //-------------------------------------------------Deleting Group---------------------------------------//
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
@@ -1330,11 +1337,25 @@ const GroupDetailsUser = ({ onClose }) => {
                 </label>
                 <input
                   type="date"
-                  value={classData.classDateTime}
-                  onChange={(e) =>
-                    handleClassDataChange("classDateTime", e.target.value)
-                  }
-                  className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                  value={formatToYYYYMMDD(classData.classDateTime)}
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:border-[#14B82C] focus:ring-0 focus:outline-none"
+                  onChange={(e) => {
+                    // parse the user input as local, not UTC
+                    const [year, month, day] = e.target.value
+                      .split("-")
+                      .map(Number);
+                    const newLocalDate = new Date(year, month - 1, day);
+                    // preserve the time from the existing Date if you want
+                    newLocalDate.setHours(classData.classDateTime.getHours());
+                    newLocalDate.setMinutes(
+                      classData.classDateTime.getMinutes()
+                    );
+
+                    setClassData((prev) => ({
+                      ...prev,
+                      classDateTime: newLocalDate,
+                    }));
+                  }}
                 />
               </div>
               <div>
