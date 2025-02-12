@@ -8,6 +8,13 @@ import { Timestamp } from "firebase/firestore";
 import Modal from "react-modal";
 import { NumberInput } from "@mantine/core";
 
+const getDateValue = (dateTime) => {
+  if (!dateTime) return new Date();
+  if (dateTime instanceof Date) return dateTime;
+  if (dateTime?.toDate) return dateTime.toDate();
+  return new Date(dateTime);
+};
+
 const EditClassModal = ({
   isOpen,
   onClose,
@@ -23,16 +30,9 @@ const EditClassModal = ({
 
   useEffect(() => {
     if (initialClassData) {
-      // Ensure classDateTime is properly converted to a Date object
-      const dateTime = initialClassData.classDateTime?.toDate?.()
-        ? initialClassData.classDateTime.toDate()
-        : initialClassData.classDateTime instanceof Date
-        ? initialClassData.classDateTime
-        : new Date();
-
       setClassData({
         ...initialClassData,
-        classDateTime: dateTime,
+        classDateTime: getDateValue(initialClassData.classDateTime),
       });
       setClassPreviewImage(initialClassData.imageUrl);
     }
@@ -398,11 +398,7 @@ const EditClassModal = ({
               </label>
               <input
                 type="date"
-                value={
-                  classData.classDateTime
-                    ? classData.classDateTime.toISOString().split("T")[0]
-                    : ""
-                }
+                value={getFormattedDate(classData.classDateTime)}
                 onChange={handleDateChange}
                 className="w-full p-2 border border-gray-300 rounded-lg focus:border-[#14B82C] focus:ring-0 focus:outline-none"
               />
