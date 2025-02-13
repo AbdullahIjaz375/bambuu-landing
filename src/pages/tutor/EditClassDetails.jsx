@@ -154,13 +154,28 @@ const EditClassPage = () => {
   };
 
   const handleDateChange = (e) => {
-    const date = new Date(e.target.value);
-    const existingDateTime = classData.classDateTime;
+    const selectedDateString = e.target.value;
 
-    // Preserve the time component
-    date.setHours(existingDateTime.getHours(), existingDateTime.getMinutes());
+    if (selectedDateString) {
+      const [year, month, day] = selectedDateString.split("-"); // Split the string
 
-    handleClassDataChange("classDateTime", date);
+      const selectedDate = new Date(year, month - 1, day); // Month is 0-indexed
+
+      const existingDateTime = classData.classDateTime
+        ? new Date(classData.classDateTime)
+        : new Date();
+
+      selectedDate.setHours(
+        existingDateTime.getHours(),
+        existingDateTime.getMinutes(),
+        existingDateTime.getSeconds(),
+        existingDateTime.getMilliseconds()
+      );
+
+      handleClassDataChange("classDateTime", selectedDate);
+    } else {
+      handleClassDataChange("classDateTime", null);
+    }
   };
 
   const handleTimeChange = (e) => {
@@ -483,9 +498,9 @@ const EditClassPage = () => {
                         type="date"
                         value={
                           classData.classDateTime
-                            ? classData.classDateTime
-                                .toISOString()
-                                .split("T")[0]
+                            ? new Date(
+                                classData.classDateTime
+                              ).toLocaleDateString("en-CA") // Use toLocaleDateString
                             : ""
                         }
                         onChange={handleDateChange}

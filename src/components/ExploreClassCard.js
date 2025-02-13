@@ -155,7 +155,7 @@ const ExploreClassCard = ({
       day: "2-digit",
       month: "short",
       year: "numeric",
-      timeZone: "utc",
+      // timeZone: "utc",
     });
   };
 

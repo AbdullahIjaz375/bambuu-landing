@@ -39,13 +39,27 @@ const EditClassModal = ({
   }, [initialClassData]);
 
   const handleDateChange = (e) => {
-    const newDate = new Date(e.target.value);
-    const currentTime = classData?.classDateTime || new Date();
-    newDate.setHours(currentTime.getHours(), currentTime.getMinutes());
-    if (!isNaN(newDate.getTime())) {
-      handleClassDataChange("classDateTime", newDate);
+    const selectedDateString = e.target.value;
+
+    if (selectedDateString) {
+      const [year, month, day] = selectedDateString.split("-"); // Split the string
+
+      const selectedDate = new Date(year, month - 1, day); // Month is 0-indexed
+
+      const existingDateTime = classData.classDateTime
+        ? new Date(classData.classDateTime)
+        : new Date();
+
+      selectedDate.setHours(
+        existingDateTime.getHours(),
+        existingDateTime.getMinutes(),
+        existingDateTime.getSeconds(),
+        existingDateTime.getMilliseconds()
+      );
+
+      handleClassDataChange("classDateTime", selectedDate);
     } else {
-      console.error("Invalid date");
+      handleClassDataChange("classDateTime", null);
     }
   };
 
@@ -75,7 +89,9 @@ const EditClassModal = ({
   const getFormattedDate = (date) => {
     if (!date) return "";
     try {
-      return date instanceof Date ? date.toISOString().split("T")[0] : "";
+      return date instanceof Date
+        ? date.toLocaleDateString("en-CA").split("T")[0]
+        : "";
     } catch (error) {
       console.error("Error formatting date:", error);
       return "";

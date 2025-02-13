@@ -817,9 +817,7 @@ const ClassDetailsUser = ({ onClose }) => {
                               <span className="text-sm">
                                 {new Date(
                                   classData?.classDateTime?.seconds * 1000
-                                ).toLocaleDateString("en-US", {
-                                  timeZone: "UTC", // Ensure the time is displayed in UTC
-                                })}
+                                ).toLocaleDateString("en-US")}
                               </span>
                             </div>
                             <div className="flex items-center justify-center gap-1 sm:justify-start">
@@ -851,9 +849,7 @@ const ClassDetailsUser = ({ onClose }) => {
                             <span className="text-xs sm:text-sm">
                               {new Date(
                                 classData?.classDateTime?.seconds * 1000
-                              ).toLocaleDateString("en-US", {
-                                timeZone: "UTC", // Ensure the time is displayed in UTC
-                              })}
+                              ).toLocaleDateString("en-US")}
                             </span>
                           </div>
                           <div className="flex items-center justify-center gap-1 sm:justify-start">

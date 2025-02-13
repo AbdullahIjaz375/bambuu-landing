@@ -757,7 +757,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
                               year: "numeric",
                               month: "long",
                               day: "numeric",
-                              timeZone: "UTC", // Ensure the time is displayed in UTC
+                              // timeZone: "UTC", // Ensure the time is displayed in UTC
                             })}
                           </span>
                         </div>

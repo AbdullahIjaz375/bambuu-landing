@@ -154,6 +154,24 @@ const AddClassTutor = () => {
         dateValue.getMinutes()
       );
 
+      // Parse the date and time inputs to create a combined datetime
+      // const dateValue = new Date(classData.classDateTime);
+      // const timeValue = document.querySelector('input[type="time"]').value;
+      // const [hours, minutes] = timeValue.split(":").map(Number);
+
+      // // Create a new Date object using local date and time values
+      // const localDate = new Date(
+      //   dateValue.getFullYear(),
+      //   dateValue.getMonth(),
+      //   dateValue.getDate(),
+      //   hours,
+      //   minutes
+      // );
+
+      // localDate.setMinutes(
+      //   localDate.getMinutes() - localDate.getTimezoneOffset()
+      // );
+
       const newClass = {
         classId: classId,
         adminId: user.uid,
