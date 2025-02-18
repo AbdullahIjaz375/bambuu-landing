@@ -111,12 +111,12 @@ const ProfileTutor = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 gap-10">
             {/* Profile Info Card */}
             <div className="bg-[#e6fde9] rounded-3xl p-8 flex flex-col items-center">
               <div className="flex items-center justify-center w-32 h-32 mb-4 bg-white rounded-full">
                 <img
-                  src={user?.photoUrl || "/api/placeholder/96/96"}
+                  src={user?.photoUrl || "/svgs/supertutor-panda.svg"}
                   alt="Profile"
                   className="object-cover w-full h-full rounded-full"
                 />

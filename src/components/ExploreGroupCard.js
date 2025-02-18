@@ -192,7 +192,7 @@ const GroupCard = ({ group }) => {
   const {
     groupName,
     groupLearningLanguage,
-    level = "Not specified",
+    level = "",
     groupAdminName = "Admin",
     memberIds = [],
     imageUrl,
@@ -401,9 +401,13 @@ const GroupCard = ({ group }) => {
                 {groupLearningLanguage}
               </span>
             </div>
-            <span className="px-3 py-1 text-xs text-gray-800 bg-[#fff885] rounded-full">
-              {level}
-            </span>
+            {level !== "" ? (
+              <span className="px-3 py-1 text-xs text-gray-800 bg-[#fff885] rounded-full">
+                {level}
+              </span>
+            ) : (
+              <></>
+            )}
           </div>
 
           {/* Admin and Members */}

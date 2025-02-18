@@ -129,7 +129,7 @@ const ProfileUser = () => {
                   }`}
                 >
                   <img
-                    src={user?.photoUrl || "/api/placeholder/96/96"}
+                    src={user?.photoUrl || "/svgs/supertutor-panda.svg"}
                     alt="Profile"
                     className="object-cover w-full h-full rounded-full"
                   />

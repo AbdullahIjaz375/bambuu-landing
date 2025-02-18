@@ -166,7 +166,7 @@ const CustomChannelHeader = ({ onChannelLeave }) => {
           </button>
 
           {showDropdown && (
-            <div className="absolute right-0 z-10 w-40 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg">
+            <div className="absolute right-0 z-10 w-32 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg">
               <button
                 className="w-full px-4 py-2 text-left text-[#3D3D3D] transition-colors hover:bg-gray-50"
                 onClick={() => {
@@ -176,18 +176,13 @@ const CustomChannelHeader = ({ onChannelLeave }) => {
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  <div className="flex items-center ">
-                    <LogOut className="inline-block mr-2" size={20} />
-                    Processing...
-                  </div>
+                  <div className="flex items-center ">Processing...</div>
                 ) : user?.userType === "tutor" ? (
-                  <div className="flex items-center">
-                    <LogOut className="inline-block mr-2" size={20} />
+                  <div className="flex items-center text-center text-red-500">
                     Delete Chat
                   </div>
                 ) : (
-                  <div className="flex items-center ">
-                    <LogOut className="inline-block mr-2" size={20} />
+                  <div className="flex items-center text-center text-red-500">
                     Leave Chat
                   </div>
                 )}

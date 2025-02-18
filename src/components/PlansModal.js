@@ -18,8 +18,10 @@ const customStyles = {
     bottom: "auto",
     transform: "translate(-50%, -50%)",
     maxWidth: "750px",
+    maxHeight: "95vh",
+    overflowY: "auto",
     width: "100%",
-    padding: "24px",
+    padding: "16px", // Reduce padding
     borderRadius: "24px",
     backgroundColor: "white",
     border: "none",
@@ -89,25 +91,25 @@ const PlansModal = ({ isOpen, onClose }) => {
     return (
       <div className="flex flex-col h-full border-[#B0B0B0] bg-white border rounded-3xl">
         {plan.isPopular && (
-          <div className="px-4 py-1.5 text-sm font-semibold bg-[#FFBF00] rounded-t-3xl text-center">
+          <div className="px-4 py-1 text-sm font-semibold bg-[#FFBF00] rounded-t-3xl text-center">
             {t("plans-modal.popular-badge")}
           </div>
         )}
-        <div className="flex flex-col flex-grow p-6 space-y-6 text-center">
+        <div className="flex flex-col flex-grow p-5 space-y-4 text-center">
           <div className="space-y-4">
-            <div className="text-5xl font-semibold">
+            <div className="text-4xl font-semibold">
               ${plan.price}
               <span className="text-base font-normal text-black">
                 /{plan.period}
               </span>
             </div>
             <div>
-              <h3 className="mb-2 text-lg font-medium">{plan.title}</h3>
+              <h3 className="mb-2 font-medium text-md">{plan.title}</h3>
               <p className="text-sm text-black">{plan.description}</p>
             </div>
           </div>
 
-          <div className="flex-grow space-y-6">
+          <div className="flex-grow space-y-3">
             {features.map((feature, index) => (
               <div
                 key={index}
@@ -117,11 +119,11 @@ const PlansModal = ({ isOpen, onClose }) => {
                   <img
                     alt="crown"
                     src="/svgs/crown-new.svg"
-                    className="w-5 h-5"
+                    className="w-4 h-4"
                   />
                   <div>
-                    <div className="font-medium">{feature.title}</div>
-                    <div className="text-sm text-black">
+                    <div className="font-sm">{feature.title}</div>
+                    <div className="text-xs text-black">
                       {feature.description}
                     </div>
                   </div>
@@ -133,7 +135,7 @@ const PlansModal = ({ isOpen, onClose }) => {
           <button
             onClick={handleClick}
             disabled={isLoading}
-            className="w-full py-3 text-[#042F0C] transition-colors bg-[#14B82C] rounded-full border border-[#042F0C] disabled:opacity-50"
+            className="w-full py-2  text-[#042F0C] transition-colors bg-[#14B82C] rounded-full border border-[#042F0C] disabled:opacity-50"
           >
             {isLoading
               ? t("plans-modal.buttons.loading")
@@ -165,7 +167,7 @@ const PlansModal = ({ isOpen, onClose }) => {
         )}
         <div className="flex flex-col flex-grow p-6 space-y-6 text-center">
           <div className="space-y-4">
-            <div className="text-5xl font-bold">${plan.price}</div>
+            <div className="text-4xl font-bold">${plan.price}</div>
             <h3 className="text-lg font-medium">{plan.title}</h3>
           </div>
 
@@ -231,20 +233,20 @@ const PlansModal = ({ isOpen, onClose }) => {
       contentLabel="Membership Modal"
     >
       <div className="relative font-urbanist">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-medium">{t("plans-modal.title")}</h2>
           <button
             onClick={onClose}
             className="p-1 text-gray-400 hover:text-gray-600"
           >
-            <X size={24} />
+            <X size={20} />
           </button>
         </div>
 
-        <div className="flex justify-center mb-6">
+        <div className="flex justify-center mb-4">
           <div className="inline-flex bg-gray-100 border border-gray-300 rounded-full">
             <button
-              className={`px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors
+              className={`px-6 py-1 rounded-full text-[#042F0C] text-sm font-medium transition-colors
                 ${
                   activeTab === "subscriptions"
                     ? "bg-[#FFBF00] border border-[#042F0C]"
@@ -278,13 +280,13 @@ const PlansModal = ({ isOpen, onClose }) => {
 
         {activeTab === "credits" && (
           <>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-2">
               {creditPlans.map((plan, index) => (
                 <CreditPlan key={index} plan={plan} userId={user?.uid} />
               ))}
             </div>
 
-            <div className="flex items-center gap-2 mt-4 text-sm text-red-500">
+            <div className="flex items-center gap-2 mt-2 text-sm text-red-500">
               <svg
                 width="16"
                 height="16"

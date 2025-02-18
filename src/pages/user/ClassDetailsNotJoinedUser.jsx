@@ -766,7 +766,9 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
                           {classData.classType === "Individual Premium" ? (
                             <>
                               {" "}
-                              <span className="text-sm">2k+</span>
+                              <span className="text-sm">
+                                {classData.classMemberIds.length}
+                              </span>
                             </>
                           ) : (
                             <span className="text-sm text-[#454545]">
@@ -808,8 +810,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
                   <div className="w-full space-y-4">
                     <div className="space-y-1">
                       {" "}
-                      {classData.classType === "Group Premium" ||
-                      classData.classType === "Individual Premium" ? (
+                      {classData.classType === "Individual Premium" ? (
                         <h1 className="text-xl font-semibold">Instructor</h1>
                       ) : (
                         <h1 className="text-xl font-semibold">Group</h1>

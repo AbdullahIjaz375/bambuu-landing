@@ -487,7 +487,7 @@ const Signup = () => {
   const facebookProvider = new FacebookAuthProvider();
 
   const handleGoogleLoginStudent = async () => {
-    const loadingToastId = toast.loading("Logging in...");
+    // const loadingToastId = toast.loading("Logging in...");
 
     try {
       const result = await signInWithPopup(auth, googleProvider);
@@ -614,12 +614,7 @@ const Signup = () => {
         });
       }
 
-      toast.update(loadingToastId, {
-        render: "Logged in successfully!",
-        type: "success",
-        isLoading: false,
-        autoClose: 3000,
-      });
+      toast.success("Logged in successfully!", { autoClose: 3000 });
 
       if (isFirstTimeLogin) {
         navigate("/userEditProfile", { replace: true });
@@ -630,12 +625,7 @@ const Signup = () => {
       console.error("Error during Google login:", error);
       updateUserData(null);
 
-      toast.update(loadingToastId, {
-        render: `Login error: ${error.message}`,
-        type: "error",
-        isLoading: false,
-        autoClose: 5000,
-      });
+      toast.error("Invalid email or password", { autoClose: 5000 });
     }
   };
 

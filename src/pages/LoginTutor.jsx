@@ -35,7 +35,7 @@ const LoginTutor = () => {
   const { user, loading, updateUserData } = useAuth(); // Destructure loading state
 
   const handleEmailLoginTutor = async (e) => {
-    const loadingToastId = toast.loading("Logging in...");
+    // const loadingToastId = toast.loading("Logging in...");
     e.preventDefault();
 
     try {
@@ -71,12 +71,7 @@ const LoginTutor = () => {
 
       updateUserData(sessionUserData);
 
-      toast.update(loadingToastId, {
-        render: "Logged in successfully!",
-        type: "success",
-        isLoading: false,
-        autoClose: 3000,
-      });
+      toast.success("Logged in successfully!", { autoClose: 3000 });
 
       navigate("/learn", { replace: true });
     } catch (error) {
@@ -96,12 +91,7 @@ const LoginTutor = () => {
         setPasswordError("Wrong password.");
       }
 
-      toast.update(loadingToastId, {
-        render: "Invalid email or password",
-        type: "error",
-        isLoading: false,
-        autoClose: 5000,
-      });
+      toast.error("Invalid email or password", { autoClose: 5000 });
     }
   };
 

@@ -126,7 +126,7 @@ const ExploreClassCard = ({
   const [isPlansModalOpen, setIsPlansModalOpen] = useState(false);
 
   // Determine which user details to display based on isBammbuu flag
-  const isPremium = classType === "Individual Premium";
+  const isPremium = classType === "Individual Premium" || "Group Premium";
 
   const displayName = isPremium ? tutorName : adminName;
   const displayImage = isPremium ? tutorImageUrl : adminImageUrl;

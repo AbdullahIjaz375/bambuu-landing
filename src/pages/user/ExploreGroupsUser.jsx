@@ -16,6 +16,7 @@ const ExploreGroupsUser = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState("all"); // State for active tab
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const language = searchParams.get("language")?.toLowerCase() || null;
@@ -62,18 +63,25 @@ const ExploreGroupsUser = () => {
     fetchGroups();
   }, [user, language]);
 
-  const filteredGroups = exploreGroups.filter((group) => {
-    const searchTerm = searchQuery.toLowerCase().trim();
+  const filteredGroups = exploreGroups
+    .filter((group) => {
+      const searchTerm = searchQuery.toLowerCase().trim();
 
-    if (!searchTerm) return true;
+      if (!searchTerm) return true;
 
-    // Adjust these fields based on your group data structure
-    return (
-      group.name?.toLowerCase().includes(searchTerm) ||
-      group.description?.toLowerCase().includes(searchTerm) ||
-      group.category?.toLowerCase().includes(searchTerm)
-    );
-  });
+      // Adjust these fields based on your group data structure
+      return (
+        group.name?.toLowerCase().includes(searchTerm) ||
+        group.description?.toLowerCase().includes(searchTerm) ||
+        group.category?.toLowerCase().includes(searchTerm)
+      );
+    })
+    .filter((group) => {
+      if (activeTab === "all") return true;
+      if (activeTab === "premium") return group.isPremium;
+      if (activeTab === "free") return !group.isPremium;
+      return true;
+    });
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -103,15 +111,44 @@ const ExploreGroupsUser = () => {
           </div>
 
           {/* Search Section */}
-          <div className="relative mb-6">
-            <Search className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
-            <input
-              type="text"
-              placeholder={t("exploreGroups.search.placeholder")}
-              className="w-full py-3 pl-10 pr-4 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-yellow-400"
-              value={searchQuery}
-              onChange={handleSearchChange}
-            />
+          <div className="flex flex-row items-center justify-between mb-6">
+            {/* Tabs Section */}
+            <div className="flex justify-center w-full sm:w-auto">
+              <div className="relative inline-flex p-1 bg-gray-100 border border-gray-300 rounded-full">
+                <div
+                  className="absolute top-0 left-0 h-full bg-[#FFBF00] border border-[#042F0C] rounded-full transition-all duration-300 ease-in-out"
+                  style={{
+                    transform: `translateX(${
+                      activeTab === "premium" ? "0%" : "100%"
+                    })`,
+                    width: "50%",
+                  }}
+                />
+
+                <button
+                  onClick={() => setActiveTab("premium")}
+                  className="relative z-10 px-4 sm:px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap"
+                >
+                  bammbuu+ Groups
+                </button>
+                <button
+                  onClick={() => setActiveTab("free")}
+                  className="relative z-10 px-4 sm:px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap"
+                >
+                  Standard Groups{" "}
+                </button>
+              </div>
+            </div>
+            <div className="relative w-[40%]">
+              <Search className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
+              <input
+                type="text"
+                placeholder={t("exploreGroups.search.placeholder")}
+                className="w-full py-3 pl-10 pr-4 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                value={searchQuery}
+                onChange={handleSearchChange}
+              />
+            </div>
           </div>
 
           {/* Content */}

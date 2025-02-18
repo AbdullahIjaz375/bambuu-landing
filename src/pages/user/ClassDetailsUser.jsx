@@ -935,12 +935,13 @@ const ClassDetailsUser = ({ onClose }) => {
                         </button>
                       </>
                     ) : (
-                      <button
-                        className="w-full px-4 py-2 text-red-500 border border-red-500 rounded-full"
-                        onClick={() => setShowLeaveConfirmation(true)}
-                      >
-                        {t("class-details.buttons.leave")}
-                      </button>
+                      // <button
+                      //   className="w-full px-4 py-2 text-red-500 border border-red-500 rounded-full"
+                      //   onClick={() => setShowLeaveConfirmation(true)}
+                      // >
+                      //   {t("class-details.buttons.leave")}
+                      // </button>
+                      <></>
                     )}
                   </div>
                 </div>

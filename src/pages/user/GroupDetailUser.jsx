@@ -1208,7 +1208,13 @@ const GroupDetailsUser = ({ onClose }) => {
                   {t("createClass.type.label")}
                 </label>
                 <div className="flex flex-wrap gap-2 mt-1">
-                  {["One-time", "Daily", "Weekly", "Monthly"].map((type) => (
+                  {[
+                    "One-time",
+                    "Daily",
+                    "Weekly",
+                    "Daily (Weekdays)",
+                    "Monthly",
+                  ].map((type) => (
                     <button
                       key={type}
                       onClick={() =>

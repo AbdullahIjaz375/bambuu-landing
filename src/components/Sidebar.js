@@ -284,7 +284,7 @@ const Sidebar = ({ user }) => {
             <div className="flex flex-row items-center space-x-2">
               <div className="flex-shrink-0 w-8 h-8 overflow-hidden bg-white rounded-full lg:w-10 lg:h-10">
                 <img
-                  src={user.photoUrl}
+                  src={user?.photoUrl || "/svgs/supertutor-panda.svg"}
                   alt="Profile"
                   className="object-cover w-full h-full"
                 />
