@@ -130,7 +130,7 @@ const Navbar = ({ user }) => {
               </>
             ) : (
               <Link
-                to="/login"
+                to="/welcome"
                 className="text-lg text-gray-700 hover:text-green-600"
               >
                 <Button

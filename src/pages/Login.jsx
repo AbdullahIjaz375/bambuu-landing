@@ -390,7 +390,14 @@ const Login = () => {
       <div className="w-full max-w-md p-6 space-y-4 bg-white rounded-3xl border border-[#e7e7e7]">
         {/* Logo */}
         <div className="flex justify-center">
-          <img alt="bambuu" src="/svgs/logo-login.svg" />
+          <img
+            alt="bambuu"
+            src="/svgs/logo-login.svg"
+            className="hover:cursor-pointer"
+            onClick={() => {
+              navigate("/");
+            }}
+          />
         </div>
 
         {/* Welcome Text */}

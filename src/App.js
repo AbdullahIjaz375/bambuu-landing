@@ -69,6 +69,9 @@ import LanguagesUser from "./pages/user/LanguagesUser";
 import { messaging } from "./firebaseConfig";
 import { toast } from "react-toastify";
 import { onMessage } from "firebase/messaging";
+import ContactUs from "./pages/ContactUs";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsConditions from "./pages/TermsConditions";
 
 const App = () => {
   const { user, streamClient } = useAuth(); // Use useAuth() inside the component
@@ -103,10 +106,22 @@ const App = () => {
               path="/"
               element={
                 <PublicRoute>
+                  <Landing />
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/welcome"
+              element={
+                <PublicRoute>
                   <Splash />
                 </PublicRoute>
               }
             />
+
+            <Route path="/contact-us" element={<ContactUs />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms-and-conditions" element={<TermsConditions />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
 
             <Route

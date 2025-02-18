@@ -13,13 +13,26 @@ const Footer = () => {
         />
       </div>
       <div className="flex flex-row items-center justify-between px-10">
-        <h1 className="text-xl text-[#6D6D6D]">© 2024 All rights reserved</h1>
+        <div className="flex flex-row space-x-8">
+          <h1 className="text-xl text-[#6D6D6D]">© 2024 All rights reserved</h1>
+          <Link to="/contact-us" className="text-xl text-[#6D6D6D]">
+            Contact Us
+          </Link>
+        </div>
         <div className="flex flex-row items-center justify-center space-x-12">
           <img alt="bambuu" src="/images/insta.png" className="w-auto h-auto" />
           <img alt="bambuu" src="/images/x.png" className="w-auto h-auto" />
           <img alt="bambuu" src="/images/fb.png" className="w-auto h-auto" />
         </div>
-        <h1 className="text-xl text-[#6D6D6D]">Privacy Policy</h1>
+        <div className="flex flex-row items-center space-x-6">
+          {" "}
+          <Link to="/privacy-policy">
+            <h1 className="text-xl text-[#6D6D6D]">Privacy Policy</h1>
+          </Link>
+          <Link to="/terms-and-conditions">
+            <h1 className="text-xl text-[#6D6D6D]">Terms & Conditions</h1>
+          </Link>
+        </div>
       </div>
     </div>
   );
