@@ -403,6 +403,7 @@ const Signup = () => {
         nativeLanguage: profileData.nativeLanguage,
         photoUrl: "",
         savedDocuments: [],
+        freeAccess: true,
         languagePreference: "en",
         uid: auth.currentUser.uid,
         fcmToken: fcmToken || "",
@@ -523,6 +524,7 @@ const Signup = () => {
           nativeLanguage: "",
           country: "",
           photoUrl: "",
+          freeAccess: true,
           savedDocuments: [],
           currentStreak: 1,
           fcmToken: fcmToken || "", // Add FCM token

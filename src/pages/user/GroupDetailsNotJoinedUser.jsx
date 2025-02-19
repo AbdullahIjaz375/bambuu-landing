@@ -251,6 +251,54 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
     try {
       setIsJoining(true);
 
+      if (user.freeAccess) {
+        // Allow user to join the group immediately
+        const groupRef = doc(db, "groups", groupId);
+        const userRef = doc(db, "students", user.uid);
+
+        // Get the current group data to check if user is already a member
+        const groupDoc = await getDoc(groupRef);
+        const groupData = groupDoc.data();
+
+        if (groupData.memberIds.includes(user.uid)) {
+          console.log("User is already a member of this group");
+          return;
+        }
+
+        const channel = group.isPremium
+          ? ChannelType.PREMIUM_GROUP
+          : ChannelType.STANDARD_GROUP;
+
+        try {
+          await addMemberToStreamChannel({
+            channelId: groupId,
+            userId: user.uid,
+            type: channel,
+            role: "channel_member",
+          });
+        } catch (streamError) {
+          console.error("Error adding to stream channel:", streamError);
+          throw new Error("Failed to join group chat");
+        }
+
+        // Update the group document to add the user's ID to memberIds
+        await updateDoc(groupRef, {
+          memberIds: arrayUnion(user.uid),
+        });
+
+        // Update the user document to add the group ID to joinedGroups
+        await updateDoc(userRef, {
+          joinedGroups: arrayUnion(groupId),
+        });
+
+        // Update context and session storage
+        updateContextAndSession(groupId);
+
+        console.log("Successfully joined group");
+        navigate(`/groupDetailsUser/${groupId}`, { replace: true });
+        return;
+      }
+
       // First check eligibility
       const eligibility = checkJoiningEligibility(
         user,

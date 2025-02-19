@@ -336,6 +336,24 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
       return;
     }
 
+    if (user.freeAccess) {
+      // Allow user to join the class immediately
+      const success = await enrollInClass(
+        classId,
+        user.uid,
+        classData.adminId,
+        false
+      );
+      if (success) {
+        setIsBookingConfirmationOpen(false);
+        setIsModalOpen(false);
+        toast.success("Successfully enrolled in class!");
+      } else {
+        toast.error("Failed to enroll in class.");
+      }
+      return;
+    }
+
     const { success, method } = await handleClassBooking(
       user,
       classData.classType, // Make sure this is available in your component props
