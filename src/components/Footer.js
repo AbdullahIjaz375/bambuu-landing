@@ -20,9 +20,19 @@ const Footer = () => {
           </Link>
         </div>
         <div className="flex flex-row items-center justify-center space-x-12">
-          <img alt="bambuu" src="/images/insta.png" className="w-auto h-auto" />
-          <img alt="bambuu" src="/images/x.png" className="w-auto h-auto" />
-          <img alt="bambuu" src="/images/fb.png" className="w-auto h-auto" />
+          <a href="https://www.instagram.com/bammbuu_languages/">
+            {" "}
+            <img
+              alt="bambuu"
+              src="/images/insta.png"
+              className="w-auto h-auto"
+            />
+          </a>
+          <a href="https://www.facebook.com/profile.php?id=61565466403338">
+            {" "}
+            <img alt="bambuu" src="/images/fb.png" className="w-auto h-auto" />
+          </a>
+          {/* <img alt="bambuu" src="/images/x.png" className="w-auto h-auto" /> */}
         </div>
         <div className="flex flex-row items-center space-x-6">
           {" "}
