@@ -167,8 +167,8 @@ const Landing = () => {
           </Button>
           <img
             alt="bambuu"
-            src="/images/landing-laptop.png"
-            className="w-full lg:w-[150vh] h-auto"
+            src="/svgs/new1.svg"
+            className=" lg:w-[50vh] h-auto"
           />
         </motion.div>
       </div>
