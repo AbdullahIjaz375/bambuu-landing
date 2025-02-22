@@ -8,6 +8,7 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
+import { OAuthProvider } from "firebase/auth";
 import { useNavigate, Link } from "react-router-dom";
 import { Button, TextInput, Paper, Divider, Group, Title } from "@mantine/core";
 import { FaFacebook } from "react-icons/fa6";
@@ -26,6 +27,7 @@ import { getMessaging, getToken } from "firebase/messaging";
 const Login = () => {
   const googleProvider = new GoogleAuthProvider();
   const facebookProvider = new FacebookAuthProvider();
+  const appleProvider = new OAuthProvider("apple.com");
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [emailError, setEmailError] = useState("");
@@ -52,6 +54,149 @@ const Login = () => {
       return null;
     }
   };
+
+  const handleAppleLoginStudent = async () => {
+    try {
+      const result = await signInWithPopup(auth, appleProvider);
+      const user = result.user;
+
+      const userRef = doc(db, "students", user.uid);
+      const userDoc = await getDoc(userRef);
+
+      const notificationPrefsRef = doc(
+        db,
+        "notification_preferences",
+        user.uid
+      );
+      const notificationPrefsDoc = await getDoc(notificationPrefsRef);
+
+      let isFirstTimeLogin = false;
+      const fcmToken = await getFCMToken();
+
+      if (!userDoc.exists()) {
+        isFirstTimeLogin = true;
+        const newUserData = {
+          email: user.email,
+          name: user.displayName || "",
+          uid: user.uid,
+          enrolledClasses: [],
+          joinedGroups: [],
+          adminOfClasses: [],
+          adminOfGroups: [],
+          lastLoggedIn: serverTimestamp(),
+          learningLanguage: "",
+          learningLanguageProficiency: "Beginner",
+          nativeLanguage: "",
+          freeAccess: true,
+          country: "",
+          photoUrl: "",
+          savedDocuments: [],
+          tier: 1,
+          currentStreak: 1,
+          fcmToken: fcmToken || "",
+          credits: 0,
+          subscriptions: [
+            {
+              endDate: null,
+              startDate: null,
+              type: "None",
+            },
+          ],
+        };
+
+        await setDoc(userRef, newUserData);
+
+        if (!notificationPrefsDoc.exists()) {
+          await setDoc(notificationPrefsRef, {
+            userId: user.uid,
+            appUpdates: true,
+            classReminder: true,
+            groupChat: true,
+            newMessages: true,
+            resourceAssign: true,
+          });
+        }
+
+        updateUserData({
+          ...newUserData,
+          lastLoggedIn: new Date(),
+        });
+      } else {
+        const userData = userDoc.data();
+        const lastLoggedIn = userData.lastLoggedIn
+          ? userData.lastLoggedIn.toDate()
+          : null;
+        const currentStreak = userData.currentStreak || 0;
+
+        const now = new Date();
+        let updatedStreak = currentStreak;
+
+        if (lastLoggedIn) {
+          const lastLoginDate = new Date(
+            lastLoggedIn.getFullYear(),
+            lastLoggedIn.getMonth(),
+            lastLoggedIn.getDate()
+          );
+          const currentDate = new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            now.getDate()
+          );
+
+          const differenceInDays =
+            (currentDate - lastLoginDate) / (1000 * 60 * 60 * 24);
+
+          if (differenceInDays === 1) {
+            updatedStreak = currentStreak + 1;
+          } else if (differenceInDays > 1) {
+            updatedStreak = 1;
+          }
+        } else {
+          updatedStreak = 1;
+        }
+
+        await updateDoc(userRef, {
+          lastLoggedIn: serverTimestamp(),
+          currentStreak: updatedStreak,
+        });
+
+        const permission = await Notification.requestPermission();
+        if (permission === "granted") {
+          const fcmToken = await getToken(messaging, {
+            vapidKey: process.env.REACT_APP_FIREBASE_VAPID_KEY,
+          });
+          console.log("FCM Token:", fcmToken);
+
+          await updateDoc(userRef, {
+            fcmToken: fcmToken,
+          });
+        } else {
+          console.warn("Notification permission not granted");
+        }
+
+        updateUserData({
+          ...userData,
+          currentStreak: updatedStreak,
+          lastLoggedIn: now,
+          userType: "student",
+        });
+      }
+
+      toast.success("Logged in successfully!", { autoClose: 3000 });
+
+      if (isFirstTimeLogin) {
+        navigate("/userEditProfile", { replace: true });
+      } else {
+        navigate("/learn", { replace: true });
+      }
+    } catch (error) {
+      console.error("Error during Apple login:", error);
+      updateUserData(null);
+
+      toast.error("Failed to log in with Apple", { autoClose: 5000 });
+    }
+  };
+
   const handleGoogleLoginStudent = async () => {
     // const loadingToastId = toast.loading("Logging in...");
 
@@ -81,6 +226,7 @@ const Login = () => {
           uid: user.uid,
           enrolledClasses: [],
           joinedGroups: [],
+          freeAccess: true,
           adminOfClasses: [],
           adminOfGroups: [],
           lastLoggedIn: serverTimestamp(),
@@ -545,11 +691,15 @@ const Login = () => {
             <span>Google</span>
           </button>
           <button
-            onClick={handleFacebookLogin}
-            className="flex items-center justify-center px-4 py-2 space-x-4 border border-gray-300 rounded-full hover:bg-gray-50"
+            onClick={handleAppleLoginStudent}
+            className="flex items-center justify-center px-4 py-2 space-x-4 text-white bg-black border border-black rounded-full"
           >
-            <img alt="google" src="/svgs/login-fb.svg" />
-            <span>Facebook</span>
+            <img
+              alt="google"
+              className="w-auto h-6"
+              src="/images/apple-white.png"
+            />
+            <span>Apple</span>
           </button>
         </div>
 
