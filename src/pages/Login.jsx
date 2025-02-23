@@ -120,6 +120,7 @@ const Login = () => {
         updateUserData({
           ...newUserData,
           lastLoggedIn: new Date(),
+          userType: "student", // Set userType in context only
         });
       } else {
         const userData = userDoc.data();
