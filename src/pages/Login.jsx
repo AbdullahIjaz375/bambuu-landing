@@ -267,6 +267,7 @@ const Login = () => {
         updateUserData({
           ...newUserData,
           lastLoggedIn: new Date(),
+          userType: "student", // Set userType in context only
         });
       } else {
         // Update existing user
