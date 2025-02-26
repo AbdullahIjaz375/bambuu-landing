@@ -2,7 +2,15 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ClipLoader } from "react-spinners";
 import { db } from "../../firebaseConfig";
-import { collection, getDocs, query, limit, orderBy } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+  orderBy,
+  limit,
+  startAfter,
+} from "firebase/firestore";
 import { useAuth } from "../../context/AuthContext";
 import ProfileSetupClassCard from "../../components/ProfileSetupClassCard";
 import ProfileSetupGroupCard from "../../components/ProfileSetupGroupCard";
@@ -21,9 +29,11 @@ const ProfileSetup = () => {
       setLoading(true);
       setError(null);
       try {
+        // Fetch random classes
         const classesQuery = query(
           collection(db, "classes"),
-          orderBy("className", "asc"),
+          where("availableSpots", ">", 0),
+          orderBy("availableSpots"),
           limit(3)
         );
         const classesSnapshot = await getDocs(classesQuery);
@@ -33,14 +43,15 @@ const ProfileSetup = () => {
         }));
 
         const filteredClasses = classesData.filter(
-          (cls) =>
-            !user?.enrolledClasses?.includes(cls.id) && cls.availableSpots > 0
+          (cls) => !user?.enrolledClasses?.includes(cls.id)
         );
         setClasses(filteredClasses);
 
+        // Fetch random groups
         const groupsQuery = query(
           collection(db, "groups"),
-          orderBy("groupName", "asc"),
+          where("isPremium", "==", false),
+          orderBy("groupName"),
           limit(3)
         );
 
@@ -51,7 +62,7 @@ const ProfileSetup = () => {
         }));
 
         const filteredGroups = groupsData.filter(
-          (group) => !user?.joinedGroups?.includes(group.id) && !group.isPremium
+          (group) => !user?.joinedGroups?.includes(group.id)
         );
         setGroups(filteredGroups);
       } catch (error) {
