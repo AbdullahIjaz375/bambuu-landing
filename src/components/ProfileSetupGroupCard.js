@@ -202,6 +202,11 @@ const ProfileSetupGroupCard = ({ group }) => {
   } = group;
 
   const checkValidSubscription = () => {
+    // Check freeAccess flag first
+    if (user?.freeAccess) {
+      return true;
+    }
+
     // Check if user has any subscriptions
     if (!user.subscriptions || user.subscriptions.length === 0) {
       return false;

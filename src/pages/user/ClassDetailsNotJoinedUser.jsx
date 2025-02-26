@@ -14,6 +14,7 @@ import { useClassBooking } from "../../hooks/useClassBooking";
 import PlansModal from "../../components/PlansModal";
 import EmptyState from "../../components/EmptyState";
 import { toast } from "react-toastify";
+import { checkAccess } from "../../utils/accessControl";
 
 Modal.setAppElement("#root");
 
@@ -687,6 +688,18 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
   }
 
   if (!classData) return null;
+
+  // Determine if premium content is accessible
+  const canAccessPremium =
+    user?.freeAccess ||
+    user?.subscriptions?.some((sub) => {
+      if (!sub.endDate) return false;
+      const endDate = new Date(sub.endDate.seconds * 1000);
+      return (
+        endDate > new Date() &&
+        sub.type === "bammbuu+ Instructor-led group Classes"
+      );
+    });
 
   return (
     <>

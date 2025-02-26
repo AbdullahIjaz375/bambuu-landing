@@ -12,6 +12,7 @@ import { ClipLoader } from "react-spinners";
 import ExploreClassCard from "../../components/ExploreClassCard";
 import ExploreGroupCard from "../../components/ExploreGroupCard";
 import EmptyState from "../../components/EmptyState";
+import { checkAccess } from "../../utils/accessControl";
 
 const LearnLanguageUser = () => {
   const [searchParams] = useSearchParams();
@@ -153,6 +154,20 @@ const LearnLanguageUser = () => {
 
   const handleBack = () => {
     navigate(-1);
+  };
+
+  const handleJoinGroup = (group) => {
+    if (group.isPremium) {
+      const access = checkAccess(user, "premium-group");
+      if (!access.hasAccess) {
+        // Redirect to plans page
+        navigate("/plans");
+        return;
+      }
+    }
+
+    // Continue with joining logic
+    // ...
   };
 
   return (

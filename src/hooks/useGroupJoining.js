@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { checkAccess } from "../utils/accessControl";
 
 export const useGroupJoining = () => {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -11,6 +12,15 @@ export const useGroupJoining = () => {
         canJoin: true,
         useSubscription: false,
         message: "Standard group joining",
+      };
+    }
+
+    // First check freeAccess flag
+    if (user?.freeAccess) {
+      return {
+        canJoin: true,
+        useSubscription: false,
+        message: "Free access enabled",
       };
     }
 

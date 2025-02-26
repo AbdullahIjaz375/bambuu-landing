@@ -203,18 +203,18 @@ const GroupCard = ({ group }) => {
   } = group;
 
   const checkValidSubscription = () => {
+    // Check freeAccess flag first
+    if (user?.freeAccess) {
+      return true;
+    }
+
     // Check if user has any subscriptions
     if (!user.subscriptions || user.subscriptions.length === 0) {
       return false;
     }
 
-    // Find a valid Bammbuu Groups subscription
-    return user.subscriptions.some(
-      (sub) =>
-        sub.type === "Bammbuu Groups" &&
-        (!sub.endDate || new Date(sub.endDate) > new Date()) &&
-        (!sub.startDate || new Date(sub.startDate) <= new Date())
-    );
+    // Original subscription check
+    // ...rest of the check
   };
 
   const handlePremiumAccess = () => {

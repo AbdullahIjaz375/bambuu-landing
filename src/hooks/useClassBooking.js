@@ -8,6 +8,7 @@ import {
   Timestamp,
 } from "firebase/firestore";
 import { db } from "../firebaseConfig";
+import { checkAccess } from "../utils/accessControl";
 
 export const useClassBooking = () => {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -28,6 +29,17 @@ export const useClassBooking = () => {
       };
     }
 
+    // Check freeAccess flag first
+    if (user?.freeAccess) {
+      return {
+        canBook: true,
+        useSubscription: false,
+        useCredits: false,
+        message: "Free access enabled",
+      };
+    }
+
+    // Continue with existing subscription and credits checks
     const currentDate = new Date();
     const validSubscriptions =
       subscriptions?.filter((sub) => {
