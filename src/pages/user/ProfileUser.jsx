@@ -1,32 +1,14 @@
-import { Search } from "lucide-react";
 import React, { useState, useEffect } from "react";
-import {
-  Bell,
-  ChevronLeft,
-  ChevronRight,
-  Users,
-  BookOpen,
-  Star,
-  Database,
-  UserCircle,
-  User,
-  ArrowLeft,
-  Globe,
-} from "lucide-react";
-import { Settings, Edit, LogOut } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { signOut } from "firebase/auth";
 import { toast } from "react-toastify";
-import { auth } from "../../firebaseConfig";
+import { auth, db } from "../../firebaseConfig";
 import { useTranslation } from "react-i18next";
 
 import Sidebar from "../../components/Sidebar";
-import ClassCard from "../../components/ClassCard";
 import { useAuth } from "../../context/AuthContext";
-import GroupCard from "../../components/GroupCard";
 import { useNavigate } from "react-router-dom";
-import { db } from "../../firebaseConfig";
 import { doc, getDoc } from "firebase/firestore";
-import { ClipLoader } from "react-spinners";
 
 const ProfileUser = () => {
   const { user, setUser } = useAuth();

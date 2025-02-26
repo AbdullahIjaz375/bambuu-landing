@@ -26,7 +26,6 @@ import {
 import { getMessaging, getToken } from "firebase/messaging";
 const Login = () => {
   const googleProvider = new GoogleAuthProvider();
-  const facebookProvider = new FacebookAuthProvider();
   const appleProvider = new OAuthProvider("apple.com");
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
@@ -199,8 +198,6 @@ const Login = () => {
   };
 
   const handleGoogleLoginStudent = async () => {
-    // const loadingToastId = toast.loading("Logging in...");
-
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;

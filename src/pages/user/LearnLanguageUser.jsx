@@ -1,17 +1,5 @@
-import { Search } from "lucide-react";
 import React, { useState, useEffect } from "react";
-import {
-  Bell,
-  ChevronLeft,
-  ChevronRight,
-  Users,
-  BookOpen,
-  Star,
-  Database,
-  UserCircle,
-  User,
-  ArrowLeft,
-} from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import Sidebar from "../../components/Sidebar";
 import ClassCard from "../../components/ClassCard";

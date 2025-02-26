@@ -239,15 +239,6 @@ const GroupCard = ({ group }) => {
   const handleClick = () => {
     navigate(`/newGroupDetailsUser/${groupId}`);
   };
-  // const handleJoinClick = (e) => {
-  //   e.stopPropagation(); // Prevent triggering the card click
-  //   setShowJoinConfirmation(true);
-  // };
-
-  // const handleClick = () => {
-  //   // Note: Removed useNavigate since it should be passed as a prop or handled differently
-  //   navigate(`/newGroupDetailsUser/${groupId}`);
-  // };
 
   const updateContextAndSession = (newGroupId) => {
     // Create updated user object with new group
@@ -377,7 +368,10 @@ const GroupCard = ({ group }) => {
           </div>
 
           {/* Group Name */}
-          <h2 className="mb-2 text-xl font-bold text-center text-gray-900 truncate">
+          <h2
+            className="mb-2 text-xl font-bold text-center text-gray-900 truncate max-w-full"
+            title={groupName}
+          >
             {groupName}
           </h2>
 
@@ -422,8 +416,14 @@ const GroupCard = ({ group }) => {
               ) : (
                 <User className="w-5 h-5 text-gray-600" />
               )}{" "}
-              <span className="text-xs text-gray-700 truncate">
-                {groupAdminName} <span className="text-gray-500">(Admin)</span>
+              <span
+                className="text-xs text-gray-700 truncate"
+                title={groupAdminName}
+              >
+                {groupAdminName.length > 10
+                  ? `${groupAdminName.slice(0, 10)}...`
+                  : groupAdminName}{" "}
+                <span className="text-gray-500">(Admin)</span>
               </span>
             </div>
             <div className="flex items-center gap-1">
