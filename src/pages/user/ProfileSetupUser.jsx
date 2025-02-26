@@ -32,9 +32,8 @@ const ProfileSetup = () => {
         // Fetch random classes
         const classesQuery = query(
           collection(db, "classes"),
-          where("availableSpots", ">", 0),
-          orderBy("availableSpots"),
-          limit(3)
+          where("availableSpots", ">", 0), // Only filter by availableSpots
+          limit(3) // Limit the results
         );
         const classesSnapshot = await getDocs(classesQuery);
         const classesData = classesSnapshot.docs.map((doc) => ({
@@ -50,9 +49,8 @@ const ProfileSetup = () => {
         // Fetch random groups
         const groupsQuery = query(
           collection(db, "groups"),
-          where("isPremium", "==", false),
-          orderBy("groupName"),
-          limit(3)
+          where("isPremium", "==", false), // Only filter by isPremium
+          limit(3) // Limit the results
         );
 
         const groupsSnapshot = await getDocs(groupsQuery);
