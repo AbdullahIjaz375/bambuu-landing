@@ -107,38 +107,50 @@ const ProfileSetup = () => {
       </div>
     );
   }
-  const TooltipOverlay = () => (
-    <div className="absolute z-50 transform -translate-y-full left-4 top-4">
-      <div className="p-5 bg-[#042F0C] text-white rounded-2xl w-96">
-        <h3 className="mb-2 text-sm font-medium">
-          {currentView === "groups"
-            ? "Join 1 or more groups."
-            : "Book 1 or more Classes"}
-        </h3>
-        <p className="mb-4 text-sm">
-          {currentView === "groups"
-            ? "Make the most out of bammbuu. Learn and practice languages through conversation."
-            : "Book unlimited live group conversation classes hosted by certified language instructors for one monthly price. These classes are more structured and expert feedback is provided to help with your learning."}
-        </p>
-        <div className="flex items-center justify-between">
-          <button onClick={handleSkip} className="text-white hover:underline">
-            Skip
-          </button>
-          <div className="flex items-center gap-4">
-            <button
-              onClick={handleNext}
-              className="px-4 py-1 bg-white text-[#043D11] rounded-full hover:bg-opacity-90"
-            >
-              {currentView === "groups" ? "Next (1/2)" : "Next (2/2)"}
+  const TooltipOverlay = () => {
+    const noContentMessage =
+      currentView === "groups"
+        ? groups.length === 0
+          ? "No groups currently available."
+          : "Join 1 or more groups."
+        : classes.length === 0
+        ? "No classes currently available."
+        : "Book 1 or more Classes";
+
+    const tooltipDescription =
+      currentView === "groups"
+        ? "Make the most out of bammbuu. Learn and practice languages through conversation."
+        : "Book unlimited live group conversation classes hosted by certified language instructors for one monthly price. These classes are more structured and expert feedback is provided to help with your learning.";
+
+    return (
+      <div className="absolute z-50 transform -translate-y-full left-4 top-4">
+        <div className="p-5 bg-[#042F0C] text-white rounded-2xl w-96">
+          <h3 className="mb-2 text-sm font-medium">{noContentMessage}</h3>
+          {/* Conditionally render the description only if there are groups or classes */}
+          {(currentView === "groups" && groups.length > 0) ||
+          (currentView === "classes" && classes.length > 0) ? (
+            <p className="mb-4 text-sm">{tooltipDescription}</p>
+          ) : null}
+          <div className="flex items-center justify-between">
+            <button onClick={handleSkip} className="text-white hover:underline">
+              Skip
             </button>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={handleNext}
+                className="px-4 py-1 bg-white text-[#043D11] rounded-full hover:bg-opacity-90"
+              >
+                {currentView === "groups" ? "Next (1/2)" : "Next (2/2)"}
+              </button>
+            </div>
           </div>
         </div>
+        <div className="absolute -bottom-2 left-12">
+          <div className="w-0 h-0 border-l-8 border-r-8 border-t-8 border-transparent border-t-[#042F0C]" />
+        </div>
       </div>
-      <div className="absolute -bottom-2 left-12">
-        <div className="w-0 h-0 border-l-8 border-r-8 border-t-8 border-transparent border-t-[#042F0C]" />
-      </div>
-    </div>
-  );
+    );
+  };
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <div className="w-full max-w-5xl px-4 py-8 mx-auto">
@@ -151,19 +163,31 @@ const ProfileSetup = () => {
         <div className="relative my-20">
           {currentView === "groups" ? (
             <div className="grid grid-cols-1 gap-4 mb-8 md:grid-cols-3">
-              {groups.map((group) => (
-                <ProfileSetupGroupCard key={group.id} group={group} />
-              ))}
+              {groups.length > 0 ? (
+                groups.map((group) => (
+                  <ProfileSetupGroupCard key={group.id} group={group} />
+                ))
+              ) : (
+                <div className="col-span-3 text-center text-gray-500">
+                  No groups available to join at the moment.
+                </div>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4 mb-8 md:grid-cols-3">
-              {classes.map((classItem) => (
-                <ProfileSetupClassCard
-                  key={classItem.id}
-                  {...classItem}
-                  isBammbuu={Boolean(classItem.tutorId)}
-                />
-              ))}
+              {classes.length > 0 ? (
+                classes.map((classItem) => (
+                  <ProfileSetupClassCard
+                    key={classItem.id}
+                    {...classItem}
+                    isBammbuu={Boolean(classItem.tutorId)}
+                  />
+                ))
+              ) : (
+                <div className="col-span-3 text-center text-gray-500">
+                  No classes available to book at the moment.
+                </div>
+              )}
             </div>
           )}
           <TooltipOverlay />
