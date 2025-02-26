@@ -527,7 +527,6 @@ const Signup = () => {
           country: "",
           photoUrl: "",
           savedDocuments: [],
-          tier: 1,
           currentStreak: 1,
           fcmToken: fcmToken || "",
           credits: 0,
@@ -556,7 +555,7 @@ const Signup = () => {
         updateUserData({
           ...newUserData,
           lastLoggedIn: new Date(),
-          userType: "student", // Set userType in context only
+          userType: "student",
         });
       } else {
         const userData = userDoc.data();
@@ -635,8 +634,6 @@ const Signup = () => {
   };
 
   const handleGoogleLoginStudent = async () => {
-    // const loadingToastId = toast.loading("Logging in...");
-
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
@@ -652,11 +649,10 @@ const Signup = () => {
       const notificationPrefsDoc = await getDoc(notificationPrefsRef);
 
       let isFirstTimeLogin = false;
-      const fcmToken = await getFCMToken(); // Call getFCMToken here
+      const fcmToken = await getFCMToken();
 
       if (!userDoc.exists()) {
         isFirstTimeLogin = true;
-        // Create new user document
         const newUserData = {
           email: user.email,
           name: user.displayName || "",
@@ -669,15 +665,13 @@ const Signup = () => {
           learningLanguage: "",
           learningLanguageProficiency: "Beginner",
           nativeLanguage: "",
+          freeAccess: true,
           country: "",
           photoUrl: "",
-          freeAccess: true,
           savedDocuments: [],
           currentStreak: 1,
-          fcmToken: fcmToken || "", // Add FCM token
+          fcmToken: fcmToken || "",
           credits: 0,
-          languagePreference: "en",
-
           subscriptions: [
             {
               endDate: null,
@@ -703,18 +697,16 @@ const Signup = () => {
         await setDoc(doc(db, "user_accounts", auth.currentUser.uid), {
           uid: auth.currentUser.uid,
           email: auth.currentUser.email,
-          sign_up_method: "google", // or dynamically detect sign-up method
+          sign_up_method: "google",
           created_at: serverTimestamp(),
         });
 
-        // Update session with new user data
         updateUserData({
           ...newUserData,
           lastLoggedIn: new Date(),
-          userType: "student", // Set userType in context only
+          userType: "student",
         });
       } else {
-        // Update existing user
         const userData = userDoc.data();
         const lastLoggedIn = userData.lastLoggedIn
           ? userData.lastLoggedIn.toDate()
@@ -748,14 +740,25 @@ const Signup = () => {
           updatedStreak = 1;
         }
 
-        // Update Firestore
         await updateDoc(userRef, {
           lastLoggedIn: serverTimestamp(),
           currentStreak: updatedStreak,
-          // userType: "student", // Ensure userType is stored in Firestore
         });
 
-        // Update session with updated user data
+        const permission = await Notification.requestPermission();
+        if (permission === "granted") {
+          const fcmToken = await getToken(messaging, {
+            vapidKey: process.env.REACT_APP_FIREBASE_VAPID_KEY,
+          });
+          console.log("FCM Token:", fcmToken);
+
+          await updateDoc(userRef, {
+            fcmToken: fcmToken,
+          });
+        } else {
+          console.warn("Notification permission not granted");
+        }
+
         updateUserData({
           ...userData,
           currentStreak: updatedStreak,
@@ -766,8 +769,9 @@ const Signup = () => {
 
       toast.success("Logged in successfully!", { autoClose: 3000 });
 
-      if (isFirstTimeLogin) {
-        navigate("/userEditProfile", { replace: true });
+      if (isFirstTimeLogin || !userDoc.data().name) {
+        setIsEmailVerified(true);
+        setHasProfile(false);
       } else {
         navigate("/learn", { replace: true });
       }
