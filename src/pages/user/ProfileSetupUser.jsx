@@ -23,7 +23,7 @@ const ProfileSetup = () => {
       try {
         const classesQuery = query(
           collection(db, "classes"),
-          orderBy("classDateTime", "desc"),
+          orderBy("className", "asc"),
           limit(3)
         );
         const classesSnapshot = await getDocs(classesQuery);
@@ -40,7 +40,7 @@ const ProfileSetup = () => {
 
         const groupsQuery = query(
           collection(db, "groups"),
-          orderBy("groupName", "asc"), // Assuming groupName is always present
+          orderBy("groupName", "asc"),
           limit(3)
         );
 
