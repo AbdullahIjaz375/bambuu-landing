@@ -9,7 +9,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import { useParams } from "react-router-dom";
 
-const CommunityUser = () => {
+const MessagesUser = () => {
   const { user } = useAuth();
   const [channels, setChannels] = useState([]);
   const [selectedChannel, setSelectedChannel] = useState(null);
@@ -18,7 +18,7 @@ const CommunityUser = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [unreadCounts, setUnreadCounts] = useState({});
   const [groupLanguages, setGroupLanguages] = useState({});
-  const { channelId: urlChannelId } = useParams(); // Extract channelId from URL
+  const { channelId: urlChannelId } = useParams();
 
   const handleChannelLeave = (channelId) => {
     setChannels((prevChannels) =>
@@ -477,4 +477,4 @@ const CommunityUser = () => {
   );
 };
 
-export default CommunityUser;
+export default MessagesUser;

@@ -25,7 +25,7 @@ import ProfileUser from "./pages/user/ProfileUser";
 import UserEditProfile from "./pages/user/UserEditProfile";
 import UserSettings from "./pages/user/UserSettings";
 import SuperTutorUser from "./pages/user/SuperTutorUser";
-import CommunityUser from "./pages/user/CommunityUser";
+import MessagesUser from "./pages/user/MessagesUser";
 import Splash from "./pages/Splash";
 import LanguageExpertsUser from "./pages/user/LanguageExpertsUser";
 import SavedRecourcesUser from "./pages/user/SavedRecourcesUser";
@@ -177,10 +177,10 @@ const App = () => {
             />
 
             <Route
-              path="/communityUser/:channelId?"
+              path="/messagesUser/:channelId?"
               element={
                 <ProtectedRoute requiredRole="student">
-                  <CommunityUser />
+                  <MessagesUser />
                 </ProtectedRoute>
               }
             />

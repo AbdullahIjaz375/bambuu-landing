@@ -31,7 +31,7 @@ const SplashScreen = () => {
 
   const handleNext = () => {
     if (currentStep === splashContent.length - 1) {
-      navigate("/login");
+      navigate("/signup");
     } else {
       setCurrentStep((prev) => prev + 1);
       sliderRef.current.slickNext();
@@ -39,7 +39,7 @@ const SplashScreen = () => {
   };
 
   const handleSkip = () => {
-    navigate("/login");
+    navigate("/signup");
   };
 
   const settings = {

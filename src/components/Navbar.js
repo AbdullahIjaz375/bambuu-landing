@@ -4,11 +4,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { auth } from "../firebaseConfig";
 import { signOut } from "firebase/auth";
 import { toast } from "react-toastify";
-import { FaBars, FaTimes } from "react-icons/fa";
-import { Avatar, TextInput, Button, Menu } from "@mantine/core";
-import { IoSearchOutline } from "react-icons/io5";
+import { Avatar, Button, Menu } from "@mantine/core";
 import { LuCrown, LuLogOut } from "react-icons/lu";
-import { TbLogout2 } from "react-icons/tb";
 import { FaAngleDown } from "react-icons/fa6";
 
 const Navbar = ({ user }) => {
@@ -28,10 +25,6 @@ const Navbar = ({ user }) => {
       toast.error("Error during logout");
       console.error("Error during logout:", error);
     }
-  };
-
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
   const toggleDropdown = () => {
