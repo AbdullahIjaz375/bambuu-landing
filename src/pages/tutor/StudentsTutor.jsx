@@ -81,6 +81,22 @@ const StudentsTutor = () => {
                   [channel.id]: unreadCount,
                 }));
               }
+
+              // Re-sort channels based on the latest message
+              setChannels((prevChannels) => {
+                const updatedChannels = prevChannels.map((ch) =>
+                  ch.id === channel.id ? channel : ch
+                );
+                return updatedChannels.sort((a, b) => {
+                  const aLastMessage = a.state.last_message_at
+                    ? new Date(a.state.last_message_at).getTime()
+                    : 0;
+                  const bLastMessage = b.state.last_message_at
+                    ? new Date(b.state.last_message_at).getTime()
+                    : 0;
+                  return bLastMessage - aLastMessage;
+                });
+              });
             });
 
             channel.on("notification.message_new", (event) => {
