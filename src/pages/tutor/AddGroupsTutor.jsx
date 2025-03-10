@@ -12,8 +12,6 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "../../firebaseConfig";
 import { createStreamChannel } from "../../services/streamService";
 import { ChannelType } from "../../config/stream";
-import Navbar from "../../components/Navbar";
-import Footer from "../../components/Footer";
 import Sidebar from "../../components/Sidebar";
 import { ArrowLeft, ImagePlus } from "lucide-react";
 
@@ -28,7 +26,6 @@ const AddGroupsTutor = () => {
   const [image, setImage] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [learningLanguage, setLearningLanguage] = useState("");
-  const [languageLevel, setLanguageLevel] = useState("");
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -94,7 +91,6 @@ const AddGroupsTutor = () => {
         groupAdminImageUrl: user.photoUrl || null,
         memberIds: [],
         classIds: [],
-        // createdAt: new Date().toISOString(),
         isPremium: true,
         imageUrl,
       };

@@ -4,7 +4,7 @@ import Sidebar from "../../components/Sidebar";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import GroupCardTutor from "../../components-tutor/GroupCardTutor";
-import { collection, doc, getDoc } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import { ClipLoader } from "react-spinners";
 import EmptyState from "../../components/EmptyState";

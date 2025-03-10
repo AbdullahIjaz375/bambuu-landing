@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next";
 const Sidebar = ({ user }) => {
   const location = useLocation();
   const { t } = useTranslation();
-  console.log("Current user type:", user?.userType);
   const studentMenuItems = [
     {
       path: "/learn",

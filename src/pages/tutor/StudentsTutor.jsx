@@ -5,6 +5,7 @@ import { useAuth } from "../../context/AuthContext";
 import { streamClient } from "../../config/stream";
 import Sidebar from "../../components/Sidebar";
 import { ClipLoader } from "react-spinners";
+import { ConsoleLevel } from "@zegocloud/zego-uikit-prebuilt";
 
 const StudentsTutor = () => {
   const { user } = useAuth();
@@ -35,8 +36,8 @@ const StudentsTutor = () => {
       if (!user) return;
 
       try {
+        // Filter for all channels
         const filter = {
-          members: { $in: [user.uid] },
           type: {
             $in: [
               "standard_group",
@@ -45,21 +46,24 @@ const StudentsTutor = () => {
               "one_to_one_chat",
             ],
           },
+          members: { $in: [user.uid] },
         };
 
-        const sort = { last_message_at: -1 };
-
-        const channels = await streamClient.queryChannels(filter, sort, {
-          watch: true,
-          state: true,
-          presence: true,
-          message_retention: "infinite",
-        });
+        // Query all channels
+        const allChannels = await streamClient.queryChannels(
+          filter,
+          {},
+          {
+            watch: true,
+            state: true,
+            presence: true,
+          }
+        );
 
         // Initialize unread counts
         const counts = {};
         await Promise.all(
-          channels.map(async (channel) => {
+          allChannels.map(async (channel) => {
             const state = await channel.watch();
             const channelState = channel.state;
             counts[channel.id] = channelState.unreadCount || 0;
@@ -94,7 +98,19 @@ const StudentsTutor = () => {
         );
 
         setUnreadCounts(counts);
-        const validChannels = channels.filter(
+
+        // Sort channels based on last_message_at
+        const sortedChannels = allChannels.sort((a, b) => {
+          const aLastMessage = a.state.last_message_at
+            ? new Date(a.state.last_message_at).getTime()
+            : 0;
+          const bLastMessage = b.state.last_message_at
+            ? new Date(b.state.last_message_at).getTime()
+            : 0;
+          return bLastMessage - aLastMessage;
+        });
+
+        const validChannels = sortedChannels.filter(
           (channel) => channel.data.name && channel.data.name.trim() !== ""
         );
         setChannels(validChannels);
@@ -184,7 +200,8 @@ const StudentsTutor = () => {
   const groupChats = filterChannels(
     channels.filter(
       (channel) =>
-        channel.type === "premium_group" &&
+        (channel.type === "premium_group" ||
+          channel.type === "standard_group") &&
         channel.data.name &&
         channel.data.name.trim() !== ""
     )
@@ -253,7 +270,9 @@ const StudentsTutor = () => {
                 <input
                   type="text"
                   placeholder={
-                    activeTab === "students" ? "Search student" : "Search group"
+                    activeTab === "students"
+                      ? "Search student"
+                      : "Search groups"
                   }
                   className="w-full py-2 pl-12 pr-4 border border-gray-200 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                   value={searchQuery}
@@ -270,6 +289,13 @@ const StudentsTutor = () => {
                         selectedChannel?.id === channel.id ? "bg-[#f0fdf1]" : ""
                       }`}
                       onClick={() => handleChannelSelect(channel)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyPress={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          handleChannelSelect(channel);
+                        }
+                      }}
                     >
                       <div className="relative">
                         <img
@@ -277,9 +303,6 @@ const StudentsTutor = () => {
                           alt={channel.data.name}
                           className="object-cover w-12 h-12 rounded-full"
                         />
-                        {/* {!channel.data.disabled && (
-                          <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full" />
-                        )} */}
                       </div>
                       <div className="flex-1">
                         <div className="flex justify-between">
