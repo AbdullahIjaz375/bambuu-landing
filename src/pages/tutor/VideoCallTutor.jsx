@@ -378,7 +378,7 @@ const VideoCallTutor = () => {
         setCurrentCall(null);
         
         // Navigate away or show a post-call screen
-        window.location.href = '/dashboard'; // Example redirect
+        window.location.href = '/learn'; // Example redirect
       }
     } catch (error) {
       console.error("Error leaving call:", error);

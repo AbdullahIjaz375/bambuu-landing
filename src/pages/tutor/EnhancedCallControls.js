@@ -360,7 +360,7 @@ const EnhancedCallControls = ({ onLeaveCall, onLayoutChange }) => {
   );
 };
 
-// Optional: Add these animations to your CSS
+// Optional: Add these animations to your CSSs
 // .animate-slide-in { animation: slideIn 0.3s ease-out; }
 // .animate-fade-in { animation: fadeIn 0.2s ease-out; }
 // @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
