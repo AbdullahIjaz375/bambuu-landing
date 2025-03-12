@@ -1,5 +1,6 @@
 // src/config/stream.js
 import { StreamChat } from "stream-chat";
+import { StreamVideoClient } from "@stream-io/video-react-sdk";
 
 export const streamApiKey = process.env.REACT_APP_STREAM_API_KEY;
 export const streamClient = StreamChat.getInstance(streamApiKey, {
@@ -7,6 +8,9 @@ export const streamClient = StreamChat.getInstance(streamApiKey, {
   axiosRequestConfig: {
     timeout: 20000,
   },
+});
+export const streamVideoClient = new StreamVideoClient({
+  apiKey: streamApiKey,
 });
 
 export const ChannelType = {

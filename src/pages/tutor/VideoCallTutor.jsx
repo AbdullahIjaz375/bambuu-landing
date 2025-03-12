@@ -1,5 +1,5 @@
+// src/components/VideoCallTutor.js
 import React, { useEffect, useState, useRef, useContext } from "react";
-import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
 import Modal from "react-modal";
 import { db } from "../../firebaseConfig";
 import {
@@ -15,15 +15,21 @@ import {
 } from "firebase/firestore";
 import { ClassContext } from "../../context/ClassContext";
 import { CopyPlus, LogOut, Users } from "lucide-react";
+import { streamVideoClient, streamClient } from "../../config/stream";
+import {
+  StreamVideo,
+  StreamCall,
+  OwnCapability,
+  CallControls,
+  SpeakerLayout,
+} from "@stream-io/video-react-sdk";
 
 /* Utility to check breakout room creation permissions */
 const canCreateBreakoutRooms = (classId) => {
   try {
     const user = JSON.parse(sessionStorage.getItem("user"));
     if (!user) return false;
-
     const { userType, adminOfClasses = [], tutorOfClasses = [] } = user;
-
     if (userType === "student") {
       return adminOfClasses.includes(classId);
     } else if (userType === "tutor") {
@@ -49,7 +55,6 @@ const VideoCallTutor = () => {
   const [availableSlots, setAvailableSlots] = useState(5);
   const [isCallJoined, setIsCallJoined] = useState(false);
   const [isRoomJoined, setIsRoomJoined] = useState(false);
-
   const [isInMainCall, setIsInMainCall] = useState(false);
 
   // Viewing breakout rooms
@@ -64,11 +69,11 @@ const VideoCallTutor = () => {
   // By default, we start in the main class room (tutorSelectedClassId).
   const [activeRoomId, setActiveRoomId] = useState(tutorSelectedClassId);
 
-  // We’ll keep a reference to the Zego instance so we can leave/destroy it when switching rooms.
-  const zegoInstanceRef = useRef(null);
-  const callContainerRef = useRef(null);
+  // Keep a reference to the current call instance from GetStream.
+  const callInstanceRef = useRef(null);
+  const [currentCall, setCurrentCall] = useState(null);
 
-  // Current user
+  // Current user from Firebase (using uid as unique identifier)
   const user = JSON.parse(sessionStorage.getItem("user"));
 
   // -----------------------------
@@ -104,7 +109,6 @@ const VideoCallTutor = () => {
   // -----------------------------
   //   Create Breakout Rooms
   // -----------------------------
-
   const updateRoomMembers = async (roomId, isJoining = true) => {
     console.log(`updateRoomMembers called with:`, {
       roomId,
@@ -122,20 +126,16 @@ const VideoCallTutor = () => {
         roomId
       );
 
-      // First verify the document exists and log its current state
       const roomDoc = await getDoc(breakoutRoomRef);
       if (!roomDoc.exists()) {
         return;
       }
 
-      // Then update the members
       await updateDoc(breakoutRoomRef, {
         roomMembers: isJoining ? arrayUnion(user.uid) : arrayRemove(user.uid),
       });
 
-      // Verify the update by getting the latest state
-      const updatedDoc = await getDoc(breakoutRoomRef);
-
+      await getDoc(breakoutRoomRef);
       await fetchBreakoutRooms();
     } catch (error) {
       console.error("Error in updateRoomMembers:", {
@@ -196,7 +196,6 @@ const VideoCallTutor = () => {
       setBreakoutRooms(
         querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
       );
-      // setIsViewModalOpen(true);
     } catch (error) {
       console.error("Error fetching breakout rooms:", error);
     }
@@ -205,110 +204,97 @@ const VideoCallTutor = () => {
   // -----------------------------------------
   //  Join any room by roomId (Main or Breakout)
   // -----------------------------------------
-  const joinRoom = (roomId) => {
-    setIsInMainCall(false);
+  const joinRoom = async (roomId) => {
+    try {
+      // Ensure the Stream Video client is connected
+      if (!streamVideoClient.user || !streamVideoClient.user.id) {
+        const token = streamClient.devToken(user.uid);
+        await streamVideoClient.connectUser(
+          {
+            id: user.uid,
+            name: user.name || "",
+            image: user.photoUrl || "",
+            userType: user.userType,
+          },
+          token
+        );
+      }
 
-    // 1) If there's a previous instance, leave the old room
-    if (zegoInstanceRef.current) {
-      // zegoInstanceRef.current.leaveRoom();
-      zegoInstanceRef.current.destroy();
+      // Leave previous call if it exists
+      if (callInstanceRef.current) {
+        await callInstanceRef.current.leave();
+        callInstanceRef.current = null;
+        setCurrentCall(null);
+      }
 
-      // If you want to fully destroy the engine:
-      // zegoInstanceRef.current.destroyEngine();
-      zegoInstanceRef.current = null;
+      // Create a new call instance using the provided roomId
+      const call = streamVideoClient.call("default", roomId);
+
+      // Join the call; if it doesn’t exist, create it
+      try {
+        await call.join({ create: true });
+      } catch (error) {
+        console.error("Error joining the call:", error);
+        return;
+      }
+
+      callInstanceRef.current = call;
+      setCurrentCall(call);
+
+      // Check for permissions before publishing
+      const canSendAudio = call.permissionsContext.hasPermission(
+        OwnCapability.SEND_AUDIO
+      );
+      const canSendVideo = call.permissionsContext.hasPermission(
+        OwnCapability.SEND_VIDEO
+      );
+
+      // Obtain media stream from user's devices
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: canSendVideo,
+        audio: canSendAudio,
+      });
+
+      const videoTracks = mediaStream.getVideoTracks();
+      const audioTracks = mediaStream.getAudioTracks();
+
+      if (videoTracks.length === 0) {
+        console.warn("No video tracks available.");
+      }
+      if (audioTracks.length === 0) {
+        console.warn("No audio tracks available.");
+      }
+
+      console.log("Publishing tracks to call:", videoTracks[0], audioTracks[0]);
+
+      // Create a new MediaStream for each track and publish using numeric constants:
+      // 2 for video and 1 for audio.
+      if (videoTracks.length > 0 && canSendVideo) {
+        const videoStream = new MediaStream([videoTracks[0]]);
+        await call.publish(videoStream, 2);
+      }
+      if (audioTracks.length > 0 && canSendAudio) {
+        const audioStream = new MediaStream([audioTracks[0]]);
+        await call.publish(audioStream, 1);
+      }
+
+      // Update UI state
+      if (roomId === tutorSelectedClassId) {
+        setIsCallJoined(true);
+        setIsInMainCall(true);
+      } else {
+        setIsRoomJoined(true);
+      }
+      setActiveRoomId(roomId);
+    } catch (error) {
+      console.error("Error in joinRoom function:", error);
     }
-
-    // 2) Generate new kit token for the new room
-    const appId = parseInt(process.env.REACT_APP_ZEGO_APP_ID);
-    const serverSecret = process.env.REACT_APP_ZEGO_SERVER_SECRET;
-
-    const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
-      appId,
-      serverSecret,
-      roomId, // the new room ID
-      user.uid, // user ID
-      user.name // user name
-    );
-
-    // 3) Create a brand-new ZegoUIKitPrebuilt instance
-    const zp = ZegoUIKitPrebuilt.create(kitToken);
-
-    // 4) Join the new room with your config
-    zp.joinRoom({
-      container: callContainerRef.current,
-      turnOnMicrophoneWhenJoining: true,
-      turnOnCameraWhenJoining: true,
-      showMyCameraToggleButton: true,
-      showMyMicrophoneToggleButton: true,
-      showAudioVideoSettingsButton: true,
-      showScreenSharingButton: true,
-      showTextChat: true,
-      showUserList: true,
-      maxUsers: 50,
-      layout: "Auto",
-      showLayoutButton: true,
-      scenario: {
-        mode: "GroupCall",
-        config: {
-          role: "Host",
-        },
-      },
-      bottomMenuBarConfig: {
-        isVisible: true,
-        maxButtons: 6,
-        buttons: [
-          "toggleCameraButton",
-          "toggleMicrophoneButton",
-          "switchAudioOutputButton",
-          "leaveButton",
-        ],
-      },
-      onJoinRoom: () => {
-        if (roomId === tutorSelectedClassId) {
-          setIsCallJoined(true);
-          setIsInMainCall(true);
-        } else {
-          setIsRoomJoined(true);
-        }
-      },
-      onLeaveRoom: async () => {
-        console.log("onLeaveRoom triggered", {
-          roomId,
-          isMainRoom: roomId === tutorSelectedClassId,
-          activeRoomId,
-        });
-
-        // Reset flags when leaving any room
-        setIsCallJoined(false);
-        setIsRoomJoined(false);
-        setIsInMainCall(false);
-        if (roomId !== tutorSelectedClassId) {
-          try {
-            await updateRoomMembers(roomId, false);
-          } catch (error) {
-            console.error("Failed to remove user from breakout room:", {
-              error,
-              roomId,
-              userId: user.uid,
-            });
-          }
-        }
-        setIsInMainCall(false);
-      },
-    });
-
-    // 5) Remember this instance so we can leave/destroy it next time
-    zegoInstanceRef.current = zp;
-
-    // 6) Update activeRoomId state
-    setActiveRoomId(roomId);
   };
 
   // Convenience method to switch back to the main class
-  const joinMainClass = () => {
-    // If we're in a breakout room, remove the user before joining main class
+  const joinMainClass = async () => {
     if (activeRoomId !== tutorSelectedClassId) {
-      updateRoomMembers(activeRoomId, false);
+      await updateRoomMembers(activeRoomId, false);
     }
     joinRoom(tutorSelectedClassId);
   };
@@ -316,46 +302,10 @@ const VideoCallTutor = () => {
   // -----------------------------------------
   //   If user clicks on a breakout room
   // -----------------------------------------
-  // const handleJoinBreakoutRoom = (room) => {
-  //   // If the breakout room's end time is in the future, join it
-  //   const now = new Date();
-  //   const endTime = room.classEndTime?.toDate?.() || null;
-  //   if (!endTime || endTime < now) {
-  //     alert("This breakout room is expired or has no valid end time.");
-  //     return;
-  //   }
-
-  //   // Check available slots
-  //   if (room.roomMembers.length >= room.availableSlots) {
-  //     alert("This breakout room is full.");
-  //     return;
-  //   }
-
-  //   // If user is already in this room, don't rejoin
-  //   if (room.roomMembers.includes(user.uid)) {
-  //     alert("You are already in this room.");
-  //     return;
-  //   }
-
-  //   updateRoomMembers(room.id, true);
-
-  //   // Switch to that breakout room
-  //   joinRoom(room.id);
-
-  //   // Calculate how long until it ends
-  //   const remainingMs = endTime - now;
-  //   // Once the time is up, automatically bring the user back to the main room
-  //   setTimeout(() => {
-  //     // (Optional) Only force them back if they are still in that breakout
-  //     // E.g.: if (activeRoomId === room.id) joinMainClass();
-  //     joinMainClass();
-  //   }, remainingMs);
-  // };
   const handleJoinBreakoutRoom = async (room) => {
     const now = new Date();
     const endTime = room.classEndTime?.toDate?.() || null;
 
-    // If the room has not started yet, set the startedAt and classEndTime
     if (!room.startedAt) {
       const startedAt = Timestamp.now();
       const classEndTime = Timestamp.fromDate(
@@ -375,42 +325,36 @@ const VideoCallTutor = () => {
         classEndTime,
       });
 
-      // Update the local state to reflect the changes
       room.startedAt = startedAt;
       room.classEndTime = classEndTime;
     }
 
-    // Check available slots
     if (room.roomMembers.length >= room.availableSlots) {
       alert("This breakout room is full.");
       return;
     }
 
-    updateRoomMembers(room.id, true);
-
-    // Switch to that breakout room
+    await updateRoomMembers(room.id, true);
     joinRoom(room.id);
 
-    // Calculate how long until it ends
     const remainingMs = room.classEndTime.toDate() - now;
-    // Once the time is up, automatically bring the user back to the main room
     setTimeout(() => {
       joinMainClass();
     }, remainingMs);
   };
+
   // -----------------------------------------
   //   Mount: start in the main class call
   // -----------------------------------------
   useEffect(() => {
-    // On first mount, join the main class
     if (tutorSelectedClassId) {
       joinMainClass();
     }
-    // Cleanup on unmount
     return () => {
-      if (zegoInstanceRef.current) {
-        zegoInstanceRef.current.destroy();
-        zegoInstanceRef.current = null;
+      if (callInstanceRef.current) {
+        callInstanceRef.current.leave();
+        callInstanceRef.current = null;
+        setCurrentCall(null);
       }
     };
     // eslint-disable-next-line
@@ -421,8 +365,43 @@ const VideoCallTutor = () => {
   // -----------------------------------------
   return (
     <>
-      {/* The container where Zego’s UI will appear */}
-      <div ref={callContainerRef} style={{ width: "100vw", height: "100vh" }} />
+      {currentCall ? (
+        // Fill entire screen with a dark background
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            overflow: "hidden",
+            backgroundColor: "#111", // Dark background
+          }}
+        >
+          <StreamVideo client={streamVideoClient}>
+            <StreamCall call={currentCall}>
+              {/* Large tile for active speaker, smaller tiles for others */}
+              <SpeakerLayout />
+              {/* Default call controls at the bottom (mic, camera, leave, etc.) */}
+              <CallControls />
+            </StreamCall>
+          </StreamVideo>
+        </div>
+      ) : (
+        // "Joining call..." fallback
+        <div
+          style={{
+            width: "100vw",
+            height: "100vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "#111",
+          }}
+        >
+          <p style={{ color: "#fff" }}>Joining call...</p>
+        </div>
+      )}
 
       {/* Button to leave breakout room and return to main call */}
       {activeRoomId !== tutorSelectedClassId &&
@@ -431,11 +410,7 @@ const VideoCallTutor = () => {
           <div className="fixed bottom-4 left-12 flex gap-2 z-[1000]">
             <button
               onClick={joinMainClass}
-              className="flex items-center justify-center
-               bg-[#313443] hover:bg-[#404352]
-               text-white rounded-lg w-10 h-10
-               transition-colors duration-200
-               shadow-md"
+              className="flex items-center justify-center bg-[#313443] hover:bg-[#404352] text-white rounded-lg w-10 h-10 transition-colors duration-200 shadow-md"
               aria-label="Leave Breakout Room"
             >
               <LogOut size={20} />
@@ -443,37 +418,26 @@ const VideoCallTutor = () => {
           </div>
         )}
 
-      {/* If you want custom floating buttons */}
+      {/* Floating buttons when in main class call */}
       {activeRoomId === tutorSelectedClassId &&
         isCallJoined &&
         isInMainCall && (
           <div className="fixed bottom-4 left-12 flex gap-2 z-[1000]">
-            {/* Create Breakout Rooms (admins/tutors only) */}
             {hasBreakoutPermission && (
               <button
                 onClick={() => setIsModalOpen(true)}
-                className="flex items-center justify-center
-                         bg-[#313443] hover:bg-[#404352]
-                         text-white rounded-lg w-10 h-10
-                         transition-colors duration-200
-                         shadow-md"
+                className="flex items-center justify-center bg-[#313443] hover:bg-[#404352] text-white rounded-lg w-10 h-10 transition-colors duration-200 shadow-md"
                 aria-label="Create Breakout Room"
               >
                 <CopyPlus size={20} />
               </button>
             )}
-
-            {/* View/Join Breakout Rooms */}
             <button
               onClick={() => {
                 fetchBreakoutRooms();
                 setIsViewModalOpen(true);
               }}
-              className="flex items-center justify-center
-                       bg-[#313443] hover:bg-[#404352]
-                       text-white rounded-lg w-10 h-10
-                       transition-colors duration-200
-                       shadow-md"
+              className="flex items-center justify-center bg-[#313443] hover:bg-[#404352] text-white rounded-lg w-10 h-10 transition-colors duration-200 shadow-md"
               aria-label="View Breakout Rooms"
             >
               <Users size={20} />
@@ -481,10 +445,9 @@ const VideoCallTutor = () => {
           </div>
         )}
 
+      {/* Show which breakout room you're in */}
       <div className="fixed top-8 left-8 flex gap-2 z-[1000]">
-        {activeRoomId === tutorSelectedClassId ? (
-          <></>
-        ) : (
+        {activeRoomId === tutorSelectedClassId ? null : (
           <div className="px-4 py-2 text-white bg-green-600 rounded-xl">
             Breakout Room{" "}
             {breakoutRooms.findIndex((room) => room.id === activeRoomId) + 1}
@@ -492,9 +455,7 @@ const VideoCallTutor = () => {
         )}
       </div>
 
-      {/* ------------------------
-          Modal: Create Breakout Rooms 
-      ------------------------ */}
+      {/* Modal: Create Breakout Rooms */}
       <Modal
         isOpen={isModalOpen}
         onRequestClose={() => setIsModalOpen(false)}
@@ -536,7 +497,6 @@ const VideoCallTutor = () => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
               />
             </div>
-
             <div>
               <label className="block mb-1 text-sm font-medium text-gray-700">
                 Room Duration (minutes)
@@ -548,7 +508,6 @@ const VideoCallTutor = () => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
               />
             </div>
-
             <div>
               <label className="block mb-1 text-sm font-medium text-gray-700">
                 Available Slots
@@ -561,7 +520,6 @@ const VideoCallTutor = () => {
               />
             </div>
           </div>
-
           <div className="flex justify-end mt-6 space-x-3">
             <button
               onClick={() => setIsModalOpen(false)}
@@ -605,9 +563,7 @@ const VideoCallTutor = () => {
         </div>
       </Modal>
 
-      {/* ------------------------
-          Modal: View/Join Breakout Rooms
-      ------------------------ */}
+      {/* Modal: View/Join Breakout Rooms */}
       <Modal
         isOpen={isViewModalOpen}
         onRequestClose={() => setIsViewModalOpen(false)}
@@ -639,14 +595,12 @@ const VideoCallTutor = () => {
           <div className="p-6 border-b">
             <h2 className="text-xl font-bold text-gray-900">Breakout Rooms</h2>
           </div>
-
           <div className="flex-1 p-6 overflow-y-auto">
             <div className="space-y-4">
               {breakoutRooms.map((room, index) => {
                 const isRoomExpired =
                   room.startedAt &&
                   new Date() > new Date(room.classEndTime.toDate());
-
                 return (
                   <div
                     key={room.id}
@@ -654,7 +608,7 @@ const VideoCallTutor = () => {
                   >
                     <div className="space-y-2">
                       <p className="font-semibold text-gray-900">
-                        Breakout Room {index + 1}{" "}
+                        Breakout Room {index + 1}
                       </p>
                       <p className="text-gray-600">
                         Available Slots: {room.availableSlots}
@@ -702,7 +656,6 @@ const VideoCallTutor = () => {
               })}
             </div>
           </div>
-
           <div className="p-6 border-t bg-gray-50 rounded-b-2xl">
             <div className="flex justify-end">
               <button

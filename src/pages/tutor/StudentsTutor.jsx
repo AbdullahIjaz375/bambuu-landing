@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Search, Bell, MoreVertical, Smile, Send, User } from "lucide-react";
+import { Search, Bell } from "lucide-react";
 import ChatComponent from "../../components/ChatComponent";
 import { useAuth } from "../../context/AuthContext";
 import { streamClient } from "../../config/stream";
 import Sidebar from "../../components/Sidebar";
 import { ClipLoader } from "react-spinners";
-import { ConsoleLevel } from "@zegocloud/zego-uikit-prebuilt";
 
 const StudentsTutor = () => {
   const { user } = useAuth();

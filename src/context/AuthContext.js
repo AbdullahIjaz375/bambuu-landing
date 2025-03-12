@@ -3,6 +3,7 @@ import { auth, db } from "../firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { StreamChat } from "stream-chat";
+import { streamVideoClient } from "../config/stream";
 import i18n from "../i18n"; // Import i18n instance
 import { checkAccess } from "../utils/accessControl";
 
@@ -36,7 +37,7 @@ export const AuthProvider = ({ children }) => {
   const connectStreamUser = async (userData) => {
     try {
       const streamToken = streamClient.devToken(userData.uid);
-      const connectedUser = await streamClient.connectUser(
+      await streamClient.connectUser(
         {
           id: userData.uid,
           name: userData.name || "",
@@ -45,7 +46,16 @@ export const AuthProvider = ({ children }) => {
         },
         streamToken
       );
-      console.log("Stream user connected successfully", connectedUser);
+      await streamVideoClient.connectUser(
+        {
+          id: userData.uid,
+          name: userData.name || "",
+          image: userData.photoUrl || "",
+          userType: userData.userType,
+        },
+        streamToken
+      );
+      console.log("Stream user connected successfully");
     } catch (error) {
       console.error("Error connecting Stream user:", error);
     }
