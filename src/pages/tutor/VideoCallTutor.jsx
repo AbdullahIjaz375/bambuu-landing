@@ -1,6 +1,9 @@
 // src/components/VideoCallTutor.js
 import React, { useEffect, useState, useRef, useContext } from "react";
 import { ClassContext } from "../../context/ClassContext";
+import "@stream-io/video-react-sdk/dist/css/styles.css";
+import "./VideoCallTutor.css";
+
 import { db } from "../../firebaseConfig";
 import {
   collection,
@@ -14,36 +17,36 @@ import {
   arrayRemove
 } from "firebase/firestore";
 
-// GetStream components
+import { streamClient, streamVideoClient } from "../../config/stream";
 import {
+  useCall,
+  useCallStateHooks,
+  StreamTheme,
   StreamVideo,
   StreamCall,
-  useCall,
-  SpeakerLayout,
-  PaginatedGridLayout,
   CallControls,
   CallParticipantsList,
-  DeviceSettings,
-  useCallStateHooks,
-  OwnCapability
+  PaginatedGridLayout,
+  SpeakerLayout,
+  ParticipantView
 } from "@stream-io/video-react-sdk";
-import { streamClient, streamVideoClient } from "../../config/stream";
 
-// UI components
-import CallHeader from "./CallHeader";
-import MeetCallControls from "./MeetCallControls";
-import BreakoutRoomPanel from "./BreakoutRoomPanel";
 import { canCreateBreakoutRooms } from "./BreakoutRoomUtils";
+
+// Import custom CallPreview component
+import CallPreview from "../../components/CallPreview";
 
 // Icons
 import {
+  Video,
+  Grid3x3,
   Users,
-  LogOut,
-  Grid,
-  Layout,
-  PictureInPicture,
-  ChevronRight,
-  Video
+  LayoutGrid,
+  MessageSquare,
+  Settings,
+  Maximize,
+  Minimize,
+  X
 } from "lucide-react";
 
 // Improved modal component with animation
@@ -71,20 +74,7 @@ const Modal = ({ isOpen, onClose, title, children, size = "md" }) => {
             onClick={onClose}
             className="p-1 text-gray-500 rounded-full hover:bg-gray-100 transition duration-200"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
+            <X size={20} />
           </button>
         </div>
         <div className="p-4">{children}</div>
@@ -93,16 +83,32 @@ const Modal = ({ isOpen, onClose, title, children, size = "md" }) => {
   );
 };
 
+// Loading spinner component
+const LoadingSpinner = ({ message }) => (
+  <div className="fixed inset-0 flex flex-col items-center justify-center bg-gray-900">
+    <div className="animate-pulse flex flex-col items-center text-center max-w-md">
+      <div className="rounded-full bg-gray-800 h-24 w-24 mb-6 flex items-center justify-center">
+        <Video size={40} className="text-blue-400" />
+      </div>
+      <h2 className="text-white text-2xl font-medium mb-2">{message || "Joining call..."}</h2>
+      <p className="text-gray-400 mb-8">Setting up your video and audio</p>
+      <div className="w-64 h-2 bg-gray-800 rounded-full overflow-hidden">
+        <div className="h-full bg-blue-500 animate-progress-bar"></div>
+      </div>
+    </div>
+  </div>
+);
+
+// Main component
 const VideoCallTutor = () => {
   const { tutorSelectedClassId } = useContext(ClassContext);
   const [classData, setClassData] = useState(null);
   const [currentCall, setCurrentCall] = useState(null);
   const [isCallJoined, setIsCallJoined] = useState(false);
   const [activeRoomId, setActiveRoomId] = useState(null);
-  const [viewMode, setViewMode] = useState("grid"); // grid or speaker
-  const [isMuted, setIsMuted] = useState(false);
-  const [isCameraOff, setIsCameraOff] = useState(false);
-  const [isLoading, setIsLoading] = useState(true); // Added loading state
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadingMessage, setLoadingMessage] = useState("Joining call...");
+  const [layout, setLayout] = useState("grid"); // 'grid' or 'speaker'
 
   // Breakout room states
   const [breakoutRooms, setBreakoutRooms] = useState([]);
@@ -112,13 +118,7 @@ const VideoCallTutor = () => {
   const [numRooms, setNumRooms] = useState(2);
   const [roomDuration, setRoomDuration] = useState(15);
   const [availableSlots, setAvailableSlots] = useState(5);
-
-  // UI states
-  const [isParticipantsOpen, setIsParticipantsOpen] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [isBreakoutPanelOpen, setIsBreakoutPanelOpen] = useState(false);
-  const [isChatOpen, setIsChatOpen] = useState(false); // Added for Chat toggle
 
   // Other states
   const callInstanceRef = useRef(null);
@@ -131,6 +131,7 @@ const VideoCallTutor = () => {
 
     const fetchClassData = async () => {
       try {
+        setLoadingMessage("Loading class data...");
         const classDocRef = doc(db, "classes", tutorSelectedClassId);
         const classDocSnap = await getDoc(classDocRef);
 
@@ -138,6 +139,9 @@ const VideoCallTutor = () => {
           setClassData(classDocSnap.data());
           // Default to the main class room ID
           setActiveRoomId(tutorSelectedClassId);
+          
+          // Fetch breakout rooms if they exist
+          fetchBreakoutRooms();
         } else {
           console.log("No such class document!");
         }
@@ -153,9 +157,8 @@ const VideoCallTutor = () => {
 
   }, [tutorSelectedClassId]);
 
-  // Add this near the top of your component
+  // Check for WebRTC support
   useEffect(() => {
-    // Check for WebRTC support
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       alert("Your browser doesn't support video calls. Please use a modern browser like Chrome, Firefox, or Safari.");
       return;
@@ -171,31 +174,27 @@ const VideoCallTutor = () => {
       .catch(err => console.log("Permission query not supported"));
   }, []);
 
+  // Set up reconnection handler
   useEffect(() => {
     if (currentCall) {
-      // Set up reconnection handler
       const handleReconnect = () => {
-        console.log("Attempting to reconnect to call...");
+        setLoadingMessage("Reconnecting to call...");
+        setIsLoading(true);
+      };
+
+      const handleReconnected = () => {
+        setIsLoading(false);
       };
 
       currentCall.on('reconnecting', handleReconnect);
+      currentCall.on('connected', handleReconnected);
 
       return () => {
         currentCall.off('reconnecting', handleReconnect);
+        currentCall.off('connected', handleReconnected);
       };
     }
   }, [currentCall]);
-  // Handle fullscreen
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
-    };
-  }, []);
 
   // Initialize call on mount
   useEffect(() => {
@@ -210,12 +209,12 @@ const VideoCallTutor = () => {
     };
   }, [tutorSelectedClassId]);
 
-  // Update your joinRoom function with better timeout handling and connection state management
-
+  // Join a room function
   const joinRoom = async (roomId) => {
     try {
       console.log("Joining room:", roomId);
       setIsLoading(true);
+      setLoadingMessage("Connecting to call...");
 
       // Get user data once
       const user = JSON.parse(sessionStorage.getItem("user") || "{}");
@@ -230,6 +229,7 @@ const VideoCallTutor = () => {
       // Check if we need to connect the user
       if (!streamVideoClient.user || streamVideoClient.user.id !== user.uid) {
         console.log("Connecting user to Stream...");
+        setLoadingMessage("Authenticating...");
 
         try {
           // Disconnect any existing user to avoid the consecutive connect warning
@@ -263,6 +263,7 @@ const VideoCallTutor = () => {
       // Leave previous call if exists
       if (callInstanceRef.current) {
         console.log("Leaving previous call...");
+        setLoadingMessage("Switching rooms...");
         await callInstanceRef.current.leave();
         callInstanceRef.current = null;
         setCurrentCall(null);
@@ -270,6 +271,7 @@ const VideoCallTutor = () => {
 
       // Create and join call with increased timeout
       console.log("Creating call instance...");
+      setLoadingMessage("Joining video call...");
       const call = streamVideoClient.call("default", roomId);
 
       try {
@@ -298,10 +300,12 @@ const VideoCallTutor = () => {
       setCurrentCall(call);
       setActiveRoomId(roomId);
       setIsCallJoined(true);
-      setIsLoading(false);
-
+      
       // Enable devices after successful join
-      enableDevices(call);
+      setLoadingMessage("Enabling camera and microphone...");
+      await enableDevices(call);
+      
+      setIsLoading(false);
     } catch (error) {
       console.error("Error in join room process:", error);
       setIsLoading(false);
@@ -309,15 +313,13 @@ const VideoCallTutor = () => {
     }
   };
 
-  // Separate function to enable devices
+  // Enable camera and microphone
   const enableDevices = async (call) => {
     try {
       console.log("Enabling camera and microphone...");
-      const camEnabled = await call.camera.enable();
-      const micEnabled = await call.microphone.enable();
-      setIsCameraOff(!camEnabled);
-      setIsMuted(!micEnabled);
-      console.log("Camera enabled:", camEnabled, "Microphone enabled:", micEnabled);
+      await call.camera.enable();
+      await call.microphone.enable();
+      console.log("Camera and microphone enabled successfully");
     } catch (err) {
       console.warn("Error enabling devices:", err);
     }
@@ -325,6 +327,8 @@ const VideoCallTutor = () => {
 
   // Fetch breakout rooms
   const fetchBreakoutRooms = async () => {
+    if (!tutorSelectedClassId) return;
+    
     try {
       const breakoutRef = collection(
         db,
@@ -362,14 +366,15 @@ const VideoCallTutor = () => {
           startedAt: null,
           roomDuration,
           roomMembers: [],
-          createdAt: Timestamp.now()
+          createdAt: Timestamp.now(),
+          roomName: `Breakout Room ${i + 1}`
         });
 
         await updateDoc(newRoomRef, { roomId: newRoomRef.id });
       }
 
       setIsBreakoutModalOpen(false);
-      fetchBreakoutRooms();
+      await fetchBreakoutRooms();
       setIsBreakoutPanelOpen(true);
 
     } catch (error) {
@@ -467,17 +472,6 @@ const VideoCallTutor = () => {
     await joinRoom(tutorSelectedClassId);
   };
 
-  // Toggle fullscreen
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      videoContainerRef.current.requestFullscreen().catch(err => {
-        console.error(`Error attempting to enable fullscreen: ${err.message}`);
-      });
-    } else {
-      document.exitFullscreen();
-    }
-  };
-
   // Handle call leaving
   const handleLeaveCall = async () => {
     try {
@@ -501,197 +495,143 @@ const VideoCallTutor = () => {
     }
   };
 
-  // Main render
-  return (
-    <div className="fixed inset-0 bg-black overflow-hidden" ref={videoContainerRef}>
-      {currentCall && !isLoading ? (
-        <StreamVideo client={streamVideoClient} className="w-full h-full">
-          <StreamCall call={currentCall} className="w-full h-full">
-            {/* Call Header */}
-            <div className="absolute top-0 left-0 right-0 z-20 p-4">
-              <CallHeader
-                classData={classData}
-                isBreakoutRoom={activeRoomId !== tutorSelectedClassId}
-                roomName={`Breakout Room ${breakoutRooms.findIndex(r => r.id === activeRoomId) + 1}`}
-                onOpenBreakoutPanel={() => {
-                  fetchBreakoutRooms();
-                  setIsBreakoutPanelOpen(true);
-                }}
-                hasBreakoutPermission={hasBreakoutPermission}
-              />
-            </div>
-
-            {/* Video Layout */}
-            <div className="absolute inset-0 w-full h-full">
-              {viewMode === 'speaker' ? (
-                <div className="w-full h-full">
-                  <SpeakerLayout />
-                </div>
-              ) : (
-                <div className="w-full h-full">
-                  <PaginatedGridLayout />
-                </div>
-              )}
-            </div>
-
-            {/* Custom Call Controls */}
-            <div className="absolute bottom-0 left-0 right-0 z-20 p-4 flex justify-center">
-              <MeetCallControls
-                onLayoutChange={(mode) => setViewMode(mode)}
-                onToggleParticipants={() => setIsParticipantsOpen(!isParticipantsOpen)}
-                onToggleSettings={() => setIsSettingsOpen(!isSettingsOpen)}
-                onToggleChat={() => setIsChatOpen(!isChatOpen)}
-                onToggleFullscreen={toggleFullscreen}
-                onLeaveCall={handleLeaveCall}
-              />
-            </div>
-
-            {/* Return to Main Room Button (if in breakout room) */}
-            {activeRoomId !== tutorSelectedClassId && (
-              <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2 z-20">
-                <button
-                  onClick={joinMainRoom}
-                  className="bg-yellow-500 hover:bg-yellow-600 text-white rounded-full px-4 py-2 flex items-center transition duration-200 shadow-lg"
-                >
-                  <LogOut size={18} className="mr-2" />
-                  Return to Main Room
-                </button>
-              </div>
-            )}
-
-            {/* Side Panels */}
-            {isParticipantsOpen && (
-              <div className="absolute top-0 right-0 bottom-0 w-80 bg-white z-30 shadow-xl flex flex-col animate-slide-in">
-                <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-                  <h2 className="text-lg font-medium">Participants</h2>
-                  <button
-                    onClick={() => setIsParticipantsOpen(false)}
-                    className="p-1 rounded-full hover:bg-gray-100 transition-colors"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="18" y1="6" x2="6" y2="18"></line>
-                      <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                  </button>
-                </div>
-                <div className="flex-1 overflow-y-auto p-2">
-                  <CallParticipantsList />
-                </div>
-              </div>
-            )}
-
-            {/* Settings Panel */}
-            {isSettingsOpen && (
-              <div className="absolute top-0 right-0 bottom-0 w-96 bg-white z-30 shadow-xl flex flex-col animate-slide-in">
-                <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-                  <h2 className="text-lg font-medium">Settings</h2>
-                  <button
-                    onClick={() => setIsSettingsOpen(false)}
-                    className="p-1 rounded-full hover:bg-gray-100 transition-colors"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="18" y1="6" x2="6" y2="18"></line>
-                      <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                  </button>
-                </div>
-                <div className="flex-1 overflow-y-auto p-4">
-                  <DeviceSettings />
-                </div>
-              </div>
-            )}
-
-            {/* Chat Panel */}
-            {isChatOpen && (
-              <div className="absolute top-0 right-0 bottom-0 w-80 bg-white z-30 shadow-xl flex flex-col animate-slide-in">
-                <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-                  <h2 className="text-lg font-medium">Chat</h2>
-                  <button
-                    onClick={() => setIsChatOpen(false)}
-                    className="p-1 rounded-full hover:bg-gray-100 transition-colors"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="18" y1="6" x2="6" y2="18"></line>
-                      <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                  </button>
-                </div>
-                <div className="flex-1 overflow-y-auto p-4 flex flex-col">
-                  <div className="flex-1 flex items-center justify-center text-gray-500">
-                    <div className="text-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mx-auto mb-4 text-gray-300">
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                      </svg>
-                      <p>No messages yet</p>
-                      <p className="text-sm mt-2">Chat with participants in this room</p>
-                    </div>
-                  </div>
-                  <div className="mt-auto border-t pt-4">
-                    <div className="flex">
-                      <input
-                        type="text"
-                        placeholder="Type a message..."
-                        className="flex-1 border border-gray-300 rounded-l-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                      <button className="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 transition duration-200">
-                        Send
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Breakout Room Panel */}
-            {isBreakoutPanelOpen && (
-              <div className="absolute top-0 right-0 bottom-0 w-96 bg-white z-30 shadow-xl flex flex-col animate-slide-in">
-                <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-                  <h2 className="text-lg font-medium">Breakout Rooms</h2>
-                  <button
-                    onClick={() => setIsBreakoutPanelOpen(false)}
-                    className="p-1 rounded-full hover:bg-gray-100 transition-colors"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="18" y1="6" x2="6" y2="18"></line>
-                      <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                  </button>
-                </div>
-
-                <div className="flex-1 overflow-y-auto p-4">
-                  <BreakoutRoomPanel
-                    rooms={breakoutRooms}
-                    onJoinRoom={joinBreakoutRoom}
-                    onCreateRooms={() => setIsBreakoutModalOpen(true)}
-                    hasPermission={hasBreakoutPermission}
-                    currentUserId={user.uid}
-                  />
-                </div>
-              </div>
-            )}
-          </StreamCall>
-        </StreamVideo>
-      ) : (
-        // Loading state while connecting to call
-        <div className="w-full h-full flex flex-col items-center justify-center bg-gray-900">
-          <div className="text-center">
+  // Render Breakout Rooms Panel
+  const renderBreakoutPanel = () => {
+    if (!isBreakoutPanelOpen) return null;
+    
+    return (
+      <div className="breakout-panel">
+        <div className="panel-header">
+          <h3>Breakout Rooms</h3>
+          <button onClick={() => setIsBreakoutPanelOpen(false)}>
+            <X size={20} />
+          </button>
+        </div>
         
-        <div className="fixed inset-0 flex flex-col items-center justify-center bg-gray-900">
-          <div className="animate-pulse flex flex-col items-center text-center max-w-md">
-            <div className="rounded-full bg-gray-800 h-24 w-24 mb-6 flex items-center justify-center">
-              <Video size={40} className="text-blue-400" />
-            </div>
-            <h2 className="text-white text-2xl font-medium mb-2">Joining call...</h2>
-            <p className="text-gray-400 mb-8">Setting up your video and audio</p>
-            <div className="w-64 h-2 bg-gray-800 rounded-full overflow-hidden">
-              <div className="h-full bg-blue-500 animate-progress-bar"></div>
-            </div>
-            </div>
-            </div>
-
-
+        <div className="panel-content">
+          {/* Main Room Button */}
+          <div className="room-item main-room">
+            <button
+              onClick={joinMainRoom}
+              className={activeRoomId === tutorSelectedClassId ? "active" : ""}
+            >
+              <div className="room-name">Main Room</div>
+              <div className="room-info">Return to main class</div>
+              {activeRoomId === tutorSelectedClassId && (
+                <span className="status-badge">Current</span>
+              )}
+            </button>
+          </div>
+          
+          {/* Breakout Rooms */}
+          <h4 className="section-title">Available Rooms:</h4>
+          <div className="rooms-list">
+            {breakoutRooms.length > 0 ? (
+              breakoutRooms.map((room) => {
+                const isFull = room.roomMembers.length >= room.availableSlots;
+                const isActive = activeRoomId === room.id;
+                const hasStarted = !!room.startedAt;
+                
+                let timeRemaining = null;
+                if (hasStarted && room.classEndTime) {
+                  const now = new Date();
+                  const endTime = room.classEndTime.toDate();
+                  const remainingMs = endTime - now;
+                  if (remainingMs > 0) {
+                    const remainingMins = Math.ceil(remainingMs / (1000 * 60));
+                    timeRemaining = `${remainingMins} min`;
+                  }
+                }
+                
+                return (
+                  <div 
+                    key={room.id}
+                    className={`room-item ${isActive ? 'active' : ''} ${isFull ? 'full' : ''}`}
+                  >
+                    <div className="room-details">
+                      <div className="room-name">{room.roomName || `Breakout Room`}</div>
+                      <div className="room-info">
+                        {room.roomMembers.length}/{room.availableSlots} participants
+                      </div>
+                      {timeRemaining && (
+                        <div className="time-remaining">
+                          Ends in: {timeRemaining}
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="room-actions">
+                      {!isActive && !isFull && (
+                        <button
+                          onClick={() => joinBreakoutRoom(room)}
+                          className="join-button"
+                        >
+                          Join
+                        </button>
+                      )}
+                      
+                      {isActive && (
+                        <span className="status-badge">Current</span>
+                      )}
+                      
+                      {!isActive && isFull && (
+                        <span className="status-badge full">Full</span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="no-rooms">
+                No breakout rooms available
+              </div>
+            )}
           </div>
         </div>
+      </div>
+    );
+  };
+
+  // Main render
+  return (
+    <div className="video-call-tutor" ref={videoContainerRef}>
+      {currentCall && !isLoading ? (
+        <>
+          <CallPreview streamVideoClient={streamVideoClient} currentCall={currentCall} />
+          
+          {/* Floating action buttons */}
+          <div className="floating-actions">
+            {/* Breakout Rooms button for tutors */}
+            {hasBreakoutPermission && (
+              <button
+                onClick={() => {
+                  isBreakoutPanelOpen ? setIsBreakoutPanelOpen(false) : fetchBreakoutRooms().then(() => setIsBreakoutPanelOpen(true));
+                }}
+                className={`action-button ${isBreakoutPanelOpen ? 'active' : ''}`}
+                title="Breakout Rooms"
+              >
+                <Grid3x3 size={22} />
+              </button>
+            )}
+            
+            {/* Create Breakout Rooms button for tutors */}
+            {hasBreakoutPermission && (
+              <button
+                onClick={() => setIsBreakoutModalOpen(true)}
+                className="action-button create-room"
+                title="Create Breakout Rooms"
+              >
+                <Users size={22} />
+              </button>
+            )}
+          </div>
+          
+          {/* Render Breakout Room panel if open */}
+          {renderBreakoutPanel()}
+        </>
+      ) : (
+        // Loading state while connecting to call
+        <LoadingSpinner message={loadingMessage} />
       )}
 
       {/* Create Breakout Rooms Modal */}
@@ -701,32 +641,32 @@ const VideoCallTutor = () => {
         title="Create Breakout Rooms"
         size="lg"
       >
-        <div className="space-y-6">
-          <div>
-            <label className="block mb-2 text-sm font-medium text-gray-700">
+        <div className="breakout-modal">
+          <div className="modal-section">
+            <label className="section-label">
               Number of Rooms
             </label>
-            <div className="flex items-center">
+            <div className="slider-container">
               <input
                 type="range"
                 min="1"
                 max="10"
                 value={numRooms}
                 onChange={(e) => setNumRooms(parseInt(e.target.value))}
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                className="slider"
               />
-              <span className="ml-4 w-10 text-center font-medium">{numRooms}</span>
+              <span className="slider-value">{numRooms}</span>
             </div>
           </div>
 
-          <div>
-            <label className="block mb-2 text-sm font-medium text-gray-700">
+          <div className="modal-section">
+            <label className="section-label">
               Room Duration (minutes)
             </label>
             <select
               value={roomDuration}
               onChange={(e) => setRoomDuration(parseInt(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="select-input"
             >
               <option value="5">5 minutes</option>
               <option value="10">10 minutes</option>
@@ -738,56 +678,55 @@ const VideoCallTutor = () => {
             </select>
           </div>
 
-          <div>
-            <label className="block mb-2 text-sm font-medium text-gray-700">
+          <div className="modal-section">
+            <label className="section-label">
               Available Slots per Room
             </label>
-            <div className="flex items-center">
+            <div className="slider-container">
               <input
                 type="range"
                 min="2"
                 max="10"
                 value={availableSlots}
                 onChange={(e) => setAvailableSlots(parseInt(e.target.value))}
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                className="slider"
               />
-              <span className="ml-4 w-10 text-center font-medium">{availableSlots}</span>
+              <span className="slider-value">{availableSlots}</span>
             </div>
           </div>
 
           {/* Preview of room distribution */}
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <h3 className="text-sm font-medium text-gray-700 mb-3">Room Preview:</h3>
-            <div className="grid grid-cols-5 gap-2">
+          <div className="room-preview">
+            <h3 className="preview-title">Room Preview:</h3>
+            <div className="room-grid">
               {Array.from({ length: Math.min(numRooms, 10) }).map((_, index) => (
                 <div
                   key={index}
-                  className="bg-blue-100 border border-blue-200 rounded-lg p-2 text-center"
+                  className="room-preview-item"
                 >
-                  <p className="text-xs font-medium text-blue-800">Room {index + 1}</p>
-                  <p className="text-xs text-blue-600">{availableSlots} slots</p>
+                  <p className="room-number">Room {index + 1}</p>
+                  <p className="room-slots">{availableSlots} slots</p>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 mt-4">
+          <div className="modal-actions">
             <button
               onClick={() => setIsBreakoutModalOpen(false)}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition duration-200"
+              className="cancel-button"
             >
               Cancel
             </button>
             <button
               onClick={createBreakoutRooms}
               disabled={isCreatingRooms}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-md transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+              className="create-button"
             >
               {isCreatingRooms ? (
                 <>
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  <svg className="spinner" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" fill="none" strokeWidth="4" />
                   </svg>
                   Creating...
                 </>
@@ -798,52 +737,6 @@ const VideoCallTutor = () => {
           </div>
         </div>
       </Modal>
-
-      {/* Add animations and styles */}
-      <style jsx>{`
-  @keyframes slideIn {
-    from { transform: translateX(100%); }
-    to { transform: translateX(0); }
-  }
-  
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  
-  @keyframes scaleIn {
-    from { transform: scale(0.95); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-  }
-  
-  .animate-slide-in {
-    animation: slideIn 0.3s ease-out forwards;
-  }
-  
-  .animate-fade-in {
-    animation: fadeIn 0.3s ease-out forwards;
-  }
-  
-  .animate-scale-in {
-    animation: scaleIn 0.3s ease-out forwards;
-  }
-  
-  /* Progress bar animation */
-  @keyframes progressBar {
-    0% { width: 0%; }
-    100% { width: 100%; }
-  }
-  
-  .animate-progress {
-    animation: progressBar 2s linear infinite;
-  }
-  
-  /* Corrected selector */
-  .str-video__video .str-video__video--mirror {
-    width: 100% !important;
-  }
-`}</style>
-
     </div>
   );
 };
