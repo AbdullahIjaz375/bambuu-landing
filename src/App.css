@@ -42,3 +42,8 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.str-video__video .str-video__video--mirror {
+  width: 100% !important;
+  height: 100vh !important;
+}

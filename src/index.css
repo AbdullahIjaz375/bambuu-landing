@@ -93,3 +93,8 @@
   /* Optional: add spacing inside bubble */
   padding: 8px !important;
 }
+
+/* str-video__video str-video__video--mirror */
+.str-video__video--mirror {
+  width: 100% !important;
+}
