@@ -18,18 +18,7 @@ import {
 } from "firebase/firestore";
 
 import { streamClient, streamVideoClient } from "../../config/stream";
-import {
-  useCall,
-  useCallStateHooks,
-  StreamTheme,
-  StreamVideo,
-  StreamCall,
-  CallControls,
-  CallParticipantsList,
-  PaginatedGridLayout,
-  SpeakerLayout,
-  ParticipantView
-} from "@stream-io/video-react-sdk";
+
 
 import { canCreateBreakoutRooms } from "./BreakoutRoomUtils";
 
