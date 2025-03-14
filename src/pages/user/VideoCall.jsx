@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useRef, useContext } from "react";
-import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
-import Modal from "react-modal";
+import { ClassContext } from "../../context/ClassContext";
+import "@stream-io/video-react-sdk/dist/css/styles.css";
+import "./VideoCallStudent.css"; // You'll need to create this CSS file
+
 import { db } from "../../firebaseConfig";
 import {
   collection,
@@ -11,10 +13,29 @@ import {
   getDoc,
   Timestamp,
   arrayUnion,
-  arrayRemove,
+  arrayRemove
 } from "firebase/firestore";
-import { ClassContext } from "../../context/ClassContext";
-import { CopyPlus, LogOut, Users } from "lucide-react";
+
+import { streamClient, streamVideoClient } from "../../config/stream";
+import {
+  StreamVideo,
+  StreamCall,
+  CallControls,
+  PaginatedGridLayout,
+  SpeakerLayout,
+  ParticipantView
+} from "@stream-io/video-react-sdk";
+
+// Import custom CallPreview component
+import CallPreview from "../../components/CallPreview";
+
+// Icons
+import {
+  CopyPlus,
+  Users,
+  LogOut,
+  X
+} from "lucide-react";
 
 /* Utility to check breakout room creation permissions */
 const canCreateBreakoutRooms = (classId) => {
@@ -36,83 +57,345 @@ const canCreateBreakoutRooms = (classId) => {
   }
 };
 
-Modal.setAppElement("#root");
+// Improved modal component with animation
+const Modal = ({ isOpen, onClose, title, children, size = "md" }) => {
+  if (!isOpen) return null;
 
-const VideoCall = () => {
+  const sizeClasses = {
+    sm: "max-w-sm",
+    md: "max-w-md",
+    lg: "max-w-lg",
+    xl: "max-w-xl",
+    "2xl": "max-w-2xl",
+    "3xl": "max-w-3xl",
+    "4xl": "max-w-4xl",
+    "5xl": "max-w-5xl",
+    full: "max-w-full"
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm animate-fade-in">
+      <div className={`${sizeClasses[size]} w-full bg-white rounded-xl shadow-2xl overflow-hidden animate-scale-in`}>
+        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+          <button
+            onClick={onClose}
+            className="p-1 text-gray-500 rounded-full hover:bg-gray-100 transition duration-200"
+          >
+            <X size={20} />
+          </button>
+        </div>
+        <div className="p-4">{children}</div>
+      </div>
+    </div>
+  );
+};
+
+// Loading spinner component
+const LoadingSpinner = ({ message }) => (
+  <div className="fixed inset-0 flex flex-col items-center justify-center bg-gray-900">
+    <div className="animate-pulse flex flex-col items-center text-center max-w-md">
+      <div className="rounded-full bg-gray-800 h-24 w-24 mb-6 flex items-center justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-400">
+          <path d="M23 7l-7 5 7 5V7z"></path>
+          <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+        </svg>
+      </div>
+      <h2 className="text-white text-2xl font-medium mb-2">{message || "Joining call..."}</h2>
+      <p className="text-gray-400 mb-8">Setting up your video and audio</p>
+      <div className="w-64 h-2 bg-gray-800 rounded-full overflow-hidden">
+        <div className="h-full bg-blue-500 animate-progress-bar"></div>
+      </div>
+    </div>
+  </div>
+);
+
+const VideoCallStudent = () => {
   const { selectedClassId } = useContext(ClassContext);
   const [classData, setClassData] = useState(null);
+  const [currentCall, setCurrentCall] = useState(null);
+  const [isCallJoined, setIsCallJoined] = useState(false);
+  const [activeRoomId, setActiveRoomId] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadingMessage, setLoadingMessage] = useState("Joining call...");
+  const [layout, setLayout] = useState("grid"); // 'grid' or 'speaker'
 
-  // Breakout creation form states
+  // Breakout room states
+  const [breakoutRooms, setBreakoutRooms] = useState([]);
+  const [hasBreakoutPermission, setHasBreakoutPermission] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
   const [numRooms, setNumRooms] = useState(2);
   const [roomDuration, setRoomDuration] = useState(15);
   const [availableSlots, setAvailableSlots] = useState(5);
-  const [isCallJoined, setIsCallJoined] = useState(false);
-  const [isRoomJoined, setIsRoomJoined] = useState(false);
-
-  const [isInMainCall, setIsInMainCall] = useState(false);
-
-  // Viewing breakout rooms
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [breakoutRooms, setBreakoutRooms] = useState([]);
 
-  // Permission checks
-  const [hasBreakoutPermission, setHasBreakoutPermission] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
+  // Other states
+  const callInstanceRef = useRef(null);
+  const videoContainerRef = useRef(null);
+  const user = JSON.parse(sessionStorage.getItem("user") || "{}");
 
-  // Track which room we are in right now:
-  // By default, we start in the main class room (selectedClassId).
-  const [activeRoomId, setActiveRoomId] = useState(selectedClassId);
-
-  // We’ll keep a reference to the Zego instance so we can leave/destroy it when switching rooms.
-  const zegoInstanceRef = useRef(null);
-  const callContainerRef = useRef(null);
-
-  // Current user
-  const user = JSON.parse(sessionStorage.getItem("user"));
-
-  // -----------------------------
-  //   Fetch the Class Data
-  // -----------------------------
+  // Fetch class data
   useEffect(() => {
+    if (!selectedClassId) return;
+
     const fetchClassData = async () => {
       try {
+        setLoadingMessage("Loading class data...");
         const classDocRef = doc(db, "classes", selectedClassId);
         const classDocSnap = await getDoc(classDocRef);
+
         if (classDocSnap.exists()) {
           setClassData(classDocSnap.data());
+          // Default to the main class room ID
+          setActiveRoomId(selectedClassId);
+          
+          // Fetch breakout rooms if they exist
+          fetchBreakoutRooms();
         } else {
-          console.log("No such document!");
-          setClassData(null);
+          console.log("No such class document!");
         }
       } catch (error) {
         console.error("Error fetching class data:", error);
       }
     };
-    if (selectedClassId) {
-      fetchClassData();
-    }
-  }, [selectedClassId]);
 
-  // -----------------------------
-  //   Permission for Breakouts
-  // -----------------------------
-  useEffect(() => {
+    fetchClassData();
+
+    // Check breakout room permissions
     setHasBreakoutPermission(canCreateBreakoutRooms(selectedClassId));
+
   }, [selectedClassId]);
 
-  // -----------------------------
-  //   Create Breakout Rooms
-  // -----------------------------
+  // Check for WebRTC support
+  useEffect(() => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert("Your browser doesn't support video calls. Please use a modern browser like Chrome, Firefox, or Safari.");
+      return;
+    }
 
+    // Check for permissions
+    navigator.permissions.query({ name: 'camera' })
+      .then(cameraPermission => {
+        if (cameraPermission.state === 'denied') {
+          alert("Camera permission is denied. Please enable camera access in your browser settings.");
+        }
+      })
+      .catch(err => console.log("Permission query not supported"));
+  }, []);
+
+  // Set up reconnection handler
+  useEffect(() => {
+    if (currentCall) {
+      const handleReconnect = () => {
+        setLoadingMessage("Reconnecting to call...");
+        setIsLoading(true);
+      };
+
+      const handleReconnected = () => {
+        setIsLoading(false);
+      };
+
+      currentCall.on('reconnecting', handleReconnect);
+      currentCall.on('connected', handleReconnected);
+
+      return () => {
+        currentCall.off('reconnecting', handleReconnect);
+        currentCall.off('connected', handleReconnected);
+      };
+    }
+  }, [currentCall]);
+
+  // Initialize call on mount
+  useEffect(() => {
+    if (selectedClassId && !isCallJoined) {
+      joinRoom(selectedClassId);
+    }
+
+    return () => {
+      if (callInstanceRef.current) {
+        callInstanceRef.current.leave().catch(console.error);
+      }
+    };
+  }, [selectedClassId]);
+
+  // Join a room function
+  const joinRoom = async (roomId) => {
+    try {
+      console.log("Joining room:", roomId);
+      setIsLoading(true);
+      setLoadingMessage("Connecting to call...");
+
+      // Get user data once
+      const user = JSON.parse(sessionStorage.getItem("user") || "{}");
+
+      if (!user || !user.uid) {
+        console.error("No valid user found in session storage");
+        alert("You need to be logged in to join a call. Please log in and try again.");
+        setIsLoading(false);
+        return;
+      }
+
+      // Check if we need to connect the user
+      if (!streamVideoClient.user || streamVideoClient.user.id !== user.uid) {
+        console.log("Connecting user to Stream...");
+        setLoadingMessage("Authenticating...");
+
+        try {
+          // Disconnect any existing user to avoid the consecutive connect warning
+          if (streamVideoClient.user) {
+            await streamVideoClient.disconnectUser();
+          }
+
+          // Use the simplest token approach for development
+          const token = streamClient.devToken(user.uid);
+
+          // Connect with increased timeout
+          await streamVideoClient.connectUser(
+            {
+              id: user.uid,
+              name: user.name || "User",
+              image: user.photoUrl || "",
+              userType: user.userType || "student"
+            },
+            token
+          );
+
+          console.log("User connected to Stream successfully");
+        } catch (err) {
+          console.error("Failed to connect user to Stream:", err);
+          setIsLoading(false);
+          alert("Could not connect to video service. Please try again later.");
+          return;
+        }
+      }
+
+      // Leave previous call if exists
+      if (callInstanceRef.current) {
+        console.log("Leaving previous call...");
+        setLoadingMessage("Switching rooms...");
+        await callInstanceRef.current.leave();
+        callInstanceRef.current = null;
+        setCurrentCall(null);
+      }
+
+      // Create and join call with increased timeout
+      console.log("Creating call instance...");
+      setLoadingMessage("Joining video call...");
+      const call = streamVideoClient.call("default", roomId);
+
+      try {
+        console.log("Joining call with extended timeout...");
+        // Increase the timeout for joining
+        await Promise.race([
+          call.join({ create: true }),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error("Join call timeout")), 30000)
+          )
+        ]);
+        console.log("Call joined successfully");
+      } catch (error) {
+        console.error("Error joining call:", error);
+        setIsLoading(false);
+        if (error.message === "Join call timeout") {
+          alert("Connection timed out. Please check your network and try again.");
+        } else {
+          alert("Could not join the video call. Please check your connection and try again.");
+        }
+        return;
+      }
+
+      // Now that we've successfully joined, update states
+      callInstanceRef.current = call;
+      setCurrentCall(call);
+      setActiveRoomId(roomId);
+      setIsCallJoined(true);
+      
+      // Enable devices after successful join
+      setLoadingMessage("Enabling camera and microphone...");
+      await enableDevices(call);
+      
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error in join room process:", error);
+      setIsLoading(false);
+      alert("An error occurred while setting up the video call. Please refresh the page and try again.");
+    }
+  };
+
+  // Enable camera and microphone
+  const enableDevices = async (call) => {
+    try {
+      console.log("Enabling camera and microphone...");
+      await call.camera.enable();
+      await call.microphone.enable();
+      console.log("Camera and microphone enabled successfully");
+    } catch (err) {
+      console.warn("Error enabling devices:", err);
+    }
+  };
+
+  // Fetch breakout rooms
+  const fetchBreakoutRooms = async () => {
+    if (!selectedClassId) return;
+    
+    try {
+      const breakoutRef = collection(
+        db,
+        "conference_calls",
+        selectedClassId,
+        "breakout_rooms"
+      );
+      const querySnapshot = await getDocs(breakoutRef);
+
+      setBreakoutRooms(
+        querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data()
+        }))
+      );
+    } catch (error) {
+      console.error("Error fetching breakout rooms:", error);
+    }
+  };
+
+  // Create breakout rooms
+  const createBreakoutRooms = async () => {
+    setIsCreating(true);
+
+    try {
+      if (!classData) return;
+
+      const conferenceDocRef = doc(db, "conference_calls", selectedClassId);
+      const breakoutRoomsRef = collection(conferenceDocRef, "breakout_rooms");
+
+      for (let i = 0; i < numRooms; i++) {
+        const newRoomRef = await addDoc(breakoutRoomsRef, {
+          availableSlots,
+          classEndTime: null,
+          startedAt: null,
+          roomDuration,
+          roomMembers: [],
+          createdAt: Timestamp.now(),
+          roomName: `Breakout Room ${i + 1}`
+        });
+
+        await updateDoc(newRoomRef, { roomId: newRoomRef.id });
+      }
+
+      setIsModalOpen(false);
+      await fetchBreakoutRooms();
+      setIsViewModalOpen(true);
+
+    } catch (error) {
+      console.error("Error creating breakout rooms:", error);
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  // Update room members
   const updateRoomMembers = async (roomId, isJoining = true) => {
-    console.log(`updateRoomMembers called with:`, {
-      roomId,
-      isJoining,
-      selectedClassId,
-      userId: user?.uid,
-    });
-
     try {
       const breakoutRoomRef = doc(
         db,
@@ -122,236 +405,28 @@ const VideoCall = () => {
         roomId
       );
 
-      // First verify the document exists and log its current state
       const roomDoc = await getDoc(breakoutRoomRef);
-      if (!roomDoc.exists()) {
-        return;
-      }
+      if (!roomDoc.exists()) return;
 
-      // Then update the members
       await updateDoc(breakoutRoomRef, {
-        roomMembers: isJoining ? arrayUnion(user.uid) : arrayRemove(user.uid),
+        roomMembers: isJoining ? arrayUnion(user.uid) : arrayRemove(user.uid)
       });
-
-      // Verify the update by getting the latest state
-      const updatedDoc = await getDoc(breakoutRoomRef);
 
       await fetchBreakoutRooms();
     } catch (error) {
-      console.error("Error in updateRoomMembers:", {
-        error,
-        roomId,
-        isJoining,
-        userId: user?.uid,
-      });
+      console.error("Error updating room members:", error);
     }
   };
 
-  const createBreakoutRooms = async () => {
-    setIsCreating(true);
-    try {
-      if (!classData) return;
-      const currentTime = new Date();
-      const endTime = new Date(
-        currentTime.getTime() + roomDuration * 60 * 1000
-      );
-
-      const conferenceDocRef = doc(db, "conference_calls", selectedClassId);
-      const breakoutRoomsRef = collection(conferenceDocRef, "breakout_rooms");
-
-      for (let i = 0; i < numRooms; i++) {
-        const newRoomRef = await addDoc(breakoutRoomsRef, {
-          availableSlots,
-          classEndTime: null, // Initialize classEndTime as null
-          startedAt: null, // Initialize startedAt as null
-          roomDuration,
-          roomMembers: [],
-          createdAt: Timestamp.now(),
-        });
-        await updateDoc(newRoomRef, { roomId: newRoomRef.id });
-      }
-
-      setIsModalOpen(false);
-      fetchBreakoutRooms();
-    } catch (error) {
-      console.error("Error creating breakout rooms:", error);
-    } finally {
-      setIsCreating(false);
-    }
-  };
-
-  const fetchBreakoutRooms = async () => {
-    try {
-      const breakoutRef = collection(
-        db,
-        "conference_calls",
-        selectedClassId,
-        "breakout_rooms"
-      );
-      const querySnapshot = await getDocs(breakoutRef);
-      setBreakoutRooms(
-        querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
-      );
-      // setIsViewModalOpen(true);
-    } catch (error) {
-      console.error("Error fetching breakout rooms:", error);
-    }
-  };
-
-  // -----------------------------------------
-  //  Join any room by roomId (Main or Breakout)
-  // -----------------------------------------
-  const joinRoom = (roomId) => {
-    setIsInMainCall(false);
-
-    // 1) If there's a previous instance, leave the old room
-    if (zegoInstanceRef.current) {
-      // zegoInstanceRef.current.leaveRoom();
-      zegoInstanceRef.current.destroy();
-
-      // If you want to fully destroy the engine:
-      // zegoInstanceRef.current.destroyEngine();
-      zegoInstanceRef.current = null;
-    }
-
-    // 2) Generate new kit token for the new room
-    const appId = parseInt(process.env.REACT_APP_ZEGO_APP_ID);
-    const serverSecret = process.env.REACT_APP_ZEGO_SERVER_SECRET;
-
-    const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(
-      appId,
-      serverSecret,
-      roomId, // the new room ID
-      user.uid, // user ID
-      user.name // user name
-    );
-
-    // 3) Create a brand-new ZegoUIKitPrebuilt instance
-    const zp = ZegoUIKitPrebuilt.create(kitToken);
-
-    // 4) Join the new room with your config
-    zp.joinRoom({
-      container: callContainerRef.current,
-      turnOnMicrophoneWhenJoining: true,
-      turnOnCameraWhenJoining: true,
-      showMyCameraToggleButton: true,
-      showMyMicrophoneToggleButton: true,
-      showAudioVideoSettingsButton: true,
-      showScreenSharingButton: true,
-      showTextChat: true,
-      showUserList: true,
-      maxUsers: 50,
-      layout: "Auto",
-      showLayoutButton: true,
-      scenario: {
-        mode: "GroupCall",
-        config: {
-          role: "Host",
-        },
-      },
-      bottomMenuBarConfig: {
-        isVisible: true,
-        maxButtons: 6,
-        buttons: [
-          "toggleCameraButton",
-          "toggleMicrophoneButton",
-          "switchAudioOutputButton",
-          "leaveButton",
-        ],
-      },
-      onJoinRoom: () => {
-        if (roomId === selectedClassId) {
-          setIsCallJoined(true);
-          setIsInMainCall(true);
-        } else {
-          setIsRoomJoined(true);
-        }
-      },
-      onLeaveRoom: async () => {
-        console.log("onLeaveRoom triggered", {
-          roomId,
-          isMainRoom: roomId === selectedClassId,
-          activeRoomId,
-        });
-
-        // Reset flags when leaving any room
-        setIsCallJoined(false);
-        setIsRoomJoined(false);
-        setIsInMainCall(false);
-        if (roomId !== selectedClassId) {
-          try {
-            await updateRoomMembers(roomId, false);
-          } catch (error) {
-            console.error("Failed to remove user from breakout room:", {
-              error,
-              roomId,
-              userId: user.uid,
-            });
-          }
-        }
-        setIsInMainCall(false);
-      },
-    });
-
-    // 5) Remember this instance so we can leave/destroy it next time
-    zegoInstanceRef.current = zp;
-
-    // 6) Update activeRoomId state
-    setActiveRoomId(roomId);
-  };
-
-  // Convenience method to switch back to the main class
-  const joinMainClass = () => {
-    // If we're in a breakout room, remove the user before joining main class
-    if (activeRoomId !== selectedClassId) {
-      updateRoomMembers(activeRoomId, false);
-    }
-    joinRoom(selectedClassId);
-  };
-
-  // -----------------------------------------
-  //   If user clicks on a breakout room
-  // -----------------------------------------
-  // const handleJoinBreakoutRoom = (room) => {
-  //   // If the breakout room's end time is in the future, join it
-  //   const now = new Date();
-  //   const endTime = room.classEndTime?.toDate?.() || null;
-  //   if (!endTime || endTime < now) {
-  //     alert("This breakout room is expired or has no valid end time.");
-  //     return;
-  //   }
-
-  //   // Check available slots
-  //   if (room.roomMembers.length >= room.availableSlots) {
-  //     alert("This breakout room is full.");
-  //     return;
-  //   }
-
-  //   // If user is already in this room, don't rejoin
-  //   if (room.roomMembers.includes(user.uid)) {
-  //     alert("You are already in this room.");
-  //     return;
-  //   }
-
-  //   updateRoomMembers(room.id, true);
-
-  //   // Switch to that breakout room
-  //   joinRoom(room.id);
-
-  //   // Calculate how long until it ends
-  //   const remainingMs = endTime - now;
-  //   // Once the time is up, automatically bring the user back to the main room
-  //   setTimeout(() => {
-  //     // (Optional) Only force them back if they are still in that breakout
-  //     // E.g.: if (activeRoomId === room.id) joinMainClass();
-  //     joinMainClass();
-  //   }, remainingMs);
-  // };
+  // Join a breakout room
   const handleJoinBreakoutRoom = async (room) => {
-    const now = new Date();
-    const endTime = room.classEndTime?.toDate?.() || null;
+    // Check if room is full
+    if (room.roomMembers.length >= room.availableSlots) {
+      alert("This breakout room is full.");
+      return;
+    }
 
-    // If the room has not started yet, set the startedAt and classEndTime
+    // Initialize room start time if not started
     if (!room.startedAt) {
       const startedAt = Timestamp.now();
       const classEndTime = Timestamp.fromDate(
@@ -368,193 +443,217 @@ const VideoCall = () => {
 
       await updateDoc(breakoutRoomRef, {
         startedAt,
-        classEndTime,
+        classEndTime
       });
 
-      // Update the local state to reflect the changes
       room.startedAt = startedAt;
       room.classEndTime = classEndTime;
     }
 
-    // Check available slots
-    if (room.roomMembers.length >= room.availableSlots) {
-      alert("This breakout room is full.");
-      return;
-    }
+    // Add user to room members
+    await updateRoomMembers(room.id, true);
 
-    updateRoomMembers(room.id, true);
+    // Join the room
+    await joinRoom(room.id);
+    setIsViewModalOpen(false);
 
-    // Switch to that breakout room
-    joinRoom(room.id);
+    // Set up auto-return timer if room has an end time
+    if (room.classEndTime) {
+      const now = new Date();
+      const endTime = room.classEndTime.toDate();
+      const remainingMs = endTime - now;
 
-    // Calculate how long until it ends
-    const remainingMs = room.classEndTime.toDate() - now;
-    // Once the time is up, automatically bring the user back to the main room
-    setTimeout(() => {
-      joinMainClass();
-    }, remainingMs);
-  };
-  // -----------------------------------------
-  //   Mount: start in the main class call
-  // -----------------------------------------
-  useEffect(() => {
-    // On first mount, join the main class
-    if (selectedClassId) {
-      joinMainClass();
-    }
-    // Cleanup on unmount
-    return () => {
-      if (zegoInstanceRef.current) {
-        zegoInstanceRef.current.destroy();
-        zegoInstanceRef.current = null;
+      if (remainingMs > 0) {
+        setTimeout(() => {
+          joinMainClass();
+        }, remainingMs);
       }
-    };
-    // eslint-disable-next-line
-  }, [selectedClassId]);
+    }
+  };
 
-  // -----------------------------------------
-  //   Render
-  // -----------------------------------------
+  // Return to main room
+  const joinMainClass = async () => {
+    // If in a breakout room, remove from members
+    if (activeRoomId !== selectedClassId) {
+      await updateRoomMembers(activeRoomId, false);
+    }
+
+    // Join main room
+    await joinRoom(selectedClassId);
+  };
+
+  // Handle call leaving
+  const handleLeaveCall = async () => {
+    try {
+      if (callInstanceRef.current) {
+        // If in breakout room, update members
+        if (activeRoomId !== selectedClassId) {
+          await updateRoomMembers(activeRoomId, false);
+        }
+
+        // Leave call
+        await callInstanceRef.current.leave();
+        callInstanceRef.current = null;
+        setCurrentCall(null);
+        setIsCallJoined(false);
+
+        // Redirect to dashboard
+        window.location.href = '/dashboard';
+      }
+    } catch (error) {
+      console.error("Error leaving call:", error);
+    }
+  };
+
   return (
-    <>
-      {/* The container where Zego’s UI will appear */}
-      <div ref={callContainerRef} style={{ width: "100vw", height: "100vh" }} />
-
-      {/* Button to leave breakout room and return to main call */}
-      {activeRoomId !== selectedClassId && isCallJoined && isRoomJoined && (
-        <div className="fixed bottom-4 left-12 flex gap-2 z-[1000]">
-          <button
-            onClick={joinMainClass}
-            className="flex items-center justify-center
-               bg-[#313443] hover:bg-[#404352]
-               text-white rounded-lg w-10 h-10
-               transition-colors duration-200
-               shadow-md"
-            aria-label="Leave Breakout Room"
-          >
-            <LogOut size={20} />
-          </button>
-        </div>
-      )}
-
-      {/* If you want custom floating buttons */}
-      {activeRoomId === selectedClassId && isCallJoined && isInMainCall && (
-        <div className="fixed bottom-4 left-12 flex gap-2 z-[1000]">
-          {/* Create Breakout Rooms (admins/tutors only) */}
-          {hasBreakoutPermission && (
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="flex items-center justify-center
+    <div className="video-call-student" ref={videoContainerRef}>
+      {currentCall && !isLoading ? (
+        <>
+          <CallPreview streamVideoClient={streamVideoClient} currentCall={currentCall} />
+          
+          {/* Room indicator */}
+          <div className="fixed top-8 left-8 z-[1000]">
+            {activeRoomId !== selectedClassId && (
+              <div className="px-4 py-2 text-white bg-green-600 rounded-xl">
+                Breakout Room {breakoutRooms.findIndex((room) => room.id === activeRoomId) + 1}
+              </div>
+            )}
+          </div>
+          
+          {/* Floating action buttons */}
+          <div className="fixed bottom-4 left-12 flex gap-2 z-[1000]">
+            {/* Create Breakout Rooms button (for users with permission) */}
+            {hasBreakoutPermission && activeRoomId === selectedClassId && (
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="flex items-center justify-center
                          bg-[#313443] hover:bg-[#404352]
                          text-white rounded-lg w-10 h-10
                          transition-colors duration-200
                          shadow-md"
-              aria-label="Create Breakout Room"
-            >
-              <CopyPlus size={20} />
-            </button>
-          )}
-
-          {/* View/Join Breakout Rooms */}
-          <button
-            onClick={() => {
-              fetchBreakoutRooms();
-              setIsViewModalOpen(true);
-            }}
-            className="flex items-center justify-center
+                aria-label="Create Breakout Room"
+              >
+                <CopyPlus size={20} />
+              </button>
+            )}
+            
+            {/* View Breakout Rooms button */}
+            {activeRoomId === selectedClassId && (
+              <button
+                onClick={() => {
+                  fetchBreakoutRooms();
+                  setIsViewModalOpen(true);
+                }}
+                className="flex items-center justify-center
                        bg-[#313443] hover:bg-[#404352]
                        text-white rounded-lg w-10 h-10
                        transition-colors duration-200
                        shadow-md"
-            aria-label="View Breakout Rooms"
-          >
-            <Users size={20} />
-          </button>
-        </div>
+                aria-label="View Breakout Rooms"
+              >
+                <Users size={20} />
+              </button>
+            )}
+            
+            {/* Return to Main Room button */}
+            {activeRoomId !== selectedClassId && (
+              <button
+                onClick={joinMainClass}
+                className="flex items-center justify-center
+                     bg-[#313443] hover:bg-[#404352]
+                     text-white rounded-lg w-10 h-10
+                     transition-colors duration-200
+                     shadow-md"
+                aria-label="Return to Main Room"
+              >
+                <LogOut size={20} />
+              </button>
+            )}
+          </div>
+        </>
+      ) : (
+        // Loading state while connecting to call
+        <LoadingSpinner message={loadingMessage} />
       )}
 
-      <div className="fixed top-8 left-8 flex gap-2 z-[1000]">
-        {activeRoomId === selectedClassId ? (
-          <></>
-        ) : (
-          <div className="px-4 py-2 text-white bg-green-600 rounded-xl">
-            Breakout Room{" "}
-            {breakoutRooms.findIndex((room) => room.id === activeRoomId) + 1}
-          </div>
-        )}
-      </div>
-
-      {/* ------------------------
-          Modal: Create Breakout Rooms 
-      ------------------------ */}
+      {/* Create Breakout Rooms Modal */}
       <Modal
         isOpen={isModalOpen}
-        onRequestClose={() => setIsModalOpen(false)}
-        style={{
-          overlay: {
-            zIndex: 9999,
-            backgroundColor: "rgba(0,0,0,0.5)",
-            overflow: "hidden",
-          },
-          content: {
-            position: "absolute",
-            zIndex: 10000,
-            top: "50%",
-            left: "50%",
-            right: "auto",
-            bottom: "auto",
-            marginRight: "-50%",
-            transform: "translate(-50%, -50%)",
-            padding: 0,
-            border: "none",
-            background: "transparent",
-            maxHeight: "90vh",
-            maxWidth: "90vw",
-            overflow: "visible",
-          },
-        }}
+        onClose={() => setIsModalOpen(false)}
+        title="Create Breakout Rooms"
+        size="lg"
       >
-        <div className="p-8 bg-white rounded-lg w-96 font-urbanist">
-          <h2 className="mb-6 text-xl font-bold">Create Breakout Rooms</h2>
-          <div className="space-y-4">
-            <div>
-              <label className="block mb-1 text-sm font-medium text-gray-700">
-                Number of Rooms
-              </label>
+        <div className="space-y-4">
+          <div>
+            <label className="block mb-1 text-sm font-medium text-gray-700">
+              Number of Rooms
+            </label>
+            <div className="slider-container">
               <input
-                type="number"
+                type="range"
+                min="1"
+                max="10"
                 value={numRooms}
                 onChange={(e) => setNumRooms(parseInt(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                className="w-full"
               />
-            </div>
-
-            <div>
-              <label className="block mb-1 text-sm font-medium text-gray-700">
-                Room Duration (minutes)
-              </label>
-              <input
-                type="number"
-                value={roomDuration}
-                onChange={(e) => setRoomDuration(parseInt(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-              />
-            </div>
-
-            <div>
-              <label className="block mb-1 text-sm font-medium text-gray-700">
-                Available Slots
-              </label>
-              <input
-                type="number"
-                value={availableSlots}
-                onChange={(e) => setAvailableSlots(parseInt(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-              />
+              <span className="text-sm font-medium">{numRooms}</span>
             </div>
           </div>
 
-          <div className="flex justify-end mt-6 space-x-3">
+          <div>
+            <label className="block mb-1 text-sm font-medium text-gray-700">
+              Room Duration (minutes)
+            </label>
+            <select
+              value={roomDuration}
+              onChange={(e) => setRoomDuration(parseInt(e.target.value))}
+              className="w-full p-2 border border-gray-300 rounded-md"
+            >
+              <option value="5">5 minutes</option>
+              <option value="10">10 minutes</option>
+              <option value="15">15 minutes</option>
+              <option value="20">20 minutes</option>
+              <option value="30">30 minutes</option>
+              <option value="45">45 minutes</option>
+              <option value="60">60 minutes</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block mb-1 text-sm font-medium text-gray-700">
+              Available Slots per Room
+            </label>
+            <div className="slider-container">
+              <input
+                type="range"
+                min="2"
+                max="10"
+                value={availableSlots}
+                onChange={(e) => setAvailableSlots(parseInt(e.target.value))}
+                className="w-full"
+              />
+              <span className="text-sm font-medium">{availableSlots}</span>
+            </div>
+          </div>
+
+          {/* Preview of room distribution */}
+          <div className="mt-4">
+            <h3 className="text-sm font-medium text-gray-700 mb-2">Room Preview:</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+              {Array.from({ length: Math.min(numRooms, 10) }).map((_, index) => (
+                <div
+                  key={index}
+                  className="p-2 bg-gray-100 rounded-md text-center"
+                >
+                  <p className="text-sm font-medium">Room {index + 1}</p>
+                  <p className="text-xs text-gray-500">{availableSlots} slots</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex justify-end space-x-3 mt-6">
             <button
               onClick={() => setIsModalOpen(false)}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
@@ -597,118 +696,102 @@ const VideoCall = () => {
         </div>
       </Modal>
 
-      {/* ------------------------
-          Modal: View/Join Breakout Rooms
-      ------------------------ */}
+      {/* View/Join Breakout Rooms Modal */}
       <Modal
         isOpen={isViewModalOpen}
-        onRequestClose={() => setIsViewModalOpen(false)}
-        style={{
-          overlay: {
-            zIndex: 9999,
-            backgroundColor: "rgba(0,0,0,0.5)",
-            overflow: "hidden",
-          },
-          content: {
-            position: "absolute",
-            zIndex: 10000,
-            top: "50%",
-            left: "50%",
-            right: "auto",
-            bottom: "auto",
-            marginRight: "-50%",
-            transform: "translate(-50%, -50%)",
-            padding: 0,
-            border: "none",
-            background: "transparent",
-            maxHeight: "90vh",
-            maxWidth: "90vw",
-            overflow: "visible",
-          },
-        }}
+        onClose={() => setIsViewModalOpen(false)}
+        title="Breakout Rooms"
+        size="lg"
       >
-        <div className="bg-white rounded-2xl shadow-xl w-full sm:w-96 max-h-[90vh] flex flex-col font-urbanist">
-          <div className="p-6 border-b">
-            <h2 className="text-xl font-bold text-gray-900">Breakout Rooms</h2>
-          </div>
+        <div className="space-y-4 max-h-96 overflow-y-auto">
+          {breakoutRooms.length > 0 ? (
+            breakoutRooms.map((room, index) => {
+              const isRoomExpired =
+                room.startedAt &&
+                new Date() > new Date(room.classEndTime?.toDate());
+              
+              let timeRemaining = null;
+              if (room.startedAt && room.classEndTime) {
+                const now = new Date();
+                const endTime = room.classEndTime.toDate();
+                const remainingMs = endTime - now;
+                if (remainingMs > 0) {
+                  const remainingMins = Math.ceil(remainingMs / (1000 * 60));
+                  timeRemaining = `${remainingMins} min`;
+                }
+              }
 
-          <div className="flex-1 p-6 overflow-y-auto">
-            <div className="space-y-4">
-              {breakoutRooms.map((room, index) => {
-                const isRoomExpired =
-                  room.startedAt &&
-                  new Date() > new Date(room.classEndTime.toDate());
-
-                return (
-                  <div
-                    key={room.id}
-                    className="p-4 transition-colors border rounded-xl bg-gray-50 hover:bg-gray-100"
-                  >
-                    <div className="space-y-2">
+              return (
+                <div
+                  key={room.id}
+                  className="p-4 border rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors"
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
                       <p className="font-semibold text-gray-900">
-                        Breakout Room {index + 1}{" "}
+                        {room.roomName || `Breakout Room ${index + 1}`}
                       </p>
-                      <p className="text-gray-600">
-                        Available Slots: {room.availableSlots}
+                      <p className="text-gray-600 text-sm mt-1">
+                        Members: {room.roomMembers.length}/{room.availableSlots}
                       </p>
-                      <p className="text-gray-600">
-                        Duration: {room.roomDuration} minutes
-                      </p>
-                      <p className="text-gray-600">
-                        Members: {room.roomMembers.length}
-                      </p>
-                      <p className="text-gray-600">
-                        {room.startedAt
-                          ? `Ends at: ${room.classEndTime
-                              .toDate()
-                              .toLocaleString()}`
-                          : "Not started yet"}
-                      </p>
+                      {timeRemaining && (
+                        <p className="text-gray-600 text-sm">
+                          Ends in: {timeRemaining}
+                        </p>
+                      )}
+                      {!room.startedAt && (
+                        <p className="text-gray-600 text-sm">
+                          Not started yet (Duration: {room.roomDuration} min)
+                        </p>
+                      )}
                     </div>
+                    
                     <button
-                      className={`px-3 py-1 mt-3 text-sm font-medium rounded ${
-                        room.roomMembers.length >= room.availableSlots ||
-                        isRoomExpired
-                          ? "bg-gray-400 cursor-not-allowed"
-                          : room.roomMembers.includes(user.uid)
-                          ? "bg-green-500"
-                          : "bg-blue-600 hover:bg-blue-700"
-                      } text-white`}
+                      className={`px-3 py-1 text-sm font-medium rounded ${
+                        room.roomMembers.length >= room.availableSlots || isRoomExpired
+                          ? "bg-gray-400 text-white cursor-not-allowed"
+                          : room.id === activeRoomId
+                          ? "bg-green-500 text-white"
+                          : "bg-blue-600 hover:bg-blue-700 text-white"
+                      }`}
                       onClick={() => {
-                        handleJoinBreakoutRoom(room);
-                        setIsViewModalOpen(false);
+                        if (room.id !== activeRoomId) {
+                          handleJoinBreakoutRoom(room);
+                          setIsViewModalOpen(false);
+                        }
                       }}
-                      disabled={
-                        room.roomMembers.length >= room.availableSlots ||
-                        isRoomExpired
-                      }
+                      disabled={room.roomMembers.length >= room.availableSlots || isRoomExpired || room.id === activeRoomId}
                     >
                       {room.roomMembers.length >= room.availableSlots
-                        ? "Room Full"
+                        ? "Full"
                         : isRoomExpired
-                        ? "Room Expired"
+                        ? "Expired"
+                        : room.id === activeRoomId
+                        ? "Current"
                         : "Join"}
                     </button>
                   </div>
-                );
-              })}
+                </div>
+              );
+            })
+          ) : (
+            <div className="p-4 text-center text-gray-500">
+              No breakout rooms available
             </div>
-          </div>
-
-          <div className="p-6 border-t bg-gray-50 rounded-b-2xl">
-            <div className="flex justify-end">
-              <button
-                onClick={() => setIsViewModalOpen(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 transition-colors bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300"
-              >
-                Close
-              </button>
-            </div>
-          </div>
+          )}
+        </div>
+        
+        <div className="flex justify-end mt-4">
+          <button
+            onClick={() => setIsViewModalOpen(false)}
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+          >
+            Close
+          </button>
         </div>
       </Modal>
-    </>
+    </div>
   );
 };
 
-export default VideoCall;
+export default VideoCallStudent;
