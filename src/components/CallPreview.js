@@ -102,7 +102,6 @@ const CallPreview = ({ streamVideoClient, currentCall }) => {
         {/* Room header */}
         <div className="call-header">
           <div className="room-info">
-            <h3>Room: {call.id}</h3>
             <span>{participants.length} participants</span>
           </div>
           
