@@ -48,6 +48,14 @@ html {
   background-color: var(--dark-bg-primary);
 }
 
+.str-video__speaker-layout__wrapper{
+  height: 100vh;
+}
+.str-chat__message--me .str-chat__message-text{
+  background-color: transparent !important;
+  color: white !important;
+}
+
 /* Call layout arrangement */
 .call-layout {
   display: flex;
