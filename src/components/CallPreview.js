@@ -1,5 +1,6 @@
 // src/components/EnhancedCallPreview.js
 import React, { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import "@stream-io/video-react-sdk/dist/css/styles.css";
 import "stream-chat-react/dist/css/v2/index.css";
 import "./CallPreview.css";
@@ -20,17 +21,12 @@ import {
   Chat,
   Channel as StreamChannel,
   MessageList,
-  MessageInput,
   Thread,
   Window,
-  ChannelHeader,
   useChannelStateContext,
   useMessageContext,
   MessageSimple,
   useChannelActionContext,
-  Attachment,
-  ReactionSelector,
-  ReactionList
 } from "stream-chat-react";
 
 // Icons
@@ -42,10 +38,47 @@ import {
   Smile,
   Image,
   File,
-  PaperclipIcon
+  PaperclipIcon,
+  Moon,
+  ChevronRight
 } from "lucide-react";
 
-// Custom Message component with enhanced UI
+// Animation variants for framer motion
+const sidebarVariants = {
+  hidden: { x: "100%" },
+  visible: { 
+    x: 0,
+    transition: { 
+      type: "spring", 
+      stiffness: 300, 
+      damping: 30 
+    }
+  },
+  exit: { 
+    x: "100%",
+    transition: { 
+      ease: "easeInOut", 
+      duration: 0.3 
+    }
+  }
+};
+
+const fadeInVariants = {
+  hidden: { opacity: 0 },
+  visible: { 
+    opacity: 1,
+    transition: { duration: 0.3 }
+  }
+};
+
+const buttonHoverVariants = {
+  hover: { 
+    scale: 1.05,
+    transition: { duration: 0.2 }
+  }
+};
+
+// Custom Message component with enhanced UI and animations
 const CustomMessage = (props) => {
   const { message, handleOpenThread } = props;
   const { updateMessage } = useChannelActionContext();
@@ -76,46 +109,66 @@ const CustomMessage = (props) => {
   };
 
   return (
-    <div className="custom-message-container">
+    <div className="custom-message-container dark-theme-message">
       <MessageSimple 
         {...props}
         additionalMessageInputProps={{
           grow: true,
           InputButtons: () => (
             <div className="message-input-buttons">
-              <button className="message-action-button" onClick={toggleReactions}>
+              <motion.button 
+                className="message-action-button"
+                onClick={toggleReactions}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+              >
                 <Smile size={18} />
-              </button>
+              </motion.button>
             </div>
           )
         }}
       />
       
-      {showReactions && (
-        <div className="reactions-selector-container">
-          <div className="reactions-selector">
-            {["like", "love", "haha", "wow", "sad", "angry"].map((type) => (
-              <button 
-                key={type}
-                className="reaction-button" 
-                onClick={() => handleReaction(type)}
-              >
-                {type === "like" && "👍"}
-                {type === "love" && "❤️"}
-                {type === "haha" && "😂"}
-                {type === "wow" && "😮"}
-                {type === "sad" && "😢"}
-                {type === "angry" && "😡"}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {showReactions && (
+          <motion.div 
+            className="reactions-selector-container"
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+            variants={fadeInVariants}
+          >
+            <motion.div 
+              className="reactions-selector"
+              initial={{ y: 10, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 10, opacity: 0 }}
+            >
+              {["like", "love", "haha", "wow", "sad", "angry"].map((type) => (
+                <motion.button 
+                  key={type}
+                  className="reaction-button" 
+                  onClick={() => handleReaction(type)}
+                  whileHover={{ scale: 1.2 }}
+                  whileTap={{ scale: 0.9 }}
+                >
+                  {type === "like" && "👍"}
+                  {type === "love" && "❤️"}
+                  {type === "haha" && "😂"}
+                  {type === "wow" && "😮"}
+                  {type === "sad" && "😢"}
+                  {type === "angry" && "😡"}
+                </motion.button>
+              ))}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
 
-// Enhanced Custom Input for better UX
+// Enhanced Custom Input for better UX with animations
 const CustomMessageInput = (props) => {
   const [message, setMessage] = useState("");
   const [isAttachmentMenuOpen, setIsAttachmentMenuOpen] = useState(false);
@@ -158,16 +211,18 @@ const CustomMessageInput = (props) => {
   };
   
   return (
-    <div className="custom-message-input">
+    <div className="custom-message-input dark-theme-input">
       <form onSubmit={handleSubmit} className="message-input-form">
         <div className="message-input-container">
-          <button 
+          <motion.button 
             type="button"
             className="attachment-button"
             onClick={() => setIsAttachmentMenuOpen(!isAttachmentMenuOpen)}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
           >
             <PaperclipIcon size={20} />
-          </button>
+          </motion.button>
           
           <input
             className="message-input-field"
@@ -177,41 +232,53 @@ const CustomMessageInput = (props) => {
             autoFocus
           />
           
-          <button 
+          <motion.button 
             type="submit" 
             className="send-button"
             disabled={!message.trim()}
+            whileHover={message.trim() ? { scale: 1.1 } : {}}
+            whileTap={message.trim() ? { scale: 0.95 } : {}}
           >
             <Send size={20} />
-          </button>
+          </motion.button>
         </div>
         
-        {isAttachmentMenuOpen && (
-          <div className="attachment-menu">
-            <button 
-              type="button"
-              className="attachment-option"
-              onClick={() => {
-                fileInputRef.current.click();
-              }}
+        <AnimatePresence>
+          {isAttachmentMenuOpen && (
+            <motion.div 
+              className="attachment-menu"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              transition={{ duration: 0.2 }}
             >
-              <File size={16} />
-              <span>File</span>
-            </button>
-            
-            <button 
-              type="button" 
-              className="attachment-option"
-              onClick={() => {
-                fileInputRef.current.accept = "image/*";
-                fileInputRef.current.click();
-              }}
-            >
-              <Image size={16} />
-              <span>Image</span>
-            </button>
-          </div>
-        )}
+              <motion.button 
+                type="button"
+                className="attachment-option"
+                onClick={() => {
+                  fileInputRef.current.click();
+                }}
+                whileHover={{ scale: 1.05, backgroundColor: "#2D3748" }}
+              >
+                <File size={16} />
+                <span>File</span>
+              </motion.button>
+              
+              <motion.button 
+                type="button" 
+                className="attachment-option"
+                onClick={() => {
+                  fileInputRef.current.accept = "image/*";
+                  fileInputRef.current.click();
+                }}
+                whileHover={{ scale: 1.05, backgroundColor: "#2D3748" }}
+              >
+                <Image size={16} />
+                <span>Image</span>
+              </motion.button>
+            </motion.div>
+          )}
+        </AnimatePresence>
         
         <input
           type="file"
@@ -224,19 +291,25 @@ const CustomMessageInput = (props) => {
   );
 };
 
-// Enhanced CustomChannelHeader for better UX
+// Enhanced CustomChannelHeader for better UX with dark theme
 const CustomChannelHeader = () => {
   const { channel } = useChannelStateContext();
   const members = Object.values(channel.state.members);
   const memberCount = members.length;
   
   return (
-    <div className="custom-channel-header">
+    <motion.div 
+      className="custom-channel-header dark-theme-header"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
       <div className="channel-header-info">
-        <h4 className="channel-name">{channel.data.name || 'Chat'}</h4>
+        {/* <h4 className="channel-name">{channel.data.name || 'Chat'}</h4> */}
         <span className="member-count">{memberCount} participants</span>
       </div>
-    </div>
+     
+    </motion.div>
   );
 };
 
@@ -246,7 +319,7 @@ const EnhancedCallPreview = ({ streamVideoClient, currentCall, chatClient, chatC
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [lastReadMessageId, setLastReadMessageId] = useState(null);
 
-  // Toggle chat panel
+  // Toggle chat panel with animation
   const toggleChat = () => {
     setIsChatOpen(!isChatOpen);
     if (!isChatOpen) {
@@ -259,7 +332,7 @@ const EnhancedCallPreview = ({ streamVideoClient, currentCall, chatClient, chatC
     }
   };
 
-  // Toggle participants panel
+  // Toggle participants panel with animation
   const toggleParticipants = () => {
     setIsParticipantsOpen(!isParticipantsOpen);
     if (!isParticipantsOpen) {
@@ -294,7 +367,7 @@ const EnhancedCallPreview = ({ streamVideoClient, currentCall, chatClient, chatC
   }, [chatChannel, isChatOpen]);
 
   return (
-    <div className="enhanced-call-preview">
+    <div className="enhanced-call-preview dark-theme">
       <Chat client={chatClient}>
         <StreamVideo client={streamVideoClient}>
           <StreamTheme>
@@ -304,65 +377,105 @@ const EnhancedCallPreview = ({ streamVideoClient, currentCall, chatClient, chatC
                 <div className={`main-video-area ${(isChatOpen || isParticipantsOpen) ? 'with-sidebar' : ''}`}>
                   <SpeakerLayout participantsBarPosition="bottom" />
                   
-                  {/* Custom floating controls */}
+                  {/* Custom floating controls with animations */}
                   <div className="floating-controls">
-                    <button 
+                    <motion.button 
                       className={`control-btn ${isChatOpen ? 'active' : ''} ${unreadMessages > 0 ? 'has-notification' : ''}`} 
                       onClick={toggleChat}
                       title="Chat"
+                      whileHover="hover"
+                      variants={buttonHoverVariants}
                     >
                       <MessageSquare size={20} />
-                      {unreadMessages > 0 && (
-                        <span className="notification-badge">{unreadMessages}</span>
-                      )}
-                    </button>
+                      <AnimatePresence>
+                        {unreadMessages > 0 && (
+                          <motion.span 
+                            className="notification-badge"
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            exit={{ scale: 0 }}
+                          >
+                            {unreadMessages}
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
+                    </motion.button>
                     
-                    <button 
+                    <motion.button 
                       className={`control-btn ${isParticipantsOpen ? 'active' : ''}`} 
                       onClick={toggleParticipants}
                       title="Participants"
+                      whileHover="hover"
+                      variants={buttonHoverVariants}
                     >
                       <Users size={20} />
-                    </button>
+                    </motion.button>
                   </div>
                   
                   {/* Call Controls at bottom */}
                   <CallControls />
                 </div>
                 
-                {/* Sidebar for Chat or Participants */}
-                {(isChatOpen || isParticipantsOpen) && (
-                  <div className="call-sidebar">
-                    <div className="sidebar-header">
-                      <h3>{isChatOpen ? 'Chat' : 'Participants'}</h3>
-                      <button 
-                        className="close-sidebar" 
-                        onClick={isChatOpen ? toggleChat : toggleParticipants}
-                      >
-                        <X size={18} />
-                      </button>
-                    </div>
-                    
-                    {isChatOpen && chatChannel && (
-                      <div className="chat-container">
-                        <StreamChannel channel={chatChannel}>
-                          <Window>
-                            <CustomChannelHeader />
-                            <MessageList Message={CustomMessage} />
-                            <CustomMessageInput />
-                          </Window>
-                          <Thread />
-                        </StreamChannel>
+                {/* Sidebar for Chat or Participants with Framer Motion animations */}
+                <AnimatePresence>
+                  {(isChatOpen || isParticipantsOpen) && (
+                    <motion.div 
+                      className="call-sidebar dark-theme-sidebar"
+                      key="sidebar"
+                      initial="hidden"
+                      animate="visible"
+                      exit="exit"
+                      variants={sidebarVariants}
+                    >
+                      <div className="sidebar-header dark-theme-sidebar-header">
+                        <motion.h3
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: 0.1 }}
+                        >
+                          {isChatOpen ? 'Chat' : 'Participants'}
+                        </motion.h3>
+                        <motion.button 
+                          className="close-sidebar"
+                          onClick={isChatOpen ? toggleChat : toggleParticipants}
+                          whileHover={{ scale: 1.1, rotate: 90 }}
+                          whileTap={{ scale: 0.9 }}
+                        >
+                          <X size={18} />
+                        </motion.button>
                       </div>
-                    )}
-                    
-                    {isParticipantsOpen && (
-                      <div className="participants-container">
-                        <CallParticipantsList />
-                      </div>
-                    )}
-                  </div>
-                )}
+                      
+                      {isChatOpen && chatChannel && (
+                        <motion.div 
+                          className="chat-container"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: 0.2 }}
+                        >
+                          <StreamChannel channel={chatChannel}>
+                            <Window>
+                              <CustomChannelHeader />
+                              <MessageList Message={CustomMessage} />
+                              <CustomMessageInput />
+                            </Window>
+                            <Thread />
+                          </StreamChannel>
+                        </motion.div>
+                      )}
+                      
+                      {isParticipantsOpen && (
+                        <motion.div 
+                          className="participants-container dark-theme-participants"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: 0.2 }}
+                        >
+                          <CallParticipantsList />
+                        </motion.div>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </StreamCall>
           </StreamTheme>

@@ -1,3 +1,5 @@
+/* src/components/CallPreview.css */
+
 body,
 html {
   height: 100%;
@@ -5,7 +7,7 @@ html {
 }
 
 .str-video {
-  background-color: #272a30;
+  background-color: #121212;
   color: #ffffff;
   height: 100dvh;
   width: 100%;
@@ -15,687 +17,35 @@ html {
   max-width: 100%;
 }
 
-/* src/components/CallPreview.css */
-
-.call-preview-container {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  background-color: #18181B;
-  overflow: hidden;
-}
-
-/* Call layout arrangement */
-.call-layout {
-  display: flex;
-  width: 100%;
-  height: 100%;
-  position: relative;
-}
-
-/* Main video area */
-.main-video-area {
-  flex: 1;
-  position: relative;
-  height: 100%;
-  transition: width 0.3s ease;
-}
-
-.main-video-area.with-sidebar {
-  width: calc(100% - 320px);
-}
-
-/* Sidebar for chat or participants */
-.call-sidebar {
-  width: 320px;
-  height: 100%;
-  background-color: #fff;
-  border-left: 1px solid #e5e7eb;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  animation: slideIn 0.3s ease;
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(0);
-  }
-}
-
-/* Sidebar header */
-.sidebar-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 16px;
-  border-bottom: 1px solid #e5e7eb;
-  background-color: #f9fafb;
-}
-
-.sidebar-header h3 {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-  color: #111827;
-}
-
-.close-sidebar {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #6b7280;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-}
-
-.close-sidebar:hover {
-  background-color: #f3f4f6;
-  color: #111827;
-}
-
-/* Containers for chat and participants */
-.chat-container,
-.participants-container {
-  flex: 1;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Make sure the chat takes full height */
-.chat-container .str-chat,
-.chat-container .str-chat__container {
-  height: 100%;
-}
-
-/* Floating controls */
-.floating-controls {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  display: flex;
-  gap: 8px;
-  z-index: 10;
-}
-
-.control-btn {
-  background-color: rgba(0, 0, 0, 0.5);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.control-btn:hover {
-  background-color: rgba(0, 0, 0, 0.7);
-}
-
-.control-btn.active {
-  background-color: #3B82F6;
-}
-
-/* Style adjustments for Stream components */
+/* Dark Theme Base Colors */
 :root {
-  --str-chat__primary-color: #3B82F6;
-  --str-chat__active-primary-color: #2563EB;
-}
-
-/* Make call controls stick to bottom */
-.str-video__call-controls {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  z-index: 5;
-}
-
-/* Improve participant list styling */
-.participants-container {
-  background-color: #f9fafb;
-}
-
-.str-video__participant-list {
-  padding: 12px;
-}
-
-.str-video__participant-list-item {
-  border-radius: 8px;
-  margin-bottom: 8px;
-  padding: 8px 12px;
-  transition: background-color 0.2s ease;
-}
-
-.str-video__participant-list-item:hover {
-  background-color: #f3f4f6;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .main-video-area.with-sidebar {
-    width: 100%;
-    display: none;
-  }
-  
-  .call-sidebar {
-    width: 100%;
-  }
-}
-/* src/components/CallPreview.css */
-
-.call-preview-container {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-/* Call layout arrangement */
-.call-layout {
-  display: flex;
-  width: 100%;
-  height: 100%;
-  position: relative;
-}
-
-/* Main video area */
-.main-video-area {
-  flex: 1;
-  position: relative;
-  height: 100%;
-  transition: width 0.3s ease;
-}
-
-.main-video-area.with-sidebar {
-  width: calc(100% - 320px);
-}
-
-/* Sidebar for chat or participants */
-.call-sidebar {
-  width: 320px;
-  height: 100%;
-  background-color: #fff;
-  border-left: 1px solid #e5e7eb;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  animation: slideIn 0.3s ease;
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(0);
-  }
-}
-
-/* Sidebar header */
-.sidebar-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 16px;
-  border-bottom: 1px solid #e5e7eb;
-  background-color: #f9fafb;
-}
-
-.sidebar-header h3 {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-  color: #111827;
-}
-
-.close-sidebar {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #6b7280;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-}
-
-.close-sidebar:hover {
-  background-color: #f3f4f6;
-  color: #111827;
-}
-
-/* Containers for chat and participants */
-.chat-container,
-.participants-container {
-  flex: 1;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Make sure the chat takes full height */
-.chat-container .str-chat,
-.chat-container .str-chat__container {
-  height: 100%;
-}
-
-/* Floating controls */
-.floating-controls {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  display: flex;
-  gap: 8px;
-  z-index: 10;
-}
-
-.control-btn {
-  background-color: rgba(0, 0, 0, 0.5);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.control-btn:hover {
-  background-color: rgba(0, 0, 0, 0.7);
-}
-
-.control-btn.active {
-  background-color: #3B82F6;
-}
-
-/* Style overrides for Stream components */
-:root {
-  --str-chat__primary-color: #3B82F6;
-  --str-chat__active-primary-color: #2563EB;
-}
-
-/* Ensure the call controls stick to the bottom */
-.str-video__call-controls {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  z-index: 5;
-}
-
-/* Improve participant list styling */
-.str-video__participant-list {
-  padding: 12px;
-}
-
-.str-video__participant-list-item {
-  border-radius: 8px;
-  margin-bottom: 8px;
-  padding: 8px 12px;
-  transition: background-color 0.2s ease;
-}
-
-.str-video__participant-list-item:hover {
-  background-color: #f3f4f6;
-}
-
-/* Speaker view adjustments */
-.str-video__speaker-layout {
-  width: 100%;
-  height: 100%;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .main-video-area.with-sidebar {
-    display: none;
-  }
-  
-  .call-sidebar {
-    width: 100%;
-  }
-}
-
-/* Message list improvements */
-.str-chat__message-list {
-  padding: 16px;
-}
-
-.str-chat__message-list-scroll {
-  padding-bottom: 8px;
-}
-
-/* Message input styling */
-.str-chat__message-textarea {
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  transition: border-color 0.2s;
-}
-
-.str-chat__message-textarea:focus {
-  border-color: #3B82F6;
-}
-
-/* src/components/CallPreview.css */
-
-.call-preview-container {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-/* Call layout arrangement */
-.call-layout {
-  display: flex;
-  width: 100%;
-  height: 100%;
-  position: relative;
-}
-
-/* Main video area */
-.main-video-area {
-  flex: 1;
-  position: relative;
-  height: 100%;
-  transition: width 0.3s ease;
-}
-
-.main-video-area.with-sidebar {
-  width: calc(100% - 320px);
-}
-
-/* Sidebar for chat or participants */
-.call-sidebar {
-  width: 320px;
-  height: 100%;
-  background-color: #fff;
-  border-left: 1px solid #e5e7eb;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  animation: slideIn 0.3s ease;
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(0);
-  }
-}
-
-/* Sidebar header */
-.sidebar-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 16px;
-  border-bottom: 1px solid #e5e7eb;
-  background-color: #f9fafb;
-}
-
-.sidebar-header h3 {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-  color: #111827;
-}
-
-.close-sidebar {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #6b7280;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-}
-
-.close-sidebar:hover {
-  background-color: #f3f4f6;
-  color: #111827;
-}
-
-/* Containers for chat and participants */
-.chat-container,
-.participants-container {
-  flex: 1;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Make sure the chat takes full height */
-.chat-container .str-chat,
-.chat-container .str-chat__container {
-  height: 100%;
-}
-
-/* Floating controls */
-.floating-controls {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  display: flex;
-  gap: 8px;
-  z-index: 10;
-}
-
-.control-btn {
-  background-color: rgba(0, 0, 0, 0.5);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.control-btn:hover {
-  background-color: rgba(0, 0, 0, 0.7);
-}
-
-.control-btn.active {
-  background-color: #3B82F6;
-}
-
-/* Style overrides for Stream components */
-:root {
-  --str-chat__primary-color: #3B82F6;
-  --str-chat__active-primary-color: #2563EB;
-}
-
-/* Ensure the call controls stick to the bottom */
-.str-video__call-controls {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  z-index: 5;
-}
-
-/* Improve participant list styling */
-.str-video__participant-list {
-  padding: 12px;
-}
-
-.str-video__participant-list-item {
-  border-radius: 8px;
-  margin-bottom: 8px;
-  padding: 8px 12px;
-  transition: background-color 0.2s ease;
-}
-
-.str-video__participant-list-item:hover {
-  background-color: #f3f4f6;
-}
-
-/* Speaker view adjustments */
-.str-video__speaker-layout {
-  width: 100%;
-  height: 100%;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .main-video-area.with-sidebar {
-    display: none;
-  }
-  
-  .call-sidebar {
-    width: 100%;
-  }
-}
-
-/* Message list improvements */
-.str-chat__message-list {
-  padding: 16px;
-}
-
-.str-chat__message-list-scroll {
-  padding-bottom: 8px;
-}
-
-/* Message input styling */
-.str-chat__message-textarea,
-.str-chat__textarea {
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  transition: border-color 0.2s;
-  width: 100%;
-  resize: none;
-  padding: 10px 12px;
-  font-size: 14px;
-  font-family: inherit;
-}
-
-.str-chat__message-textarea:focus,
-.str-chat__textarea:focus {
-  border-color: #3B82F6;
-  outline: none;
-}
-
-.str-chat__input-flat {
-  display: flex;
-  position: relative;
-  padding: 10px 16px;
-  background: #fff;
-  border-top: 1px solid #e5e7eb;
-  min-height: 60px;
-}
-
-.str-chat__input-flat-wrapper {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  background: #fff;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  padding: 0 8px;
-}
-
-.str-chat__input-flat--textarea-wrapper {
-  flex: 1;
-}
-
-.str-chat__send-button {
-  width: 36px;
-  height: 36px;
-  background: #3B82F6;
-  border-radius: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  margin-left: 8px;
-}
-
-.str-chat__send-button:hover {
-  background: #2563EB;
-}
-
-.str-chat__send-button svg {
-  width: 16px;
-  height: 16px;
-}
-
-/* Make sure message container and input are always visible */
-.str-chat__messaging,
-.str-chat,
-.str-chat__container,
-.str-chat__main-panel,
-.str-chat__channel {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden;
-}
-
-.str-chat__list {
-  flex: 1;
-  overflow-y: auto;
-}
-
-/* Message list improvements */
-.str-chat__message-list {
-  padding: 16px;
-  flex: 1;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-}
-
-.str-chat__message-list-scroll {
-  padding-bottom: 8px;
-}
-
-/* Message styling */
-.str-chat__message {
-  margin-bottom: 12px;
-}
-
-.str-chat__message-inner {
-  background: #f9fafb;
-  border-radius: 16px;
-  padding: 8px 12px;
-}
-
-.str-chat__message--me .str-chat__message-inner {
-  background: #eff6ff;
-}
-/* src/components/EnhancedCallPreview.css */
-
+  --dark-bg-primary: #121212;
+  --dark-bg-secondary: #1E1E1E;
+  --dark-bg-tertiary: #2D3748;
+  --dark-text-primary: #f7fafc59;
+  --dark-text-secondary: #A0AEC0;
+  --dark-border: #2D3748;
+  --dark-accent: #3b83f66e;
+  --dark-accent-hover: #2564eb73;
+  --dark-input-bg: #2D3748;
+  --dark-card-bg: #1A202C;
+  --dark-hover: #2D3748;
+  --dark-message-me: #3B82F6;
+  --dark-message-other: #2D3748;
+}
+
+/* Dark theme base styling */
+.dark-theme {
+  background-color: var(--dark-bg-primary);
+  color: var(--dark-text-primary);
+}
+
+/* Call preview container */
 .enhanced-call-preview {
   width: 100%;
   height: 100%;
   position: relative;
+  background-color: var(--dark-bg-primary);
 }
 
 /* Call layout arrangement */
@@ -712,6 +62,7 @@ html {
   position: relative;
   height: 100%;
   transition: width 0.3s ease;
+  background-color: var(--dark-bg-primary);
 }
 
 .main-video-area.with-sidebar {
@@ -722,22 +73,15 @@ html {
 .call-sidebar {
   width: 320px;
   height: 100%;
-  background-color: #fff;
-  border-left: 1px solid #e5e7eb;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  animation: slideIn 0.3s ease;
   z-index: 10;
 }
 
-@keyframes slideIn {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(0);
-  }
+.dark-theme-sidebar {
+  background-color: var(--dark-bg-secondary);
+  border-left: 1px solid var(--dark-border);
 }
 
 /* Sidebar header */
@@ -746,22 +90,27 @@ html {
   justify-content: space-between;
   align-items: center;
   padding: 12px 16px;
-  border-bottom: 1px solid #e5e7eb;
-  background-color: #f9fafb;
+}
+
+.dark-theme-sidebar-header {
+  background-color: var(--dark-bg-tertiary);
+  border-bottom: 1px solid var(--dark-border);
 }
 
 .sidebar-header h3 {
   margin: 0;
   font-size: 16px;
   font-weight: 600;
-  color: #111827;
+}
+
+.dark-theme-sidebar-header h3 {
+  color: var(--dark-text-primary);
 }
 
 .close-sidebar {
   background: none;
   border: none;
   cursor: pointer;
-  color: #6b7280;
   padding: 4px;
   display: flex;
   align-items: center;
@@ -769,9 +118,13 @@ html {
   border-radius: 4px;
 }
 
-.close-sidebar:hover {
-  background-color: #f3f4f6;
-  color: #111827;
+.dark-theme-sidebar-header .close-sidebar {
+  color: var(--dark-text-secondary);
+}
+
+.dark-theme-sidebar-header .close-sidebar:hover {
+  background-color: var(--dark-hover);
+  color: var(--dark-text-primary);
 }
 
 /* Containers for chat and participants */
@@ -787,6 +140,7 @@ html {
 .chat-container .str-chat,
 .chat-container .str-chat__container {
   height: 100%;
+  background-color: var(--dark-bg-secondary);
 }
 
 /* Floating controls */
@@ -800,7 +154,7 @@ html {
 }
 
 .control-btn {
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.7);
   color: white;
   border: none;
   border-radius: 8px;
@@ -809,16 +163,15 @@ html {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
   position: relative;
 }
 
 .control-btn:hover {
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.9);
 }
 
 .control-btn.active {
-  background-color: #3B82F6;
+  background-color: var(--dark-accent);
 }
 
 .control-btn.has-notification {
@@ -853,11 +206,14 @@ html {
   justify-content: center;
 }
 
-/* Custom message input */
+/* Dark theme custom message input */
 .custom-message-input {
   padding: 12px 16px;
-  border-top: 1px solid #e5e7eb;
-  background-color: #fff;
+}
+
+.dark-theme-input {
+  background-color: var(--dark-bg-tertiary);
+  border-top: 1px solid var(--dark-border);
 }
 
 .message-input-form {
@@ -867,10 +223,13 @@ html {
 .message-input-container {
   display: flex;
   align-items: center;
-  border: 1px solid #e5e7eb;
   border-radius: 24px;
   padding: 4px 12px;
-  background-color: #fff;
+}
+
+.dark-theme-input .message-input-container {
+  background-color: var(--dark-input-bg);
+  border: 1px solid var(--dark-border);
 }
 
 .message-input-field {
@@ -882,10 +241,17 @@ html {
   background: transparent;
 }
 
+.dark-theme-input .message-input-field {
+  color: var(--dark-text-primary);
+}
+
+.dark-theme-input .message-input-field::placeholder {
+  color: var(--dark-text-secondary);
+}
+
 .send-button, .attachment-button {
   background: none;
   border: none;
-  color: #3B82F6;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -894,12 +260,18 @@ html {
   border-radius: 50%;
 }
 
-.send-button:hover, .attachment-button:hover {
-  background-color: #EFF6FF;
+.dark-theme-input .send-button, 
+.dark-theme-input .attachment-button {
+  color: var(--dark-accent);
 }
 
-.send-button:disabled {
-  color: #D1D5DB;
+.dark-theme-input .send-button:hover, 
+.dark-theme-input .attachment-button:hover {
+  background-color: rgba(59, 130, 246, 0.2);
+}
+
+.dark-theme-input .send-button:disabled {
+  color: var(--dark-text-secondary);
   cursor: not-allowed;
 }
 
@@ -908,25 +280,16 @@ html {
   bottom: 100%;
   left: 10px;
   margin-bottom: 8px;
-  background-color: white;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   display: flex;
   padding: 8px;
   gap: 8px;
   z-index: 10;
-  animation: fadeIn 0.2s ease;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.dark-theme-input .attachment-menu {
+  background-color: var(--dark-card-bg);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .attachment-option {
@@ -940,19 +303,22 @@ html {
   background: none;
   border: none;
   cursor: pointer;
-  color: #4B5563;
 }
 
-.attachment-option:hover {
-  background-color: #F9FAFB;
-  color: #111827;
+.dark-theme-input .attachment-option {
+  color: var(--dark-text-secondary);
+}
+
+.dark-theme-input .attachment-option:hover {
+  background-color: var(--dark-hover);
+  color: var(--dark-text-primary);
 }
 
 .attachment-option span {
   font-size: 12px;
 }
 
-/* Custom message styling */
+/* Custom message styling for dark theme */
 .custom-message-container {
   position: relative;
   margin-bottom: 8px;
@@ -969,11 +335,14 @@ html {
 
 .reactions-selector {
   display: flex;
-  background-color: white;
   border-radius: 24px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   padding: 6px;
   gap: 4px;
+}
+
+.dark-theme-message .reactions-selector {
+  background-color: var(--dark-card-bg);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .reaction-button {
@@ -987,12 +356,10 @@ html {
   border: none;
   cursor: pointer;
   font-size: 18px;
-  transition: transform 0.1s ease;
 }
 
-.reaction-button:hover {
-  transform: scale(1.2);
-  background-color: #F9FAFB;
+.dark-theme-message .reaction-button:hover {
+  background-color: var(--dark-hover);
 }
 
 .message-action-button {
@@ -1005,19 +372,28 @@ html {
   background: none;
   border: none;
   cursor: pointer;
-  color: #6B7280;
 }
 
-.message-action-button:hover {
-  background-color: #F3F4F6;
-  color: #111827;
+.dark-theme-message .message-action-button {
+  color: var(--dark-text-secondary);
 }
 
-/* Custom channel header */
+.dark-theme-message .message-action-button:hover {
+  background-color: var(--dark-hover);
+  color: var(--dark-text-primary);
+}
+
+/* Dark theme custom channel header */
 .custom-channel-header {
   padding: 12px 16px;
-  border-bottom: 1px solid #e5e7eb;
-  background-color: #f9fafb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dark-theme-header {
+  background-color: var(--dark-bg-tertiary);
+  border-bottom: 1px solid var(--dark-border);
 }
 
 .channel-header-info {
@@ -1029,53 +405,258 @@ html {
   margin: 0;
   font-size: 16px;
   font-weight: 600;
-  color: #111827;
+}
+
+.dark-theme-header .channel-name {
+  color: var(--dark-text-primary);
 }
 
 .member-count {
   font-size: 12px;
-  color: #6B7280;
 }
 
-/* Style overrides for Stream components */
+.dark-theme-header .member-count {
+  color: var(--dark-text-secondary);
+}
+
+.channel-theme-icon {
+  color: var(--dark-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Dark theme style overrides for Stream components */
 :root {
-  --str-chat__primary-color: #3B82F6;
-  --str-chat__active-primary-color: #2563EB;
-  --str-chat__message-background-color-me: #EFF6FF;
-  --str-chat__message-background-color: #F9FAFB;
+  --str-chat__primary-color: var(--dark-accent);
+  --str-chat__active-primary-color: var(--dark-accent-hover);
+  --str-chat__message-background-color-me: var(--dark-message-me);
+  --str-chat__message-background-color: var(--dark-message-other);
+  
+  /* Override Stream Chat variables for dark theme */
+  --str-chat__channel-bg-color: var(--dark-bg-secondary);
+  --str-chat__message-text-color: var(--dark-text-primary);
+  --str-chat__message-text-color-me: white;
+  --str-chat__message-sender-text-color: var(--dark-text-secondary);
+  --str-chat__avatar-background-color: var(--dark-card-bg);
+  --str-chat__message-reaction-background-color: var(--dark-card-bg);
+  --str-chat__message-reaction-background-color-active: var(--dark-accent);
 }
 
-/* Ensure the call controls stick to the bottom */
+/* Ensure the call controls stick to the bottom with dark theme */
 .str-video__call-controls {
   position: absolute;
   bottom: 0;
   width: 100%;
   z-index: 5;
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
 }
 
-/* Improve participant list styling */
-.str-video__participant-list {
+/* Dark theme participant list styling */
+.participants-container.dark-theme-participants {
+  background-color: var(--dark-bg-secondary);
+}
+
+.dark-theme-participants .str-video__participant-list {
   padding: 12px;
 }
 
-.str-video__participant-list-item {
+.dark-theme-participants .str-video__participant-list-item {
   border-radius: 8px;
   margin-bottom: 8px;
   padding: 8px 12px;
-  transition: background-color 0.2s ease;
+  background-color: var(--dark-card-bg);
+  color: var(--dark-text-primary);
 }
 
-.str-video__participant-list-item:hover {
-  background-color: #f3f4f6;
+.dark-theme-participants .str-video__participant-list-item:hover {
+  background-color: var(--dark-hover);
 }
 
-/* Speaker view adjustments */
+/* Speaker view adjustments for dark theme */
 .str-video__speaker-layout {
   width: 100%;
   height: 100%;
+  background-color: var(--dark-bg-primary);
 }
 
-/* Responsive adjustments */
+/* Dark theme message list improvements */
+.str-chat__message-list {
+  padding: 16px;
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--dark-bg-secondary);
+}
+
+.str-chat__message-list-scroll {
+  padding-bottom: 8px;
+}
+
+/* Message styling for dark theme */
+.str-chat__message {
+  margin-bottom: 12px;
+}
+
+.str-chat__message-inner {
+  border-radius: 16px;
+  padding: 8px 12px;
+}
+
+/* Chat message bubbles styling for dark theme */
+.dark-theme .str-chat__message-inner,
+.dark-theme-message .str-chat__message-inner {
+  background: #1E1E1E;
+  color: white;
+  border: 1px solid #2D3748;
+}
+
+/* Current user's messages */
+.dark-theme .str-chat__message--me .str-chat__message-inner,
+.dark-theme-message .str-chat__message--me .str-chat__message-inner {
+  background: #2563EB;
+  color: white;
+  border: none;
+}
+
+/* Other user's messages */
+.dark-theme .str-chat__li--incoming .str-chat__message-inner,
+.dark-theme-message .str-chat__li--incoming .str-chat__message-inner {
+  background: #1E1E1E;
+  color: white;
+}
+
+/* Force chat bubble colors for all contexts */
+.str-chat__message-inner {
+  background: #1E1E1E !important;
+  color: white !important;
+}
+
+.str-chat__message--me .str-chat__message-inner {
+  background: #2564eb41 !important;
+  color: white !important;
+}
+
+/* Chat container background */
+.chat-container, 
+.dark-theme .str-chat,
+.dark-theme .str-chat__container,
+.dark-theme .str-chat__main-panel,
+.dark-theme .str-chat__channel,
+.dark-theme .str-chat__list {
+  background-color: #121212 !important;
+}
+
+/* Chat message list background */
+.str-chat__message-list,
+.str-chat__virtual-list,
+.str-chat__virtual-list-container,
+.str-chat__main-panel {
+  background-color: #121212 !important;
+}
+
+/* Thread styling for dark theme */
+.dark-theme .str-chat__thread {
+  background-color: var(--dark-bg-secondary);
+  border-left: 1px solid var(--dark-border);
+}
+
+.dark-theme .str-chat__thread-header {
+  background-color: var(--dark-bg-tertiary);
+  border-bottom: 1px solid var(--dark-border);
+}
+
+.dark-theme .str-chat__square-button {
+  background-color: var(--dark-card-bg);
+  color: var(--dark-text-primary);
+}
+
+.dark-theme .str-chat__square-button:hover {
+  background-color: var(--dark-hover);
+}
+
+/* Stream Video dark theme overrides */
+.dark-theme .str-video__participant {
+  background-color: var(--dark-bg-tertiary);
+  border: 1px solid var(--dark-border);
+}
+
+.dark-theme .str-video__participant-placeholder {
+  background-color: var(--dark-card-bg);
+}
+
+.dark-theme .str-video__menu {
+  background-color: var(--dark-card-bg);
+  border: 1px solid var(--dark-border);
+}
+
+.dark-theme .str-video__menu-item {
+  color: var(--dark-text-primary);
+}
+
+.dark-theme .str-video__menu-item:hover {
+  background-color: var(--dark-hover);
+}
+
+.dark-theme .str-video__call-controls-button {
+  background-color: var(--dark-card-bg);
+  color: var(--dark-text-primary);
+}
+
+.dark-theme .str-video__call-controls-button:hover {
+  background-color: var(--dark-hover);
+}
+
+.dark-theme .str-video__call-controls-button--leave {
+  background-color: #EF4444;
+  color: white;
+}
+
+/* Animation-specific styles */
+.fadeIn {
+  animation: fadeIn 0.3s ease forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.slideIn {
+  animation: slideIn 0.3s ease forwards;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.zoomIn {
+  animation: zoomIn 0.2s ease forwards;
+}
+
+@keyframes zoomIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Responsive adjustments for dark theme */
 @media (max-width: 768px) {
   .main-video-area.with-sidebar {
     display: none;
@@ -1083,5 +664,18 @@ html {
   
   .call-sidebar {
     width: 100%;
+  }
+  
+  .floating-controls {
+    top: 8px;
+    right: 8px;
+  }
+  
+  .control-btn {
+    padding: 6px;
+  }
+  
+  .dark-theme .str-video__call-controls {
+    padding: 8px;
   }
 }
