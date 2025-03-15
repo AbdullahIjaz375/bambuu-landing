@@ -633,7 +633,8 @@
     "title": "Membresía",
     "tabs": {
       "subscriptions": "Suscripciones",
-      "credits": "Créditos de Clase"
+      "credits": "Créditos de Clase",
+      "offers": "Ofertas"
     },
     "popular-badge": "Más Popular",
     "pricing": {
@@ -682,6 +683,24 @@
       "five": {
         "title": "5 Créditos de Clase",
         "description": "Solo clases bammbuu+"
+      }
+    },
+    "offers": {
+      "new-user": {
+        "title": "Compra un crédito de clase y obtén 2 clases gratis",
+        "description": "Clases privadas 1:1 con instructor",
+        "expiry": "Los créditos de clase se renovarán automáticamente después de la tercera clase a menos que canceles."
+      }
+    },
+    "offer-plans": {
+      "free": {
+        "description": "Clases grupales ilimitadas por una semana",
+        "body": "La suscripción se renovará automáticamente después de la primera semana a menos que canceles."
+      },
+      "premium": {
+        "title": "Compra un crédito de clase y obtén 2 clases gratis",
+        "description": "Clases privadas 1:1 con instructor",
+        "body": "Los créditos de clase se renovarán automáticamente después de la tercera clase a menos que canceles."
       }
     },
     "buttons": {

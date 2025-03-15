@@ -3,7 +3,13 @@ import { X } from "lucide-react";
 import { useAuth } from "../../src/context/AuthContext";
 import { useTranslation } from "react-i18next";
 import { db } from "../firebaseConfig";
-import { collection, getDocs } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+  Timestamp,
+} from "firebase/firestore";
 import { ClipLoader } from "react-spinners";
 
 const Subscriptions = () => {
@@ -16,6 +22,29 @@ const Subscriptions = () => {
   const [creditPlans, setCreditPlans] = useState([]);
   const [isLoadingPlans, setIsLoadingPlans] = useState(true);
   const [error, setError] = useState(null);
+  const [offerPlans, setOfferPlans] = useState([]);
+  const [showOffers, setShowOffers] = useState(false);
+
+  // Add this function to check if user is within 7 days of registration
+  const checkNewUserEligibility = async (userId) => {
+    try {
+      const userDoc = await getDocs(
+        query(collection(db, "user_accounts"), where("email", "==", user.email))
+      );
+
+      if (!userDoc.empty) {
+        const userData = userDoc.docs[0].data();
+        const createdAt = userData.created_at?.toDate() || new Date();
+        const daysSinceCreation =
+          (new Date() - createdAt) / (1000 * 60 * 60 * 24);
+        return daysSinceCreation <= 7;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error checking user eligibility:", error);
+      return false;
+    }
+  };
 
   // Fetch plans from Firebase
   useEffect(() => {
@@ -23,6 +52,29 @@ const Subscriptions = () => {
       try {
         setIsLoadingPlans(true);
         setError(null);
+
+        // Check if user is eligible for offers
+        const isEligible = await checkNewUserEligibility(user?.uid);
+        setShowOffers(isEligible);
+
+        // Fetch offers if eligible
+        if (isEligible) {
+          const offersSnapshot = await getDocs(collection(db, "offer"));
+          const offersData = offersSnapshot.docs[0]?.data()?.offerList || [];
+
+          const transformedOfferPlans = offersData.map((plan) => ({
+            id: plan.offerId,
+            title: plan.title,
+            description: plan.subtitle || "",
+            price: plan.price,
+            isPopular: plan.isPopular,
+            type: plan.type,
+            stripeLink: plan.url,
+            body: plan.body,
+          }));
+
+          setOfferPlans(transformedOfferPlans);
+        }
 
         // Fetch subscription offers
         const subscriptionSnapshot = await getDocs(
@@ -76,7 +128,7 @@ const Subscriptions = () => {
     };
 
     fetchPlans();
-  }, [t]);
+  }, [t, user]);
 
   // Check URL params for plan selection
   useEffect(() => {
@@ -234,6 +286,43 @@ const Subscriptions = () => {
     );
   };
 
+  const OfferPlan = ({ plan, userId, isSelected, onSelect }) => {
+    return (
+      <div
+        onClick={() => onSelect(plan)}
+        className={`flex flex-col h-full rounded-3xl cursor-pointer transition-all duration-200 ${
+          isSelected
+            ? "border-2 border-[#14B82C] shadow-lg transform scale-[1.02] bg-[#E6FDE9]"
+            : "border border-[#B0B0B0] hover:border-[#14B82C] hover:shadow-md bg-white"
+        }`}
+      >
+        {plan.isPopular && (
+          <div className="px-4 py-1.5 text-sm font-semibold bg-[#FFBF00] rounded-t-3xl text-center">
+            {t("plans-modal.popular-badge")}
+          </div>
+        )}
+        <div className="flex flex-col flex-grow p-6 space-y-6 text-center">
+          <div className="space-y-4">
+            <div className="flex flex-col items-center">
+              <div className="text-4xl font-bold">
+                {plan.price === 0 ? "FREE" : `$${plan.price}`}
+              </div>
+            </div>
+            <div>
+              <h3 className="text-lg font-medium">{plan.title}</h3>
+              {plan.description && (
+                <p className="text-sm text-black mt-2">{plan.description}</p>
+              )}
+            </div>
+          </div>
+          {plan.body && (
+            <p className="text-sm text-black mt-auto">{plan.body}</p>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   const handlePlanSelect = (plan) => {
     setSelectedPlan(selectedPlan?.id === plan.id ? null : plan);
   };
@@ -308,6 +397,18 @@ const Subscriptions = () => {
             >
               {t("plans-modal.tabs.credits")}
             </button>
+            {showOffers && (
+              <button
+                className={`px-6 py-2 rounded-full text-[#042F0C] text-sm font-medium transition-colors ${
+                  activeTab === "offers"
+                    ? "bg-[#FFBF00] border border-[#042F0C]"
+                    : "bg-transparent"
+                }`}
+                onClick={() => handleTabChange("offers")}
+              >
+                {t("plans-modal.tabs.offers")}
+              </button>
+            )}
           </div>
         </div>
 
@@ -355,6 +456,20 @@ const Subscriptions = () => {
               {t("plans-modal.credits-warning")}
             </div>
           </>
+        )}
+
+        {activeTab === "offers" && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {offerPlans.map((plan, index) => (
+              <OfferPlan
+                key={index}
+                plan={plan}
+                userId={user?.uid}
+                isSelected={selectedPlan?.id === plan.id}
+                onSelect={handlePlanSelect}
+              />
+            ))}
+          </div>
         )}
 
         {selectedPlan && (

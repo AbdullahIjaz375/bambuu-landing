@@ -631,7 +631,8 @@
     "title": "Membership",
     "tabs": {
       "subscriptions": "Subscriptions",
-      "credits": "Class Credits"
+      "credits": "Class Credits",
+      "offers": "Offers"
     },
     "popular-badge": "Most Popular",
     "pricing": {
@@ -687,7 +688,25 @@
       "buy": "Buy Now",
       "loading": "Loading..."
     },
-    "credits-warning": "With class credits you can only book bammbuu+ 1:1 classes other premium perks are not included."
+    "credits-warning": "With class credits you can only book bammbuu+ 1:1 classes other premium perks are not included.",
+    "offers": {
+      "new-user": {
+        "title": "Buy one class credit get 2 classes free",
+        "description": "1:1 private instructor classes",
+        "expiry": "The class credits will auto-renew after the third class is done unless you cancel."
+      }
+    },
+    "offer-plans": {
+      "free": {
+        "description": "Unlimited group classes for 1 week",
+        "body": "Subscription will auto-renew after the first week is done unless you cancel."
+      },
+      "premium": {
+        "title": "Buy one class credit get 2 classes free",
+        "description": "1:1 private instructor classes",
+        "body": "The class credits will auto-renew after the third class is done unless you cancel."
+      }
+    }
   },
   "class-details": {
     "title": "Class Details",
