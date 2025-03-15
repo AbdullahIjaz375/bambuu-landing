@@ -261,7 +261,10 @@ const LearnUser = () => {
               </p>
             </div>
             <div className="flex items-center flex-shrink-0 gap-2">
-              <div className="flex flex-col items-center justify-center rounded-full bg-[#E6FDE9]  border border-[#14B82C] p-2 ">
+              <div
+                onClick={() => navigate("/subscriptions")}
+                className="flex flex-col items-center justify-center rounded-full bg-[#E6FDE9] border border-[#14B82C] p-2 cursor-pointer hover:bg-[#d4fad9] transition-colors"
+              >
                 <h1 className="text-xs font-semibold">{user.credits}</h1>
                 <h1 className="text-[10px]">{t("learnUser.credits.label")}</h1>
               </div>

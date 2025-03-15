@@ -72,6 +72,7 @@ import { onMessage } from "firebase/messaging";
 import ContactUs from "./pages/ContactUs";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsConditions from "./pages/TermsConditions";
+import Subscriptions from "./pages/Subscriptions";
 
 const App = () => {
   const { user, streamClient } = useAuth(); // Use useAuth() inside the component
@@ -234,6 +235,16 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
+
+            <Route
+              path="/subscriptions"
+              element={
+                <ProtectedRoute requiredRole={["student", "tutor"]}>
+                  <Subscriptions />
+                </ProtectedRoute>
+              }
+            />
+
             <Route
               path="/savedRecourcesTutor"
               element={
