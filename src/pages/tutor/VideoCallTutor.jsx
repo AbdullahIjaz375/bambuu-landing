@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useRef, useContext } from "react";
 import { ClassContext } from "../../context/ClassContext";
 import "@stream-io/video-react-sdk/dist/css/styles.css";
+import "stream-chat-react/dist/css/v2/index.css";
 import "./VideoCallTutor.css";
 
 import { db } from "../../firebaseConfig";
@@ -18,12 +19,8 @@ import {
 } from "firebase/firestore";
 
 import { streamClient, streamVideoClient } from "../../config/stream";
-
-
 import { canCreateBreakoutRooms } from "./BreakoutRoomUtils";
 
-// Import custom CallPreview component
-import CallPreview from "../../components/CallPreview";
 
 // Icons
 import {
@@ -37,6 +34,7 @@ import {
   Minimize,
   X
 } from "lucide-react";
+import EnhancedCallPreview from "../../components/CallPreview";
 
 // Improved modal component with animation
 const Modal = ({ isOpen, onClose, title, children, size = "md" }) => {
@@ -88,6 +86,7 @@ const LoadingSpinner = ({ message }) => (
   </div>
 );
 
+
 // Main component
 const VideoCallTutor = () => {
   const { tutorSelectedClassId } = useContext(ClassContext);
@@ -98,6 +97,9 @@ const VideoCallTutor = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [loadingMessage, setLoadingMessage] = useState("Joining call...");
   const [layout, setLayout] = useState("grid"); // 'grid' or 'speaker'
+
+  // Chat related states
+  const [chatChannel, setChatChannel] = useState(null);
 
   // Breakout room states
   const [breakoutRooms, setBreakoutRooms] = useState([]);
@@ -128,7 +130,7 @@ const VideoCallTutor = () => {
           setClassData(classDocSnap.data());
           // Default to the main class room ID
           setActiveRoomId(tutorSelectedClassId);
-          
+
           // Fetch breakout rooms if they exist
           fetchBreakoutRooms();
         } else {
@@ -145,6 +147,50 @@ const VideoCallTutor = () => {
     setHasBreakoutPermission(canCreateBreakoutRooms(tutorSelectedClassId));
 
   }, [tutorSelectedClassId]);
+
+  // Initialize chat channel when class data is available
+  useEffect(() => {
+    if (!streamClient || !classData || !user.uid) return;
+
+    const initializeChannel = async () => {
+      try {
+        // Make sure user is connected to Stream Chat before initializing the channel
+        // Check if user is already connected to chat
+        if (!streamClient.userID) {
+          console.log("Connecting user to Stream Chat...");
+          // Generate token for chat
+          const token = streamClient.devToken(user.uid);
+
+          // Connect user to chat
+          await streamClient.connectUser(
+            {
+              id: user.uid,
+              name: user.name || "User",
+              image: user.photoUrl || "",
+            },
+            token
+          );
+          console.log("User connected to Stream Chat successfully");
+        }
+
+        // Now create or get the chat channel
+        const channelId = `class-${tutorSelectedClassId}`;
+
+        const channel = streamClient.channel('messaging', channelId, {
+          name: `Class ${tutorSelectedClassId} Chat`,
+          members: [user.uid], // Add current user as member (others will be added as they join)
+          created_by_id: user.uid
+        });
+
+        await channel.watch();
+        setChatChannel(channel);
+      } catch (error) {
+        console.error("Error initializing chat channel:", error);
+      }
+    };
+
+    initializeChannel();
+  }, [classData, user.uid, tutorSelectedClassId, streamClient]);
 
   // Check for WebRTC support
   useEffect(() => {
@@ -215,9 +261,34 @@ const VideoCallTutor = () => {
         return;
       }
 
-      // Check if we need to connect the user
+      // Make sure user is connected to Stream Chat
+      if (!streamClient.userID) {
+        console.log("Connecting user to Stream Chat first...");
+        setLoadingMessage("Initializing chat...");
+
+        try {
+          // Generate token for chat
+          const chatToken = streamClient.devToken(user.uid);
+
+          // Connect user to chat
+          await streamClient.connectUser(
+            {
+              id: user.uid,
+              name: user.name || "User",
+              image: user.photoUrl || "",
+            },
+            chatToken
+          );
+          console.log("User connected to Stream Chat successfully");
+        } catch (chatErr) {
+          console.error("Failed to connect user to Stream Chat:", chatErr);
+          // Continue with video - chat error is not fatal
+        }
+      }
+
+      // Check if we need to connect the user to Stream Video
       if (!streamVideoClient.user || streamVideoClient.user.id !== user.uid) {
-        console.log("Connecting user to Stream...");
+        console.log("Connecting user to Stream Video...");
         setLoadingMessage("Authenticating...");
 
         try {
@@ -240,9 +311,9 @@ const VideoCallTutor = () => {
             token
           );
 
-          console.log("User connected to Stream successfully");
+          console.log("User connected to Stream Video successfully");
         } catch (err) {
-          console.error("Failed to connect user to Stream:", err);
+          console.error("Failed to connect user to Stream Video:", err);
           setIsLoading(false);
           alert("Could not connect to video service. Please try again later.");
           return;
@@ -265,9 +336,18 @@ const VideoCallTutor = () => {
 
       try {
         console.log("Joining call with extended timeout...");
+
+        // Add custom data to link the video call with the chat channel
+        const callData = {
+          custom: {
+            channelCid: `messaging:class-${tutorSelectedClassId}`,
+            classId: tutorSelectedClassId
+          }
+        };
+
         // Increase the timeout for joining
         await Promise.race([
-          call.join({ create: true }),
+          call.join({ create: true, data: callData }),
           new Promise((_, reject) =>
             setTimeout(() => reject(new Error("Join call timeout")), 30000)
           )
@@ -289,11 +369,11 @@ const VideoCallTutor = () => {
       setCurrentCall(call);
       setActiveRoomId(roomId);
       setIsCallJoined(true);
-      
+
       // Enable devices after successful join
       setLoadingMessage("Enabling camera and microphone...");
       await enableDevices(call);
-      
+
       setIsLoading(false);
     } catch (error) {
       console.error("Error in join room process:", error);
@@ -317,7 +397,7 @@ const VideoCallTutor = () => {
   // Fetch breakout rooms
   const fetchBreakoutRooms = async () => {
     if (!tutorSelectedClassId) return;
-    
+
     try {
       const breakoutRef = collection(
         db,
@@ -487,7 +567,7 @@ const VideoCallTutor = () => {
   // Render Breakout Rooms Panel
   const renderBreakoutPanel = () => {
     if (!isBreakoutPanelOpen) return null;
-    
+
     return (
       <div className="breakout-panel">
         <div className="panel-header">
@@ -496,7 +576,7 @@ const VideoCallTutor = () => {
             <X size={20} />
           </button>
         </div>
-        
+
         <div className="panel-content">
           {/* Main Room Button */}
           <div className="room-item main-room">
@@ -511,7 +591,7 @@ const VideoCallTutor = () => {
               )}
             </button>
           </div>
-          
+
           {/* Breakout Rooms */}
           <h4 className="section-title">Available Rooms:</h4>
           <div className="rooms-list">
@@ -520,7 +600,7 @@ const VideoCallTutor = () => {
                 const isFull = room.roomMembers.length >= room.availableSlots;
                 const isActive = activeRoomId === room.id;
                 const hasStarted = !!room.startedAt;
-                
+
                 let timeRemaining = null;
                 if (hasStarted && room.classEndTime) {
                   const now = new Date();
@@ -531,9 +611,9 @@ const VideoCallTutor = () => {
                     timeRemaining = `${remainingMins} min`;
                   }
                 }
-                
+
                 return (
-                  <div 
+                  <div
                     key={room.id}
                     className={`room-item ${isActive ? 'active' : ''} ${isFull ? 'full' : ''}`}
                   >
@@ -548,7 +628,7 @@ const VideoCallTutor = () => {
                         </div>
                       )}
                     </div>
-                    
+
                     <div className="room-actions">
                       {!isActive && !isFull && (
                         <button
@@ -558,11 +638,11 @@ const VideoCallTutor = () => {
                           Join
                         </button>
                       )}
-                      
+
                       {isActive && (
                         <span className="status-badge">Current</span>
                       )}
-                      
+
                       {!isActive && isFull && (
                         <span className="status-badge full">Full</span>
                       )}
@@ -586,8 +666,13 @@ const VideoCallTutor = () => {
     <div className="video-call-tutor" ref={videoContainerRef}>
       {currentCall && !isLoading ? (
         <>
-          <CallPreview streamVideoClient={streamVideoClient} currentCall={currentCall} />
-          
+          <EnhancedCallPreview
+            streamVideoClient={streamVideoClient}
+            currentCall={currentCall}
+            chatClient={streamClient}
+            chatChannel={chatChannel}
+          />
+
           {/* Floating action buttons */}
           <div className="floating-actions">
             {/* Breakout Rooms button for tutors */}
@@ -602,7 +687,7 @@ const VideoCallTutor = () => {
                 <Grid3x3 size={22} />
               </button>
             )}
-            
+
             {/* Create Breakout Rooms button for tutors */}
             {hasBreakoutPermission && (
               <button
@@ -614,7 +699,7 @@ const VideoCallTutor = () => {
               </button>
             )}
           </div>
-          
+
           {/* Render Breakout Room panel if open */}
           {renderBreakoutPanel()}
         </>
