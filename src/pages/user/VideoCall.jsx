@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useRef, useContext } from "react";
 import { ClassContext } from "../../context/ClassContext";
 import "@stream-io/video-react-sdk/dist/css/styles.css";
-import "./VideoCallStudent.css"; // You'll need to create this CSS file
+import "stream-chat-react/dist/css/v2/index.css";
+import "./VideoCallStudent.css";
 
 import { db } from "../../firebaseConfig";
 import {
@@ -23,19 +24,31 @@ import {
   CallControls,
   PaginatedGridLayout,
   SpeakerLayout,
-  ParticipantView
+  ParticipantView,
+  CallParticipantsList
 } from "@stream-io/video-react-sdk";
 
-// Import custom CallPreview component
-import CallPreview from "../../components/CallPreview";
+// Stream Chat components
+import {
+  Chat,
+  Channel as StreamChannel,
+  MessageList,
+  MessageInput,
+  Thread,
+  Window
+} from "stream-chat-react";
+
+// Import EnhancedCallPreview component
 
 // Icons
 import {
   CopyPlus,
   Users,
   LogOut,
-  X
+  X,
+  MessageSquare
 } from "lucide-react";
+import EnhancedCallPreview from "../../components/CallPreview";
 
 /* Utility to check breakout room creation permissions */
 const canCreateBreakoutRooms = (classId) => {
@@ -120,6 +133,11 @@ const VideoCallStudent = () => {
   const [loadingMessage, setLoadingMessage] = useState("Joining call...");
   const [layout, setLayout] = useState("grid"); // 'grid' or 'speaker'
 
+  // Chat related states
+  const [chatChannel, setChatChannel] = useState(null);
+  const [unreadMessages, setUnreadMessages] = useState(0);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+
   // Breakout room states
   const [breakoutRooms, setBreakoutRooms] = useState([]);
   const [hasBreakoutPermission, setHasBreakoutPermission] = useState(false);
@@ -166,6 +184,67 @@ const VideoCallStudent = () => {
     setHasBreakoutPermission(canCreateBreakoutRooms(selectedClassId));
 
   }, [selectedClassId]);
+
+  // Initialize chat channel when class data is available
+  useEffect(() => {
+    if (!streamClient || !classData || !user.uid) return;
+
+    const initializeChannel = async () => {
+      try {
+        // Make sure user is connected to Stream Chat before initializing the channel
+        if (!streamClient.userID) {
+          console.log("Connecting user to Stream Chat...");
+          // Generate token for chat
+          const token = streamClient.devToken(user.uid);
+          
+          // Connect user to chat
+          await streamClient.connectUser(
+            {
+              id: user.uid,
+              name: user.name || "User",
+              image: user.photoUrl || "",
+            },
+            token
+          );
+          console.log("User connected to Stream Chat successfully");
+        }
+        
+        // Now create or get the chat channel
+        const channelId = `class-${selectedClassId}`;
+        
+        const channel = streamClient.channel('messaging', channelId, {
+          name: `Class ${selectedClassId} Chat`,
+          members: [user.uid], // Add current user as member (others will be added as they join)
+          created_by_id: user.uid
+        });
+        
+        await channel.watch();
+        setChatChannel(channel);
+      } catch (error) {
+        console.error("Error initializing chat channel:", error);
+      }
+    };
+
+    initializeChannel();
+  }, [classData, user.uid, selectedClassId, streamClient]);
+
+  // Listen for new messages when chat is not open
+  useEffect(() => {
+    if (!chatChannel || isChatOpen) return;
+    
+    const handleNewMessage = (event) => {
+      // Only increment for messages from other users
+      if (event.user.id !== streamClient.userID) {
+        setUnreadMessages((prev) => prev + 1);
+      }
+    };
+    
+    chatChannel.on('message.new', handleNewMessage);
+    
+    return () => {
+      chatChannel.off('message.new', handleNewMessage);
+    };
+  }, [chatChannel, isChatOpen, streamClient]);
 
   // Check for WebRTC support
   useEffect(() => {
@@ -236,9 +315,34 @@ const VideoCallStudent = () => {
         return;
       }
 
-      // Check if we need to connect the user
+      // Make sure user is connected to Stream Chat
+      if (!streamClient.userID) {
+        console.log("Connecting user to Stream Chat first...");
+        setLoadingMessage("Initializing chat...");
+        
+        try {
+          // Generate token for chat
+          const chatToken = streamClient.devToken(user.uid);
+          
+          // Connect user to chat
+          await streamClient.connectUser(
+            {
+              id: user.uid,
+              name: user.name || "User",
+              image: user.photoUrl || "",
+            },
+            chatToken
+          );
+          console.log("User connected to Stream Chat successfully");
+        } catch (chatErr) {
+          console.error("Failed to connect user to Stream Chat:", chatErr);
+          // Continue with video - chat error is not fatal
+        }
+      }
+
+      // Check if we need to connect the user to Stream Video
       if (!streamVideoClient.user || streamVideoClient.user.id !== user.uid) {
-        console.log("Connecting user to Stream...");
+        console.log("Connecting user to Stream Video...");
         setLoadingMessage("Authenticating...");
 
         try {
@@ -261,9 +365,9 @@ const VideoCallStudent = () => {
             token
           );
 
-          console.log("User connected to Stream successfully");
+          console.log("User connected to Stream Video successfully");
         } catch (err) {
-          console.error("Failed to connect user to Stream:", err);
+          console.error("Failed to connect user to Stream Video:", err);
           setIsLoading(false);
           alert("Could not connect to video service. Please try again later.");
           return;
@@ -286,9 +390,18 @@ const VideoCallStudent = () => {
 
       try {
         console.log("Joining call with extended timeout...");
+        
+        // Add custom data to link the video call with the chat channel
+        const callData = {
+          custom: {
+            channelCid: `messaging:class-${selectedClassId}`,
+            classId: selectedClassId
+          }
+        };
+        
         // Increase the timeout for joining
         await Promise.race([
-          call.join({ create: true }),
+          call.join({ create: true, data: callData }),
           new Promise((_, reject) =>
             setTimeout(() => reject(new Error("Join call timeout")), 30000)
           )
@@ -320,6 +433,17 @@ const VideoCallStudent = () => {
       console.error("Error in join room process:", error);
       setIsLoading(false);
       alert("An error occurred while setting up the video call. Please refresh the page and try again.");
+    }
+  };
+
+  // Toggle chat sidebar
+  const toggleChat = () => {
+    setIsChatOpen(!isChatOpen);
+    
+    // Mark messages as read when opening chat
+    if (!isChatOpen && chatChannel) {
+      chatChannel.markRead();
+      setUnreadMessages(0);
     }
   };
 
@@ -509,7 +633,12 @@ const VideoCallStudent = () => {
     <div className="video-call-student" ref={videoContainerRef}>
       {currentCall && !isLoading ? (
         <>
-          <CallPreview streamVideoClient={streamVideoClient} currentCall={currentCall} />
+          <EnhancedCallPreview
+            streamVideoClient={streamVideoClient} 
+            currentCall={currentCall} 
+            chatClient={streamClient}
+            chatChannel={chatChannel}
+          />
           
           {/* Room indicator */}
           <div className="fixed top-8 left-8 z-[1000]">

@@ -14,3 +14,1074 @@ html {
   min-width: 0;
   max-width: 100%;
 }
+
+/* src/components/CallPreview.css */
+
+.call-preview-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background-color: #18181B;
+  overflow: hidden;
+}
+
+/* Call layout arrangement */
+.call-layout {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* Main video area */
+.main-video-area {
+  flex: 1;
+  position: relative;
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.main-video-area.with-sidebar {
+  width: calc(100% - 320px);
+}
+
+/* Sidebar for chat or participants */
+.call-sidebar {
+  width: 320px;
+  height: 100%;
+  background-color: #fff;
+  border-left: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Sidebar header */
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+}
+
+.sidebar-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.close-sidebar {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.close-sidebar:hover {
+  background-color: #f3f4f6;
+  color: #111827;
+}
+
+/* Containers for chat and participants */
+.chat-container,
+.participants-container {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Make sure the chat takes full height */
+.chat-container .str-chat,
+.chat-container .str-chat__container {
+  height: 100%;
+}
+
+/* Floating controls */
+.floating-controls {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.control-btn {
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.control-btn:hover {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.control-btn.active {
+  background-color: #3B82F6;
+}
+
+/* Style adjustments for Stream components */
+:root {
+  --str-chat__primary-color: #3B82F6;
+  --str-chat__active-primary-color: #2563EB;
+}
+
+/* Make call controls stick to bottom */
+.str-video__call-controls {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  z-index: 5;
+}
+
+/* Improve participant list styling */
+.participants-container {
+  background-color: #f9fafb;
+}
+
+.str-video__participant-list {
+  padding: 12px;
+}
+
+.str-video__participant-list-item {
+  border-radius: 8px;
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  transition: background-color 0.2s ease;
+}
+
+.str-video__participant-list-item:hover {
+  background-color: #f3f4f6;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .main-video-area.with-sidebar {
+    width: 100%;
+    display: none;
+  }
+  
+  .call-sidebar {
+    width: 100%;
+  }
+}
+/* src/components/CallPreview.css */
+
+.call-preview-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Call layout arrangement */
+.call-layout {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* Main video area */
+.main-video-area {
+  flex: 1;
+  position: relative;
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.main-video-area.with-sidebar {
+  width: calc(100% - 320px);
+}
+
+/* Sidebar for chat or participants */
+.call-sidebar {
+  width: 320px;
+  height: 100%;
+  background-color: #fff;
+  border-left: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Sidebar header */
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+}
+
+.sidebar-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.close-sidebar {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.close-sidebar:hover {
+  background-color: #f3f4f6;
+  color: #111827;
+}
+
+/* Containers for chat and participants */
+.chat-container,
+.participants-container {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Make sure the chat takes full height */
+.chat-container .str-chat,
+.chat-container .str-chat__container {
+  height: 100%;
+}
+
+/* Floating controls */
+.floating-controls {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.control-btn {
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.control-btn:hover {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.control-btn.active {
+  background-color: #3B82F6;
+}
+
+/* Style overrides for Stream components */
+:root {
+  --str-chat__primary-color: #3B82F6;
+  --str-chat__active-primary-color: #2563EB;
+}
+
+/* Ensure the call controls stick to the bottom */
+.str-video__call-controls {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  z-index: 5;
+}
+
+/* Improve participant list styling */
+.str-video__participant-list {
+  padding: 12px;
+}
+
+.str-video__participant-list-item {
+  border-radius: 8px;
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  transition: background-color 0.2s ease;
+}
+
+.str-video__participant-list-item:hover {
+  background-color: #f3f4f6;
+}
+
+/* Speaker view adjustments */
+.str-video__speaker-layout {
+  width: 100%;
+  height: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .main-video-area.with-sidebar {
+    display: none;
+  }
+  
+  .call-sidebar {
+    width: 100%;
+  }
+}
+
+/* Message list improvements */
+.str-chat__message-list {
+  padding: 16px;
+}
+
+.str-chat__message-list-scroll {
+  padding-bottom: 8px;
+}
+
+/* Message input styling */
+.str-chat__message-textarea {
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  transition: border-color 0.2s;
+}
+
+.str-chat__message-textarea:focus {
+  border-color: #3B82F6;
+}
+
+/* src/components/CallPreview.css */
+
+.call-preview-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Call layout arrangement */
+.call-layout {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* Main video area */
+.main-video-area {
+  flex: 1;
+  position: relative;
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.main-video-area.with-sidebar {
+  width: calc(100% - 320px);
+}
+
+/* Sidebar for chat or participants */
+.call-sidebar {
+  width: 320px;
+  height: 100%;
+  background-color: #fff;
+  border-left: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Sidebar header */
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+}
+
+.sidebar-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.close-sidebar {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.close-sidebar:hover {
+  background-color: #f3f4f6;
+  color: #111827;
+}
+
+/* Containers for chat and participants */
+.chat-container,
+.participants-container {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Make sure the chat takes full height */
+.chat-container .str-chat,
+.chat-container .str-chat__container {
+  height: 100%;
+}
+
+/* Floating controls */
+.floating-controls {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.control-btn {
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.control-btn:hover {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.control-btn.active {
+  background-color: #3B82F6;
+}
+
+/* Style overrides for Stream components */
+:root {
+  --str-chat__primary-color: #3B82F6;
+  --str-chat__active-primary-color: #2563EB;
+}
+
+/* Ensure the call controls stick to the bottom */
+.str-video__call-controls {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  z-index: 5;
+}
+
+/* Improve participant list styling */
+.str-video__participant-list {
+  padding: 12px;
+}
+
+.str-video__participant-list-item {
+  border-radius: 8px;
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  transition: background-color 0.2s ease;
+}
+
+.str-video__participant-list-item:hover {
+  background-color: #f3f4f6;
+}
+
+/* Speaker view adjustments */
+.str-video__speaker-layout {
+  width: 100%;
+  height: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .main-video-area.with-sidebar {
+    display: none;
+  }
+  
+  .call-sidebar {
+    width: 100%;
+  }
+}
+
+/* Message list improvements */
+.str-chat__message-list {
+  padding: 16px;
+}
+
+.str-chat__message-list-scroll {
+  padding-bottom: 8px;
+}
+
+/* Message input styling */
+.str-chat__message-textarea,
+.str-chat__textarea {
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  transition: border-color 0.2s;
+  width: 100%;
+  resize: none;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.str-chat__message-textarea:focus,
+.str-chat__textarea:focus {
+  border-color: #3B82F6;
+  outline: none;
+}
+
+.str-chat__input-flat {
+  display: flex;
+  position: relative;
+  padding: 10px 16px;
+  background: #fff;
+  border-top: 1px solid #e5e7eb;
+  min-height: 60px;
+}
+
+.str-chat__input-flat-wrapper {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  padding: 0 8px;
+}
+
+.str-chat__input-flat--textarea-wrapper {
+  flex: 1;
+}
+
+.str-chat__send-button {
+  width: 36px;
+  height: 36px;
+  background: #3B82F6;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  margin-left: 8px;
+}
+
+.str-chat__send-button:hover {
+  background: #2563EB;
+}
+
+.str-chat__send-button svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Make sure message container and input are always visible */
+.str-chat__messaging,
+.str-chat,
+.str-chat__container,
+.str-chat__main-panel,
+.str-chat__channel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.str-chat__list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Message list improvements */
+.str-chat__message-list {
+  padding: 16px;
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.str-chat__message-list-scroll {
+  padding-bottom: 8px;
+}
+
+/* Message styling */
+.str-chat__message {
+  margin-bottom: 12px;
+}
+
+.str-chat__message-inner {
+  background: #f9fafb;
+  border-radius: 16px;
+  padding: 8px 12px;
+}
+
+.str-chat__message--me .str-chat__message-inner {
+  background: #eff6ff;
+}
+/* src/components/EnhancedCallPreview.css */
+
+.enhanced-call-preview {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* Call layout arrangement */
+.call-layout {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* Main video area */
+.main-video-area {
+  flex: 1;
+  position: relative;
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.main-video-area.with-sidebar {
+  width: calc(100% - 320px);
+}
+
+/* Sidebar for chat or participants */
+.call-sidebar {
+  width: 320px;
+  height: 100%;
+  background-color: #fff;
+  border-left: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideIn 0.3s ease;
+  z-index: 10;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Sidebar header */
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+}
+
+.sidebar-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.close-sidebar {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.close-sidebar:hover {
+  background-color: #f3f4f6;
+  color: #111827;
+}
+
+/* Containers for chat and participants */
+.chat-container,
+.participants-container {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Make sure the chat takes full height */
+.chat-container .str-chat,
+.chat-container .str-chat__container {
+  height: 100%;
+}
+
+/* Floating controls */
+.floating-controls {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.control-btn {
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.control-btn:hover {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.control-btn.active {
+  background-color: #3B82F6;
+}
+
+.control-btn.has-notification {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(59, 130, 246, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+}
+
+.notification-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: #EF4444;
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Custom message input */
+.custom-message-input {
+  padding: 12px 16px;
+  border-top: 1px solid #e5e7eb;
+  background-color: #fff;
+}
+
+.message-input-form {
+  position: relative;
+}
+
+.message-input-container {
+  display: flex;
+  align-items: center;
+  border: 1px solid #e5e7eb;
+  border-radius: 24px;
+  padding: 4px 12px;
+  background-color: #fff;
+}
+
+.message-input-field {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 8px 12px;
+  font-size: 14px;
+  background: transparent;
+}
+
+.send-button, .attachment-button {
+  background: none;
+  border: none;
+  color: #3B82F6;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 50%;
+}
+
+.send-button:hover, .attachment-button:hover {
+  background-color: #EFF6FF;
+}
+
+.send-button:disabled {
+  color: #D1D5DB;
+  cursor: not-allowed;
+}
+
+.attachment-menu {
+  position: absolute;
+  bottom: 100%;
+  left: 10px;
+  margin-bottom: 8px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  padding: 8px;
+  gap: 8px;
+  z-index: 10;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.attachment-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px;
+  border-radius: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #4B5563;
+}
+
+.attachment-option:hover {
+  background-color: #F9FAFB;
+  color: #111827;
+}
+
+.attachment-option span {
+  font-size: 12px;
+}
+
+/* Custom message styling */
+.custom-message-container {
+  position: relative;
+  margin-bottom: 8px;
+}
+
+.reactions-selector-container {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 4px;
+  z-index: 10;
+}
+
+.reactions-selector {
+  display: flex;
+  background-color: white;
+  border-radius: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 6px;
+  gap: 4px;
+}
+
+.reaction-button {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  transition: transform 0.1s ease;
+}
+
+.reaction-button:hover {
+  transform: scale(1.2);
+  background-color: #F9FAFB;
+}
+
+.message-action-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6B7280;
+}
+
+.message-action-button:hover {
+  background-color: #F3F4F6;
+  color: #111827;
+}
+
+/* Custom channel header */
+.custom-channel-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+}
+
+.channel-header-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.channel-name {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.member-count {
+  font-size: 12px;
+  color: #6B7280;
+}
+
+/* Style overrides for Stream components */
+:root {
+  --str-chat__primary-color: #3B82F6;
+  --str-chat__active-primary-color: #2563EB;
+  --str-chat__message-background-color-me: #EFF6FF;
+  --str-chat__message-background-color: #F9FAFB;
+}
+
+/* Ensure the call controls stick to the bottom */
+.str-video__call-controls {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  z-index: 5;
+}
+
+/* Improve participant list styling */
+.str-video__participant-list {
+  padding: 12px;
+}
+
+.str-video__participant-list-item {
+  border-radius: 8px;
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  transition: background-color 0.2s ease;
+}
+
+.str-video__participant-list-item:hover {
+  background-color: #f3f4f6;
+}
+
+/* Speaker view adjustments */
+.str-video__speaker-layout {
+  width: 100%;
+  height: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .main-video-area.with-sidebar {
+    display: none;
+  }
+  
+  .call-sidebar {
+    width: 100%;
+  }
+}
