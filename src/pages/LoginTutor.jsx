@@ -8,7 +8,7 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Button, TextInput, Paper, Divider, Group, Title } from "@mantine/core";
 import { FaFacebook } from "react-icons/fa6";
 import { FaGoogle } from "react-icons/fa6";
@@ -27,17 +27,44 @@ const LoginTutor = () => {
   const googleProvider = new GoogleAuthProvider();
   const facebookProvider = new FacebookAuthProvider();
   const navigate = useNavigate();
+  const location = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { user, loading, updateUserData } = useAuth(); // Destructure loading state
+  const { user, loading, updateUserData } = useAuth();
+
+  // Helper function: Check if the URL contains ref=sub. If so, try to retrieve the saved URL from localStorage and redirect there.
+  const redirectAfterLogin = () => {
+    const params = new URLSearchParams(location.search);
+    if (params.get("ref") === "sub") {
+      const savedUrl = localStorage.getItem("selectedPackageUrl");
+      if (savedUrl) {
+        try {
+          const parsedUrl = new URL(savedUrl);
+          const path = parsedUrl.pathname + parsedUrl.search;
+          localStorage.removeItem("selectedPackageUrl");
+          navigate(path, { replace: true });
+          return;
+        } catch (error) {
+          console.error("Error parsing saved URL:", error);
+        }
+      }
+    }
+    // Fallback: Redirect to the tutor landing page (in this example, "/learn")
+    navigate("/learn", { replace: true });
+  };
+
+  // If a tutor is already logged in, redirect accordingly.
+  useEffect(() => {
+    if (user) {
+      redirectAfterLogin();
+    }
+  }, [user]);
 
   const handleEmailLoginTutor = async (e) => {
-    // const loadingToastId = toast.loading("Logging in...");
     e.preventDefault();
-
     try {
       const userCredential = await signInWithEmailAndPassword(
         auth,
@@ -45,7 +72,6 @@ const LoginTutor = () => {
         password
       );
       const user = userCredential.user;
-
       const tutorRef = doc(db, "tutors", user.uid);
       const tutorDoc = await getDoc(tutorRef);
 
@@ -57,7 +83,7 @@ const LoginTutor = () => {
 
       const userData = tutorDoc.data();
 
-      // Just update last login time
+      // Update last login time
       await updateDoc(tutorRef, {
         lastLoggedIn: serverTimestamp(),
       });
@@ -70,10 +96,10 @@ const LoginTutor = () => {
       };
 
       updateUserData(sessionUserData);
-
       toast.success("Logged in successfully!", { autoClose: 3000 });
 
-      navigate("/learn", { replace: true });
+      // Use the helper to redirect based on the "ref" query parameter.
+      redirectAfterLogin();
     } catch (error) {
       console.error("Error during email login:", error);
       if (
@@ -90,7 +116,6 @@ const LoginTutor = () => {
       } else if (error.code === "auth/wrong-password") {
         setPasswordError("Wrong password.");
       }
-
       toast.error("Invalid email or password", { autoClose: 5000 });
     }
   };
@@ -158,8 +183,6 @@ const LoginTutor = () => {
           <div className="space-y-1">
             <label className="block text-sm text-gray-700">Email</label>
             <div className="relative">
-              {" "}
-              {/* Add this wrapper div */}
               <input
                 type="email"
                 value={email}
@@ -191,6 +214,7 @@ const LoginTutor = () => {
             </div>
             {emailError && <p className="text-sm text-red-500">{emailError}</p>}
           </div>
+
           <div className="space-y-1">
             <label className="block text-sm text-gray-700">Password</label>
             <div className="relative">
@@ -223,7 +247,7 @@ const LoginTutor = () => {
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"
+                      d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774"
                     />
                   </svg>
                 ) : (
@@ -253,15 +277,20 @@ const LoginTutor = () => {
               <p className="text-sm text-red-500">{passwordError}</p>
             )}
           </div>
+
           {/* Links */}
           <div className="flex justify-between pb-4 text-sm">
             <Link to="/forgot-password" className="font-semibold text-red-500">
               Forgot Password?
             </Link>
-            <Link to="/login" className="text-[#14b82c] font-semibold">
+            <Link
+              to={location.search.includes("ref=sub") ? "/login?ref=sub" : "/login"}
+              className="text-[#14b82c] font-semibold"
+            >
               Login as Student
             </Link>
           </div>
+
           {/* Login Button */}
           <button
             type="submit"
@@ -274,7 +303,7 @@ const LoginTutor = () => {
         </form>
 
         {/* Terms */}
-        <div className=" text-sm text-center text-[#9e9e9e] pt-6">
+        <div className="text-sm text-center text-[#9e9e9e] pt-6">
           <p>
             By logging, you agree to our{" "}
             <a href="#" className="text-black">
