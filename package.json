@@ -42,7 +42,8 @@
     "stream-chat": "^8.57.6",
     "stream-chat-react": "^12.13.1",
     "web-vitals": "^2.1.4",
-    "zegocloud_client_sdk_web": "github:ZEGOCLOUD/zego_uikit_prebuilt_call_web"
+    "zegocloud_client_sdk_web": "github:ZEGOCLOUD/zego_uikit_prebuilt_call_web",
+    "zwitch": "^2.0.4"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -69,6 +70,7 @@
     ]
   },
   "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.14"
