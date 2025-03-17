@@ -1,17 +1,39 @@
 // src/components/PublicRoute.js
-import React from "react";
-import { Navigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const PublicRoute = ({ children }) => {
   const { user } = useAuth();
+  const location = useLocation();
 
-  // If user is logged in, redirect to the learn page
+  useEffect(() => {
+    // If there are subscription parameters in the URL, store them
+    const params = new URLSearchParams(window.location.search);
+    const offerId = params.get("offerId");
+    if (offerId) {
+      sessionStorage.setItem("pendingSubscription", offerId);
+    }
+  }, []);
+
   if (user) {
-    return <Navigate to="/learn" />;
+    // Check if there's a pending subscription
+    const pendingSubscription = sessionStorage.getItem("pendingSubscription");
+    if (pendingSubscription) {
+      // Clear the stored subscription
+      sessionStorage.removeItem("pendingSubscription");
+      // Redirect to subscriptions with the stored parameter
+      return (
+        <Navigate
+          to={`/subscriptions?offerId=${pendingSubscription}`}
+          replace
+        />
+      );
+    }
+    // Default redirect if no pending subscription
+    return <Navigate to="/learn" replace />;
   }
 
-  // If not logged in, render the children components (public content)
   return children;
 };
 

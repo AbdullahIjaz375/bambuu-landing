@@ -1,6 +1,5 @@
 // src/Login.js
 import React, { useState, useEffect } from "react";
-import { useLocation, useNavigate, Link } from "react-router-dom";
 import { auth, db, messaging } from "../firebaseConfig";
 import {
   GoogleAuthProvider,
@@ -10,14 +9,8 @@ import {
   signOut,
 } from "firebase/auth";
 import { OAuthProvider } from "firebase/auth";
-import {
-  Button,
-  TextInput,
-  Paper,
-  Divider,
-  Group,
-  Title,
-} from "@mantine/core";
+import { useNavigate, Link } from "react-router-dom";
+import { Button, TextInput, Paper, Divider, Group, Title } from "@mantine/core";
 import { FaFacebook } from "react-icons/fa6";
 import { FaGoogle } from "react-icons/fa6";
 import { toast } from "react-toastify";
@@ -31,53 +24,16 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { getMessaging, getToken } from "firebase/messaging";
-
 const Login = () => {
   const googleProvider = new GoogleAuthProvider();
   const appleProvider = new OAuthProvider("apple.com");
-  const { user, loading, updateUserData } = useAuth();
-  const location = useLocation();
   const navigate = useNavigate();
-  const [redirected, setRedirected] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
-  // Helper: Redirects the user based on query parameter "ref=sub" and whether the login is first time.
-  const redirectAfterLogin = (isFirstTimeLogin = false) => {
-    const params = new URLSearchParams(location.search);
-    if (params.get("ref") === "sub") {
-      const savedUrl = localStorage.getItem("selectedPackageUrl");
-      if (savedUrl) {
-        try {
-          const parsedUrl = new URL(savedUrl);
-          const path = parsedUrl.pathname + parsedUrl.search;
-          localStorage.removeItem("selectedPackageUrl");
-          navigate(path, { replace: true });
-          setRedirected(true);
-          return;
-        } catch (error) {
-          console.error("Error parsing saved URL:", error);
-        }
-      }
-    }
-    // Fallback: if first-time login, go to profile editing; otherwise, go to learn page.
-    if (isFirstTimeLogin) {
-      navigate("/userEditProfile", { replace: true });
-    } else {
-      navigate("/learn", { replace: true });
-    }
-    setRedirected(true);
-  };
-
-  // In case a user is already logged in (or when the login page is revisited), handle redirection.
-  useEffect(() => {
-    if (user && !redirected) {
-      redirectAfterLogin(false);
-    }
-  }, [user, redirected, location, navigate]);
+  const { user, loading, updateUserData } = useAuth(); // Destructure loading state
 
   const getFCMToken = async () => {
     try {
@@ -85,9 +41,11 @@ const Login = () => {
       const currentToken = await getToken(messaging, {
         vapidKey: process.env.REACT_APP_FIREBASE_VAPID_KEY,
       });
+
       if (currentToken) {
         return currentToken;
       }
+
       console.log("No registration token available.");
       return null;
     } catch (error) {
@@ -100,14 +58,17 @@ const Login = () => {
     try {
       const result = await signInWithPopup(auth, appleProvider);
       const user = result.user;
+
       const userRef = doc(db, "students", user.uid);
       const userDoc = await getDoc(userRef);
+
       const notificationPrefsRef = doc(
         db,
         "notification_preferences",
         user.uid
       );
       const notificationPrefsDoc = await getDoc(notificationPrefsRef);
+
       let isFirstTimeLogin = false;
       const fcmToken = await getFCMToken();
 
@@ -141,7 +102,9 @@ const Login = () => {
             },
           ],
         };
+
         await setDoc(userRef, newUserData);
+
         if (!notificationPrefsDoc.exists()) {
           await setDoc(notificationPrefsRef, {
             userId: user.uid,
@@ -152,10 +115,11 @@ const Login = () => {
             resourceAssign: true,
           });
         }
+
         updateUserData({
           ...newUserData,
           lastLoggedIn: new Date(),
-          userType: "student",
+          userType: "student", // Set userType in context only
         });
       } else {
         const userData = userDoc.data();
@@ -163,8 +127,10 @@ const Login = () => {
           ? userData.lastLoggedIn.toDate()
           : null;
         const currentStreak = userData.currentStreak || 0;
+
         const now = new Date();
         let updatedStreak = currentStreak;
+
         if (lastLoggedIn) {
           const lastLoginDate = new Date(
             lastLoggedIn.getFullYear(),
@@ -176,8 +142,10 @@ const Login = () => {
             now.getMonth(),
             now.getDate()
           );
+
           const differenceInDays =
             (currentDate - lastLoginDate) / (1000 * 60 * 60 * 24);
+
           if (differenceInDays === 1) {
             updatedStreak = currentStreak + 1;
           } else if (differenceInDays > 1) {
@@ -186,22 +154,26 @@ const Login = () => {
         } else {
           updatedStreak = 1;
         }
+
         await updateDoc(userRef, {
           lastLoggedIn: serverTimestamp(),
           currentStreak: updatedStreak,
         });
+
         const permission = await Notification.requestPermission();
         if (permission === "granted") {
           const fcmToken = await getToken(messaging, {
             vapidKey: process.env.REACT_APP_FIREBASE_VAPID_KEY,
           });
           console.log("FCM Token:", fcmToken);
+
           await updateDoc(userRef, {
             fcmToken: fcmToken,
           });
         } else {
           console.warn("Notification permission not granted");
         }
+
         updateUserData({
           ...userData,
           currentStreak: updatedStreak,
@@ -209,12 +181,24 @@ const Login = () => {
           userType: "student",
         });
       }
+
       toast.success("Logged in successfully!", { autoClose: 3000 });
-      // Instead of directly calling navigate, use the helper to handle redirection
-      redirectAfterLogin(isFirstTimeLogin);
+
+      const pendingSubscription = sessionStorage.getItem("pendingSubscription");
+      if (pendingSubscription) {
+        sessionStorage.removeItem("pendingSubscription");
+        navigate(`/subscriptions?offerId=${pendingSubscription}`, {
+          replace: true,
+        });
+      } else if (isFirstTimeLogin) {
+        navigate("/userEditProfile", { replace: true });
+      } else {
+        navigate("/learn", { replace: true });
+      }
     } catch (error) {
       console.error("Error during Apple login:", error);
       updateUserData(null);
+
       toast.error("Failed to log in with Apple", { autoClose: 5000 });
     }
   };
@@ -223,18 +207,23 @@ const Login = () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
+
       const userRef = doc(db, "students", user.uid);
       const userDoc = await getDoc(userRef);
+
       const notificationPrefsRef = doc(
         db,
         "notification_preferences",
         user.uid
       );
       const notificationPrefsDoc = await getDoc(notificationPrefsRef);
+
       let isFirstTimeLogin = false;
-      const fcmToken = await getFCMToken();
+      const fcmToken = await getFCMToken(); // Call getFCMToken here
+
       if (!userDoc.exists()) {
         isFirstTimeLogin = true;
+        // Create new user document
         const newUserData = {
           email: user.email,
           name: user.displayName || "",
@@ -253,7 +242,7 @@ const Login = () => {
           savedDocuments: [],
           tier: 1,
           currentStreak: 1,
-          fcmToken: fcmToken || "",
+          fcmToken: fcmToken || "", // Add FCM token
           credits: 0,
           subscriptions: [
             {
@@ -263,7 +252,9 @@ const Login = () => {
             },
           ],
         };
+
         await setDoc(userRef, newUserData);
+
         if (!notificationPrefsDoc.exists()) {
           await setDoc(notificationPrefsRef, {
             userId: user.uid,
@@ -274,19 +265,24 @@ const Login = () => {
             resourceAssign: true,
           });
         }
+
+        // Update session with new user data
         updateUserData({
           ...newUserData,
           lastLoggedIn: new Date(),
-          userType: "student",
+          userType: "student", // Set userType in context only
         });
       } else {
+        // Update existing user
         const userData = userDoc.data();
         const lastLoggedIn = userData.lastLoggedIn
           ? userData.lastLoggedIn.toDate()
           : null;
         const currentStreak = userData.currentStreak || 0;
+
         const now = new Date();
         let updatedStreak = currentStreak;
+
         if (lastLoggedIn) {
           const lastLoginDate = new Date(
             lastLoggedIn.getFullYear(),
@@ -298,8 +294,10 @@ const Login = () => {
             now.getMonth(),
             now.getDate()
           );
+
           const differenceInDays =
             (currentDate - lastLoginDate) / (1000 * 60 * 60 * 24);
+
           if (differenceInDays === 1) {
             updatedStreak = currentStreak + 1;
           } else if (differenceInDays > 1) {
@@ -308,20 +306,31 @@ const Login = () => {
         } else {
           updatedStreak = 1;
         }
+
+        // Update Firestore
         await updateDoc(userRef, {
           lastLoggedIn: serverTimestamp(),
           currentStreak: updatedStreak,
+          // userType: "student", // Ensure userType is stored in Firestore
         });
+
+        // Request notification permission and retrieve FCM token
         const permission = await Notification.requestPermission();
         if (permission === "granted") {
           const fcmToken = await getToken(messaging, {
             vapidKey: process.env.REACT_APP_FIREBASE_VAPID_KEY,
           });
           console.log("FCM Token:", fcmToken);
-          await updateDoc(userRef, { fcmToken });
+
+          // Optionally store the token in Firestore
+          await updateDoc(userRef, {
+            fcmToken: fcmToken,
+          });
         } else {
           console.warn("Notification permission not granted");
         }
+
+        // Update session with updated user data
         updateUserData({
           ...userData,
           currentStreak: updatedStreak,
@@ -330,16 +339,31 @@ const Login = () => {
         });
       }
       toast.success("Logged in successfully!", { autoClose: 3000 });
-      redirectAfterLogin(isFirstTimeLogin);
+
+      const pendingSubscription = sessionStorage.getItem("pendingSubscription");
+      if (pendingSubscription) {
+        sessionStorage.removeItem("pendingSubscription");
+        navigate(`/subscriptions?offerId=${pendingSubscription}`, {
+          replace: true,
+        });
+      } else if (isFirstTimeLogin) {
+        navigate("/userEditProfile", { replace: true });
+      } else {
+        navigate("/learn", { replace: true });
+      }
     } catch (error) {
       console.error("Error during Google login:", error);
       updateUserData(null);
+
       toast.error("Invalid email or password", { autoClose: 5000 });
     }
   };
 
   const handleEmailLoginStudent = async (e) => {
+    // const loadingToastId = toast.loading("Logging in...");
     e.preventDefault();
+
+    let isFirstTimeLogin = false;
     try {
       const userCredential = await signInWithEmailAndPassword(
         auth,
@@ -347,19 +371,24 @@ const Login = () => {
         password
       );
       const user = userCredential.user;
+
       const userRef = doc(db, "students", user.uid);
       const userDoc = await getDoc(userRef);
+
       if (!userDoc.exists()) {
         toast.error("User profile not found");
         await signOut(auth);
         return;
       }
+
       const userData = userDoc.data();
       const lastLoggedIn = userData.lastLoggedIn
         ? userData.lastLoggedIn.toDate()
         : null;
       const now = new Date();
       const currentStreak = userData.currentStreak || 0;
+
+      // Calculate streak
       let updatedStreak = currentStreak;
       if (lastLoggedIn) {
         const lastLoginDate = new Date(
@@ -374,6 +403,7 @@ const Login = () => {
         );
         const differenceInDays =
           (currentDate - lastLoginDate) / (1000 * 60 * 60 * 24);
+
         if (differenceInDays === 1) {
           updatedStreak = currentStreak + 1;
         } else if (differenceInDays > 1) {
@@ -382,20 +412,30 @@ const Login = () => {
       } else {
         updatedStreak = 1;
       }
+
+      // Update Firestore
       await updateDoc(userRef, {
         lastLoggedIn: serverTimestamp(),
         currentStreak: updatedStreak,
       });
+
+      // Request notification permission and retrieve FCM token
       const permission = await Notification.requestPermission();
       if (permission === "granted") {
         const fcmToken = await getToken(messaging, {
           vapidKey: process.env.REACT_APP_FIREBASE_VAPID_KEY,
         });
         console.log("FCM Token:", fcmToken);
-        await updateDoc(userRef, { fcmToken });
+
+        // Optionally store the token in Firestore
+        await updateDoc(userRef, {
+          fcmToken: fcmToken,
+        });
       } else {
         console.warn("Notification permission not granted");
       }
+
+      // Store complete user data
       const sessionUserData = {
         ...userData,
         uid: user.uid,
@@ -403,9 +443,24 @@ const Login = () => {
         lastLoggedIn: now,
         userType: "student",
       };
+
+      // Use AuthContext's updateUserData
       updateUserData(sessionUserData);
+
       toast.success("Logged in successfully!", { autoClose: 3000 });
-      redirectAfterLogin(false);
+
+      // Check for pending subscription after successful login
+      const pendingSubscription = sessionStorage.getItem("pendingSubscription");
+      if (pendingSubscription) {
+        sessionStorage.removeItem("pendingSubscription");
+        navigate(`/subscriptions?offerId=${pendingSubscription}`, {
+          replace: true,
+        });
+      } else if (isFirstTimeLogin) {
+        navigate("/userEditProfile", { replace: true });
+      } else {
+        navigate("/learn", { replace: true });
+      }
     } catch (error) {
       console.error("Error during email login:", error);
       if (
@@ -422,6 +477,7 @@ const Login = () => {
       } else if (error.code === "auth/wrong-password") {
         setPasswordError("Wrong password.");
       }
+
       toast.error("Invalid email or password", { autoClose: 5000 });
     }
   };
@@ -431,8 +487,11 @@ const Login = () => {
     try {
       const result = await signInWithPopup(auth, facebookProvider);
       const user = result.user;
+
+      // Check if user data already exists in Firestore
       const userDoc = await getDoc(doc(db, "students", user.uid));
       if (!userDoc.exists()) {
+        // Set initial data with empty values if it doesn't exist
         await setDoc(doc(db, "students", user.uid), {
           email: user.email,
           nickname: "",
@@ -441,10 +500,11 @@ const Login = () => {
           nativeLanguage: "",
           accountType: "user",
           timeZone: "",
+          // createdAt: new Date(),
         });
       }
-      toast.success("Logged in successfully!", { autoClose: 3000 });
-      redirectAfterLogin(false);
+
+      navigate("/learn", { replace: true });
     } catch (error) {
       console.error("Error during Facebook login:", error);
     }
@@ -520,6 +580,8 @@ const Login = () => {
           <div className="space-y-1">
             <label className="block text-sm text-gray-700">Email</label>
             <div className="relative">
+              {" "}
+              {/* Add this wrapper div */}
               <input
                 type="email"
                 value={email}
@@ -618,15 +680,7 @@ const Login = () => {
             <Link to="/forgot-password" className="font-semibold text-red-500">
               Forgot Password?
             </Link>
-            {/* Preserve the ref query parameter in the tutor login link */}
-            <Link
-              to={
-                location.search.includes("ref=sub")
-                  ? "/login-tutor?ref=sub"
-                  : "/login-tutor"
-              }
-              className="text-[#14b82c] font-semibold"
-            >
+            <Link to="/login-tutor" className="text-[#14b82c] font-semibold">
               Login as Tutor
             </Link>
           </div>
@@ -647,9 +701,7 @@ const Login = () => {
             <div className="w-full border-t border-gray-300"></div>
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 text-gray-500 bg-white">
-              or sign in with
-            </span>
+            <span className="px-2 text-gray-500 bg-white">or sign in with</span>
           </div>
         </div>
 
@@ -666,7 +718,7 @@ const Login = () => {
             className="flex items-center justify-center px-4 py-2 space-x-4 text-white bg-black border border-black rounded-full"
           >
             <img
-              alt="apple"
+              alt="google"
               className="w-auto h-6"
               src="/images/apple-white.png"
             />
@@ -675,7 +727,7 @@ const Login = () => {
         </div>
 
         {/* Terms */}
-        <div className="text-sm text-center text-[#9e9e9e] pt-6">
+        <div className=" text-sm text-center text-[#9e9e9e] pt-6">
           <p>
             By logging, you agree to our{" "}
             <a href="#" className="text-black">
@@ -694,7 +746,7 @@ const Login = () => {
         {/* Sign Up Link */}
         <div className="text-sm text-center text-[#5d5d5d]">
           <p>
-            Don't have an account?{" "}
+            Don't have any account?{" "}
             <Link to="/signup" className="text-[#14B82C]">
               Sign up
             </Link>
