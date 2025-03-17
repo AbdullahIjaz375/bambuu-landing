@@ -5,17 +5,41 @@ import { useAuth } from "../context/AuthContext";
 const ProtectedRoute = ({ children, requiredRole }) => {
   const { user } = useAuth();
   const userType = sessionStorage.getItem("userType");
-  // Get the current URL
   const currentUrl = window.location.href;
+
+  // Save subscription URL if applicable.
   if (currentUrl.includes("subscriptions?offerId=")) {
     localStorage.setItem("selectedPackageUrl", currentUrl);
   }
-  
-  // If the user is not logged in, redirect to login with the ref query param if needed
+
+  // Save class details URL if the pathname includes "/classDetailsTutor/"
+  // and there's a "ref" query parameter present.
+  try {
+    const urlObj = new URL(currentUrl);
+    const searchParams = new URLSearchParams(urlObj.search);
+    if (urlObj.pathname.includes("/classDetailsTutor/") && searchParams.has("ref")) {
+      localStorage.setItem("selectedClassUrl", currentUrl);
+    }
+  } catch (error) {
+    console.error("Invalid URL", error);
+  }
+
+  // If the user is not logged in, determine the proper login URL.
   if (!user) {
-    const loginUrl = currentUrl.includes("subscriptions?offerId=")
-      ? "/login?ref=sub"
-      : "/login";
+    let loginUrl = "/login";
+    if (currentUrl.includes("subscriptions?offerId=")) {
+      loginUrl = "/login?ref=sub";
+    } else {
+      try {
+        const urlObj = new URL(currentUrl);
+        const searchParams = new URLSearchParams(urlObj.search);
+        if (urlObj.pathname.includes("/classDetailsTutor/") && searchParams.has("ref")) {
+          loginUrl = "/login?ref=class";
+        }
+      } catch (error) {
+        console.error("Invalid URL", error);
+      }
+    }
     return <Navigate to={loginUrl} />;
   }
 

@@ -1081,7 +1081,7 @@ const GroupDetailsTutor = ({ onClose }) => {
                 onChange={(e) =>
                   handleClassDataChange("classDescription", e.target.value)
                 }
-                maxLength={200}
+                maxLength={400}
                 rows={3}
                 className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
               />

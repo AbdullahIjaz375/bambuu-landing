@@ -823,7 +823,7 @@ const GroupDetailsModal = ({ group, onClose }) => {
                 onChange={(e) =>
                   handleClassDataChange("classDescription", e.target.value)
                 }
-                maxLength={200}
+                maxLength={400}
                 rows={3}
                 className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
               />

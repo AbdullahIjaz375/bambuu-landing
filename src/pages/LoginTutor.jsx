@@ -23,6 +23,14 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 
+// Helper: Update query string by setting a new ref value.
+const getUpdatedQuery = (locationSearch, newRef) => {
+  const params = new URLSearchParams(locationSearch);
+  params.set("ref", newRef);
+  const qs = params.toString();
+  return qs ? `?${qs}` : "";
+};
+
 const LoginTutor = () => {
   const googleProvider = new GoogleAuthProvider();
   const facebookProvider = new FacebookAuthProvider();
@@ -35,7 +43,10 @@ const LoginTutor = () => {
   const [password, setPassword] = useState("");
   const { user, loading, updateUserData } = useAuth();
 
-  // Helper function: Check if the URL contains ref=sub. If so, try to retrieve the saved URL from localStorage and redirect there.
+  // Helper: Redirect after login.
+  // If ref=sub, redirect using the saved subscription URL.
+  // If ref=class, redirect using the saved class URL.
+  // Otherwise, fall back to the tutor landing page.
   const redirectAfterLogin = () => {
     const params = new URLSearchParams(location.search);
     if (params.get("ref") === "sub") {
@@ -48,11 +59,24 @@ const LoginTutor = () => {
           navigate(path, { replace: true });
           return;
         } catch (error) {
-          console.error("Error parsing saved URL:", error);
+          console.error("Error parsing saved subscription URL:", error);
+        }
+      }
+    } else if (params.get("ref") === "class") {
+      const savedUrl = localStorage.getItem("selectedClassUrl");
+      if (savedUrl) {
+        try {
+          const parsedUrl = new URL(savedUrl);
+          const path = parsedUrl.pathname + parsedUrl.search;
+          localStorage.removeItem("selectedClassUrl");
+          navigate(path, { replace: true });
+          return;
+        } catch (error) {
+          console.error("Error parsing saved class URL:", error);
         }
       }
     }
-    // Fallback: Redirect to the tutor landing page (in this example, "/learn")
+    // Fallback: Redirect to the tutor landing page.
     navigate("/learn", { replace: true });
   };
 
@@ -83,7 +107,7 @@ const LoginTutor = () => {
 
       const userData = tutorDoc.data();
 
-      // Update last login time
+      // Update last login time.
       await updateDoc(tutorRef, {
         lastLoggedIn: serverTimestamp(),
       });
@@ -97,8 +121,6 @@ const LoginTutor = () => {
 
       updateUserData(sessionUserData);
       toast.success("Logged in successfully!", { autoClose: 3000 });
-
-      // Use the helper to redirect based on the "ref" query parameter.
       redirectAfterLogin();
     } catch (error) {
       console.error("Error during email login:", error);
@@ -283,8 +305,18 @@ const LoginTutor = () => {
             <Link to="/forgot-password" className="font-semibold text-red-500">
               Forgot Password?
             </Link>
+            {/* Switch to Student Login:
+                If the current URL contains ref=class, preserve it;
+                otherwise if it contains ref=sub, preserve that;
+                else default to "/login". */}
             <Link
-              to={location.search.includes("ref=sub") ? "/login?ref=sub" : "/login"}
+              to={
+                location.search.includes("ref=class")
+                  ? "/login?ref=class"
+                  : location.search.includes("ref=sub")
+                  ? "/login?ref=sub"
+                  : "/login"
+              }
               className="text-[#14b82c] font-semibold"
             >
               Login as Student
@@ -301,23 +333,6 @@ const LoginTutor = () => {
             Login
           </button>
         </form>
-
-        {/* Terms */}
-        <div className="text-sm text-center text-[#9e9e9e] pt-6">
-          <p>
-            By logging, you agree to our{" "}
-            <a href="#" className="text-black">
-              Terms & Conditions
-            </a>
-          </p>
-          <p>
-            and{" "}
-            <a href="#" className="text-black">
-              PrivacyPolicy
-            </a>
-            .
-          </p>
-        </div>
       </div>
     </div>
   );

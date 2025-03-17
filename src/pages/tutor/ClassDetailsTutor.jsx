@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ArrowLeft, User, Clock, Calendar, MapPin, Users } from "lucide-react";
+import { ArrowLeft} from "lucide-react";
 import { doc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import { ClipLoader } from "react-spinners";

@@ -32,6 +32,14 @@ import {
 } from "firebase/firestore";
 import { getMessaging, getToken } from "firebase/messaging";
 
+// Helper: Updates the current query string by replacing any existing "ref" value with the provided newRef.
+const getUpdatedQuery = (locationSearch, newRef) => {
+  const params = new URLSearchParams(locationSearch);
+  params.set("ref", newRef);
+  const qs = params.toString();
+  return qs ? `?${qs}` : "";
+};
+
 const Login = () => {
   const googleProvider = new GoogleAuthProvider();
   const appleProvider = new OAuthProvider("apple.com");
@@ -45,9 +53,23 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  // Helper: Redirects the user based on query parameter "ref=sub" and whether the login is first time.
+  // Ensure that if a class URL was saved, the student login URL keeps ?ref=class.
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    // If no "ref" exists and a selectedClassUrl is present, force ref=class.
+    if (!params.has("ref") && localStorage.getItem("selectedClassUrl")) {
+      params.set("ref", "class");
+      navigate(`/login?${params.toString()}`, { replace: true });
+    }
+  }, [location.search, navigate]);
+
+  // Modified redirectAfterLogin: if the query parameter is missing but a class URL was saved,
+  // force ref=class.
   const redirectAfterLogin = (isFirstTimeLogin = false) => {
     const params = new URLSearchParams(location.search);
+    if (!params.get("ref") && localStorage.getItem("selectedClassUrl")) {
+      params.set("ref", "class");
+    }
     if (params.get("ref") === "sub") {
       const savedUrl = localStorage.getItem("selectedPackageUrl");
       if (savedUrl) {
@@ -59,11 +81,27 @@ const Login = () => {
           setRedirected(true);
           return;
         } catch (error) {
-          console.error("Error parsing saved URL:", error);
+          console.error("Error parsing saved subscription URL:", error);
+        }
+      }
+    } else if (params.get("ref") == "class") {
+      
+      alert('sel ', params.get('class'));
+      const savedClassUrl = localStorage.getItem("selectedClassUrl");
+      if (savedClassUrl) {
+        try {
+          const parsedUrl = new URL(savedClassUrl);
+          const path = parsedUrl.pathname + parsedUrl.search;
+          localStorage.removeItem("selectedClassUrl");
+          navigate(path, { replace: true });
+          setRedirected(true);
+          return;
+        } catch (error) {
+          console.error("Error parsing saved class URL:", error);
         }
       }
     }
-    // Fallback: if first-time login, go to profile editing; otherwise, go to learn page.
+    // Fallback redirection.
     if (isFirstTimeLogin) {
       navigate("/userEditProfile", { replace: true });
     } else {
@@ -72,13 +110,14 @@ const Login = () => {
     setRedirected(true);
   };
 
-  // In case a user is already logged in (or when the login page is revisited), handle redirection.
+  // Automatically redirect if the user is already logged in.
   useEffect(() => {
     if (user && !redirected) {
       redirectAfterLogin(false);
     }
   }, [user, redirected, location, navigate]);
 
+  // Helper to get FCM token.
   const getFCMToken = async () => {
     try {
       const messaging = getMessaging();
@@ -96,17 +135,14 @@ const Login = () => {
     }
   };
 
+  // Apple login
   const handleAppleLoginStudent = async () => {
     try {
       const result = await signInWithPopup(auth, appleProvider);
       const user = result.user;
       const userRef = doc(db, "students", user.uid);
       const userDoc = await getDoc(userRef);
-      const notificationPrefsRef = doc(
-        db,
-        "notification_preferences",
-        user.uid
-      );
+      const notificationPrefsRef = doc(db, "notification_preferences", user.uid);
       const notificationPrefsDoc = await getDoc(notificationPrefsRef);
       let isFirstTimeLogin = false;
       const fcmToken = await getFCMToken();
@@ -210,7 +246,6 @@ const Login = () => {
         });
       }
       toast.success("Logged in successfully!", { autoClose: 3000 });
-      // Instead of directly calling navigate, use the helper to handle redirection
       redirectAfterLogin(isFirstTimeLogin);
     } catch (error) {
       console.error("Error during Apple login:", error);
@@ -219,17 +254,14 @@ const Login = () => {
     }
   };
 
+  // Google login
   const handleGoogleLoginStudent = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
       const userRef = doc(db, "students", user.uid);
       const userDoc = await getDoc(userRef);
-      const notificationPrefsRef = doc(
-        db,
-        "notification_preferences",
-        user.uid
-      );
+      const notificationPrefsRef = doc(db, "notification_preferences", user.uid);
       const notificationPrefsDoc = await getDoc(notificationPrefsRef);
       let isFirstTimeLogin = false;
       const fcmToken = await getFCMToken();
@@ -338,14 +370,11 @@ const Login = () => {
     }
   };
 
+  // Email login
   const handleEmailLoginStudent = async (e) => {
     e.preventDefault();
     try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       const userRef = doc(db, "students", user.uid);
       const userDoc = await getDoc(userRef);
@@ -355,9 +384,7 @@ const Login = () => {
         return;
       }
       const userData = userDoc.data();
-      const lastLoggedIn = userData.lastLoggedIn
-        ? userData.lastLoggedIn.toDate()
-        : null;
+      const lastLoggedIn = userData.lastLoggedIn ? userData.lastLoggedIn.toDate() : null;
       const now = new Date();
       const currentStreak = userData.currentStreak || 0;
       let updatedStreak = currentStreak;
@@ -372,8 +399,7 @@ const Login = () => {
           now.getMonth(),
           now.getDate()
         );
-        const differenceInDays =
-          (currentDate - lastLoginDate) / (1000 * 60 * 60 * 24);
+        const differenceInDays = (currentDate - lastLoginDate) / (1000 * 60 * 60 * 24);
         if (differenceInDays === 1) {
           updatedStreak = currentStreak + 1;
         } else if (differenceInDays > 1) {
@@ -423,30 +449,6 @@ const Login = () => {
         setPasswordError("Wrong password.");
       }
       toast.error("Invalid email or password", { autoClose: 5000 });
-    }
-  };
-
-  const handleFacebookLogin = async () => {
-    const facebookProvider = new FacebookAuthProvider();
-    try {
-      const result = await signInWithPopup(auth, facebookProvider);
-      const user = result.user;
-      const userDoc = await getDoc(doc(db, "students", user.uid));
-      if (!userDoc.exists()) {
-        await setDoc(doc(db, "students", user.uid), {
-          email: user.email,
-          nickname: "",
-          country: "",
-          learningLanguage: "",
-          nativeLanguage: "",
-          accountType: "user",
-          timeZone: "",
-        });
-      }
-      toast.success("Logged in successfully!", { autoClose: 3000 });
-      redirectAfterLogin(false);
-    } catch (error) {
-      console.error("Error during Facebook login:", error);
     }
   };
 
@@ -618,13 +620,9 @@ const Login = () => {
             <Link to="/forgot-password" className="font-semibold text-red-500">
               Forgot Password?
             </Link>
-            {/* Preserve the ref query parameter in the tutor login link */}
+            {/* When switching to tutor login, update the query string to set ref=tutor */}
             <Link
-              to={
-                location.search.includes("ref=sub")
-                  ? "/login-tutor?ref=sub"
-                  : "/login-tutor"
-              }
+              to={`/login-tutor${getUpdatedQuery(location.search, "class")}`}
               className="text-[#14b82c] font-semibold"
             >
               Login as Tutor

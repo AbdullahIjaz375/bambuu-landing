@@ -222,6 +222,18 @@ const StudentsTutor = () => {
     )
   );
 
+
+  const FormateDate = (created_at)=>{
+    const date = new Date(created_at);
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const hour = date.getHours();
+    const minutes = date.getMinutes();
+    const seconds = date.getSeconds();
+    return `${day}/${month}/${year}`;
+  }
+
   if (loading) {
     return (
       <div className="flex min-h-screen bg-white">
@@ -297,51 +309,58 @@ const StudentsTutor = () => {
 
               <div className="flex-1 space-y-2 overflow-y-auto scrollbar-hide">
                 {(activeTab === "students" ? studentChats : groupChats).map(
-                  (channel) => (
-                    <div
-                      key={channel.id}
-                      className={`flex items-center gap-3 p-3 border border-[#22bf37] cursor-pointer rounded-3xl ${
-                        selectedChannel?.id === channel.id ? "bg-[#f0fdf1]" : ""
-                      }`}
-                      onClick={() => handleChannelSelect(channel)}
-                      role="button"
-                      tabIndex={0}
-                      onKeyPress={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          handleChannelSelect(channel);
-                        }
-                      }}
-                    >
-                      <div className="relative">
-                        <img
-                          src={channel.data.image || "/default-avatar.png"}
-                          alt={channel.data.name}
-                          className="object-cover w-12 h-12 rounded-full"
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex justify-between">
-                          <h3 className="text-lg font-semibold">
-                            {channel.data.name}
-                          </h3>
-                        </div>
-                        <div className="flex flex-row items-center justify-between mt-1">
-                          <p className="text-sm text-gray-500 truncate">
-                            {getMessagePreview(
-                              channel.state.messages[
-                                channel.state.messages.length - 1
-                              ]
-                            )}
-                          </p>
-                          {unreadCounts[channel.id] > 0 && (
-                            <span className="flex items-center justify-center w-6 h-6 mr-5 text-xs text-white bg-[#14B82C] rounded-full">
-                              {unreadCounts[channel.id]}
-                            </span>
-                          )}
-                        </div>
-                      </div>
+                  (channel) => {
+                 return(
+                  <div
+                  key={channel.id}
+                  className={`flex items-center gap-3 p-3 border border-[#22bf37] cursor-pointer rounded-3xl ${
+                    selectedChannel?.id === channel.id ? "bg-[#f0fdf1]" : ""
+                  }`}
+                  onClick={() => handleChannelSelect(channel)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      handleChannelSelect(channel);
+                    }
+                  }}
+                >
+                  <div className="relative">
+                    <img
+                      src={channel.data.image || "/default-avatar.png"}
+                      alt={channel.data.name}
+                      className="object-cover w-12 h-12 rounded-full"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex justify-between">
+                      <h3 className="text-lg font-semibold">
+                        {channel.data.name} -1
+                      </h3>
                     </div>
-                  )
+                    <div className="flex flex-row items-center justify-between mt-1">
+                      <p className="text-sm text-gray-500 truncate">
+                        {getMessagePreview(
+                          channel.state.messages[
+                            channel.state.messages.length - 1
+                          ]
+                        )}
+                      </p>
+                      <p className="text-sm text-gray-500 truncate">
+                        {FormateDate(channel.data.created_at)}
+                      </p>
+
+
+                      {unreadCounts[channel.id] > 0 && (
+                        <span className="flex items-center justify-center w-6 h-6 mr-5 text-xs text-white bg-[#14B82C] rounded-full">
+                          {unreadCounts[channel.id]}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                 )
+                  }
                 )}
               </div>
             </div>
