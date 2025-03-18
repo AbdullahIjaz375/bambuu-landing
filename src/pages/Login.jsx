@@ -86,7 +86,6 @@ const Login = () => {
       }
     } else if (params.get("ref") == "class") {
       
-      alert('sel ', params.get('class'));
       const savedClassUrl = localStorage.getItem("selectedClassUrl");
       if (savedClassUrl) {
         try {
