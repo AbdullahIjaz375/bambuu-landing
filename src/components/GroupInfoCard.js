@@ -37,11 +37,16 @@ const GroupInfoCard = ({ group }) => {
       />
       <div className="flex flex-col items-start flex-1 gap-1">
         <h1 className="text-lg font-medium">{tutorInfo?.name}</h1>
-        <p className="text-xs text-left text-gray-600">
-          {tutorInfo?.bio
-            ? tutorInfo?.bio.split(" ").slice(0, 8).join(" ") + "..."
-            : ""}
-        </p>
+       
+        
+        <p title={tutorInfo?.bio} className="text-xs text-left text-gray-600">
+  {tutorInfo?.bio
+    ? tutorInfo?.bio.includes(" ")
+      ? tutorInfo?.bio.split(" ").slice(0, 12).join(" ") + "..."
+      : tutorInfo?.bio.slice(0, 30) + "...."
+    : ""}
+</p>
+
         <div className="flex items-center gap-4 text-xs">
           <div className="flex flex-col gap-0.5">
             <span className="text-gray-700">

@@ -3,14 +3,21 @@ import { X } from "lucide-react";
 import { useAuth } from "../../src/context/AuthContext";
 import { useTranslation } from "react-i18next";
 import { db } from "../firebaseConfig";
+import { toast } from "react-toastify";
 import {
   collection,
   getDocs,
   query,
   where,
   Timestamp,
+  doc,
+  updateDoc,
+  getDoc,
 } from "firebase/firestore";
 import { ClipLoader } from "react-spinners";
+import Modal from "react-modal";
+
+Modal.setAppElement("#root"); // Ensure this matches your app's root element
 
 const Subscriptions = () => {
   const { user } = useAuth();
@@ -24,6 +31,9 @@ const Subscriptions = () => {
   const [error, setError] = useState(null);
   const [offerPlans, setOfferPlans] = useState([]);
   const [showOffers, setShowOffers] = useState(false);
+  const [showFreeTrialModal, setShowFreeTrialModal] = useState(false);
+  const [freeTrialActivated, setFreeTrialActivated] = useState(false);
+  const [hasActiveFreeTrial, setHasActiveFreeTrial] = useState(false);
 
   // Add this function to check if user is within 7 days of registration
   const checkNewUserEligibility = async (userId) => {
@@ -46,12 +56,24 @@ const Subscriptions = () => {
     }
   };
 
-  // Fetch plans from Firebase
+  // Fetch plans and check user's subscription status
   useEffect(() => {
     const fetchPlans = async () => {
       try {
         setIsLoadingPlans(true);
         setError(null);
+        
+        // Check if user already has free access
+        if (user?.uid) {
+          const userRef = doc(db, "students", user.uid);
+          const userDoc = await getDoc(userRef);
+          
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            // Check if user already has free access enabled
+            setHasActiveFreeTrial(userData.freeAccess === true);
+          }
+        }
 
         // Check if user is eligible for offers
         const isEligible = await checkNewUserEligibility(user?.uid);
@@ -154,6 +176,31 @@ const Subscriptions = () => {
     }
   }, [subscriptionPlans, creditPlans, isLoadingPlans]);
 
+  // Activate free trial
+  const activateFreeTrial = async () => {
+    setIsLoading(true);
+    try {
+      // Update the user's document to set freeAccess to true
+      const userRef = doc(db, "students", user.uid);
+      await updateDoc(userRef, {
+        freeAccess: true,
+        subscriptions: [
+          {
+            endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+            startDate: new Date(),
+            type: "Free Trial",
+          },
+        ],
+      });
+      
+      setFreeTrialActivated(true);
+    } catch (error) {
+      console.error("Error activating free trial:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handlePurchase = async (plan, userId) => {
     try {
       // Get the base URL without any query parameters
@@ -180,7 +227,30 @@ const Subscriptions = () => {
     setSelectedPlan(null);
   };
 
+  const handleSubscribe = async () => {
+    if (!selectedPlan) return;
+    
+    // Check if this is a free plan
+    if (selectedPlan.price === 0 || selectedPlan.title.toLowerCase().includes('free')) {
+      // Check if user already has active free trial
+      if (hasActiveFreeTrial) {
+        toast.warning("You already have an active free subscription");
+        return;
+      }
+      setShowFreeTrialModal(true);
+      return;
+    }
+    
+    setIsLoading(true);
+    try {
+      await handlePurchase(selectedPlan, user?.uid);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const SubscriptionPlan = ({ plan, userId, isSelected, onSelect }) => {
+    const isFree = plan.price === 0 || plan.title.toLowerCase().includes('free');
     const features = [
       {
         title: t("plans-modal.features.experts.title"),
@@ -211,8 +281,15 @@ const Subscriptions = () => {
           isSelected
             ? "border-[#14B82C] shadow-lg transform scale-[1.02] bg-[#E6FDE9]"
             : "border-[#B0B0B0] hover:border-[#14B82C] hover:shadow-md bg-white"
-        }`}
+        } ${isFree && hasActiveFreeTrial ? "relative" : ""}`}
       >
+        {isFree && hasActiveFreeTrial && (
+          <div className="absolute inset-0 bg-gray-200 bg-opacity-50 rounded-3xl flex items-center justify-center">
+            <div className="px-4 py-2 bg-orange-100 border border-orange-400 rounded-lg text-orange-800 font-medium">
+              Already Activated
+            </div>
+          </div>
+        )}
         {plan.isPopular && (
           <div className="px-4 py-1 text-sm font-semibold bg-[#FFBF00] rounded-t-3xl text-center">
             {t("plans-modal.popular-badge")}
@@ -221,10 +298,12 @@ const Subscriptions = () => {
         <div className="flex flex-col flex-grow p-5 space-y-4 text-center">
           <div className="space-y-4">
             <div className="text-4xl font-semibold">
-              ${plan.price}
-              <span className="text-base font-normal text-black">
-                /{plan.period}
-              </span>
+              {plan.price === 0 ? "FREE" : `$${plan.price}`}
+              {plan.price !== 0 && (
+                <span className="text-base font-normal text-black">
+                  /{plan.period}
+                </span>
+              )}
             </div>
             <div>
               <h3 className="mb-2 font-medium text-md">{plan.title}</h3>
@@ -276,7 +355,9 @@ const Subscriptions = () => {
         )}
         <div className="flex flex-col flex-grow p-6 space-y-6 text-center">
           <div className="space-y-4">
-            <div className="text-4xl font-bold">${plan.price}</div>
+            <div className="text-4xl font-bold">
+              {plan.price === 0 ? "FREE" : `$${plan.price}`}
+            </div>
             <h3 className="text-lg font-medium">{plan.title}</h3>
           </div>
 
@@ -325,16 +406,6 @@ const Subscriptions = () => {
 
   const handlePlanSelect = (plan) => {
     setSelectedPlan(selectedPlan?.id === plan.id ? null : plan);
-  };
-
-  const handleSubscribe = async () => {
-    if (!selectedPlan) return;
-    setIsLoading(true);
-    try {
-      await handlePurchase(selectedPlan, user?.uid);
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   if (isLoadingPlans) {
@@ -476,18 +547,88 @@ const Subscriptions = () => {
           <div className="mt-8">
             <button
               onClick={handleSubscribe}
-              disabled={isLoading}
-              className="w-full max-w-md mx-auto block py-3 text-[#042F0C] transition-colors bg-[#14B82C] rounded-full border border-[#042F0C] disabled:opacity-50 hover:bg-[#12a528]"
+              disabled={isLoading || (hasActiveFreeTrial && selectedPlan.price === 0)}
+              className={`w-full max-w-md mx-auto block py-3 text-[#042F0C] transition-colors ${
+                hasActiveFreeTrial && selectedPlan.price === 0
+                  ? "bg-gray-300 cursor-not-allowed"
+                  : "bg-[#14B82C] hover:bg-[#12a528]"
+              } rounded-full border border-[#042F0C] disabled:opacity-50`}
             >
               {isLoading
                 ? t("plans-modal.buttons.loading")
-                : `${t("plans-modal.buttons.subscribe")} - $${
-                    selectedPlan.price
-                  }`}
+                : hasActiveFreeTrial && selectedPlan.price === 0
+                ? "Already Activated"
+                : selectedPlan.price === 0
+                ? t("plans-modal.buttons.activate-free")
+                : `${t("plans-modal.buttons.subscribe")} - ${selectedPlan.price}`}
             </button>
+            {hasActiveFreeTrial && selectedPlan.price === 0 && (
+              <p className="mt-2 text-sm text-center text-orange-500">
+                You already have an active free subscription
+              </p>
+            )}
           </div>
         )}
       </div>
+
+      {/* Free Trial Confirmation Modal */}
+      <Modal
+        isOpen={showFreeTrialModal}
+        onRequestClose={() => !isLoading && setShowFreeTrialModal(false)}
+        className="fixed w-full max-w-md p-6 transform -translate-x-1/2 -translate-y-1/2 bg-white outline-none top-1/2 left-1/2 rounded-3xl"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-50 z-50"
+      >
+        <div className="text-center">
+          {!freeTrialActivated ? (
+            <>
+              <div className="flex justify-center mb-4">
+                <img alt="Free Trial" src="/svgs/account-created.svg" />
+              </div>
+              <h2 className="mb-4 text-2xl font-semibold">Activate Free Trial</h2>
+              <p className="mb-6 text-gray-600">
+                You're about to activate your 7-day free trial subscription. Would you like to continue?
+              </p>
+              <div className="flex space-x-4">
+                <button
+                  onClick={() => setShowFreeTrialModal(false)}
+                  disabled={isLoading}
+                  className="w-full py-2 text-gray-700 bg-gray-200 rounded-full hover:bg-gray-300"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={activateFreeTrial}
+                  disabled={isLoading}
+                  className="w-full py-2 text-[#042F0C] bg-[#14B82C] rounded-full border border-[#042F0C] disabled:opacity-50"
+                >
+                  {isLoading ? "Activating..." : "Activate"}
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="flex justify-center mb-4">
+                <img alt="Success" src="/svgs/account-created.svg" />
+              </div>
+              <h2 className="mb-4 text-2xl font-semibold text-gray-900">
+                Free Trial Activated!
+              </h2>
+              <p className="mb-6 text-gray-600">
+                Your 7-day free trial has been successfully activated. You now have access to premium features.
+              </p>
+              <button
+                onClick={() => {
+                  setShowFreeTrialModal(false);
+                  window.location.href = "/learn";
+                }}
+                className="w-full py-2 text-[#042F0C] bg-[#14B82C] rounded-full border border-[#042F0C]"
+              >
+                Start Learning
+              </button>
+            </>
+          )}
+        </div>
+      </Modal>
     </div>
   );
 };
