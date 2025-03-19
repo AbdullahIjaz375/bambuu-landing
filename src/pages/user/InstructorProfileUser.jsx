@@ -128,73 +128,89 @@ const InstructorProfileUser = () => {
     navigate(-1);
   };
 
-  const renderClasses = () => {
-    if (classes.length === 0) {
-      return (
-        <div className="flex items-center justify-center h-96">
-          <EmptyState message="No classes available" />
-        </div>
-      );
+
+const renderClasses = () => {
+  // Filter out classes that are:
+  // 1. Individual Premium and already have a member
+  // 2. Group Premium and have no available spots
+  const availableClasses = classes.filter(classItem => {
+    if (classItem.classType === "Individual Premium" && classItem.classMemberIds?.length > 0) {
+      return false; // Filter out Individual Premium classes that already have a member
     }
+    
+    if (classItem.classType === "Group Premium" && classItem.availableSpots <= 0) {
+      return false; // Filter out Group Premium classes with no available spots
+    }
+    
+    return true; // Keep all other classes
+  });
 
-    // Get enrolled classes from localStorage
-    const user = JSON.parse(sessionStorage.getItem("user"));
-    const enrolledClasses = user?.enrolledClasses || [];
-
+  if (availableClasses.length === 0) {
     return (
-      <div className="grid grid-cols-1 gap-4 mt-2 ml-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {classes.map((classItem) => {
-          const isEnrolled = enrolledClasses.includes(classItem.classId);
-
-          return isEnrolled ? (
-            <ClassCard
-              key={classItem.classId}
-              classId={classItem.classId}
-              className={classItem.className}
-              language={classItem.language}
-              languageLevel={classItem.languageLevel}
-              classDateTime={classItem.classDateTime}
-              classDuration={classItem.classDuration}
-              adminId={classItem.adminId}
-              adminName={classItem.adminName}
-              adminImageUrl={classItem.adminImageUrl}
-              classMemberIds={classItem.classMemberIds}
-              availableSpots={classItem.availableSpots}
-              imageUrl={classItem.imageUrl}
-              classDescription={classItem.classDescription}
-              classAddress={classItem.classAddress}
-              groupId={classItem.groupId}
-              recurrenceType={classItem.recurrenceType}
-              classType={classItem.classType}
-              classLocation={classItem.classLocation}
-            />
-          ) : (
-            <ExploreClassCard
-              key={classItem.classId}
-              classId={classItem.classId}
-              className={classItem.className}
-              language={classItem.language}
-              languageLevel={classItem.languageLevel}
-              classDateTime={classItem.classDateTime}
-              classDuration={classItem.classDuration}
-              adminId={classItem.adminId}
-              adminName={classItem.adminName}
-              adminImageUrl={classItem.adminImageUrl}
-              classMemberIds={classItem.classMemberIds}
-              availableSpots={classItem.availableSpots}
-              imageUrl={classItem.imageUrl}
-              classDescription={classItem.classDescription}
-              classAddress={classItem.classAddress}
-              groupId={classItem.groupId}
-              recurrenceType={classItem.recurrenceType}
-              classType={classItem.classType}
-              classLocation={classItem.classLocation}
-            />
-          );
-        })}
+      <div className="flex items-center justify-center h-96">
+        <EmptyState message="No classes available" />
       </div>
     );
-  };
+  }
+
+  // Get enrolled classes from localStorage
+  const user = JSON.parse(sessionStorage.getItem("user"));
+  const enrolledClasses = user?.enrolledClasses || [];
+
+  return (
+    <div className="grid grid-cols-1 gap-4 mt-2 ml-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {availableClasses.map((classItem) => {
+        const isEnrolled = enrolledClasses.includes(classItem.classId);
+
+        return isEnrolled ? (
+          <ClassCard
+            key={classItem.classId}
+            classId={classItem.classId}
+            className={classItem.className}
+            language={classItem.language}
+            languageLevel={classItem.languageLevel}
+            classDateTime={classItem.classDateTime}
+            classDuration={classItem.classDuration}
+            adminId={classItem.adminId}
+            adminName={classItem.adminName}
+            adminImageUrl={classItem.adminImageUrl}
+            classMemberIds={classItem.classMemberIds}
+            availableSpots={classItem.availableSpots}
+            imageUrl={classItem.imageUrl}
+            classDescription={classItem.classDescription}
+            classAddress={classItem.classAddress}
+            groupId={classItem.groupId}
+            recurrenceType={classItem.recurrenceType}
+            classType={classItem.classType}
+            classLocation={classItem.classLocation}
+          />
+        ) : (
+          <ExploreClassCard
+            key={classItem.classId}
+            classId={classItem.classId}
+            className={classItem.className}
+            language={classItem.language}
+            languageLevel={classItem.languageLevel}
+            classDateTime={classItem.classDateTime}
+            classDuration={classItem.classDuration}
+            adminId={classItem.adminId}
+            adminName={classItem.adminName}
+            adminImageUrl={classItem.adminImageUrl}
+            classMemberIds={classItem.classMemberIds}
+            availableSpots={classItem.availableSpots}
+            imageUrl={classItem.imageUrl}
+            classDescription={classItem.classDescription}
+            classAddress={classItem.classAddress}
+            groupId={classItem.groupId}
+            recurrenceType={classItem.recurrenceType}
+            classType={classItem.classType}
+            classLocation={classItem.classLocation}
+          />
+        );
+      })}
+    </div>
+  );
+};
 
   if (loading) {
     return (
@@ -322,8 +338,15 @@ const InstructorProfileUser = () => {
                   </div>
 
                   <div className="px-2 mb-6 overflow-y-auto max-h-40 scrollbar-hide">
-                    <p className="text-sm text-gray-600">{tutor.bio}</p>
+                    <p className="text-sm text-gray-600">
+                      {tutor.bio.split(" ").length > 10 
+                        ? `${tutor.bio.split(" ").slice(0, 10).join(" ")}...`
+                        : tutor.bio.length > 20
+                        ? `${tutor.bio.slice(0, 20)}...`
+                        : tutor.bio}
+                    </p>
                   </div>
+
                 </div>
 
                 <div className="w-full mt-4">

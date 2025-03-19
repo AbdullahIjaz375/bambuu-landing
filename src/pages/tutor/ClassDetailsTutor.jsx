@@ -13,6 +13,7 @@ import EmptyState from "../../components/EmptyState";
 import { useTranslation } from "react-i18next";
 import { ClassContext } from "../../context/ClassContext";
 import { useContext } from "react";
+import UserAvatar from "../../utils/getAvatar";
 Modal.setAppElement("#root");
 
 const ClassDetailsTutor = ({ onClose }) => {
@@ -363,11 +364,10 @@ const ClassDetailsTutor = ({ onClose }) => {
             >
               <div className="flex items-center gap-3">
                 <div className="relative">
-                  <img
-                    src={member.photoUrl || "/api/placeholder/40/40"}
-                    alt={member.name}
-                    className="object-cover rounded-full w-9 h-9"
-                  />
+                
+                  
+                  <UserAvatar member={{ name: member.name, photoUrl: member.photoUrl }} />
+
                   {member.id === classData.adminId && (
                     <div className="absolute flex items-center justify-center w-4 h-4 bg-yellow-400 rounded-full -top-1 -right-1">
                       <span className="text-xs text-black">★</span>

@@ -18,7 +18,7 @@ import { useTranslation } from "react-i18next";
 import ClassCard from "../../components/ClassCard";
 import { useAuth } from "../../context/AuthContext";
 import GroupCard from "../../components/GroupCard";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { db } from "../../firebaseConfig";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { ClipLoader } from "react-spinners";
@@ -26,9 +26,12 @@ import { getToken } from "firebase/messaging";
 import { messaging } from "../../firebaseConfig";
 import EmptyState from "../../components/EmptyState";
 import CalendarUser from "../../components/CalenderUser";
+import TutorialOverlay from "../../components/TutorialOverlay";
+
 const LearnUser = () => {
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useTranslation();
   const settings = {
     dots: false,
@@ -201,10 +204,6 @@ const LearnUser = () => {
     return () => clearInterval(interval);
   }, [classes]);
 
-  //--------------------------------------learning language----------------------------------//
-
-  const students = Array(12).fill(null); // 8 student icons per language
-
   //----------------------------------updating FCMtoken--------------------------------------//
 
   useEffect(() => {
@@ -240,10 +239,13 @@ const LearnUser = () => {
     <div className="flex h-screen bg-white">
       <div className="flex-shrink-0 w-64 h-full">
         <Sidebar user={user} />
+        
       </div>
 
       <div className="flex-1 overflow-x-auto min-w-[calc(100%-16rem)] h-full">
         <div className="h-[calc(100vh-1rem)] p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl m-2 overflow-y-auto">
+        
+          
           {/* Header with Welcome and Notification */}
           <div className="flex items-center justify-between mb-4 border-b border-[#e7e7e7] pb-4">
             <div className="flex flex-row items-center space-x-4">
@@ -318,7 +320,7 @@ const LearnUser = () => {
                       </span>
                       <div className="flex items-center">
                         <div className="flex -space-x-3">
-                          {students.map((_, i) => (
+                          {Array(12).fill(null).map((_, i) => (
                             <div
                               key={i}
                               className="flex items-center justify-center w-6 h-6 bg-white border-2 border-white rounded-full sm:w-8 sm:h-8"
@@ -331,6 +333,7 @@ const LearnUser = () => {
                     </div>
                   </div>
 
+                  {/* Other language cards... */}
                   {/* English Card */}
                   <div
                     className="flex items-center hover:cursor-pointer gap-2 p-4 bg-[#edf2ff] rounded-3xl border border-[#768bbd] w-[250px] sm:w-[380px]   flex-shrink-0"
@@ -351,7 +354,7 @@ const LearnUser = () => {
                       </span>
                       <div className="flex items-center">
                         <div className="flex -space-x-3">
-                          {students.map((_, i) => (
+                          {Array(12).fill(null).map((_, i) => (
                             <div
                               key={i}
                               className="flex items-center justify-center w-6 h-6 bg-white border-2 border-white rounded-full sm:w-8 sm:h-8"
@@ -384,7 +387,7 @@ const LearnUser = () => {
                       </span>
                       <div className="flex items-center">
                         <div className="flex -space-x-3">
-                          {students.map((_, i) => (
+                          {Array(12).fill(null).map((_, i) => (
                             <div
                               key={i}
                               className="flex items-center justify-center w-6 h-6 bg-white border-2 border-white rounded-full sm:w-8 sm:h-8"

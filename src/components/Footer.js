@@ -32,8 +32,14 @@ const Footer = () => {
             {" "}
             <img alt="bambuu" src="/images/fb.png" className="w-auto h-auto" />
           </a>
+
+          <a href="https://www.youtube.com/@bammbuu-languages">
+            {" "}
+            <img alt="bambuu" src="/images/youtube.png" className="w-[30px] h-auto opacity-65" />
+          </a>
           {/* <img alt="bambuu" src="/images/x.png" className="w-auto h-auto" /> */}
         </div>
+        
         <div className="flex flex-row items-center space-x-6">
           {" "}
           <Link to="/privacy-policy">

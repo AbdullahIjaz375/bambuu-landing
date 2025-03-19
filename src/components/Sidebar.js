@@ -2,6 +2,7 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import TutorialOverlay from "./TutorialOverlay";
 
 const Sidebar = ({ user }) => {
   const location = useLocation();
@@ -85,7 +86,10 @@ const Sidebar = ({ user }) => {
       </Link>
 
       {/* Navigation Menu */}
-      <nav className="flex-1 px-4 overflow-y-auto">
+      <nav className="relative flex-1 px-4 overflow-y-auto">
+          <div >
+          <TutorialOverlay />
+          </div>
         {menuItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
@@ -109,6 +113,7 @@ const Sidebar = ({ user }) => {
           );
         })}
       </nav>
+  {/* Tutorial overlay */}
 
       {/* User Profile Section */}
 

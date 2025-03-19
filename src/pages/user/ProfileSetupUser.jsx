@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ClipLoader } from "react-spinners";
@@ -75,14 +76,16 @@ const ProfileSetup = () => {
   }, [user]);
 
   const handleSkip = () => {
-    navigate("/learn");
+    // Navigate to learn and include fromSetup=true to indicate we're coming from setup
+    navigate("/learn?fromSetup=true");
   };
 
   const handleNext = () => {
     if (currentView === "groups") {
       setCurrentView("classes");
     } else {
-      navigate("/learn");
+      // Navigate to learn and include fromSetup=true to indicate we're coming from setup
+      navigate("/learn?fromSetup=true");
     }
   };
 

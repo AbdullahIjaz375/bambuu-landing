@@ -17,6 +17,7 @@ import { useTranslation } from "react-i18next";
 import PlansModal from "../../components/PlansModal";
 import { useClassBooking } from "../../hooks/useClassBooking";
 import { toast } from "react-toastify";
+import UserAvatar from "../../utils/getAvatar";
 Modal.setAppElement("#root");
 
 const TimeRestrictedJoinButton = ({
@@ -1008,41 +1009,40 @@ const ClassDetailsUser = ({ onClose }) => {
                     </div>
                     <div className="flex-1 overflow-y-auto">
                       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-                        {members.map((member) => (
+                        {members.map((member) => {
+                         return(
                           <div
-                            key={member.id}
-                            className="flex items-center justify-between px-3 py-2 border border-gray-200 md:px-4 md:py-3 hover:bg-gray-50 rounded-2xl md:rounded-3xl"
-                          >
-                            <div className="flex items-center gap-2 md:gap-3">
-                              <div className="relative">
-                                <img
-                                  src={
-                                    member.photoUrl || "/api/placeholder/40/40"
-                                  }
-                                  alt={member.name}
-                                  className="object-cover w-8 h-8 rounded-full md:w-9 md:h-9"
-                                />
-                                {member.id === classData.adminId && (
-                                  <div className="absolute flex items-center justify-center w-4 h-4 bg-yellow-400 rounded-full -top-1 -right-1">
-                                    <span className="text-xs text-black">
-                                      ★
-                                    </span>
-                                  </div>
-                                )}
-                              </div>
-                              <div className="flex flex-col">
-                                <span className="text-sm font-medium text-gray-900">
-                                  {member.name}
-                                </span>
-                                {member.id === classData.adminId && (
-                                  <span className="text-xs text-gray-500">
-                                    {t("class-details.labels.teacher")}
+                          key={member.id}
+                          className="flex items-center justify-between px-3 py-2 border border-gray-200 md:px-4 md:py-3 hover:bg-gray-50 rounded-2xl md:rounded-3xl"
+                        >
+                          <div className="flex items-center gap-2 md:gap-3">
+                            <div className="relative">
+                                                                            
+
+                              <UserAvatar member={{ name: member.name, photoUrl: member.photoUrl }} />
+
+                              {member.id === classData.adminId && (
+                                <div className="absolute flex items-center justify-center w-4 h-4 bg-yellow-400 rounded-full -top-1 -right-1">
+                                  <span className="text-xs text-black">
+                                    ★
                                   </span>
-                                )}
-                              </div>
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-sm font-medium text-gray-900">
+                                {member.name}
+                              </span>
+                              {member.id === classData.adminId && (
+                                <span className="text-xs text-gray-500">
+                                  {t("class-details.labels.teacher")}
+                                </span>
+                              )}
                             </div>
                           </div>
-                        ))}
+                        </div>
+                         )
+                        })}
                       </div>
                     </div>
                   </>

@@ -18,7 +18,7 @@ const ProtectedRoute = ({ children, requiredRole }) => {
     const urlObj = new URL(currentUrl);
     const searchParams = new URLSearchParams(urlObj.search);
     if (urlObj.pathname.includes("/classDetailsUser/") && searchParams.has("ref")) {
-      localStorage.setItem("selectedClassUrl", currentUrl);
+        localStorage.setItem("selectedClassUrl", currentUrl);
     }
   } catch (error) {
     console.error("Invalid URL", error);

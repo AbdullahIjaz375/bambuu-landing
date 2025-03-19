@@ -851,12 +851,22 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
                         groupTutor={groupTutor}
                       />
                     </div>
-                    <button
-                      className="w-full px-4 py-2 text-black bg-[#14b82c] border border-black rounded-full hover:bg-[#14b82c]"
-                      onClick={handleBookClass}
-                    >
-                      Book Class
-                    </button>
+                    {classData.classType === "Individual Premium" && classData.classMemberIds.length > 0 ? (
+                      <button
+                        className="w-full px-4 py-2 text-gray-500 bg-gray-200 border border-gray-400 rounded-full cursor-not-allowed"
+                        disabled
+                        title="This individual class has already been booked"
+                      >
+                        Class Already Booked
+                      </button>
+                    ) : (
+                      <button
+                        className="w-full px-4 py-2 text-black bg-[#14b82c] border border-black rounded-full hover:bg-[#14b82c]"
+                        onClick={handleBookClass}
+                      >
+                        Book Class
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
