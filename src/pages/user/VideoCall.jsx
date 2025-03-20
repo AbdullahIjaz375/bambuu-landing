@@ -3,6 +3,8 @@ import { ClassContext } from "../../context/ClassContext";
 import "@stream-io/video-react-sdk/dist/css/styles.css";
 import "stream-chat-react/dist/css/v2/index.css";
 import "./VideoCallStudent.css";
+import axios from "axios";
+
 
 import { db } from "../../firebaseConfig";
 import {
@@ -17,28 +19,14 @@ import {
   arrayRemove
 } from "firebase/firestore";
 
-import { streamClient, streamVideoClient } from "../../config/stream";
-import {
-  StreamVideo,
-  StreamCall,
-  CallControls,
-  PaginatedGridLayout,
-  SpeakerLayout,
-  ParticipantView,
-  CallParticipantsList
-} from "@stream-io/video-react-sdk";
 
-// Stream Chat components
-import {
-  Chat,
-  Channel as StreamChannel,
-  MessageList,
-  MessageInput,
-  Thread,
-  Window
-} from "stream-chat-react";
+import { 
+  streamClient, 
+  streamVideoClient, 
+  fetchChatToken, 
+  fetchVideoToken 
+} from "../../config/stream";
 
-// Import EnhancedCallPreview component
 
 // Icons
 import {
@@ -153,6 +141,34 @@ const VideoCallStudent = () => {
   const videoContainerRef = useRef(null);
   const user = JSON.parse(sessionStorage.getItem("user") || "{}");
 
+
+  const fetchToken = async (userId) => {
+    try {
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/chat-token`, {
+        userId,
+        userName: JSON.parse(sessionStorage.getItem("user") || "{}").name || "User",
+        userImage: JSON.parse(sessionStorage.getItem("user") || "{}").photoUrl || "",
+      });
+      return response.data.token;
+    } catch (error) {
+      console.error("Failed to fetch token:", error);
+      throw new Error("Could not fetch authentication token");
+    }
+  };
+
+  const fetchVideoToken = async (userId) => {
+    try {
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/video-token`, {
+        userId,
+      });
+      return response.data.token;
+    } catch (error) {
+      console.error("Failed to fetch video token:", error);
+      throw new Error("Could not fetch video authentication token");
+    }
+  };
+
+
   // Fetch class data
   useEffect(() => {
     if (!selectedClassId) return;
@@ -195,7 +211,7 @@ const VideoCallStudent = () => {
         if (!streamClient.userID) {
           console.log("Connecting user to Stream Chat...");
           // Generate token for chat
-          const token = streamClient.devToken(user.uid);
+          const token = await fetchToken(user.uid); // Changed from devToken to fetchToken
           
           // Connect user to chat
           await streamClient.connectUser(
@@ -322,7 +338,7 @@ const VideoCallStudent = () => {
         
         try {
           // Generate token for chat
-          const chatToken = streamClient.devToken(user.uid);
+          const chatToken = await fetchToken(user.uid);
           
           // Connect user to chat
           await streamClient.connectUser(
@@ -352,7 +368,7 @@ const VideoCallStudent = () => {
           }
 
           // Use the simplest token approach for development
-          const token = streamClient.devToken(user.uid);
+          const token = await fetchVideoToken(user.uid);
 
           // Connect with increased timeout
           await streamVideoClient.connectUser(

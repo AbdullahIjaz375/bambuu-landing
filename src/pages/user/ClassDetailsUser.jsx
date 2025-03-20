@@ -30,6 +30,7 @@ const TimeRestrictedJoinButton = ({
   const [isButtonVisible, setIsButtonVisible] = useState(false);
   const [timeStatus, setTimeStatus] = useState("");
   const { setSelectedClassId } = useContext(ClassContext);
+  const { user } = useAuth(); // Get user from Auth context
 
   useEffect(() => {
     const checkTime = () => {
@@ -65,28 +66,38 @@ const TimeRestrictedJoinButton = ({
     return () => clearInterval(interval);
   }, [classDateTime, classDuration]);
 
-  // const handleJoinClass = () => {
-  //   navigate(`/call/${classId}`);
-  // };
-  const handleJoinClass = () => {
-    setSelectedClassId(classId);
-
-    // navigate(`/call`, { state: { classId } });
-    const callUrl = `/call`; // Update this URL as needed
-    window.open(callUrl, "_blank");
+  const handleButtonClick = () => {
+    // Check if user has access
+    if (user.freeAccess || user.credits > 0 || (user.subscriptions && user.subscriptions.some(sub => sub.type !== "None"))) {
+      // User has access, join the class
+      setSelectedClassId(classId);
+      const callUrl = `/call`;
+      window.open(callUrl, "_blank");
+    } else {
+      // User doesn't have access, redirect to subscriptions
+      navigate('/subscriptions');
+    }
   };
 
+  // If the class is virtual and within time window
   if (location?.toLowerCase() === "virtual" && isButtonVisible) {
+    // Determine button style based on user access
+    const hasAccess = user.freeAccess || user.credits > 0 || (user.subscriptions && user.subscriptions.some(sub => sub.type !== "None"));
+    const buttonStyle = hasAccess
+      ? "bg-[#ffbf00] hover:bg-[#ffbf00]" // Yellow for users with access
+      : "bg-[#ffb3b3] hover:bg-[#ff9999]"; // Light red for users without access
+
     return (
       <button
-        className="w-full px-4 py-2 text-black bg-[#ffbf00] border border-black rounded-full hover:bg-[#ffbf00]"
-        onClick={handleJoinClass}
+        className={`w-full px-4 py-2 text-black ${buttonStyle} border border-black rounded-full`}
+        onClick={handleButtonClick}
       >
-        Join Class
+        {hasAccess ? "Join Class" : "Subscribe to Join"}
       </button>
     );
   }
 
+  // For physical classes within time window
   if (location?.toLowerCase() === "physical" && isButtonVisible) {
     return (
       <button className="w-full px-4 py-2 text-black bg-[#ffbf00] border border-black rounded-full hover:bg-[#ffbf00]">
