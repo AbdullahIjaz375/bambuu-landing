@@ -10,14 +10,7 @@ import {
   signOut,
 } from "firebase/auth";
 import { OAuthProvider } from "firebase/auth";
-import {
-  Button,
-  TextInput,
-  Paper,
-  Divider,
-  Group,
-  Title,
-} from "@mantine/core";
+import { Button, TextInput, Paper, Divider, Group, Title } from "@mantine/core";
 import { FaFacebook } from "react-icons/fa6";
 import { FaGoogle } from "react-icons/fa6";
 import { toast } from "react-toastify";
@@ -85,7 +78,6 @@ const Login = () => {
         }
       }
     } else if (params.get("ref") == "class") {
-      
       const savedClassUrl = localStorage.getItem("selectedClassUrl");
       if (savedClassUrl) {
         try {
@@ -141,8 +133,13 @@ const Login = () => {
       const user = result.user;
       const userRef = doc(db, "students", user.uid);
       const userDoc = await getDoc(userRef);
-      const notificationPrefsRef = doc(db, "notification_preferences", user.uid);
+      const notificationPrefsRef = doc(
+        db,
+        "notification_preferences",
+        user.uid
+      );
       const notificationPrefsDoc = await getDoc(notificationPrefsRef);
+      const userAccountRef = doc(db, "user_accounts", user.uid);
       let isFirstTimeLogin = false;
       const fcmToken = await getFCMToken();
 
@@ -177,6 +174,11 @@ const Login = () => {
           ],
         };
         await setDoc(userRef, newUserData);
+        await setDoc(userAccountRef, {
+          uid: user.uid,
+          signupMethod: "Apple",
+          createdAt: serverTimestamp(),
+        });
         if (!notificationPrefsDoc.exists()) {
           await setDoc(notificationPrefsRef, {
             userId: user.uid,
@@ -260,8 +262,13 @@ const Login = () => {
       const user = result.user;
       const userRef = doc(db, "students", user.uid);
       const userDoc = await getDoc(userRef);
-      const notificationPrefsRef = doc(db, "notification_preferences", user.uid);
+      const notificationPrefsRef = doc(
+        db,
+        "notification_preferences",
+        user.uid
+      );
       const notificationPrefsDoc = await getDoc(notificationPrefsRef);
+      const userAccountRef = doc(db, "user_accounts", user.uid);
       let isFirstTimeLogin = false;
       const fcmToken = await getFCMToken();
       if (!userDoc.exists()) {
@@ -272,7 +279,7 @@ const Login = () => {
           uid: user.uid,
           enrolledClasses: [],
           joinedGroups: [],
-          freeAccess: false,
+          freeAccess: false, // Ensure freeAccess is set to false
           adminOfClasses: [],
           adminOfGroups: [],
           lastLoggedIn: serverTimestamp(),
@@ -295,6 +302,11 @@ const Login = () => {
           ],
         };
         await setDoc(userRef, newUserData);
+        await setDoc(userAccountRef, {
+          uid: user.uid,
+          signupMethod: "Google",
+          createdAt: serverTimestamp(),
+        });
         if (!notificationPrefsDoc.exists()) {
           await setDoc(notificationPrefsRef, {
             userId: user.uid,
@@ -373,7 +385,11 @@ const Login = () => {
   const handleEmailLoginStudent = async (e) => {
     e.preventDefault();
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
       const user = userCredential.user;
       const userRef = doc(db, "students", user.uid);
       const userDoc = await getDoc(userRef);
@@ -383,7 +399,9 @@ const Login = () => {
         return;
       }
       const userData = userDoc.data();
-      const lastLoggedIn = userData.lastLoggedIn ? userData.lastLoggedIn.toDate() : null;
+      const lastLoggedIn = userData.lastLoggedIn
+        ? userData.lastLoggedIn.toDate()
+        : null;
       const now = new Date();
       const currentStreak = userData.currentStreak || 0;
       let updatedStreak = currentStreak;
@@ -398,7 +416,8 @@ const Login = () => {
           now.getMonth(),
           now.getDate()
         );
-        const differenceInDays = (currentDate - lastLoginDate) / (1000 * 60 * 60 * 24);
+        const differenceInDays =
+          (currentDate - lastLoginDate) / (1000 * 60 * 60 * 24);
         if (differenceInDays === 1) {
           updatedStreak = currentStreak + 1;
         } else if (differenceInDays > 1) {
@@ -410,6 +429,7 @@ const Login = () => {
       await updateDoc(userRef, {
         lastLoggedIn: serverTimestamp(),
         currentStreak: updatedStreak,
+        freeAccess: false,
       });
       const permission = await Notification.requestPermission();
       if (permission === "granted") {
@@ -644,9 +664,7 @@ const Login = () => {
             <div className="w-full border-t border-gray-300"></div>
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 text-gray-500 bg-white">
-              or sign in with
-            </span>
+            <span className="px-2 text-gray-500 bg-white">or sign in with</span>
           </div>
         </div>
 

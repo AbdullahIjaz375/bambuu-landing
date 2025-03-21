@@ -5,7 +5,6 @@ import "stream-chat-react/dist/css/v2/index.css";
 import "./VideoCallTutor.css";
 import axios from "axios";
 
-
 import { db } from "../../firebaseConfig";
 import {
   collection,
@@ -16,19 +15,17 @@ import {
   getDoc,
   Timestamp,
   arrayUnion,
-  arrayRemove 
+  arrayRemove,
 } from "firebase/firestore";
 
 // Updated import to use the new token functions
-import { 
-  streamClient, 
-  streamVideoClient, 
-  fetchChatToken, 
-  fetchVideoToken 
+import {
+  streamClient,
+  streamVideoClient,
+  fetchChatToken,
+  fetchVideoToken,
 } from "../../config/stream";
 import { canCreateBreakoutRooms } from "./BreakoutRoomUtils";
-
-
 
 // Icons
 import {
@@ -40,7 +37,7 @@ import {
   Settings,
   Maximize,
   Minimize,
-  X
+  X,
 } from "lucide-react";
 import EnhancedCallPreview from "../../components/CallPreview";
 
@@ -57,12 +54,14 @@ const Modal = ({ isOpen, onClose, title, children, size = "md" }) => {
     "3xl": "max-w-3xl",
     "4xl": "max-w-4xl",
     "5xl": "max-w-5xl",
-    full: "max-w-full"
+    full: "max-w-full",
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm animate-fade-in">
-      <div className={`${sizeClasses[size]} w-full bg-white rounded-xl shadow-2xl overflow-hidden animate-scale-in`}>
+      <div
+        className={`${sizeClasses[size]} w-full bg-white rounded-xl shadow-2xl overflow-hidden animate-scale-in`}
+      >
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
           <button
@@ -85,7 +84,9 @@ const LoadingSpinner = ({ message }) => (
       <div className="rounded-full bg-gray-800 h-24 w-24 mb-6 flex items-center justify-center">
         <Video size={40} className="text-blue-400" />
       </div>
-      <h2 className="text-white text-2xl font-medium mb-2">{message || "Joining call..."}</h2>
+      <h2 className="text-white text-2xl font-medium mb-2">
+        {message || "Joining call..."}
+      </h2>
       <p className="text-gray-400 mb-8">Setting up your video and audio</p>
       <div className="w-64 h-2 bg-gray-800 rounded-full overflow-hidden">
         <div className="h-full bg-blue-500 animate-progress-bar"></div>
@@ -93,7 +94,6 @@ const LoadingSpinner = ({ message }) => (
     </div>
   </div>
 );
-
 
 // Main component
 const VideoCallTutor = () => {
@@ -124,35 +124,39 @@ const VideoCallTutor = () => {
   const videoContainerRef = useRef(null);
   const user = JSON.parse(sessionStorage.getItem("user") || "{}");
 
-
-
-    const fetchToken = async (userId) => {
-      try {
-        const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/chat-token`, {
+  const fetchToken = async (userId) => {
+    try {
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/chat-token`,
+        {
           userId,
-          userName: JSON.parse(sessionStorage.getItem("user") || "{}").name || "User",
-          userImage: JSON.parse(sessionStorage.getItem("user") || "{}").photoUrl || "",
-        });
-        return response.data.token;
-      } catch (error) {
-        console.error("Failed to fetch token:", error);
-        throw new Error("Could not fetch authentication token");
-      }
-    };
+          userName:
+            JSON.parse(sessionStorage.getItem("user") || "{}").name || "User",
+          userImage:
+            JSON.parse(sessionStorage.getItem("user") || "{}").photoUrl || "",
+        }
+      );
+      return response.data.token;
+    } catch (error) {
+      console.error("Failed to fetch token:", error);
+      throw new Error("Could not fetch authentication token");
+    }
+  };
 
-    const fetchVideoToken = async (userId) => {
-      try {
-        const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/video-token`, {
+  const fetchVideoToken = async (userId) => {
+    try {
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/video-token`,
+        {
           userId,
-        });
-        return response.data.token;
-      } catch (error) {
-        console.error("Failed to fetch video token:", error);
-        throw new Error("Could not fetch video authentication token");
-      }
-    };
-
-
+        }
+      );
+      return response.data.token;
+    } catch (error) {
+      console.error("Failed to fetch video token:", error);
+      throw new Error("Could not fetch video authentication token");
+    }
+  };
 
   // Fetch class data
   useEffect(() => {
@@ -183,7 +187,6 @@ const VideoCallTutor = () => {
 
     // Check breakout room permissions
     setHasBreakoutPermission(canCreateBreakoutRooms(tutorSelectedClassId));
-
   }, [tutorSelectedClassId]);
 
   // Initialize chat channel when class data is available
@@ -214,10 +217,10 @@ const VideoCallTutor = () => {
         // Now create or get the chat channel
         const channelId = `class-${tutorSelectedClassId}`;
 
-        const channel = streamClient.channel('messaging', channelId, {
+        const channel = streamClient.channel("messaging", channelId, {
           name: `Class ${tutorSelectedClassId} Chat`,
           members: [user.uid], // Add current user as member (others will be added as they join)
-          created_by_id: user.uid
+          created_by_id: user.uid,
         });
 
         await channel.watch();
@@ -233,18 +236,23 @@ const VideoCallTutor = () => {
   // Check for WebRTC support
   useEffect(() => {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      alert("Your browser doesn't support video calls. Please use a modern browser like Chrome, Firefox, or Safari.");
+      alert(
+        "Your browser doesn't support video calls. Please use a modern browser like Chrome, Firefox, or Safari."
+      );
       return;
     }
 
     // Check for permissions
-    navigator.permissions.query({ name: 'camera' })
-      .then(cameraPermission => {
-        if (cameraPermission.state === 'denied') {
-          alert("Camera permission is denied. Please enable camera access in your browser settings.");
+    navigator.permissions
+      .query({ name: "camera" })
+      .then((cameraPermission) => {
+        if (cameraPermission.state === "denied") {
+          alert(
+            "Camera permission is denied. Please enable camera access in your browser settings."
+          );
         }
       })
-      .catch(err => console.log("Permission query not supported"));
+      .catch((err) => console.log("Permission query not supported"));
   }, []);
 
   // Set up reconnection handler
@@ -259,12 +267,12 @@ const VideoCallTutor = () => {
         setIsLoading(false);
       };
 
-      currentCall.on('reconnecting', handleReconnect);
-      currentCall.on('connected', handleReconnected);
+      currentCall.on("reconnecting", handleReconnect);
+      currentCall.on("connected", handleReconnected);
 
       return () => {
-        currentCall.off('reconnecting', handleReconnect);
-        currentCall.off('connected', handleReconnected);
+        currentCall.off("reconnecting", handleReconnect);
+        currentCall.off("connected", handleReconnected);
       };
     }
   }, [currentCall]);
@@ -294,7 +302,9 @@ const VideoCallTutor = () => {
 
       if (!user || !user.uid) {
         console.error("No valid user found in session storage");
-        alert("You need to be logged in to join a call. Please log in and try again.");
+        alert(
+          "You need to be logged in to join a call. Please log in and try again."
+        );
         setIsLoading(false);
         return;
       }
@@ -344,7 +354,7 @@ const VideoCallTutor = () => {
               id: user.uid,
               name: user.name || "User",
               image: user.photoUrl || "",
-              userType: user.userType || "student"
+              userType: user.userType || "student",
             },
             token
           );
@@ -379,8 +389,8 @@ const VideoCallTutor = () => {
         const callData = {
           custom: {
             channelCid: `messaging:class-${tutorSelectedClassId}`,
-            classId: tutorSelectedClassId
-          }
+            classId: tutorSelectedClassId,
+          },
         };
 
         // Increase the timeout for joining
@@ -388,16 +398,20 @@ const VideoCallTutor = () => {
           call.join({ create: true, data: callData }),
           new Promise((_, reject) =>
             setTimeout(() => reject(new Error("Join call timeout")), 30000)
-          )
+          ),
         ]);
         console.log("Call joined successfully");
       } catch (error) {
         console.error("Error joining call:", error);
         setIsLoading(false);
         if (error.message === "Join call timeout") {
-          alert("Connection timed out. Please check your network and try again.");
+          alert(
+            "Connection timed out. Please check your network and try again."
+          );
         } else {
-          alert("Could not join the video call. Please check your connection and try again.");
+          alert(
+            "Could not join the video call. Please check your connection and try again."
+          );
         }
         return;
       }
@@ -416,7 +430,9 @@ const VideoCallTutor = () => {
     } catch (error) {
       console.error("Error in join room process:", error);
       setIsLoading(false);
-      alert("An error occurred while setting up the video call. Please refresh the page and try again.");
+      alert(
+        "An error occurred while setting up the video call. Please refresh the page and try again."
+      );
     }
   };
 
@@ -448,7 +464,7 @@ const VideoCallTutor = () => {
       setBreakoutRooms(
         querySnapshot.docs.map((doc) => ({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         }))
       );
     } catch (error) {
@@ -463,7 +479,11 @@ const VideoCallTutor = () => {
     try {
       if (!classData) return;
 
-      const conferenceDocRef = doc(db, "conference_calls", tutorSelectedClassId);
+      const conferenceDocRef = doc(
+        db,
+        "conference_calls",
+        tutorSelectedClassId
+      );
       const breakoutRoomsRef = collection(conferenceDocRef, "breakout_rooms");
 
       for (let i = 0; i < numRooms; i++) {
@@ -474,7 +494,7 @@ const VideoCallTutor = () => {
           roomDuration,
           roomMembers: [],
           createdAt: Timestamp.now(),
-          roomName: `Breakout Room ${i + 1}`
+          roomName: `Breakout Room ${i + 1}`,
         });
 
         await updateDoc(newRoomRef, { roomId: newRoomRef.id });
@@ -483,7 +503,6 @@ const VideoCallTutor = () => {
       setIsBreakoutModalOpen(false);
       await fetchBreakoutRooms();
       setIsBreakoutPanelOpen(true);
-
     } catch (error) {
       console.error("Error creating breakout rooms:", error);
     } finally {
@@ -506,7 +525,7 @@ const VideoCallTutor = () => {
       if (!roomDoc.exists()) return;
 
       await updateDoc(breakoutRoomRef, {
-        roomMembers: isJoining ? arrayUnion(user.uid) : arrayRemove(user.uid)
+        roomMembers: isJoining ? arrayUnion(user.uid) : arrayRemove(user.uid),
       });
 
       await fetchBreakoutRooms();
@@ -540,7 +559,7 @@ const VideoCallTutor = () => {
 
       await updateDoc(breakoutRoomRef, {
         startedAt,
-        classEndTime
+        classEndTime,
       });
 
       room.startedAt = startedAt;
@@ -595,7 +614,7 @@ const VideoCallTutor = () => {
         setIsCallJoined(false);
 
         // Redirect to dashboard
-        window.location.href = '/dashboard';
+        window.location.href = "/dashboard";
       }
     } catch (error) {
       console.error("Error leaving call:", error);
@@ -653,12 +672,17 @@ const VideoCallTutor = () => {
                 return (
                   <div
                     key={room.id}
-                    className={`room-item ${isActive ? 'active' : ''} ${isFull ? 'full' : ''}`}
+                    className={`room-item ${isActive ? "active" : ""} ${
+                      isFull ? "full" : ""
+                    }`}
                   >
                     <div className="room-details">
-                      <div className="room-name">{room.roomName || `Breakout Room`}</div>
+                      <div className="room-name">
+                        {room.roomName || `Breakout Room`}
+                      </div>
                       <div className="room-info">
-                        {room.roomMembers.length}/{room.availableSlots} participants
+                        {room.roomMembers.length}/{room.availableSlots}{" "}
+                        participants
                       </div>
                       {timeRemaining && (
                         <div className="time-remaining">
@@ -689,9 +713,7 @@ const VideoCallTutor = () => {
                 );
               })
             ) : (
-              <div className="no-rooms">
-                No breakout rooms available
-              </div>
+              <div className="no-rooms">No breakout rooms available</div>
             )}
           </div>
         </div>
@@ -717,9 +739,15 @@ const VideoCallTutor = () => {
             {hasBreakoutPermission && (
               <button
                 onClick={() => {
-                  isBreakoutPanelOpen ? setIsBreakoutPanelOpen(false) : fetchBreakoutRooms().then(() => setIsBreakoutPanelOpen(true));
+                  isBreakoutPanelOpen
+                    ? setIsBreakoutPanelOpen(false)
+                    : fetchBreakoutRooms().then(() =>
+                        setIsBreakoutPanelOpen(true)
+                      );
                 }}
-                className={`action-button ${isBreakoutPanelOpen ? 'active' : ''}`}
+                className={`action-button ${
+                  isBreakoutPanelOpen ? "active" : ""
+                }`}
                 title="Breakout Rooms"
               >
                 <Grid3x3 size={22} />
@@ -755,9 +783,7 @@ const VideoCallTutor = () => {
       >
         <div className="breakout-modal">
           <div className="modal-section">
-            <label className="section-label">
-              Number of Rooms
-            </label>
+            <label className="section-label">Number of Rooms</label>
             <div className="slider-container">
               <input
                 type="range"
@@ -772,9 +798,7 @@ const VideoCallTutor = () => {
           </div>
 
           <div className="modal-section">
-            <label className="section-label">
-              Room Duration (minutes)
-            </label>
+            <label className="section-label">Room Duration (minutes)</label>
             <select
               value={roomDuration}
               onChange={(e) => setRoomDuration(parseInt(e.target.value))}
@@ -791,9 +815,7 @@ const VideoCallTutor = () => {
           </div>
 
           <div className="modal-section">
-            <label className="section-label">
-              Available Slots per Room
-            </label>
+            <label className="section-label">Available Slots per Room</label>
             <div className="slider-container">
               <input
                 type="range"
@@ -811,15 +833,14 @@ const VideoCallTutor = () => {
           <div className="room-preview">
             <h3 className="preview-title">Room Preview:</h3>
             <div className="room-grid">
-              {Array.from({ length: Math.min(numRooms, 10) }).map((_, index) => (
-                <div
-                  key={index}
-                  className="room-preview-item"
-                >
-                  <p className="room-number">Room {index + 1}</p>
-                  <p className="room-slots">{availableSlots} slots</p>
-                </div>
-              ))}
+              {Array.from({ length: Math.min(numRooms, 10) }).map(
+                (_, index) => (
+                  <div key={index} className="room-preview-item">
+                    <p className="room-number">Room {index + 1}</p>
+                    <p className="room-slots">{availableSlots} slots</p>
+                  </div>
+                )
+              )}
             </div>
           </div>
 
@@ -838,7 +859,13 @@ const VideoCallTutor = () => {
               {isCreatingRooms ? (
                 <>
                   <svg className="spinner" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10" fill="none" strokeWidth="4" />
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      fill="none"
+                      strokeWidth="4"
+                    />
                   </svg>
                   Creating...
                 </>
