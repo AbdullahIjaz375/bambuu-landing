@@ -1,8 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Modal from "react-modal";
 import { X } from "lucide-react";
 import { useAuth } from "../../src/context/AuthContext";
 import { useTranslation } from "react-i18next";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { db } from "../firebaseConfig";
+import { ClipLoader } from "react-spinners";
 
 Modal.setAppElement("#root");
 
@@ -30,8 +33,12 @@ const customStyles = {
 
 const PlansModal = ({ isOpen, onClose }) => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState("subscriptions");
+  const [activeTab, setActiveTab] = useState("offers"); // Default to offers tab
   const { t } = useTranslation();
+  const [isLoadingPlans, setIsLoadingPlans] = useState(true);
+  const [error, setError] = useState(null);
+  const [offerPlans, setOfferPlans] = useState([]);
+  const [showOffers, setShowOffers] = useState(false);
 
   const handlePurchase = async (plan, userId) => {
     try {
@@ -53,6 +60,70 @@ const PlansModal = ({ isOpen, onClose }) => {
       // Handle error (show error message to user)
     }
   };
+
+  // Add function to check if user is within 7 days of registration
+  const checkNewUserEligibility = async (userId) => {
+    try {
+      const userDoc = await getDocs(
+        query(collection(db, "user_accounts"), where("email", "==", user.email))
+      );
+
+      if (!userDoc.empty) {
+        const userData = userDoc.docs[0].data();
+        const createdAt = userData.created_at?.toDate() || new Date();
+        const daysSinceCreation =
+          (new Date() - createdAt) / (1000 * 60 * 60 * 24);
+        return daysSinceCreation <= 7;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error checking user eligibility:", error);
+      return false;
+    }
+  };
+
+  // Fetch plans and check user's subscription status
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        setIsLoadingPlans(true);
+        setError(null);
+
+        // Check if user is eligible for offers
+        const isEligible = await checkNewUserEligibility(user?.uid);
+        setShowOffers(isEligible);
+
+        // Fetch offers if eligible
+        if (isEligible) {
+          const offersSnapshot = await getDocs(collection(db, "offer"));
+          const offersData = offersSnapshot.docs[0]?.data()?.offerList || [];
+
+          const transformedOfferPlans = offersData.map((plan) => ({
+            id: plan.offerId,
+            title: plan.title,
+            description: plan.subtitle || "",
+            price: plan.price,
+            isPopular: plan.isPopular,
+            type: plan.type,
+            stripeLink: plan.url,
+            body: plan.body,
+          }));
+
+          setOfferPlans(transformedOfferPlans);
+        }
+
+        // ... existing subscription and credit plans fetching ...
+      } catch (err) {
+        console.error("Error fetching plans:", err);
+        setError("Failed to load plans. Please try again later.");
+      } finally {
+        setIsLoadingPlans(false);
+      }
+    };
+
+    fetchPlans();
+  }, [user]);
+
   const SubscriptionPlan = ({ plan, userId }) => {
     const [isLoading, setIsLoading] = useState(false);
     const features = [
@@ -185,6 +256,53 @@ const PlansModal = ({ isOpen, onClose }) => {
     );
   };
 
+  const OfferPlan = ({ plan, userId }) => {
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleClick = async () => {
+      setIsLoading(true);
+      try {
+        await handlePurchase(plan, userId);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    return (
+      <div className="flex flex-col h-full bg-white border border-[#B0B0B0] rounded-3xl">
+        {plan.isPopular && (
+          <div className="px-4 py-1.5 text-sm font-semibold bg-[#FFBF00] rounded-t-3xl text-center">
+            {t("plans-modal.popular-badge")}
+          </div>
+        )}
+        <div className="flex flex-col flex-grow p-6 space-y-6 text-center">
+          <div className="space-y-4">
+            <div className="text-4xl font-bold">
+              {plan.price === 0 ? "FREE" : `$${plan.price}`}
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-lg font-medium">{plan.title}</h3>
+              {plan.description && (
+                <p className="text-sm text-black">{plan.description}</p>
+              )}
+            </div>
+            {plan.body && <p className="text-sm text-black">{plan.body}</p>}
+          </div>
+
+          <div className="flex-grow" />
+
+          <button
+            onClick={handleClick}
+            disabled={isLoading}
+            className="w-full py-3 text-[#042F0C] transition-colors bg-[#14B82C] rounded-full border border-[#042F0C] disabled:opacity-50"
+          >
+            {isLoading ? "Loading..." : "Buy Now"}
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   const subscriptionPlans = [
     {
       title: t("plans-modal.subscription-plans.group.title"),
@@ -245,6 +363,18 @@ const PlansModal = ({ isOpen, onClose }) => {
 
         <div className="flex justify-center mb-4">
           <div className="inline-flex bg-gray-100 border border-gray-300 rounded-full">
+            {showOffers && (
+              <button
+                className={`px-6 py-2 rounded-full text-[#042F0C] text-sm font-medium transition-colors ${
+                  activeTab === "offers"
+                    ? "bg-[#FFBF00] border border-[#042F0C]"
+                    : "bg-transparent"
+                }`}
+                onClick={() => setActiveTab("offers")}
+              >
+                {t("plans-modal.tabs.offers")}
+              </button>
+            )}
             <button
               className={`px-6 py-1 rounded-full text-[#042F0C] text-sm font-medium transition-colors
                 ${
@@ -269,6 +399,14 @@ const PlansModal = ({ isOpen, onClose }) => {
             </button>
           </div>
         </div>
+
+        {activeTab === "offers" && (
+          <div className="grid grid-cols-2 gap-4">
+            {offerPlans.map((plan, index) => (
+              <OfferPlan key={index} plan={plan} userId={user?.uid} />
+            ))}
+          </div>
+        )}
 
         {activeTab === "subscriptions" && (
           <div className="grid grid-cols-2 gap-4">
