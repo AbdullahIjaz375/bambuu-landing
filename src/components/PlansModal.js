@@ -318,7 +318,33 @@ const PlansModal = ({ isOpen, onClose }) => {
     const handleClick = async () => {
       setIsLoading(true);
       try {
-        await handlePurchase(plan, userId);
+        if (plan.type === "free_trial") {
+          // Show loading state with ClipLoader
+          const userRef = doc(db, "students", userId);
+          await updateDoc(userRef, {
+            freeAccess: true,
+            subscriptions: [
+              {
+                endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                startDate: new Date(),
+                type: "Free Trial",
+              },
+            ],
+          });
+
+          toast.success("Free trial activated successfully!");
+          onClose();
+
+          // Add a small delay to ensure toast is visible
+          setTimeout(() => {
+            window.location.reload();
+          }, 1500);
+        } else {
+          await handlePurchase(plan, userId);
+        }
+      } catch (error) {
+        console.error("Error during purchase:", error);
+        toast.error("Failed to process your request. Please try again.");
       } finally {
         setIsLoading(false);
       }
@@ -331,8 +357,7 @@ const PlansModal = ({ isOpen, onClose }) => {
             {t("plans-modal.popular-badge")}
           </div>
         ) : (
-          // Add empty div with same height as popular badge to align content
-          <div className="h-[30px]" /> // Adjust height to match popular badge height
+          <div className="h-[30px]" />
         )}
 
         <div className="flex flex-col flex-grow p-6 space-y-6 text-center">
@@ -354,13 +379,20 @@ const PlansModal = ({ isOpen, onClose }) => {
           <button
             onClick={handleClick}
             disabled={isLoading}
-            className="w-full py-3 text-[#042F0C] transition-colors bg-[#14B82C] rounded-full border border-[#042F0C] disabled:opacity-50"
+            className="w-full py-3 text-[#042F0C] transition-colors bg-[#14B82C] rounded-full border border-[#042F0C] disabled:opacity-50 flex items-center justify-center"
           >
-            {isLoading
-              ? t("plans-modal.buttons.loading")
-              : plan.type === "free_trial"
-              ? t("plans-modal.buttons.subscribe")
-              : t("plans-modal.buttons.buy")}
+            {isLoading ? (
+              <>
+                <ClipLoader color="#042F0C" size={20} className="mr-2" />
+                <span>{t("plans-modal.buttons.loading")}</span>
+              </>
+            ) : (
+              <span>
+                {plan.type === "free_trial"
+                  ? t("plans-modal.buttons.subscribe")
+                  : t("plans-modal.buttons.buy")}
+              </span>
+            )}
           </button>
         </div>
       </div>
