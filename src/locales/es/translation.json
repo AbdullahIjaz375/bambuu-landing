@@ -660,8 +660,8 @@
           "description": "Puedes reservar clases grupales bammbuu+"
         },
         "private": {
-          "title": "1:1 Clases",
-          "description": "Puedes reservar 1:1 clases con expertos en idiomas"
+          "title": "Clases 1:1",
+          "description": "Puedes reservar clases 1:1 con expertos en idiomas"
         }
       }
     },
@@ -672,7 +672,7 @@
       },
       "unlimited": {
         "title": "Créditos de Clase Ilimitados",
-        "description": "11 clases privadas con instructor"
+        "description": "Clases privadas 1:1 con instructor"
       }
     },
     "credit-plans": {
@@ -685,30 +685,30 @@
         "description": "Solo clases bammbuu+"
       }
     },
-    "offers": {
-      "new-user": {
-        "title": "Compra un crédito de clase y obtén 2 clases gratis",
-        "description": "Clases privadas 1:1 con instructor",
-        "expiry": "Los créditos de clase se renovarán automáticamente después de la tercera clase a menos que canceles."
-      }
-    },
-    "offer-plans": {
-      "free": {
-        "description": "Clases grupales ilimitadas por una semana",
-        "body": "La suscripción se renovará automáticamente después de la primera semana a menos que canceles."
-      },
-      "premium": {
-        "title": "Compra un crédito de clase y obtén 2 clases gratis",
-        "description": "Clases privadas 1:1 con instructor",
-        "body": "Los créditos de clase se renovarán automáticamente después de la tercera clase a menos que canceles."
-      }
-    },
     "buttons": {
       "subscribe": "Suscribirse Ahora",
       "buy": "Comprar Ahora",
       "loading": "Cargando..."
     },
-    "credits-warning": "Con los créditos de clase solo puedes reservar clases bammbuu+ 1:1, otros beneficios premium no están incluidos."
+    "credits-warning": "Con los créditos de clase solo puedes reservar clases bammbuu+ 1:1, otros beneficios premium no están incluidos.",
+    "offers": {
+      "new-user": {
+        "title": "Compra un crédito de clase y obtén 2 clases gratis",
+        "description": "Clases privadas 1:1 con instructor",
+        "expiry": "¡Obtén acceso a dos clases gratis por el precio de una!"
+      }
+    },
+    "offer-plans": {
+      "free": {
+        "description": "Clases grupales ilimitadas por una semana",
+        "body": "¡Obtén acceso completo a bammbuu+ por una semana!"
+      },
+      "premium": {
+        "title": "Compra un crédito de clase y obtén 2 clases gratis",
+        "description": "Clases privadas 1:1 con instructor",
+        "body": "¡Obtén 3 clases por el precio de una!"
+      }
+    }
   },
   "class-details": {
     "title": "Detalles de la Clase",

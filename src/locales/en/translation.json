@@ -693,18 +693,18 @@
       "new-user": {
         "title": "Buy one class credit get 2 classes free",
         "description": "1:1 private instructor classes",
-        "expiry": "The class credits will auto-renew after the third class is done unless you cancel."
+        "expiry": "Get access to two free classes for the price of one!"
       }
     },
     "offer-plans": {
       "free": {
         "description": "Unlimited group classes for 1 week",
-        "body": "Subscription will auto-renew after the first week is done unless you cancel."
+        "body": "Get complete access to bammbuu+ for one week!"
       },
       "premium": {
         "title": "Buy one class credit get 2 classes free",
         "description": "1:1 private instructor classes",
-        "body": "The class credits will auto-renew after the third class is done unless you cancel."
+        "body": "Get 3 classes for the price of one!"
       }
     }
   },

@@ -3,9 +3,17 @@ import Modal from "react-modal";
 import { X } from "lucide-react";
 import { useAuth } from "../../src/context/AuthContext";
 import { useTranslation } from "react-i18next";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+  doc,
+  updateDoc,
+} from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { ClipLoader } from "react-spinners";
+import { toast } from "react-toastify";
 
 Modal.setAppElement("#root");
 
@@ -33,7 +41,7 @@ const customStyles = {
 
 const PlansModal = ({ isOpen, onClose }) => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState("offers"); // Default to offers tab
+  const [activeTab, setActiveTab] = useState("offers");
   const { t } = useTranslation();
   const [isLoadingPlans, setIsLoadingPlans] = useState(true);
   const [error, setError] = useState(null);
@@ -42,22 +50,40 @@ const PlansModal = ({ isOpen, onClose }) => {
 
   const handlePurchase = async (plan, userId) => {
     try {
-      // Get the base URL without any query parameters
-      const baseUrl = plan.stripeLink.split("?")[0];
+      // Handle free trial activation differently
+      if (plan.type === "free_trial") {
+        const userRef = doc(db, "students", userId);
+        await updateDoc(userRef, {
+          freeAccess: true,
+          subscriptions: [
+            {
+              endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+              startDate: new Date(),
+              type: "Free Trial",
+            },
+          ],
+        });
 
-      // Add metadata to the URL
+        toast.success("Free trial activated successfully!");
+        onClose();
+
+        // Reload the page to refresh user data
+        window.location.reload();
+        return;
+      }
+
+      // For paid plans, proceed with Stripe checkout
+      const baseUrl = plan.stripeLink.split("?")[0];
       const url = new URL(baseUrl);
       url.searchParams.set("client_reference_id", userId);
       url.searchParams.set("prefilled_email", user?.email || "");
-      // Add metadata that matches your webhook expectations
       url.searchParams.set("metadata[studentId]", userId);
       url.searchParams.set("metadata[paymentType]", plan.type);
 
-      // Redirect to Stripe with metadata
       window.location.href = url.toString();
     } catch (error) {
-      console.error("Error redirecting to checkout:", error);
-      // Handle error (show error message to user)
+      console.error("Error during purchase:", error);
+      toast.error("Failed to process your request. Please try again.");
     }
   };
 
@@ -93,26 +119,47 @@ const PlansModal = ({ isOpen, onClose }) => {
         const isEligible = await checkNewUserEligibility(user?.uid);
         setShowOffers(isEligible);
 
-        // Fetch offers if eligible
+        // If eligible, create the two specific offers
         if (isEligible) {
+          const transformedOfferPlans = [];
+
+          // Add free trial offer
+          transformedOfferPlans.push({
+            id: "free-trial",
+            title: t("plans-modal.subscription-plans.group.title"),
+            description: t("plans-modal.offer-plans.free.description"),
+            price: 0,
+            isPopular: false,
+            type: "free_trial",
+            body: t("plans-modal.offer-plans.free.body"),
+          });
+
+          // Fetch the "Buy one get 2 free" offer from Firestore
           const offersSnapshot = await getDocs(collection(db, "offer"));
           const offersData = offersSnapshot.docs[0]?.data()?.offerList || [];
+          const buyOneGetTwoOffer = offersData.find(
+            (plan) =>
+              plan.type === "buy_one_get_two" ||
+              plan.title?.includes("Buy one class credit get 2 classes free")
+          );
 
-          const transformedOfferPlans = offersData.map((plan) => ({
-            id: plan.offerId,
-            title: plan.title,
-            description: plan.subtitle || "",
-            price: plan.price,
-            isPopular: plan.isPopular,
-            type: plan.type,
-            stripeLink: plan.url,
-            body: plan.body,
-          }));
+          if (buyOneGetTwoOffer) {
+            transformedOfferPlans.push({
+              id: buyOneGetTwoOffer.offerId,
+              title: t("plans-modal.offer-plans.premium.title"),
+              description: t("plans-modal.offer-plans.premium.description"),
+              price: buyOneGetTwoOffer.price,
+              isPopular: true,
+              type: "buy_one_get_two",
+              stripeLink: buyOneGetTwoOffer.url,
+              body: t("plans-modal.offer-plans.premium.body"),
+            });
+          }
 
           setOfferPlans(transformedOfferPlans);
         }
 
-        // ... existing subscription and credit plans fetching ...
+        // ... rest of the fetchPlans function for subscription and credit plans
       } catch (err) {
         console.error("Error fetching plans:", err);
         setError("Failed to load plans. Please try again later.");
@@ -122,7 +169,7 @@ const PlansModal = ({ isOpen, onClose }) => {
     };
 
     fetchPlans();
-  }, [user]);
+  }, [user, t]);
 
   const SubscriptionPlan = ({ plan, userId }) => {
     const [isLoading, setIsLoading] = useState(false);
@@ -160,11 +207,13 @@ const PlansModal = ({ isOpen, onClose }) => {
     };
 
     return (
-      <div className="flex flex-col h-full border-[#B0B0B0] bg-white border rounded-3xl">
-        {plan.isPopular && (
-          <div className="px-4 py-1 text-sm font-semibold bg-[#FFBF00] rounded-t-3xl text-center">
+      <div className="flex flex-col h-full bg-white border border-[#B0B0B0] rounded-3xl">
+        {plan.isPopular ? (
+          <div className="px-4 py-1.5 text-sm font-semibold bg-[#FFBF00] rounded-t-3xl text-center">
             {t("plans-modal.popular-badge")}
           </div>
+        ) : (
+          <div className="h-[30px]" />
         )}
         <div className="flex flex-col flex-grow p-5 space-y-4 text-center">
           <div className="space-y-4">
@@ -206,7 +255,7 @@ const PlansModal = ({ isOpen, onClose }) => {
           <button
             onClick={handleClick}
             disabled={isLoading}
-            className="w-full py-2  text-[#042F0C] transition-colors bg-[#14B82C] rounded-full border border-[#042F0C] disabled:opacity-50"
+            className="w-full py-2 text-[#042F0C] transition-colors bg-[#14B82C] rounded-full border border-[#042F0C] disabled:opacity-50"
           >
             {isLoading
               ? t("plans-modal.buttons.loading")
@@ -231,15 +280,20 @@ const PlansModal = ({ isOpen, onClose }) => {
 
     return (
       <div className="flex flex-col h-full bg-white border border-[#B0B0B0] rounded-3xl">
-        {plan.isPopular && (
+        {plan.isPopular ? (
           <div className="px-4 py-1.5 text-sm font-semibold bg-[#FFBF00] rounded-t-3xl text-center">
-            Most Popular
+            {t("plans-modal.popular-badge")}
           </div>
+        ) : (
+          <div className="h-[30px]" />
         )}
         <div className="flex flex-col flex-grow p-6 space-y-6 text-center">
           <div className="space-y-4">
             <div className="text-4xl font-bold">${plan.price}</div>
             <h3 className="text-lg font-medium">{plan.title}</h3>
+            {plan.description && (
+              <p className="text-sm text-black">{plan.description}</p>
+            )}
           </div>
 
           <div className="flex-grow" />
@@ -249,7 +303,9 @@ const PlansModal = ({ isOpen, onClose }) => {
             disabled={isLoading}
             className="w-full py-3 text-[#042F0C] transition-colors bg-[#14B82C] rounded-full border border-[#042F0C] disabled:opacity-50"
           >
-            {isLoading ? "Loading..." : "Buy Now"}
+            {isLoading
+              ? t("plans-modal.buttons.loading")
+              : t("plans-modal.buttons.buy")}
           </button>
         </div>
       </div>
@@ -270,11 +326,15 @@ const PlansModal = ({ isOpen, onClose }) => {
 
     return (
       <div className="flex flex-col h-full bg-white border border-[#B0B0B0] rounded-3xl">
-        {plan.isPopular && (
+        {plan.isPopular ? (
           <div className="px-4 py-1.5 text-sm font-semibold bg-[#FFBF00] rounded-t-3xl text-center">
             {t("plans-modal.popular-badge")}
           </div>
+        ) : (
+          // Add empty div with same height as popular badge to align content
+          <div className="h-[30px]" /> // Adjust height to match popular badge height
         )}
+
         <div className="flex flex-col flex-grow p-6 space-y-6 text-center">
           <div className="space-y-4">
             <div className="text-4xl font-bold">
@@ -296,7 +356,11 @@ const PlansModal = ({ isOpen, onClose }) => {
             disabled={isLoading}
             className="w-full py-3 text-[#042F0C] transition-colors bg-[#14B82C] rounded-full border border-[#042F0C] disabled:opacity-50"
           >
-            {isLoading ? "Loading..." : "Buy Now"}
+            {isLoading
+              ? t("plans-modal.buttons.loading")
+              : plan.type === "free_trial"
+              ? t("plans-modal.buttons.subscribe")
+              : t("plans-modal.buttons.buy")}
           </button>
         </div>
       </div>

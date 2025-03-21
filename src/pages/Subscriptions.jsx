@@ -62,15 +62,14 @@ const Subscriptions = () => {
       try {
         setIsLoadingPlans(true);
         setError(null);
-        
+
         // Check if user already has free access
         if (user?.uid) {
           const userRef = doc(db, "students", user.uid);
           const userDoc = await getDoc(userRef);
-          
+
           if (userDoc.exists()) {
             const userData = userDoc.data();
-            // Check if user already has free access enabled
             setHasActiveFreeTrial(userData.freeAccess === true);
           }
         }
@@ -79,21 +78,44 @@ const Subscriptions = () => {
         const isEligible = await checkNewUserEligibility(user?.uid);
         setShowOffers(isEligible);
 
-        // Fetch offers if eligible
+        // If eligible, create the two specific offers
         if (isEligible) {
+          const transformedOfferPlans = [];
+
+          // Add free trial offer if user doesn't have active trial
+          if (!hasActiveFreeTrial) {
+            transformedOfferPlans.push({
+              id: "free-trial",
+              title: t("plans-modal.subscription-plans.group.title"),
+              description: t("plans-modal.offer-plans.free.description"),
+              price: 0,
+              isPopular: false,
+              type: "free_trial",
+              body: t("plans-modal.offer-plans.free.body"),
+            });
+          }
+
+          // Fetch the "Buy one get 2 free" offer from Firestore
           const offersSnapshot = await getDocs(collection(db, "offer"));
           const offersData = offersSnapshot.docs[0]?.data()?.offerList || [];
+          const buyOneGetTwoOffer = offersData.find(
+            (plan) =>
+              plan.type === "buy_one_get_two" ||
+              plan.title?.includes("Buy one class credit get 2 classes free")
+          );
 
-          const transformedOfferPlans = offersData.map((plan) => ({
-            id: plan.offerId,
-            title: plan.title,
-            description: plan.subtitle || "",
-            price: plan.price,
-            isPopular: plan.isPopular,
-            type: plan.type,
-            stripeLink: plan.url,
-            body: plan.body,
-          }));
+          if (buyOneGetTwoOffer) {
+            transformedOfferPlans.push({
+              id: buyOneGetTwoOffer.offerId,
+              title: t("plans-modal.offer-plans.premium.title"),
+              description: t("plans-modal.offer-plans.premium.description"),
+              price: buyOneGetTwoOffer.price,
+              isPopular: true,
+              type: "buy_one_get_two",
+              stripeLink: buyOneGetTwoOffer.url,
+              body: t("plans-modal.offer-plans.premium.body"),
+            });
+          }
 
           setOfferPlans(transformedOfferPlans);
         }
@@ -192,10 +214,13 @@ const Subscriptions = () => {
           },
         ],
       });
-      
+
       setFreeTrialActivated(true);
+      setHasActiveFreeTrial(true); // Update local state
+      toast.success("Free trial activated successfully!");
     } catch (error) {
       console.error("Error activating free trial:", error);
+      toast.error("Failed to activate free trial");
     } finally {
       setIsLoading(false);
     }
@@ -229,20 +254,21 @@ const Subscriptions = () => {
 
   const handleSubscribe = async () => {
     if (!selectedPlan) return;
-    
-    // Check if this is a free plan
-    if (selectedPlan.price === 0 || selectedPlan.title.toLowerCase().includes('free')) {
-      // Check if user already has active free trial
-      if (hasActiveFreeTrial) {
-        toast.warning("You already have an active free subscription");
-        return;
-      }
-      setShowFreeTrialModal(true);
-      return;
-    }
-    
+
     setIsLoading(true);
     try {
+      // Handle free access plan differently
+      if (selectedPlan.type === "free_trial") {
+        // Check if user already has active free trial
+        if (hasActiveFreeTrial) {
+          toast.warning("You already have an active free subscription");
+          return;
+        }
+        setShowFreeTrialModal(true);
+        return;
+      }
+
+      // For all other plans, redirect to Stripe
       await handlePurchase(selectedPlan, user?.uid);
     } finally {
       setIsLoading(false);
@@ -250,7 +276,8 @@ const Subscriptions = () => {
   };
 
   const SubscriptionPlan = ({ plan, userId, isSelected, onSelect }) => {
-    const isFree = plan.price === 0 || plan.title.toLowerCase().includes('free');
+    const isFree =
+      plan.price === 0 || plan.title.toLowerCase().includes("free");
     const features = [
       {
         title: t("plans-modal.features.experts.title"),
@@ -277,23 +304,18 @@ const Subscriptions = () => {
     return (
       <div
         onClick={() => onSelect(plan)}
-        className={`flex flex-col h-full border-2 rounded-3xl cursor-pointer transition-all duration-200 ${
+        className={`flex flex-col h-full rounded-3xl cursor-pointer transition-all duration-200 ${
           isSelected
-            ? "border-[#14B82C] shadow-lg transform scale-[1.02] bg-[#E6FDE9]"
-            : "border-[#B0B0B0] hover:border-[#14B82C] hover:shadow-md bg-white"
+            ? "border-2 border-[#14B82C] shadow-lg transform scale-[1.02] bg-[#E6FDE9]"
+            : "border border-[#B0B0B0] hover:border-[#14B82C] hover:shadow-md bg-white"
         } ${isFree && hasActiveFreeTrial ? "relative" : ""}`}
       >
-        {isFree && hasActiveFreeTrial && (
-          <div className="absolute inset-0 bg-gray-200 bg-opacity-50 rounded-3xl flex items-center justify-center">
-            <div className="px-4 py-2 bg-orange-100 border border-orange-400 rounded-lg text-orange-800 font-medium">
-              Already Activated
-            </div>
-          </div>
-        )}
-        {plan.isPopular && (
-          <div className="px-4 py-1 text-sm font-semibold bg-[#FFBF00] rounded-t-3xl text-center">
+        {plan.isPopular ? (
+          <div className="px-4 py-1.5 text-sm font-semibold bg-[#FFBF00] rounded-t-3xl text-center">
             {t("plans-modal.popular-badge")}
           </div>
+        ) : (
+          <div className="h-[30px]" />
         )}
         <div className="flex flex-col flex-grow p-5 space-y-4 text-center">
           <div className="space-y-4">
@@ -348,19 +370,21 @@ const Subscriptions = () => {
             : "border border-[#B0B0B0] hover:border-[#14B82C] hover:shadow-md bg-white"
         }`}
       >
-        {plan.isPopular && (
+        {plan.isPopular ? (
           <div className="px-4 py-1.5 text-sm font-semibold bg-[#FFBF00] rounded-t-3xl text-center">
             {t("plans-modal.popular-badge")}
           </div>
+        ) : (
+          <div className="h-[30px]" />
         )}
         <div className="flex flex-col flex-grow p-6 space-y-6 text-center">
           <div className="space-y-4">
-            <div className="text-4xl font-bold">
-              {plan.price === 0 ? "FREE" : `$${plan.price}`}
-            </div>
+            <div className="text-4xl font-bold">${plan.price}</div>
             <h3 className="text-lg font-medium">{plan.title}</h3>
+            {plan.description && (
+              <p className="text-sm text-black">{plan.description}</p>
+            )}
           </div>
-
           <div className="flex-grow" />
         </div>
       </div>
@@ -377,28 +401,27 @@ const Subscriptions = () => {
             : "border border-[#B0B0B0] hover:border-[#14B82C] hover:shadow-md bg-white"
         }`}
       >
-        {plan.isPopular && (
+        {plan.isPopular ? (
           <div className="px-4 py-1.5 text-sm font-semibold bg-[#FFBF00] rounded-t-3xl text-center">
             {t("plans-modal.popular-badge")}
           </div>
+        ) : (
+          <div className="h-[30px]" />
         )}
         <div className="flex flex-col flex-grow p-6 space-y-6 text-center">
           <div className="space-y-4">
-            <div className="flex flex-col items-center">
-              <div className="text-4xl font-bold">
-                {plan.price === 0 ? "FREE" : `$${plan.price}`}
-              </div>
+            <div className="text-4xl font-bold">
+              {plan.price === 0 ? "FREE" : `$${plan.price}`}
             </div>
-            <div>
+            <div className="space-y-2">
               <h3 className="text-lg font-medium">{plan.title}</h3>
               {plan.description && (
-                <p className="text-sm text-black mt-2">{plan.description}</p>
+                <p className="text-sm text-black">{plan.description}</p>
               )}
             </div>
+            {plan.body && <p className="text-sm text-black">{plan.body}</p>}
           </div>
-          {plan.body && (
-            <p className="text-sm text-black mt-auto">{plan.body}</p>
-          )}
+          <div className="flex-grow" />
         </div>
       </div>
     );
@@ -547,7 +570,9 @@ const Subscriptions = () => {
           <div className="mt-8">
             <button
               onClick={handleSubscribe}
-              disabled={isLoading || (hasActiveFreeTrial && selectedPlan.price === 0)}
+              disabled={
+                isLoading || (hasActiveFreeTrial && selectedPlan.price === 0)
+              }
               className={`w-full max-w-md mx-auto block py-3 text-[#042F0C] transition-colors ${
                 hasActiveFreeTrial && selectedPlan.price === 0
                   ? "bg-gray-300 cursor-not-allowed"
@@ -558,9 +583,9 @@ const Subscriptions = () => {
                 ? t("plans-modal.buttons.loading")
                 : hasActiveFreeTrial && selectedPlan.price === 0
                 ? "Already Activated"
-                : selectedPlan.price === 0
-                ? t("plans-modal.buttons.activate-free")
-                : `${t("plans-modal.buttons.subscribe")} - ${selectedPlan.price}`}
+                : selectedPlan.type === "free_trial"
+                ? t("plans-modal.buttons.subscribe")
+                : `${t("plans-modal.buttons.buy")} - $${selectedPlan.price}`}
             </button>
             {hasActiveFreeTrial && selectedPlan.price === 0 && (
               <p className="mt-2 text-sm text-center text-orange-500">
@@ -584,9 +609,12 @@ const Subscriptions = () => {
               <div className="flex justify-center mb-4">
                 <img alt="Free Trial" src="/svgs/account-created.svg" />
               </div>
-              <h2 className="mb-4 text-2xl font-semibold">Activate Free Trial</h2>
+              <h2 className="mb-4 text-2xl font-semibold">
+                Activate Free Trial
+              </h2>
               <p className="mb-6 text-gray-600">
-                You're about to activate your 7-day free trial subscription. Would you like to continue?
+                You're about to activate your 7-day free trial subscription.
+                Would you like to continue?
               </p>
               <div className="flex space-x-4">
                 <button
@@ -614,7 +642,8 @@ const Subscriptions = () => {
                 Free Trial Activated!
               </h2>
               <p className="mb-6 text-gray-600">
-                Your 7-day free trial has been successfully activated. You now have access to premium features.
+                Your 7-day free trial has been successfully activated. You now
+                have access to premium features.
               </p>
               <button
                 onClick={() => {
