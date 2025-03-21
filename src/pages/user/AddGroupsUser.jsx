@@ -44,60 +44,6 @@ const AddGroupsUser = () => {
     return await getDownloadURL(storageRef);
   };
 
-  // const handleCreateGroup = async () => {
-  //   setLoading(true);
-
-  //   try {
-  //     // Create new group object
-  //     const newGroup = {
-  //       groupName,
-  //       groupDescription,
-  //       groupLearningLanguage: learningLanguage,
-  //       groupAdminId: user.uid,
-  //       groupAdminName: user.name || "Anonymous",
-  //       groupAdminImageUrl: user.photoUrl || null,
-  //       memberIds: [],
-  //       classIds: [],
-  //       createdAt: new Date().toISOString(),
-  //       isPremium: false,
-  //     };
-
-  //     // Add group to Firestore
-  //     const groupRef = await addDoc(collection(db, "groups"), newGroup);
-  //     const groupId = groupRef.id;
-
-  //     // Upload and update image if exists
-  //     const imageUrl = await handleImageUpload(groupId);
-  //     await updateDoc(groupRef, { imageUrl, id: groupId });
-
-  //     // Update user document in Firestore
-  //     const userRef = doc(db, "students", user.uid);
-  //     await updateDoc(userRef, {
-  //       // Add group to both arrays
-  //       adminOfGroups: [...(user.adminOfGroups || []), groupId],
-  //       joinedGroups: [...(user.joinedGroups || []), groupId],
-  //     });
-
-  //     // Update local user state and session storage
-  //     const updatedUser = {
-  //       ...user,
-  //       adminOfGroups: [...(user.adminOfGroups || []), groupId],
-  //       joinedGroups: [...(user.joinedGroups || []), groupId],
-  //     };
-  //     setUser(updatedUser);
-  //     sessionStorage.setItem("user", JSON.stringify(updatedUser));
-
-  //     // Navigate after successful creation
-  //     setTimeout(() => {
-  //       navigate("/groupsUser");
-  //     }, 1000);
-  //   } catch (error) {
-  //     console.error("Error creating group:", error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   const handleCreateGroup = async () => {
     setLoading(true);
 
@@ -109,13 +55,11 @@ const AddGroupsUser = () => {
       // Upload and get image URL if exists
       const imageUrl = await handleImageUpload(groupId);
 
-      // Create GetStream channel first before completing group creation
       try {
-        // Create member roles mapping for GetStream
         const memberRoles = [
           {
             user_id: user.uid,
-            role: "Moderator", // Group creator gets Moderator role
+            role: "Moderator",
           },
         ];
 
@@ -148,7 +92,7 @@ const AddGroupsUser = () => {
         groupAdminImageUrl: user.photoUrl || null,
         memberIds: [],
         classIds: [],
-        createdAt: new Date().toISOString(),
+        createdAt: new Date(),
         isPremium: false,
         imageUrl,
       };

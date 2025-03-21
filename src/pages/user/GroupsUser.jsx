@@ -74,7 +74,7 @@ const GroupsUser = () => {
   };
 
   const handleJoinGroup = () => {
-    navigate("/exploreGroupsUser"); // Update with your actual route
+    navigate("/exploreGroupsUser");
   };
 
   return (

@@ -170,7 +170,7 @@ const DeleteAccount = () => {
         name: user.name,
         learningLanguage: user.learningLanguage,
         reason: selectedReason,
-        deletedAt: new Date().toISOString(),
+        deletedAt: new Date(),
       });
 
       // Delete user data

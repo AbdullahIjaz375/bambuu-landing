@@ -153,7 +153,6 @@ const WeeklyTutor = ({ onDateSelect }) => {
                   isToday(day) ? "bg-[#14B82C] text-white" : "bg-white"
                 }`}
                 onClick={() => {
-                  console.log("Date clicked:", day);
                   handleDateSelect(day);
                 }}
               >

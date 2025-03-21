@@ -151,7 +151,7 @@ const TutorDeleteAccount = () => {
         name: user.name,
         teachingLanguage: user.teachingLanguage,
         reason: selectedReason,
-        deletedAt: new Date().toISOString(),
+        deletedAt: new Date(),
       });
 
       // Delete user data

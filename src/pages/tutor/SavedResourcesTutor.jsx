@@ -22,11 +22,7 @@ import {
   updateDoc,
   arrayUnion,
   arrayRemove,
-  deleteDoc,
-  collection,
-  query,
-  where,
-  getDocs,
+  serverTimestamp,
   Timestamp,
 } from "firebase/firestore";
 import { db, storage } from "../../firebaseConfig";
@@ -160,8 +156,13 @@ const SavedResourcesTutor = () => {
       // Update each selected student's savedDocuments
       for (const studentId of selectedStudents) {
         const studentRef = doc(db, "students", studentId);
+        const documentWithTimestamp = {
+          ...selectedResource,
+          createdAt: serverTimestamp(), // Add new timestamp when assigning
+        };
+
         await updateDoc(studentRef, {
-          savedDocuments: arrayUnion(selectedResource),
+          savedDocuments: arrayUnion(documentWithTimestamp),
         });
       }
 
@@ -230,7 +231,7 @@ const SavedResourcesTutor = () => {
         documentName: file.name.split(".")[0],
         documentType: fileType,
         documentUrl: downloadURL,
-        // createdAt: Timestamp.now(),
+        createdAt: serverTimestamp(), // Use serverTimestamp for new documents
         isFavorite: false,
       };
 

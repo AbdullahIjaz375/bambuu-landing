@@ -23,6 +23,8 @@ import {
   query,
   where,
   getDocs,
+  serverTimestamp,
+  Timestamp,
 } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import Modal from "react-modal";
@@ -70,7 +72,11 @@ const SavedResources = () => {
 
     try {
       const studentRef = doc(db, "students", user.uid);
-      const updatedDocument = { ...document, isFavorite: !document.isFavorite };
+      const updatedDocument = {
+        ...document,
+        isFavorite: !document.isFavorite,
+        createdAt: document.createdAt || serverTimestamp(), // Preserve existing timestamp or create new one
+      };
 
       await updateDoc(studentRef, {
         savedDocuments: arrayRemove(document),
@@ -166,7 +172,10 @@ const SavedResources = () => {
             </h3>
             <div className="flex items-center gap-2 mt-1">
               <span className="text-md text-[#3d3d3d]">
-                Uploaded: {resource.createdAt?.toDate().toLocaleDateString()}
+                Uploaded:{" "}
+                {resource.createdAt?.toDate
+                  ? resource.createdAt.toDate().toLocaleDateString()
+                  : "Date not available"}
               </span>
             </div>
           </div>
