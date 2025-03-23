@@ -14,9 +14,57 @@ export const checkAccess = (user, contentType, classType = null) => {
     hasSubscriptions: user?.subscriptions?.length > 0,
   });
 
+  // Check for Group Standard classes first
+  if (classType === "Group Standard" || classType === "Group Premium") {
+    console.log("⚡ Checking Group Class Access");
+
+    // Allow free trial users to access all group classes
+    if (user?.freeAccess) {
+      console.log("✅ Free Trial User - Access Granted to Group Class");
+      return {
+        hasAccess: true,
+        reason: "Free trial access",
+      };
+    }
+
+    // Check for valid group subscription
+    const hasValidSubscription = user?.subscriptions?.some((sub) => {
+      if (!sub.startDate || !sub.endDate) return false;
+      const endDate = new Date(sub.endDate.seconds * 1000);
+      const isValid =
+        endDate > new Date() &&
+        sub.type === "bammbuu+ Instructor-led group Classes";
+      console.log("📅 Group Subscription Check:", {
+        type: sub.type,
+        endDate,
+        isValid,
+      });
+      return isValid;
+    });
+
+    if (hasValidSubscription) {
+      console.log("✅ Valid Group Subscription Found");
+      return { hasAccess: true, reason: "Valid group subscription" };
+    }
+
+    // If it's a standard group class, allow access
+    if (classType === "Group Standard") {
+      console.log("✅ Standard Group Class - Access Granted");
+      return { hasAccess: true, reason: "Standard group class" };
+    }
+
+    console.log("❌ No Valid Access Method Found for Premium Group");
+    return {
+      hasAccess: false,
+      reason: "Premium group access requires subscription or free trial",
+    };
+  }
+
+  // Handle individual premium class access
   if (contentType === "premium-class" || classType === "Individual Premium") {
     console.log("⚡ Checking Individual Premium Access");
 
+    // Block free trial users from individual premium classes
     if (user?.freeAccess) {
       console.log("❌ Free Trial User - No Access to Individual Premium");
       return {
@@ -54,31 +102,6 @@ export const checkAccess = (user, contentType, classType = null) => {
       hasAccess: false,
       reason:
         "Individual premium classes require credits or unlimited subscription",
-    };
-  }
-
-  // For premium groups, allow free trial access
-  if (contentType === "premium-group" || classType === "Group Premium") {
-    if (user?.freeAccess) {
-      return { hasAccess: true, reason: "Free trial access" };
-    }
-
-    const hasValidSubscription = user?.subscriptions?.some((sub) => {
-      if (!sub.startDate || !sub.endDate) return false;
-      const endDate = new Date(sub.endDate.seconds * 1000);
-      return (
-        endDate > new Date() &&
-        sub.type === "bammbuu+ Instructor-led group Classes"
-      );
-    });
-
-    if (hasValidSubscription) {
-      return { hasAccess: true, reason: "Valid group subscription" };
-    }
-
-    return {
-      hasAccess: false,
-      reason: "Premium group access requires subscription or free trial",
     };
   }
 

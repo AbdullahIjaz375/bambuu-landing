@@ -339,7 +339,6 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
 
     // Check access before allowing enrollment
     const accessCheck = checkAccess(user, "premium-class", classData.classType);
-    console.log("🔒 Access Check Result:", accessCheck);
 
     if (!accessCheck.hasAccess) {
       toast.error(accessCheck.reason);
@@ -348,13 +347,11 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
       return;
     }
 
-    // If user has proper access (either through subscription or credits)
     const { success, method } = await handleClassBooking(
       user,
       classData.classType,
       user.subscriptions,
       user.credits,
-      // Success callback
       () => {
         setIsBookingConfirmationOpen(false);
         setIsModalOpen(false);
