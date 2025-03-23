@@ -5,8 +5,22 @@
  * @returns {Object} - Access status and reason
  */
 export const checkAccess = (user, contentType) => {
-  // If user has freeAccess flag, allow access to everything
+  // If user has freeAccess flag, only allow access to premium groups and standard classes
   if (user?.freeAccess) {
+    // Allow access to premium groups
+    if (contentType === "premium-group") {
+      return { hasAccess: true, reason: "Free trial access" };
+    }
+
+    // Deny access to individual premium classes for free trial users
+    if (contentType === "premium-class") {
+      return {
+        hasAccess: false,
+        reason: "Individual premium classes not included in free trial",
+      };
+    }
+
+    // Allow access to all other content types
     return { hasAccess: true, reason: "Free access enabled" };
   }
 
@@ -28,7 +42,7 @@ export const checkAccess = (user, contentType) => {
     return { hasAccess: true, reason: "Valid subscription" };
   }
 
-  // Check for credits for classes
+  // Check for credits for premium classes
   if (contentType === "premium-class" && user?.credits > 0) {
     return { hasAccess: true, reason: "Available credits" };
   }
