@@ -18,6 +18,7 @@ import PlansModal from "../../components/PlansModal";
 import { useClassBooking } from "../../hooks/useClassBooking";
 import { toast } from "react-toastify";
 import UserAvatar from "../../utils/getAvatar";
+import { checkAccess } from "../../utils/accessControl";
 Modal.setAppElement("#root");
 
 const TimeRestrictedJoinButton = ({
@@ -26,6 +27,7 @@ const TimeRestrictedJoinButton = ({
   navigate,
   classId,
   location,
+  classType, // Add classType as a prop
 }) => {
   const [isButtonVisible, setIsButtonVisible] = useState(false);
   const [timeStatus, setTimeStatus] = useState("");
@@ -67,22 +69,32 @@ const TimeRestrictedJoinButton = ({
   }, [classDateTime, classDuration]);
 
   const handleButtonClick = () => {
-    // Check if user has access
-    if (user.freeAccess || user.credits > 0 || (user.subscriptions && user.subscriptions.some(sub => sub.type !== "None"))) {
-      // User has access, join the class
-      setSelectedClassId(classId);
-      const callUrl = `/call`;
-      window.open(callUrl, "_blank");
-    } else {
-      // User doesn't have access, redirect to subscriptions
-      navigate('/subscriptions');
+    const accessCheck = checkAccess(
+      user,
+      "premium-class",
+      classType // Use the passed classType prop
+    );
+
+    if (!accessCheck.hasAccess) {
+      toast.error(accessCheck.reason);
+      navigate("/subscriptions");
+      return;
     }
+
+    // Rest of the join logic
+    setSelectedClassId(classId);
+    const callUrl = `/call`;
+    window.open(callUrl, "_blank");
   };
 
   // If the class is virtual and within time window
   if (location?.toLowerCase() === "virtual" && isButtonVisible) {
     // Determine button style based on user access
-    const hasAccess = user.freeAccess || user.credits > 0 || (user.subscriptions && user.subscriptions.some(sub => sub.type !== "None"));
+    const hasAccess =
+      user.freeAccess ||
+      user.credits > 0 ||
+      (user.subscriptions &&
+        user.subscriptions.some((sub) => sub.type !== "None"));
     const buttonStyle = hasAccess
       ? "bg-[#ffbf00] hover:bg-[#ffbf00]" // Yellow for users with access
       : "bg-[#ffb3b3] hover:bg-[#ff9999]"; // Light red for users without access
@@ -916,19 +928,13 @@ const ClassDetailsUser = ({ onClose }) => {
                       />
                     </div>
 
-                    {/* <button
-                      className="w-full px-4 py-2 text-black bg-[#ffbf00] border border-black rounded-full hover:bg-[#ffbf00]"
-                      onClick={handleJoinClass}
-                    >
-                      Join Class
-                    </button> */}
-
                     <TimeRestrictedJoinButton
                       classDateTime={classData.classDateTime}
-                      classDuration={classData.classDuration || 60} // Use class duration from data or default to 60 minutes
+                      classDuration={classData.classDuration || 60}
                       navigate={navigate}
                       classId={classId}
                       location={classData.classLocation}
+                      classType={classData.classType}
                     />
 
                     {user.uid === classData.adminId ? (
@@ -1021,38 +1027,41 @@ const ClassDetailsUser = ({ onClose }) => {
                     <div className="flex-1 overflow-y-auto">
                       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
                         {members.map((member) => {
-                         return(
-                          <div
-                          key={member.id}
-                          className="flex items-center justify-between px-3 py-2 border border-gray-200 md:px-4 md:py-3 hover:bg-gray-50 rounded-2xl md:rounded-3xl"
-                        >
-                          <div className="flex items-center gap-2 md:gap-3">
-                            <div className="relative">
-                                                                            
+                          return (
+                            <div
+                              key={member.id}
+                              className="flex items-center justify-between px-3 py-2 border border-gray-200 md:px-4 md:py-3 hover:bg-gray-50 rounded-2xl md:rounded-3xl"
+                            >
+                              <div className="flex items-center gap-2 md:gap-3">
+                                <div className="relative">
+                                  <UserAvatar
+                                    member={{
+                                      name: member.name,
+                                      photoUrl: member.photoUrl,
+                                    }}
+                                  />
 
-                              <UserAvatar member={{ name: member.name, photoUrl: member.photoUrl }} />
-
-                              {member.id === classData.adminId && (
-                                <div className="absolute flex items-center justify-center w-4 h-4 bg-yellow-400 rounded-full -top-1 -right-1">
-                                  <span className="text-xs text-black">
-                                    ★
-                                  </span>
+                                  {member.id === classData.adminId && (
+                                    <div className="absolute flex items-center justify-center w-4 h-4 bg-yellow-400 rounded-full -top-1 -right-1">
+                                      <span className="text-xs text-black">
+                                        ★
+                                      </span>
+                                    </div>
+                                  )}
                                 </div>
-                              )}
+                                <div className="flex flex-col">
+                                  <span className="text-sm font-medium text-gray-900">
+                                    {member.name}
+                                  </span>
+                                  {member.id === classData.adminId && (
+                                    <span className="text-xs text-gray-500">
+                                      {t("class-details.labels.teacher")}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
                             </div>
-                            <div className="flex flex-col">
-                              <span className="text-sm font-medium text-gray-900">
-                                {member.name}
-                              </span>
-                              {member.id === classData.adminId && (
-                                <span className="text-xs text-gray-500">
-                                  {t("class-details.labels.teacher")}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                         )
+                          );
                         })}
                       </div>
                     </div>

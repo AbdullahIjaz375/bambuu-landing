@@ -3,12 +3,11 @@ import { Users, User } from "lucide-react";
 
 import { X } from "lucide-react";
 import { doc, getDoc, updateDoc, arrayUnion } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { addMemberToStreamChannel } from "../services/streamService";
-import { db, storage } from "../firebaseConfig";
+import { db } from "../firebaseConfig";
 import { ClipLoader } from "react-spinners";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext"; // Import useAuth to access context
+import { useAuth } from "../context/AuthContext";
 import { ChannelType } from "../config/stream";
 import "react-datepicker/dist/react-datepicker.css";
 import "react-datepicker/dist/react-datepicker-cssmodules.css";
@@ -29,7 +28,7 @@ const ExploreGroupDetailsModal = ({ group, onClose, onJoinClick }) => {
   const fetchData = async () => {
     try {
       // Fetch classes
-      if (group.classIds && group.classIds.length > 0) {
+      if (group.classIds && group.classIds?.length > 0) {
         const classesData = await Promise.all(
           group.classIds.map(async (classId) => {
             const classDoc = await getDoc(doc(db, "classes", classId));

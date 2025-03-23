@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Clock, Calendar, Users, User, X, MapPin } from "lucide-react";
+import { Clock, Calendar, Users, User, X } from "lucide-react";
 import Modal from "react-modal";
 import PlansModal from "./PlansModal";
 import { useAuth } from "../context/AuthContext";
 import { doc, updateDoc, arrayUnion, getDoc } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { db, storage } from "../firebaseConfig";
+import { db } from "../firebaseConfig";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { useClassBooking } from "../hooks/useClassBooking";
+import { checkAccess } from "../utils/accessControl";
 
 Modal.setAppElement("#root");
 
@@ -17,7 +16,6 @@ const useClassEnrollment = () => {
   const [error, setError] = useState(null);
   const { user, setUser } = useAuth();
 
-  // Helper function to update session storage
   const updateSessionStorage = (newEnrolledClass) => {
     const storedUser = JSON.parse(sessionStorage.getItem("user"));
     if (storedUser) {
@@ -37,12 +35,10 @@ const useClassEnrollment = () => {
     setError(null);
     console.log(classId, userId, tutorId);
     try {
-      // Get references to both documents
       const classRef = doc(db, "classes", classId);
       const userRef = doc(db, "students", userId);
       const tutorRef = doc(db, "tutors", tutorId);
 
-      // Get the current class document to check available spots
       const classDoc = await getDoc(classRef);
       const classData = classDoc.data();
 
@@ -50,12 +46,10 @@ const useClassEnrollment = () => {
         throw new Error("Class not found");
       }
 
-      // Check if class is full
       if (classData.classMemberIds?.length >= classData.availableSpots) {
         throw new Error("Class is full");
       }
 
-      // Update both documents in parallel
       await Promise.all([
         updateDoc(classRef, {
           classMemberIds: arrayUnion(userId),
@@ -155,58 +149,17 @@ const ExploreClassCard = ({
       day: "2-digit",
       month: "short",
       year: "numeric",
-      // timeZone: "utc",
     });
   };
-
-  const { handleClassBooking, isProcessing, iserror } = useClassBooking();
-
-  // const handleCardClick = () => {
-  //   if (selectedRecurrenceType && selectedRecurrenceType !== "None") {
-  //     toast.error(
-  //       "This class is currently full. Please check back later or explore other available classes.",
-  //       {
-  //         position: "top-right",
-  //         autoClose: 3000,
-  //         hideProgressBar: false,
-  //         closeOnClick: true,
-  //         pauseOnHover: true,
-  //         draggable: true,
-  //       }
-  //     );
-  //   } else {
-  //     navigate(`/newClassDetailsUser/${classId}`);
-  //     // setIsPlansModalOpen(true);
-  //   }
-  // };
 
   const handleCardClick = () => {
     navigate(`/newClassDetailsUser/${classId}`);
   };
 
   const handleBookClass = (e) => {
-    e.stopPropagation(); // Prevent event bubbling
+    e.stopPropagation();
     setIsBookingConfirmationOpen(true);
   };
-
-  // const handleConfirmBooking = async () => {
-  //   const success = await handleClassBooking(
-  //     user,
-  //     classType,
-  //     user.subscriptions,
-  //     user.credits,
-  //     () => {
-  //       setIsBookingConfirmationOpen(false);
-  //       toast.success("Class booked successfully!");
-  //     },
-  //     (error) => {
-  //       toast.error(error);
-  //       setIsPlansModalOpen(true);
-  //     },
-  //     // This is your existing enrollment logic
-  //     () => enrollInClass(classId, user.uid, adminId)
-  //   );
-  // };
 
   const handleConfirmBooking = async () => {
     if (!user) {

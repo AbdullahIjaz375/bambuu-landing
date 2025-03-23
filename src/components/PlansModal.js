@@ -319,17 +319,9 @@ const PlansModal = ({ isOpen, onClose }) => {
       setIsLoading(true);
       try {
         if (plan.type === "free_trial") {
-          // Show loading state with ClipLoader
           const userRef = doc(db, "students", userId);
           await updateDoc(userRef, {
             freeAccess: true,
-            subscriptions: [
-              {
-                endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-                startDate: new Date(),
-                type: "Free Trial",
-              },
-            ],
           });
 
           toast.success("Free trial activated successfully!");

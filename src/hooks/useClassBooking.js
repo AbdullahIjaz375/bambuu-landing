@@ -1,14 +1,4 @@
 import { useState } from "react";
-import {
-  doc,
-  updateDoc,
-  increment,
-  getDoc,
-  arrayUnion,
-  Timestamp,
-} from "firebase/firestore";
-import { db } from "../firebaseConfig";
-import { checkAccess } from "../utils/accessControl";
 
 export const useClassBooking = () => {
   const [isProcessing, setIsProcessing] = useState(false);

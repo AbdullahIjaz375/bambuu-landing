@@ -4,7 +4,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { StreamChat } from "stream-chat";
 import { streamVideoClient } from "../config/stream";
-import i18n from "../i18n"; // Import i18n instance
+import i18n from "../i18n";
 import { checkAccess } from "../utils/accessControl";
 
 const AuthContext = createContext();
@@ -205,16 +205,41 @@ export const AuthProvider = ({ children }) => {
     };
   }, []);
 
-  // Add access status to the user context
   const userWithAccess = user
     ? {
         ...user,
         access: {
-          premiumGroups: checkAccess(user, "premium-group").hasAccess,
-          premiumClasses: checkAccess(user, "premium-class").hasAccess,
+          premiumGroups: (() => {
+            const result = checkAccess(user, "premium-group", "Group Premium");
+            console.log("🏢 Premium Groups Access:", result);
+            return result.hasAccess;
+          })(),
+          premiumClasses: (() => {
+            const result = checkAccess(
+              user,
+              "premium-class",
+              "Individual Premium"
+            );
+            console.log("👤 Premium Classes Access:", result);
+            return result.hasAccess;
+          })(),
+          canJoinClass: (classType) => {
+            console.log("🎯 Checking Specific Class Access:", classType);
+            const accessCheck = checkAccess(user, "premium-class", classType);
+            console.log("📝 Class Access Result:", accessCheck);
+            return accessCheck.hasAccess;
+          },
         },
       }
     : null;
+
+  // Add a log when providing the context
+  console.log("🔑 User Access State:", {
+    hasUser: !!userWithAccess,
+    freeAccess: userWithAccess?.freeAccess,
+    credits: userWithAccess?.credits,
+    subscriptions: userWithAccess?.subscriptions?.length,
+  });
 
   return (
     <AuthContext.Provider

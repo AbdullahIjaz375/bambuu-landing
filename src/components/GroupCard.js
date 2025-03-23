@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import React from "react";
-import { Users, User } from "lucide-react";
+import { User } from "lucide-react";
 
 const GroupCard = ({ group }) => {
   const {

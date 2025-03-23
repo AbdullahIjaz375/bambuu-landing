@@ -337,38 +337,30 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
       return;
     }
 
-    if (user.freeAccess) {
-      // Allow user to join the class immediately
-      const success = await enrollInClass(
-        classId,
-        user.uid,
-        classData.adminId,
-        false
-      );
-      if (success) {
-        setIsBookingConfirmationOpen(false);
-        setIsModalOpen(false);
-        toast.success("Successfully enrolled in class!");
-      } else {
-        toast.error("Failed to enroll in class.");
-      }
+    // Check access before allowing enrollment
+    const accessCheck = checkAccess(user, "premium-class", classData.classType);
+    console.log("🔒 Access Check Result:", accessCheck);
+
+    if (!accessCheck.hasAccess) {
+      toast.error(accessCheck.reason);
+      setIsBookingConfirmationOpen(false);
+      setIsPlansModalOpen(true);
       return;
     }
 
+    // If user has proper access (either through subscription or credits)
     const { success, method } = await handleClassBooking(
       user,
-      classData.classType, // Make sure this is available in your component props
+      classData.classType,
       user.subscriptions,
       user.credits,
       // Success callback
       () => {
         setIsBookingConfirmationOpen(false);
         setIsModalOpen(false);
-        // toast.success("Successfully enrolled in class!");
       },
       // Failure callback
       (errorMessage) => {
-        // toast.error(errorMessage);
         if (
           errorMessage.includes("subscription") ||
           errorMessage.includes("credits")
@@ -851,7 +843,8 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
                         groupTutor={groupTutor}
                       />
                     </div>
-                    {classData.classType === "Individual Premium" && classData.classMemberIds.length > 0 ? (
+                    {classData.classType === "Individual Premium" &&
+                    classData.classMemberIds.length > 0 ? (
                       <button
                         className="w-full px-4 py-2 text-gray-500 bg-gray-200 border border-gray-400 rounded-full cursor-not-allowed"
                         disabled

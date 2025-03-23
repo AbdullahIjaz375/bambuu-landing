@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { checkAccess } from "../utils/accessControl";
 
 export const useGroupJoining = () => {
   const [isProcessing, setIsProcessing] = useState(false);

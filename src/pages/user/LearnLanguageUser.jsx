@@ -156,20 +156,6 @@ const LearnLanguageUser = () => {
     navigate(-1);
   };
 
-  const handleJoinGroup = (group) => {
-    if (group.isPremium) {
-      const access = checkAccess(user, "premium-group");
-      if (!access.hasAccess) {
-        // Redirect to plans page
-        navigate("/plans");
-        return;
-      }
-    }
-
-    // Continue with joining logic
-    // ...
-  };
-
   return (
     <div className="flex h-screen bg-white">
       <div className="flex-shrink-0 w-64 h-full">
