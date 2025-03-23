@@ -41,7 +41,8 @@ const customStyles = {
 
 const PlansModal = ({ isOpen, onClose }) => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState("offers");
+  // Remove the hardcoded "offers" default
+  const [activeTab, setActiveTab] = useState("credits");
   const { t } = useTranslation();
   const [isLoadingPlans, setIsLoadingPlans] = useState(true);
   const [error, setError] = useState(null);
@@ -118,6 +119,11 @@ const PlansModal = ({ isOpen, onClose }) => {
         // Check if user is eligible for offers
         const isEligible = await checkNewUserEligibility(user?.uid);
         setShowOffers(isEligible);
+
+        // Set the active tab based on eligibility
+        if (isEligible) {
+          setActiveTab("offers");
+        }
 
         // If eligible, create the two specific offers
         if (isEligible) {
