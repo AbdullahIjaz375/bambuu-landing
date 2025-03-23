@@ -14,11 +14,11 @@ export const checkAccess = (user, contentType, classType = null) => {
     hasSubscriptions: user?.subscriptions?.length > 0,
   });
 
-  // Check for Group Standard classes first
-  if (classType === "Group Standard" || classType === "Group Premium") {
+  // First check if it's any type of group class
+  if (classType?.includes("Group")) {
     console.log("⚡ Checking Group Class Access");
 
-    // Allow free trial users to access all group classes
+    // Free trial users can access all group classes
     if (user?.freeAccess) {
       console.log("✅ Free Trial User - Access Granted to Group Class");
       return {
@@ -27,44 +27,44 @@ export const checkAccess = (user, contentType, classType = null) => {
       };
     }
 
-    // Check for valid group subscription
-    const hasValidSubscription = user?.subscriptions?.some((sub) => {
-      if (!sub.startDate || !sub.endDate) return false;
-      const endDate = new Date(sub.endDate.seconds * 1000);
-      const isValid =
-        endDate > new Date() &&
-        sub.type === "bammbuu+ Instructor-led group Classes";
-      console.log("📅 Group Subscription Check:", {
-        type: sub.type,
-        endDate,
-        isValid,
-      });
-      return isValid;
-    });
-
-    if (hasValidSubscription) {
-      console.log("✅ Valid Group Subscription Found");
-      return { hasAccess: true, reason: "Valid group subscription" };
-    }
-
     // If it's a standard group class, allow access
     if (classType === "Group Standard") {
       console.log("✅ Standard Group Class - Access Granted");
       return { hasAccess: true, reason: "Standard group class" };
     }
 
-    console.log("❌ No Valid Access Method Found for Premium Group");
+    // For premium groups, check subscription
+    if (classType === "Group Premium") {
+      const hasValidSubscription = user?.subscriptions?.some((sub) => {
+        if (!sub.startDate || !sub.endDate) return false;
+        const endDate = new Date(sub.endDate.seconds * 1000);
+        const isValid =
+          endDate > new Date() &&
+          sub.type === "bammbuu+ Instructor-led group Classes";
+        console.log("📅 Group Subscription Check:", {
+          type: sub.type,
+          endDate,
+          isValid,
+        });
+        return isValid;
+      });
+
+      if (hasValidSubscription) {
+        console.log("✅ Valid Group Subscription Found");
+        return { hasAccess: true, reason: "Valid group subscription" };
+      }
+    }
+
     return {
       hasAccess: false,
       reason: "Premium group access requires subscription or free trial",
     };
   }
 
-  // Handle individual premium class access
-  if (contentType === "premium-class" || classType === "Individual Premium") {
+  // Then check for individual premium classes
+  if (classType === "Individual Premium") {
     console.log("⚡ Checking Individual Premium Access");
 
-    // Block free trial users from individual premium classes
     if (user?.freeAccess) {
       console.log("❌ Free Trial User - No Access to Individual Premium");
       return {
@@ -73,6 +73,7 @@ export const checkAccess = (user, contentType, classType = null) => {
       };
     }
 
+    // Rest of individual premium logic remains the same
     // Check for valid unlimited subscription first
     const hasValidSubscription = user?.subscriptions?.some((sub) => {
       if (!sub.startDate || !sub.endDate) return false;
@@ -105,5 +106,6 @@ export const checkAccess = (user, contentType, classType = null) => {
     };
   }
 
+  // Default case for standard content
   return { hasAccess: true, reason: "Standard content" };
 };
