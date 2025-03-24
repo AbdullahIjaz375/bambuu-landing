@@ -10,6 +10,8 @@ export const fetchPlansFromFirebase = async (t) => {
     const subscriptionData =
       subscriptionSnapshot.docs[0]?.data()?.subscription_offer_list || [];
 
+    console.log("Raw subscription data:", subscriptionData);
+
     const transformedSubscriptionPlans = subscriptionData.map((plan) => ({
       id: plan.offerId,
       title: plan.title,
@@ -19,7 +21,13 @@ export const fetchPlansFromFirebase = async (t) => {
       isPopular: plan.isPopular,
       type: plan.type || "subscription",
       stripeLink: plan.stripeUrl,
+      stripeUrl: plan.stripeUrl,
     }));
+
+    console.log(
+      "Transformed subscription plans:",
+      transformedSubscriptionPlans
+    );
 
     // Fetch credit plans
     const creditSnapshot = await getDocs(collection(db, "credit_offer"));
