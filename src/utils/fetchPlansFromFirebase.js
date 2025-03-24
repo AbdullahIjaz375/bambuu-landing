@@ -39,9 +39,10 @@ export const fetchPlansFromFirebase = async (t) => {
       isPopular: plan.isPopular,
       type: `${plan.numberOfCredits}_credits`,
       stripeLink: plan.stripeUrl,
+      numberOfCredits: plan.numberOfCredits,
     }));
 
-    // Fetch offer plans
+    // Fetch offers with exact URLs
     const offersSnapshot = await getDocs(collection(db, "offer"));
     const offersData = offersSnapshot.docs[0]?.data()?.offerList || [];
 

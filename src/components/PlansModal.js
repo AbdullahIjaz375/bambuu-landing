@@ -70,21 +70,19 @@ const PlansModal = ({ isOpen, onClose }) => {
 
         toast.success("Free trial activated successfully!");
         onClose();
-
-        // Reload the page to refresh user data
         window.location.reload();
         return;
       }
 
-      // For paid plans, proceed with Stripe checkout
-      const baseUrl = plan.stripeLink.split("?")[0];
-      const url = new URL(baseUrl);
-      url.searchParams.set("client_reference_id", userId);
-      url.searchParams.set("prefilled_email", user?.email || "");
-      url.searchParams.set("metadata[studentId]", userId);
-      url.searchParams.set("metadata[paymentType]", plan.type);
+      // For paid plans, use the exact Stripe URL from Firebase
+      if (!plan.stripeLink) {
+        console.error("No Stripe URL found for plan:", plan);
+        toast.error("Unable to process purchase. Please try again.");
+        return;
+      }
 
-      window.location.href = url.toString();
+      // Use the exact URL without modification
+      window.location.href = plan.stripeLink;
     } catch (error) {
       console.error("Error during purchase:", error);
       toast.error("Failed to process your request. Please try again.");

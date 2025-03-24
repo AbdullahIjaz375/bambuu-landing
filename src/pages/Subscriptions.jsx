@@ -194,7 +194,6 @@ const Subscriptions = () => {
       const url = new URL(baseUrl);
       url.searchParams.set("client_reference_id", userId);
       url.searchParams.set("prefilled_email", user?.email || "");
-      // Add metadata that matches your webhook expectations
       url.searchParams.set("metadata[studentId]", userId);
       url.searchParams.set("metadata[paymentType]", plan.type);
 
