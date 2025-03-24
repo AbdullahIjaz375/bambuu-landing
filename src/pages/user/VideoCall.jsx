@@ -144,7 +144,7 @@ const VideoCallStudent = () => {
 
   const fetchToken = async (userId) => {
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/chat-token`, {
+      const response = await axios.post(`https://generatechattoken-zzpsx27htq-uc.a.run.app`, {
         userId,
         userName: JSON.parse(sessionStorage.getItem("user") || "{}").name || "User",
         userImage: JSON.parse(sessionStorage.getItem("user") || "{}").photoUrl || "",
