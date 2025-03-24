@@ -16,8 +16,9 @@ import {
 } from "firebase/firestore";
 import { ClipLoader } from "react-spinners";
 import Modal from "react-modal";
+import { fetchPlansFromFirebase } from "../utils/fetchPlansFromFirebase";
 
-Modal.setAppElement("#root"); // Ensure this matches your app's root element
+Modal.setAppElement("#root");
 
 const Subscriptions = () => {
   const { user } = useAuth();
@@ -35,7 +36,6 @@ const Subscriptions = () => {
   const [freeTrialActivated, setFreeTrialActivated] = useState(false);
   const [hasActiveFreeTrial, setHasActiveFreeTrial] = useState(false);
 
-  // Add this function to check if user is within 7 days of registration
   const checkNewUserEligibility = async (userId) => {
     try {
       const userDoc = await getDocs(
@@ -63,6 +63,10 @@ const Subscriptions = () => {
         setIsLoadingPlans(true);
         setError(null);
 
+        // Fetch all plans from Firebase
+        const { subscriptionPlans, creditPlans, offersData } =
+          await fetchPlansFromFirebase(t);
+
         // Check if user already has free access
         if (user?.uid) {
           const userRef = doc(db, "students", user.uid);
@@ -78,11 +82,10 @@ const Subscriptions = () => {
         const isEligible = await checkNewUserEligibility(user?.uid);
         setShowOffers(isEligible);
 
-        // If eligible, create the two specific offers
+        // Handle offer plans
         if (isEligible) {
           const transformedOfferPlans = [];
 
-          // Add free trial offer if user doesn't have active trial
           if (!hasActiveFreeTrial) {
             transformedOfferPlans.push({
               id: "free-trial",
@@ -95,9 +98,6 @@ const Subscriptions = () => {
             });
           }
 
-          // Fetch the "Buy one get 2 free" offer from Firestore
-          const offersSnapshot = await getDocs(collection(db, "offer"));
-          const offersData = offersSnapshot.docs[0]?.data()?.offerList || [];
           const buyOneGetTwoOffer = offersData.find(
             (plan) =>
               plan.type === "buy_one_get_two" ||
@@ -120,49 +120,9 @@ const Subscriptions = () => {
           setOfferPlans(transformedOfferPlans);
         }
 
-        // Fetch subscription offers
-        const subscriptionSnapshot = await getDocs(
-          collection(db, "subscription_offer")
-        );
-        const subscriptionData =
-          subscriptionSnapshot.docs[0]?.data()?.subscription_offer_list || [];
-
-        // Transform subscription data
-        const transformedSubscriptionPlans = subscriptionData.map((plan) => ({
-          id: plan.offerId,
-          title: plan.title,
-          description: plan.subtitle,
-          price: plan.price,
-          period: t("plans-modal.pricing.month"),
-          isPopular: plan.isPopular,
-          type: "subscription",
-          stripeLink: plan.stripeUrl,
-        }));
-
-        // Fetch credit offers
-        const creditSnapshot = await getDocs(collection(db, "credit_offer"));
-        const creditData =
-          creditSnapshot.docs[0]?.data()?.credit_offer_list || [];
-
-        // Transform credit data
-        const transformedCreditPlans = creditData.map((plan) => ({
-          id: plan.offerId,
-          title:
-            plan.numberOfCredits === 3
-              ? t("plans-modal.credit-plans.three.title")
-              : t("plans-modal.credit-plans.five.title"),
-          description:
-            plan.numberOfCredits === 3
-              ? t("plans-modal.credit-plans.three.description")
-              : t("plans-modal.credit-plans.five.description"),
-          price: plan.price,
-          isPopular: plan.isPopular,
-          type: `${plan.numberOfCredits}_credits`,
-          stripeLink: plan.stripeUrl,
-        }));
-
-        setSubscriptionPlans(transformedSubscriptionPlans);
-        setCreditPlans(transformedCreditPlans);
+        // Set subscription and credit plans
+        setSubscriptionPlans(subscriptionPlans);
+        setCreditPlans(creditPlans);
       } catch (err) {
         console.error("Error fetching plans:", err);
         setError("Failed to load plans. Please try again later.");
@@ -202,13 +162,12 @@ const Subscriptions = () => {
   const activateFreeTrial = async () => {
     setIsLoading(true);
     try {
-      // Update the user's document to set freeAccess to true
       const userRef = doc(db, "students", user.uid);
       await updateDoc(userRef, {
         freeAccess: true,
         subscriptions: [
           {
-            endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+            endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
             startDate: new Date(),
             type: "Free Trial",
           },
@@ -406,7 +365,7 @@ const Subscriptions = () => {
             {t("plans-modal.popular-badge")}
           </div>
         ) : (
-          <div className="h-[30px]" />
+          <div class="h-[30px]" />
         )}
         <div className="flex flex-col flex-grow p-6 space-y-6 text-center">
           <div className="space-y-4">

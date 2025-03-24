@@ -14,6 +14,7 @@ import {
 import { db } from "../firebaseConfig";
 import { ClipLoader } from "react-spinners";
 import { toast } from "react-toastify";
+import { fetchPlansFromFirebase } from "../utils/fetchPlansFromFirebase";
 
 Modal.setAppElement("#root");
 
@@ -48,6 +49,8 @@ const PlansModal = ({ isOpen, onClose }) => {
   const [error, setError] = useState(null);
   const [offerPlans, setOfferPlans] = useState([]);
   const [showOffers, setShowOffers] = useState(false);
+  const [subscriptionPlans, setSubscriptionPlans] = useState([]);
+  const [creditPlans, setCreditPlans] = useState([]);
 
   const handlePurchase = async (plan, userId) => {
     try {
@@ -116,6 +119,10 @@ const PlansModal = ({ isOpen, onClose }) => {
         setIsLoadingPlans(true);
         setError(null);
 
+        // Fetch all plans from Firebase
+        const { subscriptionPlans, creditPlans, offersData } =
+          await fetchPlansFromFirebase(t);
+
         // Check if user is eligible for offers
         const isEligible = await checkNewUserEligibility(user?.uid);
         setShowOffers(isEligible);
@@ -125,7 +132,7 @@ const PlansModal = ({ isOpen, onClose }) => {
           setActiveTab("offers");
         }
 
-        // If eligible, create the two specific offers
+        // If eligible, create the offer plans
         if (isEligible) {
           const transformedOfferPlans = [];
 
@@ -140,9 +147,7 @@ const PlansModal = ({ isOpen, onClose }) => {
             body: t("plans-modal.offer-plans.free.body"),
           });
 
-          // Fetch the "Buy one get 2 free" offer from Firestore
-          const offersSnapshot = await getDocs(collection(db, "offer"));
-          const offersData = offersSnapshot.docs[0]?.data()?.offerList || [];
+          // Add buy one get two offer if it exists
           const buyOneGetTwoOffer = offersData.find(
             (plan) =>
               plan.type === "buy_one_get_two" ||
@@ -165,7 +170,9 @@ const PlansModal = ({ isOpen, onClose }) => {
           setOfferPlans(transformedOfferPlans);
         }
 
-        // ... rest of the fetchPlans function for subscription and credit plans
+        // Set subscription and credit plans
+        setSubscriptionPlans(subscriptionPlans);
+        setCreditPlans(creditPlans);
       } catch (err) {
         console.error("Error fetching plans:", err);
         setError("Failed to load plans. Please try again later.");
@@ -396,46 +403,6 @@ const PlansModal = ({ isOpen, onClose }) => {
       </div>
     );
   };
-
-  const subscriptionPlans = [
-    {
-      title: t("plans-modal.subscription-plans.group.title"),
-      description: t("plans-modal.subscription-plans.group.description"),
-      price: 49.99,
-      period: t("plans-modal.pricing.month"),
-      isPopular: true,
-      type: "monthly_subscription",
-      stripeLink: "https://buy.stripe.com/test_14keVY9UVgHjapq4gi",
-    },
-    {
-      title: t("plans-modal.subscription-plans.unlimited.title"),
-      description: t("plans-modal.subscription-plans.unlimited.description"),
-      price: 149.99,
-      period: t("plans-modal.pricing.month"),
-      isPopular: false,
-      type: "yearly_subscription",
-      stripeLink: "https://buy.stripe.com/test_00g29c2st3Ux5568wA",
-    },
-  ];
-
-  const creditPlans = [
-    {
-      title: t("plans-modal.credit-plans.three.title"),
-      description: t("plans-modal.credit-plans.three.description"),
-      price: 59.99,
-      isPopular: false,
-      type: "3_credits",
-      stripeLink: "https://buy.stripe.com/test_28o1581op4YB556000",
-    },
-    {
-      title: t("plans-modal.credit-plans.five.title"),
-      description: t("plans-modal.credit-plans.five.description"),
-      price: 99.99,
-      isPopular: true,
-      type: "5_credits",
-      stripeLink: "https://buy.stripe.com/test_9AQdRU0kl2Qt9lmeUV",
-    },
-  ];
 
   return (
     <Modal
