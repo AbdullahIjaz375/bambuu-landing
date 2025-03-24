@@ -54,7 +54,7 @@ const PlansModal = ({ isOpen, onClose }) => {
 
   const handlePurchase = async (plan, userId) => {
     try {
-      // Handle free trial activation differently
+      // Handle free trial activation
       if (plan.type === "free_trial") {
         const userRef = doc(db, "students", userId);
         await updateDoc(userRef, {
@@ -74,15 +74,18 @@ const PlansModal = ({ isOpen, onClose }) => {
         return;
       }
 
-      // For paid plans, use the exact Stripe URL from Firebase
-      if (!plan.stripeLink) {
-        console.error("No Stripe URL found for plan:", plan);
-        toast.error("Unable to process purchase. Please try again.");
-        return;
-      }
+      // For paid plans, get the base URL without query parameters
+      const baseUrl = plan.stripeLink.split("?")[0];
 
-      // Use the exact URL without modification
-      window.location.href = plan.stripeLink;
+      // Add metadata to the URL
+      const url = new URL(baseUrl);
+      url.searchParams.set("client_reference_id", userId);
+      url.searchParams.set("prefilled_email", user?.email || "");
+      url.searchParams.set("metadata[studentId]", userId);
+      url.searchParams.set("metadata[paymentType]", plan.type);
+
+      // Redirect to Stripe with metadata
+      window.location.href = url.toString();
     } catch (error) {
       console.error("Error during purchase:", error);
       toast.error("Failed to process your request. Please try again.");
