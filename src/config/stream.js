@@ -42,7 +42,7 @@ export const fetchChatToken = async (userId) => {
       throw new Error("User ID is required to generate a token");
     }
 
-    const response = await axios.post(`${apiBaseUrl}/api/chat-token`, {
+    const response = await axios.post(`https://generatechattoken-3idvfneyra-uc.a.run.app`, {
       userId,
       userName:
         JSON.parse(sessionStorage.getItem("user") || "{}").name || "User",
@@ -67,7 +67,7 @@ export const fetchVideoToken = async (userId) => {
       throw new Error("User ID is required to generate a token");
     }
 
-    const response = await axios.post(`${apiBaseUrl}/api/video-token`, {
+    const response = await axios.post(`https://generatevideotoken-3idvfneyra-uc.a.run.app`, {
       userId,
     });
 

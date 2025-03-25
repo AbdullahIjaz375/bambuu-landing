@@ -127,7 +127,7 @@ const VideoCallTutor = () => {
   const fetchToken = async (userId) => {
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/chat-token`,
+        `https://generatechattoken-3idvfneyra-uc.a.run.app`,
         {
           userId,
           userName:
@@ -146,7 +146,7 @@ const VideoCallTutor = () => {
   const fetchVideoToken = async (userId) => {
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/video-token`,
+        `https://generatevideotoken-3idvfneyra-uc.a.run.app`,
         {
           userId,
         }
