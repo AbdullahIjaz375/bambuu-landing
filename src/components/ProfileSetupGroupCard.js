@@ -183,6 +183,7 @@ const ExploreGroupDetailsModal = ({ group, onClose, onJoinClick }) => {
 };
 
 const ProfileSetupGroupCard = ({ group }) => {
+
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showJoinConfirmation, setShowJoinConfirmation] = useState(false);
 
@@ -192,7 +193,7 @@ const ProfileSetupGroupCard = ({ group }) => {
   const {
     groupName,
     groupLearningLanguage,
-    level = "Not specified",
+    level = " specified",
     groupAdminName = "Admin",
     memberIds = [],
     imageUrl,
@@ -340,11 +341,10 @@ const ProfileSetupGroupCard = ({ group }) => {
     <>
       <div className="max-w-md mt-1 hover:cursor-pointer">
         <div
-          className={`max-w-sm p-4  rounded-3xl ${
-            isPremium
+          className={`max-w-sm p-4  rounded-3xl ${isPremium
               ? "bg-[#e8feeb] border border-[#14b82c]"
               : "bg-white border border-[#ffc310]"
-          }`}
+            }`}
         >
           {/* Rest of your existing GroupCard code */}
           <div className="flex flex-col items-center">
@@ -377,8 +377,8 @@ const ProfileSetupGroupCard = ({ group }) => {
                     groupLearningLanguage === "English"
                       ? "/svgs/xs-us.svg"
                       : groupLearningLanguage === "Spanish"
-                      ? "/svgs/xs-spain.svg"
-                      : "/svgs/eng-spanish-xs.svg"
+                        ? "/svgs/xs-spain.svg"
+                        : "/svgs/eng-spanish-xs.svg"
                   }
                   alt={
                     groupLearningLanguage === "English"
@@ -391,9 +391,9 @@ const ProfileSetupGroupCard = ({ group }) => {
                   {groupLearningLanguage}
                 </span>
               </div>
-              <span className="px-3 py-1 text-gray-800 bg-[#fff885] rounded-full">
+              {/* <span className="px-3 py-1 text-gray-800 bg-[#fff885] rounded-full">
                 {level}
-              </span>
+              </span> */}
             </div>
 
             <div className="flex items-center justify-between w-full">
