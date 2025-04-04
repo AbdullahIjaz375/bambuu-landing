@@ -949,7 +949,7 @@ const GroupDetailsUser = ({ onClose }) => {
                             ? "bg-[#bffcc4] border-[#0a0d0b]"
                             : "bg-[#FFFBC5] border-black"
                         }`}
-                        onClick={() => navigate("/communityUser")}
+                        onClick={() => navigate("/messagesUser")}
                       >
                         {t("groupDetails.buttons.viewChat")}
                       </button>

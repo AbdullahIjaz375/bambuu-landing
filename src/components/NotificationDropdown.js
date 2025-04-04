@@ -192,8 +192,8 @@ const NotificationDropdown = () => {
 
                   <div className="flex flex-col items-end justify-between space-y-3">
                     <span className="text-xs text-gray-400">
-                      {notification.data.timestamp
-                        ? format(new Date(notification.data.timestamp), "HH:mm")
+                      {notification.timestamp
+                        ? format(new Date(notification.timestamp), "dd MMM yyyy HH:mm")
                         : "Just now"}
                     </span>
                     <ChevronRight className="w-4 h-4" />

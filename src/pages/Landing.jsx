@@ -13,7 +13,9 @@ const Card = ({ title, description, imageSrc, index }) => {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-100px" }}
       transition={{ duration: 0.8, delay: index * 0.2 }}
-      className="w-full md:w-1/2  flex h-[100vh] flex-col justify-center items-center border-2 space-y-10 border-[#14b82c] rounded-[8vh] bg-[#e6fde9] px-20 pt-28"
+      className="w-full md:w-1/2  flex h-[100vh] flex-col justify-center items-center border-2 space-y-10 border-[#14b82c] rounded-[8vh]
+      overflow-hidden
+      bg-[#e6fde9] px-20 pt-28"
     >
       <h1 className="text-2xl lg:text-4xl font-semibold text-center text-[#042f0c]">
         {title}

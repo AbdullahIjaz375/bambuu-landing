@@ -153,7 +153,7 @@ const BecomeAnExpertUser = () => {
             {/* Scrollable Content */}
             <div className="overflow-y-auto">
               <p className="mb-8 text-gray-600">
-                We're excited that you are interested in joining our team!
+                Interested in becoming a language expert with Bammbuu? We're excited that you are interested in joining our team!
                 Please fill out this form and our team will reach out to you
                 after reviewing it.
               </p>
