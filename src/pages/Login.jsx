@@ -176,7 +176,7 @@ const Login = () => {
         await setDoc(userRef, newUserData);
         await setDoc(userAccountRef, {
           uid: user.uid,
-          signupMethod: "apple",
+          sign_up_method: "apple",
           created_at: serverTimestamp(),
         });
         if (!notificationPrefsDoc.exists()) {
@@ -304,7 +304,7 @@ const Login = () => {
         await setDoc(userRef, newUserData);
         await setDoc(userAccountRef, {
           uid: user.uid,
-          signupMethod: "google",
+          sign_up_method: "google",
           created_at: serverTimestamp(),
         });
         if (!notificationPrefsDoc.exists()) {
