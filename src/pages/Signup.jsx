@@ -940,7 +940,7 @@ const Signup = () => {
               className="flex items-center justify-center px-4 py-2 space-x-4 border border-gray-300 rounded-full hover:bg-gray-50"
             >
               <img alt="google" src="/svgs/login-insta.svg" />
-              <span>Google</span>
+              <span>google</span>
             </button>
             <button
               onClick={handleAppleLoginStudent}
@@ -951,7 +951,7 @@ const Signup = () => {
                 className="w-auto h-6"
                 src="/images/apple-white.png"
               />
-              <span>Apple</span>
+              <span>apple</span>
             </button>
           </div>
 
