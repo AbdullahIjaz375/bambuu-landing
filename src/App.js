@@ -73,10 +73,19 @@ import ContactUs from "./pages/ContactUs";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsConditions from "./pages/TermsConditions";
 import Subscriptions from "./pages/Subscriptions";
+import TagManager from 'react-gtm-module';
+
 
 const App = () => {
   const { user, streamClient } = useAuth(); // Use useAuth() inside the component
 
+  useEffect(() => {
+    const tagManagerArgs = {
+      gtmId: 'GTM-KZLTKLPJ',
+    };
+    TagManager.initialize(tagManagerArgs);
+  }, []);
+  
   useEffect(() => {
     // This listener gets triggered when a new message arrives in the foreground.
     const unsubscribe = onMessage(messaging, (payload) => {

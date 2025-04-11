@@ -293,9 +293,9 @@ const ProfileSetupClassCard = ({
                   <span className="text-[#042f0c]">{language}</span>
                 </span>
               </div>
-              <span className="px-3 py-1 text-sm bg-[#fff885] rounded-full">
+              {/* <span className="px-3 py-1 text-sm bg-[#fff885] rounded-full">
                 {languageLevel}
-              </span>
+              </span> */}
             </div>
           </div>
 

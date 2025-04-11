@@ -78,7 +78,7 @@ const InstructorProfileUser = () => {
       await createStreamChannel(channelData);
 
       // Navigate to community page on success
-      navigate(`/communityUser/${channelId}`);
+      navigate(`/messagesUser/${channelId}`);
     } catch (error) {
       console.error("Error creating chat channel:", error);
       // You might want to show an error message to the user here
@@ -129,88 +129,88 @@ const InstructorProfileUser = () => {
   };
 
 
-const renderClasses = () => {
-  // Filter out classes that are:
-  // 1. Individual Premium and already have a member
-  // 2. Group Premium and have no available spots
-  const availableClasses = classes.filter(classItem => {
-    if (classItem.classType === "Individual Premium" && classItem.classMemberIds?.length > 0) {
-      return false; // Filter out Individual Premium classes that already have a member
-    }
-    
-    if (classItem.classType === "Group Premium" && classItem.availableSpots <= 0) {
-      return false; // Filter out Group Premium classes with no available spots
-    }
-    
-    return true; // Keep all other classes
-  });
+  const renderClasses = () => {
+    // Filter out classes that are:
+    // 1. Individual Premium and already have a member
+    // 2. Group Premium and have no available spots
+    const availableClasses = classes.filter(classItem => {
+      if (classItem.classType === "Individual Premium" && classItem.classMemberIds?.length > 0) {
+        return false; // Filter out Individual Premium classes that already have a member
+      }
 
-  if (availableClasses.length === 0) {
+      if (classItem.classType === "Group Premium" && classItem.availableSpots <= 0) {
+        return false; // Filter out Group Premium classes with no available spots
+      }
+
+      return true; // Keep all other classes
+    });
+
+    if (availableClasses.length === 0) {
+      return (
+        <div className="flex items-center justify-center h-96">
+          <EmptyState message="No classes available" />
+        </div>
+      );
+    }
+
+    // Get enrolled classes from localStorage
+    const user = JSON.parse(sessionStorage.getItem("user"));
+    const enrolledClasses = user?.enrolledClasses || [];
+
     return (
-      <div className="flex items-center justify-center h-96">
-        <EmptyState message="No classes available" />
+      <div className="grid grid-cols-1 gap-4 mt-2 ml-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {availableClasses.map((classItem) => {
+          const isEnrolled = enrolledClasses.includes(classItem.classId);
+
+          return isEnrolled ? (
+            <ClassCard
+              key={classItem.classId}
+              classId={classItem.classId}
+              className={classItem.className}
+              language={classItem.language}
+              languageLevel={classItem.languageLevel}
+              classDateTime={classItem.classDateTime}
+              classDuration={classItem.classDuration}
+              adminId={classItem.adminId}
+              adminName={classItem.adminName}
+              adminImageUrl={classItem.adminImageUrl}
+              classMemberIds={classItem.classMemberIds}
+              availableSpots={classItem.availableSpots}
+              imageUrl={classItem.imageUrl}
+              classDescription={classItem.classDescription}
+              classAddress={classItem.classAddress}
+              groupId={classItem.groupId}
+              recurrenceType={classItem.recurrenceType}
+              classType={classItem.classType}
+              classLocation={classItem.classLocation}
+            />
+          ) : (
+            <ExploreClassCard
+              key={classItem.classId}
+              classId={classItem.classId}
+              className={classItem.className}
+              language={classItem.language}
+              languageLevel={classItem.languageLevel}
+              classDateTime={classItem.classDateTime}
+              classDuration={classItem.classDuration}
+              adminId={classItem.adminId}
+              adminName={classItem.adminName}
+              adminImageUrl={classItem.adminImageUrl}
+              classMemberIds={classItem.classMemberIds}
+              availableSpots={classItem.availableSpots}
+              imageUrl={classItem.imageUrl}
+              classDescription={classItem.classDescription}
+              classAddress={classItem.classAddress}
+              groupId={classItem.groupId}
+              recurrenceType={classItem.recurrenceType}
+              classType={classItem.classType}
+              classLocation={classItem.classLocation}
+            />
+          );
+        })}
       </div>
     );
-  }
-
-  // Get enrolled classes from localStorage
-  const user = JSON.parse(sessionStorage.getItem("user"));
-  const enrolledClasses = user?.enrolledClasses || [];
-
-  return (
-    <div className="grid grid-cols-1 gap-4 mt-2 ml-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {availableClasses.map((classItem) => {
-        const isEnrolled = enrolledClasses.includes(classItem.classId);
-
-        return isEnrolled ? (
-          <ClassCard
-            key={classItem.classId}
-            classId={classItem.classId}
-            className={classItem.className}
-            language={classItem.language}
-            languageLevel={classItem.languageLevel}
-            classDateTime={classItem.classDateTime}
-            classDuration={classItem.classDuration}
-            adminId={classItem.adminId}
-            adminName={classItem.adminName}
-            adminImageUrl={classItem.adminImageUrl}
-            classMemberIds={classItem.classMemberIds}
-            availableSpots={classItem.availableSpots}
-            imageUrl={classItem.imageUrl}
-            classDescription={classItem.classDescription}
-            classAddress={classItem.classAddress}
-            groupId={classItem.groupId}
-            recurrenceType={classItem.recurrenceType}
-            classType={classItem.classType}
-            classLocation={classItem.classLocation}
-          />
-        ) : (
-          <ExploreClassCard
-            key={classItem.classId}
-            classId={classItem.classId}
-            className={classItem.className}
-            language={classItem.language}
-            languageLevel={classItem.languageLevel}
-            classDateTime={classItem.classDateTime}
-            classDuration={classItem.classDuration}
-            adminId={classItem.adminId}
-            adminName={classItem.adminName}
-            adminImageUrl={classItem.adminImageUrl}
-            classMemberIds={classItem.classMemberIds}
-            availableSpots={classItem.availableSpots}
-            imageUrl={classItem.imageUrl}
-            classDescription={classItem.classDescription}
-            classAddress={classItem.classAddress}
-            groupId={classItem.groupId}
-            recurrenceType={classItem.recurrenceType}
-            classType={classItem.classType}
-            classLocation={classItem.classLocation}
-          />
-        );
-      })}
-    </div>
-  );
-};
+  };
 
   if (loading) {
     return (
@@ -326,27 +326,20 @@ const renderClasses = () => {
                           className="h-4 sm:h-5"
                         />
                         <span className="text-xs sm:text-sm">
-                          <span className="text-xs sm:text-sm">
-                            <span className="font-semibold">
-                              {t("instructor-profile.details.students.label")}:
-                            </span>{" "}
-                            {t("instructor-profile.details.students.count")}
+                          <span className="font-semibold">
+                            {t("instructor-profile.details.students.label")}:
                           </span>{" "}
+                          {tutor.tutorStudentIds.length}
                         </span>
                       </div>
                     </div>
                   </div>
 
                   <div className="px-2 mb-6 overflow-y-auto max-h-40 scrollbar-hide">
-                    <p className="text-sm text-gray-600">
-                      {tutor.bio.split(" ").length > 10 
-                        ? `${tutor.bio.split(" ").slice(0, 10).join(" ")}...`
-                        : tutor.bio.length > 20
-                        ? `${tutor.bio.slice(0, 20)}...`
-                        : tutor.bio}
+                    <p className="text-sm  text-gray-600">
+                      {tutor.bio}
                     </p>
                   </div>
-
                 </div>
 
                 <div className="w-full mt-4">

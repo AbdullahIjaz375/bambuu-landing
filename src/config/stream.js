@@ -42,13 +42,16 @@ export const fetchChatToken = async (userId) => {
       throw new Error("User ID is required to generate a token");
     }
 
-    const response = await axios.post(`https://generatechattoken-zzpsx27htq-uc.a.run.app`, {
-      userId,
-      userName:
-        JSON.parse(sessionStorage.getItem("user") || "{}").name || "User",
-      userImage:
-        JSON.parse(sessionStorage.getItem("user") || "{}").photoUrl || "",
-    });
+    const response = await axios.post(
+      `https://generatechattoken-3idvfneyra-uc.a.run.app`,
+      {
+        userId,
+        userName:
+          JSON.parse(sessionStorage.getItem("user") || "{}").name || "User",
+        userImage:
+          JSON.parse(sessionStorage.getItem("user") || "{}").photoUrl || "",
+      }
+    );
 
     if (!response.data?.token) {
       throw new Error("Invalid token response from server");
@@ -67,9 +70,12 @@ export const fetchVideoToken = async (userId) => {
       throw new Error("User ID is required to generate a token");
     }
 
-    const response = await axios.post(`https://generatevideotoken-zzpsx27htq-uc.a.run.app`, {
-      userId,
-    });
+    const response = await axios.post(
+      `https://generatevideotoken-3idvfneyra-uc.a.run.app`,
+      {
+        userId,
+      }
+    );
 
     if (!response.data?.token) {
       throw new Error("Invalid token response from server");

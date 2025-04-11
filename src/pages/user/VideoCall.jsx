@@ -5,7 +5,6 @@ import "stream-chat-react/dist/css/v2/index.css";
 import "./VideoCallStudent.css";
 import axios from "axios";
 
-
 import { db } from "../../firebaseConfig";
 import {
   collection,
@@ -16,26 +15,18 @@ import {
   getDoc,
   Timestamp,
   arrayUnion,
-  arrayRemove
+  arrayRemove,
 } from "firebase/firestore";
 
-
-import { 
-  streamClient, 
-  streamVideoClient, 
-  fetchChatToken, 
-  fetchVideoToken 
+import {
+  streamClient,
+  streamVideoClient,
+  fetchChatToken,
+  fetchVideoToken,
 } from "../../config/stream";
 
-
 // Icons
-import {
-  CopyPlus,
-  Users,
-  LogOut,
-  X,
-  MessageSquare
-} from "lucide-react";
+import { CopyPlus, Users, LogOut, X, MessageSquare } from "lucide-react";
 import EnhancedCallPreview from "../../components/CallPreview";
 
 /* Utility to check breakout room creation permissions */
@@ -71,12 +62,14 @@ const Modal = ({ isOpen, onClose, title, children, size = "md" }) => {
     "3xl": "max-w-3xl",
     "4xl": "max-w-4xl",
     "5xl": "max-w-5xl",
-    full: "max-w-full"
+    full: "max-w-full",
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm animate-fade-in">
-      <div className={`${sizeClasses[size]} w-full bg-white rounded-xl shadow-2xl overflow-hidden animate-scale-in`}>
+      <div
+        className={`${sizeClasses[size]} w-full bg-white rounded-xl shadow-2xl overflow-hidden animate-scale-in`}
+      >
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
           <button
@@ -97,12 +90,25 @@ const LoadingSpinner = ({ message }) => (
   <div className="fixed inset-0 flex flex-col items-center justify-center bg-gray-900">
     <div className="animate-pulse flex flex-col items-center text-center max-w-md">
       <div className="rounded-full bg-gray-800 h-24 w-24 mb-6 flex items-center justify-center">
-        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-400">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="40"
+          height="40"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="text-blue-400"
+        >
           <path d="M23 7l-7 5 7 5V7z"></path>
           <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
         </svg>
       </div>
-      <h2 className="text-white text-2xl font-medium mb-2">{message || "Joining call..."}</h2>
+      <h2 className="text-white text-2xl font-medium mb-2">
+        {message || "Joining call..."}
+      </h2>
       <p className="text-gray-400 mb-8">Setting up your video and audio</p>
       <div className="w-64 h-2 bg-gray-800 rounded-full overflow-hidden">
         <div className="h-full bg-blue-500 animate-progress-bar"></div>
@@ -141,14 +147,18 @@ const VideoCallStudent = () => {
   const videoContainerRef = useRef(null);
   const user = JSON.parse(sessionStorage.getItem("user") || "{}");
 
-
   const fetchToken = async (userId) => {
     try {
-      const response = await axios.post(`https://generatechattoken-zzpsx27htq-uc.a.run.app`, {
-        userId,
-        userName: JSON.parse(sessionStorage.getItem("user") || "{}").name || "User",
-        userImage: JSON.parse(sessionStorage.getItem("user") || "{}").photoUrl || "",
-      });
+      const response = await axios.post(
+        `https://generatechattoken-3idvfneyra-uc.a.run.app`,
+        {
+          userId,
+          userName:
+            JSON.parse(sessionStorage.getItem("user") || "{}").name || "User",
+          userImage:
+            JSON.parse(sessionStorage.getItem("user") || "{}").photoUrl || "",
+        }
+      );
       return response.data.token;
     } catch (error) {
       console.error("Failed to fetch token:", error);
@@ -158,16 +168,18 @@ const VideoCallStudent = () => {
 
   const fetchVideoToken = async (userId) => {
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/video-token`, {
-        userId,
-      });
+      const response = await axios.post(
+        `https://generatevideotoken-3idvfneyra-uc.a.run.app`,
+        {
+          userId,
+        }
+      );
       return response.data.token;
     } catch (error) {
       console.error("Failed to fetch video token:", error);
       throw new Error("Could not fetch video authentication token");
     }
   };
-
 
   // Fetch class data
   useEffect(() => {
@@ -183,7 +195,7 @@ const VideoCallStudent = () => {
           setClassData(classDocSnap.data());
           // Default to the main class room ID
           setActiveRoomId(selectedClassId);
-          
+
           // Fetch breakout rooms if they exist
           fetchBreakoutRooms();
         } else {
@@ -198,7 +210,6 @@ const VideoCallStudent = () => {
 
     // Check breakout room permissions
     setHasBreakoutPermission(canCreateBreakoutRooms(selectedClassId));
-
   }, [selectedClassId]);
 
   // Initialize chat channel when class data is available
@@ -212,7 +223,7 @@ const VideoCallStudent = () => {
           console.log("Connecting user to Stream Chat...");
           // Generate token for chat
           const token = await fetchToken(user.uid); // Changed from devToken to fetchToken
-          
+
           // Connect user to chat
           await streamClient.connectUser(
             {
@@ -224,16 +235,16 @@ const VideoCallStudent = () => {
           );
           console.log("User connected to Stream Chat successfully");
         }
-        
+
         // Now create or get the chat channel
         const channelId = `class-${selectedClassId}`;
-        
-        const channel = streamClient.channel('messaging', channelId, {
+
+        const channel = streamClient.channel("messaging", channelId, {
           name: `Class ${selectedClassId} Chat`,
           members: [user.uid], // Add current user as member (others will be added as they join)
-          created_by_id: user.uid
+          created_by_id: user.uid,
         });
-        
+
         await channel.watch();
         setChatChannel(channel);
       } catch (error) {
@@ -247,36 +258,41 @@ const VideoCallStudent = () => {
   // Listen for new messages when chat is not open
   useEffect(() => {
     if (!chatChannel || isChatOpen) return;
-    
+
     const handleNewMessage = (event) => {
       // Only increment for messages from other users
       if (event.user.id !== streamClient.userID) {
         setUnreadMessages((prev) => prev + 1);
       }
     };
-    
-    chatChannel.on('message.new', handleNewMessage);
-    
+
+    chatChannel.on("message.new", handleNewMessage);
+
     return () => {
-      chatChannel.off('message.new', handleNewMessage);
+      chatChannel.off("message.new", handleNewMessage);
     };
   }, [chatChannel, isChatOpen, streamClient]);
 
   // Check for WebRTC support
   useEffect(() => {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      alert("Your browser doesn't support video calls. Please use a modern browser like Chrome, Firefox, or Safari.");
+      alert(
+        "Your browser doesn't support video calls. Please use a modern browser like Chrome, Firefox, or Safari."
+      );
       return;
     }
 
     // Check for permissions
-    navigator.permissions.query({ name: 'camera' })
-      .then(cameraPermission => {
-        if (cameraPermission.state === 'denied') {
-          alert("Camera permission is denied. Please enable camera access in your browser settings.");
+    navigator.permissions
+      .query({ name: "camera" })
+      .then((cameraPermission) => {
+        if (cameraPermission.state === "denied") {
+          alert(
+            "Camera permission is denied. Please enable camera access in your browser settings."
+          );
         }
       })
-      .catch(err => console.log("Permission query not supported"));
+      .catch((err) => console.log("Permission query not supported"));
   }, []);
 
   // Set up reconnection handler
@@ -291,12 +307,12 @@ const VideoCallStudent = () => {
         setIsLoading(false);
       };
 
-      currentCall.on('reconnecting', handleReconnect);
-      currentCall.on('connected', handleReconnected);
+      currentCall.on("reconnecting", handleReconnect);
+      currentCall.on("connected", handleReconnected);
 
       return () => {
-        currentCall.off('reconnecting', handleReconnect);
-        currentCall.off('connected', handleReconnected);
+        currentCall.off("reconnecting", handleReconnect);
+        currentCall.off("connected", handleReconnected);
       };
     }
   }, [currentCall]);
@@ -326,7 +342,9 @@ const VideoCallStudent = () => {
 
       if (!user || !user.uid) {
         console.error("No valid user found in session storage");
-        alert("You need to be logged in to join a call. Please log in and try again.");
+        alert(
+          "You need to be logged in to join a call. Please log in and try again."
+        );
         setIsLoading(false);
         return;
       }
@@ -335,11 +353,11 @@ const VideoCallStudent = () => {
       if (!streamClient.userID) {
         console.log("Connecting user to Stream Chat first...");
         setLoadingMessage("Initializing chat...");
-        
+
         try {
           // Generate token for chat
           const chatToken = await fetchToken(user.uid);
-          
+
           // Connect user to chat
           await streamClient.connectUser(
             {
@@ -376,7 +394,7 @@ const VideoCallStudent = () => {
               id: user.uid,
               name: user.name || "User",
               image: user.photoUrl || "",
-              userType: user.userType || "student"
+              userType: user.userType || "student",
             },
             token
           );
@@ -406,30 +424,34 @@ const VideoCallStudent = () => {
 
       try {
         console.log("Joining call with extended timeout...");
-        
+
         // Add custom data to link the video call with the chat channel
         const callData = {
           custom: {
             channelCid: `messaging:class-${selectedClassId}`,
-            classId: selectedClassId
-          }
+            classId: selectedClassId,
+          },
         };
-        
+
         // Increase the timeout for joining
         await Promise.race([
           call.join({ create: true, data: callData }),
           new Promise((_, reject) =>
             setTimeout(() => reject(new Error("Join call timeout")), 30000)
-          )
+          ),
         ]);
         console.log("Call joined successfully");
       } catch (error) {
         console.error("Error joining call:", error);
         setIsLoading(false);
         if (error.message === "Join call timeout") {
-          alert("Connection timed out. Please check your network and try again.");
+          alert(
+            "Connection timed out. Please check your network and try again."
+          );
         } else {
-          alert("Could not join the video call. Please check your connection and try again.");
+          alert(
+            "Could not join the video call. Please check your connection and try again."
+          );
         }
         return;
       }
@@ -439,23 +461,25 @@ const VideoCallStudent = () => {
       setCurrentCall(call);
       setActiveRoomId(roomId);
       setIsCallJoined(true);
-      
+
       // Enable devices after successful join
       setLoadingMessage("Enabling camera and microphone...");
       await enableDevices(call);
-      
+
       setIsLoading(false);
     } catch (error) {
       console.error("Error in join room process:", error);
       setIsLoading(false);
-      alert("An error occurred while setting up the video call. Please refresh the page and try again.");
+      alert(
+        "An error occurred while setting up the video call. Please refresh the page and try again."
+      );
     }
   };
 
   // Toggle chat sidebar
   const toggleChat = () => {
     setIsChatOpen(!isChatOpen);
-    
+
     // Mark messages as read when opening chat
     if (!isChatOpen && chatChannel) {
       chatChannel.markRead();
@@ -478,7 +502,7 @@ const VideoCallStudent = () => {
   // Fetch breakout rooms
   const fetchBreakoutRooms = async () => {
     if (!selectedClassId) return;
-    
+
     try {
       const breakoutRef = collection(
         db,
@@ -491,7 +515,7 @@ const VideoCallStudent = () => {
       setBreakoutRooms(
         querySnapshot.docs.map((doc) => ({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         }))
       );
     } catch (error) {
@@ -517,7 +541,7 @@ const VideoCallStudent = () => {
           roomDuration,
           roomMembers: [],
           createdAt: Timestamp.now(),
-          roomName: `Breakout Room ${i + 1}`
+          roomName: `Breakout Room ${i + 1}`,
         });
 
         await updateDoc(newRoomRef, { roomId: newRoomRef.id });
@@ -526,7 +550,6 @@ const VideoCallStudent = () => {
       setIsModalOpen(false);
       await fetchBreakoutRooms();
       setIsViewModalOpen(true);
-
     } catch (error) {
       console.error("Error creating breakout rooms:", error);
     } finally {
@@ -549,7 +572,7 @@ const VideoCallStudent = () => {
       if (!roomDoc.exists()) return;
 
       await updateDoc(breakoutRoomRef, {
-        roomMembers: isJoining ? arrayUnion(user.uid) : arrayRemove(user.uid)
+        roomMembers: isJoining ? arrayUnion(user.uid) : arrayRemove(user.uid),
       });
 
       await fetchBreakoutRooms();
@@ -583,7 +606,7 @@ const VideoCallStudent = () => {
 
       await updateDoc(breakoutRoomRef, {
         startedAt,
-        classEndTime
+        classEndTime,
       });
 
       room.startedAt = startedAt;
@@ -638,7 +661,7 @@ const VideoCallStudent = () => {
         setIsCallJoined(false);
 
         // Redirect to dashboard
-        window.location.href = '/dashboard';
+        window.location.href = "/dashboard";
       }
     } catch (error) {
       console.error("Error leaving call:", error);
@@ -650,21 +673,23 @@ const VideoCallStudent = () => {
       {currentCall && !isLoading ? (
         <>
           <EnhancedCallPreview
-            streamVideoClient={streamVideoClient} 
-            currentCall={currentCall} 
+            streamVideoClient={streamVideoClient}
+            currentCall={currentCall}
             chatClient={streamClient}
             chatChannel={chatChannel}
           />
-          
+
           {/* Room indicator */}
           <div className="fixed top-8 left-8 z-[1000]">
             {activeRoomId !== selectedClassId && (
               <div className="px-4 py-2 text-white bg-green-600 rounded-xl">
-                Breakout Room {breakoutRooms.findIndex((room) => room.id === activeRoomId) + 1}
+                Breakout Room{" "}
+                {breakoutRooms.findIndex((room) => room.id === activeRoomId) +
+                  1}
               </div>
             )}
           </div>
-          
+
           {/* Floating action buttons */}
           <div className="fixed bottom-4 left-12 flex gap-2 z-[1000]">
             {/* Create Breakout Rooms button (for users with permission) */}
@@ -681,7 +706,7 @@ const VideoCallStudent = () => {
                 <CopyPlus size={20} />
               </button>
             )}
-            
+
             {/* View Breakout Rooms button */}
             {activeRoomId === selectedClassId && (
               <button
@@ -699,7 +724,7 @@ const VideoCallStudent = () => {
                 <Users size={20} />
               </button>
             )}
-            
+
             {/* Return to Main Room button */}
             {activeRoomId !== selectedClassId && (
               <button
@@ -784,17 +809,23 @@ const VideoCallStudent = () => {
 
           {/* Preview of room distribution */}
           <div className="mt-4">
-            <h3 className="text-sm font-medium text-gray-700 mb-2">Room Preview:</h3>
+            <h3 className="text-sm font-medium text-gray-700 mb-2">
+              Room Preview:
+            </h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-              {Array.from({ length: Math.min(numRooms, 10) }).map((_, index) => (
-                <div
-                  key={index}
-                  className="p-2 bg-gray-100 rounded-md text-center"
-                >
-                  <p className="text-sm font-medium">Room {index + 1}</p>
-                  <p className="text-xs text-gray-500">{availableSlots} slots</p>
-                </div>
-              ))}
+              {Array.from({ length: Math.min(numRooms, 10) }).map(
+                (_, index) => (
+                  <div
+                    key={index}
+                    className="p-2 bg-gray-100 rounded-md text-center"
+                  >
+                    <p className="text-sm font-medium">Room {index + 1}</p>
+                    <p className="text-xs text-gray-500">
+                      {availableSlots} slots
+                    </p>
+                  </div>
+                )
+              )}
             </div>
           </div>
 
@@ -854,7 +885,7 @@ const VideoCallStudent = () => {
               const isRoomExpired =
                 room.startedAt &&
                 new Date() > new Date(room.classEndTime?.toDate());
-              
+
               let timeRemaining = null;
               if (room.startedAt && room.classEndTime) {
                 const now = new Date();
@@ -890,10 +921,11 @@ const VideoCallStudent = () => {
                         </p>
                       )}
                     </div>
-                    
+
                     <button
                       className={`px-3 py-1 text-sm font-medium rounded ${
-                        room.roomMembers.length >= room.availableSlots || isRoomExpired
+                        room.roomMembers.length >= room.availableSlots ||
+                        isRoomExpired
                           ? "bg-gray-400 text-white cursor-not-allowed"
                           : room.id === activeRoomId
                           ? "bg-green-500 text-white"
@@ -905,7 +937,11 @@ const VideoCallStudent = () => {
                           setIsViewModalOpen(false);
                         }
                       }}
-                      disabled={room.roomMembers.length >= room.availableSlots || isRoomExpired || room.id === activeRoomId}
+                      disabled={
+                        room.roomMembers.length >= room.availableSlots ||
+                        isRoomExpired ||
+                        room.id === activeRoomId
+                      }
                     >
                       {room.roomMembers.length >= room.availableSlots
                         ? "Full"
@@ -925,7 +961,7 @@ const VideoCallStudent = () => {
             </div>
           )}
         </div>
-        
+
         <div className="flex justify-end mt-4">
           <button
             onClick={() => setIsViewModalOpen(false)}
