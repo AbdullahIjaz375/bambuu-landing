@@ -27,6 +27,7 @@ import ClassCard from "../../components/ClassCard";
 import ExploreClassCard from "../../components/ExploreClassCard";
 import { ChannelType } from "../../config/stream";
 import EmptyState from "../../components/EmptyState";
+import { ExpandableBio } from "../../components/ExpandableBio";
 const InstructorProfileUser = () => {
   const { tutorId } = useParams();
   const navigate = useNavigate();
@@ -264,7 +265,7 @@ const InstructorProfileUser = () => {
           {/* Content Container */}
           <div className="flex flex-col flex-1 min-h-0 gap-4 lg:flex-row">
             {/* Left sidebar - Now responsive */}
-            <div className="w-full lg:w-1/4 p-4 sm:p-6 bg-[#E6FDE9] rounded-3xl shrink-0 overflow-y-auto ">
+            <div className="w-full lg:w-1/4 p-4 sm:p-6 bg-[#E6FDE9] rounded-3xl shrink-0 overflow-y-auto  scrollbar-hide">
               <div className="flex flex-col items-center justify-between h-full text-center">
                 <div className="flex flex-col items-center w-full text-center">
                   <img
@@ -335,11 +336,8 @@ const InstructorProfileUser = () => {
                     </div>
                   </div>
 
-                  <div className="px-2 mb-6 overflow-y-auto max-h-40 scrollbar-hide">
-                    <p className="text-sm  text-gray-600">
-                      {tutor.bio}
-                    </p>
-                  </div>
+                  <ExpandableBio bio={tutor.bio} maxChars={200} />
+
                 </div>
 
                 <div className="w-full mt-4">

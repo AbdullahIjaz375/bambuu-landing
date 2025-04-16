@@ -74,20 +74,20 @@ const TutorialOverlay = () => {
   // Position and content based on current step
   if (currentStep === 1) {
     tooltipPosition = {
-        top: '135px',
-        left: '19%',
-      transform: 'translateX(-50%)'
-    };
+      top: '195px',
+    left: '420px',
+    transform: 'translateX(-50%)'
+  };
     tooltipContent = {
       title: "Explore Certified Instructors ",
       description: "Book live 1:1 language classes with certified instructors to bring your language learning to the next level."
     };
   } else if (currentStep === 2) {
     tooltipPosition = {
-        top: '170px',
-      left: '21.5%',
-      transform: 'translateX(-50%)'
-    };
+      top: '175px',
+      left: '420px',
+    transform: 'translateX(-50%)'
+  };
     tooltipContent = {
       title: "AI Tutor",
       description: "Practice 24/7 with our AI language SuperTutor. Ask SuperTutor for language translations and grammar questions. You can also have a practice conversation in the language you are learning!"

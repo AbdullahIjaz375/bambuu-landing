@@ -13,17 +13,27 @@ const Card = ({ title, description, imageSrc, index }) => {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-100px" }}
       transition={{ duration: 0.8, delay: index * 0.2 }}
-      className="w-full md:w-1/2  flex h-[100vh] flex-col justify-center items-center border-2 space-y-10 border-[#14b82c] rounded-[8vh]
-      overflow-hidden
-      bg-[#e6fde9] px-20 pt-28"
+      className="w-full flex flex-col justify-between items-center 
+        border-2 border-[#14b82c] rounded-3xl sm:rounded-[5vh]
+        overflow-hidden bg-[#e6fde9] px-4 sm:px-6 lg:px-6
+        py-4 sm:py-6 h-auto md:h-[520px] lg:h-[580px]"
     >
-      <h1 className="text-2xl lg:text-4xl font-semibold text-center text-[#042f0c]">
-        {title}
-      </h1>
-      <h1 className="text-lg lg:text-2xl text-center text-[#3d3d3d]">
-        {description}
-      </h1>
-      <img alt="bambuu" src={imageSrc} className="w-auto h-full" />
+      <div className="flex flex-col items-center space-y-2 sm:space-y-3">
+        <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold text-center text-[#042f0c]">
+          {title}
+        </h2>
+        <p className="text-sm sm:text-base text-center text-[#3d3d3d] max-w-prose">
+          {description}
+        </p>
+      </div>
+      
+      <div className="flex-grow w-full flex items-end justify-center mt-4 relative">
+        <img 
+          alt={title} 
+          src={imageSrc} 
+          className="w-auto max-w-full h-auto max-h-[220px] sm:max-h-[250px] md:max-h-[280px] lg:max-h-[300px] object-contain" 
+        />
+      </div>
     </motion.div>
   );
 };
@@ -66,7 +76,7 @@ const Landing = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="flex flex-col items-start justify-between px-6 mt-20 mb-20 space-y-8 lg:flex-row lg:mt-56 lg:mb-40 lg:px-28 lg:space-y-0"
+          className="flex flex-col items-start justify-between px-6 mt-20 mb-20 space-y-8 lg:flex-row lg:mt-40 lg:mb-32 lg:px-28 lg:space-y-0"
         >
           <h1 className="w-full text-3xl font-semibold text-left text-black lg:w-1/2 lg:text-6xl">
             About bammbuu
@@ -85,8 +95,8 @@ const Landing = () => {
         </motion.div>
 
         {/* section 3 - Cards */}
-        <div className="flex flex-col items-center justify-center px-4 mb-20 space-y-8 lg:mb-40 lg:space-y-12 lg:px-28">
-          <div className="flex flex-col items-center justify-center space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0">
+        <div className="px-4 mb-16 lg:mb-32 lg:px-6 xl:px-8 max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 md:gap-4 lg:gap-5">
             <Card
               index={0}
               title="Explore conversation classes & groups"
@@ -99,8 +109,6 @@ const Landing = () => {
               description="Practice speaking with native speakers in real-time. Improve your fluency and confidence through interactive 1:1 conversations that bring the language to life."
               imageSrc="/images/landing-card2.png"
             />
-          </div>
-          <div className="flex flex-col items-center justify-center space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0">
             <Card
               index={2}
               title="Learn from certified language instructors"
@@ -115,36 +123,6 @@ const Landing = () => {
             />
           </div>
         </div>
-
-        {/* section 4 */}
-        {/* <motion.div
-          initial={{ opacity: 0, y: 100 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="flex flex-col items-center justify-center px-4 mt-20 mb-20 space-y-8 lg:mt-56 lg:space-y-12 lg:mb-28 lg:px-0"
-        >
-          <h1 className="text-3xl font-semibold text-center text-black lg:text-6xl">
-            Download Mobile App
-          </h1>
-          <img
-            alt="bambuu"
-            src="/images/qr-code.png"
-            className="w-64 h-auto lg:w-auto"
-          />
-          <div className="flex flex-col items-center justify-center space-y-4 sm:flex-row sm:space-y-0 sm:space-x-6">
-            <img
-              alt="bambuu"
-              src="/images/apple-button.png"
-              className="w-48 h-auto sm:w-auto hover:cursor-pointer"
-            />
-            <img
-              alt="bambuu"
-              src="/images/playstore-button.png"
-              className="w-48 h-auto sm:w-auto hover:cursor-pointer"
-            />
-          </div>
-        </motion.div> */}
 
         {/* section 5 */}
         <motion.div
