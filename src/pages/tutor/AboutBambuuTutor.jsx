@@ -29,7 +29,7 @@ const AboutBambuuTutor = () => {
               >
                 <ArrowLeft className="w-6 h-6" />
               </button>
-              <h1 className="text-4xl font-semibold">About Bambuu</h1>
+              <h1 className="text-4xl font-semibold">About bammbuu</h1>
             </div>
           </div>{" "}
           <div>

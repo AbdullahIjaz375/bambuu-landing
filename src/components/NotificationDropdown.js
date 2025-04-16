@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Bell, ChevronRight, X } from "lucide-react";
 import { doc, getDoc, updateDoc, onSnapshot } from "firebase/firestore";
 import { db } from "../firebaseConfig";
-import { format } from "date-fns";
+import { format, isValid, isToday, isSameDay } from "date-fns";
 import { useNavigate } from "react-router-dom";
 
 // Import SVGs
@@ -30,6 +30,45 @@ const getNotificationSvg = (event) => {
   }
 };
 
+// Helper function to format date based on how recent it is
+const formatTimestamp = (timestamp) => {
+  try {
+    let date;
+    
+    // Handle Firestore timestamp objects
+    if (timestamp && typeof timestamp.toDate === 'function') {
+      date = timestamp.toDate();
+    } 
+    // Handle string timestamps
+    else if (timestamp && typeof timestamp === 'string') {
+      date = new Date(timestamp);
+    }
+    // Handle number timestamps
+    else if (timestamp && typeof timestamp === 'number') {
+      date = new Date(timestamp);
+    } else {
+      return "Just now";
+    }
+    
+    // Check if the date is valid
+    if (!isValid(date)) {
+      return "Just now";
+    }
+    
+    // If the notification is from today, show only the time
+    if (isToday(date)) {
+      return format(date, "HH:mm");
+    }
+    
+    // For older notifications, show date and time
+    return format(date, "dd MMM, HH:mm");
+    
+  } catch (error) {
+    console.error("Error formatting timestamp:", error);
+    return "Just now";
+  }
+};
+
 const NotificationDropdown = () => {
   const navigate = useNavigate();
   const user = JSON.parse(sessionStorage.getItem("user"));
@@ -49,9 +88,28 @@ const NotificationDropdown = () => {
       if (docSnap.exists()) {
         const data = docSnap.data();
         const notificationList = data.notification_list || [];
-        const sortedNotifications = notificationList.sort(
-          (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
-        );
+        
+        // Sort notifications safely by handling various timestamp formats
+        const sortedNotifications = [...notificationList].sort((a, b) => {
+          // Handle Firestore timestamp objects
+          if (a.timestamp && typeof a.timestamp.toDate === 'function' &&
+              b.timestamp && typeof b.timestamp.toDate === 'function') {
+            return b.timestamp.toDate() - a.timestamp.toDate();
+          }
+          
+          // Handle string timestamps
+          const dateA = a.timestamp ? new Date(a.timestamp) : new Date(0);
+          const dateB = b.timestamp ? new Date(b.timestamp) : new Date(0);
+          
+          // Check if dates are valid before comparing
+          if (isValid(dateA) && isValid(dateB)) {
+            return dateB - dateA;
+          }
+          
+          // If dates are invalid, maintain original order
+          return 0;
+        });
+        
         setNotifications(sortedNotifications);
         setUnreadCount(data.unreadCount || 0);
       }
@@ -151,52 +209,51 @@ const NotificationDropdown = () => {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 z-50 px-5 mt-2 bg-white border shadow-lg border-gray-50 w-[50vh] rounded-2xl">
-          <div className="flex items-center justify-between py-6">
-            <h2 className="text-xl">Notifications</h2>
+        <div className="absolute right-0 z-50 px-5 mt-2 bg-white border shadow-lg border-gray-50 w-[350px] rounded-2xl">
+          <div className="flex items-center justify-between py-4">
+            <h2 className="text-lg font-medium">Notifications</h2>
             <button
               onClick={() => setIsOpen(false)}
-              className="p-2 rounded-full bg-[#F6F6F6]"
+              className="p-2 rounded-full hover:bg-gray-100"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
-          <div className="max-h-[600px] overflow-y-auto space-y-2 pb-4 scrollbar-hide">
+          <div className="max-h-[400px] overflow-y-auto space-y-1 pb-4 scrollbar-hide">
             {notifications.length > 0 ? (
               notifications.map((notification) => (
                 <div
                   key={notification.notificationId}
                   onClick={() => handleNotificationClick(notification)}
-                  className={`flex items-center justify-between p-4 rounded-2xl cursor-pointer ${
-                    !notification.isRead ? "bg-[#E6FDE9]" : "bg-[#F6F6F6]"
-                  }`}
+                  className={`flex items-start justify-between p-3 rounded-xl cursor-pointer ${
+                    !notification.isRead ? "bg-[#e6fde9]" : "bg-gray-50"
+                  } hover:bg-gray-100`}
                 >
-                  <div className="flex items-center mr-4 space-x-4">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full">
+                  <div className="flex flex-grow pr-2">
+                    <div className="flex-shrink-0 mr-3">
                       <img
                         src={getNotificationSvg(notification.event)}
                         alt={notification.event}
                         className="w-6 h-6"
                       />
                     </div>
+                    
                     <div>
-                      <p className="font-semibold text-gray-800 font-sm">
+                      <p className="font-medium text-gray-900">
                         {notification.title}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-sm text-gray-600">
                         {notification.body}
                       </p>
                     </div>
                   </div>
-
-                  <div className="flex flex-col items-end justify-between space-y-3">
-                    <span className="text-xs text-gray-400">
-                      {notification.timestamp
-                        ? format(new Date(notification.timestamp), "dd MMM yyyy HH:mm")
-                        : "Just now"}
+                  
+                  <div className="flex flex-col items-end min-w-[60px]">
+                    <span className="text-xs text-gray-500 whitespace-nowrap">
+                      {formatTimestamp(notification.timestamp)}
                     </span>
-                    <ChevronRight className="w-4 h-4" />
+                    <ChevronRight className="w-4 h-4 text-gray-400 mt-3" />
                   </div>
                 </div>
               ))
