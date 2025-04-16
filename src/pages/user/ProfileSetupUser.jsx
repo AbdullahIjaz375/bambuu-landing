@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ClipLoader } from "react-spinners";
@@ -110,50 +109,7 @@ const ProfileSetup = () => {
       </div>
     );
   }
-  const TooltipOverlay = () => {
-    const noContentMessage =
-      currentView === "groups"
-        ? groups.length === 0
-          ? "No groups currently available."
-          : "Join 1 or more groups."
-        : classes.length === 0
-        ? "No classes currently available."
-        : "Book 1 or more Classes";
-
-    const tooltipDescription =
-      currentView === "groups"
-        ? "Make the most out of bammbuu. Learn and practice languages through conversation."
-        : "Book unlimited live group conversation classes hosted by certified language instructors for one monthly price. These classes are more structured and expert feedback is provided to help with your learning.";
-
-    return (
-      <div className="absolute z-50 transform -translate-y-full left-4 top-4">
-        <div className="p-5 bg-[#042F0C] text-white rounded-2xl w-96">
-          <h3 className="mb-2 text-sm font-medium">{noContentMessage}</h3>
-          {/* Conditionally render the description only if there are groups or classes */}
-          {(currentView === "groups" && groups.length > 0) ||
-          (currentView === "classes" && classes.length > 0) ? (
-            <p className="mb-4 text-sm">{tooltipDescription}</p>
-          ) : null}
-          <div className="flex items-center justify-between">
-            <button onClick={handleSkip} className="text-white hover:underline">
-              Skip
-            </button>
-            <div className="flex items-center gap-4">
-              <button
-                onClick={handleNext}
-                className="px-4 py-1 bg-white text-[#043D11] rounded-full hover:bg-opacity-90"
-              >
-                {currentView === "groups" ? "Next (1/2)" : "Next (2/2)"}
-              </button>
-            </div>
-          </div>
-        </div>
-        <div className="absolute -bottom-2 left-12">
-          <div className="w-0 h-0 border-l-8 border-r-8 border-t-8 border-transparent border-t-[#042F0C]" />
-        </div>
-      </div>
-    );
-  };
+  
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <div className="w-full max-w-5xl px-4 py-8 mx-auto">
@@ -163,37 +119,67 @@ const ProfileSetup = () => {
             ? "Let's join a few groups below."
             : "Let's book a few classes below."}
         </p>
-        <div className="relative my-20">
+        
+        {/* Grid of cards */}
+        <div className="grid grid-cols-1 gap-4 mb-4 md:grid-cols-3">
           {currentView === "groups" ? (
-            <div className="grid grid-cols-1 gap-4 mb-8 md:grid-cols-3">
-              {groups.length > 0 ? (
-                groups.map((group) => (
-                  <ProfileSetupGroupCard key={group.id} group={group} />
-                ))
-              ) : (
-                <div className="col-span-3 text-center text-gray-500">
-                  No groups available to join at the moment.
-                </div>
-              )}
-            </div>
+            groups.length > 0 ? (
+              groups.map((group) => (
+                <ProfileSetupGroupCard key={group.id} group={group} />
+              ))
+            ) : (
+              <div className="col-span-3 text-center text-gray-500">
+                No groups available to join at the moment.
+              </div>
+            )
           ) : (
-            <div className="grid grid-cols-1 gap-4 mb-8 md:grid-cols-3">
-              {classes.length > 0 ? (
-                classes.map((classItem) => (
-                  <ProfileSetupClassCard
-                    key={classItem.id}
-                    {...classItem}
-                    isBammbuu={Boolean(classItem.tutorId)}
-                  />
-                ))
-              ) : (
-                <div className="col-span-3 text-center text-gray-500">
-                  No classes available to book at the moment.
-                </div>
-              )}
-            </div>
+            classes.length > 0 ? (
+              classes.map((classItem) => (
+                <ProfileSetupClassCard
+                  key={classItem.id}
+                  {...classItem}
+                  isBammbuu={Boolean(classItem.tutorId)}
+                />
+              ))
+            ) : (
+              <div className="col-span-3 text-center text-gray-500">
+                No classes available to book at the moment.
+              </div>
+            )
           )}
-          <TooltipOverlay />
+        </div>
+        
+        {/* Positioned tooltip based on current view */}
+        <div className={`flex ${currentView === "groups" ? "justify-start" : "justify-center"} mt-8 mb-4`}>
+          <div className="relative">
+            <div className="p-5 bg-[#042F0C] text-white rounded-2xl max-w-md">
+              <h3 className="mb-2 text-sm font-medium">
+                {currentView === "groups" 
+                  ? "Join 1 or more language learning groups." 
+                  : "Book 1 or more classes."}
+              </h3>
+              <p className="mb-4 text-sm">
+                {currentView === "groups"
+                  ? "Description: Make the most out of bammbuu. Community language groups are free to create and join. They allow you to connect with native speakers to practice language through live conversation."
+                  : "Book unlimited live group conversation classes hosted by certified language instructors for one monthly price. These classes are more structured and expert feedback is provided to help with your learning."}
+              </p>
+              <div className="flex items-center justify-between">
+                <button onClick={handleSkip} className="text-white hover:underline">
+                  Skip
+                </button>
+                <button
+                  onClick={handleNext}
+                  className="px-4 py-1 bg-white text-[#043D11] rounded-full hover:bg-opacity-90"
+                >
+                  {currentView === "groups" ? "Next (1/4)" : "Next (2/4)"}
+                </button>
+              </div>
+            </div>
+            {/* Notch positioned to correspond with the correct card */}
+            <div className={`absolute -top-2 ${currentView === "groups" ? "left-1/4" : "right-1/4"} transform ${currentView === "groups" ? "-translate-x-1/2" : "translate-x-1/2"}`}>
+              <div className="w-0 h-0 border-l-8 border-r-8 border-b-8 border-transparent border-b-[#042F0C]" />
+            </div>
+          </div>
         </div>
       </div>
     </div>

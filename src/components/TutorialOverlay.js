@@ -84,8 +84,8 @@ const TutorialOverlay = () => {
     };
   } else if (currentStep === 2) {
     tooltipPosition = {
-      top: '175px',
-      left: '420px',
+      top: '120px',
+      left: '370px',
     transform: 'translateX(-50%)'
   };
     tooltipContent = {

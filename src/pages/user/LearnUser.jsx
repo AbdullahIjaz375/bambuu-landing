@@ -20,7 +20,7 @@ import { useAuth } from "../../context/AuthContext";
 import GroupCard from "../../components/GroupCard";
 import { useNavigate, useLocation } from "react-router-dom";
 import { db } from "../../firebaseConfig";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, collection, getDocs } from "firebase/firestore";
 import { ClipLoader } from "react-spinners";
 import { getToken } from "firebase/messaging";
 import { messaging } from "../../firebaseConfig";
@@ -33,11 +33,12 @@ const LearnUser = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
+
   const settings = {
     dots: false,
     infinite: false,
     speed: 500,
-    slidesToShow: 4, // Show 4 cards at once
+    slidesToShow: 4,
     slidesToScroll: 1,
     arrows: true,
     responsive: [
@@ -62,8 +63,73 @@ const LearnUser = () => {
     ],
   };
 
-  //---------------------------------getting my classes--------------------------------------------//
+  // State for language student data
+  const [languageData, setLanguageData] = useState({
+    spanish: { studentIds: [], studentPhotos: [] },
+    english: { studentIds: [], studentPhotos: [] },
+    exchange: { studentIds: [], studentPhotos: [] },
+  });
+  const [loadingLanguages, setLoadingLanguages] = useState(true);
 
+  // Fetch classes and student data for languages
+  useEffect(() => {
+    const fetchClassesAndStudents = async () => {
+      try {
+        setLoadingLanguages(true);
+        const classesSnapshot = await getDocs(collection(db, "classes"));
+        const tempLanguageData = {
+          spanish: { studentIds: new Set(), studentPhotos: [] },
+          english: { studentIds: new Set(), studentPhotos: [] },
+          exchange: { studentIds: new Set(), studentPhotos: [] },
+        };
+
+        // Aggregate student IDs by language
+        for (const classDoc of classesSnapshot.docs) {
+          const classData = classDoc.data();
+          const language = classData.language;
+          const classMemberIds = classData.classMemberIds || [];
+
+          if (language === "Spanish") {
+            classMemberIds.forEach((id) => tempLanguageData.spanish.studentIds.add(id));
+          } else if (language === "English") {
+            classMemberIds.forEach((id) => tempLanguageData.english.studentIds.add(id));
+          } else if (language === "English-Spanish") {
+            classMemberIds.forEach((id) => tempLanguageData.exchange.studentIds.add(id));
+          }
+        }
+
+        // Convert Sets to Arrays
+        tempLanguageData.spanish.studentIds = Array.from(tempLanguageData.spanish.studentIds);
+        tempLanguageData.english.studentIds = Array.from(tempLanguageData.english.studentIds);
+        tempLanguageData.exchange.studentIds = Array.from(tempLanguageData.exchange.studentIds);
+
+        // Fetch student profile pictures (limit to 12 per language)
+        for (const langKey of ["spanish", "english", "exchange"]) {
+          const studentIds = tempLanguageData[langKey].studentIds.slice(0, 12);
+          const photoPromises = studentIds.map(async (studentId) => {
+            const studentRef = doc(db, "students", studentId);
+            const studentDoc = await getDoc(studentRef);
+            if (studentDoc.exists()) {
+              const studentData = studentDoc.data();
+              return studentData.photoUrl || "";
+            }
+            return "";
+          });
+          tempLanguageData[langKey].studentPhotos = await Promise.all(photoPromises);
+        }
+
+        setLanguageData(tempLanguageData);
+      } catch (error) {
+        console.error("Error fetching classes or students:", error);
+      } finally {
+        setLoadingLanguages(false);
+      }
+    };
+
+    fetchClassesAndStudents();
+  }, []);
+
+  // Fetch My Classes
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -91,9 +157,7 @@ const LearnUser = () => {
         setClasses(classesData);
       } catch (error) {
         console.error("Error fetching classes:", error);
-        setError(
-          "Unable to fetch classes at this time. Please try again later."
-        );
+        setError("Unable to fetch classes at this time. Please try again later.");
       } finally {
         setLoading(false);
       }
@@ -102,7 +166,7 @@ const LearnUser = () => {
     fetchClasses();
   }, [user]);
 
-  //------------------------------------getting my groups-------------------------------------------//
+  // Fetch My Groups
   const [groups, setGroups] = useState([]);
   const [loadingGroups, setLoadingGroups] = useState(true);
   const [errorGroups, setErrorGroups] = useState(null);
@@ -143,8 +207,7 @@ const LearnUser = () => {
     fetchGroups();
   }, [user]);
 
-  //---------------------------time for next class---------------------------------------------------//
-
+  // Calculate Next Class
   const [nextClass, setNextClass] = useState(null);
 
   useEffect(() => {
@@ -156,7 +219,6 @@ const LearnUser = () => {
       let smallestTimeDiff = Infinity;
 
       classes.forEach((classItem) => {
-        // Get timestamp from classDateTime
         const classTime = classItem.classDateTime?.toDate();
 
         if (classTime && classTime > now) {
@@ -177,23 +239,18 @@ const LearnUser = () => {
 
     const formatTimeUntil = (milliseconds) => {
       const hours = Math.floor(milliseconds / (1000 * 60 * 60));
-      const minutes = Math.floor(
-        (milliseconds % (1000 * 60 * 60)) / (1000 * 60)
-      );
+      const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
 
       if (hours > 24) {
         const days = Math.floor(hours / 24);
         return `${days} day${days > 1 ? "s" : ""} away`;
       } else if (hours > 0) {
-        return `${hours} hour${
-          hours > 1 ? "s" : ""
-        } and ${minutes} minutes away`;
+        return `${hours} hour${hours > 1 ? "s" : ""} and ${minutes} minutes away`;
       } else {
         return `${minutes} minute${minutes > 1 ? "s" : ""} away`;
       }
     };
 
-    // Update next class every minute
     const updateNextClass = () => {
       setNextClass(calculateNextClass());
     };
@@ -204,8 +261,7 @@ const LearnUser = () => {
     return () => clearInterval(interval);
   }, [classes]);
 
-  //----------------------------------updating FCMtoken--------------------------------------//
-
+  // Update FCM Token
   useEffect(() => {
     const updateFCMToken = async () => {
       try {
@@ -232,26 +288,56 @@ const LearnUser = () => {
     if (user?.uid) {
       updateFCMToken();
     }
-  }, []); // Empty dependency array to run on mount
-  //------------------------------------------------------------------------------------------//
+  }, []);
+
+  // Language cards configuration
+  const languageCards = [
+    {
+      id: "spanish",
+      bgColor: "bg-[#fff0f1]",
+      borderColor: "border-[#d58287]",
+      imgSrc: "/svgs/spain-big.svg",
+      alt: "Spanish",
+      title: t("learnUser.languageLearning.languages.spanish"),
+      path: "/learnLanguageUser?language=Spanish",
+      firestoreLanguage: "Spanish",
+    },
+    {
+      id: "english",
+      bgColor: "bg-[#edf2ff]",
+      borderColor: "border-[#768bbd]",
+      imgSrc: "/svgs/us-big.svg",
+      alt: "English",
+      title: t("learnUser.languageLearning.languages.english"),
+      path: "/learnLanguageUser?language=English",
+      firestoreLanguage: "English",
+    },
+    {
+      id: "exchange",
+      bgColor: "bg-[#FFFFEA]",
+      borderColor: "border-[#FFED46]",
+      imgSrc: "/svgs/eng-spanish.svg",
+      alt: "English-Spanish Exchange",
+      title: t("learnUser.languageLearning.languages.exchange"),
+      path: "/learnLanguageUser?language=English-Spanish",
+      firestoreLanguage: "English-Spanish",
+    },
+  ];
 
   return (
     <div className="flex h-screen bg-white">
       <div className="flex-shrink-0 w-64 h-full">
         <Sidebar user={user} />
-        
       </div>
 
       <div className="flex-1 overflow-x-auto min-w-[calc(100%-16rem)] h-full">
         <div className="h-[calc(100vh-1rem)] p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl m-2 overflow-y-auto">
-        
-          
           {/* Header with Welcome and Notification */}
           <div className="flex items-center justify-between mb-4 border-b border-[#e7e7e7] pb-4">
             <div className="flex flex-row items-center space-x-4">
               <h1 className="text-3xl font-semibold">
                 {t("learnUser.welcome.greeting", { name: user.name })}
-              </h1>{" "}
+              </h1>
               <p className="text-[#616161] text-lg whitespace-nowrap">
                 {t("learnUser.welcome.question")}{" "}
                 {nextClass
@@ -275,8 +361,8 @@ const LearnUser = () => {
           </div>
 
           {/* Calendar and Language Learning Section */}
-          <div className="flex flex-col items-start justify-between w-full gap-4 py-4 mb-4 lg:flex-row ">
-            {/* Calendar section with responsive width */}
+          <div className="flex flex-col items-start justify-between w-full gap-4 py-4 mb-4 lg:flex-row">
+            {/* Calendar section */}
             <div className="w-full lg:w-[40%] mb-4 lg:mb-0">
               <CalendarUser />
             </div>
@@ -297,110 +383,82 @@ const LearnUser = () => {
                 </div>
               </div>
 
-              {/* Card Container with responsive overflow handling */}
+              {/* Language Cards */}
               <div className="w-full overflow-hidden">
-                <div className="flex gap-2 pb-4 overflow-x-auto scrollbar-hide">
-                  {/* Spanish Card */}
-                  <div
-                    className="flex items-center hover:cursor-pointer gap-2 p-4 bg-[#fff0f1] rounded-3xl border border-[#d58287] w-[250px] sm:w-[380px]   flex-shrink-0"
-                    onClick={() =>
-                      navigate("/learnLanguageUser?language=Spanish")
-                    }
-                  >
-                    <div className="flex-shrink-0 w-12 h-12 overflow-hidden rounded-full sm:w-20 sm:h-20">
-                      <img
-                        src="/svgs/spain-big.svg"
-                        alt="Spanish"
-                        className="object-cover w-full h-full"
-                      />
-                    </div>
-                    <div className="flex flex-col items-start justify-between space-y-2">
-                      <span className="text-xl font-semibold ">
-                        {t("learnUser.languageLearning.languages.spanish")}
-                      </span>
-                      <div className="flex items-center">
-                        <div className="flex -space-x-3">
-                          {Array(12).fill(null).map((_, i) => (
-                            <div
-                              key={i}
-                              className="flex items-center justify-center w-6 h-6 bg-white border-2 border-white rounded-full sm:w-8 sm:h-8"
-                            >
-                              <User className="w-4 h-4 text-gray-600 " />
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+      {loadingLanguages ? (
+        <div className="flex items-center justify-center h-48">
+          <ClipLoader color="#14B82C" size={50} />
+        </div>
+      ) : (
+        <div className="flex gap-2 pb-4 overflow-x-auto scrollbar-hide">
+          {languageCards.map((card) => {
+            const students = languageData[card.id]?.studentPhotos?.slice(0, 8) || [];
+            const studentCount = languageData[card.id]?.studentIds?.length || 0;
 
-                  {/* Other language cards... */}
-                  {/* English Card */}
-                  <div
-                    className="flex items-center hover:cursor-pointer gap-2 p-4 bg-[#edf2ff] rounded-3xl border border-[#768bbd] w-[250px] sm:w-[380px]   flex-shrink-0"
-                    onClick={() =>
-                      navigate("/learnLanguageUser?language=English")
-                    }
-                  >
-                    <div className="flex-shrink-0 w-12 h-12 overflow-hidden rounded-full sm:w-20 sm:h-20">
-                      <img
-                        src="/svgs/us-big.svg"
-                        alt="English"
-                        className="object-cover w-full h-full"
-                      />
-                    </div>
-                    <div className="flex flex-col items-start justify-between space-y-2">
-                      <span className="text-xl font-semibold ">
-                        {t("learnUser.languageLearning.languages.english")}
-                      </span>
-                      <div className="flex items-center">
-                        <div className="flex -space-x-3">
-                          {Array(12).fill(null).map((_, i) => (
+            return (
+              <div
+                key={card.id}
+                className={`flex items-center hover:cursor-pointer gap-2 p-4 ${card.bgColor} rounded-3xl border ${card.borderColor} w-[250px] sm:w-[380px] flex-shrink-0`}
+                onClick={() => navigate(card.path)}
+              >
+                <div className="flex-shrink-0 w-12 h-12 overflow-hidden rounded-full sm:w-20 sm:h-20">
+                  <img
+                    src={card.imgSrc}
+                    alt={card.alt}
+                    className="object-cover w-full h-full"
+                  />
+                </div>
+                <div className="flex flex-col items-start justify-between space-y-2">
+                  <span className="text-xl font-semibold whitespace-nowrap">
+                    {card.title}
+                  </span>
+                  <div className="flex items-center">
+                    <div className="flex relative">
+                      {students.length > 0 ? (
+                        students.map((photo, i) => (
+                          <div
+                            key={i}
+                            className="flex items-center justify-center w-6 h-6 bg-white border-2 border-white rounded-full sm:w-8 sm:h-8 -mr-2"
+                            style={{ zIndex: students.length - i }}
+                          >
+                            {photo ? (
+                              <img
+                                src={photo}
+                                alt={`Student ${i + 1}`}
+                                className="object-cover w-full h-full rounded-full"
+                              />
+                            ) : (
+                              <User className="w-4 h-4 text-gray-600 sm:w-5 sm:h-5" />
+                            )}
+                          </div>
+                        ))
+                      ) : (
+                        Array(4)
+                          .fill(null)
+                          .map((_, i) => (
                             <div
                               key={i}
-                              className="flex items-center justify-center w-6 h-6 bg-white border-2 border-white rounded-full sm:w-8 sm:h-8"
+                              className="flex items-center justify-center w-6 h-6 bg-white border-2 border-white rounded-full sm:w-8 sm:h-8 -mr-2"
+                              style={{ zIndex: 4 - i }}
                             >
-                              <User className="w-4 h-4 text-gray-600 " />
+                              <User className="w-4 h-4 text-gray-600 sm:w-5 sm:h-5" />
                             </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Exchange Card */}
-                  <div
-                    className="flex items-center hover:cursor-pointer gap-2 p-4 bg-[#FFFFEA] rounded-3xl border border-[#FFED46] w-[250px] sm:w-[380px]   flex-shrink-0"
-                    onClick={() =>
-                      navigate("/learnLanguageUser?language=English-Spanish")
-                    }
-                  >
-                    <div className="flex-shrink-0 w-12 h-12 overflow-hidden rounded-full sm:w-20 sm:h-20">
-                      <img
-                        src="/svgs/eng-spanish.svg"
-                        alt="English-Spanish Exchange"
-                        className="object-cover w-full h-full"
-                      />
-                    </div>
-                    <div className="flex flex-col items-start justify-between space-y-2">
-                      <span className="text-xl font-semibold whitespace-nowrap">
-                        {t("learnUser.languageLearning.languages.exchange")}
-                      </span>
-                      <div className="flex items-center">
-                        <div className="flex -space-x-3">
-                          {Array(12).fill(null).map((_, i) => (
-                            <div
-                              key={i}
-                              className="flex items-center justify-center w-6 h-6 bg-white border-2 border-white rounded-full sm:w-8 sm:h-8"
-                            >
-                              <User className="w-4 h-4 text-gray-600 " />
-                            </div>
-                          ))}
-                        </div>
+                          ))
+                      )}
+                      
+                      {/* User count badge */}
+                      <div className="flex items-center justify-center ml-2 text-xs font-medium text-green-800 bg-green-100 rounded-full px-2 py-1 min-w-8">
+                        +{studentCount > 999 ? `${Math.floor(studentCount/1000)}k` : studentCount}
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
+            );
+          })}
+        </div>
+      )}
+    </div>  
             </div>
           </div>
 

@@ -18,7 +18,7 @@ const LearnLanguageUser = () => {
   const [searchParams] = useSearchParams();
   const language = searchParams.get("language")?.toLowerCase() || null;
   const { user, setUser } = useAuth();
-  const [activeTab, setActiveTab] = useState("myBambuu");
+  const [activeTab, setActiveTab] = useState("exploreBambuu");
   const navigate = useNavigate();
 
   // States for My Classes and Groups
