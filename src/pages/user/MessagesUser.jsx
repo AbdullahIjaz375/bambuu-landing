@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { Search, Bell, MoreVertical, Smile, Send, User } from "lucide-react";
-import ChatComponent from "../../components/ChatComponent";
+import { Search } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { streamClient } from "../../config/stream";
 import Sidebar from "../../components/Sidebar";
 import { ClipLoader } from "react-spinners";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import CustomChatComponent from "../../components/ChatComponent";
 
 const MessagesUser = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [channels, setChannels] = useState([]);
   const [selectedChannel, setSelectedChannel] = useState(null);
+  const [selectedChatInfo, setSelectedChatInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("group");
   const [searchQuery, setSearchQuery] = useState("");
@@ -32,7 +34,42 @@ const MessagesUser = () => {
       setSelectedChannel(
         remainingChannels.length > 0 ? remainingChannels[0] : null
       );
+      if (remainingChannels.length > 0) {
+        const firstChannel = remainingChannels[0];
+        const otherUser = getOtherUserFromChannel(firstChannel);
+        setSelectedChatInfo(otherUser);
+      } else {
+        setSelectedChatInfo(null);
+      }
     }
+  };
+
+  // Helper function to extract the other user's info from a channel
+  const getOtherUserFromChannel = (channel) => {
+    if (!channel || !user) return null;
+    
+    // For one-to-one chats
+    if (channel.type === "premium_individual_class" || channel.type === "one_to_one_chat") {
+      const members = Object.values(channel.state?.members || {});
+      const otherMember = members.find(member => member.user?.id !== user.uid);
+      
+      if (otherMember && otherMember.user) {
+        return {
+          id: otherMember.user.id,
+          name: otherMember.user.name || channel.data.name,
+          image: otherMember.user.image,
+          online: otherMember.user.online || false
+        };
+      }
+    }
+    
+    // For group chats, just return the group info
+    return {
+      id: channel.id,
+      name: channel.data.name,
+      image: channel.data.image,
+      online: false
+    };
   };
 
   useEffect(() => {
@@ -69,15 +106,9 @@ const MessagesUser = () => {
             const state = await channel.watch();
             const channelState = channel.state;
             counts[channel.id] = channelState.unreadCount || 0;
-            console.log(
-              "Initial unread count for channel:",
-              channel.id,
-              counts[channel.id]
-            );
 
             // Set up message.new event listener
             channel.on("message.new", async (event) => {
-              console.log("New message event:", event);
               // Check if message is from another user and channel is not selected
               if (
                 event.user?.id !== user.uid &&
@@ -85,11 +116,6 @@ const MessagesUser = () => {
               ) {
                 const state = channel.state;
                 const unreadCount = state.unreadCount || 1;
-                console.log(
-                  "Updating unread count for channel:",
-                  channel.id,
-                  unreadCount
-                );
                 setUnreadCounts((prev) => ({
                   ...prev,
                   [channel.id]: unreadCount,
@@ -98,7 +124,6 @@ const MessagesUser = () => {
             });
 
             channel.on("notification.message_new", (event) => {
-              console.log("New message notification:", event);
               if (
                 event.user?.id !== user.uid &&
                 channel.id !== selectedChannel?.id
@@ -131,12 +156,15 @@ const MessagesUser = () => {
 
         setUnreadCounts(counts);
         setChannels(channels);
+        
+        // Select channel from URL or first available
         if (urlChannelId) {
           const channelToSelect = channels.find(
             (channel) => channel.id === urlChannelId
           );
           if (channelToSelect) {
             setSelectedChannel(channelToSelect);
+            setSelectedChatInfo(getOtherUserFromChannel(channelToSelect));
             await channelToSelect.markRead();
             setUnreadCounts((prev) => ({
               ...prev,
@@ -145,6 +173,7 @@ const MessagesUser = () => {
           }
         } else if (channels.length > 0 && !selectedChannel) {
           setSelectedChannel(channels[0]);
+          setSelectedChatInfo(getOtherUserFromChannel(channels[0]));
         }
       } catch (error) {
         console.error("Error loading channels:", error);
@@ -166,6 +195,7 @@ const MessagesUser = () => {
 
   const handleChannelSelect = async (channel) => {
     setSelectedChannel(channel);
+    setSelectedChatInfo(getOtherUserFromChannel(channel));
 
     try {
       // Mark channel as read when selected
@@ -222,29 +252,9 @@ const MessagesUser = () => {
   );
 
   const ChatItem = ({ channel, isInstructor }) => {
-    // const [groupLanguage, setGroupLanguage] = useState(null);
     const groupLanguage = groupLanguages[channel.id];
-
     const latestMessage =
       channel.state.messages[channel.state.messages.length - 1];
-
-    // useEffect(() => {
-    //   const fetchGroupLanguage = async () => {
-    //     if (!isInstructor) {
-    //       try {
-    //         const groupRef = doc(db, "groups", channel.id);
-    //         const groupDoc = await getDoc(groupRef);
-    //         if (groupDoc.exists()) {
-    //           setGroupLanguage(groupDoc.data().groupLearningLanguage);
-    //         }
-    //       } catch (error) {
-    //         console.error("Error fetching group language:", error);
-    //       }
-    //     }
-    //   };
-
-    //   fetchGroupLanguage();
-    // }, [channel.id, isInstructor]);
 
     const getMessagePreview = (message) => {
       if (!message) return "No messages yet";
@@ -268,6 +278,9 @@ const MessagesUser = () => {
         : message.text;
     };
 
+    // Get other user's data for display (for one-to-one chats)
+    const otherUser = getOtherUserFromChannel(channel);
+
     return (
       <div
         key={channel.id}
@@ -284,17 +297,18 @@ const MessagesUser = () => {
       >
         <div className="relative">
           <img
-            src={channel.data.image || "/default-avatar.png"}
-            alt={channel.data.name}
+            src={otherUser?.image || channel.data.image || "/default-avatar.png"}
+            alt={otherUser?.name || channel.data.name}
             className="object-cover w-12 h-12 rounded-full"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = "/default-avatar.png";
+            }}
           />
-          {/* {!channel.data.disabled && (
-            <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full" />
-          )} */}
         </div>
         <div className="flex-1">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold">{channel.data.name}</h3>
+            <h3 className="text-lg font-semibold">{otherUser?.name || channel.data.name}</h3>
           </div>
 
           <div className="flex flex-row items-center justify-between mt-1">
@@ -304,28 +318,11 @@ const MessagesUser = () => {
               ) : (
                 <div className="flex flex-row items-center space-x-4">
                   <div className="flex flex-row items-center space-x-2">
-                    <img
-                      src={
-                        groupLanguage === "English"
-                          ? "/svgs/xs-us.svg"
-                          : groupLanguage === "Spanish"
-                          ? "/svgs/xs-spain.svg"
-                          : "/svgs/eng-spanish-xs.svg" // Optional: fallback flag
-                      }
-                      alt={
-                        groupLanguage === "English"
-                          ? "US Flag"
-                          : groupLanguage === "Spanish"
-                          ? "Spain Flag"
-                          : "Default Flag"
-                      }
-                      className="w-4 h-4 sm:w-auto"
-                    />
+                    {/* Flag icon will be added */}
                     <span>{groupLanguage}</span>
                   </div>
                   <div className="flex items-center ">
-                    <img alt="bammbuu" src="/svgs/users.svg" />
-
+                    {/* Users icon will be added */}
                     <span className="">{channel.data.member_count}</span>
                   </div>
                 </div>
@@ -372,31 +369,6 @@ const MessagesUser = () => {
           <div className="flex-1 flex bg-white rounded-3xl m-2 h-[calc(100vh-125px)]">
             <div className="p-4 bg-[#f6f6f6] w-96 rounded-2xl overflow-hidden flex flex-col">
               <div className="flex justify-center w-full mb-4 sm:w-auto">
-                {/* <div className="inline-flex bg-gray-100 border border-gray-300 rounded-full">
-                  <button
-                    onClick={() => setActiveTab("group")}
-                    className={`px-4  py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap
-                  ${
-                    activeTab === "group"
-                      ? "bg-[#FFBF00] border border-[#042F0C]"
-                      : "bg-transparent"
-                  }`}
-                  >
-                    Group Chats
-                  </button>
-                  <button
-                    onClick={() => setActiveTab("bammbuuu")}
-                    className={`px-4  py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap
-                  ${
-                    activeTab === "bammbuuu"
-                      ? "bg-[#FFBF00] border border-[#042F0C]"
-                      : "bg-transparent"
-                  }`}
-                  >
-                    bammbuuu+ Instructor
-                  </button>
-                </div> */}
-
                 <div className="relative inline-flex p-1 bg-gray-100 border border-gray-300 rounded-full">
                   <div
                     className="absolute top-0 left-0 h-full transition-all duration-300 ease-in-out border border-gray-800 rounded-full bg-amber-400"
@@ -434,7 +406,7 @@ const MessagesUser = () => {
                       ? "Search groups"
                       : "Search instructor"
                   }
-                  className="w-full py-2 pl-12 pr-4 border border-gray-200 rounded-3xl  focus:border-[#14B82C] focus:ring-0 focus:outline-none"
+                  className="w-full py-2 pl-12 pr-4 border border-gray-200 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                 />
               </div>
 
@@ -459,10 +431,11 @@ const MessagesUser = () => {
 
             <div className="flex-1 ml-4">
               {selectedChannel ? (
-                <ChatComponent
+                <CustomChatComponent
                   channelId={selectedChannel.id}
                   type={selectedChannel.type}
                   onChannelLeave={handleChannelLeave}
+                  chatInfo={selectedChatInfo}
                 />
               ) : (
                 <div className="flex items-center justify-center h-full text-gray-500">
