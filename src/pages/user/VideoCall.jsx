@@ -236,8 +236,22 @@ const VideoCallStudent = () => {
           console.log("User connected to Stream Chat successfully");
         }
 
-        // Now create or get the chat channel
-        const channelId = `class-${selectedClassId}`;
+        // Get current day abbreviation (Mon, Tue, Wed, Thu, Fri, Sat, Sun)
+        const dayAbbreviations = [
+          "Sun",
+          "Mon",
+          "Tue",
+          "Wed",
+          "Thu",
+          "Fri",
+          "Sat",
+        ];
+        const currentDay = dayAbbreviations[new Date().getDay()];
+
+        // Now create or get the chat channel with day prefix
+        const channelId = `${currentDay}-${selectedClassId}`;
+
+        console.log(`Creating chat channel with ID: ${channelId}`);
 
         const channel = streamClient.channel("messaging", channelId, {
           name: `Class ${selectedClassId} Chat`,
@@ -425,10 +439,22 @@ const VideoCallStudent = () => {
       try {
         console.log("Joining call with extended timeout...");
 
+        // Get current day abbreviation
+        const dayAbbreviations = [
+          "Sun",
+          "Mon",
+          "Tue",
+          "Wed",
+          "Thu",
+          "Fri",
+          "Sat",
+        ];
+        const currentDay = dayAbbreviations[new Date().getDay()];
+
         // Add custom data to link the video call with the chat channel
         const callData = {
           custom: {
-            channelCid: `messaging:class-${selectedClassId}`,
+            channelCid: `messaging:${currentDay}-${selectedClassId}`,
             classId: selectedClassId,
           },
         };
