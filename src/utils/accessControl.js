@@ -14,6 +14,12 @@ export const checkAccess = (user, contentType, classType = null) => {
     subscriptionTypes: user?.subscriptions?.map((sub) => sub.type),
   });
 
+  // Allow free access to Group Standard classes
+  if (classType === "Group Standard") {
+    console.log("✅ Group Standard Class - Access Granted");
+    return { hasAccess: true, reason: "Group Standard classes are free" };
+  }
+
   // Check if this is a premium class request
   if (contentType === "premium-class") {
     console.log("⚡ Checking Premium Class Access");
