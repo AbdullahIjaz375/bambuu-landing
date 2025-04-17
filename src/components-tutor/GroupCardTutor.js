@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import React from "react";
-import { Users, User } from "lucide-react";
+import { User } from "lucide-react";
 
 const GroupCardTutor = ({ group }) => {
   const {
@@ -16,8 +16,11 @@ const GroupCardTutor = ({ group }) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate(`/groupDetailsTutor/${id}`);
+    // Add ref parameter to make it work with the ProtectedRoute logic
+    navigate(`/groupDetailsTutor/${id}?ref=shared`);
   };
+
+
 
   return (
     <div onClick={handleClick} className="w-full max-w-sm mx-auto">
@@ -103,6 +106,8 @@ const GroupCardTutor = ({ group }) => {
               <span className="text-gray-700">{memberIds.length}</span>
             </div>
           </div>
+          
+     
         </div>
       </div>
     </div>

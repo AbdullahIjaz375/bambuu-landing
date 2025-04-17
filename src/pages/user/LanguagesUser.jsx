@@ -176,7 +176,11 @@ const LanguagesUser = () => {
                                   className="object-cover w-full h-full rounded-full"
                                 />
                               ) : (
-                                <User className="w-5 h-5 text-gray-600" />
+                                <img  
+                                  src={'/images/panda.png'}
+                                  alt={`Student ${i + 1}`}
+                                  className="object-cover w-full h-full rounded-full opacity-75"
+                                />
                               )}
                             </div>
                           ))
@@ -189,7 +193,11 @@ const LanguagesUser = () => {
                                 className="flex items-center justify-center w-8 h-8 bg-white border-2 border-white rounded-full -mr-2"
                                 style={{ zIndex: 6 - i }}
                               >
-                                <User className="w-5 h-5 text-gray-600" />
+                               <img
+                                  src={'/images/panda.png'}
+                                  alt={`Student ${i + 1}`}
+                                  className="object-cover w-full h-full rounded-full"
+                                />
                               </div>
                             ))
                         )}

@@ -12,13 +12,20 @@ const ProtectedRoute = ({ children, requiredRole }) => {
     localStorage.setItem("selectedPackageUrl", currentUrl);
   }
 
-  // Save class details URL if the pathname includes "/classDetailsTutor/"
+  // Save class details URL if the pathname includes "/classDetailsUser/"
   // and there's a "ref" query parameter present.
   try {
     const urlObj = new URL(currentUrl);
     const searchParams = new URLSearchParams(urlObj.search);
+    
+    // Check for class details
     if (urlObj.pathname.includes("/classDetailsUser/") && searchParams.has("ref")) {
-        localStorage.setItem("selectedClassUrl", currentUrl);
+      localStorage.setItem("selectedClassUrl", currentUrl);
+    }
+    
+    // Check for group details
+    if (urlObj.pathname.includes("/groupDetailsTutor/") && searchParams.has("ref")) {
+      localStorage.setItem("selectedGroupUrl", currentUrl);
     }
   } catch (error) {
     console.error("Invalid URL", error);
@@ -27,14 +34,21 @@ const ProtectedRoute = ({ children, requiredRole }) => {
   // If the user is not logged in, determine the proper login URL.
   if (!user) {
     let loginUrl = "/login";
+    
     if (currentUrl.includes("subscriptions?offerId=")) {
       loginUrl = "/login?ref=sub";
     } else {
       try {
         const urlObj = new URL(currentUrl);
         const searchParams = new URLSearchParams(urlObj.search);
+        
         if (urlObj.pathname.includes("/classDetailsUser/") && searchParams.has("ref")) {
           loginUrl = "/login?ref=class";
+        }
+        
+        // Add handler for group details links
+        if (urlObj.pathname.includes("/groupDetailsTutor/") && searchParams.has("ref")) {
+          loginUrl = "/login?ref=group";
         }
       } catch (error) {
         console.error("Invalid URL", error);

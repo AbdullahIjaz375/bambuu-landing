@@ -428,7 +428,11 @@ const LearnUser = () => {
                                 className="object-cover w-full h-full rounded-full"
                               />
                             ) : (
-                              <User className="w-4 h-4 text-gray-600 sm:w-5 sm:h-5" />
+                              <img  
+                              src={'/images/panda.png'}
+                              alt={`Student ${i + 1}`}
+                              className="object-cover w-full h-full rounded-full opacity-75"
+                              />
                             )}
                           </div>
                         ))
