@@ -222,7 +222,7 @@ const VideoCallStudent = () => {
         if (!streamClient.userID) {
           console.log("Connecting user to Stream Chat...");
           // Generate token for chat
-          const token = await fetchToken(user.uid);
+          const token = await fetchToken(user.uid); // Changed from devToken to fetchToken
 
           // Connect user to chat
           await streamClient.connectUser(
@@ -236,36 +236,12 @@ const VideoCallStudent = () => {
           console.log("User connected to Stream Chat successfully");
         }
 
-        // Get current day abbreviation (Mon, Tue, Wed, Thu, Fri, Sat, Sun)
-        const dayAbbreviations = [
-          "Sun",
-          "Mon",
-          "Tue",
-          "Wed",
-          "Thu",
-          "Fri",
-          "Sat",
-        ];
-        const currentDay = dayAbbreviations[new Date().getDay()];
-
-        // Now create or get the chat channel with day prefix
-        // For main class chat, just use the day + classId
-        // For breakout room, append the breakout room id
-        const isBreakoutRoom = activeRoomId !== selectedClassId;
-        const channelId = isBreakoutRoom
-          ? `${currentDay}${selectedClassId}${activeRoomId}`
-          : `${currentDay}${selectedClassId}`;
-
-        console.log(`Creating chat channel with ID: ${channelId}`);
+        // Now create or get the chat channel
+        const channelId = `class-${selectedClassId}`;
 
         const channel = streamClient.channel("messaging", channelId, {
-          name: isBreakoutRoom
-            ? `${
-                breakoutRooms.find((room) => room.id === activeRoomId)
-                  ?.roomName || "Breakout Room"
-              } Call Chat`
-            : `Class ${selectedClassId} Chat`,
-          members: [user.uid], // Add current user as member (others will be added as they join)
+          name: `Class ${selectedClassId} Chat`,
+          members: [user.uid],
           created_by_id: user.uid,
         });
 
@@ -277,14 +253,7 @@ const VideoCallStudent = () => {
     };
 
     initializeChannel();
-  }, [
-    classData,
-    user.uid,
-    selectedClassId,
-    streamClient,
-    activeRoomId,
-    breakoutRooms,
-  ]);
+  }, [classData, user.uid, selectedClassId, streamClient]);
 
   // Listen for new messages when chat is not open
   useEffect(() => {
@@ -456,29 +425,11 @@ const VideoCallStudent = () => {
       try {
         console.log("Joining call with extended timeout...");
 
-        // Get current day abbreviation
-        const dayAbbreviations = [
-          "Sun",
-          "Mon",
-          "Tue",
-          "Wed",
-          "Thu",
-          "Fri",
-          "Sat",
-        ];
-        const currentDay = dayAbbreviations[new Date().getDay()];
-
-        // Is this a breakout room?
-        const isBreakoutRoom = roomId !== selectedClassId;
-
         // Add custom data to link the video call with the chat channel
         const callData = {
           custom: {
-            channelCid: `messaging:${currentDay}${selectedClassId}${
-              isBreakoutRoom ? roomId : ""
-            }`,
+            channelCid: `messaging:class-${selectedClassId}`,
             classId: selectedClassId,
-            isBreakoutRoom: isBreakoutRoom,
           },
         };
 

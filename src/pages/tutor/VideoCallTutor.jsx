@@ -214,36 +214,12 @@ const VideoCallTutor = () => {
           console.log("User connected to Stream Chat successfully");
         }
 
-        // Fix the day abbreviation calculation - current code has a bug
-        const dayAbbreviations = [
-          "Sun",
-          "Mon",
-          "Tue",
-          "Wed",
-          "Thu",
-          "Fri",
-          "Sat",
-        ];
-        const currentDay = dayAbbreviations[new Date().getDay()];
-
-        // Now create or get the chat channel with day prefix
-        // For main class chat, just use the day + classId
-        // For breakout room, append the breakout room id
-        const isBreakoutRoom = activeRoomId !== tutorSelectedClassId;
-        const channelId = isBreakoutRoom
-          ? `${currentDay}${tutorSelectedClassId}${activeRoomId}`
-          : `${currentDay}${tutorSelectedClassId}`;
-
-        console.log(`Creating chat channel with ID: ${channelId}`);
+        // Now create or get the chat channel
+        const channelId = `class-${tutorSelectedClassId}`;
 
         const channel = streamClient.channel("messaging", channelId, {
-          name: isBreakoutRoom
-            ? `${
-                breakoutRooms.find((room) => room.id === activeRoomId)
-                  ?.roomName || "Breakout Room"
-              } Call Chat`
-            : `Class ${tutorSelectedClassId} Chat`,
-          members: [user.uid],
+          name: `Class ${tutorSelectedClassId} Chat`,
+          members: [user.uid], // Add current user as member (others will be added as they join)
           created_by_id: user.uid,
         });
 
@@ -406,33 +382,16 @@ const VideoCallTutor = () => {
       setLoadingMessage("Joining video call...");
       const call = streamVideoClient.call("default", roomId);
 
-      // Get current day abbreviation
-      const dayAbbreviations = [
-        "Sun",
-        "Mon",
-        "Tue",
-        "Wed",
-        "Thu",
-        "Fri",
-        "Sat",
-      ];
-      const currentDay = dayAbbreviations[new Date().getDay()];
-
-      // Is this a breakout room?
-      const isBreakoutRoom = roomId !== tutorSelectedClassId;
-
-      // Add custom data to link the video call with the chat channel
-      const callData = {
-        custom: {
-          channelCid: `messaging:${currentDay}${tutorSelectedClassId}${
-            isBreakoutRoom ? roomId : ""
-          }`,
-          classId: tutorSelectedClassId,
-        },
-      };
-
       try {
         console.log("Joining call with extended timeout...");
+
+        // Add custom data to link the video call with the chat channel
+        const callData = {
+          custom: {
+            channelCid: `messaging:class-${tutorSelectedClassId}`,
+            classId: tutorSelectedClassId,
+          },
+        };
 
         // Increase the timeout for joining
         await Promise.race([
