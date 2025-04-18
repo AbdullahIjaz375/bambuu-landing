@@ -413,6 +413,8 @@ const VideoCallTutor = () => {
           },
         };
 
+        console.log("Call data:", callData);
+
         // Increase the timeout for joining
         await Promise.race([
           call.join({ create: true, data: callData }),
