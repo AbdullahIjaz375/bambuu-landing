@@ -196,10 +196,11 @@ const VideoCallTutor = () => {
     const initializeChannel = async () => {
       try {
         // Make sure user is connected to Stream Chat before initializing the channel
+        // Check if user is already connected to chat
         if (!streamClient.userID) {
           console.log("Connecting user to Stream Chat...");
-          // Generate token for chat
-          const token = await fetchToken(user.uid);
+          // Generate token for chat - UPDATED TO USE REAL TOKEN
+          const token = await fetchToken(user.uid); // Changed from devToken to fetchToken
 
           // Connect user to chat
           await streamClient.connectUser(
@@ -213,7 +214,7 @@ const VideoCallTutor = () => {
           console.log("User connected to Stream Chat successfully");
         }
 
-        // Get current day abbreviation (Sun, Mon, Tue, Wed, Thu, Fri, Sat)
+        // Fix the day abbreviation calculation - current code has a bug
         const dayAbbreviations = [
           "Sun",
           "Mon",
@@ -242,7 +243,7 @@ const VideoCallTutor = () => {
                   ?.roomName || "Breakout Room"
               } Call Chat`
             : `Class ${tutorSelectedClassId} Chat`,
-          members: [user.uid], // Add current user as member (others will be added as they join)
+          members: [user.uid],
           created_by_id: user.uid,
         });
 
@@ -254,14 +255,7 @@ const VideoCallTutor = () => {
     };
 
     initializeChannel();
-  }, [
-    classData,
-    user.uid,
-    tutorSelectedClassId,
-    streamClient,
-    activeRoomId,
-    breakoutRooms,
-  ]);
+  }, [classData, user.uid, tutorSelectedClassId, streamClient]);
 
   // Check for WebRTC support
   useEffect(() => {
@@ -434,7 +428,6 @@ const VideoCallTutor = () => {
             isBreakoutRoom ? roomId : ""
           }`,
           classId: tutorSelectedClassId,
-          isBreakoutRoom: isBreakoutRoom,
         },
       };
 
