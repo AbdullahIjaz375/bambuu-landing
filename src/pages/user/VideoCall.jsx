@@ -481,7 +481,7 @@ const VideoCallStudent = () => {
         // Add custom data to link the video call with the chat channel
         const callData = {
           custom: {
-            channelCid: `messaging:${channelId}`,
+            channelCid: `${channelId}`,
             classId: selectedClassId,
           },
         };
