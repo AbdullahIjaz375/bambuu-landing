@@ -220,7 +220,7 @@ const VideoCallStudent = () => {
       try {
         // Make sure user is connected to Stream Chat before initializing the channel
         if (!streamClient.userID) {
-          console.log("Connecting user to Stream Chat...");
+          console.log("[CHAT DEBUG] Connecting user to Stream Chat...");
           // Generate token for chat
           const token = await fetchToken(user.uid);
 
@@ -233,7 +233,9 @@ const VideoCallStudent = () => {
             },
             token
           );
-          console.log("User connected to Stream Chat successfully");
+          console.log(
+            "[CHAT DEBUG] User connected to Stream Chat successfully"
+          );
         }
 
         // Get the current day abbreviation
@@ -256,7 +258,52 @@ const VideoCallStudent = () => {
           ? `${currentDay}${selectedClassId}${activeRoomId}`
           : `${currentDay}${selectedClassId}`;
 
-        console.log(`Creating chat channel with ID: ${channelId}`);
+        console.log(`[CHAT DEBUG] Looking for channel with ID: ${channelId}`);
+        console.log(
+          `[CHAT DEBUG] Day: ${currentDay}, ClassId: ${selectedClassId}, ActiveRoomId: ${activeRoomId}`
+        );
+
+        // IMPORTANT: First check if the channel already exists
+        try {
+          // Query to find the existing channel
+          const filter = { type: "messaging", id: channelId };
+          const sort = [{ field: "created_at", direction: -1 }];
+
+          console.log(
+            `[CHAT DEBUG] Querying for existing channel with filter:`,
+            filter
+          );
+          const channels = await streamClient.queryChannels(filter, sort, {
+            watch: true,
+            state: true,
+          });
+
+          if (channels && channels.length > 0) {
+            console.log(`[CHAT DEBUG] Found existing channel: ${channelId}`);
+            const existingChannel = channels[0];
+
+            // Make sure current user is a member
+            await existingChannel.addMembers([user.uid]);
+            console.log(
+              `[CHAT DEBUG] Added current user to existing channel's members`
+            );
+
+            setChatChannel(existingChannel);
+            return; // Exit early since we found and joined the channel
+          } else {
+            console.log(
+              `[CHAT DEBUG] No existing channel found, will create new one`
+            );
+          }
+        } catch (queryError) {
+          console.error(`[CHAT DEBUG] Error querying channels:`, queryError);
+          // Continue to channel creation if query fails
+        }
+
+        // If no existing channel was found, create a new one
+        console.log(
+          `[CHAT DEBUG] Creating new chat channel with ID: ${channelId}`
+        );
 
         const chatRoomName = isBreakoutRoom
           ? `${
@@ -272,9 +319,12 @@ const VideoCallStudent = () => {
         });
 
         await channel.watch();
+        console.log(
+          `[CHAT DEBUG] Successfully created and watching new channel: ${channelId}`
+        );
         setChatChannel(channel);
       } catch (error) {
-        console.error("Error initializing chat channel:", error);
+        console.error("[CHAT DEBUG] Error initializing chat channel:", error);
       }
     };
 
@@ -479,6 +529,7 @@ const VideoCallStudent = () => {
           : `${currentDay}${selectedClassId}`;
 
         // Add custom data to link the video call with the chat channel
+        // IMPORTANT: Must include "messaging:" prefix for the channel reference to work
         const callData = {
           custom: {
             channelCid: `${channelId}`,
@@ -486,7 +537,9 @@ const VideoCallStudent = () => {
           },
         };
 
-        console.log("Call data:", callData);
+        console.log(
+          `[CHAT DEBUG] Setting call data with channelCid: messaging:${channelId}`
+        );
 
         // Increase the timeout for joining
         await Promise.race([
