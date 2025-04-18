@@ -24,6 +24,8 @@ const ClassCard = ({
   classAddress,
   groupId,
   recurrenceType,
+  recurrenceTypes = [],
+  selectedRecurrenceType,
   classType,
   classLocation,
   onClick,
@@ -58,6 +60,33 @@ const ClassCard = ({
       month: "short",
       year: "numeric",
     });
+  };
+
+  // New function to get the day name for recurring classes
+  const getRecurringDayDisplay = (timestamp) => {
+    if (!timestamp) return "TBD";
+    
+    const date = new Date(timestamp.seconds * 1000);
+    
+    // Get the day name
+    const dayName = date.toLocaleDateString("en-US", { weekday: "long" });
+    
+    // For weekly recurring classes, show just the day name
+    return dayName;
+  };
+
+  // Function to determine if we should show the day name or full date
+  const getDateDisplay = (timestamp) => {
+    // Check if the class is recurring (weekly)
+    const isRecurring = (recurrenceType === "Weekly") || 
+                       (recurrenceTypes && recurrenceTypes.includes("Weekly")) ||
+                       (selectedRecurrenceType === "Weekly");
+    
+    if (isRecurring) {
+      return getRecurringDayDisplay(timestamp);
+    } else {
+      return formatDate(timestamp);
+    }
   };
 
   const handleClick = () => {
@@ -104,9 +133,10 @@ const ClassCard = ({
 
     fetchAdminProfile();
   }, [adminId]);
+  
   return (
     <>
-      <div className=" hover:cursor-pointer" onClick={handleClick}>
+      <div className="hover:cursor-pointer" onClick={handleClick}>
         <div
           className={`flex flex-col h-auto sm:h-[25rem] border ${
             isPremium ? "border-[#14b82c]" : "border-[#ffc71f]"
@@ -162,45 +192,45 @@ const ClassCard = ({
                 )}
               </div>
             </div>
+          </div>
 
-            <div className="flex flex-col items-center justify-end w-full p-2 space-y-2">
-              <div className="flex flex-col items-start justify-between w-full gap-2 sm:flex-row sm:items-center sm:gap-0">
-                <div className="flex items-center space-x-2">
-                  <img alt="bammbuu" src="/svgs/clock.svg" />
-                  <span className="text-sm sm:text-md text-[#454545]">
-                    {formatTime(classDateTime)} ({classDuration} min)
-                  </span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <img alt="bammbuu" src="/svgs/calendar.svg" />
-                  <span className="text-sm sm:text-md text-[#454545]">
-                    {formatDate(classDateTime)}
-                  </span>
-                </div>
+          <div className="flex flex-col items-center justify-end w-full p-2 space-y-2">
+            <div className="flex flex-col items-start justify-between w-full gap-2 sm:flex-row sm:items-center sm:gap-0">
+              <div className="flex items-center space-x-2">
+                <img alt="bammbuu" src="/svgs/clock.svg" />
+                <span className="text-sm sm:text-md text-[#454545]">
+                  {formatTime(classDateTime)} ({classDuration} min)
+                </span>
               </div>
-              <div className="flex flex-col items-start justify-between w-full gap-2 sm:flex-row sm:items-center sm:gap-0">
-                <div className="flex items-center space-x-1">
-                  {profileUrl ? (
-                    <img
-                      src={profileUrl}
-                      alt={adminName}
-                      className="object-cover w-4 h-4 rounded-full sm:w-5 sm:h-5"
-                    />
-                  ) : (
-                    <User className="w-4 h-4 text-gray-600 sm:w-5 sm:h-5" />
-                  )}
+              <div className="flex items-center space-x-2">
+                <img alt="bammbuu" src="/svgs/calendar.svg" />
+                <span className="text-sm sm:text-md text-[#454545]">
+                  {getDateDisplay(classDateTime)}
+                </span>
+              </div>
+            </div>
+            <div className="flex flex-col items-start justify-between w-full gap-2 sm:flex-row sm:items-center sm:gap-0">
+              <div className="flex items-center space-x-1">
+                {profileUrl ? (
+                  <img
+                    src={profileUrl}
+                    alt={adminName}
+                    className="object-cover w-4 h-4 rounded-full sm:w-5 sm:h-5"
+                  />
+                ) : (
+                  <User className="w-4 h-4 text-gray-600 sm:w-5 sm:h-5" />
+                )}
+                <span className="text-sm sm:text-md text-[#454545]">
+                  {adminName || "TBD"}
+                </span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <img alt="bammbuu" src="/svgs/users.svg" />
+                {!isPremium && (
                   <span className="text-sm sm:text-md text-[#454545]">
-                    {adminName || "TBD"}
+                    {classMemberIds.length}/{availableSpots}
                   </span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <img alt="bammbuu" src="/svgs/users.svg" />
-                  {!isPremium && (
-                    <span className="text-sm sm:text-md text-[#454545]">
-                      {classMemberIds.length}/{availableSpots}
-                    </span>
-                  )}
-                </div>
+                )}
               </div>
             </div>
           </div>
@@ -263,7 +293,7 @@ const ClassCard = ({
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4" />
-                  <span>{formatDate(classDateTime)}</span>
+                  <span>{getDateDisplay(classDateTime)}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Users className="w-4 h-4" />
