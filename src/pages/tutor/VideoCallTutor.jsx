@@ -185,8 +185,35 @@ const VideoCallTutor = () => {
 
     fetchClassData();
 
-    // Check breakout room permissions
-    setHasBreakoutPermission(canCreateBreakoutRooms(tutorSelectedClassId));
+    // Add extensive debugging for breakout room permissions
+    const userInfo = JSON.parse(sessionStorage.getItem("user") || "{}");
+    console.log("[PERMISSION DEBUG] User info:", {
+      uid: userInfo.uid,
+      userType: userInfo.userType,
+      adminOfClasses: userInfo.adminOfClasses || [],
+      tutorOfClasses: userInfo.tutorOfClasses || [],
+    });
+
+    const hasPermission = canCreateBreakoutRooms(tutorSelectedClassId);
+    console.log(
+      "[PERMISSION DEBUG] Checking permission for class:",
+      tutorSelectedClassId
+    );
+    console.log("[PERMISSION DEBUG] Permission result:", hasPermission);
+
+    // For tutors, force permission if sessionStorage data confirms they're a tutor
+    if (
+      userInfo.userType === "tutor" &&
+      userInfo.tutorOfClasses &&
+      userInfo.tutorOfClasses.includes(tutorSelectedClassId)
+    ) {
+      console.log(
+        "[PERMISSION DEBUG] User is confirmed tutor for this class, forcing permission"
+      );
+      setHasBreakoutPermission(true);
+    } else {
+      setHasBreakoutPermission(hasPermission);
+    }
   }, [tutorSelectedClassId]);
 
   // Initialize chat channel when class data is available
@@ -245,11 +272,14 @@ const VideoCallTutor = () => {
         try {
           // Query to find the existing channel
           const filter = { type: "messaging", id: channelId };
-          const sort = [{ field: "created_at", direction: -1 }];
+          // FIX: Change sort direction from -1 (number) to "-1" (string)
+          const sort = [{ field: "created_at", direction: "-1" }];
 
           console.log(
             `[CHAT DEBUG] Querying for existing channel with filter:`,
-            filter
+            filter,
+            "sort:",
+            sort
           );
           const channels = await streamClient.queryChannels(filter, sort, {
             watch: true,
@@ -287,7 +317,7 @@ const VideoCallTutor = () => {
           ? `${
               breakoutRooms.find((room) => room.id === activeRoomId)
                 ?.roomName || "Breakout Room"
-            } Call Chat`
+            } Chat`
           : `Class ${tutorSelectedClassId} Chat`;
 
         const channel = streamClient.channel("messaging", channelId, {
