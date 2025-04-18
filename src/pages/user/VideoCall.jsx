@@ -222,7 +222,7 @@ const VideoCallStudent = () => {
         if (!streamClient.userID) {
           console.log("Connecting user to Stream Chat...");
           // Generate token for chat
-          const token = await fetchToken(user.uid); // Changed from devToken to fetchToken
+          const token = await fetchToken(user.uid);
 
           // Connect user to chat
           await streamClient.connectUser(
@@ -249,12 +249,22 @@ const VideoCallStudent = () => {
         const currentDay = dayAbbreviations[new Date().getDay()];
 
         // Now create or get the chat channel with day prefix
-        const channelId = `${currentDay}-${selectedClassId}`;
+        // For main class chat, just use the day + classId
+        // For breakout room, append the breakout room id
+        const isBreakoutRoom = activeRoomId !== selectedClassId;
+        const channelId = isBreakoutRoom
+          ? `${currentDay}${selectedClassId}${activeRoomId}`
+          : `${currentDay}${selectedClassId}`;
 
         console.log(`Creating chat channel with ID: ${channelId}`);
 
         const channel = streamClient.channel("messaging", channelId, {
-          name: `Class ${selectedClassId} Chat`,
+          name: isBreakoutRoom
+            ? `${
+                breakoutRooms.find((room) => room.id === activeRoomId)
+                  ?.roomName || "Breakout Room"
+              } Call Chat`
+            : `Class ${selectedClassId} Chat`,
           members: [user.uid], // Add current user as member (others will be added as they join)
           created_by_id: user.uid,
         });
@@ -267,7 +277,14 @@ const VideoCallStudent = () => {
     };
 
     initializeChannel();
-  }, [classData, user.uid, selectedClassId, streamClient]);
+  }, [
+    classData,
+    user.uid,
+    selectedClassId,
+    streamClient,
+    activeRoomId,
+    breakoutRooms,
+  ]);
 
   // Listen for new messages when chat is not open
   useEffect(() => {
@@ -451,11 +468,17 @@ const VideoCallStudent = () => {
         ];
         const currentDay = dayAbbreviations[new Date().getDay()];
 
+        // Is this a breakout room?
+        const isBreakoutRoom = roomId !== selectedClassId;
+
         // Add custom data to link the video call with the chat channel
         const callData = {
           custom: {
-            channelCid: `messaging:${currentDay}-${selectedClassId}`,
+            channelCid: `messaging:${currentDay}${selectedClassId}${
+              isBreakoutRoom ? roomId : ""
+            }`,
             classId: selectedClassId,
+            isBreakoutRoom: isBreakoutRoom,
           },
         };
 
