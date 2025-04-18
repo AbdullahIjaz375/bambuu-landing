@@ -22,6 +22,8 @@ const ClassCardTutor = ({
   classAddress,
   groupId,
   recurrenceType,
+  selectedRecurrenceType,
+  recurrenceTypes = [],
   classType,
   classLocation,
   onClick,
@@ -58,8 +60,34 @@ const ClassCardTutor = ({
     });
   };
 
+  // New function to get the day name for recurring classes
+  const getRecurringDayDisplay = (timestamp) => {
+    if (!timestamp) return "TBD";
+    
+    const date = new Date(timestamp.seconds * 1000);
+    
+    // Get the day name
+    const dayName = date.toLocaleDateString("en-US", { weekday: "long" });
+    
+    // For weekly recurring classes, show just the day name
+    return dayName;
+  };
+
+  // Function to determine if we should show the day name or full date
+  const getDateDisplay = (timestamp) => {
+    // Check if the class is recurring (weekly)
+    const isRecurring = recurrenceTypes && 
+                       (recurrenceTypes.includes("Weekly") || 
+                        selectedRecurrenceType === "Weekly");
+    
+    if (isRecurring) {
+      return getRecurringDayDisplay(timestamp);
+    } else {
+      return formatDate(timestamp);
+    }
+  };
+
   const handleClick = () => {
-    // Note: Removed useNavigate since it should be passed as a prop or handled differently
     navigate(`/classDetailsTutor/${classId}`);
   };
 
@@ -70,14 +98,6 @@ const ClassCardTutor = ({
     const classEnd = new Date(classStart.getTime() + classDuration * 60 * 1000);
     return now >= classStart && now <= classEnd;
   };
-
-  // const handleCardClick = (e) => {
-  //   if (onClick) {
-  //     onClick(e);
-  //   } else {
-  //     setIsModalOpen(true);
-  //   }
-  // };
 
   return (
     <>
@@ -151,7 +171,7 @@ const ClassCardTutor = ({
                 <div className="flex items-center space-x-2">
                   <img alt="bammbuu" src="/svgs/calendar.svg" />
                   <span className="text-sm sm:text-md text-[#454545]">
-                    {formatDate(classDateTime)}
+                    {getDateDisplay(classDateTime)}
                   </span>
                 </div>
               </div>
@@ -224,11 +244,7 @@ const ClassCardTutor = ({
 
               <div className="flex items-center gap-2 mb-6">
                 <div className="w-6 h-6">
-                  {/* <img
-                    src="/api/placeholder/24/24"
-                    alt={language}
-                    className="w-full h-full rounded-full"
-                  /> */}
+                  {/* Language flag would go here */}
                 </div>
                 <span>{language}</span>
                 <span className="px-2 py-0.5 text-sm bg-[#fff885] rounded-full">
@@ -243,7 +259,7 @@ const ClassCardTutor = ({
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4" />
-                  <span>{formatDate(classDateTime)}</span>
+                  <span>{getDateDisplay(classDateTime)}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Users className="w-4 h-4" />
