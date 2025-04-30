@@ -39,7 +39,6 @@ if ("serviceWorker" in navigator && "PushManager" in window) {
       const registration = await navigator.serviceWorker.register(
         "/firebase-messaging-sw.js"
       );
-      console.log("ServiceWorker registered:", registration);
     } catch (error) {
       console.error("ServiceWorker registration failed:", error);
     }

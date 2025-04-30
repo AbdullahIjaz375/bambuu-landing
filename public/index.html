@@ -20,6 +20,20 @@
       rel="stylesheet"
     />
 
+    <!-- Google tag (gtag.js) - Google Analytics 4 -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-XXXXXXXXXX"); // Replace with your GA4 measurement ID
+    </script>
+
     <!-- Google Tag Manager -->
     <script>
       (function (w, d, s, l, i) {

@@ -3,15 +3,11 @@ import React, { useState, useEffect } from "react";
 import { auth, db } from "../firebaseConfig";
 import {
   GoogleAuthProvider,
-  signInWithPopup,
   FacebookAuthProvider,
   signInWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
 import { useNavigate, Link, useLocation } from "react-router-dom";
-import { Button, TextInput, Paper, Divider, Group, Title } from "@mantine/core";
-import { FaFacebook } from "react-icons/fa6";
-import { FaGoogle } from "react-icons/fa6";
 import { toast } from "react-toastify";
 import { useAuth } from "../context/AuthContext";
 import ClipLoader from "react-spinners/ClipLoader";
@@ -44,10 +40,17 @@ const LoginTutor = () => {
   const { user, loading, updateUserData } = useAuth();
 
   // Helper: Redirect after login.
-  // If ref=sub, redirect using the saved subscription URL.
-  // If ref=class, redirect using the saved class URL.
-  // Otherwise, fall back to the tutor landing page.
+  // Check for saved redirect path first, then fallback to other methods
   const redirectAfterLogin = () => {
+    // First check for the general redirect path saved in sessionStorage
+    const savedRedirectPath = sessionStorage.getItem("redirectAfterLogin");
+    if (savedRedirectPath) {
+      sessionStorage.removeItem("redirectAfterLogin");
+      navigate(savedRedirectPath, { replace: true });
+      return;
+    }
+
+    // Continue with existing special case handling
     const params = new URLSearchParams(location.search);
     if (params.get("ref") === "sub") {
       const savedUrl = localStorage.getItem("selectedPackageUrl");
@@ -73,6 +76,19 @@ const LoginTutor = () => {
           return;
         } catch (error) {
           console.error("Error parsing saved class URL:", error);
+        }
+      }
+    } else if (params.get("ref") === "group") {
+      const savedUrl = localStorage.getItem("selectedGroupUrl");
+      if (savedUrl) {
+        try {
+          const parsedUrl = new URL(savedUrl);
+          const path = parsedUrl.pathname + parsedUrl.search;
+          localStorage.removeItem("selectedGroupUrl");
+          navigate(path, { replace: true });
+          return;
+        } catch (error) {
+          console.error("Error parsing saved group URL:", error);
         }
       }
     }

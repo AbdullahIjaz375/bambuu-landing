@@ -35,7 +35,6 @@ const useClassEnrollment = () => {
   const enrollInClass = async (classId, userId, tutorId) => {
     setIsEnrolling(true);
     setError(null);
-    console.log(classId, userId, tutorId);
     try {
       // Get references to both documents
       const classRef = doc(db, "classes", classId);

@@ -56,9 +56,16 @@ const Login = () => {
     }
   }, [location.search, navigate]);
 
-  // Modified redirectAfterLogin: if the query parameter is missing but a class URL was saved,
-  // force ref=class.
   const redirectAfterLogin = (isFirstTimeLogin = false) => {
+    const savedRedirectPath = sessionStorage.getItem("redirectAfterLogin");
+    if (savedRedirectPath) {
+      sessionStorage.removeItem("redirectAfterLogin");
+      navigate(savedRedirectPath, { replace: true });
+      setRedirected(true);
+      return;
+    }
+
+    // Continue with existing special case handling
     const params = new URLSearchParams(location.search);
     if (!params.get("ref") && localStorage.getItem("selectedClassUrl")) {
       params.set("ref", "class");
@@ -118,7 +125,6 @@ const Login = () => {
       if (currentToken) {
         return currentToken;
       }
-      console.log("No registration token available.");
       return null;
     } catch (error) {
       console.error("Error getting FCM token:", error);
@@ -232,7 +238,6 @@ const Login = () => {
           const fcmToken = await getToken(messaging, {
             vapidKey: process.env.REACT_APP_FIREBASE_VAPID_KEY,
           });
-          console.log("FCM Token:", fcmToken);
           await updateDoc(userRef, {
             fcmToken: fcmToken,
           });
@@ -360,7 +365,6 @@ const Login = () => {
           const fcmToken = await getToken(messaging, {
             vapidKey: process.env.REACT_APP_FIREBASE_VAPID_KEY,
           });
-          console.log("FCM Token:", fcmToken);
           await updateDoc(userRef, { fcmToken });
         } else {
           console.warn("Notification permission not granted");
@@ -436,7 +440,6 @@ const Login = () => {
         const fcmToken = await getToken(messaging, {
           vapidKey: process.env.REACT_APP_FIREBASE_VAPID_KEY,
         });
-        console.log("FCM Token:", fcmToken);
         await updateDoc(userRef, { fcmToken });
       } else {
         console.warn("Notification permission not granted");

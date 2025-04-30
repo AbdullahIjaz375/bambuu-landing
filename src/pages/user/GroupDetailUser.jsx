@@ -103,7 +103,6 @@ const GroupDetailsUser = ({ onClose }) => {
   useEffect(() => {
     if (group) {
       fetchGroupTutor();
-      console.log("tutor:", groupTutor);
     }
   }, [group]);
   //---------------------------------------------------------------------------------------------------//
@@ -123,7 +122,6 @@ const GroupDetailsUser = ({ onClose }) => {
           })
         );
         setClasses(classesData.filter(Boolean));
-        console.log("class", classes);
       }
 
       // Fetch members
@@ -138,7 +136,6 @@ const GroupDetailsUser = ({ onClose }) => {
               : null;
           })
         );
-        console.log("Final members data:", membersData);
         setMembers(membersData.filter(Boolean));
       }
 
@@ -508,7 +505,6 @@ const GroupDetailsUser = ({ onClose }) => {
           const classData = classDoc.data();
 
           if (!classData) {
-            console.log(`Class ${classId} not found or has no data`);
             return;
           }
 

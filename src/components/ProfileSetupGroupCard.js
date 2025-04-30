@@ -39,7 +39,6 @@ const ExploreGroupDetailsModal = ({ group, onClose, onJoinClick }) => {
           })
         );
         setClasses(classesData.filter(Boolean));
-        console.log("class", classes);
       }
 
       setLoading(false);
@@ -183,7 +182,6 @@ const ExploreGroupDetailsModal = ({ group, onClose, onJoinClick }) => {
 };
 
 const ProfileSetupGroupCard = ({ group }) => {
-
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showJoinConfirmation, setShowJoinConfirmation] = useState(false);
 
@@ -288,7 +286,6 @@ const ProfileSetupGroupCard = ({ group }) => {
       const groupData = groupDoc.data();
 
       if (groupData.memberIds.includes(user.uid)) {
-        console.log("User is already a member of this group");
         return;
       }
 
@@ -321,8 +318,6 @@ const ProfileSetupGroupCard = ({ group }) => {
       // Update context and session storage
       updateContextAndSession(groupId);
 
-      console.log("Successfully joined group:", groupName);
-
       // Close modals and reset state
       setShowJoinConfirmation(false);
       setShowDetailsModal(false);
@@ -341,10 +336,11 @@ const ProfileSetupGroupCard = ({ group }) => {
     <>
       <div className="max-w-md mt-1 hover:cursor-pointer">
         <div
-          className={`max-w-sm p-4  rounded-3xl ${isPremium
+          className={`max-w-sm p-4  rounded-3xl ${
+            isPremium
               ? "bg-[#e8feeb] border border-[#14b82c]"
               : "bg-white border border-[#ffc310]"
-            }`}
+          }`}
         >
           {/* Rest of your existing GroupCard code */}
           <div className="flex flex-col items-center">
@@ -377,8 +373,8 @@ const ProfileSetupGroupCard = ({ group }) => {
                     groupLearningLanguage === "English"
                       ? "/svgs/xs-us.svg"
                       : groupLearningLanguage === "Spanish"
-                        ? "/svgs/xs-spain.svg"
-                        : "/svgs/eng-spanish-xs.svg"
+                      ? "/svgs/xs-spain.svg"
+                      : "/svgs/eng-spanish-xs.svg"
                   }
                   alt={
                     groupLearningLanguage === "English"

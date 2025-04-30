@@ -110,12 +110,7 @@ const GroupDetailsTutor = ({ onClose }) => {
           })
         );
         setClasses(classesData.filter(Boolean));
-        console.log("class", classes);
       }
-
-      // Debug group members
-      console.log("Group data:", group);
-      console.log("Member IDs:", group.memberIds);
 
       // Fetch members
       // Fetch members
@@ -123,17 +118,12 @@ const GroupDetailsTutor = ({ onClose }) => {
         const membersData = await Promise.all(
           group.memberIds.map(async (memberId) => {
             const userDoc = await getDoc(doc(db, "students", memberId));
-            // Add detailed logging
-            console.log(`Fetching user ${memberId}:`);
-            console.log("User document exists:", userDoc.exists());
-            console.log("User data:", userDoc.data());
 
             return userDoc.exists()
               ? { id: userDoc.id, ...userDoc.data() }
               : null;
           })
         );
-        console.log("Final members data:", membersData);
         setMembers(membersData.filter(Boolean));
       }
 
@@ -493,7 +483,6 @@ const GroupDetailsTutor = ({ onClose }) => {
           const classData = classDoc.data();
 
           if (!classData) {
-            console.log(`Class ${classId} not found or has no data`);
             return;
           }
 

@@ -55,7 +55,6 @@ export const AuthProvider = ({ children }) => {
         },
         streamToken
       );
-      console.log("Stream user connected successfully");
     } catch (error) {
       console.error("Error connecting Stream user:", error);
     }
@@ -65,7 +64,6 @@ export const AuthProvider = ({ children }) => {
     try {
       if (streamClient.userID) {
         await streamClient.disconnectUser();
-        console.log("Stream user disconnected");
       }
     } catch (error) {
       console.error("Error disconnecting Stream user:", error);
@@ -211,7 +209,6 @@ export const AuthProvider = ({ children }) => {
         access: {
           premiumGroups: (() => {
             const result = checkAccess(user, "premium-group", "Group Premium");
-            console.log("🏢 Premium Groups Access:", result);
             return result.hasAccess;
           })(),
           premiumClasses: (() => {
@@ -220,26 +217,15 @@ export const AuthProvider = ({ children }) => {
               "premium-class",
               "Individual Premium"
             );
-            console.log("👤 Premium Classes Access:", result);
             return result.hasAccess;
           })(),
           canJoinClass: (classType) => {
-            console.log("🎯 Checking Specific Class Access:", classType);
             const accessCheck = checkAccess(user, "premium-class", classType);
-            console.log("📝 Class Access Result:", accessCheck);
             return accessCheck.hasAccess;
           },
         },
       }
     : null;
-
-  // Add a log when providing the context
-  console.log("🔑 User Access State:", {
-    hasUser: !!userWithAccess,
-    freeAccess: userWithAccess?.freeAccess,
-    credits: userWithAccess?.credits,
-    subscriptions: userWithAccess?.subscriptions?.length,
-  });
 
   return (
     <AuthContext.Provider

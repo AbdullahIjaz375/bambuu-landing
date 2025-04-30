@@ -110,7 +110,6 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
   useEffect(() => {
     if (group) {
       fetchGroupTutor();
-      console.log("tutor:", groupTutor);
     }
   }, [group]);
 
@@ -131,12 +130,7 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
           })
         );
         setClasses(classesData.filter(Boolean));
-        console.log("class", classes);
       }
-
-      // Debug group members
-      console.log("Group data:", group);
-      console.log("Member IDs:", group.memberIds);
 
       setLoading(false);
     } catch (error) {
@@ -261,7 +255,6 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
         const groupData = groupDoc.data();
 
         if (groupData.memberIds.includes(user.uid)) {
-          console.log("User is already a member of this group");
           return;
         }
 
@@ -294,7 +287,6 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
         // Update context and session storage
         updateContextAndSession(groupId);
 
-        console.log("Successfully joined group");
         navigate(`/groupDetailsUser/${groupId}`, { replace: true });
         return;
       }
@@ -321,7 +313,6 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
       const groupData = groupDoc.data();
 
       if (groupData.memberIds.includes(user.uid)) {
-        console.log("User is already a member of this group");
         return;
       }
 
@@ -353,8 +344,6 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
 
       // Update context and session storage
       updateContextAndSession(groupId);
-
-      console.log("Successfully joined group");
 
       navigate(`/groupDetailsUser/${groupId}`, { replace: true });
     } catch (error) {

@@ -12,6 +12,48 @@
   scrollbar-width: none; /* Firefox */
 }
 
+/* Language cards slider styling */
+.language-slider-container {
+  position: relative;
+  padding: 0 20px;
+  margin-bottom: 20px;
+}
+
+/* Add cursor grab indicators */
+.draggable-container {
+  cursor: grab;
+}
+
+.draggable-container:active {
+  cursor: grabbing;
+}
+
+/* Scale and shadow effects for cards */
+.language-card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.language-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Animation to subtly show cards are movable when page loads */
+@keyframes gentle-shift {
+  0% {
+    transform: translateX(0);
+  }
+  5% {
+    transform: translateX(-10px);
+  }
+  10% {
+    transform: translateX(0);
+  }
+}
+
+.animate-pulse-once {
+  animation: gentle-shift 3s ease-in-out;
+}
+
 /* -----------------------------------------------------------------chat-overrides.css --------------------------------------------*/
 
 /* ----------------------------------------------Hide scrollbar for the message list ---------------------------------*/

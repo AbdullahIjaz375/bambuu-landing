@@ -58,8 +58,6 @@ const SavedResourcesTutor = () => {
           const savedDocs = tutorData.savedDocuments || [];
           setResources(savedDocs);
 
-          console.log(tutorData);
-
           // Fetch students based on tutorStudentIds
           const studentIds = tutorData.tutorStudentIds || [];
           const studentsData = [];
@@ -160,17 +158,17 @@ const SavedResourcesTutor = () => {
           ...selectedResource,
           createdAt: Timestamp.now(), // Use Timestamp.now() instead of serverTimestamp()
         };
-  
+
         await updateDoc(studentRef, {
           savedDocuments: arrayUnion(documentWithTimestamp),
         });
       }
-  
+
       // Close modal and reset state
       setIsAssignModalOpen(false);
       setSelectedStudents([]);
       setStudentSearchQuery("");
-  
+
       // Optional: Show success message
       toast.success(
         `Resource assigned to ${selectedStudents.length} student${
@@ -206,7 +204,7 @@ const SavedResourcesTutor = () => {
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
     if (!file || !user?.uid) return;
-  
+
     setIsUploading(true);
     try {
       // Create a unique filename
@@ -216,7 +214,7 @@ const SavedResourcesTutor = () => {
         .toLowerCase()
         .replace(/\s+/g, "")}%${timestamp}`;
       const fileType = file.name.split(".").pop().toUpperCase();
-  
+
       // Upload to Firebase Storage
       const storageRef = ref(
         storage,
@@ -224,7 +222,7 @@ const SavedResourcesTutor = () => {
       );
       await uploadBytes(storageRef, file);
       const downloadURL = await getDownloadURL(storageRef);
-  
+
       // Create document object - use regular Timestamp instead of serverTimestamp
       const newDocument = {
         docId: fileName,
@@ -234,16 +232,16 @@ const SavedResourcesTutor = () => {
         createdAt: Timestamp.now(), // Use Timestamp.now() instead of serverTimestamp()
         isFavorite: false,
       };
-  
+
       // Update Firestore
       const tutorRef = doc(db, "tutors", user.uid);
       await updateDoc(tutorRef, {
         savedDocuments: arrayUnion(newDocument),
       });
-  
+
       // Update local state
       setResources((prev) => [...prev, newDocument]);
-  
+
       // Update context and session storage
       const updatedUser = {
         ...user,
@@ -251,7 +249,7 @@ const SavedResourcesTutor = () => {
       };
       setUser(updatedUser);
       sessionStorage.setItem("user", JSON.stringify(updatedUser));
-  
+
       toast.success("Resource uploaded successfully!");
     } catch (error) {
       console.error("Error uploading file:", error);

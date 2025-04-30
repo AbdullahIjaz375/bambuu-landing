@@ -53,7 +53,6 @@ const AccountTab = () => {
       [field]: !prev[field],
     }));
   };
-  console.log(user);
 
   const handleUpdatePassword = async (e) => {
     e.preventDefault();

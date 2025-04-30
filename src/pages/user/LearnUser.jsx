@@ -20,7 +20,13 @@ import { useAuth } from "../../context/AuthContext";
 import GroupCard from "../../components/GroupCard";
 import { useNavigate, useLocation } from "react-router-dom";
 import { db } from "../../firebaseConfig";
-import { doc, getDoc, updateDoc, collection, getDocs } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  updateDoc,
+  collection,
+  getDocs,
+} from "firebase/firestore";
 import { ClipLoader } from "react-spinners";
 import { getToken } from "firebase/messaging";
 import { messaging } from "../../firebaseConfig";
@@ -90,18 +96,30 @@ const LearnUser = () => {
           const classMemberIds = classData.classMemberIds || [];
 
           if (language === "Spanish") {
-            classMemberIds.forEach((id) => tempLanguageData.spanish.studentIds.add(id));
+            classMemberIds.forEach((id) =>
+              tempLanguageData.spanish.studentIds.add(id)
+            );
           } else if (language === "English") {
-            classMemberIds.forEach((id) => tempLanguageData.english.studentIds.add(id));
+            classMemberIds.forEach((id) =>
+              tempLanguageData.english.studentIds.add(id)
+            );
           } else if (language === "English-Spanish") {
-            classMemberIds.forEach((id) => tempLanguageData.exchange.studentIds.add(id));
+            classMemberIds.forEach((id) =>
+              tempLanguageData.exchange.studentIds.add(id)
+            );
           }
         }
 
         // Convert Sets to Arrays
-        tempLanguageData.spanish.studentIds = Array.from(tempLanguageData.spanish.studentIds);
-        tempLanguageData.english.studentIds = Array.from(tempLanguageData.english.studentIds);
-        tempLanguageData.exchange.studentIds = Array.from(tempLanguageData.exchange.studentIds);
+        tempLanguageData.spanish.studentIds = Array.from(
+          tempLanguageData.spanish.studentIds
+        );
+        tempLanguageData.english.studentIds = Array.from(
+          tempLanguageData.english.studentIds
+        );
+        tempLanguageData.exchange.studentIds = Array.from(
+          tempLanguageData.exchange.studentIds
+        );
 
         // Fetch student profile pictures (limit to 12 per language)
         for (const langKey of ["spanish", "english", "exchange"]) {
@@ -115,7 +133,9 @@ const LearnUser = () => {
             }
             return "";
           });
-          tempLanguageData[langKey].studentPhotos = await Promise.all(photoPromises);
+          tempLanguageData[langKey].studentPhotos = await Promise.all(
+            photoPromises
+          );
         }
 
         setLanguageData(tempLanguageData);
@@ -157,7 +177,9 @@ const LearnUser = () => {
         setClasses(classesData);
       } catch (error) {
         console.error("Error fetching classes:", error);
-        setError("Unable to fetch classes at this time. Please try again later.");
+        setError(
+          "Unable to fetch classes at this time. Please try again later."
+        );
       } finally {
         setLoading(false);
       }
@@ -239,13 +261,17 @@ const LearnUser = () => {
 
     const formatTimeUntil = (milliseconds) => {
       const hours = Math.floor(milliseconds / (1000 * 60 * 60));
-      const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
+      const minutes = Math.floor(
+        (milliseconds % (1000 * 60 * 60)) / (1000 * 60)
+      );
 
       if (hours > 24) {
         const days = Math.floor(hours / 24);
         return `${days} day${days > 1 ? "s" : ""} away`;
       } else if (hours > 0) {
-        return `${hours} hour${hours > 1 ? "s" : ""} and ${minutes} minutes away`;
+        return `${hours} hour${
+          hours > 1 ? "s" : ""
+        } and ${minutes} minutes away`;
       } else {
         return `${minutes} minute${minutes > 1 ? "s" : ""} away`;
       }
@@ -385,84 +411,87 @@ const LearnUser = () => {
 
               {/* Language Cards */}
               <div className="w-full overflow-hidden">
-      {loadingLanguages ? (
-        <div className="flex items-center justify-center h-48">
-          <ClipLoader color="#14B82C" size={50} />
-        </div>
-      ) : (
-        <div className="flex gap-2 pb-4 overflow-x-auto scrollbar-hide">
-          {languageCards.map((card) => {
-            const students = languageData[card.id]?.studentPhotos?.slice(0, 8) || [];
-            const studentCount = languageData[card.id]?.studentIds?.length || 0;
-
-            return (
-              <div
-                key={card.id}
-                className={`flex items-center hover:cursor-pointer gap-2 p-4 ${card.bgColor} rounded-3xl border ${card.borderColor} w-[250px] sm:w-[380px] flex-shrink-0`}
-                onClick={() => navigate(card.path)}
-              >
-                <div className="flex-shrink-0 w-12 h-12 overflow-hidden rounded-full sm:w-20 sm:h-20">
-                  <img
-                    src={card.imgSrc}
-                    alt={card.alt}
-                    className="object-cover w-full h-full"
-                  />
-                </div>
-                <div className="flex flex-col items-start justify-between space-y-2">
-                  <span className="text-xl font-semibold whitespace-nowrap">
-                    {card.title}
-                  </span>
-                  <div className="flex items-center">
-                    <div className="flex relative">
-                      {students.length > 0 ? (
-                        students.map((photo, i) => (
-                          <div
-                            key={i}
-                            className="flex items-center justify-center w-6 h-6 bg-white border-2 border-white rounded-full sm:w-8 sm:h-8 -mr-2"
-                            style={{ zIndex: students.length - i }}
-                          >
-                            {photo ? (
-                              <img
-                                src={photo}
-                                alt={`Student ${i + 1}`}
-                                className="object-cover w-full h-full rounded-full"
-                              />
-                            ) : (
-                              <img  
-                              src={'/images/panda.png'}
-                              alt={`Student ${i + 1}`}
-                              className="object-cover w-full h-full rounded-full opacity-75"
-                              />
-                            )}
-                          </div>
-                        ))
-                      ) : (
-                        Array(4)
-                          .fill(null)
-                          .map((_, i) => (
-                            <div
-                              key={i}
-                              className="flex items-center justify-center w-6 h-6 bg-white border-2 border-white rounded-full sm:w-8 sm:h-8 -mr-2"
-                              style={{ zIndex: 4 - i }}
-                            >
-                              <User className="w-4 h-4 text-gray-600 sm:w-5 sm:h-5" />
-                            </div>
-                          ))
-                      )}
-                      
-                      {/* User count badge */}
-                      <div className="flex items-center justify-center ml-2 text-xs font-medium text-green-800 bg-green-100 rounded-full px-2 py-1 min-w-8">
-                        +{studentCount > 999 ? `${Math.floor(studentCount/1000)}k` : studentCount}
-                      </div>
-                    </div>
+                {loadingLanguages ? (
+                  <div className="flex items-center justify-center h-48">
+                    <ClipLoader color="#14B82C" size={50} />
                   </div>
-                </div>
+                ) : (
+                  <div className="flex gap-2 pb-4 overflow-x-auto scrollbar-hide">
+                    {languageCards.map((card) => {
+                      const students =
+                        languageData[card.id]?.studentPhotos?.slice(0, 8) || [];
+                      const studentCount =
+                        languageData[card.id]?.studentIds?.length || 0;
+
+                      return (
+                        <div
+                          key={card.id}
+                          className={`flex items-center hover:cursor-pointer gap-2 p-4 ${card.bgColor} rounded-3xl border ${card.borderColor} w-[250px] sm:w-[380px] flex-shrink-0`}
+                          onClick={() => navigate(card.path)}
+                        >
+                          <div className="flex-shrink-0 w-12 h-12 overflow-hidden rounded-full sm:w-20 sm:h-20">
+                            <img
+                              src={card.imgSrc}
+                              alt={card.alt}
+                              className="object-cover w-full h-full"
+                            />
+                          </div>
+                          <div className="flex flex-col items-start justify-between space-y-2">
+                            <span className="text-xl font-semibold whitespace-nowrap">
+                              {card.title}
+                            </span>
+                            <div className="flex items-center">
+                              <div className="flex relative">
+                                {students.length > 0
+                                  ? students.map((photo, i) => (
+                                      <div
+                                        key={i}
+                                        className="flex items-center justify-center w-6 h-6 bg-white border-2 border-white rounded-full sm:w-8 sm:h-8 -mr-2"
+                                        style={{ zIndex: students.length - i }}
+                                      >
+                                        {photo ? (
+                                          <img
+                                            src={photo}
+                                            alt={`Student ${i + 1}`}
+                                            className="object-cover w-full h-full rounded-full"
+                                          />
+                                        ) : (
+                                          <img
+                                            src={"/images/panda.png"}
+                                            alt={`Student ${i + 1}`}
+                                            className="object-cover w-full h-full rounded-full opacity-75"
+                                          />
+                                        )}
+                                      </div>
+                                    ))
+                                  : Array(4)
+                                      .fill(null)
+                                      .map((_, i) => (
+                                        <div
+                                          key={i}
+                                          className="flex items-center justify-center w-6 h-6 bg-white border-2 border-white rounded-full sm:w-8 sm:h-8 -mr-2"
+                                          style={{ zIndex: 4 - i }}
+                                        >
+                                          <User className="w-4 h-4 text-gray-600 sm:w-5 sm:h-5" />
+                                        </div>
+                                      ))}
+
+                                {/* User count badge */}
+                                <div className="flex items-center justify-center ml-2 text-xs font-medium text-green-800 bg-green-100 rounded-full px-2 py-1 min-w-8">
+                                  +
+                                  {studentCount > 999
+                                    ? `${Math.floor(studentCount / 1000)}k`
+                                    : studentCount}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            );
-          })}
-        </div>
-      )}
-    </div>  
             </div>
           </div>
 

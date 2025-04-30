@@ -1,63 +1,30 @@
 import { useState } from "react";
+import { checkAccess } from "../utils/accessControl";
 
 export const useGroupJoining = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState(null);
 
-  const checkJoiningEligibility = (user, groupType, subscriptions) => {
-    // If group is not premium, allow joining without subscription check
-    if (groupType !== "Premium") {
-      return {
-        canJoin: true,
-        useSubscription: false,
-        message: "Standard group joining",
-      };
-    }
+  const checkJoiningEligibility = (user, group) => {
+    // Use the centralized access control function
+    const isPremium = group.isPremium === true;
+    const groupType = isPremium ? "Group Premium" : "Group Standard";
+    const contentType = isPremium ? "premium-class" : "standard";
 
-    // First check freeAccess flag
-    if (user?.freeAccess) {
-      return {
-        canJoin: true,
-        useSubscription: false,
-        message: "Free access enabled",
-      };
-    }
+    const accessResult = checkAccess(user, contentType, groupType);
 
-    // Check for valid subscriptions
-    const currentDate = new Date();
-    const validSubscriptions =
-      subscriptions?.filter((sub) => {
-        if (!sub.startDate || !sub.endDate) return false;
-        const endDate = new Date(sub.endDate.seconds * 1000);
-        return endDate > currentDate;
-      }) || [];
-
-    // For premium groups, check for specific subscription type
-    const hasValidSubscription = validSubscriptions.some(
-      (sub) => sub.type === "bammbuu+ Instructor-led group Classes"
-    );
-
-    // If has valid subscription, allow joining
-    if (hasValidSubscription) {
-      return {
-        canJoin: true,
-        useSubscription: true,
-        message: "Premium group joining with subscription",
-      };
-    }
-
-    // No valid subscription for premium group
     return {
-      canJoin: false,
-      useSubscription: false,
-      message: "No valid subscription for premium group",
+      canJoin: accessResult.hasAccess,
+      useSubscription:
+        accessResult.reason === "Valid group subscription" ||
+        accessResult.reason === "Unlimited subscription",
+      message: accessResult.reason,
     };
   };
 
   const handleGroupJoining = async (
     user,
-    groupType,
-    subscriptions,
+    group,
     onSuccess,
     onFailure,
     handleJoinGroup
@@ -66,11 +33,7 @@ export const useGroupJoining = () => {
     setError(null);
 
     try {
-      const eligibility = checkJoiningEligibility(
-        user,
-        groupType,
-        subscriptions
-      );
+      const eligibility = checkJoiningEligibility(user, group);
 
       if (!eligibility.canJoin) {
         setError(eligibility.message);

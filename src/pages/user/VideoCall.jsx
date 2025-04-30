@@ -220,7 +220,6 @@ const VideoCallStudent = () => {
       try {
         // Make sure user is connected to Stream Chat before initializing the channel
         if (!streamClient.userID) {
-          console.log("[CHAT DEBUG] Connecting user to Stream Chat...");
           // Generate token for chat
           const token = await fetchToken(user.uid);
 
@@ -232,9 +231,6 @@ const VideoCallStudent = () => {
               image: user.photoUrl || "",
             },
             token
-          );
-          console.log(
-            "[CHAT DEBUG] User connected to Stream Chat successfully"
           );
         }
 
@@ -258,35 +254,22 @@ const VideoCallStudent = () => {
           ? `${currentDay}${selectedClassId}${activeRoomId}`
           : `${currentDay}${selectedClassId}`;
 
-        console.log(`[CHAT DEBUG] Looking for channel with ID: ${channelId}`);
-        console.log(
-          `[CHAT DEBUG] Day: ${currentDay}, ClassId: ${selectedClassId}, ActiveRoomId: ${activeRoomId}`
-        );
-
         // IMPORTANT: First check if the channel already exists
         try {
           // Query to find the existing channel
           const filter = { type: "messaging", id: channelId };
           const sort = [{ field: "created_at", direction: -1 }];
 
-          console.log(
-            `[CHAT DEBUG] Querying for existing channel with filter:`,
-            filter
-          );
           const channels = await streamClient.queryChannels(filter, sort, {
             watch: true,
             state: true,
           });
 
           if (channels && channels.length > 0) {
-            console.log(`[CHAT DEBUG] Found existing channel: ${channelId}`);
             const existingChannel = channels[0];
 
             // Make sure current user is a member
             await existingChannel.addMembers([user.uid]);
-            console.log(
-              `[CHAT DEBUG] Added current user to existing channel's members`
-            );
 
             setChatChannel(existingChannel);
             return; // Exit early since we found and joined the channel
@@ -299,11 +282,6 @@ const VideoCallStudent = () => {
           console.error(`[CHAT DEBUG] Error querying channels:`, queryError);
           // Continue to channel creation if query fails
         }
-
-        // If no existing channel was found, create a new one
-        console.log(
-          `[CHAT DEBUG] Creating new chat channel with ID: ${channelId}`
-        );
 
         const chatRoomName = isBreakoutRoom
           ? `${
@@ -319,9 +297,7 @@ const VideoCallStudent = () => {
         });
 
         await channel.watch();
-        console.log(
-          `[CHAT DEBUG] Successfully created and watching new channel: ${channelId}`
-        );
+
         setChatChannel(channel);
       } catch (error) {
         console.error("[CHAT DEBUG] Error initializing chat channel:", error);
@@ -416,7 +392,6 @@ const VideoCallStudent = () => {
   // Join a room function
   const joinRoom = async (roomId) => {
     try {
-      console.log("Joining room:", roomId);
       setIsLoading(true);
       setLoadingMessage("Connecting to call...");
 
@@ -434,7 +409,6 @@ const VideoCallStudent = () => {
 
       // Make sure user is connected to Stream Chat
       if (!streamClient.userID) {
-        console.log("Connecting user to Stream Chat first...");
         setLoadingMessage("Initializing chat...");
 
         try {
@@ -450,7 +424,6 @@ const VideoCallStudent = () => {
             },
             chatToken
           );
-          console.log("User connected to Stream Chat successfully");
         } catch (chatErr) {
           console.error("Failed to connect user to Stream Chat:", chatErr);
           // Continue with video - chat error is not fatal
@@ -459,7 +432,6 @@ const VideoCallStudent = () => {
 
       // Check if we need to connect the user to Stream Video
       if (!streamVideoClient.user || streamVideoClient.user.id !== user.uid) {
-        console.log("Connecting user to Stream Video...");
         setLoadingMessage("Authenticating...");
 
         try {
@@ -481,8 +453,6 @@ const VideoCallStudent = () => {
             },
             token
           );
-
-          console.log("User connected to Stream Video successfully");
         } catch (err) {
           console.error("Failed to connect user to Stream Video:", err);
           setIsLoading(false);
@@ -493,7 +463,6 @@ const VideoCallStudent = () => {
 
       // Leave previous call if exists
       if (callInstanceRef.current) {
-        console.log("Leaving previous call...");
         setLoadingMessage("Switching rooms...");
         await callInstanceRef.current.leave();
         callInstanceRef.current = null;
@@ -501,13 +470,10 @@ const VideoCallStudent = () => {
       }
 
       // Create and join call with increased timeout
-      console.log("Creating call instance...");
       setLoadingMessage("Joining video call...");
       const call = streamVideoClient.call("default", roomId);
 
       try {
-        console.log("Joining call with extended timeout...");
-
         // Get the current day abbreviation
         const dayAbbreviations = [
           "Sun",
@@ -537,10 +503,6 @@ const VideoCallStudent = () => {
           },
         };
 
-        console.log(
-          `[CHAT DEBUG] Setting call data with channelCid: messaging:${channelId}`
-        );
-
         // Increase the timeout for joining
         await Promise.race([
           call.join({ create: true, data: callData }),
@@ -548,7 +510,6 @@ const VideoCallStudent = () => {
             setTimeout(() => reject(new Error("Join call timeout")), 30000)
           ),
         ]);
-        console.log("Call joined successfully");
       } catch (error) {
         console.error("Error joining call:", error);
         setIsLoading(false);
@@ -598,10 +559,8 @@ const VideoCallStudent = () => {
   // Enable camera and microphone
   const enableDevices = async (call) => {
     try {
-      console.log("Enabling camera and microphone...");
       await call.camera.enable();
       await call.microphone.enable();
-      console.log("Camera and microphone enabled successfully");
     } catch (err) {
       console.warn("Error enabling devices:", err);
     }

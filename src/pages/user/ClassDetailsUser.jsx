@@ -427,7 +427,6 @@ const ClassDetailsUser = ({ onClose }) => {
   useEffect(() => {
     if (classData) {
       fetchClassAdmin();
-      console.log("admin:", groupTutor);
     }
   }, [classData]);
 

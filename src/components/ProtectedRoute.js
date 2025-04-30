@@ -1,12 +1,26 @@
-import React from "react";
-import { Navigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const ProtectedRoute = ({ children, requiredRole }) => {
   const { user } = useAuth();
   const userType = sessionStorage.getItem("userType");
+  const location = useLocation();
   const currentUrl = window.location.href;
+  const currentPath = location.pathname + location.search + location.hash;
 
+  // Save the current path for redirection after login - using useEffect to ensure this runs once
+  useEffect(() => {
+    if (!user) {
+      console.log("Saving redirect path:", currentPath); // Debug log
+      sessionStorage.setItem("redirectAfterLogin", currentPath);
+
+      // Also save the full URL just for backup
+      localStorage.setItem("fullRedirectUrl", currentUrl);
+    }
+  }, [user, currentPath, currentUrl]);
+
+  // Keep existing special case handling
   // Save subscription URL if applicable.
   if (currentUrl.includes("subscriptions?offerId=")) {
     localStorage.setItem("selectedPackageUrl", currentUrl);
@@ -17,46 +31,51 @@ const ProtectedRoute = ({ children, requiredRole }) => {
   try {
     const urlObj = new URL(currentUrl);
     const searchParams = new URLSearchParams(urlObj.search);
-    
-    // Check for class details
-    if (urlObj.pathname.includes("/classDetailsUser/") && searchParams.has("ref")) {
+
+    // Save all class detail URLs regardless of query params
+    if (
+      urlObj.pathname.includes("/classDetailsUser/") ||
+      urlObj.pathname.includes("/newClassDetailsUser/")
+    ) {
       localStorage.setItem("selectedClassUrl", currentUrl);
     }
-    
-    // Check for group details
-    if (urlObj.pathname.includes("/groupDetailsTutor/") && searchParams.has("ref")) {
+
+    // Save all group detail URLs regardless of query params
+    if (
+      urlObj.pathname.includes("/groupDetailsTutor/") ||
+      urlObj.pathname.includes("/groupDetailsUser/") ||
+      urlObj.pathname.includes("/newGroupDetailsUser/")
+    ) {
       localStorage.setItem("selectedGroupUrl", currentUrl);
     }
   } catch (error) {
     console.error("Invalid URL", error);
   }
 
-  // If the user is not logged in, determine the proper login URL.
+  // If the user is not logged in, redirect to login page with appropriate query param
   if (!user) {
+    // Determine the login URL with appropriate query parameter
     let loginUrl = "/login";
-    
+
     if (currentUrl.includes("subscriptions?offerId=")) {
       loginUrl = "/login?ref=sub";
-    } else {
-      try {
-        const urlObj = new URL(currentUrl);
-        const searchParams = new URLSearchParams(urlObj.search);
-        
-        if (urlObj.pathname.includes("/classDetailsUser/") && searchParams.has("ref")) {
-          loginUrl = "/login?ref=class";
-        }
-        
-        // Add handler for group details links
-        if (urlObj.pathname.includes("/groupDetailsTutor/") && searchParams.has("ref")) {
-          loginUrl = "/login?ref=group";
-        }
-      } catch (error) {
-        console.error("Invalid URL", error);
-      }
+    } else if (
+      currentPath.includes("/classDetailsUser/") ||
+      currentPath.includes("/newClassDetailsUser/")
+    ) {
+      loginUrl = "/login?ref=class";
+    } else if (
+      currentPath.includes("/groupDetailsTutor/") ||
+      currentPath.includes("/groupDetailsUser/") ||
+      currentPath.includes("/newGroupDetailsUser/")
+    ) {
+      loginUrl = "/login?ref=group";
     }
+
     return <Navigate to={loginUrl} />;
   }
 
+  // Role-based access checks
   const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
   if (roles.length > 0 && !roles.includes(userType)) {
     return <Navigate to="/unauthorized" />;

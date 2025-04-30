@@ -5,10 +5,12 @@ import { ArrowLeft } from "lucide-react";
 import Sidebar from "../../components/Sidebar";
 import countryList from "react-select-country-list";
 import ISO6391 from "iso-639-1";
+import { useTranslation } from "react-i18next";
 
 const BecomeAnExpertUser = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [submitStatus, setSubmitStatus] = useState({ type: "", message: "" });
   const countries = countryList().getData();
@@ -36,12 +38,16 @@ const BecomeAnExpertUser = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.name.trim()) newErrors.name = "Name is required";
-    if (!formData.country) newErrors.country = "Country is required";
+    if (!formData.name.trim())
+      newErrors.name = t("becomeAnExpert.form.name.error");
+    if (!formData.country)
+      newErrors.country = t("becomeAnExpert.form.country.error");
     if (!formData.aboutYourself.trim())
-      newErrors.aboutYourself = "Please tell us about yourself";
+      newErrors.aboutYourself = t("becomeAnExpert.form.aboutYourself.error");
     if (formData.aboutYourself.length > 500)
-      newErrors.aboutYourself = "Bio must be less than 500 characters";
+      newErrors.aboutYourself = t(
+        "becomeAnExpert.form.aboutYourself.errorLength"
+      );
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -79,7 +85,7 @@ const BecomeAnExpertUser = () => {
     if (!validateForm()) {
       setSubmitStatus({
         type: "error",
-        message: "Please fill in all required fields correctly.",
+        message: t("becomeAnExpert.status.formError"),
       });
       return;
     }
@@ -99,16 +105,16 @@ const BecomeAnExpertUser = () => {
     `;
 
     // Construct the mailto link
-    const mailtoLink = `mailto:admin@bammbuu.co?subject=Become an Expert Application&body=${encodeURIComponent(
-      emailBody
-    )}`;
+    const mailtoLink = `mailto:admin@bammbuu.co?subject=${encodeURIComponent(
+      t("becomeAnExpert.email.subject")
+    )}&body=${encodeURIComponent(emailBody)}`;
 
     // Open the user's email client
     window.location.href = mailtoLink;
 
     setSubmitStatus({
       type: "success",
-      message: "Your application has been prepared. Please send the email.",
+      message: t("becomeAnExpert.status.success"),
     });
 
     setLoading(false);
@@ -132,7 +138,9 @@ const BecomeAnExpertUser = () => {
                   >
                     <ArrowLeft size="30" />
                   </button>
-                  <h1 className="text-4xl font-semibold">Become an Expert</h1>
+                  <h1 className="text-4xl font-semibold">
+                    {t("becomeAnExpert.title")}
+                  </h1>
                 </div>
               </div>
             </div>
@@ -152,17 +160,14 @@ const BecomeAnExpertUser = () => {
 
             {/* Scrollable Content */}
             <div className="overflow-y-auto">
-              <p className="mb-8 text-gray-600">
-                Interested in becoming a language expert with Bammbuu? We're excited that you are interested in joining our team!
-                Please fill out this form and our team will reach out to you
-                after reviewing it.
-              </p>
+              <p className="mb-8 text-gray-600">{t("becomeAnExpert.intro")}</p>
 
               <form className="max-w-3xl">
                 <div className="space-y-6">
                   <div>
                     <label className="block mb-2 text-sm font-medium">
-                      Name <span className="text-red-500">*</span>
+                      {t("becomeAnExpert.form.name.label")}{" "}
+                      <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -172,7 +177,7 @@ const BecomeAnExpertUser = () => {
                       className={`w-full p-3 border rounded-lg ${
                         errors.name ? "border-red-500" : "border-gray-300"
                       }`}
-                      placeholder="Enter your name"
+                      placeholder={t("becomeAnExpert.form.name.placeholder")}
                     />
                     {errors.name && (
                       <p className="mt-1 text-sm text-red-500">{errors.name}</p>
@@ -181,7 +186,7 @@ const BecomeAnExpertUser = () => {
 
                   <div>
                     <label className="block mb-2 text-sm font-medium">
-                      Native Language
+                      {t("becomeAnExpert.form.nativeLanguage.label")}
                     </label>
                     <select
                       name="nativeLanguage"
@@ -199,7 +204,8 @@ const BecomeAnExpertUser = () => {
 
                   <div>
                     <label className="block mb-2 text-sm font-medium">
-                      Country <span className="text-red-500">*</span>
+                      {t("becomeAnExpert.form.country.label")}{" "}
+                      <span className="text-red-500">*</span>
                     </label>
                     <select
                       name="country"
@@ -209,7 +215,9 @@ const BecomeAnExpertUser = () => {
                         errors.country ? "border-red-500" : "border-gray-300"
                       }`}
                     >
-                      <option value="">Select a country</option>
+                      <option value="">
+                        {t("becomeAnExpert.form.country.placeholder")}
+                      </option>
                       {countries.map((country) => (
                         <option key={country.value} value={country.value}>
                           {country.label}
@@ -225,7 +233,7 @@ const BecomeAnExpertUser = () => {
 
                   <div>
                     <label className="block mb-2 text-sm font-medium">
-                      Tell us about yourself{" "}
+                      {t("becomeAnExpert.form.aboutYourself.label")}{" "}
                       <span className="text-red-500">*</span>
                     </label>
                     <textarea
@@ -237,7 +245,9 @@ const BecomeAnExpertUser = () => {
                           ? "border-red-500"
                           : "border-gray-300"
                       }`}
-                      placeholder="Enter details about your teaching expertise (max 500 characters)"
+                      placeholder={t(
+                        "becomeAnExpert.form.aboutYourself.placeholder"
+                      )}
                       rows={4}
                     />
                     {errors.aboutYourself && (
@@ -246,13 +256,15 @@ const BecomeAnExpertUser = () => {
                       </p>
                     )}
                     <p className="mt-1 text-sm text-gray-500">
-                      {formData.aboutYourself.length}/500 characters
+                      {t("becomeAnExpert.form.aboutYourself.charCount", {
+                        count: formData.aboutYourself.length,
+                      })}
                     </p>
                   </div>
 
                   <div>
                     <label className="block mb-2 text-sm font-medium">
-                      Teaching Language
+                      {t("becomeAnExpert.form.teachingLanguage.label")}
                     </label>
                     <div className="flex gap-2">
                       {["English", "Spanish"].map((lang) => (
@@ -274,7 +286,7 @@ const BecomeAnExpertUser = () => {
 
                   <div>
                     <label className="block mb-2 text-sm font-medium">
-                      Teaching Language Proficiency Level
+                      {t("becomeAnExpert.form.proficiencyLevel.label")}
                     </label>
                     <div className="flex gap-2">
                       {["Beginner", "Intermediate", "Advanced"].map((level) => (
@@ -288,7 +300,9 @@ const BecomeAnExpertUser = () => {
                               : "bg-gray-100 text-gray-600 border border-gray-300"
                           }`}
                         >
-                          {level}
+                          {t(
+                            `becomeAnExpert.form.proficiencyLevel.levels.${level.toLowerCase()}`
+                          )}
                         </button>
                       ))}
                     </div>
@@ -301,7 +315,7 @@ const BecomeAnExpertUser = () => {
                 onClick={() => navigate(-1)}
                 className="px-8 py-3 text-[#042f0c] border border-[#5d5d5d] rounded-full"
               >
-                Cancel
+                {t("becomeAnExpert.buttons.cancel")}
               </button>
               <button
                 disabled={
@@ -315,7 +329,9 @@ const BecomeAnExpertUser = () => {
                 className="px-8 py-3 text-[#042f0c] bg-[#14b82c] border border-[#5d5d5d] rounded-full disabled:bg-[#b9f9c2] disabled:text-[#b0b0b0] disabled:border-[#b0b0b0]"
                 onClick={handleSubmit}
               >
-                {loading ? "Submitting..." : "Submit Form"}
+                {loading
+                  ? t("becomeAnExpert.buttons.submitting")
+                  : t("becomeAnExpert.buttons.submit")}
               </button>
             </div>
           </div>

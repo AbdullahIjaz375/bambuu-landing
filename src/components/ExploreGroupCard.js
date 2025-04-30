@@ -38,7 +38,6 @@ const ExploreGroupDetailsModal = ({ group, onClose, onJoinClick }) => {
           })
         );
         setClasses(classesData.filter(Boolean));
-        console.log("class", classes);
       }
 
       setLoading(false);
@@ -274,7 +273,6 @@ const GroupCard = ({ group }) => {
         const groupData = groupDoc.data();
 
         if (groupData.memberIds.includes(user.uid)) {
-          console.log("User is already a member of this group");
           return;
         }
 
@@ -307,7 +305,6 @@ const GroupCard = ({ group }) => {
         // Update context and session storage
         updateContextAndSession(groupId);
 
-        console.log("Successfully joined group");
         setShowJoinConfirmation(false);
         setShowDetailsModal(false);
         return;
@@ -335,7 +332,6 @@ const GroupCard = ({ group }) => {
       const groupData = groupDoc.data();
 
       if (groupData.memberIds.includes(user.uid)) {
-        console.log("User is already a member of this group");
         return;
       }
 
@@ -367,8 +363,6 @@ const GroupCard = ({ group }) => {
 
       // Update context and session storage
       updateContextAndSession(groupId);
-
-      console.log("Successfully joined group:", groupName);
 
       // Close modals and reset state
       setShowJoinConfirmation(false);

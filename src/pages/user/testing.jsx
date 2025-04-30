@@ -343,34 +343,3 @@ const CommunityUser = () => {
 };
 
 export default CommunityUser;
-
-
-
- // Instead of using the "in" query, just get all groups
-        // const groupsRef = collection(db, "groups");
-        // const groupsQuery = query(groupsRef); // Simple query to get all groups
-
-        // try {
-        //   const groupsSnapshot = await getDocs(groupsQuery);
-        //   const groupsData = groupsSnapshot.docs.map((doc) => ({
-        //     id: doc.id,
-        //     ...doc.data(),
-        //   }));
-
-        //   console.log("Firebase Groups Data:", groupsData);
-
-        //   // Now you can match them with channels if needed
-        //   const channelsWithGroups = channels.map((channel) => {
-        //     const matchingGroup = groupsData.find(
-        //       (group) => group.channelId === channel.id
-        //     );
-        //     return {
-        //       ...channel,
-        //       groupData: matchingGroup,
-        //     };
-        //   });
-
-        //   setChannels(channelsWithGroups);
-        // } catch (firebaseError) {
-        //   console.error("Error fetching groups from Firebase:", firebaseError);
-        }

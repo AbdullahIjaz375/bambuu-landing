@@ -11,48 +11,28 @@
 export const canCreateBreakoutRooms = (classId) => {
   try {
     const user = JSON.parse(sessionStorage.getItem("user"));
-    console.log(
-      "[PERMISSION DEBUG] canCreateBreakoutRooms called with classId:",
-      classId
-    );
-    console.log("[PERMISSION DEBUG] User from sessionStorage:", user);
 
     if (!user) {
-      console.log("[PERMISSION DEBUG] No user found in sessionStorage");
       return false;
     }
 
     const { userType, adminOfClasses = [], tutorOfClasses = [] } = user;
-    console.log("[PERMISSION DEBUG] User details:", {
-      userType,
-      adminOfClasses,
-      tutorOfClasses,
-      classId,
-    });
 
     // Students can create breakout rooms if they are class admins
     if (userType === "student") {
       const hasPermission = adminOfClasses.includes(classId);
-      console.log(
-        "[PERMISSION DEBUG] Student permission check:",
-        hasPermission
-      );
+
       return hasPermission;
     }
     // Tutors can create breakout rooms for their classes
     else if (userType === "tutor") {
       const hasPermission = tutorOfClasses.includes(classId);
-      console.log("[PERMISSION DEBUG] Tutor permission check:", hasPermission);
       return hasPermission;
     }
 
-    console.log("[PERMISSION DEBUG] User is neither student nor tutor");
     return false;
   } catch (error) {
-    console.error(
-      "[PERMISSION DEBUG] Error checking breakout room permissions:",
-      error
-    );
+    console.error(error);
     return false;
   }
 };

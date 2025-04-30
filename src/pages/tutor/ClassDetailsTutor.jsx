@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ArrowLeft} from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { doc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import { ClipLoader } from "react-spinners";
@@ -106,7 +106,6 @@ const ClassDetailsTutor = ({ onClose }) => {
   useEffect(() => {
     if (classData) {
       fetchClassAdmin();
-      console.log("admin:", groupTutor);
     }
   }, [classData]);
   //---------------------------------------------------------------------------------------------------//
@@ -364,9 +363,9 @@ const ClassDetailsTutor = ({ onClose }) => {
             >
               <div className="flex items-center gap-3">
                 <div className="relative">
-                
-                  
-                  <UserAvatar member={{ name: member.name, photoUrl: member.photoUrl }} />
+                  <UserAvatar
+                    member={{ name: member.name, photoUrl: member.photoUrl }}
+                  />
 
                   {member.id === classData.adminId && (
                     <div className="absolute flex items-center justify-center w-4 h-4 bg-yellow-400 rounded-full -top-1 -right-1">

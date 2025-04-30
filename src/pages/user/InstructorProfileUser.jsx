@@ -110,7 +110,6 @@ const InstructorProfileUser = () => {
             .filter((doc) => doc.exists())
             .map((doc) => ({ id: doc.id, ...doc.data() }));
           setClasses(classesData);
-          console.log(classes);
         }
       } catch (err) {
         console.error("Error fetching tutor data:", err);
@@ -129,17 +128,22 @@ const InstructorProfileUser = () => {
     navigate(-1);
   };
 
-
   const renderClasses = () => {
     // Filter out classes that are:
     // 1. Individual Premium and already have a member
     // 2. Group Premium and have no available spots
-    const availableClasses = classes.filter(classItem => {
-      if (classItem.classType === "Individual Premium" && classItem.classMemberIds?.length > 0) {
+    const availableClasses = classes.filter((classItem) => {
+      if (
+        classItem.classType === "Individual Premium" &&
+        classItem.classMemberIds?.length > 0
+      ) {
         return false; // Filter out Individual Premium classes that already have a member
       }
 
-      if (classItem.classType === "Group Premium" && classItem.availableSpots <= 0) {
+      if (
+        classItem.classType === "Group Premium" &&
+        classItem.availableSpots <= 0
+      ) {
         return false; // Filter out Group Premium classes with no available spots
       }
 
@@ -337,7 +341,6 @@ const InstructorProfileUser = () => {
                   </div>
 
                   <ExpandableBio bio={tutor.bio} maxChars={200} />
-
                 </div>
 
                 <div className="w-full mt-4">

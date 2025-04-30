@@ -118,7 +118,6 @@ export const connectStreamVideoUser = async (user) => {
 
   try {
     if (streamVideoClient.user?.id === user.uid) {
-      console.log("User already connected to Stream Video");
       return true;
     }
 
@@ -137,7 +136,6 @@ export const connectStreamVideoUser = async (user) => {
       token
     );
 
-    console.log("User connected to Stream Video successfully", user.uid);
     return true;
   } catch (error) {
     console.error("Failed to connect to Stream Video:", error);

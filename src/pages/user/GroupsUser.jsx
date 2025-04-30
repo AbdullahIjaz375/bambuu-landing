@@ -41,7 +41,6 @@ const GroupsUser = () => {
         setGroups(filteredByLanguage);
         setFilteredGroups(fetchedGroups);
         setLoadingGroups(false);
-        console.log("my groups", groups);
       };
 
       fetchGroups();

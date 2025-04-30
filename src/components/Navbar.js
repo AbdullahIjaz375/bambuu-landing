@@ -12,8 +12,6 @@ const Navbar = ({ user }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  console.log(user);
-
   const navigate = useNavigate();
 
   const handleSignOut = async () => {

@@ -112,7 +112,6 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
   useEffect(() => {
     if (classData) {
       fetchClassAdmin();
-      console.log("admin:", groupTutor);
     }
   }, [classData]);
   //---------------------------------------------------------------------------------------------------//
@@ -273,7 +272,6 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
             : user.credits,
         }),
       ];
-      console.log(classData.type);
       // Check if the tutorId corresponds to an actual tutor document
       const tutorDoc = await getDoc(tutorRef);
       if (tutorDoc.exists()) {
@@ -388,7 +386,6 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
     }
 
     const baseDate = new Date(startDateTimeMillis);
-    console.log("Base date:", baseDate);
 
     if (!["Daily", "Weekly", "Monthly"].includes(recurrenceType)) {
       console.error("Invalid recurrenceType:", recurrenceType);
@@ -422,7 +419,6 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
       slots.push(new Timestamp(Math.floor(slotDate.getTime() / 1000), 0));
     }
 
-    console.log("Generated slots:", slots);
     return slots;
   };
   const renderRecurrenceOptions = () => (
@@ -774,10 +770,10 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
                             {new Date(
                               classData?.classDateTime?.seconds * 1000
                             ).toLocaleDateString("en-US", {
-                              year: "numeric",
-                              month: "long",
+                              weekday: "short",
+                              month: "short",
                               day: "numeric",
-                              // timeZone: "UTC", // Ensure the time is displayed in UTC
+                              year: "numeric",
                             })}
                           </span>
                         </div>

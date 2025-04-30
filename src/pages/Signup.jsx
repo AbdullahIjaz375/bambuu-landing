@@ -6,7 +6,6 @@ import {
   signOut,
   signInWithPopup,
   GoogleAuthProvider,
-  FacebookAuthProvider,
 } from "firebase/auth";
 import { OAuthProvider } from "firebase/auth";
 
@@ -169,7 +168,6 @@ const Signup = () => {
   };
 
   const handleProfileSubmit = async (e) => {
-    console.log(profileData);
     e.preventDefault();
     setLoading1(true);
     const loadingToastId = toast.loading("Completing account setup...");
@@ -225,14 +223,18 @@ const Signup = () => {
         notificationPreferences
       );
 
-      await setDoc(doc(db, "user_accounts", auth.currentUser.uid), {
-        uid: auth.currentUser.uid,
-        email: auth.currentUser.email,
-        sign_up_method: "email", // or dynamically detect sign-up method
-        created_at: serverTimestamp(),
-      });
+      const userAccountRef = doc(db, "user_accounts", auth.currentUser.uid);
+      const userAccountDoc = await getDoc(userAccountRef);
 
-      // Update the user data in context
+      if (!userAccountDoc.exists()) {
+        await setDoc(userAccountRef, {
+          uid: auth.currentUser.uid,
+          email: auth.currentUser.email,
+          sign_up_method: "email",
+          created_at: serverTimestamp(),
+        });
+      }
+
       const sessionUserData = {
         ...userData,
         userType: "student",
@@ -248,7 +250,6 @@ const Signup = () => {
 
       // Show success modal instead of navigating
       setHasProfile(true);
-
       setShowSuccessModal(true);
     } catch (error) {
       toast.update(loadingToastId, {
@@ -277,12 +278,21 @@ const Signup = () => {
 
   //------------------------------------------------google and fb---------------------------------//
   const googleProvider = new GoogleAuthProvider();
-  const facebookProvider = new FacebookAuthProvider();
 
   const handleGoogleLoginStudent = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
+
+      // Get the provider data to confirm Google sign-in
+      const providerData = user.providerData;
+      const isGoogleProvider = providerData.some(
+        (provider) => provider.providerId === "google.com"
+      );
+
+      // Log authentication information for debugging
+      console.log("Auth provider data:", providerData);
+      console.log("Is Google provider:", isGoogleProvider);
 
       const userRef = doc(db, "students", user.uid);
       const userDoc = await getDoc(userRef);
@@ -329,13 +339,29 @@ const Signup = () => {
 
         await setDoc(userRef, newUserData);
 
+        // Use the confirmed provider information
+        const signUpMethod = isGoogleProvider ? "google" : "email";
+
         // Create user_accounts document with correct signup method
         await setDoc(doc(db, "user_accounts", user.uid), {
           uid: user.uid,
           email: user.email,
-          sign_up_method: "google", // Set correct signup method
+          sign_up_method: signUpMethod,
           created_at: serverTimestamp(),
         });
+
+        // Log what was actually stored
+        const userAccountDoc = await getDoc(doc(db, "user_accounts", user.uid));
+        if (userAccountDoc.exists()) {
+          console.log(
+            "User account data from database (Google):",
+            userAccountDoc.data()
+          );
+        } else {
+          console.log(
+            "Failed to retrieve user account document for Google login"
+          );
+        }
 
         if (!notificationPrefsDoc.exists()) {
           await setDoc(notificationPrefsRef, {
@@ -397,7 +423,6 @@ const Signup = () => {
           const fcmToken = await getToken(messaging, {
             vapidKey: process.env.REACT_APP_FIREBASE_VAPID_KEY,
           });
-          console.log("FCM Token:", fcmToken);
 
           await updateDoc(userRef, {
             fcmToken: fcmToken,
@@ -480,13 +505,25 @@ const Signup = () => {
 
         await setDoc(userRef, newUserData);
 
-        // Create user_accounts document with correct signup method
+        console.log("User data set in Firestore:", newUserData);
         await setDoc(doc(db, "user_accounts", user.uid), {
           uid: user.uid,
           email: user.email,
-          sign_up_method: "apple", // Set correct signup method
+          sign_up_method: "apple",
           created_at: serverTimestamp(),
         });
+
+        const userAccountDoc = await getDoc(doc(db, "user_accounts", user.uid));
+        if (userAccountDoc.exists()) {
+          console.log(
+            "User account data from database (Apple):",
+            userAccountDoc.data()
+          );
+        } else {
+          console.log(
+            "Failed to retrieve user account document for Apple login"
+          );
+        }
 
         if (!notificationPrefsDoc.exists()) {
           await setDoc(notificationPrefsRef, {
@@ -578,34 +615,6 @@ const Signup = () => {
       updateUserData(null);
 
       toast.error("Failed to log in with Apple", { autoClose: 5000 });
-    }
-  };
-
-  const handleFacebookLogin = async () => {
-    const facebookProvider = new FacebookAuthProvider();
-    try {
-      const result = await signInWithPopup(auth, facebookProvider);
-      const user = result.user;
-
-      // Check if user data already exists in Firestore
-      const userDoc = await getDoc(doc(db, "students", user.uid));
-      if (!userDoc.exists()) {
-        // Set initial data with empty values if it doesn't exist
-        await setDoc(doc(db, "students", user.uid), {
-          email: user.email,
-          nickname: "",
-          country: "",
-          learningLanguage: "",
-          nativeLanguage: "",
-          accountType: "user",
-          timeZone: "",
-          // createdAt: new Date(),
-        });
-      }
-
-      navigate("/learn", { replace: true });
-    } catch (error) {
-      console.error("Error during Facebook login:", error);
     }
   };
 

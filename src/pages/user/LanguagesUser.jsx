@@ -47,7 +47,7 @@ const LanguagesUser = () => {
       imgSrc: "/svgs/eng-spanish.svg",
       alt: "English-Spanish Exchange",
       title: t("learnUser.languageLearning.languages.exchange"),
-      path: "/learnLanguageUser?language=English-Spanish Exchange",
+      path: "/learnLanguageUser?language=English-Spanish",
       firestoreLanguage: "English-Spanish",
     },
   ];
@@ -58,31 +58,66 @@ const LanguagesUser = () => {
       try {
         setLoading(true);
         const classesSnapshot = await getDocs(collection(db, "classes"));
+        const groupsSnapshot = await getDocs(collection(db, "groups"));
+
         const tempLanguageData = {
           spanish: { studentIds: new Set(), studentPhotos: [] },
           english: { studentIds: new Set(), studentPhotos: [] },
           exchange: { studentIds: new Set(), studentPhotos: [] },
         };
 
-        // Aggregate student IDs by language
+        // Aggregate student IDs by language from classes
         for (const classDoc of classesSnapshot.docs) {
           const classData = classDoc.data();
           const language = classData.language;
           const classMemberIds = classData.classMemberIds || [];
 
           if (language === "Spanish") {
-            classMemberIds.forEach((id) => tempLanguageData.spanish.studentIds.add(id));
+            classMemberIds.forEach((id) =>
+              tempLanguageData.spanish.studentIds.add(id)
+            );
           } else if (language === "English") {
-            classMemberIds.forEach((id) => tempLanguageData.english.studentIds.add(id));
+            classMemberIds.forEach((id) =>
+              tempLanguageData.english.studentIds.add(id)
+            );
           } else if (language === "English-Spanish") {
-            classMemberIds.forEach((id) => tempLanguageData.exchange.studentIds.add(id));
+            classMemberIds.forEach((id) =>
+              tempLanguageData.exchange.studentIds.add(id)
+            );
+          }
+        }
+
+        // Add students from groups based on language too
+        for (const groupDoc of groupsSnapshot.docs) {
+          const groupData = groupDoc.data();
+          const language = groupData.groupLearningLanguage;
+          const groupMemberIds = groupData.groupMemberIds || [];
+
+          if (language === "Spanish") {
+            groupMemberIds.forEach((id) =>
+              tempLanguageData.spanish.studentIds.add(id)
+            );
+          } else if (language === "English") {
+            groupMemberIds.forEach((id) =>
+              tempLanguageData.english.studentIds.add(id)
+            );
+          } else if (language === "English-Spanish") {
+            groupMemberIds.forEach((id) =>
+              tempLanguageData.exchange.studentIds.add(id)
+            );
           }
         }
 
         // Convert Sets to Arrays for easier handling
-        tempLanguageData.spanish.studentIds = Array.from(tempLanguageData.spanish.studentIds);
-        tempLanguageData.english.studentIds = Array.from(tempLanguageData.english.studentIds);
-        tempLanguageData.exchange.studentIds = Array.from(tempLanguageData.exchange.studentIds);
+        tempLanguageData.spanish.studentIds = Array.from(
+          tempLanguageData.spanish.studentIds
+        );
+        tempLanguageData.english.studentIds = Array.from(
+          tempLanguageData.english.studentIds
+        );
+        tempLanguageData.exchange.studentIds = Array.from(
+          tempLanguageData.exchange.studentIds
+        );
 
         // Fetch student profile pictures (limit to 12 per language for display)
         for (const langKey of ["spanish", "english", "exchange"]) {
@@ -96,7 +131,9 @@ const LanguagesUser = () => {
             }
             return "";
           });
-          tempLanguageData[langKey].studentPhotos = await Promise.all(photoPromises);
+          tempLanguageData[langKey].studentPhotos = await Promise.all(
+            photoPromises
+          );
         }
 
         setLanguageData(tempLanguageData);
@@ -162,49 +199,50 @@ const LanguagesUser = () => {
                     </span>
                     <div className="flex items-center">
                       <div className="flex relative">
-                        {students.length > 0 ? (
-                          students.map((photo, i) => (
-                            <div
-                              key={i}
-                              className="flex items-center justify-center w-8 h-8 bg-white border-2 border-white rounded-full -mr-2"
-                              style={{ zIndex: students.length - i }}
-                            >
-                              {photo ? (
-                                <img
-                                  src={photo}
-                                  alt={`Student ${i + 1}`}
-                                  className="object-cover w-full h-full rounded-full"
-                                />
-                              ) : (
-                                <img  
-                                  src={'/images/panda.png'}
-                                  alt={`Student ${i + 1}`}
-                                  className="object-cover w-full h-full rounded-full opacity-75"
-                                />
-                              )}
-                            </div>
-                          ))
-                        ) : (
-                          Array(6)
-                            .fill(null)
-                            .map((_, i) => (
+                        {students.length > 0
+                          ? students.map((photo, i) => (
                               <div
                                 key={i}
                                 className="flex items-center justify-center w-8 h-8 bg-white border-2 border-white rounded-full -mr-2"
-                                style={{ zIndex: 6 - i }}
+                                style={{ zIndex: students.length - i }}
                               >
-                               <img
-                                  src={'/images/panda.png'}
-                                  alt={`Student ${i + 1}`}
-                                  className="object-cover w-full h-full rounded-full"
-                                />
+                                {photo ? (
+                                  <img
+                                    src={photo}
+                                    alt={`Student ${i + 1}`}
+                                    className="object-cover w-full h-full rounded-full"
+                                  />
+                                ) : (
+                                  <img
+                                    src={"/images/panda.png"}
+                                    alt={`Student ${i + 1}`}
+                                    className="object-cover w-full h-full rounded-full opacity-75"
+                                  />
+                                )}
                               </div>
                             ))
-                        )}
-                        
+                          : Array(6)
+                              .fill(null)
+                              .map((_, i) => (
+                                <div
+                                  key={i}
+                                  className="flex items-center justify-center w-8 h-8 bg-white border-2 border-white rounded-full -mr-2"
+                                  style={{ zIndex: 6 - i }}
+                                >
+                                  <img
+                                    src={"/images/panda.png"}
+                                    alt={`Student ${i + 1}`}
+                                    className="object-cover w-full h-full rounded-full"
+                                  />
+                                </div>
+                              ))}
+
                         {/* User count badge */}
                         <div className="flex items-center justify-center ml-2 text-xs font-medium text-green-800 bg-green-100 rounded-full px-2 py-1">
-                          +{studentCount > 999 ? `${Math.floor(studentCount/1000)}k` : studentCount}
+                          +
+                          {studentCount > 999
+                            ? `${Math.floor(studentCount / 1000)}k`
+                            : studentCount}
                         </div>
                       </div>
                     </div>

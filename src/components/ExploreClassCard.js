@@ -8,6 +8,7 @@ import { db } from "../firebaseConfig";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { checkAccess } from "../utils/accessControl";
+import { useTranslation } from "react-i18next";
 
 Modal.setAppElement("#root");
 
@@ -15,6 +16,7 @@ const useClassEnrollment = () => {
   const [isEnrolling, setIsEnrolling] = useState(false);
   const [error, setError] = useState(null);
   const { user, setUser } = useAuth();
+  const { t } = useTranslation();
 
   const updateSessionStorage = (newEnrolledClass) => {
     const storedUser = JSON.parse(sessionStorage.getItem("user"));
@@ -33,7 +35,6 @@ const useClassEnrollment = () => {
   const enrollInClass = async (classId, userId, tutorId) => {
     setIsEnrolling(true);
     setError(null);
-    console.log(classId, userId, tutorId);
     try {
       const classRef = doc(db, "classes", classId);
       const userRef = doc(db, "students", userId);
@@ -43,11 +44,11 @@ const useClassEnrollment = () => {
       const classData = classDoc.data();
 
       if (!classData) {
-        throw new Error("Class not found");
+        throw new Error(t("exploreClassCard.errors.classNotFound"));
       }
 
       if (classData.classMemberIds?.length >= classData.availableSpots) {
-        throw new Error("Class is full");
+        throw new Error(t("exploreClassCard.errors.classFull"));
       }
 
       await Promise.all([
@@ -108,9 +109,9 @@ const ExploreClassCard = ({
   adminName,
   adminImageUrl,
   groupId,
-  recurrenceType,
-  selectedRecurrenceType,
+  recurrenceTypes,
 }) => {
+  const { t } = useTranslation();
   const { user, setUser } = useAuth();
   const { enrollInClass, isEnrolling, error, setError } = useClassEnrollment();
   const navigate = useNavigate();
@@ -126,7 +127,7 @@ const ExploreClassCard = ({
   const displayImage = isPremium ? tutorImageUrl : adminImageUrl;
 
   const formatTime = (timestamp) => {
-    if (!timestamp) return "TBD";
+    if (!timestamp) return t("exploreClassCard.labels.tbd");
 
     // Convert Firebase timestamp to a Date object
     const date = new Date(timestamp.seconds * 1000);
@@ -139,12 +140,25 @@ const ExploreClassCard = ({
   };
 
   const formatDate = (timestamp) => {
-    if (!timestamp) return "TBD";
+    if (!timestamp) return t("exploreClassCard.labels.tbd");
 
     // Convert Firebase timestamp to a Date object
     const date = new Date(timestamp.seconds * 1000);
 
-    // Format the date in UTC
+    // Check if it's a recurring class - need to use recurrenceTypes array
+    if (
+      recurrenceTypes &&
+      Array.isArray(recurrenceTypes) &&
+      recurrenceTypes.length > 0
+    ) {
+      // Show the day of week for weekly, monthly, daily recurring classes
+      const firstType = recurrenceTypes[0];
+      if (firstType !== "One-time" && firstType !== "None") {
+        return date.toLocaleString("en-US", { weekday: "long" });
+      }
+    }
+
+    // For one-time classes, format the date normally
     return date.toLocaleDateString("en-US", {
       day: "2-digit",
       month: "short",
@@ -163,7 +177,7 @@ const ExploreClassCard = ({
 
   const handleConfirmBooking = async () => {
     if (!user) {
-      setError("Please log in to enroll in classes");
+      setError(t("exploreClassCard.errors.loginRequired"));
       return;
     }
 
@@ -237,7 +251,7 @@ const ExploreClassCard = ({
             {isPremium && (
               <img
                 src="/images/bambuu-plus-tag.png"
-                alt="Bammbuu+"
+                alt={t("exploreClassCard.labels.bambuuPlus")}
                 className="absolute w-24 h-6 sm:h-8 sm:w-28 top-2 left-2"
               />
             )}
@@ -248,11 +262,6 @@ const ExploreClassCard = ({
                 <h2 className="ml-2 text-lg font-bold text-gray-800 sm:text-xl line-clamp-2">
                   {className}
                 </h2>
-                {/* {classType === "Individual Premium" && (
-                  <span className="px-2 py-1 text-xs bg-[#fff885] rounded-full">
-                    1 to 1 Class
-                  </span>
-                )} */}
               </div>
 
               <div className="flex flex-wrap items-center justify-between">
@@ -265,7 +274,11 @@ const ExploreClassCard = ({
                         ? "/svgs/xs-spain.svg"
                         : "/svgs/eng-spanish-xs.svg"
                     }
-                    alt={language === "English" ? "US Flag" : "Spain Flag"}
+                    alt={
+                      language === "English"
+                        ? t("exploreClassCard.altText.usFlag")
+                        : t("exploreClassCard.altText.spainFlag")
+                    }
                     className="w-4 h-4"
                   />
                   <span className="text-[#042f0c] text-sm sm:text-base">
@@ -286,14 +299,19 @@ const ExploreClassCard = ({
             {/* Time and Date */}
             <div className="flex flex-wrap items-center justify-between w-full">
               <div className="flex items-center space-x-2">
-                <img alt="clock" src="/svgs/clock.svg" className="w-4 h-4" />
+                <img
+                  alt={t("exploreClassCard.altText.clock")}
+                  src="/svgs/clock.svg"
+                  className="w-4 h-4"
+                />
                 <span className="text-[#454545] text-sm">
-                  {formatTime(classDateTime)} ({classDuration} min)
+                  {formatTime(classDateTime)} ({classDuration}{" "}
+                  {t("exploreClassCard.labels.min")})
                 </span>
               </div>
               <div className="flex items-center space-x-2">
                 <img
-                  alt="calendar"
+                  alt={t("exploreClassCard.altText.calendar")}
                   src="/svgs/calendar.svg"
                   className="w-4 h-4"
                 />
@@ -316,11 +334,15 @@ const ExploreClassCard = ({
                   <User className="w-5 h-5 text-gray-600" />
                 )}
                 <span className="text-[#454545] text-sm">
-                  {adminName || "TBD"}
+                  {adminName || t("exploreClassCard.labels.tbd")}
                 </span>
               </div>
               <div className="flex items-center space-x-2">
-                <img alt="users" src="/svgs/users.svg" className="w-4 h-4" />
+                <img
+                  alt={t("exploreClassCard.altText.users")}
+                  src="/svgs/users.svg"
+                  className="w-4 h-4"
+                />
                 {!isPremium && (
                   <span className="text-[#454545] text-sm">
                     {classMemberIds.length}/{availableSpots}
@@ -334,7 +356,7 @@ const ExploreClassCard = ({
               onClick={handleCardClick}
               className="w-full py-2 font-medium text-[#042F0C] border-[#042F0C] border bg-[#14b82c] rounded-full hover:bg-[#119924] transition-colors duration-200"
             >
-              Book Class
+              {t("exploreClassCard.labels.bookClass")}
             </button>
           </div>
         </div>
@@ -356,7 +378,9 @@ const ExploreClassCard = ({
         <div className="">
           {/* Header */}
           <div className="flex items-center justify-between p-6 pb-4">
-            <h2 className="text-2xl font-semibold">Class Details</h2>
+            <h2 className="text-2xl font-semibold">
+              {t("exploreClassCard.labels.classDetails")}
+            </h2>
             <button
               onClick={() => setIsModalOpen(false)}
               className="p-2 bg-gray-200 rounded-full hover:bg-gray-300"
@@ -365,7 +389,7 @@ const ExploreClassCard = ({
             </button>
           </div>
 
-          {/* Main content with yellow background */}
+          {/* Modal content... */}
           <div
             className={`${
               isPremium ? "bg-[#e6fde9]" : "bg-yellow-50"
@@ -425,7 +449,7 @@ const ExploreClassCard = ({
               {groupId && (
                 <div className="w-full">
                   <h3 className="mb-3 text-lg font-bold text-center">
-                    Language Group
+                    {t("exploreClassCard.labels.languageGroup")}
                   </h3>
                   <div className="flex items-center gap-4 p-4 bg-white rounded-xl border border-[#97e3a2]">
                     <img
@@ -435,7 +459,9 @@ const ExploreClassCard = ({
                     />
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
-                        <span className="font-medium">{`${language} Learners`}</span>
+                        <span className="font-medium">
+                          {t("exploreClassCard.labels.learners", { language })}
+                        </span>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-gray-600">
                         <img
@@ -472,11 +498,12 @@ const ExploreClassCard = ({
               onClick={handleBookClass}
               className="w-full py-3 font-medium text-black bg-[#14b82c] rounded-full hover:bg-[#119924] border border-[#042f0c]"
             >
-              Book Class
+              {t("exploreClassCard.labels.bookClass")}
             </button>
           </div>
         </div>
       </Modal>
+
       <Modal
         isOpen={isBookingConfirmationOpen}
         onRequestClose={() => setIsBookingConfirmationOpen(false)}
@@ -486,32 +513,32 @@ const ExploreClassCard = ({
           content: {
             border: "none",
             padding: "24px",
-            maxWidth: "420px", // max-w-sm
+            maxWidth: "420px",
           },
         }}
       >
         <div className="text-center">
           <h2 className="mb-4 text-xl font-semibold">
-            Are you sure you want to book this class?
+            {t("exploreClassCard.confirmBooking.title")}
           </h2>
           {error && <p className="mb-4 text-red-600">{error}</p>}
           <p className="mb-6 text-gray-600">
-            By booking class you will be added in the group and you'll be able
-            to join the class 5 minutes before it starts. It will also be added
-            to your calendar.
+            {t("exploreClassCard.confirmBooking.description")}
           </p>
           <div className="flex flex-row gap-2">
             <button
               onClick={() => setIsBookingConfirmationOpen(false)}
               className="w-full py-2 font-medium border border-gray-300 rounded-full hover:bg-gray-50"
             >
-              No, Cancel
+              {t("exploreClassCard.confirmBooking.cancel")}
             </button>
             <button
               onClick={handleConfirmBooking}
               className="w-full py-2 font-medium text-black bg-[#14b82c] rounded-full hover:bg-[#119924] border border-[#042f0c]"
             >
-              {isEnrolling ? "Enrolling..." : "Yes, Book Now"}
+              {isEnrolling
+                ? t("exploreClassCard.confirmBooking.enrolling")
+                : t("exploreClassCard.confirmBooking.confirm")}
             </button>
           </div>
         </div>

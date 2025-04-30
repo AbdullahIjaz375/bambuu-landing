@@ -1,9 +1,8 @@
 // src/App.js
 import React, { useEffect } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
 import Learn from "./pages/Learn";
 import Signup from "./pages/Signup";
@@ -12,12 +11,10 @@ import { useAuth } from "./context/AuthContext"; // Get useAuth in the component
 import Landing from "./pages/Landing";
 import PublicRoute from "./components/PublicRoute"; // Import PublicRoute
 import LanguageGroups from "./pages/LanguageGroups";
-import SuperTutor from "./pages/SuperTutor";
 import ClassesUser from "./pages/user/ClassesUser";
 import GroupsUser from "./pages/user/GroupsUser";
 import Unauthorized from "./pages/Unauthorized";
 import GroupDetailUser from "./pages/user/GroupDetailUser";
-import ClassesDetailsUser from "./pages/user/ClassesDetailsUser";
 import ForgotPassword from "./pages/ForgotPassword";
 import LearnLanguageUser from "./pages/user/LearnLanguageUser";
 import AddGroupsUser from "./pages/user/AddGroupsUser";
@@ -73,23 +70,33 @@ import ContactUs from "./pages/ContactUs";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsConditions from "./pages/TermsConditions";
 import Subscriptions from "./pages/Subscriptions";
-import TagManager from 'react-gtm-module';
-
+import TagManager from "react-gtm-module";
+import { initAnalytics, trackPageView } from "./utils/analytics";
 
 const App = () => {
   const { user, streamClient } = useAuth(); // Use useAuth() inside the component
+  const location = useLocation();
 
   useEffect(() => {
+    // Initialize Google Tag Manager
     const tagManagerArgs = {
-      gtmId: 'GTM-KZLTKLPJ',
+      gtmId: "GTM-KZLTKLPJ",
     };
     TagManager.initialize(tagManagerArgs);
+
+    // Initialize our custom analytics
+    initAnalytics();
   }, []);
-  
+
+  // Track page views when route changes
+  useEffect(() => {
+    // Track page view on route change
+    trackPageView(location.pathname);
+  }, [location]);
+
   useEffect(() => {
     // This listener gets triggered when a new message arrives in the foreground.
     const unsubscribe = onMessage(messaging, (payload) => {
-      console.log("Foreground message received:", payload);
       if (payload.notification) {
         const { title, body } = payload.notification;
 
@@ -101,6 +108,7 @@ const App = () => {
     // Clean up the listener on unmount
     return () => unsubscribe();
   }, []);
+
   if (!streamClient) {
     return <div>Loading...</div>;
   }

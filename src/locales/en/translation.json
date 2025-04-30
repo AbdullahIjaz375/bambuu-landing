@@ -823,5 +823,85 @@
         "loading": "Updating..."
       }
     }
+  },
+  "exploreClassCard": {
+    "labels": {
+      "tbd": "TBD",
+      "min": "min",
+      "bookClass": "Book Class",
+      "classDetails": "Class Details",
+      "languageGroup": "Language Group",
+      "learners": "{{language}} Learners",
+      "leader": "Leader",
+      "bambuuPlus": "Bammbuu+"
+    },
+    "confirmBooking": {
+      "title": "Are you sure you want to book this class?",
+      "description": "By booking class you will be added in the group and you'll be able to join the class 5 minutes before it starts. It will also be added to your calendar.",
+      "cancel": "No, Cancel",
+      "confirm": "Yes, Book Now",
+      "enrolling": "Enrolling..."
+    },
+    "errors": {
+      "classNotFound": "Class not found",
+      "classFull": "Class is full",
+      "loginRequired": "Please log in to enroll in classes"
+    },
+    "altText": {
+      "clock": "clock",
+      "calendar": "calendar",
+      "users": "users",
+      "usFlag": "US Flag",
+      "spainFlag": "Spain Flag"
+    }
+  },
+  "becomeAnExpert": {
+    "title": "Become an Expert",
+    "intro": "Interested in becoming a language expert with bammbuu? We're excited that you are interested in joining our team! Please fill out this form and our team will reach out to you after reviewing it.",
+    "form": {
+      "name": {
+        "label": "Name",
+        "placeholder": "Enter your name",
+        "error": "Name is required"
+      },
+      "nativeLanguage": {
+        "label": "Native Language"
+      },
+      "country": {
+        "label": "Country",
+        "placeholder": "Select a country",
+        "error": "Country is required"
+      },
+      "aboutYourself": {
+        "label": "Tell us about yourself",
+        "placeholder": "Enter details about your teaching expertise (max 500 characters)",
+        "error": "Please tell us about yourself",
+        "errorLength": "Bio must be less than 500 characters",
+        "charCount": "{{count}}/500 characters"
+      },
+      "teachingLanguage": {
+        "label": "Teaching Language"
+      },
+      "proficiencyLevel": {
+        "label": "Teaching Language Proficiency Level",
+        "levels": {
+          "beginner": "Beginner",
+          "intermediate": "Intermediate",
+          "advanced": "Advanced"
+        }
+      }
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "submit": "Submit Form",
+      "submitting": "Submitting..."
+    },
+    "status": {
+      "formError": "Please fill in all required fields correctly.",
+      "success": "Your application has been prepared. Please send the email."
+    },
+    "email": {
+      "subject": "Become an Expert Application"
+    }
   }
 }
