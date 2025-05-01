@@ -210,11 +210,21 @@ const AddClassTutor = () => {
             },
           ];
 
+          // Format the date to display in the channel name
+          const classDate = new Date(localDate);
+          const formattedDate = classDate.toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+          });
+
+          // Add the date to the channel name
+          const channelName = `${classData.className} (${formattedDate})`;
+
           const channelData = {
             id: classId, // Using classId instead of groupId
             type: ChannelType.PREMIUM_INDIVIDUAL_CLASS,
             members: [user.uid],
-            name: classData.className,
+            name: channelName, // Using the name with date
             image: imageUrl,
             description: classData.classDescription,
             created_by_id: user.uid,

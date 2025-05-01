@@ -25,7 +25,7 @@ const StudentsTutor = () => {
       const remainingChannels = channels.filter(
         (channel) => channel.id !== channelId
       );
-      
+
       if (remainingChannels.length > 0) {
         const firstChannel = remainingChannels[0];
         setSelectedChannel(firstChannel);
@@ -41,28 +41,33 @@ const StudentsTutor = () => {
   // Helper function to extract the other user's info from a channel
   const getOtherUserFromChannel = (channel) => {
     if (!channel || !user) return null;
-    
+
     // For one-to-one chats
-    if (channel.type === "premium_individual_class" || channel.type === "one_to_one_chat") {
+    if (
+      channel.type === "premium_individual_class" ||
+      channel.type === "one_to_one_chat"
+    ) {
       const members = Object.values(channel.state?.members || {});
-      const otherMember = members.find(member => member.user?.id !== user.uid);
-      
+      const otherMember = members.find(
+        (member) => member.user?.id !== user.uid
+      );
+
       if (otherMember && otherMember.user) {
         return {
           id: otherMember.user.id,
           name: otherMember.user.name || channel.data.name,
           image: otherMember.user.image,
-          online: otherMember.user.online || false
+          online: otherMember.user.online || false,
         };
       }
     }
-    
+
     // For group chats, just return the group info
     return {
       id: channel.id,
       name: channel.data.name,
       image: channel.data.image,
-      online: false
+      online: false,
     };
   };
 
@@ -105,6 +110,7 @@ const StudentsTutor = () => {
 
             // Set up message listeners
             channel.on("message.new", async (event) => {
+              // Update unread counts for messages from others
               if (
                 event.user?.id !== user.uid &&
                 channel.id !== selectedChannel?.id
@@ -133,18 +139,6 @@ const StudentsTutor = () => {
                 });
               });
             });
-
-            channel.on("notification.message_new", (event) => {
-              if (
-                event.user?.id !== user.uid &&
-                channel.id !== selectedChannel?.id
-              ) {
-                setUnreadCounts((prev) => ({
-                  ...prev,
-                  [channel.id]: (prev[channel.id] || 0) + 1,
-                }));
-              }
-            });
           })
         );
 
@@ -165,7 +159,7 @@ const StudentsTutor = () => {
           (channel) => channel.data.name && channel.data.name.trim() !== ""
         );
         setChannels(validChannels);
-        
+
         if (validChannels.length > 0 && !selectedChannel) {
           const firstChannel = validChannels[0];
           setSelectedChannel(firstChannel);
@@ -191,7 +185,7 @@ const StudentsTutor = () => {
   const handleChannelSelect = async (channel) => {
     setSelectedChannel(channel);
     setSelectedChatInfo(getOtherUserFromChannel(channel));
-    
+
     try {
       await channel.markRead();
       setUnreadCounts((prev) => ({
@@ -269,7 +263,7 @@ const StudentsTutor = () => {
     const month = date.getMonth() + 1;
     const day = date.getDate();
     return `${day}/${month}/${year}`;
-  }
+  };
 
   if (loading) {
     return (
@@ -351,7 +345,9 @@ const StudentsTutor = () => {
                       <div
                         key={channel.id}
                         className={`flex items-center gap-3 p-3 border border-[#22bf37] cursor-pointer rounded-3xl ${
-                          selectedChannel?.id === channel.id ? "bg-[#f0fdf1]" : ""
+                          selectedChannel?.id === channel.id
+                            ? "bg-[#f0fdf1]"
+                            : ""
                         }`}
                         onClick={() => handleChannelSelect(channel)}
                         role="button"
@@ -376,7 +372,7 @@ const StudentsTutor = () => {
                         <div className="flex-1">
                           <div className="flex justify-between">
                             <h3 className="text-lg font-semibold">
-                              {(channel.data.name).split('-')[0]}
+                              {channel.data.name.split("-")[0]}
                             </h3>
                           </div>
                           <div className="flex flex-row items-center justify-between mt-1">

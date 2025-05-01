@@ -442,47 +442,41 @@ const LearnUser = () => {
                             </span>
                             <div className="flex items-center">
                               <div className="flex relative">
-                                {students.length > 0
-                                  ? students.map((photo, i) => (
-                                      <div
-                                        key={i}
-                                        className="flex items-center justify-center w-6 h-6 bg-white border-2 border-white rounded-full sm:w-8 sm:h-8 -mr-2"
-                                        style={{ zIndex: students.length - i }}
-                                      >
-                                        {photo ? (
-                                          <img
-                                            src={photo}
-                                            alt={`Student ${i + 1}`}
-                                            className="object-cover w-full h-full rounded-full"
-                                          />
-                                        ) : (
-                                          <img
-                                            src={"/images/panda.png"}
-                                            alt={`Student ${i + 1}`}
-                                            className="object-cover w-full h-full rounded-full opacity-75"
-                                          />
-                                        )}
-                                      </div>
-                                    ))
-                                  : Array(4)
-                                      .fill(null)
-                                      .map((_, i) => (
+                                {
+                                  students.length > 0
+                                    ? // Only show actual student photos if they exist
+                                      students.map((photo, i) => (
                                         <div
                                           key={i}
                                           className="flex items-center justify-center w-6 h-6 bg-white border-2 border-white rounded-full sm:w-8 sm:h-8 -mr-2"
-                                          style={{ zIndex: 4 - i }}
+                                          style={{
+                                            zIndex: students.length - i,
+                                          }}
                                         >
-                                          <User className="w-4 h-4 text-gray-600 sm:w-5 sm:h-5" />
+                                          {photo ? (
+                                            <img
+                                              src={photo}
+                                              alt={`Student ${i + 1}`}
+                                              className="object-cover w-full h-full rounded-full"
+                                            />
+                                          ) : (
+                                            <img
+                                              src={"/images/panda.png"}
+                                              alt={`Student ${i + 1}`}
+                                              className="object-cover w-full h-full rounded-full opacity-75"
+                                            />
+                                          )}
                                         </div>
-                                      ))}
+                                      ))
+                                    : null /* Don't show anything if no students */
+                                }
 
-                                {/* User count badge */}
-                                <div className="flex items-center justify-center ml-2 text-xs font-medium text-green-800 bg-green-100 rounded-full px-2 py-1 min-w-8">
-                                  +
-                                  {studentCount > 999
-                                    ? `${Math.floor(studentCount / 1000)}k`
-                                    : studentCount}
-                                </div>
+                                {/* Only show the count badge if there are MORE users than shown in the icons */}
+                                {studentCount > students.length && (
+                                  <div className="flex items-center justify-center ml-2 text-xs font-medium text-green-800 bg-green-100 rounded-full px-2 py-1 min-w-8">
+                                    +{studentCount - students.length}
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </div>

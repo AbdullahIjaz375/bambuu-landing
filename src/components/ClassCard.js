@@ -29,6 +29,7 @@ const ClassCard = ({
   classType,
   classLocation,
   onClick,
+  isBammbuu = false, // Add the isBammbuu prop with a default value of false
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
@@ -65,12 +66,12 @@ const ClassCard = ({
   // New function to get the day name for recurring classes
   const getRecurringDayDisplay = (timestamp) => {
     if (!timestamp) return "TBD";
-    
+
     const date = new Date(timestamp.seconds * 1000);
-    
+
     // Get the day name
     const dayName = date.toLocaleDateString("en-US", { weekday: "long" });
-    
+
     // For weekly recurring classes, show just the day name
     return dayName;
   };
@@ -78,10 +79,11 @@ const ClassCard = ({
   // Function to determine if we should show the day name or full date
   const getDateDisplay = (timestamp) => {
     // Check if the class is recurring (weekly)
-    const isRecurring = (recurrenceType === "Weekly") || 
-                       (recurrenceTypes && recurrenceTypes.includes("Weekly")) ||
-                       (selectedRecurrenceType === "Weekly");
-    
+    const isRecurring =
+      recurrenceType === "Weekly" ||
+      (recurrenceTypes && recurrenceTypes.includes("Weekly")) ||
+      selectedRecurrenceType === "Weekly";
+
     if (isRecurring) {
       return getRecurringDayDisplay(timestamp);
     } else {
@@ -133,7 +135,7 @@ const ClassCard = ({
 
     fetchAdminProfile();
   }, [adminId]);
-  
+
   return (
     <>
       <div className="hover:cursor-pointer" onClick={handleClick}>
@@ -185,7 +187,7 @@ const ClassCard = ({
                     </span>
                   </span>
                 </div>
-                {languageLevel !== "None" && (
+                {languageLevel !== "None" && !isBammbuu && (
                   <span className="px-2 sm:px-3 py-1 text-xs sm:text-sm bg-[#fff885] rounded-full">
                     {languageLevel}
                   </span>
@@ -281,9 +283,12 @@ const ClassCard = ({
 
               <div className="flex items-center gap-2 mb-6">
                 <span className="text-sm sm:text-base">{language}</span>
-                <span className="px-2 py-0.5 text-xs sm:text-sm bg-[#fff885] rounded-full">
-                  {languageLevel}
-                </span>
+                {/* Only show language level in modal for group classes */}
+                {languageLevel !== "None" && !isBammbuu && (
+                  <span className="px-2 py-0.5 text-xs sm:text-sm bg-[#fff885] rounded-full">
+                    {languageLevel}
+                  </span>
+                )}
               </div>
 
               <div className="flex flex-wrap justify-center gap-4 mb-6 text-xs sm:gap-8 sm:text-sm">

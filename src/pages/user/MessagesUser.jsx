@@ -47,28 +47,33 @@ const MessagesUser = () => {
   // Helper function to extract the other user's info from a channel
   const getOtherUserFromChannel = (channel) => {
     if (!channel || !user) return null;
-    
+
     // For one-to-one chats
-    if (channel.type === "premium_individual_class" || channel.type === "one_to_one_chat") {
+    if (
+      channel.type === "premium_individual_class" ||
+      channel.type === "one_to_one_chat"
+    ) {
       const members = Object.values(channel.state?.members || {});
-      const otherMember = members.find(member => member.user?.id !== user.uid);
-      
+      const otherMember = members.find(
+        (member) => member.user?.id !== user.uid
+      );
+
       if (otherMember && otherMember.user) {
         return {
           id: otherMember.user.id,
           name: otherMember.user.name || channel.data.name,
           image: otherMember.user.image,
-          online: otherMember.user.online || false
+          online: otherMember.user.online || false,
         };
       }
     }
-    
+
     // For group chats, just return the group info
     return {
       id: channel.id,
       name: channel.data.name,
       image: channel.data.image,
-      online: false
+      online: false,
     };
   };
 
@@ -123,17 +128,8 @@ const MessagesUser = () => {
               }
             });
 
-            channel.on("notification.message_new", (event) => {
-              if (
-                event.user?.id !== user.uid &&
-                channel.id !== selectedChannel?.id
-              ) {
-                setUnreadCounts((prev) => ({
-                  ...prev,
-                  [channel.id]: (prev[channel.id] || 0) + 1,
-                }));
-              }
-            });
+            // Removing the notification.message_new listener that was causing duplicate messages
+            // The message.new event above already handles unread count updates
           })
         );
 
@@ -156,7 +152,7 @@ const MessagesUser = () => {
 
         setUnreadCounts(counts);
         setChannels(channels);
-        
+
         // Select channel from URL or first available
         if (urlChannelId) {
           const channelToSelect = channels.find(
@@ -234,7 +230,8 @@ const MessagesUser = () => {
   const groupChats = filterChannels(
     channels.filter(
       (channel) =>
-        channel.type === "standard_group" &&
+        (channel.type === "standard_group" ||
+          channel.type === "premium_group") &&
         channel.data.name &&
         channel.data.name.trim() !== ""
     )
@@ -243,8 +240,7 @@ const MessagesUser = () => {
   const bambuuInstructors = filterChannels(
     channels.filter(
       (channel) =>
-        (channel.type === "premium_group" ||
-          channel.type === "premium_individual_class" ||
+        (channel.type === "premium_individual_class" ||
           channel.type === "one_to_one_chat") &&
         channel.data.name &&
         channel.data.name.trim() !== ""
@@ -297,7 +293,9 @@ const MessagesUser = () => {
       >
         <div className="relative">
           <img
-            src={otherUser?.image || channel.data.image || "/default-avatar.png"}
+            src={
+              otherUser?.image || channel.data.image || "/default-avatar.png"
+            }
             alt={otherUser?.name || channel.data.name}
             className="object-cover w-12 h-12 rounded-full"
             onError={(e) => {
@@ -308,26 +306,25 @@ const MessagesUser = () => {
         </div>
         <div className="flex-1">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold">{otherUser?.name || channel.data.name}</h3>
+            <h3 className="text-lg font-semibold">
+              {otherUser?.name || channel.data.name}
+            </h3>
           </div>
 
           <div className="flex flex-row items-center justify-between mt-1">
             <p className="text-sm text-gray-500 truncate">
-              {isInstructor ? (
-                getMessagePreview(latestMessage)
-              ) : (
-                <div className="flex flex-row items-center space-x-4">
-                  <div className="flex flex-row items-center space-x-2">
-                    {/* Flag icon will be added */}
-                    <span>{groupLanguage}</span>
-                  </div>
-                  <div className="flex items-center ">
-                    {/* Users icon will be added */}
-                    <span className="">{channel.data.member_count}</span>
-                  </div>
+              {getMessagePreview(latestMessage)}
+            </p>
+
+            <div className="flex items-center space-x-2">
+              {isInstructor ? null : (
+                <div className="flex flex-row items-center space-x-2">
+                  <span className="px-2 py-0.5 text-xs bg-yellow-100 rounded-full">
+                    {groupLanguage}
+                  </span>
                 </div>
               )}
-            </p>
+            </div>
 
             {unreadCounts[channel.id] > 0 && (
               <span className="flex items-center justify-center w-6 h-6 mr-5 text-xs text-white bg-[#14B82C] rounded-full">
