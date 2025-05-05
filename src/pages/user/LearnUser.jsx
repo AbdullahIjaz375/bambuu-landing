@@ -1,6 +1,6 @@
 import { Search } from "lucide-react";
 import NotificationDropdown from "../../components/NotificationDropdown";
-import React, { useState, useEffect } from "react";
+import React, { useRef, useEffect, useCallback,useState } from 'react';
 import {
   Bell,
   ChevronLeft,
@@ -33,7 +33,182 @@ import { messaging } from "../../firebaseConfig";
 import EmptyState from "../../components/EmptyState";
 import CalendarUser from "../../components/CalenderUser";
 import TutorialOverlay from "../../components/TutorialOverlay";
+// This component must be defined at the top level of your file,
+// outside the LearnUser component but still within the file
+const LanguageCardsSection = ({ languageCards, languageData, navigate }) => {
+  // Reference to the container for scrolling
+  const containerRef = useRef(null);
+  const leftArrowRef = useRef(null);
+  const rightArrowRef = useRef(null);
+  
+  // Function to update arrow visibility
+  const updateArrows = useCallback(() => {
+    const container = containerRef.current;
+    const leftArrow = leftArrowRef.current;
+    const rightArrow = rightArrowRef.current;
+    
+    if (container && leftArrow && rightArrow) {
+      // Show left arrow only if scrolled away from the start
+      if (container.scrollLeft > 20) {
+        leftArrow.style.display = 'block';
+      } else {
+        leftArrow.style.display = 'none';
+      }
+      
+      // Show right arrow only if there's more content to scroll
+      if (container.scrollLeft + container.clientWidth + 20 >= container.scrollWidth) {
+        rightArrow.style.display = 'none';
+      } else {
+        rightArrow.style.display = 'block';
+      }
+    }
+  }, []);
 
+  // Scroll left
+  const scrollLeft = useCallback(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollBy({ left: -300, behavior: 'smooth' });
+      setTimeout(updateArrows, 300); // Update after scroll animation
+    }
+  }, [updateArrows]);
+
+  // Scroll right
+  const scrollRight = useCallback(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollBy({ left: 300, behavior: 'smooth' });
+      setTimeout(updateArrows, 300); // Update after scroll animation
+    }
+  }, [updateArrows]);
+
+  // Set up initial arrow visibility and window resize listener
+  useEffect(() => {
+    updateArrows();
+    
+    // Handle window resize
+    window.addEventListener('resize', updateArrows);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('resize', updateArrows);
+    };
+  }, [updateArrows]);
+
+  return (
+    <div className="flex flex-col">
+      {/* Left navigation arrow */}
+      <div 
+        ref={leftArrowRef}
+        className="absolute left-0 top-1/2 -translate-y-1/2 z-10" 
+        style={{display: 'none'}}
+      >
+        <button 
+          className="flex items-center justify-center w-12 h-12 rounded-full shadow-2xl bg-white  border  ml-4 hover:bg-gray-100"
+          onClick={scrollLeft}
+        >
+          <ChevronLeft size={30} color="#14B82C" />
+        </button>
+      </div>
+      
+      {/* Right navigation arrow */}                                    
+      <div 
+        ref={rightArrowRef}
+        className="absolute right-0 top-1/2 -translate-y-1/2 z-10"
+      >
+        <button 
+          className="flex items-center justify-center w-12 h-12 rounded-full shadow-2xl bg-white  border  mr-4 hover:bg-gray-100"
+          onClick={scrollRight}
+        >
+          <ChevronRight size={30} color="#14B82C" />
+        </button>
+      </div>
+
+      {/* Language cards container */}
+      <div 
+        ref={containerRef}
+        className="flex gap-4 pb-4 overflow-x-auto px-4"
+        onScroll={updateArrows}
+        style={{ 
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none'
+        }}
+      >
+        {languageCards.map((card) => {
+          const students = languageData[card.id]?.studentPhotos?.slice(0, 8) || [];
+          const studentCount = languageData[card.id]?.studentIds?.length || 0;
+
+          return (
+            <div
+              key={card.id}
+              className={`flex items-center hover:cursor-pointer gap-3 p-4 ${card.bgColor} rounded-3xl border ${card.borderColor} w-[250px] sm:w-[380px] flex-shrink-0`}
+              onClick={() => navigate(card.path)}
+            >
+              <div className="flex-shrink-0 w-12 h-12 overflow-hidden rounded-full sm:w-20 sm:h-20">
+                <img
+                  src={card.imgSrc}
+                  alt={card.alt}
+                  className="object-cover w-full h-full"
+                />
+              </div>
+              <div className="flex flex-col items-start justify-between space-y-2">
+                <span className="text-xl font-semibold whitespace-nowrap">
+                  {card.title}
+                </span>
+                <div className="flex items-center">
+                  <div className="flex relative">
+                    {students.length > 0
+                      ? students.map((photo, i) => (
+                          <div
+                            key={i}
+                            className="flex items-center justify-center w-6 h-6 bg-white border-2 border-white rounded-full sm:w-8 sm:h-8 -mr-2"
+                            style={{
+                              zIndex: students.length - i,
+                            }}
+                          >
+                            {photo ? (
+                              <img
+                                src={photo}
+                                alt={`Student ${i + 1}`}
+                                className="object-cover w-full h-full rounded-full"
+                              />
+                            ) : (
+                              <img
+                                src={"/images/panda.png"}
+                                alt={`Student ${i + 1}`}
+                                className="object-cover w-full h-full rounded-full opacity-75"
+                              />
+                            )}
+                          </div>
+                        ))
+                      : null}
+
+                    {studentCount > students.length && (
+                      <div className="flex items-center justify-center ml-2 text-xs font-medium text-green-800 bg-green-100 rounded-full px-2 py-1 min-w-8">
+                        +{studentCount - students.length}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <style jsx global>{`
+        div[ref="containerRef"]::-webkit-scrollbar {
+          width: 0;
+          height: 0;
+          display: none;
+        }
+        
+        div[ref="containerRef"] {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
+    </div>
+  );
+};
 const LearnUser = () => {
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
@@ -410,136 +585,19 @@ const LearnUser = () => {
               </div>
 
               {/* Language Cards */}
-              <div className="w-full overflow-hidden">
-                {loadingLanguages ? (
-                  <div className="flex items-center justify-center h-48">
-                    <ClipLoader color="#14B82C" size={50} />
-                  </div>
-                ) : (
-                  <div className="flex flex-col">
-                    {/* Original cards display - unchanged */}
-                    <div
-                      className="flex gap-2 pb-4 overflow-x-auto scrollbar-hide"
-                      id="languageCardsContainer"
-                    >
-                      {/* ...existing code... */}
-                      {languageCards.map((card) => {
-                        const students =
-                          languageData[card.id]?.studentPhotos?.slice(0, 8) ||
-                          [];
-                        const studentCount =
-                          languageData[card.id]?.studentIds?.length || 0;
-
-                        return (
-                          <div
-                            key={card.id}
-                            className={`flex items-center hover:cursor-pointer gap-2 p-4 ${card.bgColor} rounded-3xl border ${card.borderColor} w-[250px] sm:w-[380px] flex-shrink-0`}
-                            onClick={() => navigate(card.path)}
-                          >
-                            {/* ...existing code... */}
-                            <div className="flex-shrink-0 w-12 h-12 overflow-hidden rounded-full sm:w-20 sm:h-20">
-                              <img
-                                src={card.imgSrc}
-                                alt={card.alt}
-                                className="object-cover w-full h-full"
-                              />
-                            </div>
-                            <div className="flex flex-col items-start justify-between space-y-2">
-                              <span className="text-xl font-semibold whitespace-nowrap">
-                                {card.title}
-                              </span>
-                              <div className="flex items-center">
-                                <div className="flex relative">
-                                  {students.length > 0
-                                    ? students.map((photo, i) => (
-                                        <div
-                                          key={i}
-                                          className="flex items-center justify-center w-6 h-6 bg-white border-2 border-white rounded-full sm:w-8 sm:h-8 -mr-2"
-                                          style={{
-                                            zIndex: students.length - i,
-                                          }}
-                                        >
-                                          {photo ? (
-                                            <img
-                                              src={photo}
-                                              alt={`Student ${i + 1}`}
-                                              className="object-cover w-full h-full rounded-full"
-                                            />
-                                          ) : (
-                                            <img
-                                              src={"/images/panda.png"}
-                                              alt={`Student ${i + 1}`}
-                                              className="object-cover w-full h-full rounded-full opacity-75"
-                                            />
-                                          )}
-                                        </div>
-                                      ))
-                                    : null}
-
-                                  {studentCount > students.length && (
-                                    <div className="flex items-center justify-center ml-2 text-xs font-medium text-green-800 bg-green-100 rounded-full px-2 py-1 min-w-8">
-                                      +{studentCount - students.length}
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    {/* Simple horizontal scroll control slider - themed to match app with circular handle */}
-                    <div className="hidden md:block w-full mt-1">
-                      <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        defaultValue="0"
-                        className="w-full appearance-none cursor-pointer"
-                        style={{
-                          opacity: 0.5,
-                          height: "2px",
-                          backgroundColor: "#E6FDE9",
-                          backgroundSize: "0% 100%",
-                          backgroundRepeat: "no-repeat",
-                        }}
-                        onChange={(e) => {
-                          const container = document.getElementById(
-                            "languageCardsContainer"
-                          );
-                          const maxScroll =
-                            container.scrollWidth - container.clientWidth;
-                          const scrollPosition =
-                            (maxScroll * parseInt(e.target.value)) / 100;
-                          container.scrollLeft = scrollPosition;
-                        }}
-                      />
-                      <style jsx>{`
-                        input[type="range"]::-webkit-slider-thumb {
-                          -webkit-appearance: none;
-                          appearance: none;
-                          width: 8px;
-                          height: 8px;
-                          background-color: #14b82c;
-                          border: 1px solid #042f0c;
-                          border-radius: 50%;
-                          cursor: pointer;
-                        }
-
-                        input[type="range"]::-moz-range-thumb {
-                          width: 8px;
-                          height: 8px;
-                          background-color: #14b82c;
-                          border: 1px solid #042f0c;
-                          border-radius: 50%;
-                          cursor: pointer;
-                        }
-                      `}</style>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <div className="w-full overflow-hidden relative">
+              {loadingLanguages ? (
+                <div className="flex items-center justify-center h-48">
+                  <ClipLoader color="#14B82C" size={50} />
+                </div>
+              ) : (
+                <LanguageCardsSection 
+                  languageCards={languageCards} 
+                  languageData={languageData} 
+                  navigate={navigate} 
+                />
+              )}
+            </div>
             </div>
           </div>
 

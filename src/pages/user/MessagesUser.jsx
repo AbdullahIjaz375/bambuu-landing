@@ -16,7 +16,7 @@ const MessagesUser = () => {
   const [selectedChannel, setSelectedChannel] = useState(null);
   const [selectedChatInfo, setSelectedChatInfo] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("group");
+  const [activeTab, setActiveTab] = useState("standard");
   const [searchQuery, setSearchQuery] = useState("");
   const [unreadCounts, setUnreadCounts] = useState({});
   const [groupLanguages, setGroupLanguages] = useState({});
@@ -289,8 +289,8 @@ const MessagesUser = () => {
     });
   };
 
-  // Standard (free) group chats
-  const standardGroupChats = filterChannels(
+  // Standard chats - only standard_group
+  const standardChats = filterChannels(
     channels.filter(
       (channel) =>
         channel.type === "standard_group" &&
@@ -299,8 +299,8 @@ const MessagesUser = () => {
     )
   );
 
-  // Premium content (bammbuu+ groups and instructor chats)
-  const bammbuuPlusContent = filterChannels(
+  // Bammbuu+ chats - all other types (premium_group, premium_individual_class, one_to_one_chat)
+  const bammbuuChats = filterChannels(
     channels.filter(
       (channel) =>
         (channel.type === "premium_group" ||
@@ -457,23 +457,23 @@ const MessagesUser = () => {
                     className="absolute top-0 left-0 h-full transition-all duration-300 ease-in-out border border-gray-800 rounded-full bg-amber-400"
                     style={{
                       transform:
-                        activeTab === "group"
+                        activeTab === "standard"
                           ? "translateX(0)"
-                          : "translateX(66.67%)",
-                      width: activeTab === "group" ? "40%" : "60%",
+                          : "translateX(82.0%)",
+                      width: activeTab === "standard" ? "45%" : "55%",
                     }}
                   />
                   <button
-                    onClick={() => setActiveTab("group")}
+                    onClick={() => setActiveTab("standard")}
                     className="relative z-10 w-2/5 px-6 py-1 font-medium text-gray-800 transition-colors rounded-full text-md whitespace-nowrap"
                   >
-                    Group Chats
+                    Standard Chats
                   </button>
                   <button
-                    onClick={() => setActiveTab("bammbuuu")}
+                    onClick={() => setActiveTab("bammbuu")}
                     className="relative z-10 w-3/5 px-6 py-1 font-medium text-gray-800 transition-colors rounded-full text-md whitespace-nowrap"
                   >
-                    bammbuuu+ Instructor
+                    bammbuuu+ Chats
                   </button>
                 </div>
               </div>
@@ -485,24 +485,27 @@ const MessagesUser = () => {
                   value={searchQuery}
                   onChange={handleSearch}
                   placeholder={
-                    activeTab === "group"
-                      ? "Search groups"
-                      : "Search instructor"
+                    activeTab === "standard"
+                      ? "Search standard chats"
+                      : "Search bammbuuu+ chats"
                   }
                   className="w-full py-2 pl-12 pr-4 border border-gray-200 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                 />
               </div>
 
               <div className="flex-1 space-y-2 overflow-y-auto scrollbar-hide">
-                {activeTab === "bammbuuu"
-                  ? bammbuuPlusContent.map((channel) => (
+                {activeTab === "bammbuu"
+                  ? bammbuuChats.map((channel) => (
                       <ChatItem
                         key={channel.id}
                         channel={channel}
-                        isInstructor={true}
+                        isInstructor={
+                          channel.type === "premium_individual_class" ||
+                          channel.type === "one_to_one_chat"
+                        }
                       />
                     ))
-                  : standardGroupChats.map((channel) => (
+                  : standardChats.map((channel) => (
                       <ChatItem
                         key={channel.id}
                         channel={channel}
