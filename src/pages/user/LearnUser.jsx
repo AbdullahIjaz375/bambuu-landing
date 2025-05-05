@@ -416,36 +416,42 @@ const LearnUser = () => {
                     <ClipLoader color="#14B82C" size={50} />
                   </div>
                 ) : (
-                  <div className="flex gap-2 pb-4 overflow-x-auto scrollbar-hide">
-                    {languageCards.map((card) => {
-                      const students =
-                        languageData[card.id]?.studentPhotos?.slice(0, 8) || [];
-                      const studentCount =
-                        languageData[card.id]?.studentIds?.length || 0;
+                  <div className="flex flex-col">
+                    {/* Original cards display - unchanged */}
+                    <div
+                      className="flex gap-2 pb-4 overflow-x-auto scrollbar-hide"
+                      id="languageCardsContainer"
+                    >
+                      {/* ...existing code... */}
+                      {languageCards.map((card) => {
+                        const students =
+                          languageData[card.id]?.studentPhotos?.slice(0, 8) ||
+                          [];
+                        const studentCount =
+                          languageData[card.id]?.studentIds?.length || 0;
 
-                      return (
-                        <div
-                          key={card.id}
-                          className={`flex items-center hover:cursor-pointer gap-2 p-4 ${card.bgColor} rounded-3xl border ${card.borderColor} w-[250px] sm:w-[380px] flex-shrink-0`}
-                          onClick={() => navigate(card.path)}
-                        >
-                          <div className="flex-shrink-0 w-12 h-12 overflow-hidden rounded-full sm:w-20 sm:h-20">
-                            <img
-                              src={card.imgSrc}
-                              alt={card.alt}
-                              className="object-cover w-full h-full"
-                            />
-                          </div>
-                          <div className="flex flex-col items-start justify-between space-y-2">
-                            <span className="text-xl font-semibold whitespace-nowrap">
-                              {card.title}
-                            </span>
-                            <div className="flex items-center">
-                              <div className="flex relative">
-                                {
-                                  students.length > 0
-                                    ? // Only show actual student photos if they exist
-                                      students.map((photo, i) => (
+                        return (
+                          <div
+                            key={card.id}
+                            className={`flex items-center hover:cursor-pointer gap-2 p-4 ${card.bgColor} rounded-3xl border ${card.borderColor} w-[250px] sm:w-[380px] flex-shrink-0`}
+                            onClick={() => navigate(card.path)}
+                          >
+                            {/* ...existing code... */}
+                            <div className="flex-shrink-0 w-12 h-12 overflow-hidden rounded-full sm:w-20 sm:h-20">
+                              <img
+                                src={card.imgSrc}
+                                alt={card.alt}
+                                className="object-cover w-full h-full"
+                              />
+                            </div>
+                            <div className="flex flex-col items-start justify-between space-y-2">
+                              <span className="text-xl font-semibold whitespace-nowrap">
+                                {card.title}
+                              </span>
+                              <div className="flex items-center">
+                                <div className="flex relative">
+                                  {students.length > 0
+                                    ? students.map((photo, i) => (
                                         <div
                                           key={i}
                                           className="flex items-center justify-center w-6 h-6 bg-white border-2 border-white rounded-full sm:w-8 sm:h-8 -mr-2"
@@ -468,21 +474,69 @@ const LearnUser = () => {
                                           )}
                                         </div>
                                       ))
-                                    : null /* Don't show anything if no students */
-                                }
+                                    : null}
 
-                                {/* Only show the count badge if there are MORE users than shown in the icons */}
-                                {studentCount > students.length && (
-                                  <div className="flex items-center justify-center ml-2 text-xs font-medium text-green-800 bg-green-100 rounded-full px-2 py-1 min-w-8">
-                                    +{studentCount - students.length}
-                                  </div>
-                                )}
+                                  {studentCount > students.length && (
+                                    <div className="flex items-center justify-center ml-2 text-xs font-medium text-green-800 bg-green-100 rounded-full px-2 py-1 min-w-8">
+                                      +{studentCount - students.length}
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
+                    </div>
+
+                    {/* Simple horizontal scroll control slider - themed to match app with circular handle */}
+                    <div className="hidden md:block w-full mt-1">
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        defaultValue="0"
+                        className="w-full appearance-none cursor-pointer"
+                        style={{
+                          opacity: 0.5,
+                          height: "2px",
+                          backgroundColor: "#E6FDE9",
+                          backgroundSize: "0% 100%",
+                          backgroundRepeat: "no-repeat",
+                        }}
+                        onChange={(e) => {
+                          const container = document.getElementById(
+                            "languageCardsContainer"
+                          );
+                          const maxScroll =
+                            container.scrollWidth - container.clientWidth;
+                          const scrollPosition =
+                            (maxScroll * parseInt(e.target.value)) / 100;
+                          container.scrollLeft = scrollPosition;
+                        }}
+                      />
+                      <style jsx>{`
+                        input[type="range"]::-webkit-slider-thumb {
+                          -webkit-appearance: none;
+                          appearance: none;
+                          width: 8px;
+                          height: 8px;
+                          background-color: #14b82c;
+                          border: 1px solid #042f0c;
+                          border-radius: 50%;
+                          cursor: pointer;
+                        }
+
+                        input[type="range"]::-moz-range-thumb {
+                          width: 8px;
+                          height: 8px;
+                          background-color: #14b82c;
+                          border: 1px solid #042f0c;
+                          border-radius: 50%;
+                          cursor: pointer;
+                        }
+                      `}</style>
+                    </div>
                   </div>
                 )}
               </div>

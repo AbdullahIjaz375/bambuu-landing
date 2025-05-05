@@ -20,6 +20,7 @@ const MessagesUser = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [unreadCounts, setUnreadCounts] = useState({});
   const [groupLanguages, setGroupLanguages] = useState({});
+  const [onlineUsers, setOnlineUsers] = useState({});
   const { channelId: urlChannelId } = useParams();
 
   const handleChannelLeave = (channelId) => {
@@ -103,14 +104,39 @@ const MessagesUser = () => {
           message_retention: "infinite",
         });
 
-        // Initialize unread counts
+        // Initialize unread counts and online status tracking
         const counts = {};
+        const onlineStatusMap = {};
+
         await Promise.all(
           channels.map(async (channel) => {
             // Get the channel state including unread counts
             const state = await channel.watch();
             const channelState = channel.state;
             counts[channel.id] = channelState.unreadCount || 0;
+
+            // Initialize online users status tracking
+            if (
+              channel.type === "standard_group" ||
+              channel.type === "premium_group"
+            ) {
+              // For group chats, count online members
+              const members = Object.values(channel.state?.members || {});
+              const onlineCount = members.filter(
+                (member) => member.user?.online
+              ).length;
+              const totalMembers = members.length;
+              onlineStatusMap[channel.id] = { onlineCount, totalMembers };
+            } else {
+              // For one-to-one chats, track tutor's online status
+              const members = Object.values(channel.state?.members || {});
+              const otherMember = members.find(
+                (member) => member.user?.id !== user.uid
+              );
+              onlineStatusMap[channel.id] = {
+                isOnline: otherMember?.user?.online || false,
+              };
+            }
 
             // Set up message.new event listener
             channel.on("message.new", async (event) => {
@@ -128,8 +154,41 @@ const MessagesUser = () => {
               }
             });
 
-            // Removing the notification.message_new listener that was causing duplicate messages
-            // The message.new event above already handles unread count updates
+            // Add presence change listeners
+            channel.on("user.presence.changed", async (event) => {
+              if (
+                channel.type === "standard_group" ||
+                channel.type === "premium_group"
+              ) {
+                // Update group online count
+                const members = Object.values(channel.state?.members || {});
+                const onlineCount = members.filter(
+                  (member) => member.user?.online
+                ).length;
+                const totalMembers = members.length;
+
+                setOnlineUsers((prev) => ({
+                  ...prev,
+                  [channel.id]: { onlineCount, totalMembers },
+                }));
+              } else if (
+                channel.type === "premium_individual_class" ||
+                channel.type === "one_to_one_chat"
+              ) {
+                // Update tutor online status
+                const members = Object.values(channel.state?.members || {});
+                const otherMember = members.find(
+                  (member) => member.user?.id !== user.uid
+                );
+
+                setOnlineUsers((prev) => ({
+                  ...prev,
+                  [channel.id]: {
+                    isOnline: otherMember?.user?.online || false,
+                  },
+                }));
+              }
+            });
           })
         );
 
@@ -148,9 +207,10 @@ const MessagesUser = () => {
             }
           })
         );
-        setGroupLanguages(groupLanguagesData);
 
+        setGroupLanguages(groupLanguagesData);
         setUnreadCounts(counts);
+        setOnlineUsers(onlineStatusMap);
         setChannels(channels);
 
         // Select channel from URL or first available
@@ -185,6 +245,7 @@ const MessagesUser = () => {
       channels.forEach((channel) => {
         channel.off("message.new");
         channel.off("message.read");
+        channel.off("user.presence.changed");
       });
     };
   }, [user]);
@@ -209,6 +270,7 @@ const MessagesUser = () => {
     setSearchQuery(event.target.value);
   };
 
+  // Filter helpers
   const filterChannels = (channelsToFilter) => {
     return channelsToFilter.filter((channel) => {
       // First check if the channel has a valid name
@@ -227,20 +289,22 @@ const MessagesUser = () => {
     });
   };
 
-  const groupChats = filterChannels(
+  // Standard (free) group chats
+  const standardGroupChats = filterChannels(
     channels.filter(
       (channel) =>
-        (channel.type === "standard_group" ||
-          channel.type === "premium_group") &&
+        channel.type === "standard_group" &&
         channel.data.name &&
         channel.data.name.trim() !== ""
     )
   );
 
-  const bambuuInstructors = filterChannels(
+  // Premium content (bammbuu+ groups and instructor chats)
+  const bammbuuPlusContent = filterChannels(
     channels.filter(
       (channel) =>
-        (channel.type === "premium_individual_class" ||
+        (channel.type === "premium_group" ||
+          channel.type === "premium_individual_class" ||
           channel.type === "one_to_one_chat") &&
         channel.data.name &&
         channel.data.name.trim() !== ""
@@ -251,6 +315,7 @@ const MessagesUser = () => {
     const groupLanguage = groupLanguages[channel.id];
     const latestMessage =
       channel.state.messages[channel.state.messages.length - 1];
+    const channelOnlineStatus = onlineUsers[channel.id];
 
     const getMessagePreview = (message) => {
       if (!message) return "No messages yet";
@@ -303,12 +368,33 @@ const MessagesUser = () => {
               e.target.src = "/default-avatar.png";
             }}
           />
+          {isInstructor && channelOnlineStatus?.isOnline && (
+            <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+          )}
         </div>
         <div className="flex-1">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold">
               {otherUser?.name || channel.data.name}
             </h3>
+            {isInstructor ? (
+              <span
+                className={`text-xs ${
+                  channelOnlineStatus?.isOnline
+                    ? "text-green-600"
+                    : "text-gray-500"
+                }`}
+              >
+                {channelOnlineStatus?.isOnline ? "Online" : "Offline"}
+              </span>
+            ) : (
+              channelOnlineStatus && (
+                <span className="text-xs text-green-600">
+                  {channelOnlineStatus.onlineCount}/
+                  {channelOnlineStatus.totalMembers} online
+                </span>
+              )
+            )}
           </div>
 
           <div className="flex flex-row items-center justify-between mt-1">
@@ -409,14 +495,14 @@ const MessagesUser = () => {
 
               <div className="flex-1 space-y-2 overflow-y-auto scrollbar-hide">
                 {activeTab === "bammbuuu"
-                  ? bambuuInstructors.map((channel) => (
+                  ? bammbuuPlusContent.map((channel) => (
                       <ChatItem
                         key={channel.id}
                         channel={channel}
                         isInstructor={true}
                       />
                     ))
-                  : groupChats.map((channel) => (
+                  : standardGroupChats.map((channel) => (
                       <ChatItem
                         key={channel.id}
                         channel={channel}

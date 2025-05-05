@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Clock, Calendar, Users, User, X } from "lucide-react";
 import Modal from "react-modal";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 Modal.setAppElement("#root");
 
@@ -30,11 +31,12 @@ const ClassCardTutor = ({
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const isPremium =
     classType === "Individual Premium" || classType === "Group Premium";
 
   const formatTime = (timestamp) => {
-    if (!timestamp) return "TBD";
+    if (!timestamp) return t("class-card-tutor.labels.tbd");
 
     // Convert Firebase timestamp to a Date object
     const date = new Date(timestamp.seconds * 1000);
@@ -47,7 +49,7 @@ const ClassCardTutor = ({
   };
 
   const formatDate = (timestamp) => {
-    if (!timestamp) return "TBD";
+    if (!timestamp) return t("class-card-tutor.labels.tbd");
 
     // Convert Firebase timestamp to a Date object
     const date = new Date(timestamp.seconds * 1000);
@@ -62,13 +64,13 @@ const ClassCardTutor = ({
 
   // New function to get the day name for recurring classes
   const getRecurringDayDisplay = (timestamp) => {
-    if (!timestamp) return "TBD";
-    
+    if (!timestamp) return t("class-card-tutor.labels.tbd");
+
     const date = new Date(timestamp.seconds * 1000);
-    
+
     // Get the day name
     const dayName = date.toLocaleDateString("en-US", { weekday: "long" });
-    
+
     // For weekly recurring classes, show just the day name
     return dayName;
   };
@@ -76,10 +78,11 @@ const ClassCardTutor = ({
   // Function to determine if we should show the day name or full date
   const getDateDisplay = (timestamp) => {
     // Check if the class is recurring (weekly)
-    const isRecurring = recurrenceTypes && 
-                       (recurrenceTypes.includes("Weekly") || 
-                        selectedRecurrenceType === "Weekly");
-    
+    const isRecurring =
+      recurrenceTypes &&
+      (recurrenceTypes.includes("Weekly") ||
+        selectedRecurrenceType === "Weekly");
+
     if (isRecurring) {
       return getRecurringDayDisplay(timestamp);
     } else {
@@ -92,7 +95,7 @@ const ClassCardTutor = ({
   };
 
   const isClassOngoing = () => {
-    if (!classDateTime) return false;
+    if (!classDateTime || !classDateTime.seconds) return false;
     const now = new Date();
     const classStart = new Date(classDateTime.seconds * 1000);
     const classEnd = new Date(classStart.getTime() + classDuration * 60 * 1000);
@@ -106,7 +109,9 @@ const ClassCardTutor = ({
           <div
             className={`flex flex-col h-auto sm:h-[25rem] border ${
               isPremium ? "border-[#14b82c]" : "border-[#ffc71f]"
-            } bg-white rounded-3xl p-2`}
+            } ${
+              classType === "Individual Premium" ? "bg-[#e6fde9]" : "bg-white"
+            } rounded-3xl p-2`}
           >
             <div className="relative w-full aspect-video sm:h-80">
               <img
@@ -117,13 +122,13 @@ const ClassCardTutor = ({
               {isPremium && (
                 <img
                   src="/images/bambuu-plus-tag.png"
-                  alt="Premium"
+                  alt={t("class-card-tutor.labels.premium")}
                   className="absolute w-24 h-6 sm:h-8 sm:w-28 top-2 left-2"
                 />
               )}
               {isClassOngoing() && (
                 <span className="absolute px-2 sm:px-3 py-1 text-xs sm:text-sm bg-[#B9F9C2BF]/75 backdrop-blur-sm rounded-full top-2 right-2">
-                  Ongoing
+                  {t("class-card-tutor.labels.ongoing")}
                 </span>
               )}
 
@@ -142,7 +147,11 @@ const ClassCardTutor = ({
                           ? "/svgs/xs-spain.svg"
                           : "/svgs/eng-spanish-xs.svg"
                       }
-                      alt={language === "English" ? "US Flag" : "Spain Flag"}
+                      alt={
+                        language === "English"
+                          ? t("class-card-tutor.altText.usFlag")
+                          : t("class-card-tutor.altText.spainFlag")
+                      }
                       className="w-4 h-4 sm:w-auto"
                     />
                     <span className="flex items-center">
@@ -151,11 +160,22 @@ const ClassCardTutor = ({
                       </span>
                     </span>
                   </div>
-                  {languageLevel !== "None" && (
-                    <span className="px-2 sm:px-3 py-1 text-xs sm:text-sm bg-[#fff885] rounded-full">
-                      {languageLevel}
-                    </span>
-                  )}
+
+                  <div className="flex items-center space-x-2">
+                    {/* Show 1:1 badge for individual premium classes */}
+                    {classType === "Individual Premium" && (
+                      <span className="px-2 py-[2px] bg-[#fff885] rounded-full text-xs sm:text-sm font-medium">
+                        1:1
+                      </span>
+                    )}
+
+                    {/* Show language level badge if available */}
+                    {languageLevel !== "None" && (
+                      <span className="px-2 sm:px-3 py-1 text-xs sm:text-sm bg-[#fff885] rounded-full">
+                        {languageLevel}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -163,13 +183,20 @@ const ClassCardTutor = ({
             <div className="flex flex-col items-center justify-end w-full p-2 space-y-2">
               <div className="flex flex-col items-start justify-between w-full gap-2 sm:flex-row sm:items-center sm:gap-0">
                 <div className="flex items-center space-x-2">
-                  <img alt="bammbuu" src="/svgs/clock.svg" />
+                  <img
+                    alt={t("class-card-tutor.altText.clock")}
+                    src="/svgs/clock.svg"
+                  />
                   <span className="text-sm sm:text-md text-[#454545]">
-                    {formatTime(classDateTime)} ({classDuration} min)
+                    {formatTime(classDateTime)} ({classDuration}{" "}
+                    {t("class-card-tutor.labels.min")})
                   </span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <img alt="bammbuu" src="/svgs/calendar.svg" />
+                  <img
+                    alt={t("class-card-tutor.altText.calendar")}
+                    src="/svgs/calendar.svg"
+                  />
                   <span className="text-sm sm:text-md text-[#454545]">
                     {getDateDisplay(classDateTime)}
                   </span>
@@ -187,11 +214,14 @@ const ClassCardTutor = ({
                     <User className="w-4 h-4 text-gray-600 sm:w-5 sm:h-5" />
                   )}
                   <span className="text-sm sm:text-md text-[#454545]">
-                    {adminName || "TBD"}
+                    {adminName || t("class-card-tutor.labels.tbd")}
                   </span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <img alt="bammbuu" src="/svgs/users.svg" />
+                  <img
+                    alt={t("class-card-tutor.altText.users")}
+                    src="/svgs/users.svg"
+                  />
                   <span className="text-sm sm:text-md text-[#454545]">
                     {classMemberIds.length}/{availableSpots}
                   </span>
@@ -217,7 +247,9 @@ const ClassCardTutor = ({
       >
         <div className="">
           <div className="flex items-center justify-between p-6 pb-4">
-            <h2 className="text-2xl font-semibold">Class Details</h2>
+            <h2 className="text-2xl font-semibold">
+              {t("class-card-tutor.modal.title")}
+            </h2>
             <button
               onClick={() => setIsModalOpen(false)}
               className="p-2 bg-gray-200 rounded-full hover:bg-gray-300"
@@ -276,7 +308,7 @@ const ClassCardTutor = ({
               {groupId && (
                 <div className="w-full">
                   <h3 className="mb-3 text-lg font-bold text-center">
-                    Language Group
+                    {t("class-card-tutor.modal.languageGroup")}
                   </h3>
                   <div
                     className={`flex items-center gap-4 p-4 bg-white rounded-xl border ${
@@ -290,7 +322,9 @@ const ClassCardTutor = ({
                     />
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
-                        <span className="font-medium">{`${language} Learners`}</span>
+                        <span className="font-medium">{`${language} ${t(
+                          "class-card-tutor.modal.learners"
+                        )}`}</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-gray-600">
                         <img
@@ -303,7 +337,7 @@ const ClassCardTutor = ({
                         <div className="flex items-center gap-1">
                           <img
                             src={adminImageUrl || "/api/placeholder/16/16"}
-                            alt="Leader"
+                            alt={t("class-card-tutor.modal.leader")}
                             className="w-4 h-4 rounded-full"
                           />
                           <span>{adminName}</span>
@@ -323,7 +357,7 @@ const ClassCardTutor = ({
 
           <div className="p-4">
             <button className="w-full py-3 font-medium text-black bg-[#ffbf00] rounded-full hover:bg-[#e6ac00] border border-black">
-              Join Class
+              {t("class-card-tutor.modal.joinClass")}
             </button>
           </div>
         </div>

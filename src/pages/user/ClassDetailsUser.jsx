@@ -785,7 +785,7 @@ const ClassDetailsUser = ({ onClose }) => {
                     </h3>
 
                     {/* Language Info */}
-                    <div className="flex items-center gap-4 mb-2">
+                    <div className="flex items-center gap-4 mb-2 flex-wrap justify-center">
                       <div className="flex flex-row items-center space-x-1">
                         <img
                           src={
@@ -806,6 +806,14 @@ const ClassDetailsUser = ({ onClose }) => {
                           {classData.language}
                         </span>
                       </div>
+
+                      {/* Add 1:1 Class badge for Individual Premium classes */}
+                      {classData.classType === "Individual Premium" && (
+                        <span className="px-2 py-[2px] bg-[#fff885] rounded-full text-xs md:text-sm font-medium text-center">
+                          1:1 Class
+                        </span>
+                      )}
+
                       <span className="px-3 py-1 text-sm bg-yellow-200 rounded-full md:text-md">
                         {classData.languageLevel}
                       </span>

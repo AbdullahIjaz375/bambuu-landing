@@ -25,29 +25,37 @@ const GroupInfoCard = ({ group }) => {
   }, [group]);
 
   const baseCardClass =
-    "flex flex-row items-center w-full max-w-md gap-3 p-2 bg-white border rounded-3xl";
+    "flex flex-row items-center w-full max-w-md gap-3 p-4 bg-white border rounded-3xl";
   const imgClass = "object-cover rounded-2xl";
+
+  // Function to truncate text to a specific number of words
+  const truncateText = (text, maxWords) => {
+    if (!text) return "";
+    const words = text.split(" ");
+    if (words.length <= maxWords) return text;
+    return words.slice(0, maxWords).join(" ") + "...";
+  };
 
   return (
     <div className={`${baseCardClass} border-green-500`}>
       <img
         alt={`${tutorInfo?.name || "Tutor"}'s profile`}
         src={tutorInfo?.photoUrl || "/api/placeholder/80/80"}
-        className={`${imgClass} w-28 h-28 rounded-xl`}
+        className={`${imgClass} w-24 h-24 rounded-xl flex-shrink-0`}
       />
-      <div className="flex flex-col items-start flex-1 gap-1">
-        <h1 className="text-lg font-medium">{tutorInfo?.name}</h1>
-       
-        
-        <p title={tutorInfo?.bio} className="text-xs text-left text-gray-600">
-  {tutorInfo?.bio
-    ? tutorInfo?.bio.includes(" ")
-      ? tutorInfo?.bio.split(" ").slice(0, 12).join(" ") + "..."
-      : tutorInfo?.bio.slice(0, 30) + "...."
-    : ""}
-</p>
+      <div className="flex flex-col items-start w-full flex-1 gap-2 overflow-hidden">
+        <h1 className="text-lg font-medium truncate w-full">
+          {tutorInfo?.name}
+        </h1>
 
-        <div className="flex items-center gap-4 text-xs">
+        <p
+          title={tutorInfo?.bio}
+          className="text-xs text-left text-gray-600 w-full overflow-hidden"
+        >
+          {truncateText(tutorInfo?.bio, 12)}
+        </p>
+
+        <div className="flex items-center justify-between w-full text-xs">
           <div className="flex flex-col gap-0.5">
             <span className="text-gray-700">
               {tutorInfo?.teachingLanguage} (Teaching)
@@ -58,12 +66,17 @@ const GroupInfoCard = ({ group }) => {
           </div>
           <div className="flex flex-col gap-0.5">
             <div className="flex items-center gap-1">
-              <img src="/svgs/location.svg" />{" "}
+              <img src="/svgs/location.svg" alt="location" />
               <span className="text-gray-700">{tutorInfo?.country}</span>
             </div>
             <div className="flex items-center gap-1">
-              <img src="/svgs/users.svg" />{" "}
-              <span className="text-gray-700">200k</span>
+              <img src="/svgs/users.svg" alt="users" />
+              <span className="text-gray-700">
+                {group.memberIds ? group.memberIds.length : 0}{" "}
+                {group.memberIds && group.memberIds.length === 1
+                  ? "member"
+                  : "members"}
+              </span>
             </div>
           </div>
         </div>

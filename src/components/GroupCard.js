@@ -73,7 +73,9 @@ const GroupCard = ({ group }) => {
                 className="w-5 h-5 sm:w-auto"
               />
             </div>
-            <span className="font-medium text-md">{groupLearningLanguage}</span>
+            <span className="font-medium text-md w-auto max-w-[180px] text-center">
+              {groupLearningLanguage}
+            </span>
           </div>
 
           {/* Admin and Member Count */}

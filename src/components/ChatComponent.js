@@ -13,11 +13,10 @@ import {
   getDoc,
   updateDoc,
   arrayUnion,
-  serverTimestamp,
   Timestamp,
 } from "firebase/firestore";
 import { db } from "../firebaseConfig";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 Modal.setAppElement("#root");
 
@@ -234,6 +233,13 @@ const CustomChatComponent = ({ channelId, type, onChannelLeave, chatInfo }) => {
   };
 
   const handleViewProfile = async () => {
+    // For group chats, navigate to group details page
+    if (type === "standard_group" || type === "premium_group") {
+      navigate(`/groupDetailsUser/${channelId}`);
+      setShowDropdown(false);
+      return;
+    }
+
     if (!isStudentsTutorPage) {
       // Navigate to profile if not in students tutor page
       if (chatPartner && chatPartner.id) {
@@ -293,6 +299,7 @@ const CustomChatComponent = ({ channelId, type, onChannelLeave, chatInfo }) => {
       setIsLoading(false);
     }
   };
+
   const handleAssignResources = () => {
     setShowAssignModal(true);
     setShowDropdown(false);
@@ -431,7 +438,9 @@ const CustomChatComponent = ({ channelId, type, onChannelLeave, chatInfo }) => {
                 className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-50"
                 onClick={handleViewProfile}
               >
-                View Profile
+                {type === "standard_group" || type === "premium_group"
+                  ? "View Group"
+                  : "View Profile"}
               </button>
 
               {isStudentsTutorPage && (

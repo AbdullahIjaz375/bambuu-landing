@@ -38,7 +38,12 @@ const ProfileUser = () => {
   }, [user]);
 
   const hasBambbuuPlus = user?.subscriptions?.some(
-    (sub) => sub.type === "bammbuu+ Instructor-led group Classes"
+    (sub) =>
+      sub.type === "bammbuu+ Instructor-led group Classes" ||
+      sub.type === "individual_premium" ||
+      sub.type === "group_premium" ||
+      sub.type?.toLowerCase().includes("premium") ||
+      sub.type?.toLowerCase().includes("bambuu+")
   );
 
   const handleSignOut = async () => {

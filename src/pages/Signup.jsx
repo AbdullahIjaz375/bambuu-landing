@@ -191,7 +191,7 @@ const Signup = () => {
         learningLanguageProficiency: profileData.proficiency,
         name: profileData.name,
         nativeLanguage: profileData.nativeLanguage,
-        photoUrl: "",
+        photoUrl: "/images/panda.png",
         savedDocuments: [],
         freeAccess: false,
         languagePreference: "en",
@@ -323,7 +323,7 @@ const Signup = () => {
           nativeLanguage: "",
           freeAccess: false,
           country: "",
-          photoUrl: "",
+          photoUrl: "/images/panda.png",
           savedDocuments: [],
           currentStreak: 1,
           fcmToken: fcmToken || "",
@@ -489,7 +489,7 @@ const Signup = () => {
           nativeLanguage: "",
           freeAccess: false,
           country: "",
-          photoUrl: "",
+          photoUrl: "/images/panda.png",
           savedDocuments: [],
           currentStreak: 1,
           fcmToken: fcmToken || "",
@@ -774,9 +774,44 @@ const Signup = () => {
                 </select>
               </div>
 
+              <div className="space-y-2">
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="ageVerification"
+                    className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                    required
+                  />
+                  <label
+                    htmlFor="ageVerification"
+                    className="ml-2 text-sm font-medium text-gray-700"
+                  >
+                    I confirm that I am at least 18 years old
+                  </label>
+                </div>
+                <p
+                  className="text-sm text-red-500"
+                  id="ageWarning"
+                  style={{ display: "none" }}
+                >
+                  You must be at least 18 years old to use this application.
+                </p>
+              </div>
+
               <button
                 type="submit"
                 className="w-full py-2.5 mt-4 text-black bg-[#14B82C] border border-black rounded-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                onClick={(e) => {
+                  const checkbox = document.getElementById("ageVerification");
+                  const warning = document.getElementById("ageWarning");
+
+                  if (!checkbox.checked) {
+                    e.preventDefault();
+                    warning.style.display = "block";
+                  } else {
+                    warning.style.display = "none";
+                  }
+                }}
               >
                 Submit
               </button>

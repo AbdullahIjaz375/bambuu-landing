@@ -331,9 +331,10 @@ const ClassDetailsTutor = ({ onClose }) => {
   };
 
   const isClassOngoing = () => {
-    if (!classData?.classDateTime) return false;
+    if (!classData?.classDateTime || !classData?.classDateTime.seconds)
+      return false;
     const now = new Date();
-    const classStart = new Date(classData?.classDateTime.seconds * 1000);
+    const classStart = new Date(classData.classDateTime.seconds * 1000);
     const classEnd = new Date(
       classStart.getTime() + classData?.classDuration * 60 * 1000
     );

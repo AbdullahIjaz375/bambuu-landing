@@ -24,6 +24,10 @@ const ClassesUser = () => {
     navigate(-1);
   };
 
+  const handleBookNewClass = () => {
+    navigate("/exploreClassesUser");
+  };
+
   useEffect(() => {
     const fetchClasses = async () => {
       if (!user || !user.enrolledClasses) {
@@ -107,7 +111,10 @@ const ClassesUser = () => {
                 My Classes
               </h1>
             </div>
-            <button className="px-6 py-3 text-[#042f0c] text-xl font-medium bg-white border border-[#5d5d5d] rounded-full whitespace-nowrap">
+            <button
+              className="px-6 py-3 text-[#042f0c] text-xl font-medium bg-white border border-[#5d5d5d] rounded-full whitespace-nowrap"
+              onClick={handleBookNewClass}
+            >
               Book New Class
             </button>
           </div>

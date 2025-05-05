@@ -35,6 +35,7 @@ const ClassCard = ({
   const navigate = useNavigate();
   const isPremium =
     classType === "Individual Premium" || classType === "Group Premium";
+  const isIndividualPremium = classType === "Individual Premium";
 
   const formatTime = (timestamp) => {
     if (!timestamp) return "TBD";
@@ -142,7 +143,9 @@ const ClassCard = ({
         <div
           className={`flex flex-col h-auto sm:h-[25rem] border ${
             isPremium ? "border-[#14b82c]" : "border-[#ffc71f]"
-          } bg-white rounded-3xl p-2`}
+          } ${
+            isIndividualPremium ? "bg-[#e6fde9]" : "bg-white"
+          } rounded-3xl p-2`}
         >
           <div className="relative w-full aspect-video sm:h-80">
             <img
@@ -169,7 +172,7 @@ const ClassCard = ({
               </h2>
 
               <div className="flex items-center justify-between">
-                <div className="flex items-center ml-2 space-x-2">
+                <div className="flex items-center space-x-2">
                   <img
                     src={
                       language === "English"
@@ -179,7 +182,7 @@ const ClassCard = ({
                         : "/svgs/eng-spanish-xs.svg"
                     }
                     alt={language === "English" ? "US Flag" : "Spain Flag"}
-                    className="w-4 h-4 sm:w-auto"
+                    className="w-4 h-4 sm:w-auto ml-2"
                   />
                   <span className="flex items-center">
                     <span className="text-sm sm:text-base text-[#042f0c]">
@@ -187,11 +190,22 @@ const ClassCard = ({
                     </span>
                   </span>
                 </div>
-                {languageLevel !== "None" && !isBammbuu && (
-                  <span className="px-2 sm:px-3 py-1 text-xs sm:text-sm bg-[#fff885] rounded-full">
-                    {languageLevel}
-                  </span>
-                )}
+
+                <div className="flex items-center space-x-2 justify-center mr-2">
+                  {/* Show 1:1 badge for individual premium classes */}
+                  {isIndividualPremium && (
+                    <span className="px-2 py-[2px] bg-[#fff885] rounded-full text-xs sm:text-sm font-medium text-center">
+                      1:1 Class
+                    </span>
+                  )}
+
+                  {/* Show language level badge if available */}
+                  {languageLevel !== "None" && !isBammbuu && (
+                    <span className="px-2 sm:px-3 py-1 text-xs sm:text-sm bg-[#fff885] rounded-full">
+                      {languageLevel}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -283,12 +297,22 @@ const ClassCard = ({
 
               <div className="flex items-center gap-2 mb-6">
                 <span className="text-sm sm:text-base">{language}</span>
-                {/* Only show language level in modal for group classes */}
-                {languageLevel !== "None" && !isBammbuu && (
-                  <span className="px-2 py-0.5 text-xs sm:text-sm bg-[#fff885] rounded-full">
-                    {languageLevel}
-                  </span>
-                )}
+
+                <div className="flex items-center ml-auto space-x-2">
+                  {/* Show 1:1 badge for individual premium classes */}
+                  {isIndividualPremium && (
+                    <span className="px-2 py-[2px] bg-[#fff885] rounded-full text-xs sm:text-sm font-medium text-center">
+                      1:1 Class
+                    </span>
+                  )}
+
+                  {/* Only show language level if available */}
+                  {languageLevel !== "None" && !isBammbuu && (
+                    <span className="px-2 py-0.5 text-xs sm:text-sm bg-[#fff885] rounded-full">
+                      {languageLevel}
+                    </span>
+                  )}
+                </div>
               </div>
 
               <div className="flex flex-wrap justify-center gap-4 mb-6 text-xs sm:gap-8 sm:text-sm">

@@ -60,7 +60,7 @@ const ProfileTutor = () => {
     try {
       await signOut(auth);
       toast.success("Logged out successfully!");
-      sessionStorage.removeItem("userType"); // Remove userType from session storage
+      sessionStorage.removeItem("userType");
     } catch (error) {
       toast.error("Error during logout");
       console.error("Error during logout:", error);
@@ -158,7 +158,7 @@ const ProfileTutor = () => {
                     className="flex-shrink-0 w-6 h-6"
                   />
                   <span className="font-semibold text-black whitespace-nowrap">
-                    {t("profile.learning")}:
+                    {t("profile.teaching")}:
                   </span>
                   <span className="font-medium text-gray-600 truncate">
                     {user?.learningLanguage || "-"}

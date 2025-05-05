@@ -719,7 +719,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
                     <h3 className="mb-2 text-2xl font-medium">
                       {classData.className}
                     </h3>
-                    <div className="flex items-center gap-4 mb-2">
+                    <div className="flex items-center gap-4 mb-2 flex-wrap justify-center">
                       <div className="flex flex-row items-center space-x-1">
                         <img
                           src={
@@ -743,8 +743,8 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
                         {classData.languageLevel}
                       </span>
                       {classData.classType === "Individual Premium" && (
-                        <span className="px-3 py-[2px] bg-yellow-200 rounded-full text-sm">
-                          1 to 1 Class
+                        <span className="px-2 py-[2px] bg-[#fff885] rounded-full text-xs md:text-sm font-medium text-center">
+                          1:1 Class
                         </span>
                       )}
                     </div>

@@ -177,8 +177,19 @@ const LanguagesUser = () => {
           {/* Content - Grid Layout */}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {languageCards.map((card) => {
-              const students = languageData[card.id].studentPhotos.slice(0, 8);
+              // Maximum number of profile photos to display
+              const MAX_DISPLAY_PHOTOS = 8;
+
+              const students = languageData[card.id].studentPhotos.slice(
+                0,
+                MAX_DISPLAY_PHOTOS
+              );
               const studentCount = languageData[card.id].studentIds.length;
+              // Only show additional count (beyond what's displayed in photos)
+              const additionalStudents = Math.max(
+                0,
+                studentCount - students.length
+              );
 
               return (
                 <div
@@ -199,8 +210,9 @@ const LanguagesUser = () => {
                     </span>
                     <div className="flex items-center">
                       <div className="flex relative">
-                        {students.length > 0
-                          ? students.map((photo, i) => (
+                        {students.length > 0 ? (
+                          <>
+                            {students.map((photo, i) => (
                               <div
                                 key={i}
                                 className="flex items-center justify-center w-8 h-8 bg-white border-2 border-white rounded-full -mr-2"
@@ -220,30 +232,32 @@ const LanguagesUser = () => {
                                   />
                                 )}
                               </div>
-                            ))
-                          : Array(6)
-                              .fill(null)
-                              .map((_, i) => (
-                                <div
-                                  key={i}
-                                  className="flex items-center justify-center w-8 h-8 bg-white border-2 border-white rounded-full -mr-2"
-                                  style={{ zIndex: 6 - i }}
-                                >
-                                  <img
-                                    src={"/images/panda.png"}
-                                    alt={`Student ${i + 1}`}
-                                    className="object-cover w-full h-full rounded-full"
-                                  />
-                                </div>
-                              ))}
+                            ))}
 
-                        {/* User count badge */}
-                        <div className="flex items-center justify-center ml-2 text-xs font-medium text-green-800 bg-green-100 rounded-full px-2 py-1">
-                          +
-                          {studentCount > 999
-                            ? `${Math.floor(studentCount / 1000)}k`
-                            : studentCount}
-                        </div>
+                            {/* Only show the count badge if there are MORE users than shown in the photos */}
+                            {additionalStudents > 0 && (
+                              <div className="flex items-center justify-center ml-2 text-xs font-medium text-green-800 bg-green-100 rounded-full px-2 py-1">
+                                +
+                                {additionalStudents > 999
+                                  ? `${Math.floor(additionalStudents / 1000)}k`
+                                  : additionalStudents}
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <div className="flex items-center justify-center text-xs font-medium text-gray-600">
+                            {studentCount > 0 ? (
+                              <div className="flex items-center justify-center text-xs font-medium text-green-800 bg-green-100 rounded-full px-2 py-1">
+                                {studentCount}{" "}
+                                {studentCount === 1 ? "user" : "users"}
+                              </div>
+                            ) : (
+                              <div className="flex items-center justify-center text-xs font-medium text-gray-600">
+                                No users yet
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

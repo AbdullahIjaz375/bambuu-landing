@@ -14,7 +14,7 @@ const GroupCardTutor = ({ group }) => {
     id = "",
     isPremium = false,
   } = group || {};
-  
+
   const navigate = useNavigate();
 
   const handleClick = () => {
@@ -36,8 +36,8 @@ const GroupCardTutor = ({ group }) => {
   };
 
   return (
-    <div 
-      onClick={handleClick} 
+    <div
+      onClick={handleClick}
       className="w-full max-w-sm mx-auto transition-transform duration-200 hover:scale-[1.02]"
       aria-label={`${groupName} group card`}
     >
@@ -93,8 +93,8 @@ const GroupCardTutor = ({ group }) => {
           </div>
 
           {/* Language Badge */}
-          <div className="flex items-center gap-2 mb-6">
-            <div className="w-6 h-6 overflow-hidden rounded-full bg-gray-50">
+          <div className="flex items-center justify-center gap-2 mb-6 min-h-[28px]">
+            <div className="w-6 h-6 overflow-hidden rounded-full bg-gray-50 flex-shrink-0">
               <img
                 src={getLanguageIcon()}
                 alt={`${groupLearningLanguage} language`}
@@ -102,7 +102,9 @@ const GroupCardTutor = ({ group }) => {
                 loading="lazy"
               />
             </div>
-            <span className="text-lg font-medium">{groupLearningLanguage}</span>
+            <span className="text-lg font-medium w-auto max-w-[180px] text-center">
+              {groupLearningLanguage}
+            </span>
           </div>
 
           {/* Admin and Member Count - Maintains Space at Bottom */}

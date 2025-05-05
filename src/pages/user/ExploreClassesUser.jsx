@@ -40,10 +40,31 @@ const ExploreClassesUser = () => {
           .map((doc) => ({
             id: doc.id,
             ...doc.data(),
+            classId: doc.id, // Ensure classId is always set
           }))
           .filter((cls) => !user.enrolledClasses?.includes(cls.id))
           .filter(
             (cls) => !language || cls.language?.toLowerCase() === language
+          )
+          // Enhanced filtering to remove classes with missing or invalid data
+          .filter(
+            (cls) =>
+              // Make sure classDateTime exists and has seconds property (not TBD)
+              cls.classDateTime &&
+              typeof cls.classDateTime === "object" &&
+              cls.classDateTime.seconds &&
+              typeof cls.classDateTime.seconds === "number" &&
+              // Ensure the class has a valid ID
+              cls.id &&
+              // Make sure className exists and is not empty
+              cls.className &&
+              typeof cls.className === "string" &&
+              cls.className.trim() !== "" &&
+              // Make sure we have a valid adminId or tutorId
+              (cls.adminId || cls.tutorId) &&
+              // Make sure we have valid language information
+              cls.language &&
+              typeof cls.language === "string"
           );
 
         setExploreClasses(allClasses);
@@ -139,6 +160,7 @@ const ExploreClassesUser = () => {
                   <div key={classItem.id}>
                     <ExploreClassCard
                       {...classItem}
+                      classId={classItem.id} // Explicitly pass the classId
                       isBammbuu={isBambbuuPlusClass(classItem.classType)}
                     />
                   </div>

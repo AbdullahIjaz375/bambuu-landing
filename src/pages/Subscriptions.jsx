@@ -238,16 +238,16 @@ const Subscriptions = () => {
       plan.price === 0 || plan.title.toLowerCase().includes("free");
     const features = [
       {
-        title: t("plans-modal.features.experts.title"),
-        description: t("plans-modal.features.experts.description"),
-      },
-      {
         title: plan.title.includes("Group")
           ? t("plans-modal.features.classes.group.title")
           : t("plans-modal.features.classes.private.title"),
         description: plan.title.includes("Group")
           ? t("plans-modal.features.classes.group.description")
           : t("plans-modal.features.classes.private.description"),
+      },
+      {
+        title: t("plans-modal.features.experts.title"),
+        description: t("plans-modal.features.experts.description"),
       },
       {
         title: t("plans-modal.features.resources.title"),

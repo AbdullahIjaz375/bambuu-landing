@@ -33,6 +33,11 @@ const useClassEnrollment = () => {
   };
 
   const enrollInClass = async (classId, userId, tutorId) => {
+    if (!classId) {
+      setError(t("exploreClassCard.errors.invalidClassId"));
+      return false;
+    }
+
     setIsEnrolling(true);
     setError(null);
     try {
@@ -45,6 +50,10 @@ const useClassEnrollment = () => {
 
       if (!classData) {
         throw new Error(t("exploreClassCard.errors.classNotFound"));
+      }
+
+      if (!classData.classDateTime || !classData.classDateTime.seconds) {
+        throw new Error(t("exploreClassCard.errors.classDateNotSet"));
       }
 
       if (classData.classMemberIds?.length >= classData.availableSpots) {
@@ -86,11 +95,13 @@ const useClassEnrollment = () => {
     enrollInClass,
     isEnrolling,
     error,
+    setError,
   };
 };
 
 const ExploreClassCard = ({
   classId,
+  id,
   className,
   language,
   languageLevel,
@@ -120,14 +131,26 @@ const ExploreClassCard = ({
     useState(false);
   const [isPlansModalOpen, setIsPlansModalOpen] = useState(false);
 
+  // Ensure we have a valid classId (use id as fallback)
+  const validClassId = classId || id;
+
+  // Check if classDateTime is valid (not TBD)
+  const hasValidDateTime =
+    classDateTime &&
+    typeof classDateTime === "object" &&
+    classDateTime.seconds &&
+    typeof classDateTime.seconds === "number";
+
   // Determine which user details to display based on isBammbuu flag
-  const isPremium = classType === "Individual Premium" || "Group Premium";
+  const isPremium =
+    classType === "Individual Premium" || classType === "Group Premium";
 
   const displayName = isPremium ? tutorName : adminName;
   const displayImage = isPremium ? tutorImageUrl : adminImageUrl;
 
   const formatTime = (timestamp) => {
-    if (!timestamp) return t("exploreClassCard.labels.tbd");
+    if (!timestamp || !timestamp.seconds)
+      return t("exploreClassCard.labels.tbd");
 
     // Convert Firebase timestamp to a Date object
     const date = new Date(timestamp.seconds * 1000);
@@ -140,7 +163,8 @@ const ExploreClassCard = ({
   };
 
   const formatDate = (timestamp) => {
-    if (!timestamp) return t("exploreClassCard.labels.tbd");
+    if (!timestamp || !timestamp.seconds)
+      return t("exploreClassCard.labels.tbd");
 
     // Convert Firebase timestamp to a Date object
     const date = new Date(timestamp.seconds * 1000);
@@ -167,11 +191,33 @@ const ExploreClassCard = ({
   };
 
   const handleCardClick = () => {
-    navigate(`/newClassDetailsUser/${classId}`);
+    if (!validClassId) {
+      console.error("Invalid class ID");
+      return;
+    }
+    navigate(`/newClassDetailsUser/${validClassId}`);
   };
 
   const handleBookClass = (e) => {
     e.stopPropagation();
+
+    // Check for valid classId
+    if (!validClassId) {
+      toast.error(
+        t("exploreClassCard.errors.invalidClassId") || "Invalid class ID"
+      );
+      return;
+    }
+
+    // Prevent booking if date/time is not set
+    if (!hasValidDateTime) {
+      toast.error(
+        t("exploreClassCard.errors.classDateNotSet") ||
+          "Class date is not set yet"
+      );
+      return;
+    }
+
     setIsBookingConfirmationOpen(true);
   };
 
@@ -181,12 +227,27 @@ const ExploreClassCard = ({
       return;
     }
 
-    const success = await enrollInClass(classId, user.uid, adminId);
+    // Check for valid classId
+    if (!validClassId) {
+      setError(t("exploreClassCard.errors.invalidClassId"));
+      return;
+    }
+
+    // Double-check no booking for TBD classes
+    if (!hasValidDateTime) {
+      setError(t("exploreClassCard.errors.classDateNotSet"));
+      return;
+    }
+
+    const success = await enrollInClass(validClassId, user.uid, adminId);
 
     if (success) {
       setIsBookingConfirmationOpen(false);
       setIsModalOpen(false);
-      // You might want to show a success toast or message here
+      toast.success(
+        t("exploreClassCard.success.classBooked") ||
+          "Class booked successfully!"
+      );
     }
   };
 
@@ -223,6 +284,11 @@ const ExploreClassCard = ({
     fetchAdminProfile();
   }, [adminId]);
 
+  // If we don't have a valid class ID or a valid class name, don't render the card
+  if (!validClassId || !className) {
+    return null;
+  }
+
   return (
     <>
       <div
@@ -239,7 +305,9 @@ const ExploreClassCard = ({
         <div
           className={`flex flex-col h-auto border ${
             isPremium ? "border-[#14b82c]" : "border-[#ffc71f]"
-          } bg-white rounded-3xl p-2 overflow-hidden`}
+          } ${
+            classType === "Individual Premium" ? "bg-[#e6fde9]" : "bg-white"
+          } rounded-3xl p-2 overflow-hidden`}
         >
           {/* Image Section */}
           <div className="relative w-full aspect-video">
@@ -285,11 +353,21 @@ const ExploreClassCard = ({
                     {language}
                   </span>
                 </div>
-                {languageLevel !== "None" && (
-                  <span className="px-2 sm:px-3 py-1 text-xs sm:text-sm bg-[#fff885] rounded-full">
-                    {languageLevel}
-                  </span>
-                )}
+
+                <div className="flex items-center space-x-2">
+                  {/* Show 1:1 badge for individual premium classes */}
+                  {classType === "Individual Premium" && (
+                    <span className="px-2 py-[2px] bg-[#fff885] rounded-full text-xs sm:text-sm font-medium">
+                      1:1
+                    </span>
+                  )}
+
+                  {languageLevel !== "None" && (
+                    <span className="px-2 sm:px-3 py-1 text-xs sm:text-sm bg-[#fff885] rounded-full">
+                      {languageLevel}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -353,10 +431,17 @@ const ExploreClassCard = ({
 
             {/* Book Class Button */}
             <button
-              onClick={handleCardClick}
-              className="w-full py-2 font-medium text-[#042F0C] border-[#042F0C] border bg-[#14b82c] rounded-full hover:bg-[#119924] transition-colors duration-200"
+              onClick={handleBookClass}
+              className={`w-full py-2 font-medium border rounded-full transition-colors duration-200 ${
+                hasValidDateTime
+                  ? "text-[#042F0C] border-[#042F0C] bg-[#14b82c] hover:bg-[#119924]"
+                  : "text-gray-500 border-gray-300 bg-gray-200 cursor-not-allowed"
+              }`}
+              disabled={!hasValidDateTime}
             >
-              {t("exploreClassCard.labels.bookClass")}
+              {hasValidDateTime
+                ? t("exploreClassCard.labels.bookClass")
+                : t("exploreClassCard.labels.classNotScheduled")}
             </button>
           </div>
         </div>
@@ -496,9 +581,16 @@ const ExploreClassCard = ({
           <div className="p-4">
             <button
               onClick={handleBookClass}
-              className="w-full py-3 font-medium text-black bg-[#14b82c] rounded-full hover:bg-[#119924] border border-[#042f0c]"
+              className={`w-full py-3 font-medium border rounded-full ${
+                hasValidDateTime
+                  ? "text-black bg-[#14b82c] hover:bg-[#119924] border-[#042f0c]"
+                  : "text-gray-500 bg-gray-200 border-gray-400 cursor-not-allowed"
+              }`}
+              disabled={!hasValidDateTime}
             >
-              {t("exploreClassCard.labels.bookClass")}
+              {hasValidDateTime
+                ? t("exploreClassCard.labels.bookClass")
+                : t("exploreClassCard.labels.classNotScheduled")}
             </button>
           </div>
         </div>

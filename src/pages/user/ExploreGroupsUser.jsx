@@ -14,9 +14,10 @@ const ExploreGroupsUser = () => {
   const { user } = useAuth();
   const [exploreGroups, setExploreGroups] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchLoading, setSearchLoading] = useState(false); // Add loading state for search
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState("all"); // State for active tab
+  const [activeTab, setActiveTab] = useState("premium"); // Set default tab to premium instead of "all"
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const language = searchParams.get("language")?.toLowerCase() || null;
@@ -63,25 +64,49 @@ const ExploreGroupsUser = () => {
     fetchGroups();
   }, [user, language]);
 
-  const filteredGroups = exploreGroups
-    .filter((group) => {
-      const searchTerm = searchQuery.toLowerCase().trim();
+  // Effect to handle search filtering with loading state
+  const [filteredGroups, setFilteredGroups] = useState([]);
 
-      if (!searchTerm) return true;
+  useEffect(() => {
+    // Show loading state when user is searching
+    if (searchQuery.trim()) {
+      setSearchLoading(true);
 
-      // Adjust these fields based on your group data structure
-      return (
-        group.name?.toLowerCase().includes(searchTerm) ||
-        group.description?.toLowerCase().includes(searchTerm) ||
-        group.category?.toLowerCase().includes(searchTerm)
-      );
-    })
-    .filter((group) => {
-      if (activeTab === "all") return true;
-      if (activeTab === "premium") return group.isPremium;
-      if (activeTab === "free") return !group.isPremium;
-      return true;
-    });
+      // Small timeout to show the loading state (improves UX)
+      const timer = setTimeout(() => {
+        const filtered = exploreGroups
+          .filter((group) => {
+            const searchTerm = searchQuery.toLowerCase().trim();
+
+            // Use the correct field names based on your database structure
+            return (
+              group.groupName?.toLowerCase().includes(searchTerm) ||
+              group.groupDescription?.toLowerCase().includes(searchTerm) ||
+              group.groupLearningLanguage?.toLowerCase().includes(searchTerm)
+            );
+          })
+          .filter((group) => {
+            if (activeTab === "premium") return group.isPremium;
+            if (activeTab === "free") return !group.isPremium;
+            return true;
+          });
+
+        setFilteredGroups(filtered);
+        setSearchLoading(false);
+      }, 300); // Small delay for better user experience
+
+      return () => clearTimeout(timer);
+    } else {
+      // No search query, just filter by tab
+      const filtered = exploreGroups.filter((group) => {
+        if (activeTab === "premium") return group.isPremium;
+        if (activeTab === "free") return !group.isPremium;
+        return true;
+      });
+
+      setFilteredGroups(filtered);
+    }
+  }, [searchQuery, exploreGroups, activeTab]);
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -156,6 +181,11 @@ const ExploreGroupsUser = () => {
             {loading ? (
               <div className="flex items-center justify-center min-h-[60vh]">
                 <ClipLoader color="#14B82C" size={50} />
+              </div>
+            ) : searchLoading ? (
+              <div className="flex flex-col items-center justify-center min-h-[60vh]">
+                <ClipLoader color="#14B82C" size={40} />
+                <p className="mt-4 text-gray-600">Searching groups...</p>
               </div>
             ) : error ? (
               <p className="text-center text-red-500">{error}</p>

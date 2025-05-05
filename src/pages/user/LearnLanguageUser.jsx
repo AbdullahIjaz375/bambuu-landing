@@ -12,12 +12,11 @@ import { ClipLoader } from "react-spinners";
 import ExploreClassCard from "../../components/ExploreClassCard";
 import ExploreGroupCard from "../../components/ExploreGroupCard";
 import EmptyState from "../../components/EmptyState";
-import { checkAccess } from "../../utils/accessControl";
 
 const LearnLanguageUser = () => {
   const [searchParams] = useSearchParams();
   const language = searchParams.get("language")?.toLowerCase() || null;
-  const { user, setUser } = useAuth();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("exploreBambuu");
   const navigate = useNavigate();
 
@@ -54,7 +53,19 @@ const LearnLanguageUser = () => {
 
           if (classDoc.exists()) {
             const classData = { id: classId, ...classDoc.data() };
-            if (!language || classData.language?.toLowerCase() === language) {
+
+            // Added check for valid classDateTime
+            const hasValidDateTime =
+              classData.classDateTime &&
+              typeof classData.classDateTime === "object" &&
+              classData.classDateTime.seconds &&
+              typeof classData.classDateTime.seconds === "number";
+
+            // Only include classes with valid dates and matching language if specified
+            if (
+              hasValidDateTime &&
+              (!language || classData.language?.toLowerCase() === language)
+            ) {
               classesData.push(classData);
             }
           }
@@ -127,7 +138,20 @@ const LearnLanguageUser = () => {
           .filter((cls) => !user?.enrolledClasses?.includes(cls.id))
           .filter(
             (cls) => !language || cls.language?.toLowerCase() === language
-          );
+          )
+          // Add filter for classes with valid date/time
+          .filter((cls) => {
+            // Check if classDateTime exists and has seconds property
+            return (
+              cls.classDateTime &&
+              typeof cls.classDateTime === "object" &&
+              cls.classDateTime.seconds &&
+              typeof cls.classDateTime.seconds === "number" &&
+              // Ensure the class has a valid ID and name
+              cls.id &&
+              cls.className
+            );
+          });
 
         const allGroups = groupsSnapshot.docs
           .map((doc) => ({ id: doc.id, ...doc.data() }))

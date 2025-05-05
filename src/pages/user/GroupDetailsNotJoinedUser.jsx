@@ -464,7 +464,15 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
                           className="w-4 md:w-5"
                         />
                         <span className="text-xs text-gray-800 md:text-sm">
-                          {t("group-details.members")}
+                          {(() => {
+                            // Handle all possible cases
+                            if (!group.memberIds) return "0";
+                            if (Array.isArray(group.memberIds))
+                              return group.memberIds.length.toString();
+                            if (typeof group.memberIds === "number")
+                              return group.memberIds.toString();
+                            return "0";
+                          })()}{" "}
                         </span>
                       </div>
                     </div>

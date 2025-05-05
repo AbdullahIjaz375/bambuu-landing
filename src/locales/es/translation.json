@@ -154,6 +154,7 @@
     "appStreak": "Racha de la App",
     "native": "Nativo",
     "learning": "Aprendiendo",
+    "teaching": "Enseñando",
     "from": "De",
     "stats": {
       "totalClassesJoined": "Total de Clases Unidas",
@@ -406,7 +407,28 @@
       "spain-alt": "Bandera de España"
     }
   },
-
+  "class-card-tutor": {
+    "labels": {
+      "tbd": "Por determinar",
+      "min": "min",
+      "premium": "Premium",
+      "ongoing": "En curso"
+    },
+    "altText": {
+      "usFlag": "Bandera de EE.UU.",
+      "spainFlag": "Bandera de España",
+      "clock": "Icono de reloj",
+      "calendar": "Icono de calendario",
+      "users": "Icono de usuarios"
+    },
+    "modal": {
+      "title": "Detalles de la Clase",
+      "languageGroup": "Grupo de Idioma",
+      "learners": "Estudiantes",
+      "leader": "Líder del Grupo",
+      "joinClass": "Unirse a la Clase"
+    }
+  },
   "groupDetails": {
     "title": "Detalles del Grupo",
     "adminLabel": "(Administrador)",

@@ -15,6 +15,7 @@ const StudentsTutor = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("students");
   const [unreadCounts, setUnreadCounts] = useState({});
+  const [onlineUsers, setOnlineUsers] = useState({});
 
   const handleChannelLeave = (channelId) => {
     setChannels((prevChannels) =>
@@ -100,13 +101,38 @@ const StudentsTutor = () => {
           }
         );
 
-        // Initialize unread counts
+        // Initialize unread counts and online status tracking
         const counts = {};
+        const onlineStatusMap = {};
+
         await Promise.all(
           allChannels.map(async (channel) => {
             const state = await channel.watch();
             const channelState = channel.state;
             counts[channel.id] = channelState.unreadCount || 0;
+
+            // Initialize online users status tracking
+            if (
+              channel.type === "standard_group" ||
+              channel.type === "premium_group"
+            ) {
+              // For group chats, count online members
+              const members = Object.values(channel.state?.members || {});
+              const onlineCount = members.filter(
+                (member) => member.user?.online
+              ).length;
+              const totalMembers = members.length;
+              onlineStatusMap[channel.id] = { onlineCount, totalMembers };
+            } else {
+              // For individual student chats, track student's online status
+              const members = Object.values(channel.state?.members || {});
+              const otherMember = members.find(
+                (member) => member.user?.id !== user.uid
+              );
+              onlineStatusMap[channel.id] = {
+                isOnline: otherMember?.user?.online || false,
+              };
+            }
 
             // Set up message listeners
             channel.on("message.new", async (event) => {
@@ -139,10 +165,47 @@ const StudentsTutor = () => {
                 });
               });
             });
+
+            // Add presence change listeners
+            channel.on("user.presence.changed", async (event) => {
+              if (
+                channel.type === "standard_group" ||
+                channel.type === "premium_group"
+              ) {
+                // Update group online count
+                const members = Object.values(channel.state?.members || {});
+                const onlineCount = members.filter(
+                  (member) => member.user?.online
+                ).length;
+                const totalMembers = members.length;
+
+                setOnlineUsers((prev) => ({
+                  ...prev,
+                  [channel.id]: { onlineCount, totalMembers },
+                }));
+              } else if (
+                channel.type === "premium_individual_class" ||
+                channel.type === "one_to_one_chat"
+              ) {
+                // Update student online status
+                const members = Object.values(channel.state?.members || {});
+                const otherMember = members.find(
+                  (member) => member.user?.id !== user.uid
+                );
+
+                setOnlineUsers((prev) => ({
+                  ...prev,
+                  [channel.id]: {
+                    isOnline: otherMember?.user?.online || false,
+                  },
+                }));
+              }
+            });
           })
         );
 
         setUnreadCounts(counts);
+        setOnlineUsers(onlineStatusMap);
 
         // Sort channels based on last_message_at
         const sortedChannels = allChannels.sort((a, b) => {
@@ -178,6 +241,7 @@ const StudentsTutor = () => {
       channels.forEach((channel) => {
         channel.off("message.new");
         channel.off("message.read");
+        channel.off("user.presence.changed");
       });
     };
   }, [user]);
@@ -341,6 +405,11 @@ const StudentsTutor = () => {
               <div className="flex-1 space-y-2 overflow-y-auto scrollbar-hide">
                 {(activeTab === "students" ? studentChats : groupChats).map(
                   (channel) => {
+                    const channelOnlineStatus = onlineUsers[channel.id];
+                    const isGroupChat =
+                      channel.type === "standard_group" ||
+                      channel.type === "premium_group";
+
                     return (
                       <div
                         key={channel.id}
@@ -368,12 +437,35 @@ const StudentsTutor = () => {
                               e.target.src = "/default-avatar.png";
                             }}
                           />
+                          {!isGroupChat && channelOnlineStatus?.isOnline && (
+                            <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+                          )}
                         </div>
                         <div className="flex-1">
                           <div className="flex justify-between">
                             <h3 className="text-lg font-semibold">
                               {channel.data.name.split("-")[0]}
                             </h3>
+                            {isGroupChat ? (
+                              channelOnlineStatus && (
+                                <span className="text-xs text-green-600">
+                                  {channelOnlineStatus.onlineCount}/
+                                  {channelOnlineStatus.totalMembers} online
+                                </span>
+                              )
+                            ) : (
+                              <span
+                                className={`text-xs ${
+                                  channelOnlineStatus?.isOnline
+                                    ? "text-green-600"
+                                    : "text-gray-500"
+                                }`}
+                              >
+                                {channelOnlineStatus?.isOnline
+                                  ? "Online"
+                                  : "Offline"}
+                              </span>
+                            )}
                           </div>
                           <div className="flex flex-row items-center justify-between mt-1">
                             <p className="text-sm text-gray-500 truncate">

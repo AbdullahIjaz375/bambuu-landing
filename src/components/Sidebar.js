@@ -69,6 +69,18 @@ const Sidebar = ({ user }) => {
   const truncateEmail = (email) => {
     return email && email.length > 20 ? `${email.slice(0, 20)}...` : email;
   };
+
+  // Function to check if user has Bammbuu+ subscription
+  const hasBambbuuPlus = user?.subscriptions?.some(
+    (sub) =>
+      sub.type === "bammbuu+ Instructor-led group Classes" ||
+      sub.type === "individual_premium" ||
+      sub.type === "group_premium" ||
+      sub.type?.toLowerCase().includes("premium") ||
+      sub.type?.toLowerCase().includes("bambuu+")
+  );
+
+  // Determine the appropriate navigation items based on user type
   const menuItems =
     user?.userType === "tutor" ? tutorMenuItems : studentMenuItems;
   const profilePath =
@@ -87,9 +99,9 @@ const Sidebar = ({ user }) => {
 
       {/* Navigation Menu */}
       <nav className="relative flex-1 px-4 overflow-y-auto">
-          <div >
+        <div>
           <TutorialOverlay />
-          </div>
+        </div>
         {menuItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
@@ -113,7 +125,7 @@ const Sidebar = ({ user }) => {
           );
         })}
       </nav>
-  {/* Tutorial overlay */}
+      {/* Tutorial overlay */}
 
       {/* User Profile Section */}
 
@@ -124,12 +136,27 @@ const Sidebar = ({ user }) => {
             className="flex items-center justify-between p-2 transition-colors bg-white rounded-2xl"
           >
             <div className="flex flex-row items-center space-x-2">
-              <div className="flex-shrink-0 w-8 h-8 overflow-hidden bg-white rounded-full lg:w-10 lg:h-10">
-                <img
-                  src={user?.photoUrl || "/svgs/supertutor-panda.svg"}
-                  alt="Profile"
-                  className="object-cover w-full h-full"
-                />
+              <div className="relative flex-shrink-0 w-8 h-8 overflow-hidden bg-white rounded-full lg:w-10 lg:h-10">
+                {hasBambbuuPlus && (
+                  <div className="absolute z-10 -top-1 -right-1 w-4 h-4 lg:w-5 lg:h-5">
+                    <img
+                      alt="bambbuu plus"
+                      src="/svgs/bambuu-plus-user.svg"
+                      className="w-full h-full"
+                    />
+                  </div>
+                )}
+                <div
+                  className={`w-full h-full rounded-full ${
+                    hasBambbuuPlus ? "ring-2 ring-green-500" : ""
+                  }`}
+                >
+                  <img
+                    src={user?.photoUrl || "/svgs/supertutor-panda.svg"}
+                    alt="Profile"
+                    className="object-cover w-full h-full"
+                  />
+                </div>
               </div>
               <div className="flex flex-col min-w-0">
                 <span className="text-base font-semibold text-black truncate lg:text-lg">
