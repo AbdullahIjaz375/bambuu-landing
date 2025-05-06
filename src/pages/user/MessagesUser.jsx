@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
-import { streamClient } from "../../config/stream";
+import { streamClient, fetchChatToken } from "../../config/stream";
 import Sidebar from "../../components/Sidebar";
 import { ClipLoader } from "react-spinners";
 import { doc, getDoc } from "firebase/firestore";
@@ -22,6 +22,7 @@ const MessagesUser = () => {
   const [groupLanguages, setGroupLanguages] = useState({});
   const [onlineUsers, setOnlineUsers] = useState({});
   const { channelId: urlChannelId } = useParams();
+  const [streamClientConnected, setStreamClientConnected] = useState(false);
 
   const handleChannelLeave = (channelId) => {
     setChannels((prevChannels) =>
@@ -49,7 +50,6 @@ const MessagesUser = () => {
   const getOtherUserFromChannel = (channel) => {
     if (!channel || !user) return null;
 
-    // For one-to-one chats
     if (
       channel.type === "premium_individual_class" ||
       channel.type === "one_to_one_chat"
@@ -78,11 +78,49 @@ const MessagesUser = () => {
     };
   };
 
+  // Ensure Stream client is connected
   useEffect(() => {
-    const loadChannels = async () => {
+    const connectStreamClient = async () => {
       if (!user) return;
 
       try {
+        // Always disconnect first to ensure clean state
+        if (streamClient.userID) {
+          await streamClient.disconnectUser();
+        }
+
+        const token = await fetchChatToken(user.uid);
+
+        await streamClient.connectUser(
+          {
+            id: user.uid,
+            name: user.name || "",
+            image: user.photoUrl || "",
+            userType: user.userType || "student",
+          },
+          token
+        );
+
+        setStreamClientConnected(true);
+      } catch (error) {
+        console.error("Error connecting to Stream client:", error);
+        setStreamClientConnected(false);
+      }
+    };
+
+    connectStreamClient();
+
+    return () => {
+      // No need to disconnect here as we'll manage connection state explicitly
+    };
+  }, [user]);
+
+  useEffect(() => {
+    const loadChannels = async () => {
+      if (!user || !streamClientConnected) return;
+
+      try {
+        console.log("Loading channels for user:", user.uid);
         const filter = {
           members: { $in: [user.uid] },
           type: {
@@ -103,6 +141,35 @@ const MessagesUser = () => {
           presence: true,
           message_retention: "infinite",
         });
+
+        // Force check all channels and their types
+        channels.forEach((channel) => {
+          console.log("Channel details:", {
+            id: channel.id,
+            type: channel.type,
+            name: channel.data?.name || "Unnamed channel",
+            isPremiumGroup: channel.type === "premium_group",
+            data: channel.data,
+          });
+        });
+
+        // Log premium groups specifically
+        const premiumGroups = channels.filter(
+          (ch) => ch.type === "premium_group"
+        );
+        console.log(
+          `Found ${premiumGroups.length} premium groups:`,
+          premiumGroups.map((g) => ({ id: g.id, name: g.data?.name }))
+        );
+
+        console.log("Retrieved channels:", channels.length);
+        console.log(
+          "Channels by type:",
+          channels.reduce((acc, channel) => {
+            acc[channel.type] = (acc[channel.type] || 0) + 1;
+            return acc;
+          }, {})
+        );
 
         // Initialize unread counts and online status tracking
         const counts = {};
@@ -193,8 +260,14 @@ const MessagesUser = () => {
         );
 
         const groupIds = channels
-          .filter((channel) => channel.type === "standard_group")
+          .filter(
+            (channel) =>
+              channel.type === "standard_group" ||
+              channel.type === "premium_group"
+          )
           .map((channel) => channel.id);
+
+        console.log("Group IDs for language data:", groupIds);
 
         const groupLanguagesData = {};
         await Promise.all(
@@ -204,21 +277,60 @@ const MessagesUser = () => {
             if (groupDoc.exists()) {
               groupLanguagesData[groupId] =
                 groupDoc.data().groupLearningLanguage;
+            } else {
+              console.log(`Group document not found for ID: ${groupId}`);
+              // Set a default language for groups without document data
+              groupLanguagesData[groupId] = "Unknown";
             }
           })
         );
+
+        console.log("Group language data:", groupLanguagesData);
 
         setGroupLanguages(groupLanguagesData);
         setUnreadCounts(counts);
         setOnlineUsers(onlineStatusMap);
         setChannels(channels);
 
-        // Select channel from URL or first available
+        // Select channel from URL parameter
         if (urlChannelId) {
-          const channelToSelect = channels.find(
+          console.log("URL Channel ID:", urlChannelId);
+
+          // First try to find a direct match
+          let channelToSelect = channels.find(
             (channel) => channel.id === urlChannelId
           );
+
+          // If not found and we're coming from a tutor profile, the channel ID might be combined IDs
+          if (!channelToSelect) {
+            // Look for channels that might be a one-to-one chat with this tutor
+            channelToSelect = channels.find((channel) => {
+              // Check if it's a one-to-one chat
+              if (channel.type === "one_to_one_chat") {
+                // Check if channel members include the tutor from the URL
+                const channelMembers = Object.keys(
+                  channel.state?.members || {}
+                );
+                // Since urlChannelId might be a combination of userIds, check if it contains the member IDs
+                return channelMembers.some(
+                  (memberId) =>
+                    urlChannelId.includes(memberId) && memberId !== user.uid
+                );
+              }
+              return false;
+            });
+          }
+
           if (channelToSelect) {
+            // Auto-switch to bammbuu+ tab if it's a one-to-one chat
+            if (
+              channelToSelect.type === "one_to_one_chat" ||
+              channelToSelect.type === "premium_individual_class" ||
+              channelToSelect.type === "premium_group"
+            ) {
+              setActiveTab("bammbuu");
+            }
+
             setSelectedChannel(channelToSelect);
             setSelectedChatInfo(getOtherUserFromChannel(channelToSelect));
             await channelToSelect.markRead();
@@ -227,9 +339,10 @@ const MessagesUser = () => {
               [channelToSelect.id]: 0,
             }));
           }
-        } else if (channels.length > 0 && !selectedChannel) {
-          setSelectedChannel(channels[0]);
-          setSelectedChatInfo(getOtherUserFromChannel(channels[0]));
+        } else {
+          // Don't select any channel by default
+          setSelectedChannel(null);
+          setSelectedChatInfo(null);
         }
       } catch (error) {
         console.error("Error loading channels:", error);
@@ -248,7 +361,7 @@ const MessagesUser = () => {
         channel.off("user.presence.changed");
       });
     };
-  }, [user]);
+  }, [user, streamClientConnected]);
 
   const handleChannelSelect = async (channel) => {
     setSelectedChannel(channel);
@@ -300,22 +413,35 @@ const MessagesUser = () => {
   );
 
   // Bammbuu+ chats - all other types (premium_group, premium_individual_class, one_to_one_chat)
-  const bammbuuChats = filterChannels(
-    channels.filter(
-      (channel) =>
-        (channel.type === "premium_group" ||
-          channel.type === "premium_individual_class" ||
-          channel.type === "one_to_one_chat") &&
-        channel.data.name &&
-        channel.data.name.trim() !== ""
-    )
+  const filteredForBammbuu = channels.filter(
+    (channel) =>
+      (channel.type === "premium_group" ||
+        channel.type === "premium_individual_class" ||
+        channel.type === "one_to_one_chat") &&
+      channel.data.name &&
+      channel.data.name.trim() !== ""
   );
+
+  console.log(
+    "Filtered for bammbuu+ tab:",
+    filteredForBammbuu.length,
+    filteredForBammbuu.map((ch) => ({
+      id: ch.id,
+      type: ch.type,
+      name: ch.data.name,
+    }))
+  );
+
+  const bammbuuChats = filterChannels(filteredForBammbuu);
 
   const ChatItem = ({ channel, isInstructor }) => {
     const groupLanguage = groupLanguages[channel.id];
     const latestMessage =
       channel.state.messages[channel.state.messages.length - 1];
     const channelOnlineStatus = onlineUsers[channel.id];
+
+    // Debug channel type for troubleshooting
+    console.log(`Rendering channel ${channel.id}, type: ${channel.type}`);
 
     const getMessagePreview = (message) => {
       if (!message) return "No messages yet";
@@ -341,6 +467,9 @@ const MessagesUser = () => {
 
     // Get other user's data for display (for one-to-one chats)
     const otherUser = getOtherUserFromChannel(channel);
+
+    // For premium groups, ensure we show a language even if not in groupLanguages
+    const displayLanguage = isInstructor ? null : groupLanguage || "Unknown";
 
     return (
       <div
@@ -403,13 +532,15 @@ const MessagesUser = () => {
             </p>
 
             <div className="flex items-center space-x-2">
-              {isInstructor ? null : (
-                <div className="flex flex-row items-center space-x-2">
-                  <span className="px-2 py-0.5 text-xs bg-yellow-100 rounded-full">
-                    {groupLanguage}
-                  </span>
-                </div>
-              )}
+              {isInstructor
+                ? null
+                : displayLanguage && (
+                    <div className="flex flex-row items-center space-x-2">
+                      <span className="px-2 py-0.5 text-xs bg-yellow-100 rounded-full">
+                        {displayLanguage}
+                      </span>
+                    </div>
+                  )}
             </div>
 
             {unreadCounts[channel.id] > 0 && (
@@ -494,24 +625,61 @@ const MessagesUser = () => {
               </div>
 
               <div className="flex-1 space-y-2 overflow-y-auto scrollbar-hide">
-                {activeTab === "bammbuu"
-                  ? bammbuuChats.map((channel) => (
-                      <ChatItem
-                        key={channel.id}
-                        channel={channel}
-                        isInstructor={
+                {activeTab === "bammbuu" ? (
+                  // For bammbuu+ chats, display both identified premium types and any groups that might not be properly typed
+                  <>
+                    {channels
+                      .filter((channel) => {
+                        // Check if this is any type of premium channel
+                        const isPremiumType =
+                          channel.type === "premium_group" ||
                           channel.type === "premium_individual_class" ||
-                          channel.type === "one_to_one_chat"
-                        }
-                      />
-                    ))
-                  : standardChats.map((channel) => (
-                      <ChatItem
-                        key={channel.id}
-                        channel={channel}
-                        isInstructor={false}
-                      />
-                    ))}
+                          channel.type === "one_to_one_chat";
+
+                        // Also include channels that might be premium groups but not properly typed
+                        const mightBePremiumGroup =
+                          channel.data &&
+                          channel.data.name &&
+                          channel.data.name.trim() !== "" &&
+                          // Check for any premium-related flags in channel data
+                          (channel.data.isPremium === true ||
+                            channel.data.premium === true ||
+                            (channel.data.custom &&
+                              channel.data.custom.isPremium === true));
+
+                        return (
+                          (isPremiumType || mightBePremiumGroup) &&
+                          // Apply search filter
+                          (!searchQuery ||
+                            channel.data.name
+                              .toLowerCase()
+                              .includes(searchQuery.toLowerCase()) ||
+                            (channel.data.description || "")
+                              .toLowerCase()
+                              .includes(searchQuery.toLowerCase()))
+                        );
+                      })
+                      .map((channel) => (
+                        <ChatItem
+                          key={channel.id}
+                          channel={channel}
+                          isInstructor={
+                            channel.type === "premium_individual_class" ||
+                            channel.type === "one_to_one_chat"
+                          }
+                        />
+                      ))}
+                  </>
+                ) : (
+                  // Standard chats remain the same
+                  standardChats.map((channel) => (
+                    <ChatItem
+                      key={channel.id}
+                      channel={channel}
+                      isInstructor={false}
+                    />
+                  ))
+                )}
               </div>
             </div>
 
