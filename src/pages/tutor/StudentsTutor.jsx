@@ -13,7 +13,7 @@ const StudentsTutor = () => {
   const [selectedChatInfo, setSelectedChatInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState("students");
+  const [activeTab, setActiveTab] = useState("standard");
   const [unreadCounts, setUnreadCounts] = useState({});
   const [onlineUsers, setOnlineUsers] = useState({});
 
@@ -299,23 +299,23 @@ const StudentsTutor = () => {
     });
   };
 
-  // Get individual student chats
-  const studentChats = filterChannels(
+  // Standard chats - only standard_group
+  const standardChats = filterChannels(
     channels.filter(
       (channel) =>
-        (channel.type === "premium_individual_class" ||
-          channel.type === "one_to_one_chat") &&
+        channel.type === "standard_group" &&
         channel.data.name &&
         channel.data.name.trim() !== ""
     )
   );
 
-  // Get group chats
-  const groupChats = filterChannels(
+  // Bammbuu+ chats - premium groups and individual chats
+  const bammbuuChats = filterChannels(
     channels.filter(
       (channel) =>
         (channel.type === "premium_group" ||
-          channel.type === "standard_group") &&
+         channel.type === "premium_individual_class" ||
+         channel.type === "one_to_one_chat") &&
         channel.data.name &&
         channel.data.name.trim() !== ""
     )
@@ -364,25 +364,26 @@ const StudentsTutor = () => {
               <div className="flex justify-center w-full mb-4 sm:w-auto">
                 <div className="relative inline-flex p-1 bg-gray-100 border border-gray-300 rounded-full">
                   <div
-                    className="absolute top-0 left-0 h-full bg-[#FFBF00] border border-[#042F0C] rounded-full transition-all duration-300 ease-in-out"
+                    className="absolute top-0 left-0 h-full transition-all duration-300 ease-in-out border border-gray-800 rounded-full bg-amber-400"
                     style={{
-                      transform: `translateX(${
-                        activeTab === "students" ? "0" : "100%"
-                      })`,
-                      width: "50%",
+                      transform:
+                        activeTab === "standard"
+                          ? "translateX(0)"
+                          : "translateX(82.0%)",
+                      width: activeTab === "standard" ? "45%" : "55%",
                     }}
                   />
                   <button
-                    onClick={() => setActiveTab("students")}
-                    className="relative z-10 px-4 sm:px-8 py-1 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap"
+                    onClick={() => setActiveTab("standard")}
+                    className="relative z-10 w-2/5 px-6 py-1 font-medium text-gray-800 transition-colors rounded-full text-md whitespace-nowrap"
                   >
-                    Student Chats
+                    Standard Chats
                   </button>
                   <button
-                    onClick={() => setActiveTab("groups")}
-                    className="relative z-10 px-4 sm:px-8 py-1 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap"
+                    onClick={() => setActiveTab("bammbuu")}
+                    className="relative z-10 w-3/5 px-6 py-1 font-medium text-gray-800 transition-colors rounded-full text-md whitespace-nowrap"
                   >
-                    Group Chats
+                    bammbuuu+ Chats
                   </button>
                 </div>
               </div>
@@ -392,9 +393,9 @@ const StudentsTutor = () => {
                 <input
                   type="text"
                   placeholder={
-                    activeTab === "students"
-                      ? "Search student"
-                      : "Search groups"
+                    activeTab === "standard"
+                      ? "Search standard chats"
+                      : "Search bammbuuu+ chats"
                   }
                   className="w-full py-2 pl-12 pr-4 border border-gray-200 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                   value={searchQuery}
@@ -403,20 +404,28 @@ const StudentsTutor = () => {
               </div>
 
               <div className="flex-1 space-y-2 overflow-y-auto scrollbar-hide">
-                {(activeTab === "students" ? studentChats : groupChats).map(
+                {(activeTab === "standard" ? standardChats : bammbuuChats).map(
                   (channel) => {
                     const channelOnlineStatus = onlineUsers[channel.id];
                     const isGroupChat =
                       channel.type === "standard_group" ||
                       channel.type === "premium_group";
 
+                    const isInstructor = 
+                      channel.type === "premium_individual_class" ||
+                      channel.type === "one_to_one_chat";
+
                     return (
                       <div
                         key={channel.id}
-                        className={`flex items-center gap-3 p-3 border border-[#22bf37] cursor-pointer rounded-3xl ${
+                        className={`flex items-center gap-3 p-3 border ${
+                          isInstructor ? "border-[#22bf37]" : "border-[#fbbf12]"
+                        } cursor-pointer rounded-3xl ${
                           selectedChannel?.id === channel.id
-                            ? "bg-[#f0fdf1]"
-                            : ""
+                            ? isInstructor
+                              ? "bg-[#f0fdf1]"
+                              : "bg-[#ffffea]"
+                            : "bg-white"
                         }`}
                         onClick={() => handleChannelSelect(channel)}
                         role="button"
@@ -475,9 +484,12 @@ const StudentsTutor = () => {
                                 ]
                               )}
                             </p>
-                            <p className="text-sm text-gray-500 truncate">
-                              {FormateDate(channel.data.created_at)}
-                            </p>
+
+                            {channel.data.created_at && (
+                              <p className="text-sm text-gray-500 truncate">
+                                {FormateDate(channel.data.created_at)}
+                              </p>
+                            )}
 
                             {unreadCounts[channel.id] > 0 && (
                               <span className="flex items-center justify-center w-6 h-6 mr-5 text-xs text-white bg-[#14B82C] rounded-full">
