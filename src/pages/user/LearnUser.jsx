@@ -1,6 +1,6 @@
 import { Search } from "lucide-react";
 import NotificationDropdown from "../../components/NotificationDropdown";
-import React, { useRef, useEffect, useCallback,useState } from 'react';
+import React, { useRef, useEffect, useCallback, useState } from "react";
 import {
   Bell,
   ChevronLeft,
@@ -15,6 +15,7 @@ import {
 import Slider from "react-slick";
 import Sidebar from "../../components/Sidebar";
 import { useTranslation } from "react-i18next";
+import { useLanguage } from "../../context/LanguageContext";
 import ClassCard from "../../components/ClassCard";
 import { useAuth } from "../../context/AuthContext";
 import GroupCard from "../../components/GroupCard";
@@ -40,26 +41,29 @@ const LanguageCardsSection = ({ languageCards, languageData, navigate }) => {
   const containerRef = useRef(null);
   const leftArrowRef = useRef(null);
   const rightArrowRef = useRef(null);
-  
+
   // Function to update arrow visibility
   const updateArrows = useCallback(() => {
     const container = containerRef.current;
     const leftArrow = leftArrowRef.current;
     const rightArrow = rightArrowRef.current;
-    
+
     if (container && leftArrow && rightArrow) {
       // Show left arrow only if scrolled away from the start
       if (container.scrollLeft > 20) {
-        leftArrow.style.display = 'block';
+        leftArrow.style.display = "block";
       } else {
-        leftArrow.style.display = 'none';
+        leftArrow.style.display = "none";
       }
-      
+
       // Show right arrow only if there's more content to scroll
-      if (container.scrollLeft + container.clientWidth + 20 >= container.scrollWidth) {
-        rightArrow.style.display = 'none';
+      if (
+        container.scrollLeft + container.clientWidth + 20 >=
+        container.scrollWidth
+      ) {
+        rightArrow.style.display = "none";
       } else {
-        rightArrow.style.display = 'block';
+        rightArrow.style.display = "block";
       }
     }
   }, []);
@@ -67,7 +71,7 @@ const LanguageCardsSection = ({ languageCards, languageData, navigate }) => {
   // Scroll left
   const scrollLeft = useCallback(() => {
     if (containerRef.current) {
-      containerRef.current.scrollBy({ left: -300, behavior: 'smooth' });
+      containerRef.current.scrollBy({ left: -300, behavior: "smooth" });
       setTimeout(updateArrows, 300); // Update after scroll animation
     }
   }, [updateArrows]);
@@ -75,7 +79,7 @@ const LanguageCardsSection = ({ languageCards, languageData, navigate }) => {
   // Scroll right
   const scrollRight = useCallback(() => {
     if (containerRef.current) {
-      containerRef.current.scrollBy({ left: 300, behavior: 'smooth' });
+      containerRef.current.scrollBy({ left: 300, behavior: "smooth" });
       setTimeout(updateArrows, 300); // Update after scroll animation
     }
   }, [updateArrows]);
@@ -83,38 +87,38 @@ const LanguageCardsSection = ({ languageCards, languageData, navigate }) => {
   // Set up initial arrow visibility and window resize listener
   useEffect(() => {
     updateArrows();
-    
+
     // Handle window resize
-    window.addEventListener('resize', updateArrows);
-    
+    window.addEventListener("resize", updateArrows);
+
     // Cleanup
     return () => {
-      window.removeEventListener('resize', updateArrows);
+      window.removeEventListener("resize", updateArrows);
     };
   }, [updateArrows]);
 
   return (
     <div className="flex flex-col">
       {/* Left navigation arrow */}
-      <div 
+      <div
         ref={leftArrowRef}
-        className="absolute left-0 top-1/2 -translate-y-1/2 z-10" 
-        style={{display: 'none'}}
+        className="absolute left-0 top-1/2 -translate-y-1/2 z-10"
+        style={{ display: "none" }}
       >
-        <button 
+        <button
           className="flex items-center justify-center w-12 h-12 rounded-full shadow-2xl bg-white  border  ml-4 hover:bg-gray-100"
           onClick={scrollLeft}
         >
           <ChevronLeft size={30} color="#14B82C" />
         </button>
       </div>
-      
-      {/* Right navigation arrow */}                                    
-      <div 
+
+      {/* Right navigation arrow */}
+      <div
         ref={rightArrowRef}
         className="absolute right-0 top-1/2 -translate-y-1/2 z-10"
       >
-        <button 
+        <button
           className="flex items-center justify-center w-12 h-12 rounded-full shadow-2xl bg-white  border  mr-4 hover:bg-gray-100"
           onClick={scrollRight}
         >
@@ -123,17 +127,18 @@ const LanguageCardsSection = ({ languageCards, languageData, navigate }) => {
       </div>
 
       {/* Language cards container */}
-      <div 
+      <div
         ref={containerRef}
         className="flex gap-4 pb-4 overflow-x-auto px-4"
         onScroll={updateArrows}
-        style={{ 
-          scrollbarWidth: 'none',
-          msOverflowStyle: 'none'
+        style={{
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
         }}
       >
         {languageCards.map((card) => {
-          const students = languageData[card.id]?.studentPhotos?.slice(0, 8) || [];
+          const students =
+            languageData[card.id]?.studentPhotos?.slice(0, 8) || [];
           const studentCount = languageData[card.id]?.studentIds?.length || 0;
 
           return (
@@ -200,7 +205,7 @@ const LanguageCardsSection = ({ languageCards, languageData, navigate }) => {
           height: 0;
           display: none;
         }
-        
+
         div[ref="containerRef"] {
           -ms-overflow-style: none;
           scrollbar-width: none;
@@ -210,10 +215,35 @@ const LanguageCardsSection = ({ languageCards, languageData, navigate }) => {
   );
 };
 const LearnUser = () => {
+  // Get translation and language hooks at the component level
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { currentLanguage, changeLanguage } = useLanguage();
+
+  // Maintain language from navigation when redirected from profile setup
+  useEffect(() => {
+    // Check if we're coming from profile setup with a language preference
+    const languageToUse =
+      location.state?.language || localStorage.getItem("i18nextLng") || "en";
+
+    // Apply the language to ensure consistency throughout the app
+    if (i18n.language !== languageToUse || currentLanguage !== languageToUse) {
+      changeLanguage(languageToUse);
+
+      // Force language application with small delay to ensure it applies
+      setTimeout(() => {
+        if (i18n.language !== languageToUse) {
+          i18n.changeLanguage(languageToUse);
+          document.documentElement.lang = languageToUse;
+        }
+      }, 50);
+    }
+
+    // Ensure language persistence
+    localStorage.setItem("i18nextLng", languageToUse);
+  }, [location.state, i18n, currentLanguage, changeLanguage]);
 
   const settings = {
     dots: false,
@@ -586,18 +616,18 @@ const LearnUser = () => {
 
               {/* Language Cards */}
               <div className="w-full overflow-hidden relative">
-              {loadingLanguages ? (
-                <div className="flex items-center justify-center h-48">
-                  <ClipLoader color="#14B82C" size={50} />
-                </div>
-              ) : (
-                <LanguageCardsSection 
-                  languageCards={languageCards} 
-                  languageData={languageData} 
-                  navigate={navigate} 
-                />
-              )}
-            </div>
+                {loadingLanguages ? (
+                  <div className="flex items-center justify-center h-48">
+                    <ClipLoader color="#14B82C" size={50} />
+                  </div>
+                ) : (
+                  <LanguageCardsSection
+                    languageCards={languageCards}
+                    languageData={languageData}
+                    navigate={navigate}
+                  />
+                )}
+              </div>
             </div>
           </div>
 

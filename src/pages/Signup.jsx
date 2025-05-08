@@ -22,6 +22,9 @@ import { updateDoc, serverTimestamp, getDoc } from "firebase/firestore";
 import { COUNTRIES } from "../config/contries";
 import { LANGUAGES } from "../config/languages";
 import { TEACHINGLANGUAGES } from "../config/teachingLanguages";
+import { useTranslation } from "react-i18next";
+import { useLanguage } from "../context/LanguageContext"; // Import the language context
+import i18n from "../i18n";
 
 Modal.setAppElement("#root");
 
@@ -35,6 +38,8 @@ const Signup = () => {
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const [hasProfile, setHasProfile] = useState(false);
   const appleProvider = new OAuthProvider("apple.com");
+  const { currentLanguage, changeLanguage } = useLanguage(); // Use the language context
+  const { t } = useTranslation();
 
   const [profileData, setProfileData] = useState({
     name: "",
@@ -49,6 +54,13 @@ const Signup = () => {
   const navigate = useNavigate();
   const { user, loading, updateUserData } = useAuth();
   const [loading1, setLoading1] = useState(false);
+
+  const handleLanguageChange = (lang) => {
+    changeLanguage(lang);
+    i18n.changeLanguage(lang);
+    localStorage.setItem("i18nextLng", lang);
+    document.documentElement.lang = lang;
+  };
 
   const resetStates = async () => {
     try {
@@ -178,6 +190,21 @@ const Signup = () => {
       }
       const fcmToken = await getFCMToken();
 
+      // Set app language based on the user's selection
+      // If the user selects Spanish as native language, set the app language to Spanish
+      const selectedNativeLanguage = profileData.nativeLanguage;
+      let appLanguageCode =
+        currentLanguage || localStorage.getItem("i18nextLng") || "en";
+
+      // If native language is Spanish, set app language to Spanish
+      if (selectedNativeLanguage === "Spanish") {
+        appLanguageCode = "es";
+        changeLanguage("es");
+        i18n.changeLanguage("es");
+        localStorage.setItem("i18nextLng", "es");
+        document.documentElement.lang = "es";
+      }
+
       const userData = {
         adminOfClasses: [],
         adminOfGroups: [],
@@ -194,7 +221,6 @@ const Signup = () => {
         photoUrl: "/images/panda.png",
         savedDocuments: [],
         freeAccess: false,
-        languagePreference: "en",
         uid: auth.currentUser.uid,
         fcmToken: fcmToken || "",
         credits: 0,
@@ -265,11 +291,21 @@ const Signup = () => {
   };
 
   const handleSkip = () => {
-    navigate("/learn", { replace: true });
+    const currentLanguageToUse =
+      currentLanguage || localStorage.getItem("i18nextLng") || "en";
+    navigate("/learn", {
+      replace: true,
+      state: { language: currentLanguageToUse },
+    });
   };
 
   const handleOnboarding = () => {
-    navigate("/onboarding", { replace: true });
+    const currentLanguageToUse =
+      currentLanguage || localStorage.getItem("i18nextLng") || "en";
+    navigate("/onboarding", {
+      replace: true,
+      state: { language: currentLanguageToUse },
+    });
   };
 
   const handleBackToSignup = async () => {
@@ -636,15 +672,24 @@ const Signup = () => {
             <div className="flex justify-center mb-6">
               <img alt="bambuu" src="/svgs/email-verify.svg" />
             </div>
-            <h2 className="text-3xl font-bold">Email Verification</h2>
+            <h2 className="text-3xl font-bold">
+              {t("signup.verification.title", "Email Verification")}
+            </h2>
             <p className="text-lg text-gray-600">
-              An email with verification link has been sent to {email}
+              {t(
+                "signup.verification.message",
+                "An email with verification link has been sent to"
+              )}{" "}
+              {email}
             </p>
             <button
               onClick={handleBackToSignup}
               className="w-full py-3 text-black border border-black bg-[#ffbf00] rounded-full hover:bg-[#cc9900] focus:outline-none"
             >
-              Sign up with different email
+              {t(
+                "signup.verification.changeEmail",
+                "Sign up with different email"
+              )}
             </button>
           </div>
         </div>
@@ -662,22 +707,30 @@ const Signup = () => {
             </div>
 
             <h2 className="text-2xl font-bold text-center md:text-3xl">
-              Complete Profile
+              {t("signup.profile.title", "Complete Profile")}
             </h2>
             <p className="text-sm text-center text-gray-600 md:text-base">
-              Add your personal details to gets started.
+              {t(
+                "signup.profile.subtitle",
+                "Add your personal details to gets started."
+              )}
             </p>
 
             <form onSubmit={handleProfileSubmit} className="space-y-4">
               <div className="space-y-1">
-                <label className="block text-sm font-medium">Name</label>
+                <label className="block text-sm font-medium">
+                  {t("signup.profile.name", "Name")}
+                </label>
                 <input
                   type="text"
                   value={profileData.name}
                   onChange={(e) =>
                     setProfileData({ ...profileData, name: e.target.value })
                   }
-                  placeholder="Enter your name"
+                  placeholder={t(
+                    "signup.profile.namePlaceholder",
+                    "Enter your name"
+                  )}
                   className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                   required
                 />
@@ -685,7 +738,7 @@ const Signup = () => {
 
               <div className="space-y-1">
                 <label className="block text-sm font-medium">
-                  Native Language
+                  {t("signup.profile.nativeLanguage", "Native Language")}
                 </label>
                 <select
                   value={profileData.nativeLanguage}
@@ -698,7 +751,12 @@ const Signup = () => {
                   className="w-full px-4 py-2 text-gray-600 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
                   required
                 >
-                  <option value="">Select your native language</option>
+                  <option value="">
+                    {t(
+                      "signup.profile.selectNativeLanguage",
+                      "Select your native language"
+                    )}
+                  </option>
                   {LANGUAGES.map((language) => (
                     <option key={language.code} value={language.name}>
                       {language.name}
@@ -709,7 +767,7 @@ const Signup = () => {
 
               <div className="space-y-1">
                 <label className="block text-sm font-medium">
-                  Learning Language
+                  {t("signup.profile.learningLanguage", "Learning Language")}
                 </label>
                 <select
                   value={profileData.learningLanguage}
@@ -722,7 +780,12 @@ const Signup = () => {
                   className="w-full px-4 py-2 text-gray-600 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
                   required
                 >
-                  <option value="">Select language you want to learn</option>
+                  <option value="">
+                    {t(
+                      "signup.profile.selectLearningLanguage",
+                      "Select language you want to learn"
+                    )}
+                  </option>
                   {TEACHINGLANGUAGES.map((lang) => (
                     <option key={lang} value={lang}>
                       {lang}
@@ -733,7 +796,8 @@ const Signup = () => {
 
               <div className="space-y-1">
                 <label className="block text-sm font-medium">
-                  Your Proficiency in {profileData.learningLanguage || "[x]"}
+                  {t("signup.profile.proficiency", "Your Proficiency in")}{" "}
+                  {profileData.learningLanguage || "[x]"}
                 </label>
                 <div className="flex gap-2">
                   {["Beginner", "Intermediate", "Advanced"].map((level) => (
@@ -749,14 +813,16 @@ const Signup = () => {
                           : "border-gray-200 text-gray-600"
                       }`}
                     >
-                      {level}
+                      {t(`signup.profile.levels.${level.toLowerCase()}`, level)}
                     </button>
                   ))}
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="block text-sm font-medium">Country</label>
+                <label className="block text-sm font-medium">
+                  {t("signup.profile.country", "Country")}
+                </label>
                 <select
                   value={profileData.country}
                   onChange={(e) =>
@@ -765,7 +831,9 @@ const Signup = () => {
                   className="w-full px-4 py-2 text-gray-600 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
                   required
                 >
-                  <option value="">Select your country</option>
+                  <option value="">
+                    {t("signup.profile.selectCountry", "Select your country")}
+                  </option>
                   {COUNTRIES.map((country) => (
                     <option key={country} value={country}>
                       {country}
@@ -786,7 +854,10 @@ const Signup = () => {
                     htmlFor="ageVerification"
                     className="ml-2 text-sm font-medium text-gray-700"
                   >
-                    I confirm that I am at least 18 years old
+                    {t(
+                      "signup.profile.ageVerification",
+                      "I confirm that I am at least 18 years old"
+                    )}
                   </label>
                 </div>
                 <p
@@ -794,7 +865,10 @@ const Signup = () => {
                   id="ageWarning"
                   style={{ display: "none" }}
                 >
-                  You must be at least 18 years old to use this application.
+                  {t(
+                    "signup.profile.ageWarning",
+                    "You must be at least 18 years old to use this application."
+                  )}
                 </p>
               </div>
 
@@ -813,7 +887,7 @@ const Signup = () => {
                   }
                 }}
               >
-                Submit
+                {t("signup.profile.submit", "Submit")}
               </button>
             </form>
           </div>
@@ -826,9 +900,25 @@ const Signup = () => {
     <>
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="w-full max-w-md p-8 bg-white rounded-3xl">
+          {/* Language Selector */}
+          <div className="flex justify-end mb-4">
+            <select
+              value={currentLanguage}
+              onChange={(e) => handleLanguageChange(e.target.value)}
+              className="px-2 py-1 text-sm border border-gray-200 rounded-full focus:outline-none focus:ring-1 focus:ring-green-500"
+            >
+              <option value="en">English</option>
+              <option value="es">Español</option>
+            </select>
+          </div>
+
           <div className="mb-8 space-y-2 text-center">
-            <h1 className="text-3xl font-bold">Sign Up</h1>
-            <p className="text-lg text-gray-600">Let's create a new account!</p>
+            <h1 className="text-3xl font-bold">
+              {t("signup.title", "Sign Up")}
+            </h1>
+            <p className="text-lg text-gray-600">
+              {t("signup.subtitle", "Let's create a new account!")}
+            </p>
           </div>
 
           <form onSubmit={handleInitialSignup} className="space-y-6">
@@ -967,59 +1057,63 @@ const Signup = () => {
             </button>
           </form>
 
+          {/* Social Login Separator */}
           <div className="relative my-8">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-300"></div>
             </div>
             <div className="relative flex justify-center text-sm">
               <span className="px-2 text-gray-500 bg-white">
-                or continue with
+                {t("signup.orContinueWith", "or continue with")}
               </span>
             </div>
           </div>
 
+          {/* Social Login Buttons */}
           <div className="grid grid-cols-2 gap-4">
             <button
               onClick={handleGoogleLoginStudent}
               className="flex items-center justify-center px-4 py-2 space-x-4 border border-gray-300 rounded-full hover:bg-gray-50"
             >
               <img alt="google" src="/svgs/login-insta.svg" />
-              <span>google</span>
+              <span>{t("signup.google", "google")}</span>
             </button>
             <button
               onClick={handleAppleLoginStudent}
               className="flex items-center justify-center px-4 py-2 space-x-4 text-white bg-black border border-black rounded-full"
             >
               <img
-                alt="google"
+                alt="apple"
                 className="w-auto h-6"
                 src="/images/apple-white.png"
               />
-              <span>apple</span>
+              <span>{t("signup.apple", "apple")}</span>
             </button>
           </div>
 
+          {/* Terms & Privacy */}
           <div className="mb-4 text-sm text-center text-gray-500">
             <p>
-              By signing up, you agree to our{" "}
+              {t("signup.termsConditions", "By signing up, you agree to our")}{" "}
               <Link to="/terms" className="text-black hover:underline">
-                Terms & Conditions
+                {t("signup.terms", "Terms & Conditions")}
               </Link>{" "}
-              and{" "}
+              {t("signup.and", "and")}{" "}
               <Link to="/privacy" className="text-black hover:underline">
-                Privacy Policy
+                {t("signup.privacyPolicy", "Privacy Policy")}
               </Link>
               .
             </p>
           </div>
 
+          {/* Login Link */}
           <div className="text-sm text-center text-gray-600">
-            Already have an account?{" "}
+            {t("signup.haveAccount", "Already have an account?")}{" "}
             <Link
               to="/login"
               className="font-semibold text-green-600 hover:text-green-700"
             >
-              Login
+              {t("signup.login", "Login")}
             </Link>
           </div>
         </div>
@@ -1029,7 +1123,7 @@ const Signup = () => {
         isOpen={showSuccessModal}
         onRequestClose={() => {}}
         className="fixed w-full max-w-xl p-6 transform -translate-x-1/2 -translate-y-1/2 bg-white outline-none font-urbanist top-1/2 left-1/2 rounded-3xl"
-        overlayClassName="fixed inset-0 bg-black bg-opacity-50 z-[1000]" // Added high z-index
+        overlayClassName="fixed inset-0 bg-black bg-opacity-50 z-[1000]"
         shouldCloseOnOverlayClick={false}
         shouldCloseOnEsc={false}
       >
@@ -1039,26 +1133,32 @@ const Signup = () => {
           </div>
 
           <h2 className="mb-2 text-2xl font-semibold text-gray-900">
-            Account Created Successfully!
+            {t("signup.successModal.title", "Account Created Successfully!")}
           </h2>
 
           <p className="mb-6 text-gray-600">
-            Great! All set. You can book your first class and start learning.
+            {t(
+              "signup.successModal.description",
+              "Great! All set. You can book your first class and start learning."
+            )}
           </p>
 
           <div className="flex flex-row items-center space-x-3">
             <button
               onClick={handleSkip}
-              className="w-full py-2 font-medium border  rounded-full text-[#042F0C]  border-[#042F0C]"
+              className="w-full py-2 font-medium border rounded-full text-[#042F0C] border-[#042F0C]"
             >
-              Skip Now
+              {t("signup.successModal.skipButton", "Skip Now")}
             </button>
 
             <button
               onClick={handleOnboarding}
               className="w-full py-2 px-2 font-medium text-[#042F0C] bg-[#14B82C] rounded-full border border-[#042F0C]"
             >
-              Start Learning with bammbuu
+              {t(
+                "signup.successModal.startLearningButton",
+                "Start Learning with bammbuu"
+              )}
             </button>
           </div>
         </div>

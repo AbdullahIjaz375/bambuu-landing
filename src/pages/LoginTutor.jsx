@@ -18,6 +18,8 @@ import {
   updateDoc,
   serverTimestamp,
 } from "firebase/firestore";
+import { useTranslation } from "react-i18next";
+import i18n from "../i18n";
 
 // Helper: Update query string by setting a new ref value.
 const getUpdatedQuery = (locationSearch, newRef) => {
@@ -38,6 +40,17 @@ const LoginTutor = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { user, loading, updateUserData } = useAuth();
+  const [selectedLanguage, setSelectedLanguage] = useState(
+    localStorage.getItem("i18nextLng") || "en"
+  );
+  const { t } = useTranslation();
+
+  // Handle language change
+  const handleLanguageChange = (lang) => {
+    setSelectedLanguage(lang);
+    i18n.changeLanguage(lang);
+    localStorage.setItem("i18nextLng", lang);
+  };
 
   // Helper: Redirect after login.
   // Check for saved redirect path first, then fallback to other methods
@@ -205,6 +218,18 @@ const LoginTutor = () => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50 ">
       <div className="w-full max-w-md p-6 space-y-6 bg-white rounded-3xl border border-[#e7e7e7]">
+        {/* Language Selector */}
+        <div className="flex justify-end">
+          <select
+            value={selectedLanguage}
+            onChange={(e) => handleLanguageChange(e.target.value)}
+            className="px-2 py-1 text-sm border border-gray-200 rounded-full focus:outline-none focus:ring-1 focus:ring-green-500"
+          >
+            <option value="en">English</option>
+            <option value="es">Español</option>
+          </select>
+        </div>
+
         {/* Logo */}
         <div className="flex justify-center">
           <img alt="bambuu" src="/svgs/logo-login.svg" />
@@ -212,20 +237,26 @@ const LoginTutor = () => {
 
         {/* Welcome Text */}
         <div className="space-y-2 text-center">
-          <h1 className="text-3xl font-bold">Welcome Back!</h1>
-          <p className="text-gray-600">Let's get you logged in.</p>
+          <h1 className="text-3xl font-bold">
+            {t("login.title", "Welcome Back!")}
+          </h1>
+          <p className="text-gray-600">
+            {t("login.subtitle", "Let's get you logged in.")}
+          </p>
         </div>
 
         {/* Login Form */}
         <form onSubmit={handleEmailLoginTutor} className="space-y-4">
           <div className="space-y-1">
-            <label className="block text-sm text-gray-700">Email</label>
+            <label className="block text-sm text-gray-700">
+              {t("login.email", "Email")}
+            </label>
             <div className="relative">
               <input
                 type="email"
                 value={email}
                 onChange={handleEmailChange}
-                placeholder="Enter your email"
+                placeholder={t("login.emailPlaceholder", "Enter your email")}
                 className={`w-full p-2 border rounded-3xl ${
                   emailError
                     ? "border-red-500 focus:border-red-500"
@@ -250,17 +281,26 @@ const LoginTutor = () => {
                 </div>
               )}
             </div>
-            {emailError && <p className="text-sm text-red-500">{emailError}</p>}
+            {emailError && (
+              <p className="text-sm text-red-500">
+                {t(`login.errors.wrongEmail`, emailError)}
+              </p>
+            )}
           </div>
 
           <div className="space-y-1">
-            <label className="block text-sm text-gray-700">Password</label>
+            <label className="block text-sm text-gray-700">
+              {t("login.password", "Password")}
+            </label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={handlePasswordChange}
-                placeholder="Enter your password"
+                placeholder={t(
+                  "login.passwordPlaceholder",
+                  "Enter your password"
+                )}
                 className={`w-full p-2 border rounded-3xl ${
                   passwordError
                     ? "border-red-500 focus:border-red-500"
@@ -312,14 +352,16 @@ const LoginTutor = () => {
               </button>
             </div>
             {passwordError && (
-              <p className="text-sm text-red-500">{passwordError}</p>
+              <p className="text-sm text-red-500">
+                {t(`login.errors.wrongPassword`, passwordError)}
+              </p>
             )}
           </div>
 
           {/* Links */}
           <div className="flex justify-between pb-4 text-sm">
             <Link to="/forgot-password" className="font-semibold text-red-500">
-              Forgot Password?
+              {t("login.forgotPassword", "Forgot Password?")}
             </Link>
             {/* Switch to Student Login:
                 If the current URL contains ref=class, preserve it;
@@ -335,7 +377,7 @@ const LoginTutor = () => {
               }
               className="text-[#14b82c] font-semibold"
             >
-              Login as Student
+              {t("loginTutor.loginAsStudent", "Login as Student")}
             </Link>
           </div>
 
@@ -346,7 +388,7 @@ const LoginTutor = () => {
               email && password ? " bg-[#14B82C] " : " bg-[#b9f9c2]"
             }`}
           >
-            Login
+            {t("login.loginButton", "Login")}
           </button>
         </form>
       </div>

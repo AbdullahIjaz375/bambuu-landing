@@ -14,6 +14,34 @@
       "resources": "Resources"
     }
   },
+  "onboarding": {
+    "screens": {
+      "1": {
+        "title": "Let's get Started!",
+        "description": "Make the most out of bammbuu. Learn and practice languages through conversation. Read the following directions to learn how!"
+      },
+      "2": {
+        "title": "",
+        "description": "Create or join a language learning group for free! Join live conversation classes to practice with native speakers."
+      },
+      "3": {
+        "title": "",
+        "description": "Join unlimited live group conversation classes hosted by certified language instructors for one monthly price. These classes are more structured and expert feedback is provided to help with your learning."
+      },
+      "4": {
+        "title": "",
+        "description": "Book live 1:1 language classes with certified instructors to bring your language learning to the next level. Practice 24/7 with our AI language SuperTutor."
+      }
+    },
+    "buttons": {
+      "skip": "Skip",
+      "next": "Next",
+      "getStarted": "Get Started"
+    }
+  },
+  "loginTutor": {
+    "loginAsStudent": "Login as Student"
+  },
   "settings": {
     "appLanguage": "App Language",
     "deleteAccount": "Delete Account",
@@ -606,325 +634,51 @@
       "noGroups": "No groups yet."
     }
   },
-  "group-details": {
-    "title": "Group Details",
-    "members": "2k+",
-    "admin-label": "(Admin)",
-    "buttons": {
-      "cancel": "Cancel",
-      "join": {
-        "default": "Yes, Join",
-        "loading": "Joining...."
+  "signup": {
+    "profile": {
+      "levels": {
+        "beginner": "Beginner",
+        "intermediate": "Intermediate",
+        "advanced": "Advanced"
       }
     },
-    "languages": {
-      "english": "English",
-      "spanish": "Spanish"
-    },
-    "alt-text": {
-      "us-flag": "US Flag",
-      "spain-flag": "Spain Flag",
-      "admin-image": "admin",
-      "members-icon": "bammbuu"
+    "successModal": {
+      "title": "Account Created Successfully!",
+      "description": "Great! All set. You can book your first class and start learning.",
+      "skipButton": "Skip Now",
+      "startLearningButton": "Start Learning with bammbuu"
     }
   },
-  "plans-modal": {
-    "title": "Membership",
-    "tabs": {
-      "subscriptions": "Subscriptions",
-      "credits": "Class Credits",
-      "offers": "Offers"
-    },
-    "popular-badge": "Most Popular",
-    "pricing": {
-      "per": "/{period}",
-      "month": "month"
-    },
-    "features": {
-      "supertutor": {
-        "title": "SuperTutor",
-        "description": "Gemini based AI tutor"
-      },
-      "experts": {
-        "title": "Language Experts",
-        "description": "You'll have direct access to our language experts"
-      },
-      "resources": {
-        "title": "Saved Resources",
-        "description": "You can save resources in the app"
-      },
-      "classes": {
-        "group": {
-          "title": "bammbuu+ Group Classes",
-          "description": "You can book bammbuu+ group classes"
-        },
-        "private": {
-          "title": "1:1 Classes",
-          "description": "You can book 1:1 classes with language experts"
-        }
-      }
-    },
-    "subscription-plans": {
-      "group": {
-        "title": "bammbuu+ Instructor-Led Group Classes",
-        "description": "Unlimited instructor-led group conversation classes"
-      },
-      "unlimited": {
-        "title": "Unlimited Class Credits",
-        "description": "1:1 private instructor classes"
-      }
-    },
-    "credit-plans": {
-      "three": {
-        "title": "3 Class Credits",
-        "description": "bammbuu+ classes only"
-      },
-      "five": {
-        "title": "5 Class Credits",
-        "description": "bammbuu+ classes only"
-      }
+  "profileSetup": {
+    "title": "Profile Setup",
+    "subtitle": "We're almost there! Select the language you want to learn.",
+    "joinGroups": "Let's join a few groups below.",
+    "bookClasses": "Let's book a few classes below.",
+    "noGroups": "No groups available to join at the moment.",
+    "noClasses": "No classes available to book at the moment.",
+    "learningLanguage": "Learning Language",
+    "languageProficiency": "Language Proficiency",
+    "proficiencyLevels": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
     },
     "buttons": {
-      "subscribe": "Subscribe Now",
-      "buy": "Buy Now",
-      "loading": "Loading..."
+      "back": "Back",
+      "continue": "Continue",
+      "skip": "Skip",
+      "nextStep": "Next (1/4)",
+      "nextStep2": "Next (2/4)"
     },
-    "credits-warning": "With class credits you can only book bammbuu+ 1:1 classes other premium perks are not included.",
-    "offers": {
-      "new-user": {
-        "title": "Buy one class credit get 2 classes free",
-        "description": "1:1 private instructor classes",
-        "expiry": "Get access to two free classes for the price of one!"
+    "tooltips": {
+      "joinGroups": {
+        "title": "Join 1 or more language learning groups.",
+        "description": "Description: Make the most out of bammbuu. Community language groups are free to create and join. They allow you to connect with native speakers to practice language through live conversation."
+      },
+      "bookClasses": {
+        "title": "Book 1 or more classes.",
+        "description": "Book unlimited live group conversation classes hosted by certified language instructors for one monthly price. These classes are more structured and expert feedback is provided to help with your learning."
       }
-    },
-    "offer-plans": {
-      "free": {
-        "description": "Unlimited group classes for 1 week",
-        "body": "You'll be able to join any premium group for one week!"
-      },
-      "premium": {
-        "title": "Buy one class credit get 2 classes free",
-        "description": "1:1 private instructor classes",
-        "body": "Get 3 classes for the price of one!"
-      }
-    }
-  },
-  "class-details": {
-    "title": "Class Details",
-    "flags": {
-      "us": "US Flag",
-      "spain": "Spain Flag"
-    },
-    "labels": {
-      "instructor": "Instructor",
-      "group": "Group",
-      "teacher": "Teacher"
-    },
-    "members": {
-      "title": "Members",
-      "count": "Members ({{count}})"
-    },
-    "slots": {
-      "title": "Recurring Class Slots",
-      "add-button": "+ More Slots"
-    },
-    "buttons": {
-      "join": "Join Class",
-      "edit": "Edit Class Details",
-      "delete": "Delete Class",
-      "leave": "Leave Class"
-    },
-    "modals": {
-      "delete": {
-        "title": "Are you sure you want to delete this class?",
-        "cancel": "No, Cancel",
-        "confirm": "Delete",
-        "loading": "Deleting..."
-      },
-      "leave": {
-        "title": "Are you sure you want to leave this class?",
-        "cancel": "No, Cancel",
-        "confirm": "Leave",
-        "loading": "Leaving..."
-      }
-    },
-    "status": {
-      "none": "None"
-    },
-    "alt-text": {
-      "time": "time",
-      "date": "date",
-      "participants": "participants",
-      "recurrence": "recurrence",
-      "location": "location"
-    },
-    "class-types": {
-      "individual-premium": "Individual Premium"
-    }
-  },
-  "instructor-profile": {
-    "title": "Instructor Profile",
-    "details": {
-      "native": {
-        "label": "Native",
-        "alt": "language"
-      },
-      "from": {
-        "label": "From",
-        "alt": "location"
-      },
-      "teaching": {
-        "label": "Teaching",
-        "alt": "teaching"
-      },
-      "students": {
-        "label": "Students",
-        "alt": "students",
-        "count": "200k"
-      }
-    },
-    "sections": {
-      "classes": "Classes"
-    },
-    "buttons": {
-      "send-message": "Send Message"
-    },
-    "alt-text": {
-      "profile-image": "{{name}}'s profile picture"
-    }
-  },
-  "edit-group": {
-    "title": "Edit Group",
-    "form": {
-      "group-image": {
-        "alt": "Group",
-        "upload-label": "Upload group image"
-      },
-      "name": {
-        "label": "Group Name",
-        "placeholder": "Group name"
-      },
-      "description": {
-        "label": "Group Description",
-        "placeholder": "Enter short description of group. (max 200 letter)"
-      },
-      "language": {
-        "label": "Learning Language",
-        "options": {
-          "english": "English",
-          "spanish": "Spanish",
-          "exchange": "English-Spanish Exchange"
-        }
-      }
-    },
-    "buttons": {
-      "cancel": "Cancel",
-      "update": {
-        "default": "Update Group",
-        "loading": "Updating..."
-      }
-    }
-  },
-  "exploreClassCard": {
-    "labels": {
-      "tbd": "TBD",
-      "min": "min",
-      "bookClass": "Book Class",
-      "classDetails": "Class Details",
-      "languageGroup": "Language Group",
-      "learners": "{{language}} Learners",
-      "leader": "Leader",
-      "bambuuPlus": "Bammbuu+"
-    },
-    "confirmBooking": {
-      "title": "Are you sure you want to book this class?",
-      "description": "By booking class you will be added in the group and you'll be able to join the class 5 minutes before it starts. It will also be added to your calendar.",
-      "cancel": "No, Cancel",
-      "confirm": "Yes, Book Now",
-      "enrolling": "Enrolling..."
-    },
-    "errors": {
-      "classNotFound": "Class not found",
-      "classFull": "Class is full",
-      "loginRequired": "Please log in to enroll in classes"
-    },
-    "altText": {
-      "clock": "clock",
-      "calendar": "calendar",
-      "users": "users",
-      "usFlag": "US Flag",
-      "spainFlag": "Spain Flag"
-    }
-  },
-  "becomeAnExpert": {
-    "title": "Become an Expert",
-    "intro": "Interested in becoming a language expert with bammbuu? We're excited that you are interested in joining our team! Please fill out this form and our team will reach out to you after reviewing it.",
-    "form": {
-      "name": {
-        "label": "Name",
-        "placeholder": "Enter your name",
-        "error": "Name is required"
-      },
-      "nativeLanguage": {
-        "label": "Native Language"
-      },
-      "country": {
-        "label": "Country",
-        "placeholder": "Select a country",
-        "error": "Country is required"
-      },
-      "aboutYourself": {
-        "label": "Tell us about yourself",
-        "placeholder": "Enter details about your teaching expertise (max 500 characters)",
-        "error": "Please tell us about yourself",
-        "errorLength": "Bio must be less than 500 characters",
-        "charCount": "{{count}}/500 characters"
-      },
-      "teachingLanguage": {
-        "label": "Teaching Language"
-      },
-      "proficiencyLevel": {
-        "label": "Teaching Language Proficiency Level",
-        "levels": {
-          "beginner": "Beginner",
-          "intermediate": "Intermediate",
-          "advanced": "Advanced"
-        }
-      }
-    },
-    "buttons": {
-      "cancel": "Cancel",
-      "submit": "Submit Form",
-      "submitting": "Submitting..."
-    },
-    "status": {
-      "formError": "Please fill in all required fields correctly.",
-      "success": "Your application has been prepared. Please send the email."
-    },
-    "email": {
-      "subject": "Become an Expert Application"
-    }
-  },
-  "class-card-tutor": {
-    "labels": {
-      "tbd": "TBD",
-      "min": "min",
-      "premium": "Premium",
-      "ongoing": "Ongoing"
-    },
-    "altText": {
-      "usFlag": "US Flag",
-      "spainFlag": "Spain Flag",
-      "clock": "Clock icon",
-      "calendar": "Calendar icon",
-      "users": "Users icon"
-    },
-    "modal": {
-      "title": "Class Details",
-      "languageGroup": "Language Group",
-      "learners": "Learners",
-      "leader": "Group Leader",
-      "joinClass": "Join Class"
     }
   }
 }

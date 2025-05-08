@@ -69,7 +69,6 @@ const AccountTab = () => {
     try {
       setIsLoading(true);
 
-      // We assume 'user' is already signed in with email/password
       const auth = getAuth();
       if (!auth.currentUser) {
         setError(t("account.errors.noUser"));

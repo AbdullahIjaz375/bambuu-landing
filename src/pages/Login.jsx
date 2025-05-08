@@ -24,6 +24,8 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { getMessaging, getToken } from "firebase/messaging";
+import { useTranslation } from "react-i18next";
+import { useLanguage } from "../context/LanguageContext"; // Import the language context
 
 // Helper: Updates the current query string by replacing any existing "ref" value with the provided newRef.
 const getUpdatedQuery = (locationSearch, newRef) => {
@@ -45,6 +47,13 @@ const Login = () => {
   const [passwordError, setPasswordError] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { currentLanguage, changeLanguage } = useLanguage(); // Use the language context
+  const { t } = useTranslation();
+
+  // Handle language change
+  const handleLanguageChange = (lang) => {
+    changeLanguage(lang);
+  };
 
   // Ensure that if a class URL was saved, the student login URL keeps ?ref=class.
   useEffect(() => {
@@ -521,6 +530,18 @@ const Login = () => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50 ">
       <div className="w-full max-w-md p-6 space-y-4 bg-white rounded-3xl border border-[#e7e7e7]">
+        {/* Language Selector */}
+        <div className="flex justify-end">
+          <select
+            value={currentLanguage}
+            onChange={(e) => handleLanguageChange(e.target.value)}
+            className="px-2 py-1 text-sm border border-gray-200 rounded-full focus:outline-none focus:ring-1 focus:ring-green-500"
+          >
+            <option value="en">English</option>
+            <option value="es">Español</option>
+          </select>
+        </div>
+
         {/* Logo */}
         <div className="flex justify-center">
           <img
@@ -535,20 +556,26 @@ const Login = () => {
 
         {/* Welcome Text */}
         <div className="space-y-2 text-center">
-          <h1 className="text-3xl font-bold">Welcome Back!</h1>
-          <p className="text-gray-600">Let's get you logged in.</p>
+          <h1 className="text-3xl font-bold">
+            {t("login.title", "Welcome Back!")}
+          </h1>
+          <p className="text-gray-600">
+            {t("login.subtitle", "Let's get you logged in.")}
+          </p>
         </div>
 
         {/* Login Form */}
         <form onSubmit={handleEmailLoginStudent} className="space-y-4">
           <div className="space-y-1">
-            <label className="block text-sm text-gray-700">Email</label>
+            <label className="block text-sm text-gray-700">
+              {t("login.email", "Email")}
+            </label>
             <div className="relative">
               <input
                 type="email"
                 value={email}
                 onChange={handleEmailChange}
-                placeholder="Enter your email"
+                placeholder={t("login.emailPlaceholder", "Enter your email")}
                 className={`w-full p-2 border rounded-3xl ${
                   emailError
                     ? "border-red-500 focus:border-red-500"
@@ -573,16 +600,25 @@ const Login = () => {
                 </div>
               )}
             </div>
-            {emailError && <p className="text-sm text-red-500">{emailError}</p>}
+            {emailError && (
+              <p className="text-sm text-red-500">
+                {t(`login.errors.wrongEmail`, emailError)}
+              </p>
+            )}
           </div>
           <div className="space-y-1">
-            <label className="block text-sm text-gray-700">Password</label>
+            <label className="block text-sm text-gray-700">
+              {t("login.password", "Password")}
+            </label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={handlePasswordChange}
-                placeholder="Enter your password"
+                placeholder={t(
+                  "login.passwordPlaceholder",
+                  "Enter your password"
+                )}
                 className={`w-full p-2 border rounded-3xl ${
                   passwordError
                     ? "border-red-500 focus:border-red-500"
@@ -634,20 +670,22 @@ const Login = () => {
               </button>
             </div>
             {passwordError && (
-              <p className="text-sm text-red-500">{passwordError}</p>
+              <p className="text-sm text-red-500">
+                {t(`login.errors.wrongPassword`, passwordError)}
+              </p>
             )}
           </div>
           {/* Links */}
           <div className="flex justify-between pb-4 text-sm">
             <Link to="/forgot-password" className="font-semibold text-red-500">
-              Forgot Password?
+              {t("login.forgotPassword", "Forgot Password?")}
             </Link>
             {/* When switching to tutor login, update the query string to set ref=tutor */}
             <Link
               to={`/login-tutor${getUpdatedQuery(location.search, "class")}`}
               className="text-[#14b82c] font-semibold"
             >
-              Login as Tutor
+              {t("login.loginAsTutor", "Login as Tutor")}
             </Link>
           </div>
           {/* Login Button */}
@@ -657,7 +695,7 @@ const Login = () => {
               email && password ? " bg-[#14B82C] " : " bg-[#b9f9c2]"
             }`}
           >
-            Login
+            {t("login.loginButton", "Login")}
           </button>
         </form>
 
@@ -667,7 +705,9 @@ const Login = () => {
             <div className="w-full border-t border-gray-300"></div>
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 text-gray-500 bg-white">or sign in with</span>
+            <span className="px-2 text-gray-500 bg-white">
+              {t("login.orSignInWith", "or sign in with")}
+            </span>
           </div>
         </div>
 
@@ -677,7 +717,7 @@ const Login = () => {
             className="flex items-center justify-center px-4 py-2 space-x-4 border border-gray-300 rounded-full hover:bg-gray-50"
           >
             <img alt="google" src="/svgs/login-insta.svg" />
-            <span>Google</span>
+            <span>{t("login.google", "Google")}</span>
           </button>
           <button
             onClick={handleAppleLoginStudent}
@@ -688,22 +728,22 @@ const Login = () => {
               className="w-auto h-6"
               src="/images/apple-white.png"
             />
-            <span>Apple</span>
+            <span>{t("login.apple", "Apple")}</span>
           </button>
         </div>
 
         {/* Terms */}
         <div className="text-sm text-center text-[#9e9e9e] pt-6">
           <p>
-            By logging, you agree to our{" "}
+            {t("login.termsConditions", "By logging, you agree to our")}{" "}
             <a href="#" className="text-black">
-              Terms & Conditions
+              {t("login.terms", "Terms & Conditions")}
             </a>
           </p>
           <p>
-            and{" "}
+            {t("login.and", "and")}{" "}
             <a href="#" className="text-black">
-              PrivacyPolicy
+              {t("login.privacyPolicy", "Privacy Policy")}
             </a>
             .
           </p>
@@ -712,9 +752,9 @@ const Login = () => {
         {/* Sign Up Link */}
         <div className="text-sm text-center text-[#5d5d5d]">
           <p>
-            Don't have an account?{" "}
+            {t("login.noAccount", "Don't have an account?")}{" "}
             <Link to="/signup" className="text-[#14B82C]">
-              Sign up
+              {t("login.signUp", "Sign up")}
             </Link>
           </p>
         </div>

@@ -2,29 +2,34 @@ import React, { useState, useEffect } from "react";
 import { db } from "../firebaseConfig";
 import { doc, updateDoc, getDoc } from "firebase/firestore";
 import { useAuth } from "../context/AuthContext";
+import { useTranslation } from "react-i18next";
 
 const TutorialOverlay = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [showTutorial, setShowTutorial] = useState(false);
   const { user, setUser } = useAuth();
-  
+  const { t } = useTranslation();
+
   useEffect(() => {
     // Check if user is coming from ProfileSetup by looking for URL parameter
     const urlParams = new URLSearchParams(window.location.search);
-    const fromSetup = urlParams.get('fromSetup');
-    
+    const fromSetup = urlParams.get("fromSetup");
+
     // Check if tutorial was already completed
     const checkTutorialStatus = async () => {
       if (user?.uid) {
         const userDoc = await getDoc(doc(db, "students", user.uid));
         const userData = userDoc.data();
-        
-        if (fromSetup === 'true' || (userData && !userData.hasCompletedTutorial)) {
+
+        if (
+          fromSetup === "true" ||
+          (userData && !userData.hasCompletedTutorial)
+        ) {
           setShowTutorial(true);
         }
       }
     };
-    
+
     checkTutorialStatus();
   }, [user]);
 
@@ -42,28 +47,28 @@ const TutorialOverlay = () => {
 
   const completeTutorial = async () => {
     setShowTutorial(false);
-    
+
     // Update user record in Firestore to mark tutorial as completed
     if (user?.uid) {
       try {
         await updateDoc(doc(db, "students", user.uid), {
-          hasCompletedTutorial: true
+          hasCompletedTutorial: true,
         });
-        
+
         // Update local user state
-        setUser(prev => ({
+        setUser((prev) => ({
           ...prev,
-          hasCompletedTutorial: true
+          hasCompletedTutorial: true,
         }));
       } catch (error) {
         console.error("Error updating tutorial status:", error);
       }
     }
-    
+
     // Remove the URL parameter
     const url = new URL(window.location);
-    url.searchParams.delete('fromSetup');
-    window.history.replaceState({}, '', url);
+    url.searchParams.delete("fromSetup");
+    window.history.replaceState({}, "", url);
   };
 
   if (!showTutorial) return null;
@@ -74,29 +79,35 @@ const TutorialOverlay = () => {
   // Position and content based on current step
   if (currentStep === 1) {
     tooltipPosition = {
-      top: '195px',
-    left: '420px',
-    transform: 'translateX(-50%)'
-  };
+      top: "195px",
+      left: "420px",
+      transform: "translateX(-50%)",
+    };
     tooltipContent = {
-      title: "Explore Certified Instructors ",
-      description: "Book live 1:1 language classes with certified instructors to bring your language learning to the next level."
+      title: t("tutorial.step1.title", "Explore Certified Instructors"),
+      description: t(
+        "tutorial.step1.description",
+        "Book live 1:1 language classes with certified instructors to bring your language learning to the next level."
+      ),
     };
   } else if (currentStep === 2) {
     tooltipPosition = {
-      top: '120px',
-      left: '370px',
-    transform: 'translateX(-50%)'
-  };
+      top: "120px",
+      left: "370px",
+      transform: "translateX(-50%)",
+    };
     tooltipContent = {
-      title: "AI Tutor",
-      description: "Practice 24/7 with our AI language SuperTutor. Ask SuperTutor for language translations and grammar questions. You can also have a practice conversation in the language you are learning!"
+      title: t("tutorial.step2.title", "AI Tutor"),
+      description: t(
+        "tutorial.step2.description",
+        "Practice 24/7 with our AI language SuperTutor. Ask SuperTutor for language translations and grammar questions. You can also have a practice conversation in the language you are learning!"
+      ),
     };
   }
 
   return (
     <div className="fixed inset-0 z-50 pointer-events-none">
-      <div 
+      <div
         className="absolute z-50 pointer-events-auto"
         style={tooltipPosition}
       >
@@ -104,17 +115,16 @@ const TutorialOverlay = () => {
           <h3 className="mb-2 text-sm font-medium">{tooltipContent.title}</h3>
           <p className="mb-4 text-sm">{tooltipContent.description}</p>
           <div className="flex items-center justify-between">
-            <button 
-              onClick={handleSkip} 
-              className="text-white hover:underline"
-            >
-              Skip
+            <button onClick={handleSkip} className="text-white hover:underline">
+              {t("tutorial.buttons.skip", "Skip")}
             </button>
             <button
               onClick={handleNext}
               className="px-4 py-1 bg-white text-[#043D11] rounded-full hover:bg-opacity-90"
             >
-              {currentStep === 2 ? "Done (4/4)" : "Next (3/4)"}
+              {currentStep === 2
+                ? t("tutorial.buttons.done", "Done (4/4)")
+                : t("tutorial.buttons.next", "Next (3/4)")}
             </button>
           </div>
         </div>

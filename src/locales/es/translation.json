@@ -14,6 +14,119 @@
       "resources": "Recursos"
     }
   },
+  "onboarding": {
+    "screens": {
+      "1": {
+        "title": "¡Empecemos!",
+        "description": "Aprovecha al máximo bammbuu. Aprende y practica idiomas a través de la conversación. ¡Lee las siguientes instrucciones para aprender cómo!"
+      },
+      "2": {
+        "title": "",
+        "description": "¡Crea o únete a un grupo de aprendizaje de idiomas gratis! Únete a clases de conversación en vivo para practicar con hablantes nativos."
+      },
+      "3": {
+        "title": "",
+        "description": "Únete a clases de conversación grupales ilimitadas en vivo impartidas por instructores certificados de idiomas por un precio mensual. Estas clases están más estructuradas y se proporciona retroalimentación experta para ayudarte con tu aprendizaje."
+      },
+      "4": {
+        "title": "",
+        "description": "Reserva clases de idiomas 1:1 en vivo con instructores certificados para llevar tu aprendizaje de idiomas al siguiente nivel. Practica 24/7 con nuestro SuperTutor de idiomas basado en IA."
+      }
+    },
+    "buttons": {
+      "skip": "Omitir",
+      "next": "Siguiente",
+      "getStarted": "Comenzar"
+    }
+  },
+  "login": {
+    "title": "¡Bienvenido de Nuevo!",
+    "subtitle": "Vamos a iniciar sesión.",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "loginAsTutor": "Iniciar sesión como Tutor",
+    "loginButton": "Iniciar Sesión",
+    "orSignInWith": "o inicia sesión con",
+    "google": "Google",
+    "apple": "Apple",
+    "termsConditions": "Al iniciar sesión, aceptas nuestros",
+    "terms": "Términos y Condiciones",
+    "and": "y",
+    "privacyPolicy": "Política de Privacidad",
+    "noAccount": "¿No tienes una cuenta?",
+    "signUp": "Regístrate",
+    "emailPlaceholder": "Ingresa tu correo electrónico",
+    "passwordPlaceholder": "Ingresa tu contraseña",
+    "errors": {
+      "wrongEmail": "Correo electrónico incorrecto.",
+      "wrongPassword": "Contraseña incorrecta.",
+      "userNotFound": "Usuario no encontrado",
+      "invalidCredentials": "Correo electrónico o contraseña no válidos"
+    },
+    "success": "¡Sesión iniciada correctamente!"
+  },
+  "loginTutor": {
+    "loginAsStudent": "Iniciar sesión como Estudiante"
+  },
+  "signup": {
+    "title": "Registrarse",
+    "subtitle": "¡Vamos a crear una nueva cuenta!",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar Contraseña",
+    "createAccount": "Crear Cuenta",
+    "orContinueWith": "o continúa con",
+    "google": "google",
+    "apple": "apple",
+    "termsConditions": "Al registrarte, aceptas nuestros",
+    "terms": "Términos y Condiciones",
+    "and": "y",
+    "privacyPolicy": "Política de Privacidad",
+    "haveAccount": "¿Ya tienes una cuenta?",
+    "login": "Iniciar Sesión",
+    "emailPlaceholder": "Ingresa tu correo electrónico",
+    "passwordPlaceholder": "Ingresa tu contraseña",
+    "confirmPasswordPlaceholder": "Vuelve a ingresar tu contraseña",
+    "verification": {
+      "title": "Verificación de Correo Electrónico",
+      "message": "Se ha enviado un correo con un enlace de verificación a",
+      "changeEmail": "Registrarse con un correo electrónico diferente"
+    },
+    "profile": {
+      "title": "Completar Perfil",
+      "subtitle": "Añade tus datos personales para comenzar.",
+      "name": "Nombre",
+      "namePlaceholder": "Ingresa tu nombre",
+      "nativeLanguage": "Idioma Nativo",
+      "selectNativeLanguage": "Selecciona tu idioma nativo",
+      "learningLanguage": "Idioma a Aprender",
+      "selectLearningLanguage": "Selecciona el idioma que quieres aprender",
+      "proficiency": "Tu nivel en",
+      "country": "País",
+      "selectCountry": "Selecciona tu país",
+      "ageVerification": "Confirmo que tengo al menos 18 años",
+      "ageWarning": "Debes tener al menos 18 años para usar esta aplicación.",
+      "submit": "Enviar",
+      "levels": {
+        "beginner": "Principiante",
+        "intermediate": "Intermedio",
+        "advanced": "Avanzado"
+      }
+    },
+    "success": {
+      "title": "¡Cuenta Creada Exitosamente!",
+      "message": "¡Genial! Todo listo. Puedes reservar tu primera clase y comenzar a aprender.",
+      "skipNow": "Omitir Ahora",
+      "startLearning": "Comenzar a Aprender con bammbuu"
+    },
+    "successModal": {
+      "title": "¡Cuenta Creada Exitosamente!",
+      "description": "¡Genial! Todo listo. Puedes reservar tu primera clase y comenzar a aprender.",
+      "skipButton": "Omitir Ahora",
+      "startLearningButton": "Comenzar a Aprender con bammbuu"
+    }
+  },
   "settings": {
     "appLanguage": "Idioma de la Aplicación",
     "deleteAccount": "Eliminar Cuenta",
@@ -628,7 +741,6 @@
       "noGroups": "Aún no hay grupos."
     }
   },
-
   "group-details": {
     "title": "Detalles del Grupo",
     "members": "2k+",
@@ -926,6 +1038,38 @@
     },
     "email": {
       "subject": "Solicitud para Convertirse en Experto"
+    }
+  },
+  "profileSetup": {
+    "title": "Configuración de Perfil",
+    "subtitle": "¡Estamos casi listos! Selecciona el idioma que quieres aprender.",
+    "joinGroups": "Vamos a unirte a algunos grupos a continuación.",
+    "bookClasses": "Vamos a reservar algunas clases a continuación.",
+    "noGroups": "No hay grupos disponibles para unirse en este momento.",
+    "noClasses": "No hay clases disponibles para reservar en este momento.",
+    "learningLanguage": "Idioma de Aprendizaje",
+    "languageProficiency": "Nivel de Idioma",
+    "proficiencyLevels": {
+      "beginner": "Principiante",
+      "intermediate": "Intermedio",
+      "advanced": "Avanzado"
+    },
+    "buttons": {
+      "back": "Atrás",
+      "continue": "Continuar",
+      "skip": "Omitir",
+      "nextStep": "Siguiente (1/4)",
+      "nextStep2": "Siguiente (2/4)"
+    },
+    "tooltips": {
+      "joinGroups": {
+        "title": "Únete a 1 o más grupos de aprendizaje de idiomas.",
+        "description": "Descripción: Aprovecha al máximo bammbuu. Los grupos comunitarios de idiomas son gratuitos para crear y unirse. Te permiten conectarte con hablantes nativos para practicar el idioma a través de conversaciones en vivo."
+      },
+      "bookClasses": {
+        "title": "Reserva 1 o más clases.",
+        "description": "Reserva clases ilimitadas de conversación grupal en vivo impartidas por instructores certificados de idiomas por un precio mensual. Estas clases están más estructuradas y se proporciona retroalimentación experta para ayudarte con tu aprendizaje."
+      }
     }
   }
 }
