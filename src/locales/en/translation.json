@@ -634,19 +634,218 @@
       "noGroups": "No groups yet."
     }
   },
-  "signup": {
-    "profile": {
-      "levels": {
-        "beginner": "Beginner",
-        "intermediate": "Intermediate",
-        "advanced": "Advanced"
+  "exploreClassCard": {
+    "labels": {
+      "tbd": "TBD",
+      "min": "min",
+      "bookClass": "Book Class",
+      "classDetails": "Class Details",
+      "languageGroup": "Language Group",
+      "learners": "{{language}} learners",
+      "leader": "Leader",
+      "bambuuPlus": "Bammbuu+"
+    },
+    "confirmBooking": {
+      "title": "Are you sure you want to book this class?",
+      "description": "By booking the class, you will be added to the group and can join the class 5 minutes before it starts. It will also be added to your calendar.",
+      "cancel": "No, Cancel",
+      "confirm": "Yes, Book Now",
+      "enrolling": "Booking..."
+    },
+    "errors": {
+      "classNotFound": "Class not found",
+      "classFull": "Class is full",
+      "loginRequired": "Please login to enroll in classes"
+    },
+    "altText": {
+      "clock": "clock",
+      "calendar": "calendar",
+      "users": "users",
+      "usFlag": "US Flag",
+      "spainFlag": "Spain Flag"
+    },
+    "success": {
+      "classBooked": "Class booked successfully!"
+    }
+  },
+  "exploreGroupCard": {
+    "labels": {
+      "joinGroup": "Join Group"
+    },
+    "confirmJoining": {
+      "title": "Are you sure you want to join this group?",
+      "description": "By joining this group, you will have access to all group conversations and classes.",
+      "cancel": "No, Cancel",
+      "confirm": "Yes, Join",
+      "joining": "Joining..."
+    },
+    "errors": {
+      "groupNotFound": "Group not found",
+      "alreadyMember": "You are already a member of this group",
+      "loginRequired": "Please login to join groups"
+    },
+    "premium": {
+      "title": "Premium Group",
+      "requiresSubscription": "This is a premium group and requires a subscription"
+    }
+  },
+  "group-details-user": {
+    "title": "Group Details",
+    "buttons": {
+      "back": "Back",
+      "viewChat": "View Group Chat",
+      "leaveGroup": "Leave Group"
+    },
+    "tabs": {
+      "classes": "Classes",
+      "members": "Members"
+    },
+    "emptyState": {
+      "noClasses": "No classes available for this group yet."
+    }
+  },
+  "plans-modal": {
+    "title": "Membership",
+    "tabs": {
+      "subscriptions": "Subscriptions",
+      "credits": "Class Credits",
+      "offers": "Offers"
+    },
+    "popular-badge": "Most Popular",
+    "pricing": {
+      "per": "/{period}",
+      "month": "month"
+    },
+    "features": {
+      "supertutor": {
+        "title": "SuperTutor",
+        "description": "Gemini based AI tutor"
+      },
+      "experts": {
+        "title": "Language Experts",
+        "description": "You'll have direct access to our language experts"
+      },
+      "resources": {
+        "title": "Saved Resources",
+        "description": "You can save resources in the app"
+      },
+      "classes": {
+        "group": {
+          "title": "bammbuu+ Group Classes",
+          "description": "You can book bammbuu+ group classes"
+        },
+        "private": {
+          "title": "1:1 Classes",
+          "description": "You can book 1:1 classes with language experts"
+        }
       }
     },
-    "successModal": {
-      "title": "Account Created Successfully!",
-      "description": "Great! All set. You can book your first class and start learning.",
-      "skipButton": "Skip Now",
-      "startLearningButton": "Start Learning with bammbuu"
+    "subscription-plans": {
+      "group": {
+        "title": "bammbuu+ Instructor-Led Group Classes",
+        "description": "Unlimited instructor-led group conversation classes"
+      },
+      "unlimited": {
+        "title": "Unlimited Class Credits",
+        "description": "1:1 private instructor classes"
+      }
+    },
+    "credit-plans": {
+      "three": {
+        "title": "3 Class Credits",
+        "description": "bammbuu+ classes only"
+      },
+      "five": {
+        "title": "5 Class Credits",
+        "description": "bammbuu+ classes only"
+      }
+    },
+    "buttons": {
+      "subscribe": "Subscribe Now",
+      "buy": "Buy Now",
+      "loading": "Loading..."
+    },
+    "credits-warning": "With class credits you can only book bammbuu+ 1:1 classes other premium perks are not included.",
+    "offers": {
+      "new-user": {
+        "title": "Buy one class credit get 2 classes free",
+        "description": "1:1 private instructor classes",
+        "expiry": "Get access to two free classes for the price of one!"
+      }
+    },
+    "offer-plans": {
+      "free": {
+        "description": "Unlimited group classes for 1 week",
+        "body": "You'll be able to join any premium group for one week!"
+      },
+      "premium": {
+        "title": "Buy one class credit get 2 classes free",
+        "description": "1:1 private instructor classes",
+        "body": "Get 3 classes for the price of one!"
+      }
+    }
+  },
+  "instructor-profile": {
+    "title": "Instructor Profile",
+    "details": {
+      "native": {
+        "label": "Native",
+        "alt": "language"
+      },
+      "from": {
+        "label": "From",
+        "alt": "location"
+      },
+      "teaching": {
+        "label": "Teaching",
+        "alt": "teaching"
+      },
+      "students": {
+        "label": "Students",
+        "alt": "students",
+        "count": "200k"
+      }
+    },
+    "sections": {
+      "classes": "Classes"
+    },
+    "buttons": {
+      "send-message": "Send Message"
+    },
+    "alt-text": {
+      "profile-image": "{{name}}'s profile picture"
+    }
+  },
+  "edit-group": {
+    "title": "Edit Group",
+    "form": {
+      "group-image": {
+        "alt": "Group",
+        "upload-label": "Upload group image"
+      },
+      "name": {
+        "label": "Group Name",
+        "placeholder": "Group name"
+      },
+      "description": {
+        "label": "Group Description",
+        "placeholder": "Enter short description of group. (max 200 letter)"
+      },
+      "language": {
+        "label": "Learning Language",
+        "options": {
+          "english": "English",
+          "spanish": "Spanish",
+          "exchange": "English-Spanish Exchange"
+        }
+      }
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "update": {
+        "default": "Update Group",
+        "loading": "Updating..."
+      }
     }
   },
   "profileSetup": {

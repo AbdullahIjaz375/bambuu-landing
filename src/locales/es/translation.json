@@ -960,116 +960,43 @@
       }
     }
   },
-  "exploreClassCard": {
+  "exploreGroupCard": {
     "labels": {
-      "tbd": "Por determinar",
-      "min": "min",
-      "bookClass": "Reservar Clase",
-      "classDetails": "Detalles de la Clase",
-      "languageGroup": "Grupo de Idioma",
-      "learners": "Estudiantes de {{language}}",
-      "leader": "Líder",
-      "bambuuPlus": "Bammbuu+"
+      "joinGroup": "Unirse al Grupo"
     },
-    "confirmBooking": {
-      "title": "¿Estás seguro de que quieres reservar esta clase?",
-      "description": "Al reservar la clase, serás añadido al grupo y podrás unirte a la clase 5 minutos antes de que comience. También se añadirá a tu calendario.",
+    "confirmJoining": {
+      "title": "¿Estás seguro de que quieres unirte a este grupo?",
+      "description": "Al unirte a este grupo, tendrás acceso a todas las conversaciones y clases del grupo.",
       "cancel": "No, Cancelar",
-      "confirm": "Sí, Reservar Ahora",
-      "enrolling": "Reservando..."
+      "confirm": "Sí, Unirse",
+      "joining": "Uniéndose..."
     },
     "errors": {
-      "classNotFound": "Clase no encontrada",
-      "classFull": "La clase está llena",
-      "loginRequired": "Por favor, inicia sesión para inscribirte en las clases"
+      "groupNotFound": "Grupo no encontrado",
+      "alreadyMember": "Ya eres miembro de este grupo",
+      "loginRequired": "Por favor, inicia sesión para unirte a los grupos"
     },
-    "altText": {
-      "clock": "reloj",
-      "calendar": "calendario",
-      "users": "usuarios",
-      "usFlag": "Bandera de EEUU",
-      "spainFlag": "Bandera de España"
+    "premium": {
+      "title": "Grupo Premium",
+      "requiresSubscription": "Este es un grupo premium y requiere una suscripción"
     }
   },
-  "becomeAnExpert": {
-    "title": "Conviértete en Experto",
-    "intro": "¿Interesado en convertirte en un experto en idiomas con bammbuu? ¡Nos entusiasma que estés interesado en unirte a nuestro equipo! Por favor, completa este formulario y nuestro equipo se pondrá en contacto contigo después de revisarlo.",
-    "form": {
-      "name": {
-        "label": "Nombre",
-        "placeholder": "Ingresa tu nombre",
-        "error": "El nombre es obligatorio"
-      },
-      "nativeLanguage": {
-        "label": "Idioma Nativo"
-      },
-      "country": {
-        "label": "País",
-        "placeholder": "Selecciona un país",
-        "error": "El país es obligatorio"
-      },
-      "aboutYourself": {
-        "label": "Cuéntanos sobre ti",
-        "placeholder": "Ingresa detalles sobre tu experiencia en enseñanza (máximo 500 caracteres)",
-        "error": "Por favor, cuéntanos sobre ti",
-        "errorLength": "La biografía debe tener menos de 500 caracteres",
-        "charCount": "{{count}}/500 caracteres"
-      },
-      "teachingLanguage": {
-        "label": "Idioma de Enseñanza"
-      },
-      "proficiencyLevel": {
-        "label": "Nivel de Dominio del Idioma de Enseñanza",
-        "levels": {
-          "beginner": "Principiante",
-          "intermediate": "Intermedio",
-          "advanced": "Avanzado"
-        }
-      }
-    },
-    "buttons": {
-      "cancel": "Cancelar",
-      "submit": "Enviar Formulario",
-      "submitting": "Enviando..."
-    },
-    "status": {
-      "formError": "Por favor, completa correctamente todos los campos obligatorios.",
-      "success": "Tu solicitud ha sido preparada. Por favor, envía el correo electrónico."
-    },
-    "email": {
-      "subject": "Solicitud para Convertirse en Experto"
-    }
-  },
-  "profileSetup": {
-    "title": "Configuración de Perfil",
-    "subtitle": "¡Estamos casi listos! Selecciona el idioma que quieres aprender.",
-    "joinGroups": "Vamos a unirte a algunos grupos a continuación.",
-    "bookClasses": "Vamos a reservar algunas clases a continuación.",
-    "noGroups": "No hay grupos disponibles para unirse en este momento.",
-    "noClasses": "No hay clases disponibles para reservar en este momento.",
-    "learningLanguage": "Idioma de Aprendizaje",
-    "languageProficiency": "Nivel de Idioma",
-    "proficiencyLevels": {
-      "beginner": "Principiante",
-      "intermediate": "Intermedio",
-      "advanced": "Avanzado"
-    },
+  "group-details-user": {
+    "title": "Detalles del Grupo",
     "buttons": {
       "back": "Atrás",
-      "continue": "Continuar",
-      "skip": "Omitir",
-      "nextStep": "Siguiente (1/4)",
-      "nextStep2": "Siguiente (2/4)"
+      "viewChat": "Ver Chat del Grupo",
+      "leaveGroup": "Salir del Grupo"
     },
-    "tooltips": {
-      "joinGroups": {
-        "title": "Únete a 1 o más grupos de aprendizaje de idiomas.",
-        "description": "Descripción: Aprovecha al máximo bammbuu. Los grupos comunitarios de idiomas son gratuitos para crear y unirse. Te permiten conectarte con hablantes nativos para practicar el idioma a través de conversaciones en vivo."
-      },
-      "bookClasses": {
-        "title": "Reserva 1 o más clases.",
-        "description": "Reserva clases ilimitadas de conversación grupal en vivo impartidas por instructores certificados de idiomas por un precio mensual. Estas clases están más estructuradas y se proporciona retroalimentación experta para ayudarte con tu aprendizaje."
-      }
+    "tabs": {
+      "classes": "Clases",
+      "members": "Miembros"
+    },
+    "emptyState": {
+      "noClasses": "Aún no hay clases disponibles para este grupo."
     }
+  },
+  "success": {
+    "classBooked": "¡Clase reservada exitosamente!"
   }
 }
