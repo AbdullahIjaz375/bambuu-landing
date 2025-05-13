@@ -28,6 +28,7 @@ import ExploreClassCard from "../../components/ExploreClassCard";
 import { ChannelType } from "../../config/stream";
 import EmptyState from "../../components/EmptyState";
 import { ExpandableBio } from "../../components/ExpandableBio";
+import ShowDescription from "../../components/ShowDescription";
 const InstructorProfileUser = () => {
   const { tutorId } = useParams();
   const navigate = useNavigate();
@@ -340,7 +341,12 @@ const InstructorProfileUser = () => {
                     </div>
                   </div>
 
-                  <ExpandableBio bio={tutor.bio} maxChars={200} />
+                  {/* <ExpandableBio bio={tutor.bio} maxChars={200} /> */}
+
+                  <ShowDescription 
+                       description={tutor.bio} 
+                       maxHeight={100}
+                       />
                 </div>
 
                 <div className="w-full mt-4">

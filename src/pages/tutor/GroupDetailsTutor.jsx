@@ -49,6 +49,7 @@ import Modal from "react-modal";
 import ClassCardTutor from "../../components-tutor/ClassCardTutor";
 import { deleteStreamChannel } from "../../services/streamService";
 import EmptyState from "../../components/EmptyState";
+import ShowDescription from "../../components/ShowDescription";
 Modal.setAppElement("#root");
 
 const GroupDetailsTutor = ({ onClose }) => {
@@ -856,7 +857,10 @@ const GroupDetailsTutor = ({ onClose }) => {
                       </div>
                     </div>
                     <p className="mb-6 text-gray-600">
-                      {group.groupDescription}
+                      <ShowDescription 
+                       description={group.groupDescription} 
+                       maxHeight={100}
+                       />
                     </p>
                   </div>
 

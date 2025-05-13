@@ -14,13 +14,13 @@ const ExploreGroupsUser = () => {
   const { user } = useAuth();
   const [exploreGroups, setExploreGroups] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchLoading, setSearchLoading] = useState(false); // Add loading state for search
+  const [searchLoading, setSearchLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState("premium"); // Set default tab to premium instead of "all"
+  const [activeTab, setActiveTab] = useState("premium"); // Default tab is premium
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const language = searchParams.get("language")?.toLowerCase() || null;
+  const urlLanguage = searchParams.get("language")?.toLowerCase() || null;
   const { t } = useTranslation();
 
   const handleBack = () => {
@@ -43,13 +43,9 @@ const ExploreGroupsUser = () => {
             id: doc.id,
             ...doc.data(),
           }))
-          .filter((group) => !user?.joinedGroups?.includes(group.id))
-          .filter(
-            (group) =>
-              !language ||
-              group.groupLearningLanguage?.toLowerCase() === language
-          );
-
+          .filter((group) => !user?.joinedGroups?.includes(group.id));
+        
+        // Don't filter by language here, keep all groups and filter in the search/filter logic
         setExploreGroups(allGroups);
       } catch (error) {
         console.error("Error fetching groups:", error);
@@ -62,51 +58,54 @@ const ExploreGroupsUser = () => {
     };
 
     fetchGroups();
-  }, [user, language]);
+  }, [user]);
 
   // Effect to handle search filtering with loading state
   const [filteredGroups, setFilteredGroups] = useState([]);
 
   useEffect(() => {
-    // Show loading state when user is searching
-    if (searchQuery.trim()) {
-      setSearchLoading(true);
+    // Show loading state when filtering
+    setSearchLoading(true);
 
-      // Small timeout to show the loading state (improves UX)
-      const timer = setTimeout(() => {
-        const filtered = exploreGroups
-          .filter((group) => {
-            const searchTerm = searchQuery.toLowerCase().trim();
-
-            // Use the correct field names based on your database structure
+    // Small timeout to show the loading state (improves UX)
+    const timer = setTimeout(() => {
+      const searchTerm = searchQuery.toLowerCase().trim();
+      
+      const filtered = exploreGroups
+        .filter((group) => {
+          // First apply tab filter (premium/free)
+          if (activeTab === "premium" && !group.isPremium) return false;
+          if (activeTab === "free" && group.isPremium) return false;
+          
+          // Then apply URL language filter if present
+          if (urlLanguage && 
+              group.groupLearningLanguage?.toLowerCase() !== urlLanguage) {
+            return false;
+          }
+          
+          // If there's a search query, search across multiple fields
+          if (searchTerm) {
             return (
               group.groupName?.toLowerCase().includes(searchTerm) ||
               group.groupDescription?.toLowerCase().includes(searchTerm) ||
-              group.groupLearningLanguage?.toLowerCase().includes(searchTerm)
+              group.groupLearningLanguage?.toLowerCase().includes(searchTerm) ||
+              group.tutorName?.toLowerCase().includes(searchTerm) ||
+              group.topics?.some(topic => 
+                topic.toLowerCase().includes(searchTerm)
+              )
             );
-          })
-          .filter((group) => {
-            if (activeTab === "premium") return group.isPremium;
-            if (activeTab === "free") return !group.isPremium;
-            return true;
-          });
-
-        setFilteredGroups(filtered);
-        setSearchLoading(false);
-      }, 300); // Small delay for better user experience
-
-      return () => clearTimeout(timer);
-    } else {
-      // No search query, just filter by tab
-      const filtered = exploreGroups.filter((group) => {
-        if (activeTab === "premium") return group.isPremium;
-        if (activeTab === "free") return !group.isPremium;
-        return true;
-      });
+          }
+          
+          // If no search query, include the group (it passed tab and URL language filters)
+          return true;
+        });
 
       setFilteredGroups(filtered);
-    }
-  }, [searchQuery, exploreGroups, activeTab]);
+      setSearchLoading(false);
+    }, 300); // Small delay for better user experience
+
+    return () => clearTimeout(timer);
+  }, [searchQuery, exploreGroups, activeTab, urlLanguage]);
 
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
@@ -173,6 +172,11 @@ const ExploreGroupsUser = () => {
                 value={searchQuery}
                 onChange={handleSearchChange}
               />
+              {urlLanguage && (
+                <div className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">
+                  {urlLanguage.charAt(0).toUpperCase() + urlLanguage.slice(1)}
+                </div>
+              )}
             </div>
           </div>
 
@@ -193,7 +197,7 @@ const ExploreGroupsUser = () => {
               <div className="flex items-center justify-center min-h-[60vh]">
                 <EmptyState
                   message={
-                    searchQuery
+                    searchQuery || urlLanguage
                       ? t("exploreGroups.empty.noResults")
                       : t("exploreGroups.empty.noGroups")
                   }

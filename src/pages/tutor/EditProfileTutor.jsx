@@ -224,18 +224,20 @@ const COUNTRIES = [
   "Zimbabwe",
 ];
 
+
+
+
 const TutorEditProfile = () => {
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  // No need for languages state and useEffect anymore since we're using hardcoded data
-
+  
   // Form state
   const [formData, setFormData] = useState({
     name: user?.name || "",
     email: user?.email || "",
     nativeLanguage: user?.nativeLanguage || "",
-    teachingLanguage: user?.teachingLanguage || "Spanish",
+    teachingLanguage: user?.teachingLanguage || "",
     teachingLanguageProficiency:
       user?.teachingLanguageProficiency || "Intermediate",
     country: user?.country || "",
@@ -243,6 +245,22 @@ const TutorEditProfile = () => {
   });
   const [image, setImage] = useState(null);
   const [selectedImage, setSelectedImage] = useState(user?.photoUrl || null);
+
+  useEffect(() => {
+    // Initialize form data from user object when it becomes available
+    if (user) {
+      setFormData({
+        name: user.name || "",
+        email: user.email || "",
+        nativeLanguage: user.nativeLanguage || "",
+        teachingLanguage: user.teachingLanguage || "",
+        teachingLanguageProficiency: user.teachingLanguageProficiency || "Intermediate",
+        country: user.country || "",
+        bio: user.bio || "",
+      });
+      setSelectedImage(user.photoUrl || null);
+    }
+  }, [user]);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -273,6 +291,12 @@ const TutorEditProfile = () => {
   };
 
   const handleSaveChanges = async () => {
+    // Form validation
+    if (!formData.teachingLanguage) {
+      alert("Please select a teaching language");
+      return;
+    }
+    
     setLoading(true);
     try {
       const photoUrl = await handleImageUpload(user.uid);
@@ -342,8 +366,8 @@ const TutorEditProfile = () => {
                     ) : (
                       <ImagePlus className="w-8 h-8 text-gray-400" />
                     )}
-                    <div className="absolute right-0 p-1 bg-black rounded-full shadow-lg bottom-1">
-                      <img src="/svgs/camera.svg" />
+                    <div className="absolute bottom-0 right-0 flex items-center justify-center w-8 h-8 bg-white rounded-full shadow-md border border-gray-200">
+                      <Camera className="w-4 h-4 text-gray-700" />
                     </div>
                     <input
                       id="profileImage"
@@ -417,16 +441,19 @@ const TutorEditProfile = () => {
                         Select language you want to teach
                       </option>
                       {TEACHINGLANGUAGES.map((lang) => (
-                        <option key={lang.code} value={lang}>
+                        <option key={lang} value={lang}>
                           {lang}
                         </option>
                       ))}
                     </select>
+                    {!formData.teachingLanguage && (
+                      <p className="mt-1 text-red-500 text-sm">Please select a teaching language</p>
+                    )}
                   </div>
 
                   <div>
                     <label className="block mb-2 text-lg font-medium">
-                      Your Proficiency in {formData.teachingLanguage}
+                      Your Proficiency in {formData.teachingLanguage || "Teaching Language"}
                     </label>
                     <div className="flex gap-2">
                       {["Beginner", "Intermediate", "Advanced", "Native"].map(
@@ -437,7 +464,7 @@ const TutorEditProfile = () => {
                             onClick={() => handleProficiencyChange(level)}
                             className={`flex-1 py-2 px-4 text-xl rounded-3xl border ${
                               formData.teachingLanguageProficiency === level
-                                ? "bg-[#e6fde9] text-black"
+                                ? "bg-[#e6fde9] border-[#14B82C] text-black"
                                 : "bg-gray-100 text-gray-600"
                             }`}
                           >
@@ -498,9 +525,9 @@ const TutorEditProfile = () => {
                 </button>
               </div>
             </div>
-          </div>{" "}
-        </div>{" "}
-      </div>{" "}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

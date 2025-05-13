@@ -38,6 +38,7 @@ import { useGroupJoining } from "../../hooks/useGroupJoining";
 import EmptyState from "../../components/EmptyState";
 import ClassInfoCard from "../../components/ClassInfoCard";
 import GroupInfoCard from "../../components/GroupInfoCard";
+import ShowDescription from "../../components/ShowDescription";
 Modal.setAppElement("#root");
 
 const GroupDetailsNotJoinedUser = ({ onClose }) => {
@@ -477,9 +478,13 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
                       </div>
                     </div>
 
-                    <p className="mb-6 text-sm text-gray-600 md:text-base">
-                      {group.groupDescription}
-                    </p>
+                  
+
+
+                    <ShowDescription 
+                       description={group.groupDescription} 
+                       maxHeight={100}
+                       />
                   </div>
 
                   <div className="w-full space-y-4">

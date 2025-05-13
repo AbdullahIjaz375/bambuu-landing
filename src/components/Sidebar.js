@@ -1,12 +1,14 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import TutorialOverlay from "./TutorialOverlay";
 
 const Sidebar = ({ user }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { t } = useTranslation();
+  
   const studentMenuItems = [
     {
       path: "/learn",
@@ -19,6 +21,10 @@ const Sidebar = ({ user }) => {
       translationKey: "sidebar.student.messages",
       lightImage: "/svgs/community-light.svg",
       darkImage: "/svgs/community-dark.svg",
+      onClick: () => {
+        localStorage.setItem("activetab", "standard");
+        navigate("/messagesUser");
+      },
     },
     {
       path: "/superTutorUser",
@@ -66,19 +72,20 @@ const Sidebar = ({ user }) => {
       darkImage: "/svgs/saved-resources-dark.svg",
     },
   ];
+  
   const truncateEmail = (email) => {
     return email && email.length > 20 ? `${email.slice(0, 20)}...` : email;
   };
 
   // Function to check if user has Bammbuu+ subscription
-  const hasBambbuuPlus = user?.subscriptions?.some(
+  const hasBambuuPlus = user?.subscriptions?.some(
     (sub) =>
       sub.type === "bammbuu+ Instructor-led group Classes" ||
       sub.type === "individual_premium" ||
       sub.type === "group_premium" ||
       sub.type?.toLowerCase().includes("premium") ||
       sub.type?.toLowerCase().includes("bambuu+")
-  );
+  ) || user?.isPremium === true;
 
   // Determine the appropriate navigation items based on user type
   const menuItems =
@@ -105,30 +112,51 @@ const Sidebar = ({ user }) => {
         {menuItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
-            <Link
+            <div
               key={item.path}
-              to={item.path}
-              className={`flex text-base lg:text-lg items-center gap-3 pl-3 py-2 mb-2 transition-colors rounded-full
-                ${
-                  isActive
-                    ? "bg-[#14B82C] text-white"
-                    : "text-[#042F0C] hover:bg-[#6fdb55]"
-                }`}
+              onClick={item.onClick}
+              className="mb-2"
             >
-              <img
-                src={isActive ? item.lightImage : item.darkImage}
-                alt={t(item.translationKey)}
-                className="w-6 h-6"
-              />
-              <span>{t(item.translationKey)}</span>
-            </Link>
+              {item.onClick ? (
+                <div
+                  className={`flex text-base lg:text-lg items-center gap-3 pl-3 py-2 transition-colors rounded-full cursor-pointer
+                    ${
+                      isActive
+                        ? "bg-[#14B82C] text-white"
+                        : "text-[#042F0C] hover:bg-[#6fdb55]"
+                    }`}
+                >
+                  <img
+                    src={isActive ? item.lightImage : item.darkImage}
+                    alt={t(item.translationKey)}
+                    className="w-6 h-6"
+                  />
+                  <span>{t(item.translationKey)}</span>
+                </div>
+              ) : (
+                <Link
+                  to={item.path}
+                  className={`flex text-base lg:text-lg items-center gap-3 pl-3 py-2 transition-colors rounded-full
+                    ${
+                      isActive
+                        ? "bg-[#14B82C] text-white"
+                        : "text-[#042F0C] hover:bg-[#6fdb55]"
+                    }`}
+                >
+                  <img
+                    src={isActive ? item.lightImage : item.darkImage}
+                    alt={t(item.translationKey)}
+                    className="w-6 h-6"
+                  />
+                  <span>{t(item.translationKey)}</span>
+                </Link>
+              )}
+            </div>
           );
         })}
       </nav>
-      {/* Tutorial overlay */}
 
       {/* User Profile Section */}
-
       <div className="px-3">
         {user ? (
           <Link
@@ -137,10 +165,10 @@ const Sidebar = ({ user }) => {
           >
             <div className="flex flex-row items-center space-x-2">
               <div className="relative flex-shrink-0 w-8 h-8 overflow-hidden bg-white rounded-full lg:w-10 lg:h-10">
-                {hasBambbuuPlus && (
+                {hasBambuuPlus && (
                   <div className="absolute z-10 -top-1 -right-1 w-4 h-4 lg:w-5 lg:h-5">
                     <img
-                      alt="bambbuu plus"
+                      alt="bammbuu plus"
                       src="/svgs/bambuu-plus-user.svg"
                       className="w-full h-full"
                     />
@@ -148,7 +176,7 @@ const Sidebar = ({ user }) => {
                 )}
                 <div
                   className={`w-full h-full rounded-full ${
-                    hasBambbuuPlus ? "ring-2 ring-green-500" : ""
+                    hasBambuuPlus ? "ring-2 ring-green-500" : ""
                   }`}
                 >
                   <img

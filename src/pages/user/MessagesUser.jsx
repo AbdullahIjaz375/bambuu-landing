@@ -24,6 +24,17 @@ const MessagesUser = () => {
   const { channelId: urlChannelId } = useParams();
   const [streamClientConnected, setStreamClientConnected] = useState(false);
 
+
+
+  useEffect(() => {
+    const savedActiveTab = localStorage.getItem("activetab");
+    if (savedActiveTab) {
+      setActiveTab(savedActiveTab);
+    }
+  }, []);
+
+
+
   const handleChannelLeave = (channelId) => {
     setChannels((prevChannels) =>
       prevChannels.filter((channel) => channel.id !== channelId)

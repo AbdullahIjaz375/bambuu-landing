@@ -32,6 +32,7 @@ import Modal from "react-modal";
 import ExploreClassCard from "../../components/ExploreClassCard";
 import EmptyState from "../../components/EmptyState";
 import GroupInfoCard from "../../components/GroupInfoCard";
+import ShowDescription from "../../components/ShowDescription";
 Modal.setAppElement("#root");
 
 const GroupDetailsUser = ({ onClose }) => {
@@ -763,7 +764,7 @@ const GroupDetailsUser = ({ onClose }) => {
           >
             <div className="flex items-center gap-3">
               <img
-                src={member.photoUrl || "/api/placeholder/40/40"}
+                src={member.photoUrl || "/images/panda.png"}
                 alt={member.name}
                 className="object-cover rounded-full w-9 h-9"
               />
@@ -931,9 +932,11 @@ const GroupDetailsUser = ({ onClose }) => {
                       </div>
                     </div>
 
-                    <p className="mb-6 text-sm text-gray-600 md:text-base">
-                      {group.groupDescription}
-                    </p>
+
+                    <ShowDescription 
+                       description={group.groupDescription} 
+                       maxHeight={100}
+                       />
                   </div>{" "}
                   <div className="space-y-4">
                     {" "}
@@ -945,7 +948,9 @@ const GroupDetailsUser = ({ onClose }) => {
                             ? "bg-[#bffcc4] border-[#0a0d0b]"
                             : "bg-[#FFFBC5] border-black"
                         }`}
-                        onClick={() => navigate("/messagesUser")}
+                        onClick={() => {
+                          localStorage.setItem("activetab","bammbuu");
+                          navigate("/messagesUser")}}
                       >
                         {t("groupDetails.buttons.viewChat")}
                       </button>

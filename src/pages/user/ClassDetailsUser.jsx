@@ -19,6 +19,7 @@ import { useClassBooking } from "../../hooks/useClassBooking";
 import { toast } from "react-toastify";
 import UserAvatar from "../../utils/getAvatar";
 import { checkAccess } from "../../utils/accessControl";
+import ShowDescription from "../../components/ShowDescription";
 Modal.setAppElement("#root");
 
 const TimeRestrictedJoinButton = ({
@@ -916,9 +917,12 @@ const ClassDetailsUser = ({ onClose }) => {
                       </div>
                     )}
 
-                    <p className="mt-4 mb-6 text-sm text-gray-600 md:text-base">
-                      {classData.classDescription}
-                    </p>
+                   
+
+                    <ShowDescription 
+                       description={classData.classDescription} 
+                       maxHeight={100}
+                       />
                   </div>
 
                   {/* Bottom Actions */}

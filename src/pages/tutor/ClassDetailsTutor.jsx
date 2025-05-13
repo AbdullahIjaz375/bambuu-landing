@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 import { ClassContext } from "../../context/ClassContext";
 import { useContext } from "react";
 import UserAvatar from "../../utils/getAvatar";
+import ShowDescription from "../../components/ShowDescription";
 Modal.setAppElement("#root");
 
 const ClassDetailsTutor = ({ onClose }) => {
@@ -664,9 +665,10 @@ const ClassDetailsTutor = ({ onClose }) => {
                       </div>
                     </div>
 
-                    <p className="my-6 text-gray-600">
-                      {classData.classDescription}
-                    </p>
+                    <ShowDescription 
+                       description={classData.classDescription} 
+                       maxHeight={100}
+                       />
                   </div>
 
                   <div className="w-full space-y-4">

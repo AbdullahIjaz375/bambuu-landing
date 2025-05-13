@@ -37,14 +37,15 @@ const ProfileUser = () => {
     fetchUserData();
   }, [user]);
 
-  const hasBambbuuPlus = user?.subscriptions?.some(
+  // Enhanced logic to check if user has Bammbuu+ subscription
+  const hasBambuuPlus = user?.subscriptions?.some(
     (sub) =>
       sub.type === "bammbuu+ Instructor-led group Classes" ||
       sub.type === "individual_premium" ||
       sub.type === "group_premium" ||
       sub.type?.toLowerCase().includes("premium") ||
       sub.type?.toLowerCase().includes("bambuu+")
-  );
+  ) || user?.isPremium === true || userData?.isPremium === true;
 
   const handleSignOut = async () => {
     try {
@@ -105,14 +106,18 @@ const ProfileUser = () => {
             {/* Profile Info Card */}
             <div className="bg-[#e6fde9] rounded-3xl p-8 flex flex-col items-center">
               <div className="relative flex items-center justify-center w-32 h-32 mb-4">
-                {hasBambbuuPlus && (
-                  <div className="absolute z-10 -top-1 -right-1">
-                    <img alt="bambbuu" src="/svgs/bambuu-plus-user.svg" />
+                {hasBambuuPlus && (
+                  <div className="absolute z-10 -top-1 -right-1 w-8 h-8">
+                    <img 
+                      alt="bambbuu plus" 
+                      src="/svgs/bambuu-plus-user.svg"
+                      className="w-full h-full" 
+                    />
                   </div>
                 )}
                 <div
                   className={`w-32 h-32 bg-white rounded-full ${
-                    hasBambbuuPlus ? "ring-4 ring-green-500" : ""
+                    hasBambuuPlus ? "ring-4 ring-green-500" : ""
                   }`}
                 >
                   <img
@@ -136,6 +141,13 @@ const ProfileUser = () => {
                   {user?.currentStreak || 0}
                 </span>
               </div>
+
+              {hasBambuuPlus && (
+                <div className="flex items-center gap-2 px-4 py-2 mb-6 text-md font-semibold bg-yellow-100 text-yellow-800 rounded-full">
+                  <img alt="bambuu plus" src="/svgs/bambuu-plus-icon.svg" className="w-5 h-5" />
+                  <span>Bammbuu+ Member</span>
+                </div>
+              )}
 
               <div className="grid w-full grid-cols-3 gap-4 mb-6 text-xl">
                 {/* Language and Location Info */}
