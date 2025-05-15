@@ -101,6 +101,8 @@ const StudentsTutor = () => {
           }
         );
 
+        console.log('chanel ======= ' ,channels);
+
         // Initialize unread counts and online status tracking
         const counts = {};
         const onlineStatusMap = {};

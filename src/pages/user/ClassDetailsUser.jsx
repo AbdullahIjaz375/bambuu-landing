@@ -954,14 +954,14 @@ const ClassDetailsUser = ({ onClose }) => {
                           className="w-full px-4 py-2 text-black bg-white border border-black rounded-full"
                           onClick={() => setIsEditModalOpen(true)}
                         >
-                          {t("class-details.buttons.edit")}
+              {t("class-details-tutor.actions.edit-class")}
                         </button>
                         <button
                           className="w-full px-4 py-2 text-red-500 bg-white border border-red-500 rounded-full"
                           onClick={() => setShowDeleteConfirmation(true)}
                         >
-                          {t("class-details.buttons.delete")}
-                        </button>
+                      {t("class-details-tutor.actions.delete-class")}
+                      </button>
                       </>
                     ) : (
                       // <button
@@ -1030,9 +1030,9 @@ const ClassDetailsUser = ({ onClose }) => {
                         className="px-4 py-2 text-black bg-yellow-400 rounded-full"
                         onClick={() => setActiveTab("Members")}
                       >
-                        {t("class-details.members.count", {
-                          count: members.length,
-                        })}
+                       {t("class-details-tutor.tabs.members", {
+                      count: members.length,
+                    })}
                       </button>
                     </div>
                     <div className="flex-1 overflow-y-auto">

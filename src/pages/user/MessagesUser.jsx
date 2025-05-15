@@ -413,6 +413,10 @@ const MessagesUser = () => {
     });
   };
 
+
+  console.log("Channels:  --", channels);
+
+
   // Standard chats - only standard_group
   const standardChats = filterChannels(
     channels.filter(
@@ -422,6 +426,8 @@ const MessagesUser = () => {
         channel.data.name.trim() !== ""
     )
   );
+
+    
 
   // Bammbuu+ chats - all other types (premium_group, premium_individual_class, one_to_one_chat)
   const filteredForBammbuu = channels.filter(
