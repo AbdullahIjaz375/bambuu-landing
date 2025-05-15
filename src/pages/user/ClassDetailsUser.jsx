@@ -760,7 +760,7 @@ const ClassDetailsUser = ({ onClose }) => {
                   <ArrowLeft size={24} />
                 </button>
                 <h1 className="text-2xl font-semibold md:text-4xl">
-                  {t("class-details.title")}
+                {t("class-details-tutor.title")}
                 </h1>
               </div>
             </div>

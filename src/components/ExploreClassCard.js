@@ -496,7 +496,7 @@ const ExploreClassCard = ({
               <div className="flex items-center gap-2 mb-6">
                 <div className="w-6 h-6">
                   <img
-                    src="/api/placeholder/24/24"
+                    src="/images/panda.png"
                     alt={language}
                     className="w-full h-full rounded-full"
                   />

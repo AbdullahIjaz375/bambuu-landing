@@ -124,7 +124,7 @@ const ClassInfoCard = ({ classData, groupTutor }) => {
             </div>
             <div className="flex items-center gap-1">
               <img
-                src={groupInfo?.groupAdminImageUrl || "/api/placeholder/24/24"}
+                src={groupInfo?.groupAdminImageUrl || "/images/panda.png"}
                 alt={`${classData.adminName}'s profile`}
                 className="w-4 h-4 rounded-full"
               />
@@ -218,7 +218,7 @@ const ClassInfoCard = ({ classData, groupTutor }) => {
             </div>
             <div className="flex items-center gap-1">
               <img
-                src={adminInfo?.photoUrl || "/api/placeholder/24/24"}
+                src={adminInfo?.photoUrl || "/images/panda.png"}
                 alt={`${classData.adminName}'s profile`}
                 className="w-4 h-4 rounded-full"
               />
