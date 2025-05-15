@@ -70,7 +70,7 @@ const AddGroupsUser = () => {
           name: groupName,
           image: imageUrl,
           description: groupDescription,
-          created_by_id: user.uid, // Important for GetStream
+          created_by_id: user.uid,
           member_roles: memberRoles,
         };
         await createStreamChannel(channelData);

@@ -186,7 +186,7 @@ const ClassCardTutor = ({
                   <img
                     alt={t("class-card-tutor.altText.clock")}
                     src="/svgs/clock.svg"
-                  />
+                  />{" "}
                   <span className="text-sm sm:text-md text-[#454545]">
                     {formatTime(classDateTime)} ({classDuration}{" "}
                     {t("class-card-tutor.labels.min")})

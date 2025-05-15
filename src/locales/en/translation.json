@@ -279,6 +279,28 @@
       }
     }
   },
+  "class-card-tutor": {
+    "labels": {
+      "tbd": "TBD",
+      "min": "min",
+      "premium": "Premium",
+      "ongoing": "Ongoing"
+    },
+    "altText": {
+      "usFlag": "US Flag",
+      "spainFlag": "Spain Flag",
+      "clock": "Clock icon",
+      "calendar": "Calendar icon",
+      "users": "Users icon"
+    },
+    "modal": {
+      "title": "Class Details",
+      "languageGroup": "Language Group",
+      "learners": "Learners",
+      "leader": "Group Leader",
+      "joinClass": "Join Class"
+    }
+  },
   "classes-tutor": {
     "title": "My Classes",
     "actions": {
