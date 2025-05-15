@@ -23,6 +23,7 @@ import {
   streamVideoClient,
   fetchChatToken,
   fetchVideoToken,
+  videotokenUrl,
 } from "../../config/stream";
 
 // Icons
@@ -150,7 +151,7 @@ const VideoCallStudent = () => {
   const fetchToken = async (userId) => {
     try {
       const response = await axios.post(
-        `https://generatechattoken-3idvfneyra-uc.a.run.app`,
+         videotokenUrl,
         {
           userId,
           userName:
@@ -169,7 +170,7 @@ const VideoCallStudent = () => {
   const fetchVideoToken = async (userId) => {
     try {
       const response = await axios.post(
-        `https://generatevideotoken-3idvfneyra-uc.a.run.app`,
+        videotokenUrl,
         {
           userId,
         }

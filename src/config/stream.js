@@ -3,8 +3,9 @@ import { StreamVideoClient } from "@stream-io/video-react-sdk";
 import axios from "axios";
 
 export const streamApiKey = process.env.REACT_APP_STREAM_API_KEY;
-export const apiBaseUrl =
-  process.env.REACT_APP_API_URL || "http://localhost:5000";
+export const apiBaseUrl = process.env.REACT_APP_API_URL || "http://localhost:5000";
+export const videotokenUrl = process.env.REACT_APP_VIDEO_TOKEN_URL;
+export const chattokenUrl = process.env.REACT_APP_CHAT_TOKEN_URL;
 
 const DEBUG = process.env.NODE_ENV === "development";
 
@@ -46,7 +47,7 @@ export const fetchChatToken = async (userId) => {
     const userInfo = JSON.parse(sessionStorage.getItem("user") || "{}");
     
     const response = await axios.post(
-      `https://generatechattoken-3idvfneyra-uc.a.run.app`,
+      chattokenUrl,
       {
         userId,
         userName: userInfo.name || "User",
@@ -93,7 +94,7 @@ export const fetchVideoToken = async (userId) => {
     }
 
     const response = await axios.post(
-      `https://generatevideotoken-3idvfneyra-uc.a.run.app`,
+      videotokenUrl,
       {
         userId,
       },
@@ -263,6 +264,8 @@ const streamConfig = {
   generateStreamToken,
   fetchChatToken,
   fetchVideoToken,
+  videotokenUrl,
+  chattokenUrl,
 };
 
 export default streamConfig;

@@ -24,6 +24,7 @@ import {
   streamVideoClient,
   fetchChatToken,
   fetchVideoToken,
+  videotokenUrl,
 } from "../../config/stream";
 import { canCreateBreakoutRooms } from "./BreakoutRoomUtils";
 
@@ -127,7 +128,7 @@ const VideoCallTutor = () => {
   const fetchToken = async (userId) => {
     try {
       const response = await axios.post(
-        `https://generatechattoken-3idvfneyra-uc.a.run.app`,
+        videotokenUrl,
         {
           userId,
           userName:
@@ -146,7 +147,7 @@ const VideoCallTutor = () => {
   const fetchVideoToken = async (userId) => {
     try {
       const response = await axios.post(
-        `https://generatevideotoken-3idvfneyra-uc.a.run.app`,
+        videotokenUrl,
         {
           userId,
         }
