@@ -121,6 +121,7 @@ const ExploreClassCard = ({
   adminImageUrl,
   groupId,
   recurrenceTypes,
+  isBooked = false,
 }) => {
   const { t } = useTranslation();
   const { user, setUser } = useAuth();
@@ -398,8 +399,7 @@ const ExploreClassCard = ({
                 </span>
               </div>
             </div>
-
-            {/* Admin and Spots */}
+            {/* Admin and Spots */}{" "}
             <div className="flex flex-wrap items-center justify-between w-full">
               <div className="flex items-center space-x-2">
                 {profileUrl ? (
@@ -427,22 +427,38 @@ const ExploreClassCard = ({
                   </span>
                 )}
               </div>
-            </div>
-
+            </div>{" "}
             {/* Book Class Button */}
-            <button
-              onClick={handleBookClass}
-              className={`w-full py-2 font-medium border rounded-full transition-colors duration-200 ${
-                hasValidDateTime
-                  ? "text-[#042F0C] border-[#042F0C] bg-[#14b82c] hover:bg-[#119924]"
-                  : "text-gray-500 border-gray-300 bg-gray-200 cursor-not-allowed"
-              }`}
-              disabled={!hasValidDateTime}
-            >
-              {hasValidDateTime
-                ? t("exploreClassCard.labels.bookClass")
-                : t("exploreClassCard.labels.classNotScheduled")}
-            </button>
+            <div className="w-full mt-4">
+              {isBooked ? (
+                <button
+                  className="w-full py-3 font-medium text-gray-500 bg-gray-200 border border-gray-400 rounded-full cursor-not-allowed"
+                  disabled
+                  style={{ minHeight: "48px" }}
+                  title="You have already booked this class"
+                >
+                  {t(
+                    "exploreClassCard.labels.alreadyBooked",
+                    "Class Already Booked"
+                  )}
+                </button>
+              ) : (
+                <button
+                  onClick={handleBookClass}
+                  className={`w-full py-3 font-medium border rounded-full transition-colors duration-200 ${
+                    hasValidDateTime
+                      ? "text-[#042F0C] border-[#042F0C] bg-[#14b82c] hover:bg-[#119924]"
+                      : "text-gray-500 border-gray-300 bg-gray-200 cursor-not-allowed"
+                  }`}
+                  style={{ minHeight: "48px" }}
+                  disabled={!hasValidDateTime}
+                >
+                  {hasValidDateTime
+                    ? t("exploreClassCard.labels.bookClass")
+                    : t("exploreClassCard.labels.classNotScheduled")}
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>

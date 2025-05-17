@@ -1,4 +1,7 @@
 {
+  "common": {
+    "user": "Usuario"
+  },
   "sidebar": {
     "student": {
       "learn": "Aprender",
@@ -923,6 +926,10 @@
     },
     "buttons": {
       "send-message": "Enviar Mensaje"
+    },
+    "stats": {
+      "totalClassesTaught": "Total de Clases Enseñadas",
+      "totalGroupsCreated": "Total de Grupos Creados"
     },
     "alt-text": {
       "profile-image": "foto de perfil de {{name}}"

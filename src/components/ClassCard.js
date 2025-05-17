@@ -27,9 +27,8 @@ const ClassCard = ({
   recurrenceTypes = [],
   selectedRecurrenceType,
   classType,
-  classLocation,
-  onClick,
-  isBammbuu = false, // Add the isBammbuu prop with a default value of false
+  isBammbuu = false,
+  isBooked = false,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
@@ -140,8 +139,9 @@ const ClassCard = ({
   return (
     <>
       <div className="hover:cursor-pointer" onClick={handleClick}>
+        {" "}
         <div
-          className={`flex flex-col h-auto sm:h-[25rem] border ${
+          className={`flex flex-col h-auto sm:h-[24.75rem] border ${
             isPremium ? "border-[#14b82c]" : "border-[#ffc71f]"
           } ${
             isIndividualPremium ? "bg-[#e6fde9]" : "bg-white"
@@ -208,8 +208,7 @@ const ClassCard = ({
                 </div>
               </div>
             </div>
-          </div>
-
+          </div>{" "}
           <div className="flex flex-col items-center justify-end w-full p-2 space-y-2">
             <div className="flex flex-col items-start justify-between w-full gap-2 sm:flex-row sm:items-center sm:gap-0">
               <div className="flex items-center space-x-2">
@@ -249,6 +248,8 @@ const ClassCard = ({
                 )}
               </div>
             </div>
+
+            <div className="w-full h-12 mt-4"></div>
           </div>
         </div>
       </div>
@@ -384,6 +385,7 @@ const ClassCard = ({
             </div>
           </div>
 
+          {/* At the bottom of the card, always render a button area with fixed height */}
           <div className="p-4">
             <button className="w-full py-2.5 sm:py-3 text-sm sm:text-base font-medium text-black bg-[#ffbf00] rounded-full hover:bg-[#e6ac00] border border-black">
               Join Class

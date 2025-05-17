@@ -36,14 +36,23 @@ const ProfileTutor = () => {
 
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         if (user?.uid) {
           const userDoc = await getDoc(doc(db, "tutors", user.uid));
           if (userDoc.exists()) {
-            setUserData(userDoc.data());
+            const tutorData = userDoc.data();
+            setUserData(tutorData);
+
+            // Log for debugging
+            console.log("Tutor data loaded:", {
+              photoUrl: tutorData.photoUrl,
+              name: tutorData.name,
+              teachingLanguage: tutorData.teachingLanguage,
+              tutorOfClasses: tutorData.tutorOfClasses?.length || 0,
+              tutorOfGroups: tutorData.tutorOfGroups?.length || 0,
+            });
           }
         }
       } catch (error) {
@@ -114,30 +123,41 @@ const ProfileTutor = () => {
           <div className="grid grid-cols-2 gap-10">
             {/* Profile Info Card */}
             <div className="bg-[#e6fde9] rounded-3xl p-8 flex flex-col items-center">
+              {" "}
               <div className="flex items-center justify-center w-32 h-32 mb-4 bg-white rounded-full">
                 <img
-                  src={user?.photoUrl || "/svgs/supertutor-panda.svg"}
-                  alt="Profile"
+                  src={
+                    userData?.photoUrl ||
+                    user?.photoUrl ||
+                    "/svgs/supertutor-panda.svg"
+                  }
+                  alt={t("instructor-profile.alt-text.profile-image", {
+                    name: userData?.name || user?.name || "",
+                  })}
                   className="object-cover w-full h-full rounded-full"
+                  onError={(e) => {
+                    console.log(
+                      "Profile image failed to load, using default panda"
+                    );
+                    e.target.src = "/svgs/supertutor-panda.svg";
+                  }}
+                  referrerPolicy="no-referrer"
                 />
-              </div>
-
+              </div>{" "}
               <h2 className="mb-4 text-3xl font-semibold">
-                {user?.name || "User"}
+                {userData?.name || user?.name || t("common.user", "User")}
               </h2>
-
               <div className="flex items-center gap-2 px-3 py-1 mb-6 text-xl bg-white rounded-full">
                 <img alt="bambbuu" src="/svgs/fire.svg" className="w-6 h-6" />
                 <span className="font-semibold text-[#6D6D6D]">
                   {t("profile.appStreak")}
-                </span>
+                </span>{" "}
                 <span className="font-bold text-green-600">
-                  {user?.currentStreak || 0}
+                  {userData?.currentStreak || user?.currentStreak || 0}
                 </span>
               </div>
-
               <div className="grid w-full grid-cols-3 gap-4 mb-6 text-xl">
-                {/* Language and Location Info */}
+                {/* Language and Location Info */}{" "}
                 <div className="flex items-center min-w-0 gap-1">
                   <img
                     alt="bambbuu"
@@ -148,7 +168,7 @@ const ProfileTutor = () => {
                     {t("profile.native")}:
                   </span>
                   <span className="font-medium text-gray-600 truncate">
-                    {user?.nativeLanguage || "-"}
+                    {userData?.nativeLanguage || user?.nativeLanguage || "-"}
                   </span>
                 </div>
                 <div className="flex items-center min-w-0 gap-1">
@@ -161,9 +181,11 @@ const ProfileTutor = () => {
                     {t("profile.teaching")}:
                   </span>
                   <span className="font-medium text-gray-600 truncate">
-                    {user?.learningLanguage || "-"}
+                    {userData?.teachingLanguage ||
+                      user?.teachingLanguage ||
+                      "-"}
                   </span>
-                </div>
+                </div>{" "}
                 <div className="flex items-center min-w-0 gap-1">
                   <img
                     alt="bambbuu"
@@ -174,26 +196,29 @@ const ProfileTutor = () => {
                     {t("profile.from")}:
                   </span>
                   <span className="font-medium text-gray-600 truncate">
-                    {user?.country || "-"}
+                    {userData?.country || user?.country || "-"}
                   </span>
                 </div>
-              </div>
-
+              </div>{" "}
               <div className="grid w-full grid-cols-2 gap-4 text-xl">
                 <div className="flex items-center gap-2">
                   <span className="font-semibold text-black whitespace-nowrap">
-                    {t("profile.stats.totalClassesJoined")}:
+                    {t("instructor-profile.stats.totalClassesTaught")}:
                   </span>
                   <span className="font-medium text-gray-600">
-                    {user?.enrolledClasses?.length || 0}
+                    {userData?.tutorOfClasses?.length ||
+                      user?.tutorOfClasses?.length ||
+                      0}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="font-semibold text-black whitespace-nowrap">
-                    {t("profile.stats.totalGroupsJoined")}:
+                    {t("instructor-profile.stats.totalGroupsCreated")}:
                   </span>
                   <span className="font-medium text-gray-600">
-                    {user?.joinedGroups?.length || 0}
+                    {userData?.tutorOfGroups?.length ||
+                      user?.tutorOfGroups?.length ||
+                      0}
                   </span>
                 </div>
               </div>

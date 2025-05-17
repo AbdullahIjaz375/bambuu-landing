@@ -665,10 +665,10 @@ const ClassDetailsTutor = ({ onClose }) => {
                       </div>
                     </div>
 
-                    <ShowDescription 
-                       description={classData.classDescription} 
-                       maxHeight={100}
-                       />
+                    <ShowDescription
+                      description={classData.classDescription}
+                      maxHeight={100}
+                    />
                   </div>
 
                   <div className="w-full space-y-4">
