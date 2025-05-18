@@ -3,11 +3,8 @@ import { StreamVideoClient } from "@stream-io/video-react-sdk";
 import axios from "axios";
 
 export const streamApiKey = process.env.REACT_APP_STREAM_API_KEY;
-export const apiBaseUrl = process.env.REACT_APP_API_URL || "http://localhost:5000";
 export const videotokenUrl = process.env.REACT_APP_VIDEO_TOKEN_URL;
 export const chattokenUrl = process.env.REACT_APP_CHAT_TOKEN_URL;
-
-const DEBUG = process.env.NODE_ENV === "development";
 
 export const streamClient = StreamChat.getInstance(streamApiKey, {
   timeout: 20000,
@@ -22,7 +19,6 @@ export const streamClient = StreamChat.getInstance(streamApiKey, {
 
 export const streamVideoClient = new StreamVideoClient({
   apiKey: streamApiKey,
-  logLevel: DEBUG ? "debug" : "error",
   options: {
     timeout: 20000,
     reconnectionDelay: 2000,
@@ -44,20 +40,34 @@ export const fetchChatToken = async (userId) => {
       throw new Error("User ID is required to generate a token");
     }
 
-    const userInfo = JSON.parse(sessionStorage.getItem("user") || "{}");
-    
+    const userInfo = JSON.parse(sessionStorage.getItem("user") || "{}"); // Determine user's role based on subscriptions, free access, etc.
+    const isPremium =
+      userInfo.freeAccess ||
+      (userInfo.subscriptions &&
+        userInfo.subscriptions.some(
+          (sub) =>
+            sub.type === "Bammbuu Groups" &&
+            (!sub.endDate || new Date(sub.endDate) > new Date()) &&
+            (!sub.startDate || new Date(sub.startDate) <= new Date())
+        ));
+
+    const isTutor = userInfo.userType === "tutor";
+
+    // Include user role info in token request
     const response = await axios.post(
       chattokenUrl,
       {
         userId,
         userName: userInfo.name || "User",
         userImage: userInfo.photoUrl || "",
-      }, 
+        isPremium: isPremium || isTutor, // Tutors always get premium access
+        isTutor, // Special flag for tutors
+      },
       {
         timeout: 10000, // Add timeout to prevent long hanging requests
         headers: {
-          'Content-Type': 'application/json'
-        }
+          "Content-Type": "application/json",
+        },
       }
     );
 
@@ -69,17 +79,27 @@ export const fetchChatToken = async (userId) => {
     return response.data.token;
   } catch (error) {
     console.error("Failed to fetch Stream chat token:", error);
-    
+
     // More specific error messaging
     if (error.response) {
       // The request was made and the server responded with a status code
       // that falls out of the range of 2xx
-      console.error("Server returned error:", error.response.status, error.response.data);
-      throw new Error(`Token service error: ${error.response.status} - ${error.response.data?.message || 'Unknown error'}`);
+      console.error(
+        "Server returned error:",
+        error.response.status,
+        error.response.data
+      );
+      throw new Error(
+        `Token service error: ${error.response.status} - ${
+          error.response.data?.message || "Unknown error"
+        }`
+      );
     } else if (error.request) {
       // The request was made but no response was received
       console.error("No response from token server");
-      throw new Error("Token service unavailable. Please check your connection and try again.");
+      throw new Error(
+        "Token service unavailable. Please check your connection and try again."
+      );
     } else {
       // Something happened in setting up the request that triggered an Error
       throw new Error(`Token fetch error: ${error.message}`);
@@ -101,8 +121,8 @@ export const fetchVideoToken = async (userId) => {
       {
         timeout: 10000, // Add timeout to prevent long hanging requests
         headers: {
-          'Content-Type': 'application/json'
-        }
+          "Content-Type": "application/json",
+        },
       }
     );
 
@@ -114,14 +134,24 @@ export const fetchVideoToken = async (userId) => {
     return response.data.token;
   } catch (error) {
     console.error("Failed to fetch Stream video token:", error);
-    
+
     // More specific error messaging
     if (error.response) {
-      console.error("Server returned error:", error.response.status, error.response.data);
-      throw new Error(`Video token service error: ${error.response.status} - ${error.response.data?.message || 'Unknown error'}`);
+      console.error(
+        "Server returned error:",
+        error.response.status,
+        error.response.data
+      );
+      throw new Error(
+        `Video token service error: ${error.response.status} - ${
+          error.response.data?.message || "Unknown error"
+        }`
+      );
     } else if (error.request) {
       console.error("No response from video token server");
-      throw new Error("Video token service unavailable. Please check your connection and try again.");
+      throw new Error(
+        "Video token service unavailable. Please check your connection and try again."
+      );
     } else {
       throw new Error(`Video token fetch error: ${error.message}`);
     }
@@ -143,13 +173,15 @@ export const generateStreamToken = async (userId) => {
     // ONLY use devToken in development, NEVER in production
     if (process.env.NODE_ENV === "development") {
       console.warn("⚠️ USING DEV TOKEN - NOT SECURE FOR PRODUCTION ⚠️");
-      
+
       // This is the line that causes your error in production
       // Only use it in development
       return streamClient.devToken(userId);
     } else {
       // In production, we must have a proper token
-      throw new Error("Authentication service unavailable. Please try again later.");
+      throw new Error(
+        "Authentication service unavailable. Please try again later."
+      );
     }
   }
 };

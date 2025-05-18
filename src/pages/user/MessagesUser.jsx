@@ -8,6 +8,8 @@ import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import { useParams, useNavigate } from "react-router-dom";
 import CustomChatComponent from "../../components/ChatComponent";
+import { syncChannelWithFirestore } from "../../services/streamService";
+import { safeMarkChannelRead } from "../../services/streamConnectionService";
 
 const MessagesUser = () => {
   const { user } = useAuth();
@@ -20,20 +22,23 @@ const MessagesUser = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [unreadCounts, setUnreadCounts] = useState({});
   const [groupLanguages, setGroupLanguages] = useState({});
+  const [groupNames, setGroupNames] = useState({});
   const [onlineUsers, setOnlineUsers] = useState({});
   const { channelId: urlChannelId } = useParams();
   const [streamClientConnected, setStreamClientConnected] = useState(false);
-
-
-
   useEffect(() => {
     const savedActiveTab = localStorage.getItem("activetab");
     if (savedActiveTab) {
       setActiveTab(savedActiveTab);
     }
-  }, []);
 
-
+    // Force select the bammbuu+ tab if there's a channel ID in the URL
+    // This helps ensure the correct tab is selected when navigating directly to a channel
+    if (urlChannelId) {
+      setActiveTab("bammbuu");
+      localStorage.setItem("activetab", "bammbuu");
+    }
+  }, [urlChannelId]);
 
   const handleChannelLeave = (channelId) => {
     setChannels((prevChannels) =>
@@ -269,7 +274,6 @@ const MessagesUser = () => {
             });
           })
         );
-
         const groupIds = channels
           .filter(
             (channel) =>
@@ -280,25 +284,73 @@ const MessagesUser = () => {
 
         console.log("Group IDs for language data:", groupIds);
 
+        // Get group data from Firestore and sync with Stream
         const groupLanguagesData = {};
+        const groupNamesData = {};
+
         await Promise.all(
           groupIds.map(async (groupId) => {
-            const groupRef = doc(db, "groups", groupId);
-            const groupDoc = await getDoc(groupRef);
-            if (groupDoc.exists()) {
-              groupLanguagesData[groupId] =
-                groupDoc.data().groupLearningLanguage;
-            } else {
-              console.log(`Group document not found for ID: ${groupId}`);
-              // Set a default language for groups without document data
-              groupLanguagesData[groupId] = "Unknown";
+            try {
+              // First sync the channel with Firestore to ensure names and images are correct
+              const channel = channels.find((ch) => ch.id === groupId);
+              if (channel) {
+                // Sync channel data with Firestore
+                const result = await syncChannelWithFirestore({
+                  channelId: groupId,
+                  type: channel.type,
+                });
+                console.log(`Channel sync result for ${groupId}:`, result);
+              }
+
+              // Get group data for local display
+              const groupRef = doc(db, "groups", groupId);
+              const groupDoc = await getDoc(groupRef);
+              if (groupDoc.exists()) {
+                const groupData = groupDoc.data();
+                groupLanguagesData[groupId] =
+                  groupData.groupLearningLanguage || "Unknown";
+
+                // Store the actual group name from Firestore
+                groupNamesData[groupId] =
+                  groupData.groupName || "Unnamed Group";
+
+                // Update the channel data with the correct name from Firestore
+                const channelToUpdate = channels.find(
+                  (ch) => ch.id === groupId
+                );
+                if (channelToUpdate) {
+                  if (channelToUpdate.data) {
+                    channelToUpdate.data.name = groupData.groupName;
+                    // Also update the image if available
+                    if (groupData.imageUrl) {
+                      channelToUpdate.data.image = groupData.imageUrl;
+                    }
+                  } else {
+                    channelToUpdate.data = {
+                      name: groupData.groupName,
+                      image: groupData.imageUrl || null,
+                    };
+                  }
+                  console.log(
+                    `Updated channel ${groupId} with name from Firestore: ${groupData.groupName}`
+                  );
+                }
+              } else {
+                console.log(`Group document not found for ID: ${groupId}`);
+                // Set defaults for groups without document data
+                groupLanguagesData[groupId] = "Unknown";
+                groupNamesData[groupId] = "Unnamed Group";
+              }
+            } catch (syncError) {
+              console.error(`Error syncing channel ${groupId}:`, syncError);
             }
           })
         );
-
         console.log("Group language data:", groupLanguagesData);
+        console.log("Group name data:", groupNamesData);
 
         setGroupLanguages(groupLanguagesData);
+        setGroupNames(groupNamesData);
         setUnreadCounts(counts);
         setOnlineUsers(onlineStatusMap);
         setChannels(channels);
@@ -341,14 +393,19 @@ const MessagesUser = () => {
             ) {
               setActiveTab("bammbuu");
             }
-
             setSelectedChannel(channelToSelect);
             setSelectedChatInfo(getOtherUserFromChannel(channelToSelect));
-            await channelToSelect.markRead();
-            setUnreadCounts((prev) => ({
-              ...prev,
-              [channelToSelect.id]: 0,
-            }));
+
+            // Use safe mark read function to prevent disconnect errors
+            try {
+              await safeMarkChannelRead(channelToSelect);
+              setUnreadCounts((prev) => ({
+                ...prev,
+                [channelToSelect.id]: 0,
+              }));
+            } catch (markReadError) {
+              console.error("Error marking channel as read:", markReadError);
+            }
           }
         } else {
           // Don't select any channel by default
@@ -361,26 +418,30 @@ const MessagesUser = () => {
         setLoading(false);
       }
     };
-
     loadChannels();
 
     return () => {
       // Cleanup channel listeners when component unmounts
-      channels.forEach((channel) => {
-        channel.off("message.new");
-        channel.off("message.read");
-        channel.off("user.presence.changed");
-      });
+      if (channels && channels.length) {
+        channels.forEach((channel) => {
+          try {
+            channel.off("message.new");
+            channel.off("message.read");
+            channel.off("user.presence.changed");
+          } catch (error) {
+            console.error(`Error cleaning up channel ${channel.id}:`, error);
+          }
+        });
+      }
     };
-  }, [user, streamClientConnected]);
-
+  }, [user, streamClientConnected, urlChannelId]);
   const handleChannelSelect = async (channel) => {
     setSelectedChannel(channel);
     setSelectedChatInfo(getOtherUserFromChannel(channel));
 
     try {
-      // Mark channel as read when selected
-      await channel.markRead();
+      // Mark channel as read when selected - use safe function to prevent disconnect errors
+      await safeMarkChannelRead(channel);
       setUnreadCounts((prev) => ({
         ...prev,
         [channel.id]: 0,
@@ -413,52 +474,89 @@ const MessagesUser = () => {
     });
   };
 
-
   console.log("Channels:  --", channels);
-
-
+  // Log all channels with types for debugging
+  console.log(
+    "All channels:",
+    channels.map((ch) => ({
+      id: ch.id,
+      type: ch.type,
+      name: ch.data.name,
+      members: Object.keys(ch.state?.members || {}),
+    }))
+  );
   // Standard chats - only standard_group
   const standardChats = filterChannels(
-    channels.filter(
-      (channel) =>
-        channel.type === "standard_group" &&
-        channel.data.name &&
-        channel.data.name.trim() !== ""
-    )
+    channels.filter((channel) => channel.type === "standard_group")
   );
 
-    
+  console.log(
+    "Filtered for standard tab:",
+    standardChats.length,
+    standardChats.map((ch) => ({
+      id: ch.id,
+      type: ch.type,
+      name: ch.data?.name || "Unnamed channel",
+    }))
+  );
 
   // Bammbuu+ chats - all other types (premium_group, premium_individual_class, one_to_one_chat)
   const filteredForBammbuu = channels.filter(
     (channel) =>
-      (channel.type === "premium_group" ||
-        channel.type === "premium_individual_class" ||
-        channel.type === "one_to_one_chat") &&
-      channel.data.name &&
-      channel.data.name.trim() !== ""
+      channel.type === "premium_group" ||
+      channel.type === "premium_individual_class" ||
+      channel.type === "one_to_one_chat"
   );
-
   console.log(
     "Filtered for bammbuu+ tab:",
     filteredForBammbuu.length,
     filteredForBammbuu.map((ch) => ({
       id: ch.id,
       type: ch.type,
-      name: ch.data.name,
+      name: ch.data?.name || "Unnamed",
     }))
   );
-
-  const bammbuuChats = filterChannels(filteredForBammbuu);
-
   const ChatItem = ({ channel, isInstructor }) => {
     const groupLanguage = groupLanguages[channel.id];
+    const groupName = groupNames[channel.id];
     const latestMessage =
-      channel.state.messages[channel.state.messages.length - 1];
+      channel.state?.messages?.length > 0
+        ? channel.state.messages[channel.state.messages.length - 1]
+        : null;
     const channelOnlineStatus = onlineUsers[channel.id];
 
     // Debug channel type for troubleshooting
-    console.log(`Rendering channel ${channel.id}, type: ${channel.type}`);
+    console.log(
+      `Rendering channel ${channel.id}, type: ${channel.type}, raw name: "${
+        channel.data?.name || "undefined"
+      }", firestore name: "${groupName || "none"}"`
+    );
+
+    // Add fallback name for channels without proper names
+    let displayName = "";
+    // First priority: Use the Firestore group name for group channels
+    if (
+      (channel.type === "standard_group" || channel.type === "premium_group") &&
+      groupName
+    ) {
+      displayName = groupName;
+    }
+    // Second priority: Use the Stream channel name if available
+    else if (channel.data?.name && channel.data.name.trim() !== "") {
+      displayName = channel.data.name;
+    }
+    // Fallbacks based on channel type
+    else if (channel.type === "premium_group") {
+      displayName = "Premium Group";
+    } else if (channel.type === "standard_group") {
+      displayName = "Standard Group";
+    } else if (channel.type === "premium_individual_class") {
+      displayName = "Private Class";
+    } else if (channel.type === "one_to_one_chat") {
+      displayName = "Private Chat";
+    } else {
+      displayName = `Channel (${channel.id})`;
+    }
 
     const getMessagePreview = (message) => {
       if (!message) return "No messages yet";
@@ -477,9 +575,9 @@ const MessagesUser = () => {
       }
 
       // Regular text message
-      return message.text.length > 30
+      return message.text?.length > 30
         ? message.text.slice(0, 30) + "..."
-        : message.text;
+        : message.text || "No message content";
     };
 
     // Get other user's data for display (for one-to-one chats)
@@ -517,11 +615,11 @@ const MessagesUser = () => {
           {isInstructor && channelOnlineStatus?.isOnline && (
             <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
           )}
-        </div>
+        </div>{" "}
         <div className="flex-1">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold">
-              {otherUser?.name || channel.data.name}
+              {otherUser?.name || displayName || "Unnamed Channel"}
             </h3>
             {isInstructor ? (
               <span
@@ -625,7 +723,6 @@ const MessagesUser = () => {
                   </button>
                 </div>
               </div>
-
               <div className="relative mb-4">
                 <Search className="absolute w-5 h-5 text-[#5d5d5d] left-3 top-3" />
                 <input
@@ -639,63 +736,96 @@ const MessagesUser = () => {
                   }
                   className="w-full py-2 pl-12 pr-4 border border-gray-200 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                 />
-              </div>
-
+              </div>{" "}
               <div className="flex-1 space-y-2 overflow-y-auto scrollbar-hide">
                 {activeTab === "bammbuu" ? (
-                  // For bammbuu+ chats, display both identified premium types and any groups that might not be properly typed
+                  // For bammbuu+ chats
                   <>
-                    {channels
-                      .filter((channel) => {
-                        // Check if this is any type of premium channel
-                        const isPremiumType =
-                          channel.type === "premium_group" ||
-                          channel.type === "premium_individual_class" ||
-                          channel.type === "one_to_one_chat";
-
-                        // Also include channels that might be premium groups but not properly typed
-                        const mightBePremiumGroup =
-                          channel.data &&
-                          channel.data.name &&
-                          channel.data.name.trim() !== "" &&
-                          // Check for any premium-related flags in channel data
-                          (channel.data.isPremium === true ||
-                            channel.data.premium === true ||
-                            (channel.data.custom &&
-                              channel.data.custom.isPremium === true));
-
-                        return (
-                          (isPremiumType || mightBePremiumGroup) &&
+                    {filteredForBammbuu.length > 0 ? (
+                      filteredForBammbuu
+                        .filter((channel) => {
                           // Apply search filter
-                          (!searchQuery ||
-                            channel.data.name
+                          const channelName = channel.data?.name || "";
+                          const channelDesc = channel.data?.description || "";
+
+                          return (
+                            !searchQuery ||
+                            channelName
                               .toLowerCase()
                               .includes(searchQuery.toLowerCase()) ||
-                            (channel.data.description || "")
+                            channelDesc
                               .toLowerCase()
-                              .includes(searchQuery.toLowerCase()))
-                        );
-                      })
-                      .map((channel) => (
-                        <ChatItem
-                          key={channel.id}
-                          channel={channel}
-                          isInstructor={
-                            channel.type === "premium_individual_class" ||
-                            channel.type === "one_to_one_chat"
-                          }
-                        />
-                      ))}
+                              .includes(searchQuery.toLowerCase())
+                          );
+                        })
+                        .map((channel) => {
+                          // Debug why this specific channel is being rendered
+                          console.log(
+                            `Rendering bammbuu+ chat: ${channel.id}, type: ${
+                              channel.type
+                            }, name: ${channel.data?.name || "Unnamed"}`
+                          );
+
+                          return (
+                            <ChatItem
+                              key={channel.id}
+                              channel={channel}
+                              isInstructor={
+                                channel.type === "premium_individual_class" ||
+                                channel.type === "one_to_one_chat"
+                              }
+                            />
+                          );
+                        })
+                    ) : (
+                      <div className="flex flex-col items-center justify-center h-64">
+                        <p className="text-xl font-semibold text-gray-500">
+                          No Bammbuu+ chats found
+                        </p>
+                        <p className="text-sm text-gray-400">
+                          (Looking for {filteredForBammbuu.length} channels with
+                          types: premium_group, premium_individual_class,
+                          one_to_one_chat)
+                        </p>
+                      </div>
+                    )}
                   </>
                 ) : (
-                  // Standard chats remain the same
-                  standardChats.map((channel) => (
-                    <ChatItem
-                      key={channel.id}
-                      channel={channel}
-                      isInstructor={false}
-                    />
-                  ))
+                  // Standard chats
+                  <>
+                    {standardChats.length > 0 ? (
+                      standardChats.map((channel) => {
+                        console.log(
+                          `Rendering standard chat: ${channel.id}, type: ${
+                            channel.type
+                          }, name: ${channel.data?.name || "Unnamed"}`
+                        );
+
+                        return (
+                          <ChatItem
+                            key={channel.id}
+                            channel={channel}
+                            isInstructor={false}
+                          />
+                        );
+                      })
+                    ) : (
+                      <div className="flex flex-col items-center justify-center h-64">
+                        <p className="text-xl font-semibold text-gray-500">
+                          No standard chats found
+                        </p>
+                        <p className="text-sm text-gray-400">
+                          (Looking for{" "}
+                          {
+                            channels.filter(
+                              (ch) => ch.type === "standard_group"
+                            ).length
+                          }{" "}
+                          standard_group channels)
+                        </p>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>
