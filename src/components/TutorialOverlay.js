@@ -117,7 +117,7 @@ const TutorialOverlay = () => {
           <div className="flex items-center justify-between">
             <button onClick={handleSkip} className="text-white hover:underline">
               {t("tutorial.buttons.skip", "Skip")}
-            </button>
+            </button>{" "}
             <button
               onClick={handleNext}
               className="px-4 py-1 bg-white text-[#043D11] rounded-full hover:bg-opacity-90"

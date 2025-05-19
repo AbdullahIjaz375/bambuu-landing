@@ -1,0 +1,34 @@
+{
+  "profileSetup": {
+    "title": "Configuración de Perfil",
+    "subtitle": "¡Ya casi estamos listos! Selecciona el idioma que quieres aprender.",
+    "joinGroups": "Unámonos a algunos grupos a continuación.",
+    "bookClasses": "Reservemos algunas clases a continuación.",
+    "noGroups": "No hay grupos disponibles para unirse en este momento.",
+    "noClasses": "No hay clases disponibles para reservar en este momento.",
+    "learningLanguage": "Idioma de Aprendizaje",
+    "languageProficiency": "Nivel de Idioma",
+    "proficiencyLevels": {
+      "beginner": "Principiante",
+      "intermediate": "Intermedio",
+      "advanced": "Avanzado"
+    },
+    "buttons": {
+      "back": "Atrás",
+      "continue": "Continuar",
+      "skip": "Omitir",
+      "nextStep": "Siguiente (1/4)",
+      "nextStep2": "Siguiente (2/4)"
+    },
+    "tooltips": {
+      "joinGroups": {
+        "title": "Únete a 1 o más grupos de aprendizaje de idiomas.",
+        "description": "Descripción: Aprovecha al máximo bammbuu. Los grupos comunitarios de idiomas son gratuitos para crear y unirse. Te permiten conectarte con hablantes nativos para practicar el idioma a través de conversaciones en vivo."
+      },
+      "bookClasses": {
+        "title": "Reserva 1 o más clases.",
+        "description": "Reserva clases de conversación grupales ilimitadas en vivo impartidas por instructores de idiomas certificados por un precio mensual. Estas clases están más estructuradas y se proporciona retroalimentación experta para ayudarte con tu aprendizaje."
+      }
+    }
+  }
+}

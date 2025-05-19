@@ -964,5 +964,20 @@
         "description": "Book unlimited live group conversation classes hosted by certified language instructors for one monthly price. These classes are more structured and expert feedback is provided to help with your learning."
       }
     }
+  },
+  "tutorial": {
+    "step1": {
+      "title": "Explore Certified Instructors",
+      "description": "Book live 1:1 language classes with certified instructors to bring your language learning to the next level."
+    },
+    "step2": {
+      "title": "AI Tutor",
+      "description": "Practice 24/7 with our AI language SuperTutor. Ask SuperTutor for language translations and grammar questions. You can also have a practice conversation in the language you are learning!"
+    },
+    "buttons": {
+      "skip": "Skip",
+      "next": "Next (3/4)",
+      "done": "Done (4/4)"
+    }
   }
 }
