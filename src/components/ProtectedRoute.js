@@ -40,11 +40,12 @@ const ProtectedRoute = ({ children, requiredRole }) => {
       localStorage.setItem("selectedClassUrl", currentUrl);
     }
 
-    // Save all group detail URLs regardless of query params
+    // Save group detail URL ONLY if user is not logged in and path is a group details page
     if (
-      urlObj.pathname.includes("/groupDetailsTutor/") ||
-      urlObj.pathname.includes("/groupDetailsUser/") ||
-      urlObj.pathname.includes("/newGroupDetailsUser/")
+      !user &&
+      (currentPath.includes("/groupDetailsTutor/") ||
+        currentPath.includes("/groupDetailsUser/") ||
+        currentPath.includes("/newGroupDetailsUser/"))
     ) {
       localStorage.setItem("selectedGroupUrl", currentUrl);
     }

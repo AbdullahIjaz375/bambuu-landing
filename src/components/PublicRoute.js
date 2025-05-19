@@ -67,7 +67,12 @@ const PublicRoute = ({ children }) => {
 
     if (params.get("ref") === "group") {
       const groupUrl = localStorage.getItem("selectedGroupUrl");
-      if (groupUrl) {
+      if (
+        groupUrl &&
+        (groupUrl.includes("/groupDetailsTutor/") ||
+          groupUrl.includes("/groupDetailsUser/") ||
+          groupUrl.includes("/newGroupDetailsUser/"))
+      ) {
         try {
           const parsedUrl = new URL(groupUrl);
           const path = parsedUrl.pathname + parsedUrl.search;
@@ -76,7 +81,10 @@ const PublicRoute = ({ children }) => {
           return <Navigate to={path} />;
         } catch (error) {
           console.error("Error parsing group URL:", error);
+          localStorage.removeItem("selectedGroupUrl"); // Always clear if error
         }
+      } else {
+        localStorage.removeItem("selectedGroupUrl"); // Clear if not valid
       }
     }
 

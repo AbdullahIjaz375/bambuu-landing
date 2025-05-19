@@ -93,7 +93,12 @@ const LoginTutor = () => {
       }
     } else if (params.get("ref") === "group") {
       const savedUrl = localStorage.getItem("selectedGroupUrl");
-      if (savedUrl) {
+      if (
+        savedUrl &&
+        (savedUrl.includes("/groupDetailsTutor/") ||
+          savedUrl.includes("/groupDetailsUser/") ||
+          savedUrl.includes("/newGroupDetailsUser/"))
+      ) {
         try {
           const parsedUrl = new URL(savedUrl);
           const path = parsedUrl.pathname + parsedUrl.search;
@@ -102,7 +107,10 @@ const LoginTutor = () => {
           return;
         } catch (error) {
           console.error("Error parsing saved group URL:", error);
+          localStorage.removeItem("selectedGroupUrl"); // Always clear if error
         }
+      } else {
+        localStorage.removeItem("selectedGroupUrl"); // Clear if not valid
       }
     }
     // Fallback: Redirect to the tutor landing page.
