@@ -2,7 +2,6 @@ import React from "react";
 import { motion } from "framer-motion";
 import Navbar from "../components/Navbar";
 import { useAuth } from "../context/AuthContext";
-import { Button } from "@mantine/core";
 import "../styles/LandingStyles.css";
 import Footer from "../components/Footer";
 
@@ -26,12 +25,12 @@ const Card = ({ title, description, imageSrc, index }) => {
           {description}
         </p>
       </div>
-      
+
       <div className="flex-grow w-full flex items-end justify-center mt-4 relative">
-        <img 
-          alt={title} 
-          src={imageSrc} 
-          className="w-auto max-w-full h-auto max-h-[220px] sm:max-h-[250px] md:max-h-[280px] lg:max-h-[300px] object-contain" 
+        <img
+          alt={title}
+          src={imageSrc}
+          className="w-auto max-w-full h-auto max-h-[220px] sm:max-h-[250px] md:max-h-[280px] lg:max-h-[300px] object-contain"
         />
       </div>
     </motion.div>
@@ -133,18 +132,32 @@ const Landing = () => {
           className="flex flex-col items-center justify-center rounded-3xl lg:rounded-[6vh] border-2 border-[#14b82c] bg-[#e6fde9] pt-16 lg:pt-28 mx-4 lg:mx-28 space-y-6 lg:space-y-10 mb-8"
         >
           <h1 className="px-4 text-3xl font-semibold text-center text-black lg:text-6xl">
-            The bammbuu mobile version
-            <br /> is coming soon!
+            Download the app now
           </h1>
-          <Button
-            className="text-black border-2 border-black"
-            size="xl"
-            variant="filled"
-            color="#ffbf00"
-            radius="xl"
-          >
-            Coming Soon!
-          </Button>
+          <div className="flex flex-row gap-4 mt-2 mb-2">
+            <a
+              href="https://apps.apple.com/us/app/bammbuu-language-learning/id6739758405"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                src="/images/apple-button.png"
+                alt="Apple Store"
+                className="h-12 w-auto"
+              />
+            </a>
+            <a
+              href="https://play.google.com/store/apps/details?id=com.bammbuu.app&pli=1"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                src="/images/playstore-button.png"
+                alt="Google Play"
+                className="h-12 w-auto"
+              />
+            </a>
+          </div>
           <img
             alt="bambuu"
             src="/svgs/new1.svg"
