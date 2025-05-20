@@ -40,7 +40,7 @@ const GroupInfoCard = ({ group }) => {
     <div className={`${baseCardClass} border-green-500`}>
       <img
         alt={`${tutorInfo?.name || "Tutor"}'s profile`}
-        src={tutorInfo?.photoUrl || "/api/placeholder/80/80"}
+        src={tutorInfo?.photoUrl || "/images/panda.png"}
         className={`${imgClass} w-24 h-24 rounded-xl flex-shrink-0`}
       />
       <div className="flex flex-col items-start w-full flex-1 gap-2 overflow-hidden">

@@ -110,7 +110,7 @@ const LanguageExpertsPage = () => {
       >
         <div className="flex flex-col gap-4 sm:flex-row">
           <img
-            src={tutor.photoUrl || "/api/placeholder/80/80"}
+            src={tutor.photoUrl || "/images/panda.png"}
             alt={tutor.name}
             className="object-cover mx-auto rounded-lg w-28 h-28 sm:mx-0"
           />

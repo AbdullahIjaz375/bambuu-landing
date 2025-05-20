@@ -273,7 +273,7 @@ const InstructorProfileUser = () => {
               <div className="flex flex-col items-center justify-between h-full text-center">
                 <div className="flex flex-col items-center w-full text-center">
                   <img
-                    src={tutor.photoUrl || "/api/placeholder/128/128"}
+                    src={tutor.photoUrl || "/images/panda.png"}
                     alt={tutor.name}
                     className="object-cover w-24 h-24 mb-4 rounded-full sm:w-32 sm:h-32"
                   />

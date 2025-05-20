@@ -266,7 +266,7 @@ const ClassCardTutor = ({
             <div className="flex flex-col items-center">
               <div className="w-24 h-24 mb-4">
                 <img
-                  src={imageUrl || "/api/placeholder/96/96"}
+                  src={imageUrl || "/images/panda.png"}
                   alt={className}
                   className="object-cover w-full h-full rounded-full"
                 />
@@ -316,7 +316,7 @@ const ClassCardTutor = ({
                     }`}
                   >
                     <img
-                      src="/api/placeholder/48/48"
+                      src="/images/panda.png"
                       alt={`${language} flag`}
                       className="w-12 h-12 rounded-full"
                     />
@@ -328,7 +328,7 @@ const ClassCardTutor = ({
                       </div>
                       <div className="flex items-center gap-2 text-sm text-gray-600">
                         <img
-                          src="/api/placeholder/16/16"
+                          src="/images/panda.png"
                           alt={language}
                           className="w-4 h-4 rounded-full"
                         />
@@ -336,7 +336,7 @@ const ClassCardTutor = ({
                         <span>•</span>
                         <div className="flex items-center gap-1">
                           <img
-                            src={adminImageUrl || "/api/placeholder/16/16"}
+                            src={adminImageUrl || "/images/panda.png"}
                             alt={t("class-card-tutor.modal.leader")}
                             className="w-4 h-4 rounded-full"
                           />

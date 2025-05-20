@@ -460,13 +460,13 @@ const GroupDetailsModal = ({ group, onClose }) => {
             <div className="flex flex-col items-center justify-center border border-[#14b82c] bg-white rounded-3xl p-1">
               <div className="relative w-full">
                 <img
-                  src={classItem.imageUrl || "/api/placeholder/400/300"}
+                  src={classItem.imageUrl || "/images/panda.png"}
                   alt={classItem.className}
                   className="object-cover w-full h-28 rounded-t-2xl"
                 />
                 {classItem.isBammbuu && (
                   <img
-                    src="/api/placeholder/112/32"
+                    src="/images/panda.png"
                     alt="Bammbuu+"
                     className="absolute w-16 h-4 top-1 left-1"
                   />
@@ -563,7 +563,7 @@ const GroupDetailsModal = ({ group, onClose }) => {
             <div className="flex items-center gap-3">
               <div className="relative">
                 <img
-                  src={member.photoUrl || "/api/placeholder/40/40"}
+                  src={member.photoUrl || "/images/panda.png"}
                   alt={member.name}
                   className="object-cover rounded-full w-9 h-9"
                 />

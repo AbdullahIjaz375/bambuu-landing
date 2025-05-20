@@ -67,7 +67,7 @@ const ExploreGroupDetailsModal = ({ group, onClose, onJoinClick }) => {
           <div key={classItem.id} className="p-4 bg-white rounded-lg shadow">
             <div className="relative w-full h-48 mb-4 overflow-hidden rounded-lg">
               <img
-                src={classItem.imageUrl || "/api/placeholder/400/300"}
+                src={classItem.imageUrl || "/images/panda.png"}
                 alt={classItem.className}
                 className="object-cover w-full h-full"
               />
@@ -84,7 +84,7 @@ const ExploreGroupDetailsModal = ({ group, onClose, onJoinClick }) => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <img
-                  src={classItem.teacherImageUrl || "/api/placeholder/32/32"}
+                  src={classItem.teacherImageUrl || "/images/panda.png"}
                   alt={classItem.teacherName}
                   className="w-6 h-6 rounded-full"
                 />
@@ -136,7 +136,7 @@ const ExploreGroupDetailsModal = ({ group, onClose, onJoinClick }) => {
                 </div>
                 <div className="flex items-center gap-2 mb-4">
                   <img
-                    src={group.groupAdminImageUrl || "/api/placeholder/32/32"}
+                    src={group.groupAdminImageUrl || "/images/panda.png"}
                     alt={group.groupAdminName}
                     className="w-6 h-6 rounded-full"
                   />

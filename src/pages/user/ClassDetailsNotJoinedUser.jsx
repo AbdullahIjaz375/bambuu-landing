@@ -219,7 +219,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
             <div className="flex items-center gap-3">
               <div className="relative">
                 <img
-                  src={member.photoUrl || "/api/placeholder/40/40"}
+                  src={member.photoUrl || "/images/panda.png"}
                   alt={member.name}
                   className="object-cover rounded-full w-9 h-9"
                 />

@@ -286,7 +286,7 @@ const ClassCard = ({
             <div className="flex flex-col items-center">
               <div className="w-20 h-20 mb-4 sm:w-24 sm:h-24">
                 <img
-                  src={imageUrl || "/api/placeholder/96/96"}
+                  src={imageUrl || "/images/panda.png"}
                   alt={className}
                   className="object-cover w-full h-full rounded-full"
                 />
@@ -348,7 +348,7 @@ const ClassCard = ({
                     }`}
                   >
                     <img
-                      src="/api/placeholder/48/48"
+                      src="/images/panda.png"
                       alt={`${language} flag`}
                       className="w-10 h-10 rounded-full sm:w-12 sm:h-12"
                     />
@@ -358,7 +358,7 @@ const ClassCard = ({
                       </div>
                       <div className="flex flex-wrap items-center gap-2 text-xs text-gray-600 sm:text-sm">
                         <img
-                          src="/api/placeholder/16/16"
+                          src="/images/panda.png"
                           alt={language}
                           className="w-4 h-4 rounded-full"
                         />
@@ -366,7 +366,7 @@ const ClassCard = ({
                         <span>•</span>
                         <div className="flex items-center gap-1">
                           <img
-                            src={adminImageUrl || "/api/placeholder/16/16"}
+                            src={adminImageUrl || "/images/panda.png"}
                             alt="Leader"
                             className="w-4 h-4 rounded-full"
                           />
