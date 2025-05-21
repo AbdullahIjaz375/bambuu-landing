@@ -556,7 +556,12 @@
       "deleteGroup": "Eliminar Grupo",
       "leaveGroup": "Salir del Grupo",
       "createClass": "+ Crear Nueva Clase",
-      "back": "Atrás"
+      "back": "Atrás",
+      "cancel": "Cancelar",
+      "join": {
+        "default": "Unirse al Grupo",
+        "loading": "Uniéndose..."
+      }
     },
     "stats": {
       "members": "2k+"
@@ -746,13 +751,20 @@
   },
   "group-details": {
     "title": "Detalles del Grupo",
-    "members": "2k+",
-    "admin-label": "(Administrador)",
+    "adminLabel": "(Administrador)",
+    "members": "Miembros",
+    "classes": "Clases",
     "buttons": {
+      "viewChat": "Ver Chat del Grupo",
+      "editDetails": "Editar Detalles del Grupo",
+      "deleteGroup": "Eliminar Grupo",
+      "leaveGroup": "Salir del Grupo",
+      "createClass": "+ Crear Nueva Clase",
+      "back": "Atrás",
       "cancel": "Cancelar",
       "join": {
-        "default": "Sí, Unirse",
-        "loading": "Uniéndose...."
+        "default": "Unirse al Grupo",
+        "loading": "Uniéndose..."
       }
     },
     "languages": {
@@ -1051,6 +1063,43 @@
       "skip": "Omitir",
       "next": "Siguiente (3/4)",
       "done": "Finalizar (4/4)"
+    }
+  },
+  "channel": {
+    "errors": {
+      "noChannel": "No se proporcionó canal",
+      "notGroupOrClass": "No es un canal de grupo o clase",
+      "noFirestoreData": "No se encontraron datos en Firestore",
+      "noUserLoggedIn": "No hay usuario conectado"
+    },
+    "status": {
+      "nameCorrect": "Nombre ya correcto",
+      "channelsRefreshed": "Actualizados {{count}} canales"
+    }
+  },
+  "chat": {
+    "dropdownOptions": {
+      "viewGroup": "Ver Grupo",
+      "viewProfile": "Ver Perfil",
+      "assignResources": "Asignar Recursos",
+      "deleteChat": "Eliminar Chat",
+      "leaveChat": "Salir del Chat"
+    },
+    "confirmDelete": {
+      "title": "¿Estás seguro de que quieres salir de este chat?",
+      "confirm": "Sí, Salir",
+      "cancel": "Cancelar"
+    },
+    "resources": {
+      "assign": "Asignar Recursos",
+      "searchPlaceholder": "Buscar recursos por nombre",
+      "myResources": "Mis Recursos",
+      "newResource": "Agregar Nuevo"
+    },
+    "profile": {
+      "title": "Perfil del Estudiante",
+      "noClasses": "Aún no hay clases reservadas",
+      "loading": "Cargando perfil del estudiante..."
     }
   }
 }

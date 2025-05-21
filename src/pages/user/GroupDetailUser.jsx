@@ -865,7 +865,7 @@ const GroupDetailsUser = ({ onClose }) => {
                   <ArrowLeft size={20} className="md:w-8 md:h-8" />
                 </button>
                 <h1 className="text-xl font-semibold md:text-4xl">
-                  {t("groupDetails.title")}
+                  {t("group-details.title")}
                 </h1>
               </div>
             </div>
@@ -932,11 +932,10 @@ const GroupDetailsUser = ({ onClose }) => {
                       </div>
                     </div>
 
-
-                    <ShowDescription 
-                       description={group.groupDescription} 
-                       maxHeight={100}
-                       />
+                    <ShowDescription
+                      description={group.groupDescription}
+                      maxHeight={100}
+                    />
                   </div>{" "}
                   <div className="space-y-4">
                     {" "}
@@ -949,10 +948,11 @@ const GroupDetailsUser = ({ onClose }) => {
                             : "bg-[#FFFBC5] border-black"
                         }`}
                         onClick={() => {
-                          localStorage.setItem("activetab","bammbuu");
-                          navigate("/messagesUser")}}
+                          localStorage.setItem("activetab", "bammbuu");
+                          navigate("/messagesUser");
+                        }}
                       >
-                        {t("groupDetails.buttons.viewChat")}
+                        {t("group-details.buttons.viewChat")}
                       </button>
                       {user.uid === group.groupAdminId ? (
                         <>
@@ -960,13 +960,13 @@ const GroupDetailsUser = ({ onClose }) => {
                             className="w-full px-3 py-2 text-sm text-black bg-white border border-black rounded-full md:px-4 md:text-base"
                             onClick={() => navigate(`/editGroup/${groupId}`)}
                           >
-                            {t("groupDetails.buttons.editDetails")}
+                            {t("group-details.buttons.editDetails")}
                           </button>
                           <button
                             className="w-full px-3 py-2 text-sm text-red-500 bg-white border border-red-500 rounded-full md:px-4 md:text-base"
                             onClick={() => setShowDeleteConfirmation(true)}
                           >
-                            {t("groupDetails.buttons.deleteGroup")}
+                            {t("group-details.buttons.deleteGroup")}
                           </button>
                         </>
                       ) : (
@@ -974,7 +974,7 @@ const GroupDetailsUser = ({ onClose }) => {
                           className="w-full px-3 py-2 text-sm text-red-500 border border-red-500 rounded-full md:px-4 md:text-base"
                           onClick={() => setShowLeaveConfirmation(true)}
                         >
-                          {t("groupDetails.buttons.leaveGroup")}
+                          {t("group-details.buttons.leaveGroup")}
                         </button>
                       )}
                     </div>
@@ -1000,13 +1000,13 @@ const GroupDetailsUser = ({ onClose }) => {
                         onClick={() => setActiveTab("Classes")}
                         className="relative z-10 px-4 sm:px-8 py-1 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap"
                       >
-                        {t("groupDetails.classes")}
+                        {t("group-details.classes")}
                       </button>
                       <button
                         onClick={() => setActiveTab("Members")}
                         className="relative z-10 px-4 sm:px-8 py-1 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap"
                       >
-                        {t("groupDetails.members")}
+                        {t("group-details.members")}
                       </button>
                     </div>
                   </div>
@@ -1016,7 +1016,7 @@ const GroupDetailsUser = ({ onClose }) => {
                       className="w-full md:w-auto bg-[#14b82c] border border-[#19291c] text-[#19291c] px-4 md:px-6 py-2 rounded-full text-sm md:text-base"
                       onClick={handleAddClassButtonClick}
                     >
-                      {t("groupDetails.buttons.createClass")}
+                      {t("group-details.buttons.createClass")}
                     </button>
                   )}
                 </div>

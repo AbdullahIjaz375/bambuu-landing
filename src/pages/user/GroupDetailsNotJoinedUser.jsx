@@ -579,7 +579,7 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
                 onClick={handleJoinConfirm}
               >
                 {isJoining
-                  ? t("group-details-user.buttons.join.loading")
+                  ? t("group-details.buttons.join.loading")
                   : t("group-details.buttons.join.default")}
               </button>
             </div>

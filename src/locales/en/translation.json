@@ -460,7 +460,7 @@
       "spain-alt": "Spain Flag"
     }
   },
-  "groupDetails": {
+  "group-details": {
     "title": "Group Details",
     "adminLabel": "(Admin)",
     "members": "Members",
@@ -471,7 +471,12 @@
       "deleteGroup": "Delete Group",
       "leaveGroup": "Leave Group",
       "createClass": "+ Create New Class",
-      "back": "Back"
+      "back": "Back",
+      "cancel": "Cancel",
+      "join": {
+        "default": "Join Group",
+        "loading": "Joining..."
+      }
     },
     "stats": {
       "members": "2k+"
@@ -978,6 +983,43 @@
       "skip": "Skip",
       "next": "Next (3/4)",
       "done": "Done (4/4)"
+    }
+  },
+  "channel": {
+    "errors": {
+      "noChannel": "No channel provided",
+      "notGroupOrClass": "Not a group or class channel",
+      "noFirestoreData": "No Firestore data found",
+      "noUserLoggedIn": "No user logged in"
+    },
+    "status": {
+      "nameCorrect": "Name already correct",
+      "channelsRefreshed": "Refreshed {{count}} channels"
+    }
+  },
+  "chat": {
+    "dropdownOptions": {
+      "viewGroup": "View Group",
+      "viewProfile": "View Profile",
+      "assignResources": "Assign Resources",
+      "deleteChat": "Delete Chat",
+      "leaveChat": "Leave Chat"
+    },
+    "confirmDelete": {
+      "title": "Are you sure you want to leave this chat?",
+      "confirm": "Yes, Leave",
+      "cancel": "Cancel"
+    },
+    "resources": {
+      "assign": "Assign Resources",
+      "searchPlaceholder": "Search resources by name",
+      "myResources": "My Resources",
+      "newResource": "Add New"
+    },
+    "profile": {
+      "title": "Student Profile",
+      "noClasses": "No classes booked yet",
+      "loading": "Loading student profile..."
     }
   }
 }

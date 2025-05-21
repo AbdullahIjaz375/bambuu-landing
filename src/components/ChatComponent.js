@@ -18,6 +18,7 @@ import {
 import { db } from "../firebaseConfig";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useTranslation } from "react-i18next";
 Modal.setAppElement("#root");
 
 const CustomChatComponent = ({ channelId, type, onChannelLeave, chatInfo }) => {
@@ -25,6 +26,7 @@ const CustomChatComponent = ({ channelId, type, onChannelLeave, chatInfo }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const isStudentsTutorPage = location.pathname.includes("/studentsTutor");
+  const { t } = useTranslation();
 
   const [isLoading, setIsLoading] = useState(true);
   const [channel, setChannel] = useState(null);
@@ -231,11 +233,15 @@ const CustomChatComponent = ({ channelId, type, onChannelLeave, chatInfo }) => {
       setShowConfirmModal(false);
     }
   };
-
   const handleViewProfile = async () => {
     // For group chats, navigate to group details page
     if (type === "standard_group" || type === "premium_group") {
-      navigate(`/groupDetailsUser/${channelId}`);
+      // If user is a tutor and in the tutor interface, navigate to tutor group details
+      if (user?.userType === "tutor" && isStudentsTutorPage) {
+        navigate(`/group-details-tutor/${channelId}`);
+      } else {
+        navigate(`/groupDetailsUser/${channelId}`);
+      }
       setShowDropdown(false);
       return;
     }
@@ -430,28 +436,26 @@ const CustomChatComponent = ({ channelId, type, onChannelLeave, chatInfo }) => {
                 fill="#292D32"
               />
             </svg>
-          </button>
-
+          </button>{" "}
           {showDropdown && (
             <div className="absolute right-0 z-10 w-40 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg">
+              {" "}
               <button
                 className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-50"
                 onClick={handleViewProfile}
               >
                 {type === "standard_group" || type === "premium_group"
-                  ? "View Group"
-                  : "View Profile"}
+                  ? t("chat.dropdownOptions.viewGroup")
+                  : t("chat.dropdownOptions.viewProfile")}
               </button>
-
               {isStudentsTutorPage && (
                 <button
                   className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-50"
                   onClick={handleAssignResources}
                 >
-                  Assign Resources
+                  {t("chat.dropdownOptions.assignResources")}
                 </button>
               )}
-
               <button
                 className="w-full px-4 py-2 text-left text-red-500 hover:bg-gray-50"
                 onClick={() => {
@@ -460,13 +464,14 @@ const CustomChatComponent = ({ channelId, type, onChannelLeave, chatInfo }) => {
                 }}
                 disabled={isLoading}
               >
-                {user?.userType === "tutor" ? "Delete Chat" : "Leave Chat"}
+                {user?.userType === "tutor"
+                  ? t("chat.dropdownOptions.deleteChat")
+                  : t("chat.dropdownOptions.leaveChat")}
               </button>
             </div>
           )}
         </div>
       </div>
-
       <div className="flex-1 p-4 overflow-y-auto bg-white">
         <div className="flex flex-col gap-3">
           {messages.map((message) => (
@@ -498,7 +503,6 @@ const CustomChatComponent = ({ channelId, type, onChannelLeave, chatInfo }) => {
           <div ref={messagesEndRef} />
         </div>
       </div>
-
       <div className="px-4 py-3 bg-white border-t border-gray-200">
         <form onSubmit={handleSendMessage} className="flex items-center">
           <div className="relative flex items-center flex-1">
@@ -574,8 +578,7 @@ const CustomChatComponent = ({ channelId, type, onChannelLeave, chatInfo }) => {
           </button>
         </form>
       </div>
-
-      {/* Delete/Leave Chat Modal */}
+      {/* Delete/Leave Chat Modal */}{" "}
       <Modal
         isOpen={showConfirmModal}
         onRequestClose={() => setShowConfirmModal(false)}
@@ -596,32 +599,25 @@ const CustomChatComponent = ({ channelId, type, onChannelLeave, chatInfo }) => {
       >
         <div className="text-center">
           <h2 className="mb-4 text-xl font-semibold">
-            {user?.userType === "tutor"
-              ? "Are you sure you want to delete this chat?"
-              : "Are you sure you want to leave this chat?"}
+            {t("chat.confirmDelete.title")}
           </h2>
           <div className="flex flex-row gap-2">
             <button
               className="w-full py-2 font-medium border border-gray-300 rounded-full hover:bg-gray-50"
               onClick={() => setShowConfirmModal(false)}
             >
-              No, Cancel
+              {t("chat.confirmDelete.cancel")}
             </button>
             <button
               className="w-full py-2 font-medium text-black bg-[#ff4d4d] rounded-full hover:bg-[#ff3333] border border-[#8b0000]"
               onClick={handleLeaveChat}
               disabled={isLoading}
             >
-              {isLoading
-                ? "Processing..."
-                : user?.userType === "tutor"
-                ? "Delete"
-                : "Leave"}
+              {isLoading ? "Processing..." : t("chat.confirmDelete.confirm")}
             </button>
           </div>
         </div>
       </Modal>
-
       {/* Student Profile Modal */}
       {/* Student Profile Modal */}
       {isStudentsTutorPage && (
@@ -646,7 +642,9 @@ const CustomChatComponent = ({ channelId, type, onChannelLeave, chatInfo }) => {
           {studentProfile ? (
             <div className="font-urbanist">
               <div className="flex items-center justify-between p-4 border-b">
-                <h2 className="text-2xl font-bold">Student Profile</h2>
+                <h2 className="text-2xl font-bold">
+                  {t("chat.profile.title")}
+                </h2>
                 <div className="flex items-center">
                   <div className="flex items-center bg-blue-100 rounded-full px-2 py-1 mr-2">
                     <span className="text-blue-500 font-medium text-sm">B</span>
@@ -873,8 +871,7 @@ const CustomChatComponent = ({ channelId, type, onChannelLeave, chatInfo }) => {
             </div>
           )}
         </Modal>
-      )}
-
+      )}{" "}
       {/* Assign Resources Modal */}
       {isStudentsTutorPage && (
         <Modal
@@ -897,7 +894,9 @@ const CustomChatComponent = ({ channelId, type, onChannelLeave, chatInfo }) => {
         >
           <div className="p-4">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold">Assign Resources</h2>
+              <h2 className="text-xl font-bold">
+                {t("chat.resources.assign")}
+              </h2>
               <button
                 onClick={() => setShowAssignModal(false)}
                 className="p-1 rounded-full"
@@ -910,7 +909,7 @@ const CustomChatComponent = ({ channelId, type, onChannelLeave, chatInfo }) => {
               <Search className="absolute w-5 h-5 text-gray-400 left-3 top-1/2 transform -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Search resource by name"
+                placeholder={t("chat.resources.searchPlaceholder")}
                 className="w-full py-2 pl-10 pr-4 border border-gray-200 rounded-full focus:outline-none focus:ring-1 focus:ring-green-500"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -919,7 +918,9 @@ const CustomChatComponent = ({ channelId, type, onChannelLeave, chatInfo }) => {
 
             <div className="mb-4">
               <div className="flex justify-between items-center mb-2">
-                <h3 className="font-semibold">My Resources</h3>
+                <h3 className="font-semibold">
+                  {t("chat.resources.myResources")}
+                </h3>
                 <button
                   className="text-sm text-green-600 bg-green-100 rounded-full px-3 py-1"
                   onClick={() => {
@@ -927,7 +928,7 @@ const CustomChatComponent = ({ channelId, type, onChannelLeave, chatInfo }) => {
                     setShowAssignModal(false);
                   }}
                 >
-                  + New Resource
+                  + {t("chat.resources.newResource")}
                 </button>
               </div>
               <div className="space-y-2 max-h-60 overflow-y-auto">

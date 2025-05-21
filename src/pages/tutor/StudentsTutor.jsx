@@ -101,7 +101,7 @@ const StudentsTutor = () => {
           }
         );
 
-        console.log('chanel ======= ' ,channels);
+        console.log("chanel ======= ", channels);
 
         // Initialize unread counts and online status tracking
         const counts = {};
@@ -219,17 +219,12 @@ const StudentsTutor = () => {
             : 0;
           return bLastMessage - aLastMessage;
         });
-
         const validChannels = sortedChannels.filter(
           (channel) => channel.data.name && channel.data.name.trim() !== ""
         );
         setChannels(validChannels);
 
-        if (validChannels.length > 0 && !selectedChannel) {
-          const firstChannel = validChannels[0];
-          setSelectedChannel(firstChannel);
-          setSelectedChatInfo(getOtherUserFromChannel(firstChannel));
-        }
+        // Removed auto-selection of first chat when page loads
       } catch (error) {
         console.error("Error loading channels:", error);
       } finally {
@@ -246,7 +241,7 @@ const StudentsTutor = () => {
         channel.off("user.presence.changed");
       });
     };
-  }, [user]);
+  }, [user, selectedChannel]);
 
   const handleChannelSelect = async (channel) => {
     setSelectedChannel(channel);
@@ -316,8 +311,8 @@ const StudentsTutor = () => {
     channels.filter(
       (channel) =>
         (channel.type === "premium_group" ||
-         channel.type === "premium_individual_class" ||
-         channel.type === "one_to_one_chat") &&
+          channel.type === "premium_individual_class" ||
+          channel.type === "one_to_one_chat") &&
         channel.data.name &&
         channel.data.name.trim() !== ""
     )
@@ -413,7 +408,7 @@ const StudentsTutor = () => {
                       channel.type === "standard_group" ||
                       channel.type === "premium_group";
 
-                    const isInstructor = 
+                    const isInstructor =
                       channel.type === "premium_individual_class" ||
                       channel.type === "one_to_one_chat";
 
