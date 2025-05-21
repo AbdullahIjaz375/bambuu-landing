@@ -37,43 +37,91 @@ export const AuthProvider = ({ children }) => {
 
     initializeLanguage();
   }, []);
-
   const connectStreamUser = async (userData) => {
     try {
-      // Use proper token generation instead of development tokens
-      const chatToken = await fetchChatToken(userData.uid);
-      const videoToken = await fetchVideoToken(userData.uid);
+      // Don't attempt to connect if there's no user data
+      if (!userData || !userData.uid) {
+        console.log("No user data available for Stream connection");
+        return;
+      }
 
-      await streamClient.connectUser(
-        {
-          id: userData.uid,
-          name: userData.name || "",
-          image: userData.photoUrl || "",
-          userType: userData.userType,
-        },
-        chatToken
-      );
-      await streamVideoClient.connectUser(
-        {
-          id: userData.uid,
-          name: userData.name || "",
-          image: userData.photoUrl || "",
-          userType: userData.userType,
-        },
-        videoToken
-      );
-    } catch (error) {
-      console.error("Error connecting Stream user:", error);
-    }
-  };
+      try {
+        // Use proper token generation instead of development tokens
+        const chatToken = await fetchChatToken(userData.uid);
+        
+        // Check if already connected with the same user ID
+        if (streamClient.userID === userData.uid && streamClient.isConnected) {
+          console.log("Stream chat client already connected with the same user ID");
+        } else {
+          // Disconnect previous user if connected with different ID
+          if (streamClient.userID && streamClient.userID !== userData.uid) {
+            await streamClient.disconnectUser();
+          }
+          
+          // Connect with chat token
+          await streamClient.connectUser(
+            {
+              id: userData.uid,
+              name: userData.name || "",
+              image: userData.photoUrl || "",
+              userType: userData.userType,
+            },
+            chatToken
+          );
+          console.log("Stream chat client connected successfully");
+        }
+      } catch (chatError) {
+        // Log error but don't throw - this allows auth to proceed even if Stream chat fails
+        console.error("Error connecting Stream chat client:", chatError);
+        // Don't throw the error - allow auth to continue
+      }
 
-  const disconnectStreamUser = async () => {
-    try {
-      if (streamClient.userID) {
-        await streamClient.disconnectUser();
+      try {
+        // Set up video client separately so errors don't affect chat
+        const videoToken = await fetchVideoToken(userData.uid);
+        await streamVideoClient.connectUser(
+          {
+            id: userData.uid,
+            name: userData.name || "",
+            image: userData.photoUrl || "",
+            userType: userData.userType,
+          },
+          videoToken
+        );
+        console.log("Stream video client connected successfully");
+      } catch (videoError) {
+        // Log error but don't throw - this allows auth to proceed even if Stream video fails
+        console.error("Error connecting Stream video client:", videoError);
+        // Don't throw the error - allow auth to continue
       }
     } catch (error) {
-      console.error("Error disconnecting Stream user:", error);
+      // This will only catch errors not already caught in the inner try/catch blocks
+      console.error("Unexpected error connecting Stream user:", error);
+    }
+  };
+  const disconnectStreamUser = async () => {
+    try {
+      // Disconnect Stream chat client
+      try {
+        if (streamClient.userID) {
+          await streamClient.disconnectUser();
+          console.log("Stream chat client disconnected successfully");
+        }
+      } catch (chatError) {
+        console.error("Error disconnecting Stream chat client:", chatError);
+      }
+      
+      // Disconnect Stream video client
+      try {
+        if (streamVideoClient.user?.id) {
+          await streamVideoClient.disconnectUser();
+          console.log("Stream video client disconnected successfully");
+        }
+      } catch (videoError) {
+        console.error("Error disconnecting Stream video client:", videoError);
+      }
+    } catch (error) {
+      console.error("Unexpected error disconnecting Stream services:", error);
     }
   };
 
@@ -98,38 +146,66 @@ export const AuthProvider = ({ children }) => {
     }
     return null;
   };
-
   const updateUserData = async (userData) => {
-    if (userData) {
-      // If we have existing user data, fetch the latest from Firebase
-      if (userData.uid && userData.userType) {
-        const latestData = await fetchLatestUserData(
-          userData.uid,
-          userData.userType
-        );
-        if (latestData) {
-          userData = latestData;
+    try {
+      if (userData) {
+        // If we have existing user data, fetch the latest from Firebase
+        if (userData.uid && userData.userType) {
+          try {
+            const latestData = await fetchLatestUserData(
+              userData.uid,
+              userData.userType
+            );
+            if (latestData) {
+              userData = latestData;
+            }
+          } catch (fetchError) {
+            console.error("Error fetching latest user data:", fetchError);
+            // Continue with existing userData if fetch fails
+          }
         }
+
+        // Update language when updating user data
+        if (userData.languagePreference) {
+          i18n.changeLanguage(userData.languagePreference);
+        }
+
+        // Update state and session storage
+        setUser(userData);
+        sessionStorage.setItem("user", JSON.stringify(userData));
+        sessionStorage.setItem("userType", userData.userType);
+        
+        // Connect Stream services but don't let failures affect authentication
+        try {
+          await connectStreamUser(userData);
+        } catch (streamError) {
+          console.error("Stream connection error during user update:", streamError);
+          // Don't block auth flow if Stream connection fails
+        }
+      } else {
+        // User is logging out or null
+        const currentLanguage = i18n.language;
+
+        try {
+          await disconnectStreamUser();
+        } catch (disconnectError) {
+          console.error("Error disconnecting Stream user:", disconnectError);
+          // Continue with logout process even if Stream disconnect fails
+        }
+        
+        setUser(null);
+        sessionStorage.clear();
+
+        // Update language when updating user data
+        i18n.changeLanguage(currentLanguage);
       }
-
-      // Update language when updating user data
-      if (userData.languagePreference) {
-        i18n.changeLanguage(userData.languagePreference);
+    } catch (error) {
+      console.error("Unexpected error in updateUserData:", error);
+      // If there was an error updating user data, ensure user state is consistent
+      if (!userData) {
+        setUser(null);
+        sessionStorage.clear();
       }
-
-      setUser(userData);
-      sessionStorage.setItem("user", JSON.stringify(userData));
-      sessionStorage.setItem("userType", userData.userType);
-      await connectStreamUser(userData);
-    } else {
-      const currentLanguage = i18n.language;
-
-      await disconnectStreamUser();
-      setUser(null);
-      sessionStorage.clear();
-
-      // Update language when updating user data
-      i18n.changeLanguage(currentLanguage);
     }
   };
 

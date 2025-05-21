@@ -3,19 +3,17 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const ProtectedRoute = ({ children, requiredRole }) => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const userType = sessionStorage.getItem("userType");
   const location = useLocation();
   const currentUrl = window.location.href;
   const currentPath = location.pathname + location.search + location.hash;
 
-  // Save the current path for redirection after login - using useEffect to ensure this runs once
   useEffect(() => {
     if (!user) {
-      console.log("Saving redirect path:", currentPath); // Debug log
+      console.log("Saving redirect path:", currentPath);
       sessionStorage.setItem("redirectAfterLogin", currentPath);
 
-      // Also save the full URL just for backup
       localStorage.setItem("fullRedirectUrl", currentUrl);
     }
   }, [user, currentPath, currentUrl]);
@@ -74,12 +72,38 @@ const ProtectedRoute = ({ children, requiredRole }) => {
     }
 
     return <Navigate to={loginUrl} />;
-  }
-
-  // Role-based access checks
+  } // Role-based access checks
   const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
-  if (roles.length > 0 && !roles.includes(userType)) {
-    return <Navigate to="/unauthorized" />;
+
+  // Get authentication loading state
+  // Don't redirect during loading - fixes the flash to /unauthorized
+  if (loading) {
+    // Show a loading indicator or nothing while authentication data is being loaded
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
+      </div>
+    );
+  }
+  // Only perform role checks if there are required roles and we're not in a loading state
+  if (roles.length > 0) {
+    // Get user type from context first, then fallback to sessionStorage
+    const userTypeFromContext = user?.userType;
+    const effectiveUserType = userTypeFromContext || userType;
+    
+    // If we still don't have a user type, or it's not in the allowed roles
+    if (!effectiveUserType || !roles.includes(effectiveUserType)) {
+      console.log("Access denied: Required role(s):", roles, "User type:", effectiveUserType);
+      
+      // Instead of immediately redirecting to unauthorized, redirect to login if it seems
+      // like there might be authentication problems
+      if (!effectiveUserType || effectiveUserType === "undefined") {
+        console.log("No user type detected, redirecting to login instead of unauthorized");
+        return <Navigate to="/login" />;
+      } else {
+        return <Navigate to="/unauthorized" />;
+      }
+    }
   }
 
   return children;

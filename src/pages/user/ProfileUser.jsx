@@ -45,10 +45,8 @@ const ProfileUser = () => {
       sub.type === "group_premium" ||
       sub.type?.toLowerCase().includes("premium") ||
       sub.type?.toLowerCase().includes("bambuu+")
-  ) || user?.isPremium === true || userData?.isPremium === true;
-  const handleSignOut = async () => {
+  ) || user?.isPremium === true || userData?.isPremium === true;  const handleSignOut = async () => {
     try {
-      await signOut(auth);
       // Clear all authentication-related data
       sessionStorage.removeItem("userType");
       sessionStorage.removeItem("user");
@@ -59,6 +57,15 @@ const ProfileUser = () => {
       localStorage.removeItem("selectedGroupUrl");
       localStorage.removeItem("selectedPackageUrl");
       localStorage.removeItem("fullRedirectUrl");
+      
+      // Update the user context to null before sign out
+      setUser(null);
+
+      // Then perform the actual sign out
+      await signOut(auth);
+
+      // Navigate to login page (not landing page)
+      navigate("/login");
       
       toast.success("Logged out successfully!");
     } catch (error) {

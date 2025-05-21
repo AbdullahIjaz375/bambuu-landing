@@ -64,10 +64,18 @@ const Login = () => {
       navigate(`/login?${params.toString()}`, { replace: true });
     }
   }, [location.search, navigate]);
-
   const redirectAfterLogin = (isFirstTimeLogin = false) => {
     const savedRedirectPath = sessionStorage.getItem("redirectAfterLogin");
     if (savedRedirectPath) {
+      // Don't redirect back to profile page after logging in
+      if (savedRedirectPath.includes("/ProfileUser")) {
+        console.log("Avoiding redirect loop back to ProfileUser");
+        sessionStorage.removeItem("redirectAfterLogin");
+        navigate("/learn", { replace: true });
+        setRedirected(true);
+        return;
+      }
+      
       sessionStorage.removeItem("redirectAfterLogin");
       navigate(savedRedirectPath, { replace: true });
       setRedirected(true);
@@ -93,7 +101,7 @@ const Login = () => {
           console.error("Error parsing saved subscription URL:", error);
         }
       }
-    } else if (params.get("ref") == "class") {
+    } else if (params.get("ref") === "class") {
       const savedClassUrl = localStorage.getItem("selectedClassUrl");
       if (savedClassUrl) {
         try {
@@ -384,13 +392,28 @@ const Login = () => {
           lastLoggedIn: now,
           userType: "student",
         });
+      }      toast.success("Logged in successfully!", { autoClose: 3000 });
+      
+      // Use a try-catch for the redirect to prevent auth errors from breaking login flow
+      try {
+        redirectAfterLogin(isFirstTimeLogin);
+      } catch (redirectError) {
+        console.error("Error during redirect after Google login:", redirectError);
+        // If redirect fails, go to the default page
+        navigate("/learn", { replace: true });
       }
-      toast.success("Logged in successfully!", { autoClose: 3000 });
-      redirectAfterLogin(isFirstTimeLogin);
     } catch (error) {
       console.error("Error during Google login:", error);
       updateUserData(null);
-      toast.error("Invalid email or password", { autoClose: 5000 });
+      
+      // More specific error handling for Google login
+      if (error.code === "auth/popup-closed-by-user") {
+        toast.warning("Login canceled", { autoClose: 3000 });
+      } else if (error.code === "auth/network-request-failed") {
+        toast.error("Network error. Please check your connection", { autoClose: 5000 });
+      } else {
+        toast.error("Login failed", { autoClose: 5000 });
+      }
     }
   };
 
@@ -460,15 +483,25 @@ const Login = () => {
         lastLoggedIn: now,
         userType: "student",
       };
-      updateUserData(sessionUserData);
-      toast.success("Logged in successfully!", { autoClose: 3000 });
-      redirectAfterLogin(false);
+      updateUserData(sessionUserData);      toast.success("Logged in successfully!", { autoClose: 3000 });
+      
+      // Use a try-catch for the redirect to prevent auth errors from breaking login flow
+      try {
+        redirectAfterLogin(false);
+      } catch (redirectError) {
+        console.error("Error during redirect after login:", redirectError);
+        // If redirect fails, go to the default page
+        navigate("/learn", { replace: true });
+      }
     } catch (error) {
       console.error("Error during email login:", error);
+      
+      // Clear user data on authentication errors
       if (
         error.code === "auth/invalid-credential" ||
-        error.message.includes("INVALID_LOGIN_CREDENTIALS")
+        error.message?.includes("INVALID_LOGIN_CREDENTIALS")
       ) {
+        updateUserData(null);
         setEmailError("Wrong email address.");
         setPasswordError("Wrong password.");
       } else if (
@@ -478,6 +511,13 @@ const Login = () => {
         setEmailError("Wrong email address.");
       } else if (error.code === "auth/wrong-password") {
         setPasswordError("Wrong password.");
+      } else {
+        // For other errors, show a generic message but don't block login
+        console.warn("Non-critical error during login:", error);
+        toast.warning("Login succeeded but some services may be unavailable", { 
+          autoClose: 5000
+        });
+        navigate("/learn", { replace: true });
       }
       toast.error("Invalid email or password", { autoClose: 5000 });
     }
