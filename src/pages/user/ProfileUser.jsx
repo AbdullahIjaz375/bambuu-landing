@@ -46,12 +46,21 @@ const ProfileUser = () => {
       sub.type?.toLowerCase().includes("premium") ||
       sub.type?.toLowerCase().includes("bambuu+")
   ) || user?.isPremium === true || userData?.isPremium === true;
-
   const handleSignOut = async () => {
     try {
       await signOut(auth);
-      toast.success("Logged out successfully!");
+      // Clear all authentication-related data
       sessionStorage.removeItem("userType");
+      sessionStorage.removeItem("user");
+      sessionStorage.removeItem("redirectAfterLogin");
+      
+      // Clear saved URLs that could cause redirection issues
+      localStorage.removeItem("selectedClassUrl");
+      localStorage.removeItem("selectedGroupUrl");
+      localStorage.removeItem("selectedPackageUrl");
+      localStorage.removeItem("fullRedirectUrl");
+      
+      toast.success("Logged out successfully!");
     } catch (error) {
       toast.error("Error during logout");
       console.error("Error during logout:", error);
