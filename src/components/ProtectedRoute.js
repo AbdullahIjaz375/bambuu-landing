@@ -90,15 +90,22 @@ const ProtectedRoute = ({ children, requiredRole }) => {
     // Get user type from context first, then fallback to sessionStorage
     const userTypeFromContext = user?.userType;
     const effectiveUserType = userTypeFromContext || userType;
-    
+
     // If we still don't have a user type, or it's not in the allowed roles
     if (!effectiveUserType || !roles.includes(effectiveUserType)) {
-      console.log("Access denied: Required role(s):", roles, "User type:", effectiveUserType);
-      
+      console.log(
+        "Access denied: Required role(s):",
+        roles,
+        "User type:",
+        effectiveUserType
+      );
+
       // Instead of immediately redirecting to unauthorized, redirect to login if it seems
       // like there might be authentication problems
       if (!effectiveUserType || effectiveUserType === "undefined") {
-        console.log("No user type detected, redirecting to login instead of unauthorized");
+        console.log(
+          "No user type detected, redirecting to login instead of unauthorized"
+        );
         return <Navigate to="/login" />;
       } else {
         return <Navigate to="/unauthorized" />;

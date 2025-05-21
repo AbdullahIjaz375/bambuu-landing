@@ -373,7 +373,6 @@ const AddClassTutor = () => {
                       className="hidden"
                     />
                   </div>
-
                   <div className="flex flex-row items-start justify-between space-x-4">
                     <div>
                       <label className="text-sm font-medium text-gray-700">
@@ -442,14 +441,14 @@ const AddClassTutor = () => {
                         )}
                       </div>
                     </div>
-                  </div>
+                  </div>{" "}
                   {/* Description */}
                   <div>
                     <label className="text-sm font-medium text-gray-700">
                       Class Description
                     </label>
                     <textarea
-                      placeholder="Enter short description of class (max 200 letter)"
+                      placeholder="Enter short description of class (max 400 characters)"
                       value={classData.classDescription}
                       onChange={(e) =>
                         handleClassDataChange(
@@ -461,6 +460,9 @@ const AddClassTutor = () => {
                       rows={3}
                       className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                     />
+                    <div className="text-xs text-right text-gray-500 mt-1">
+                      {classData.classDescription.length}/400 characters
+                    </div>
                   </div>
                   <div className="flex flex-row items-start justify-between space-x-4">
                     {/* Class Level */}
@@ -579,7 +581,6 @@ const AddClassTutor = () => {
                       )}
                     </div>
                   </div>
-
                   <div className="flex flex-row items-start justify-between space-x-4">
                     {/* Available Slots */}
 

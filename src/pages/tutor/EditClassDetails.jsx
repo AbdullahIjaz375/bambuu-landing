@@ -320,9 +320,9 @@ const EditClassPage = () => {
                   <div>
                     <label className="text-sm font-medium text-gray-700">
                       Class Description
-                    </label>
+                    </label>{" "}
                     <textarea
-                      placeholder="Enter short description of class (max 200 letter)"
+                      placeholder="Enter short description of class (max 400 characters)"
                       value={classData.classDescription}
                       onChange={(e) =>
                         handleClassDataChange(
@@ -334,6 +334,9 @@ const EditClassPage = () => {
                       rows={3}
                       className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
                     />
+                    <div className="text-xs text-right text-gray-500 mt-1">
+                      {classData.classDescription.length}/400 characters
+                    </div>
                   </div>
 
                   {/* Class Level and Recurrence Type */}

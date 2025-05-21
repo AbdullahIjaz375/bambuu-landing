@@ -75,7 +75,7 @@ const Login = () => {
         setRedirected(true);
         return;
       }
-      
+
       sessionStorage.removeItem("redirectAfterLogin");
       navigate(savedRedirectPath, { replace: true });
       setRedirected(true);
@@ -392,25 +392,31 @@ const Login = () => {
           lastLoggedIn: now,
           userType: "student",
         });
-      }      toast.success("Logged in successfully!", { autoClose: 3000 });
-      
+      }
+      toast.success("Logged in successfully!", { autoClose: 3000 });
+
       // Use a try-catch for the redirect to prevent auth errors from breaking login flow
       try {
         redirectAfterLogin(isFirstTimeLogin);
       } catch (redirectError) {
-        console.error("Error during redirect after Google login:", redirectError);
+        console.error(
+          "Error during redirect after Google login:",
+          redirectError
+        );
         // If redirect fails, go to the default page
         navigate("/learn", { replace: true });
       }
     } catch (error) {
       console.error("Error during Google login:", error);
       updateUserData(null);
-      
+
       // More specific error handling for Google login
       if (error.code === "auth/popup-closed-by-user") {
         toast.warning("Login canceled", { autoClose: 3000 });
       } else if (error.code === "auth/network-request-failed") {
-        toast.error("Network error. Please check your connection", { autoClose: 5000 });
+        toast.error("Network error. Please check your connection", {
+          autoClose: 5000,
+        });
       } else {
         toast.error("Login failed", { autoClose: 5000 });
       }
@@ -483,8 +489,9 @@ const Login = () => {
         lastLoggedIn: now,
         userType: "student",
       };
-      updateUserData(sessionUserData);      toast.success("Logged in successfully!", { autoClose: 3000 });
-      
+      updateUserData(sessionUserData);
+      toast.success("Logged in successfully!", { autoClose: 3000 });
+
       // Use a try-catch for the redirect to prevent auth errors from breaking login flow
       try {
         redirectAfterLogin(false);
@@ -495,7 +502,7 @@ const Login = () => {
       }
     } catch (error) {
       console.error("Error during email login:", error);
-      
+
       // Clear user data on authentication errors
       if (
         error.code === "auth/invalid-credential" ||
@@ -514,8 +521,8 @@ const Login = () => {
       } else {
         // For other errors, show a generic message but don't block login
         console.warn("Non-critical error during login:", error);
-        toast.warning("Login succeeded but some services may be unavailable", { 
-          autoClose: 5000
+        toast.warning("Login succeeded but some services may be unavailable", {
+          autoClose: 5000,
         });
         navigate("/learn", { replace: true });
       }

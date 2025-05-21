@@ -48,16 +48,18 @@ export const AuthProvider = ({ children }) => {
       try {
         // Use proper token generation instead of development tokens
         const chatToken = await fetchChatToken(userData.uid);
-        
+
         // Check if already connected with the same user ID
         if (streamClient.userID === userData.uid && streamClient.isConnected) {
-          console.log("Stream chat client already connected with the same user ID");
+          console.log(
+            "Stream chat client already connected with the same user ID"
+          );
         } else {
           // Disconnect previous user if connected with different ID
           if (streamClient.userID && streamClient.userID !== userData.uid) {
             await streamClient.disconnectUser();
           }
-          
+
           // Connect with chat token
           await streamClient.connectUser(
             {
@@ -110,7 +112,7 @@ export const AuthProvider = ({ children }) => {
       } catch (chatError) {
         console.error("Error disconnecting Stream chat client:", chatError);
       }
-      
+
       // Disconnect Stream video client
       try {
         if (streamVideoClient.user?.id) {
@@ -174,12 +176,15 @@ export const AuthProvider = ({ children }) => {
         setUser(userData);
         sessionStorage.setItem("user", JSON.stringify(userData));
         sessionStorage.setItem("userType", userData.userType);
-        
+
         // Connect Stream services but don't let failures affect authentication
         try {
           await connectStreamUser(userData);
         } catch (streamError) {
-          console.error("Stream connection error during user update:", streamError);
+          console.error(
+            "Stream connection error during user update:",
+            streamError
+          );
           // Don't block auth flow if Stream connection fails
         }
       } else {
@@ -192,7 +197,7 @@ export const AuthProvider = ({ children }) => {
           console.error("Error disconnecting Stream user:", disconnectError);
           // Continue with logout process even if Stream disconnect fails
         }
-        
+
         setUser(null);
         sessionStorage.clear();
 

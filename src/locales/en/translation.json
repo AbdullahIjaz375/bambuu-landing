@@ -494,7 +494,7 @@
     },
     "description": {
       "label": "Class Description",
-      "placeholder": "Enter short description of class (max 200 letter)"
+      "placeholder": "Enter short description of class (max 400 characters)"
     },
     "level": {
       "label": "Class Level",
@@ -919,7 +919,7 @@
       },
       "description": {
         "label": "Group Description",
-        "placeholder": "Enter short description of group. (max 200 letter)"
+        "placeholder": "Enter short description of group. (max 400 characters)"
       },
       "language": {
         "label": "Learning Language",
