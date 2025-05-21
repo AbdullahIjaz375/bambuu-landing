@@ -1,4 +1,4 @@
-import { streamClient } from "../config/stream";
+import { streamClient, ChannelType } from "../config/stream";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { ensureStreamConnection } from "./streamConnectionService";
@@ -165,12 +165,21 @@ export const addMemberToStreamChannel = async ({
       `Adding user ${userId} to channel ${channelId} with type ${type}`
     );
 
+    // Validate inputs - make sure we have valid channel types
+    if (!Object.values(ChannelType).includes(type)) {
+      console.error(`Invalid channel type: ${type}`);
+      throw new Error(`Invalid channel type: ${type}`);
+    }
+
     // Fetch the group or class data from Firestore to sync with Stream
     let firestoreData = null;
     let groupAdminId = null;
 
     try {
-      if (type === "standard_group" || type === "premium_group") {
+      if (
+        type === ChannelType.STANDARD_GROUP ||
+        type === ChannelType.PREMIUM_GROUP
+      ) {
         // It's a group channel - fetch from groups collection
         const groupDoc = await getDoc(doc(db, "groups", channelId));
         if (groupDoc.exists()) {
@@ -180,7 +189,7 @@ export const addMemberToStreamChannel = async ({
             `Found Firestore group data for ${channelId}: ${firestoreData.groupName}`
           );
         }
-      } else if (type === "premium_individual_class") {
+      } else if (type === ChannelType.PREMIUM_INDIVIDUAL_CLASS) {
         // It's a class channel - fetch from classes collection
         const classDoc = await getDoc(doc(db, "classes", channelId));
         if (classDoc.exists()) {
@@ -190,56 +199,79 @@ export const addMemberToStreamChannel = async ({
           );
         }
       }
+      // One-to-one chat channels don't need Firestore data
     } catch (firestoreErr) {
       console.error(
         `Failed to fetch Firestore data for channel ${channelId}:`,
         firestoreErr
       );
     }
-    // New approach - use a simple and direct method without modifying permissions
+
+    // Special handling for premium channels - make sure the channel exists and is watched
+    if (
+      type === ChannelType.PREMIUM_GROUP ||
+      type === ChannelType.PREMIUM_INDIVIDUAL_CLASS
+    ) {
+      try {
+        // Get the channel first to ensure it exists
+        const channel = streamClient.channel(type, channelId);
+        await channel.watch();
+
+        // Force a query to refresh the client's cache
+        await streamClient.queryChannels({ id: channelId });
+
+        console.log(
+          `Verified premium channel ${channelId} exists and is being watched`
+        );
+      } catch (watchError) {
+        console.error(
+          `Error watching channel ${channelId}: ${watchError.message}`
+        );
+      }
+    }
+
+    // Use the streamChannelHelpers method for all channel types consistently
     let response;
     try {
       // Import helper dynamically to avoid circular dependencies
       const { addUserToChannel } = await import("./streamChannelHelpers");
 
-      if (type === "premium_group" || type === "premium_individual_class") {
-        console.log(`Using direct approach for premium content type: ${type}`);
+      // Determine the appropriate role (admin gets channel_moderator)
+      const memberRole =
+        groupAdminId === userId
+          ? "channel_moderator"
+          : role || "channel_member";
 
-        // Determine the appropriate role (admin gets channel_moderator)
-        const memberRole =
-          groupAdminId === userId
-            ? "channel_moderator"
-            : role || "channel_member";
+      // Use the helper to add user correctly based on channel type
+      response = await addUserToChannel(channelId, userId, type, memberRole);
 
-        // Use the direct helper to add user
-        response = await addUserToChannel(channelId, userId, type, memberRole);
-        // For premium channels, we don't try to update the channel directly
-        // as regular users don't have permission to do this
-        if (response && firestoreData) {
-          console.log(
-            `Channel ${channelId} was updated in Firestore - Stream will sync via backend`
-          );
-        }
-      } else {
-        // For standard channels, proceed as normal
-        const channel = streamClient.channel(type, channelId);
-        await channel.watch();
-
-        // Log current members before adding
-        const state = channel.state;
-        const currentMembers = Object.keys(state?.members || {});
-        console.log(`Current channel members: ${currentMembers.join(", ")}`);
-
-        // Update channel data from Firestore if available
-        if (firestoreData) {
-          await updateChannelWithFirestoreData(channel, firestoreData);
-        }
-
-        response = await channel.addMembers([{ user_id: userId, role: role }]);
-
+      if (response && firestoreData) {
         console.log(
-          `Successfully added user ${userId} to channel ${channelId}`
+          `Channel ${channelId} was updated in Firestore - Stream will sync via backend`
         );
+      }
+
+      // For non-premium channels, we can try to update channel metadata directly
+      if (
+        type === ChannelType.STANDARD_GROUP ||
+        type === ChannelType.ONE_TO_ONE_CHAT
+      ) {
+        try {
+          const channel = streamClient.channel(type, channelId);
+          await channel.watch();
+
+          // Update channel data from Firestore if available
+          if (firestoreData) {
+            await updateChannelWithFirestoreData(channel, firestoreData);
+          }
+
+          console.log(`Updated channel metadata for ${channelId}`);
+        } catch (updateError) {
+          console.warn(
+            `Failed to update channel metadata: ${updateError.message}`
+          );
+          // Continue anyway as this is not critical
+        }
       }
     } catch (error) {
       console.error(`Failed to add member to channel: ${error.message}`);
@@ -288,32 +320,71 @@ async function updateChannelWithFirestoreData(channel, firestoreData) {
     updateData.description = firestoreData.groupDescription;
   } else if (firestoreData.classDescription) {
     updateData.description = firestoreData.classDescription;
-  } // Only update if we have something to update
+  }
+
+  // Only update if we have something to update
   if (Object.keys(updateData).length > 0) {
     try {
-      // Check if the type is premium - if so, avoid direct updates which require elevated permissions
+      // CRITICAL FIX: For ALL channel types - update local data first which affects the UI
+      // This will ensure the chat shows the correct name regardless of server update permissions
+      console.log(
+        `Ensuring local data for ${channel.id} shows name "${updateData.name}"`
+      );
+
+      // DIRECTLY UPDATE CHANNEL DATA OBJECT - this is what the UI uses
+      if (updateData.name) {
+        channel.data = channel.data || {};
+        channel.data.name = updateData.name;
+
+        // Also set it on the channel object directly for some Stream Chat versions
+        if (channel.name !== updateData.name) {
+          console.log(`Also updating channel object name property`);
+          channel.name = updateData.name;
+        }
+      }
+
+      // Update other properties
+      if (updateData.image) channel.data.image = updateData.image;
+      if (updateData.description)
+        channel.data.description = updateData.description;
+
+      // Force the channel state to update
+      if (channel.state) {
+        channel.state.name = updateData.name;
+      }
+
+      // Check if the type is premium - if so, avoid server updates which require elevated permissions
       if (
         channel.type === "premium_group" ||
         channel.type === "premium_individual_class"
       ) {
         console.log(
-          `Skipping direct channel update for ${channel.id} as it's a premium channel`
+          `Skipping server update for ${channel.id} as it's a premium channel`
         );
         // Just return the data without trying to update (avoid permission errors)
         return updateData;
       } else {
-        // For standard channels, we can update directly
-        console.log(`Updating channel ${channel.id} with data:`, updateData);
+        // For standard channels, we can update the server directly
+        console.log(
+          `Updating standard channel ${channel.id} with data:`,
+          updateData
+        );
         await channel.update(updateData);
       }
+
+      // Force a watch to refresh channel data
+      await channel.watch();
     } catch (updateErr) {
       console.error(
         `Failed to update channel ${channel.id} with Firestore data:`,
         updateErr
       );
-      // Continue anyway as this is not critical
+      // We already updated the local data, so the UI should show correctly
+      console.log("Local data was updated but server update failed");
     }
   }
+
+  return updateData;
 }
 
 export const removeMemberFromStreamChannel = async ({
@@ -422,25 +493,30 @@ export const syncChannelWithFirestore = async ({ channelId, type }) => {
       } else if (firestoreData.classDescription) {
         updateData.description = firestoreData.classDescription;
       }
+
       // Only update if we have data to update
       if (Object.keys(updateData).length > 0) {
         // For premium channels, we need special handling
         if (type === "premium_group" || type === "premium_individual_class") {
           console.log(
-            `Premium channel ${channelId} update - skipping direct update to avoid permission errors`
+            `Premium channel ${channelId} update - may have limited permissions`
           );
 
           try {
             // Get the admin ID for this channel
             const adminId = firestoreData.groupAdminId || null;
 
-            // For premium channels, just log the update data
+            // Always update the local channel data properties - this affects the UI
+            // This doesn't actually change server data but updates what's shown in the UI
             console.log(
-              `Firestore data for premium channel ${channelId}:`,
-              updateData
+              `Ensuring local channel data for ${channelId} shows name "${updateData.name}"`
             );
+            channel.data.name = updateData.name;
+            if (updateData.image) channel.data.image = updateData.image;
+            if (updateData.description)
+              channel.data.description = updateData.description;
 
-            // If this user is the admin, they might be able to update properties
+            // If this user is the admin, they might be able to update properties on the server
             if (streamClient.userID === adminId) {
               try {
                 await channel.update(updateData);
@@ -454,7 +530,7 @@ export const syncChannelWithFirestore = async ({ channelId, type }) => {
             }
           } catch (permError) {
             console.warn(
-              `Skipped channel property updates: ${permError.message}`
+              `Skipped channel server updates: ${permError.message}`
             );
             // Continue anyway as this is not critical
           }
@@ -466,23 +542,15 @@ export const syncChannelWithFirestore = async ({ channelId, type }) => {
           );
           await channel.update(updateData);
         }
-
-        return {
-          success: true,
-          message: "Channel updated successfully",
-          data: updateData,
-        };
       }
-
-      return { success: true, message: "No updates needed" };
     } catch (error) {
       console.error(
-        `Error syncing channel ${channelId} with Firestore:`,
-        error
+        `Error syncing channel ${channelId} (${type}) with Firestore:`,
+        error.message
       );
       return { success: false, message: error.message };
     }
+
+    return { success: true, message: "Channel synced successfully" };
   });
 };
-
-// This function was replaced by addUserToChannel in streamChannelHelpers.js

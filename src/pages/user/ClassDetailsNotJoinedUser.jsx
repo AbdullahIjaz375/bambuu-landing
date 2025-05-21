@@ -29,23 +29,20 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
   const { classId } = useParams();
   const [nextClassDate, setNextClassDate] = useState(null);
 
-
-
-
   const calculateNextClassDate = (classData) => {
     const originalDate = new Date(classData.classDateTime.seconds * 1000);
     const currentDate = new Date();
     const recurrenceType = classData.recurrenceTypes[0];
-    
+
     // If the original date is in the future, use it
     if (originalDate > currentDate) {
       setNextClassDate(originalDate);
       return;
     }
-    
+
     // Calculate the next occurrence based on recurrence type
     let nextDate = new Date(originalDate);
-    
+
     switch (recurrenceType) {
       case "Daily":
         // Find the next day
@@ -53,32 +50,32 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
           nextDate.setDate(nextDate.getDate() + 1);
         }
         break;
-        
+
       case "Weekly":
         // Find the next occurrence of the same day of week
         while (nextDate <= currentDate) {
           nextDate.setDate(nextDate.getDate() + 7);
         }
         break;
-        
+
       case "Monthly":
         // Find the next occurrence on the same day of month
         while (nextDate <= currentDate) {
           nextDate.setMonth(nextDate.getMonth() + 1);
         }
         break;
-        
+
       default:
         // For any other recurrence types, use the original date
         nextDate = originalDate;
     }
-    
+
     setNextClassDate(nextDate);
   };
 
   const formatDate = (date, format = "full") => {
     if (!date) return "";
-    
+
     // For recurring classes in class details page, show the full date
     if (format === "full") {
       return date.toLocaleDateString("en-US", {
@@ -87,11 +84,11 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
         day: "numeric",
         year: "numeric",
       });
-    } 
+    }
     // For day-only format (used in class cards)
     else if (format === "day") {
       return date.toLocaleDateString("en-US", {
-        weekday: "long"
+        weekday: "long",
       });
     }
   };
@@ -115,14 +112,16 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
       console.error("Error fetching class:", err);
       setError("Failed to fetch class details");
     }
-  
+
     setLoading(false);
   };
-  if (fetchClass.classDateTime && 
-    (fetchClass.recurrenceTypes?.length > 0 && 
-     fetchClass.recurrenceTypes[0] !== "One-time")) {
-  calculateNextClassDate(fetchClass);
-}
+  if (
+    fetchClass.classDateTime &&
+    fetchClass.recurrenceTypes?.length > 0 &&
+    fetchClass.recurrenceTypes[0] !== "One-time"
+  ) {
+    calculateNextClassDate(fetchClass);
+  }
 
   useEffect(() => {
     if (classData?.recurrenceTypes?.length > 0) {
@@ -354,21 +353,36 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
             tutorStudentIds: arrayUnion(userId),
           })
         );
-      }
-
-      // Execute all updates in parallel
+      } // Execute all updates in parallel
       await Promise.all(updates);
+
+      // For Individual Premium classes, add the user to the Stream chat channel
       if (classData.classType === "Individual Premium") {
         try {
+          console.log(
+            `Adding user ${userId} to premium class channel ${classId}`
+          );
+
           await addMemberToStreamChannel({
             channelId: classId,
             userId: userId,
             type: ChannelType.PREMIUM_INDIVIDUAL_CLASS,
             role: "channel_member",
           });
+
+          console.log(
+            `Successfully added user ${userId} to class ${classId} chat`
+          );
         } catch (streamError) {
           console.error("Error adding to stream channel:", streamError);
-          toast.error("Failed to join class chat");
+          // Log more details about the error for debugging
+          if (streamError.response) {
+            console.error("Stream API error response:", streamError.response);
+          }
+          // Show error to user but don't block class joining
+          toast.error(
+            "Failed to join class chat - you may need to refresh to see messages"
+          );
         }
       }
 
@@ -760,13 +774,15 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
       );
     });
 
-    const isRecurringClass = classData.recurrenceTypes && 
-    classData.recurrenceTypes.length > 0 && 
+  const isRecurringClass =
+    classData.recurrenceTypes &&
+    classData.recurrenceTypes.length > 0 &&
     classData.recurrenceTypes[0] !== "One-time";
-  
-    const displayDate = isRecurringClass && nextClassDate ? nextClassDate : 
-                  new Date(classData?.classDateTime?.seconds * 1000);
 
+  const displayDate =
+    isRecurringClass && nextClassDate
+      ? nextClassDate
+      : new Date(classData?.classDateTime?.seconds * 1000);
 
   return (
     <>
@@ -830,68 +846,68 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
                         </span>
                       )}
                     </div>
-                   
-                    <div className="flex flex-col mt-4 space-y-4">
-  {/* First Row */}
-  <div className="flex items-center justify-between space-x-12">
-    <div className="flex items-center gap-1">
-      <img alt="bammbuu" src="/svgs/clock.svg" />{" "}
-      <span className="text-sm">
-        {displayDate.toLocaleTimeString("en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: true, // for AM/PM format
-        })}
-      </span>
-    </div>
-    <div className="flex items-center gap-1">
-      <img alt="bammbuu" src="/svgs/calendar.svg" />
-      <span className="text-sm">
-        {formatDate(displayDate, "full")}
-      </span>
-    </div>
-    <div className="flex items-center gap-1">
-      <img alt="bammbuu" src="/svgs/users.svg" />
-      {classData.classType === "Individual Premium" ? (
-        <>
-          {" "}
-          <span className="text-sm">
-            {classData.classMemberIds.length}
-          </span>
-        </>
-      ) : (
-        <span className="text-sm text-[#454545]">
-          {classData.classMemberIds.length}/
-          {classData.availableSpots}
-        </span>
-      )}
-    </div>
-  </div>
 
-  {/* Second Row */}
-  <div className="flex items-center justify-between">
-    <div className="flex items-center gap-1">
-      <img alt="bammbuu" src="/svgs/repeate-music.svg" />
-      {isRecurringClass ? (
-        <span className="text-sm font-semibold text-green-700">
-          {classData.recurrenceTypes[0]}
-        </span>
-      ) : (
-        <span className="text-sm">
-          {classData.classType === "Individual Premium" 
-            ? (classData.selectedRecurrenceType || "One-time") 
-            : classData.recurrenceTypes[0]}
-        </span>
-      )}
-    </div>
-    <div className="flex items-center gap-1">
-      <img alt="bammbuu" src="/svgs/location.svg" />
-      <span className="text-sm">
-        {classData.classLocation}
-      </span>
-    </div>
-  </div>
-</div>
+                    <div className="flex flex-col mt-4 space-y-4">
+                      {/* First Row */}
+                      <div className="flex items-center justify-between space-x-12">
+                        <div className="flex items-center gap-1">
+                          <img alt="bammbuu" src="/svgs/clock.svg" />{" "}
+                          <span className="text-sm">
+                            {displayDate.toLocaleTimeString("en-US", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: true, // for AM/PM format
+                            })}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <img alt="bammbuu" src="/svgs/calendar.svg" />
+                          <span className="text-sm">
+                            {formatDate(displayDate, "full")}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <img alt="bammbuu" src="/svgs/users.svg" />
+                          {classData.classType === "Individual Premium" ? (
+                            <>
+                              {" "}
+                              <span className="text-sm">
+                                {classData.classMemberIds.length}
+                              </span>
+                            </>
+                          ) : (
+                            <span className="text-sm text-[#454545]">
+                              {classData.classMemberIds.length}/
+                              {classData.availableSpots}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Second Row */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1">
+                          <img alt="bammbuu" src="/svgs/repeate-music.svg" />
+                          {isRecurringClass ? (
+                            <span className="text-sm font-semibold text-green-700">
+                              {classData.recurrenceTypes[0]}
+                            </span>
+                          ) : (
+                            <span className="text-sm">
+                              {classData.classType === "Individual Premium"
+                                ? classData.selectedRecurrenceType || "One-time"
+                                : classData.recurrenceTypes[0]}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <img alt="bammbuu" src="/svgs/location.svg" />
+                          <span className="text-sm">
+                            {classData.classLocation}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
 
                     <p className="mt-4 mb-6 text-gray-600">
                       {classData.classDescription}

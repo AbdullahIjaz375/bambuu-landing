@@ -321,9 +321,7 @@ const GroupCard = ({ group }) => {
         console.error("Cannot join group:", eligibility.message);
         setIsPlansModalOpen(true);
         return;
-      }
-
-      // Get references to the group and user documents
+      } // Get references to the group and user documents
       const groupRef = doc(db, "groups", groupId);
       const userRef = doc(db, "students", user.uid);
 
@@ -339,18 +337,7 @@ const GroupCard = ({ group }) => {
         ? ChannelType.PREMIUM_GROUP
         : ChannelType.STANDARD_GROUP;
 
-      try {
-        await addMemberToStreamChannel({
-          channelId: groupId,
-          userId: user.uid,
-          type: channel,
-          role: "channel_member",
-        });
-      } catch (streamError) {
-        console.error("Error adding to stream channel:", streamError);
-        throw new Error("Failed to join group chat");
-      }
-
+      // Update Firestore FIRST - this is the source of truth
       // Update the group document to add the user's ID to memberIds
       await updateDoc(groupRef, {
         memberIds: arrayUnion(user.uid),
@@ -360,6 +347,53 @@ const GroupCard = ({ group }) => {
       await updateDoc(userRef, {
         joinedGroups: arrayUnion(groupId),
       });
+
+      // Now try to add to Stream channel - but don't let Stream errors prevent joining
+      try {
+        await addMemberToStreamChannel({
+          channelId: groupId,
+          userId: user.uid,
+          type: channel,
+          role: "channel_member",
+        });
+      } catch (streamError) {
+        console.error("Stream error (continuing anyway):", streamError);
+        // Don't throw here - we've already updated Firestore, which is the source of truth
+        console.log(
+          `User ${user.uid} added to group ${groupId} in Firestore, Stream sync pending`
+        );
+      }
+      // For premium groups, refresh channels to ensure they appear in the user's channel list
+      if (isPremium) {
+        try {
+          // First disconnect the current token which doesn't have the group membership
+          const { streamClient } = await import("../config/stream");
+          if (streamClient.userID) {
+            await streamClient.disconnectUser();
+
+            // Then connect with a fresh token that will have the updated permissions
+            const { fetchChatToken } = await import("../config/stream");
+            const token = await fetchChatToken(user.uid);
+            await streamClient.connectUser(
+              {
+                id: user.uid,
+                name: user.name || "",
+                image: user.photoUrl || "",
+              },
+              token
+            );
+            console.log(`Stream client reconnected for user ${user.uid}`);
+
+            // Now force refresh all channels for this user
+            const { refreshUserChannels } = await import(
+              "../services/streamConnectionService"
+            );
+            await refreshUserChannels(user.uid);
+          }
+        } catch (tokenError) {
+          console.error("Error refreshing Stream token:", tokenError);
+        }
+      }
 
       // Update context and session storage
       updateContextAndSession(groupId);

@@ -245,7 +245,6 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
   const handleJoinConfirm = async () => {
     try {
       setIsJoining(true);
-
       if (user.freeAccess) {
         // Allow user to join the group immediately
         const groupRef = doc(db, "groups", groupId);
@@ -256,26 +255,46 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
         const groupData = groupDoc.data();
 
         if (groupData.memberIds.includes(user.uid)) {
+          console.log(
+            `User ${user.uid} is already a member of group ${groupId}`
+          );
           return;
         }
 
-        const channel = group.isPremium
+        // Determine if this is a premium or standard group
+        const channelType = group.isPremium
           ? ChannelType.PREMIUM_GROUP
           : ChannelType.STANDARD_GROUP;
 
+        // Add the user to both Firestore and Stream
         try {
+          // First update the group document to add the user's ID to memberIds
+          await updateDoc(groupRef, {
+            memberIds: arrayUnion(user.uid),
+          });
+
+          // Then update the user document to add the group ID to joinedGroups
+          await updateDoc(userRef, {
+            joinedGroups: arrayUnion(groupId),
+          });
+
+          // Now add to Stream channel (this uses our improved helper that handles permissions)
           await addMemberToStreamChannel({
             channelId: groupId,
             userId: user.uid,
-            type: channel,
+            type: channelType,
             role: "channel_member",
           });
-        } catch (streamError) {
-          console.error("Error adding to stream channel:", streamError);
-          throw new Error("Failed to join group chat");
+
+          console.log(
+            `Successfully added user ${user.uid} to group ${groupId} and its chat`
+          );
+        } catch (error) {
+          console.error("Error joining group:", error);
+          throw new Error("Failed to join group");
         }
 
-        // Update the group document to add the user's ID to memberIds
+        // Update context and session storage (moved after all operations)
         await updateDoc(groupRef, {
           memberIds: arrayUnion(user.uid),
         });
@@ -303,9 +322,7 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
         console.error("Cannot join group:", eligibility.message);
         setIsPlansModalOpen(true);
         return;
-      }
-
-      // Get references to the group and user documents
+      } // Get references to the group and user documents
       const groupRef = doc(db, "groups", groupId);
       const userRef = doc(db, "students", user.uid);
 
@@ -314,34 +331,80 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
       const groupData = groupDoc.data();
 
       if (groupData.memberIds.includes(user.uid)) {
+        console.log(`User ${user.uid} is already a member of group ${groupId}`);
         return;
       }
 
-      const channel = group.isPremium
+      // Determine the channel type based on group's premium status
+      const channelType = group.isPremium
         ? ChannelType.PREMIUM_GROUP
         : ChannelType.STANDARD_GROUP;
 
       try {
-        await addMemberToStreamChannel({
-          channelId: groupId,
-          userId: user.uid,
-          type: channel,
-          role: "channel_member",
+        // First update Firestore - this ensures data consistency
+        // Update the group document to add the user's ID to memberIds
+        await updateDoc(groupRef, {
+          memberIds: arrayUnion(user.uid),
         });
-      } catch (streamError) {
-        console.error("Error adding to stream channel:", streamError);
-        throw new Error("Failed to join group chat");
+
+        // Update the user document to add the group ID to joinedGroups
+        await updateDoc(userRef, {
+          joinedGroups: arrayUnion(groupId),
+        });
+
+        // Now try to add to Stream channel - but don't let Stream errors prevent joining
+        try {
+          await addMemberToStreamChannel({
+            channelId: groupId,
+            userId: user.uid,
+            type: channelType,
+            role: "channel_member",
+          });
+
+          console.log(
+            `User ${user.uid} added to group ${groupId} and its channel`
+          );
+        } catch (streamError) {
+          console.error("Stream error (continuing anyway):", streamError);
+          // Don't throw here - we've already updated Firestore, which is the source of truth
+          console.log(
+            `User ${user.uid} added to group ${groupId} in Firestore, Stream sync pending`
+          );
+        }
+      } catch (error) {
+        console.error("Error joining group:", error);
+        throw new Error("Failed to join group");
+      } // For premium groups, refresh channels to ensure they appear in the user's channel list
+      if (group.isPremium) {
+        try {
+          // First disconnect the current token which doesn't have the group membership
+          const { streamClient } = await import("../../config/stream");
+          if (streamClient.userID) {
+            await streamClient.disconnectUser();
+
+            // Then connect with a fresh token that will have the updated permissions
+            const { fetchChatToken } = await import("../../config/stream");
+            const token = await fetchChatToken(user.uid);
+            await streamClient.connectUser(
+              {
+                id: user.uid,
+                name: user.name || "",
+                image: user.photoUrl || "",
+              },
+              token
+            );
+            console.log(`Stream client reconnected for user ${user.uid}`);
+
+            // Now force refresh all channels for this user
+            const { refreshUserChannels } = await import(
+              "../../services/streamConnectionService"
+            );
+            await refreshUserChannels(user.uid);
+          }
+        } catch (tokenError) {
+          console.error("Error refreshing Stream token:", tokenError);
+        }
       }
-
-      // Update the group document to add the user's ID to memberIds
-      await updateDoc(groupRef, {
-        memberIds: arrayUnion(user.uid),
-      });
-
-      // Update the user document to add the group ID to joinedGroups
-      await updateDoc(userRef, {
-        joinedGroups: arrayUnion(groupId),
-      });
 
       // Update context and session storage
       updateContextAndSession(groupId);
@@ -478,13 +541,10 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
                       </div>
                     </div>
 
-                  
-
-
-                    <ShowDescription 
-                       description={group.groupDescription} 
-                       maxHeight={100}
-                       />
+                    <ShowDescription
+                      description={group.groupDescription}
+                      maxHeight={100}
+                    />
                   </div>
 
                   <div className="w-full space-y-4">
@@ -519,7 +579,7 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
                 onClick={handleJoinConfirm}
               >
                 {isJoining
-                  ? t("group-details.buttons.join.loading")
+                  ? t("group-details-user.buttons.join.loading")
                   : t("group-details.buttons.join.default")}
               </button>
             </div>

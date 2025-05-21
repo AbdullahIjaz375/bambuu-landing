@@ -10,6 +10,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import CustomChatComponent from "../../components/ChatComponent";
 import { syncChannelWithFirestore } from "../../services/streamService";
 import { safeMarkChannelRead } from "../../services/streamConnectionService";
+import updateChannelNameFromFirestore from "../../utils/channelNameFix";
+import {
+  enforceChannelNameFromFirestore,
+  refreshUserChannels,
+} from "../../utils/channelRefreshUtil";
 
 const MessagesUser = () => {
   const { user } = useAuth();
@@ -93,19 +98,33 @@ const MessagesUser = () => {
       online: false,
     };
   };
-
   // Ensure Stream client is connected
   useEffect(() => {
     const connectStreamClient = async () => {
       if (!user) return;
 
       try {
-        // Always disconnect first to ensure clean state
+        // Check if we're already connected as this user
+        if (streamClient.userID === user.uid && streamClient.isConnected) {
+          console.log(`Stream client already connected as ${user.uid}`);
+          setStreamClientConnected(true);
+          return;
+        }
+
+        // If connected as different user or disconnected, reconnect
         if (streamClient.userID) {
+          console.log(`Disconnecting current user: ${streamClient.userID}`);
           await streamClient.disconnectUser();
         }
 
+        console.log(`Connecting Stream client as ${user.uid}`);
         const token = await fetchChatToken(user.uid);
+
+        // Import helper to record the user ID for reconnection attempts
+        const { setLastUserId } = await import(
+          "../../services/streamConnectionService"
+        );
+        setLastUserId(user.uid);
 
         await streamClient.connectUser(
           {
@@ -117,45 +136,72 @@ const MessagesUser = () => {
           token
         );
 
+        console.log(`Stream client connected successfully as ${user.uid}`);
         setStreamClientConnected(true);
       } catch (error) {
-        console.error("Error connecting to Stream client:", error);
+        console.error(`Error connecting to Stream client: ${error.message}`);
         setStreamClientConnected(false);
+
+        // Try one more time after a short delay
+        setTimeout(() => {
+          console.log("Retrying Stream connection...");
+          connectStreamClient();
+        }, 3000);
       }
     };
 
     connectStreamClient();
 
     return () => {
-      // No need to disconnect here as we'll manage connection state explicitly
+      // We'll keep the connection alive - disconnection is handled elsewhere
     };
   }, [user]);
 
   useEffect(() => {
     const loadChannels = async () => {
-      if (!user || !streamClientConnected) return;
+      if (!user) {
+        console.log("No user, skipping channel load");
+        setLoading(false);
+        return;
+      }
+
+      if (!streamClientConnected) {
+        console.log(
+          "Stream client not connected, will try again when connected"
+        );
+        return;
+      }
 
       try {
         console.log("Loading channels for user:", user.uid);
-        const filter = {
-          members: { $in: [user.uid] },
-          type: {
-            $in: [
-              "standard_group",
-              "premium_group",
-              "premium_individual_class",
-              "one_to_one_chat",
-            ],
-          },
-        };
 
-        const sort = { last_message_at: -1 };
+        // Import our connection helper to ensure we're connected
+        const { ensureStreamConnection } = await import(
+          "../../services/streamConnectionService"
+        );
 
-        const channels = await streamClient.queryChannels(filter, sort, {
-          watch: true,
-          state: true,
-          presence: true,
-          message_retention: "infinite",
+        // Use the helper to ensure connection and handle the query
+        const channels = await ensureStreamConnection(async () => {
+          const filter = {
+            members: { $in: [user.uid] },
+            type: {
+              $in: [
+                "standard_group",
+                "premium_group",
+                "premium_individual_class",
+                "one_to_one_chat",
+              ],
+            },
+          };
+
+          const sort = { last_message_at: -1 };
+
+          return streamClient.queryChannels(filter, sort, {
+            watch: true,
+            state: true,
+            presence: true,
+            message_retention: "infinite",
+          });
         });
 
         // Force check all channels and their types
@@ -668,6 +714,47 @@ const MessagesUser = () => {
       </div>
     );
   };
+
+  useEffect(() => {
+    // Fix channel names for premium channels to ensure they display correctly
+    const fixChannelNames = async () => {
+      try {
+        // Only fix channel names if we have channels and the stream client is connected
+        if (channels.length > 0 && streamClientConnected) {
+          console.log("Fixing channel names for display...");
+          const premiumChannels = channels.filter(
+            (ch) =>
+              ch.type === "premium_group" ||
+              ch.type === "premium_individual_class"
+          );
+
+          // Update names for premium channels
+          for (const channel of premiumChannels) {
+            try {
+              const result = await updateChannelNameFromFirestore(
+                channel.id,
+                channel.type
+              );
+              if (result.fixed) {
+                console.log(
+                  `Fixed channel name for ${channel.id} to "${result.name}"`
+                );
+              }
+            } catch (error) {
+              console.warn(
+                `Error fixing channel ${channel.id} name: ${error.message}`
+              );
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error in fixChannelNames:", error);
+      }
+    };
+
+    // Run the fix whenever channels are updated
+    fixChannelNames();
+  }, [channels, streamClientConnected]);
 
   if (loading) {
     return (
