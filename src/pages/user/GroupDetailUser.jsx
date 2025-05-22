@@ -939,7 +939,11 @@ const GroupDetailsUser = ({ onClose }) => {
                   </div>{" "}
                   <div className="space-y-4">
                     {" "}
-                    {group.isPremium ? <GroupInfoCard group={group} /> : <></>}
+                    {group.isPremium ? (
+                      <GroupInfoCard group={group} />
+                    ) : (
+                      <></>
+                    )}{" "}
                     <div className="w-full space-y-2 md:space-y-4">
                       <button
                         className={`w-full px-3 md:px-4 py-2 text-sm md:text-base text-black border rounded-full ${
@@ -949,7 +953,7 @@ const GroupDetailsUser = ({ onClose }) => {
                         }`}
                         onClick={() => {
                           localStorage.setItem("activetab", "bammbuu");
-                          navigate("/messagesUser");
+                          navigate(`/messagesUser/${group.id}`);
                         }}
                       >
                         {t("group-details.buttons.viewChat")}
