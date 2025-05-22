@@ -56,9 +56,45 @@ export const createStreamChannel = async ({
   name,
   image,
   description,
+  created_by_id,
   member_roles,
 }) => {
   try {
+    // For one-to-one chats, check if the channel already exists first
+    if (type === ChannelType.ONE_TO_ONE_CHAT) {
+      try {
+        console.log(`Checking if one-to-one chat ${id} already exists...`);
+        const existingChannel = streamClient.channel(type, id);
+        const response = await existingChannel.query({
+          watch: true,
+          state: true,
+        });
+
+        if (response?.channel?.id) {
+          console.log(
+            `One-to-one chat ${id} already exists, updating metadata if needed`
+          );
+
+          // Update the channel name if it's different
+          if (name && name !== response.channel.data.name) {
+            await existingChannel.update({
+              name: name,
+              description: description || `Chat for ${name}`,
+              image: image || "",
+            });
+            console.log(`Updated existing one-to-one chat name to "${name}"`);
+          }
+
+          return existingChannel; // Return the existing channel instead of creating a new one
+        }
+      } catch (checkError) {
+        // If channel doesn't exist or error occurred, continue with creation
+        console.log(
+          `No existing one-to-one chat found with ID ${id}, creating new one`
+        );
+      }
+    }
+
     // Ensure all members exist in Stream before creating the channel
     await Promise.all(members.map((userId) => ensureUserExists(userId)));
 
@@ -205,9 +241,7 @@ export const addMemberToStreamChannel = async ({
         `Failed to fetch Firestore data for channel ${channelId}:`,
         firestoreErr
       );
-    }
-
-    // Special handling for premium channels - make sure the channel exists and is watched
+    } // Special handling for premium channels - make sure the channel exists and is watched
     if (
       type === ChannelType.PREMIUM_GROUP ||
       type === ChannelType.PREMIUM_INDIVIDUAL_CLASS
@@ -215,7 +249,64 @@ export const addMemberToStreamChannel = async ({
       try {
         // Get the channel first to ensure it exists
         const channel = streamClient.channel(type, channelId);
-        await channel.watch();
+        await channel.watch(); // If we have Firestore data, update the channel metadata to ensure proper display
+        if (firestoreData) {
+          if (type === ChannelType.PREMIUM_GROUP && firestoreData.groupName) {
+            await channel.update({
+              name: firestoreData.groupName,
+              description:
+                firestoreData.groupDescription ||
+                `Group chat for ${firestoreData.groupName}`,
+              image: firestoreData.imageUrl || "",
+            });
+            console.log(
+              `Updated premium group channel name to "${firestoreData.groupName}"`
+            );
+          } else if (
+            type === ChannelType.PREMIUM_INDIVIDUAL_CLASS &&
+            firestoreData.className
+          ) {
+            await channel.update({
+              name: firestoreData.className,
+              description:
+                firestoreData.classDescription ||
+                `Class chat for ${firestoreData.className}`,
+              image: firestoreData.imageUrl || "",
+            });
+            console.log(
+              `Updated premium class channel name to "${firestoreData.className}"`
+            );
+          } else {
+            // Fallback if we have firestoreData but name is missing
+            const fallbackName =
+              type === ChannelType.PREMIUM_GROUP
+                ? "Premium Group Chat"
+                : "Premium Individual Class";
+
+            await channel.update({
+              name: fallbackName,
+              description: `Chat for ${fallbackName}`,
+              image: firestoreData.imageUrl || "",
+            });
+            console.log(
+              `Updated channel ${channelId} with fallback name "${fallbackName}" because the original name was undefined`
+            );
+          }
+        } else {
+          // No Firestore data available, set a default name
+          const defaultName =
+            type === ChannelType.PREMIUM_GROUP
+              ? "Premium Group Chat"
+              : "Premium Individual Class";
+
+          await channel.update({
+            name: defaultName,
+            description: `Chat for ${defaultName}`,
+          });
+          console.log(
+            `No Firestore data found, set default name "${defaultName}" for channel ${channelId}`
+          );
+        }
 
         // Force a query to refresh the client's cache
         await streamClient.queryChannels({ id: channelId });

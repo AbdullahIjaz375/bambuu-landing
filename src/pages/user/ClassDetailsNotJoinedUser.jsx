@@ -7,14 +7,18 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import Modal from "react-modal";
 import { Timestamp } from "firebase/firestore";
-import { addMemberToStreamChannel } from "../../services/streamService";
-import { ChannelType } from "../../config/stream";
+import {
+  addMemberToStreamChannel,
+  createStreamChannel,
+} from "../../services/streamService";
+import { ChannelType, streamClient } from "../../config/stream";
 import ClassInfoCard from "../../components/ClassInfoCard";
 import { useClassBooking } from "../../hooks/useClassBooking";
 import PlansModal from "../../components/PlansModal";
 import EmptyState from "../../components/EmptyState";
 import { toast } from "react-toastify";
 import { checkAccess } from "../../utils/accessControl";
+import { updateStreamChannelMetadata } from "./UpdateStreamChannel";
 
 Modal.setAppElement("#root");
 
@@ -344,8 +348,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
             ? user.credits - creditsToDeduct
             : user.credits,
         }),
-      ];
-      // Check if the tutorId corresponds to an actual tutor document
+      ]; // Check if the tutorId corresponds to an actual tutor document
       const tutorDoc = await getDoc(tutorRef);
       if (tutorDoc.exists()) {
         updates.push(
@@ -354,15 +357,13 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
           })
         );
       } // Execute all updates in parallel
-      await Promise.all(updates);
-
-      // For Individual Premium classes, add the user to the Stream chat channel
+      await Promise.all(updates); // For Individual Premium classes, add the user to the Stream chat channel
       if (classData.classType === "Individual Premium") {
         try {
           console.log(
             `Adding user ${userId} to premium class channel ${classId}`
           );
-
+          // Add user to the premium class channel
           await addMemberToStreamChannel({
             channelId: classId,
             userId: userId,
@@ -370,9 +371,173 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
             role: "channel_member",
           });
 
+          // Update the channel name and metadata to ensure it displays correctly in the chat UI
+          try {
+            await updateStreamChannelMetadata(
+              ChannelType.PREMIUM_INDIVIDUAL_CLASS,
+              classId,
+              {
+                name: classData.className || "Premium Individual Class",
+                description: `Class chat for ${
+                  classData.className || "Premium Individual Class"
+                }`,
+                image: classData.imageUrl || "",
+              }
+            );
+            console.log(
+              `Updated class channel name to "${classData.className}"`
+            );
+          } catch (nameUpdateError) {
+            console.error(
+              "Error updating class channel name:",
+              nameUpdateError
+            );
+            // Don't block the process for this error
+          }
+
           console.log(
             `Successfully added user ${userId} to class ${classId} chat`
-          );
+          ); // Create one-on-one chat between student and tutor automatically
+          const tutorId = classData.adminId;
+          const tutorData = tutorDoc.exists() ? tutorDoc.data() : null;
+
+          if (tutorId && tutorData) {
+            try {
+              // Create channel ID by combining student and teacher IDs
+              // Consistently order the IDs to ensure the same channel ID is generated
+              // regardless of who initiates the chat
+              const userIds = [userId, tutorId].sort();
+              const oneToOneChannelId = `${userIds[0]}${userIds[1]}`;
+
+              console.log(
+                `Checking for existing one-to-one chat between ${userId} and ${tutorId}`
+              );
+
+              // Check if a chat already exists between this student and tutor
+              try {
+                // Try to query for an existing channel
+                const existingChannel = streamClient.channel(
+                  ChannelType.ONE_TO_ONE_CHAT,
+                  oneToOneChannelId
+                );
+                const response = await existingChannel.query({
+                  watch: true,
+                  state: true,
+                });
+
+                if (response?.channel?.id) {
+                  console.log(
+                    `Chat already exists between student ${userId} and tutor ${tutorId}, skipping creation`
+                  );
+
+                  // Optionally update the channel name if needed
+                  const currentName = response.channel.data?.name || "";
+                  const desiredName =
+                    classData.className || "Premium Individual Class";
+
+                  if (!currentName.includes(desiredName)) {
+                    // Update the channel with the class name if it's different
+                    await existingChannel.update({
+                      name: desiredName,
+                      description: `Chat for ${desiredName}`,
+                    });
+                    console.log(
+                      `Updated existing chat channel name to "${desiredName}"`
+                    );
+                  }
+
+                  return; // Skip creating a new channel
+                }
+              } catch (checkError) {
+                // Channel doesn't exist, continue with creation
+                console.log(
+                  `No existing chat found between student ${userId} and tutor ${tutorId}, creating new one`
+                );
+              }
+
+              // Check if a chat already exists between this student and tutor
+              try {
+                // Try to query for an existing channel
+                const existingChannel = streamClient.channel(
+                  ChannelType.ONE_TO_ONE_CHAT,
+                  oneToOneChannelId
+                );
+                const response = await existingChannel.query({
+                  watch: true,
+                  state: true,
+                });
+
+                if (response?.channel?.id) {
+                  console.log(
+                    `Chat already exists between student ${userId} and tutor ${tutorId}, skipping creation`
+                  );
+
+                  // Optionally update the channel name if needed
+                  const currentName = response.channel.name || "";
+                  const desiredName =
+                    classData.className || "Premium Individual Class";
+
+                  if (!currentName.includes(desiredName)) {
+                    // Update the channel with the class name if it's different
+                    await existingChannel.update({
+                      name: desiredName,
+                      description: `Chat for ${desiredName}`,
+                    });
+                    console.log(
+                      `Updated existing chat channel name to "${desiredName}"`
+                    );
+                  }
+
+                  return; // Skip creating a new channel
+                }
+              } catch (checkError) {
+                // Channel doesn't exist, continue with creation
+                console.log(
+                  `No existing chat found between student ${userId} and tutor ${tutorId}, creating new one`
+                );
+              } // Use the class name for the chat instead of combining student and tutor names
+              const channelName =
+                classData.className || "Premium Individual Class";
+
+              // Set up member roles
+              const memberRoles = [
+                {
+                  user_id: userId,
+                  role: "member",
+                },
+                {
+                  user_id: tutorId,
+                  role: "member",
+                },
+              ];
+
+              // Create channel data object
+              const channelData = {
+                id: oneToOneChannelId,
+                type: ChannelType.ONE_TO_ONE_CHAT,
+                members: [userId, tutorId],
+                name: channelName,
+                image: tutorData.photoUrl || "",
+                description: `Chat for ${
+                  classData.className || "Premium Individual Class"
+                }`,
+                created_by_id: userId,
+                member_roles: memberRoles,
+              };
+
+              // Create the Stream channel (or get existing one if it exists)
+              const channel = await createStreamChannel(channelData);
+              console.log(
+                `Successfully created/connected to class chat "${channelName}" between student ${userId} and tutor ${tutorId}`
+              );
+            } catch (oneToOneError) {
+              console.error(
+                "Error creating one-on-one chat channel:",
+                oneToOneError
+              );
+              // Don't show this error to the user since the class joining should still work
+            }
+          }
         } catch (streamError) {
           console.error("Error adding to stream channel:", streamError);
           // Log more details about the error for debugging
@@ -1055,11 +1220,21 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
           <h2 className="mb-4 text-xl font-semibold">
             Are you sure you want to book this class?
           </h2>
-          {error && <p className="mb-4 text-red-600">{error}</p>}
+          {error && <p className="mb-4 text-red-600">{error}</p>}{" "}
           <p className="mb-6 text-gray-600">
-            By booking class you will be added in the group and you'll be able
-            to join the class 5 minutes before it starts. It will also be added
-            to your calendar.
+            {classData.classType === "Individual Premium" ? (
+              <>
+                By booking this class, you'll connect with your private tutor
+                and you'll be able to join the class 5 minutes before it starts.
+                It will also be added to your calendar.
+              </>
+            ) : (
+              <>
+                By booking class you will be added in the group and you'll be
+                able to join the class 5 minutes before it starts. It will also
+                be added to your calendar.
+              </>
+            )}
           </p>
           <div className="flex flex-row gap-2">
             <button
