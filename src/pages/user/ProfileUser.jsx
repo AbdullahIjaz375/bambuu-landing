@@ -162,17 +162,6 @@ const ProfileUser = () => {
                 </span>
               </div>
 
-              {hasBambuuPlus && (
-                <div className="flex items-center gap-2 px-4 py-2 mb-6 text-md font-semibold bg-yellow-100 text-yellow-800 rounded-full">
-                  <img
-                    alt="bambuu plus"
-                    src="/svgs/bambuu-plus-icon.svg"
-                    className="w-5 h-5"
-                  />
-                  <span>Bammbuu+ Member</span>
-                </div>
-              )}
-
               <div className="grid w-full grid-cols-3 gap-4 mb-6 text-xl">
                 {/* Language and Location Info */}
                 <div className="flex items-center min-w-0 gap-1">
