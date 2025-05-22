@@ -462,7 +462,7 @@
   },
   "group-details": {
     "title": "Group Details",
-    "adminLabel": "(Admin)",
+    "admin-label": "(Admin)",
     "members": "Members",
     "classes": "Classes",
     "buttons": {

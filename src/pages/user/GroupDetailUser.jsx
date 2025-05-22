@@ -749,32 +749,32 @@ const GroupDetailsUser = ({ onClose }) => {
 
     if (allMembers.length === 0) {
       return (
-        <div className="flex items-center justify-center h-96">
+        <div className="flex items-center justify-center h-48 sm:h-64 md:h-96">
           <EmptyState message="No members available" />
         </div>
       );
     }
 
     return (
-      <div className="grid grid-cols-1 gap-2 md:grid-cols-4">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {allMembers.map((member) => (
           <div
             key={member.id}
-            className="flex items-center justify-between px-4 py-2 border border-gray-200 hover:bg-gray-50 rounded-3xl"
+            className="flex items-center justify-between px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 md:py-2 border border-gray-200 hover:bg-gray-50 rounded-2xl sm:rounded-3xl"
           >
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 flex-grow overflow-hidden">
               <img
                 src={member.photoUrl || "/images/panda.png"}
                 alt={member.name}
-                className="object-cover rounded-full w-9 h-9"
+                className="object-cover flex-shrink-0 rounded-full w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9"
               />
 
-              <div className="flex flex-row items-center justify-between w-full space-x-16">
-                <span className="text-sm font-medium text-gray-900">
+              <div className="flex flex-row items-center justify-between w-full overflow-hidden">
+                <span className="text-xs sm:text-sm font-medium text-gray-900 truncate mr-1">
                   {member.name}
                 </span>
                 {member.id === group.groupAdminId && (
-                  <span className="p-1 text-xs text-right text-gray-500 bg-gray-200 rounded-full">
+                  <span className="px-1 py-0.5 text-xs text-right whitespace-nowrap text-gray-500 bg-gray-200 rounded-full">
                     Admin
                   </span>
                 )}
@@ -782,23 +782,13 @@ const GroupDetailsUser = ({ onClose }) => {
             </div>
             {user.uid === group.groupAdminId &&
               member.id !== group.groupAdminId && (
-                // <button
-                //   onClick={() => {
-                //   setSelectedUser(member);
-                //   setShowRemoveConfirmation(true);
-                // }}
-                //   className="px-3 py-1 text-xs text-red-500 border border-red-500 rounded-full hover:bg-red-50"
-                // >
-                //   Remove
-                // </button>
-
-                <Menu shadow="md" width={180} position="bottom-end" radius="lg">
+                <Menu shadow="md" width={150} position="bottom-end" radius="lg">
                   <Menu.Target>
                     <button
                       onClick={(e) => e.stopPropagation()}
-                      className="flex items-center justify-center w-8 h-8 "
+                      className="flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 flex-shrink-0 ml-1"
                     >
-                      <EllipsisVertical className="text-gray-400" />
+                      <EllipsisVertical size={16} className="text-gray-400" />
                     </button>
                   </Menu.Target>
 
@@ -850,44 +840,46 @@ const GroupDetailsUser = ({ onClose }) => {
   if (!group) {
     return null;
   }
-
   return (
     <>
       <div className="flex min-h-screen">
-        <div className="flex flex-1 m-2 border md:m-6 rounded-xl md:rounded-3xl">
-          <div className="flex flex-col w-full p-3 mx-2 bg-white md:p-6 md:mx-4 rounded-xl md:rounded-3xl">
-            <div className="flex items-center justify-between pb-2 mb-3 border-b md:pb-4 md:mb-6">
+        <div className="flex flex-1 m-1 border sm:m-2 md:m-6 rounded-xl md:rounded-3xl">
+          <div className="flex flex-col w-full p-2 bg-white sm:p-3 md:p-6 rounded-xl md:rounded-3xl">
+            <div className="flex items-center justify-between pb-2 mb-2 border-b sm:mb-3 md:pb-4 md:mb-6">
               <div className="flex items-center gap-2 md:gap-4">
+                {" "}
                 <button
-                  className="p-2 bg-gray-100 rounded-full md:p-3"
+                  className="p-1.5 bg-gray-100 rounded-full sm:p-2 md:p-3"
                   onClick={handleBack}
                 >
-                  <ArrowLeft size={20} className="md:w-8 md:h-8" />
+                  <ArrowLeft
+                    size={16}
+                    className="sm:w-5 sm:h-5 md:w-6 md:h-6"
+                  />
                 </button>
-                <h1 className="text-xl font-semibold md:text-4xl">
+                <h1 className="text-lg font-semibold sm:text-xl md:text-2xl lg:text-3xl">
                   {t("group-details.title")}
                 </h1>
               </div>
-            </div>
-
-            <div className="flex flex-col flex-1 min-h-0 gap-4 lg:flex-row md:gap-6">
+            </div>{" "}
+            <div className="flex flex-col flex-1 min-h-0 gap-3 lg:flex-row md:gap-6">
               {/* Left sidebar */}
               <div
-                className={`w-full lg:w-1/4 p-4 md:p-6 rounded-xl md:rounded-3xl ${
+                className={`w-full lg:w-1/4 p-3 sm:p-4 md:p-5 rounded-xl md:rounded-3xl flex-shrink-0 ${
                   group.isPremium ? "bg-[#e6fce8]" : "bg-[#ffffea]"
                 }`}
               >
-                <div className="flex flex-col items-center justify-between h-full text-center">
-                  <div className="flex flex-col items-center text-center">
+                <div className="flex flex-col items-center justify-between h-full text-center max-w-full">
+                  <div className="flex flex-col items-center text-center max-w-full">
                     <img
                       src={group.imageUrl}
                       alt={group.groupName}
-                      className="object-cover w-24 h-24 mb-4 rounded-full md:w-32 md:h-32"
+                      className="object-cover w-12 h-12 mb-2 rounded-full sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24"
                     />
-                    <h3 className="mb-2 text-xl font-semibold md:text-2xl">
+                    <h3 className="mb-1 text-sm font-semibold truncate w-full sm:text-base md:text-lg lg:text-xl">
                       {group.groupName}
                     </h3>
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center gap-1 mb-1">
                       <div className="flex flex-row items-center space-x-1">
                         <img
                           src={
@@ -902,51 +894,51 @@ const GroupDetailsUser = ({ onClose }) => {
                               ? "US Flag"
                               : "Spain Flag"
                           }
-                          className="w-5 h-5 sm:w-auto"
+                          className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5"
                         />
-                        <span className="text-sm md:text-md">
+                        <span className="text-xs sm:text-sm">
                           {group.groupLearningLanguage}
                         </span>
                       </div>
                     </div>
-                    <div className="flex flex-col items-center mt-2 md:flex-row md:space-x-40">
-                      <div className="flex items-center gap-1 mb-2 md:mb-4">
+                    <div className="flex justify-center gap-3 w-full mt-1">
+                      <div className="flex items-center gap-1">
                         <img
-                          src={group.groupAdminImageUrl}
+                          src={group.groupAdminImageUrl || "/images/panda.png"}
                           alt="admin"
-                          className="w-6 h-6 rounded-full "
+                          className="w-3 h-3 rounded-full sm:w-4 sm:h-4 lg:w-5 lg:h-5"
                         />
-                        <span className="text-xs text-gray-800 md:text-sm">
+                        <span className="text-xs text-gray-800 truncate max-w-[80px] sm:max-w-[100px] md:max-w-[150px]">
                           {group.groupAdminName} (Admin)
                         </span>
                       </div>
-                      <div className="flex items-center gap-1 mb-2 md:mb-4">
+                      <div className="flex items-center gap-1">
                         <img
                           alt="bammbuu"
                           src="/svgs/users.svg"
-                          className="w-4 md:w-5"
+                          className="w-3 h-3 sm:w-4 sm:h-4"
                         />
-                        <span className="text-xs text-gray-800 md:text-sm">
+                        <span className="text-xs text-gray-800">
                           {group?.memberIds.length}
                         </span>
                       </div>
+                    </div>{" "}
+                    <div className="w-full mt-1 sm:mt-2 md:mt-3 px-1">
+                      <ShowDescription
+                        description={group.groupDescription}
+                        maxHeight={60}
+                      />
                     </div>
-
-                    <ShowDescription
-                      description={group.groupDescription}
-                      maxHeight={100}
-                    />
-                  </div>{" "}
-                  <div className="space-y-4">
-                    {" "}
-                    {group.isPremium ? (
-                      <GroupInfoCard group={group} />
-                    ) : (
-                      <></>
-                    )}{" "}
-                    <div className="w-full space-y-2 md:space-y-4">
+                  </div>
+                  <div className="w-full mt-2 space-y-2">
+                    {group.isPremium && (
+                      <div className="w-full scale-90 origin-top sm:scale-100">
+                        <GroupInfoCard group={group} />
+                      </div>
+                    )}
+                    <div className="w-full space-y-1 sm:space-y-2">
                       <button
-                        className={`w-full px-3 md:px-4 py-2 text-sm md:text-base text-black border rounded-full ${
+                        className={`w-full px-2 py-1 text-xs sm:text-sm md:text-base text-black border rounded-full ${
                           group.isPremium
                             ? "bg-[#bffcc4] border-[#0a0d0b]"
                             : "bg-[#FFFBC5] border-black"
@@ -961,13 +953,13 @@ const GroupDetailsUser = ({ onClose }) => {
                       {user.uid === group.groupAdminId ? (
                         <>
                           <button
-                            className="w-full px-3 py-2 text-sm text-black bg-white border border-black rounded-full md:px-4 md:text-base"
+                            className="w-full px-2 py-1 text-xs sm:text-sm text-black bg-white border border-black rounded-full md:px-4 md:text-base"
                             onClick={() => navigate(`/editGroup/${groupId}`)}
                           >
                             {t("group-details.buttons.editDetails")}
                           </button>
                           <button
-                            className="w-full px-3 py-2 text-sm text-red-500 bg-white border border-red-500 rounded-full md:px-4 md:text-base"
+                            className="w-full px-2 py-1 text-xs sm:text-sm text-red-500 bg-white border border-red-500 rounded-full md:px-4 md:text-base"
                             onClick={() => setShowDeleteConfirmation(true)}
                           >
                             {t("group-details.buttons.deleteGroup")}
@@ -975,7 +967,7 @@ const GroupDetailsUser = ({ onClose }) => {
                         </>
                       ) : (
                         <button
-                          className="w-full px-3 py-2 text-sm text-red-500 border border-red-500 rounded-full md:px-4 md:text-base"
+                          className="w-full px-2 py-1 text-xs sm:text-sm text-red-500 border border-red-500 rounded-full md:px-4 md:text-base"
                           onClick={() => setShowLeaveConfirmation(true)}
                         >
                           {t("group-details.buttons.leaveGroup")}
@@ -985,10 +977,9 @@ const GroupDetailsUser = ({ onClose }) => {
                   </div>
                 </div>
               </div>
-
-              {/* Main content */}
+              {/* Main content */}{" "}
               <div className="flex flex-col flex-1 min-h-0">
-                <div className="flex flex-col items-center justify-between gap-4 mb-4 md:flex-row md:mb-6 md:gap-0">
+                <div className="flex flex-col items-center justify-between gap-2 mb-3 md:flex-row md:mb-6 md:gap-0">
                   <div className="flex justify-center w-full md:w-auto">
                     <div className="relative inline-flex p-1 bg-gray-100 border border-gray-300 rounded-full">
                       <div
@@ -1002,13 +993,13 @@ const GroupDetailsUser = ({ onClose }) => {
                       />
                       <button
                         onClick={() => setActiveTab("Classes")}
-                        className="relative z-10 px-4 sm:px-8 py-1 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap"
+                        className="relative z-10 px-3 sm:px-6 md:px-8 py-1 rounded-full text-[#042F0C] text-xs sm:text-sm md:text-base font-medium transition-colors whitespace-nowrap"
                       >
                         {t("group-details.classes")}
                       </button>
                       <button
                         onClick={() => setActiveTab("Members")}
-                        className="relative z-10 px-4 sm:px-8 py-1 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap"
+                        className="relative z-10 px-3 sm:px-6 md:px-8 py-1 rounded-full text-[#042F0C] text-xs sm:text-sm md:text-base font-medium transition-colors whitespace-nowrap"
                       >
                         {t("group-details.members")}
                       </button>
@@ -1017,7 +1008,7 @@ const GroupDetailsUser = ({ onClose }) => {
 
                   {user.uid === group.groupAdminId && (
                     <button
-                      className="w-full md:w-auto bg-[#14b82c] border border-[#19291c] text-[#19291c] px-4 md:px-6 py-2 rounded-full text-sm md:text-base"
+                      className="w-full mt-2 md:mt-0 md:w-auto bg-[#14b82c] border border-[#19291c] text-[#19291c] px-2 sm:px-3 md:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm md:text-base"
                       onClick={handleAddClassButtonClick}
                     >
                       {t("group-details.buttons.createClass")}
@@ -1026,7 +1017,11 @@ const GroupDetailsUser = ({ onClose }) => {
                 </div>
                 {loading ? (
                   <div className="flex items-center justify-center flex-1">
-                    <ClipLoader color="#FFB800" size={40} />
+                    <ClipLoader
+                      color="#FFB800"
+                      size={30}
+                      className="sm:w-10 sm:h-10"
+                    />
                   </div>
                 ) : (
                   <div className="flex-1 overflow-y-auto">

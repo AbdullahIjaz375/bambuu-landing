@@ -547,7 +547,7 @@
   },
   "groupDetails": {
     "title": "Detalles del Grupo",
-    "adminLabel": "(Administrador)",
+    "admin-label": "(Administrador)",
     "members": "Miembros",
     "classes": "Clases",
     "buttons": {
@@ -751,7 +751,7 @@
   },
   "group-details": {
     "title": "Detalles del Grupo",
-    "adminLabel": "(Administrador)",
+    "admin-label": "(Administrador)",
     "members": "Miembros",
     "classes": "Clases",
     "buttons": {
