@@ -122,6 +122,10 @@ const ExploreClassCard = ({
   groupId,
   recurrenceTypes,
   isBooked = false,
+  // New props for sizing (same as ClassCard)
+  cardHeight = "h-auto sm:h-[20rem]", // Matching ClassCard default
+  cardWidth = "w-full",
+  imageHeight = "aspect-video sm:h-48", // Matching ClassCard default
 }) => {
   const { t } = useTranslation();
   const { user, setUser } = useAuth();
@@ -303,19 +307,20 @@ const ExploreClassCard = ({
           }
         }}
       >
+        {" "}
         <div
-          className={`flex flex-col h-auto border ${
+          className={`flex flex-col ${cardHeight} ${cardWidth} border ${
             isPremium ? "border-[#14b82c]" : "border-[#ffc71f]"
           } ${
             classType === "Individual Premium" ? "bg-[#e6fde9]" : "bg-white"
           } rounded-3xl p-2 overflow-hidden`}
         >
           {/* Image Section */}
-          <div className="relative w-full aspect-video">
+          <div className={`relative w-full ${imageHeight}`}>
             <img
               alt={className}
               src={imageUrl || "/images/default-class.png"}
-              className="object-cover w-full h-64 rounded-t-2xl rounded-b-3xl"
+              className="object-cover w-full h-full rounded-t-2xl rounded-b-3xl"
             />
             {isPremium && (
               <img
@@ -459,6 +464,8 @@ const ExploreClassCard = ({
                 </button>
               )}
             </div>
+            <div className="w-full h-8 mt-2"></div>{" "}
+            {/* Reduced spacer height */}
           </div>
         </div>
       </div>

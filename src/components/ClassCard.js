@@ -29,6 +29,10 @@ const ClassCard = ({
   classType,
   isBammbuu = false,
   isBooked = false,
+  // New props for sizing
+  cardHeight = "h-auto sm:h-[20rem]", // Reduced default height
+  cardWidth = "w-full",
+  imageHeight = "aspect-video sm:h-48", // Reduced default image height
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
@@ -141,13 +145,13 @@ const ClassCard = ({
       <div className="hover:cursor-pointer" onClick={handleClick}>
         {" "}
         <div
-          className={`flex flex-col h-auto sm:h-[24.75rem] border ${
+          className={`flex flex-col ${cardHeight} ${cardWidth} border ${
             isPremium ? "border-[#14b82c]" : "border-[#ffc71f]"
           } ${
             isIndividualPremium ? "bg-[#e6fde9]" : "bg-white"
           } rounded-3xl p-2`}
         >
-          <div className="relative w-full aspect-video sm:h-80">
+          <div className={`relative w-full ${imageHeight}`}>
             <img
               alt={className}
               src={imageUrl || "/images/default-class.png"}
@@ -248,8 +252,8 @@ const ClassCard = ({
                 )}
               </div>
             </div>
-
-            <div className="w-full h-12 mt-4"></div>
+            <div className="w-full h-8 mt-2"></div>{" "}
+            {/* Reduced spacer height */}
           </div>
         </div>
       </div>
