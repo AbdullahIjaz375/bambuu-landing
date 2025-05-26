@@ -4,6 +4,7 @@ import Modal from "react-modal";
 import { useNavigate } from "react-router-dom";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebaseConfig";
+import { useAuth } from "../context/AuthContext";
 
 Modal.setAppElement("#root");
 
@@ -29,42 +30,58 @@ const ClassCard = ({
   classType,
   isBammbuu = false,
   isBooked = false,
-  // New props for sizing
-  cardHeight = "h-auto sm:h-[20rem]", // Reduced default height
-  cardWidth = "w-full",
-  imageHeight = "aspect-video sm:h-48", // Reduced default image height
+  hideBookButton = false, // New prop to hide the Book Class button completely  cardHeight = "h-[340px]", // Consistent height for all cards
+  cardWidth = "w-full max-w-lg", // Further increased width from max-w-md to max-w-lg
+  imageHeight = "h-[210px]", // Slightly taller image
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
+  const { user } = useAuth();
   const isPremium =
     classType === "Individual Premium" || classType === "Group Premium";
   const isIndividualPremium = classType === "Individual Premium";
-
+  const [profileUrl, setProfileUrl] = useState(null);
+  // We need loading state for the profile fetch
+  const [, setLoading] = useState(true);
   const formatTime = (timestamp) => {
     if (!timestamp) return "TBD";
 
     // Convert Firebase timestamp to a Date object
     const date = new Date(timestamp.seconds * 1000);
 
-    // Format the time in UTC
-    return date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
+    // Format as "HH:MM-HH:MM EST" (with end time calculated using duration)
+    const startHour = date.getHours();
+    const startMinutes = date.getMinutes();
 
+    // Calculate end time
+    const endDate = new Date(date.getTime() + classDuration * 60000);
+    const endHour = endDate.getHours();
+    const endMinutes = endDate.getMinutes();
+
+    // Format with leading zeros
+    const formatDigit = (num) => num.toString().padStart(2, "0");
+
+    // Get timezone abbreviation (EST, PST, etc)
+    const timezone = "EST"; // Hardcoding to EST to match the design
+
+    return `${formatDigit(startHour)}:${formatDigit(
+      startMinutes
+    )}-${formatDigit(endHour)}:${formatDigit(endMinutes)} ${timezone}`;
+  };
   const formatDate = (timestamp) => {
     if (!timestamp) return "TBD";
 
     // Convert Firebase timestamp to a Date object
     const date = new Date(timestamp.seconds * 1000);
 
-    // Format the date in UTC
-    return date.toLocaleDateString("en-US", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
+    // Format to match "20 DEC 2024" format as in the screenshot
+    const day = date.getDate();
+    const month = date
+      .toLocaleString("en-US", { month: "short" })
+      .toUpperCase();
+    const year = date.getFullYear();
+
+    return `${day} ${month} ${year}`;
   };
 
   // New function to get the day name for recurring classes
@@ -105,10 +122,8 @@ const ClassCard = ({
     const classStart = new Date(classDateTime.seconds * 1000);
     const classEnd = new Date(classStart.getTime() + classDuration * 60 * 1000);
     return now >= classStart && now <= classEnd;
-  };
-
-  const [profileUrl, setProfileUrl] = useState(null);
-  const [loading, setLoading] = useState(true);
+  }; // Determine if the class is booked by the user, but not directly using this variable
+  // instead, we use the checks inline in the JSX
 
   useEffect(() => {
     const fetchAdminProfile = async () => {
@@ -142,16 +157,36 @@ const ClassCard = ({
 
   return (
     <>
-      <div className="hover:cursor-pointer" onClick={handleClick}>
+      <div
+        className="hover:cursor-pointer"
+        onClick={handleClick}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            handleClick();
+          }
+        }}
+      >
         {" "}
         <div
-          className={`flex flex-col ${cardHeight} ${cardWidth} border ${
+          className={`flex flex-col h-[340px] w-full max-w-lg border ${
             isPremium ? "border-[#14b82c]" : "border-[#ffc71f]"
           } ${
             isIndividualPremium ? "bg-[#e6fde9]" : "bg-white"
-          } rounded-3xl p-2`}
+          } rounded-3xl p-2 mx-auto overflow-hidden`}
         >
-          <div className={`relative w-full ${imageHeight}`}>
+          {" "}
+          <div
+            className={`relative w-full ${
+              // If booked or showing in group details (no book button), make image taller
+              isBooked ||
+              hideBookButton ||
+              user?.enrolledClasses?.includes(classId)
+                ? "h-[230px]"
+                : "h-[190px]"
+            } overflow-hidden`}
+          >
             <img
               alt={className}
               src={imageUrl || "/images/default-class.png"}
@@ -169,7 +204,6 @@ const ClassCard = ({
                 Ongoing
               </span>
             )}
-
             <div className="absolute bottom-0 left-0 right-0 bg-[#B9F9C2BF]/75 backdrop-blur-sm rounded-b-2xl p-2 space-y-1">
               <h2 className="ml-2 text-xl font-bold text-gray-800 sm:text-xl line-clamp-2">
                 {className}
@@ -211,49 +245,72 @@ const ClassCard = ({
                   )}
                 </div>
               </div>
-            </div>
+            </div>{" "}
           </div>{" "}
-          <div className="flex flex-col items-center justify-end w-full p-2 space-y-2">
-            <div className="flex flex-col items-start justify-between w-full gap-2 sm:flex-row sm:items-center sm:gap-0">
-              <div className="flex items-center space-x-2">
-                <img alt="bammbuu" src="/svgs/clock.svg" />
-                <span className="text-sm sm:text-md text-[#454545]">
-                  {formatTime(classDateTime)} ({classDuration} min)
-                </span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <img alt="bammbuu" src="/svgs/calendar.svg" />
-                <span className="text-sm sm:text-md text-[#454545]">
-                  {getDateDisplay(classDateTime)}
-                </span>
-              </div>
-            </div>
-            <div className="flex flex-col items-start justify-between w-full gap-2 sm:flex-row sm:items-center sm:gap-0">
-              <div className="flex items-center space-x-1">
-                {profileUrl ? (
+          <div className="flex flex-col flex-1 w-full px-3 py-1 justify-evenly">
+            <div className="flex flex-col w-full space-y-1.5">
+              {" "}
+              <div className="flex flex-row items-center justify-between w-full">
+                <div className="flex items-center space-x-1">
                   <img
-                    src={profileUrl}
-                    alt={adminName}
-                    className="object-cover w-4 h-4 rounded-full sm:w-5 sm:h-5"
+                    alt="bammbuu"
+                    src="/svgs/clock.svg"
+                    className="w-4 h-4"
                   />
-                ) : (
-                  <User className="w-4 h-4 text-gray-600 sm:w-5 sm:h-5" />
-                )}
-                <span className="text-sm sm:text-md text-[#454545]">
-                  {adminName || "TBD"}
-                </span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <img alt="bammbuu" src="/svgs/users.svg" />
-                {!isPremium && (
-                  <span className="text-sm sm:text-md text-[#454545]">
-                    {classMemberIds.length}/{availableSpots}
+                  <span className="text-sm text-[#454545]">
+                    {formatTime(classDateTime)}
                   </span>
-                )}
+                </div>
+                <div className="flex items-center space-x-1">
+                  <img
+                    alt="bammbuu"
+                    src="/svgs/calendar.svg"
+                    className="w-4 h-4"
+                  />
+                  <span className="text-sm text-[#454545]">
+                    {getDateDisplay(classDateTime)}
+                  </span>
+                </div>
               </div>
-            </div>
-            <div className="w-full h-8 mt-2"></div>{" "}
-            {/* Reduced spacer height */}
+              <div className="flex flex-row items-center justify-between w-full">
+                <div className="flex items-center space-x-1">
+                  {profileUrl ? (
+                    <img
+                      src={profileUrl}
+                      alt={adminName}
+                      className="object-cover w-4 h-4 rounded-full"
+                    />
+                  ) : (
+                    <User className="w-4 h-4 text-gray-600" />
+                  )}
+                  <span className="text-sm text-[#454545]">
+                    {adminName || "TBD"}
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <img
+                    alt="bammbuu"
+                    src="/svgs/users.svg"
+                    className="w-4 h-4"
+                  />
+                  {!isPremium && (
+                    <span className="text-sm text-[#454545]">
+                      {classMemberIds.length}/{availableSpots}
+                    </span>
+                  )}{" "}
+                </div>
+              </div>
+            </div>{" "}
+            {/* Only show Book Class button if class is not booked and hideBookButton is false */}
+            {!isBooked &&
+              !hideBookButton &&
+              !user?.enrolledClasses?.includes(classId) && (
+                <div className="mt-auto pt-1">
+                  <button className="w-full py-2 font-medium text-black bg-[#00B919] rounded-full hover:bg-[#00A117] border border-black">
+                    Book Class
+                  </button>
+                </div>
+              )}
           </div>
         </div>
       </div>
@@ -295,11 +352,9 @@ const ClassCard = ({
                   className="object-cover w-full h-full rounded-full"
                 />
               </div>
-
               <h2 className="mb-3 text-xl font-bold text-center sm:text-2xl">
                 {className}
               </h2>
-
               <div className="flex items-center gap-2 mb-6">
                 <span className="text-sm sm:text-base">{language}</span>
 
@@ -319,7 +374,6 @@ const ClassCard = ({
                   )}
                 </div>
               </div>
-
               <div className="flex flex-wrap justify-center gap-4 mb-6 text-xs sm:gap-8 sm:text-sm">
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4" />
@@ -335,12 +389,12 @@ const ClassCard = ({
                     {classMemberIds.length}/{availableSpots}
                   </span>
                 </div>
+              </div>{" "}
+              <div className="mb-6 text-sm text-center text-gray-600 sm:text-base">
+                <div className="max-h-24 overflow-hidden">
+                  <p className="break-words line-clamp-4">{classDescription}</p>
+                </div>
               </div>
-
-              <p className="mb-6 text-sm text-center text-gray-600 sm:text-base">
-                {classDescription}
-              </p>
-
               {groupId && (
                 <div className="w-full">
                   <h3 className="mb-3 text-base font-bold text-center sm:text-lg">

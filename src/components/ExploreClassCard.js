@@ -122,10 +122,9 @@ const ExploreClassCard = ({
   groupId,
   recurrenceTypes,
   isBooked = false,
-  // New props for sizing (same as ClassCard)
-  cardHeight = "h-auto sm:h-[20rem]", // Matching ClassCard default
-  cardWidth = "w-full",
-  imageHeight = "aspect-video sm:h-48", // Matching ClassCard default
+  cardHeight = "h-[340px]", // Adjusted height based on reference images
+  cardWidth = "w-full max-w-sm", // Fixed width with max-width for consistency
+  imageHeight = "h-[180px]", // Reduced image height to match reference
 }) => {
   const { t } = useTranslation();
   const { user, setUser } = useAuth();
@@ -296,8 +295,9 @@ const ExploreClassCard = ({
 
   return (
     <>
+      {/* Remove the max-w-sm constraint to match ClassCard */}
       <div
-        className="w-full max-w-sm mx-auto hover:cursor-pointer"
+        className="hover:cursor-pointer"
         onClick={handleCardClick}
         role="button"
         tabIndex={0}
@@ -307,15 +307,14 @@ const ExploreClassCard = ({
           }
         }}
       >
-        {" "}
         <div
           className={`flex flex-col ${cardHeight} ${cardWidth} border ${
             isPremium ? "border-[#14b82c]" : "border-[#ffc71f]"
           } ${
             classType === "Individual Premium" ? "bg-[#e6fde9]" : "bg-white"
-          } rounded-3xl p-2 overflow-hidden`}
+          } rounded-3xl p-2`}
         >
-          {/* Image Section */}
+          {/* Image Section - match aspect ratio with ClassCard */}
           <div className={`relative w-full ${imageHeight}`}>
             <img
               alt={className}
@@ -329,7 +328,6 @@ const ExploreClassCard = ({
                 className="absolute w-24 h-6 sm:h-8 sm:w-28 top-2 left-2"
               />
             )}
-
             {/* Class Info Overlay */}
             <div className="absolute bottom-0 left-0 right-0 bg-[#B9F9C2BF]/75 backdrop-blur-sm rounded-b-2xl p-2 space-y-1">
               <div className="flex items-center justify-between">
@@ -375,87 +373,80 @@ const ExploreClassCard = ({
                   )}
                 </div>
               </div>
-            </div>
+            </div>{" "}
           </div>
 
-          {/* Details Section */}
-          <div className="flex flex-col items-center justify-center w-full p-2 space-y-2">
-            {/* Time and Date */}
-            <div className="flex flex-wrap items-center justify-between w-full">
-              <div className="flex items-center space-x-2">
-                <img
-                  alt={t("exploreClassCard.altText.clock")}
-                  src="/svgs/clock.svg"
-                  className="w-4 h-4"
-                />
-                <span className="text-[#454545] text-sm">
-                  {formatTime(classDateTime)} ({classDuration}{" "}
-                  {t("exploreClassCard.labels.min")})
-                </span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <img
-                  alt={t("exploreClassCard.altText.calendar")}
-                  src="/svgs/calendar.svg"
-                  className="w-4 h-4"
-                />
-                <span className="text-[#454545] text-sm">
-                  {formatDate(classDateTime)}
-                </span>
-              </div>
-            </div>
-            {/* Admin and Spots */}{" "}
-            <div className="flex flex-wrap items-center justify-between w-full">
-              <div className="flex items-center space-x-2">
-                {profileUrl ? (
+          {/* Details Section - using flex-1 to fill available space with justify-between */}
+          <div className="flex flex-col flex-1 w-full px-3 pt-2 pb-2 justify-between">
+            <div className="flex flex-col w-full space-y-1.5">
+              {/* Time and Date */}{" "}
+              <div className="flex flex-row items-center justify-between w-full">
+                <div className="flex items-center space-x-2">
                   <img
-                    src={profileUrl}
-                    alt={adminName}
-                    className="object-cover w-5 h-5 rounded-full"
+                    alt={t("exploreClassCard.altText.clock")}
+                    src="/svgs/clock.svg"
+                    className="w-4 h-4"
                   />
-                ) : (
-                  <User className="w-5 h-5 text-gray-600" />
-                )}
-                <span className="text-[#454545] text-sm">
-                  {adminName || t("exploreClassCard.labels.tbd")}
-                </span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <img
-                  alt={t("exploreClassCard.altText.users")}
-                  src="/svgs/users.svg"
-                  className="w-4 h-4"
-                />
-                {!isPremium && (
-                  <span className="text-[#454545] text-sm">
-                    {classMemberIds.length}/{availableSpots}
+                  <span className="text-sm text-[#454545]">
+                    {formatTime(classDateTime)} ({classDuration}{" "}
+                    {t("exploreClassCard.labels.min")})
                   </span>
-                )}
+                </div>{" "}
+                <div className="flex items-center space-x-2">
+                  <img
+                    alt={t("exploreClassCard.altText.calendar")}
+                    src="/svgs/calendar.svg"
+                    className="w-4 h-4"
+                  />
+                  <span className="text-sm text-[#454545]">
+                    {formatDate(classDateTime)}
+                  </span>
+                </div>
+              </div>
+              {/* Admin and Spots */}{" "}
+              <div className="flex flex-row items-center justify-between w-full">
+                <div className="flex items-center space-x-1">
+                  {profileUrl ? (
+                    <img
+                      src={profileUrl}
+                      alt={adminName}
+                      className="object-cover w-4 h-4 rounded-full"
+                    />
+                  ) : (
+                    <User className="w-4 h-4 text-gray-600" />
+                  )}
+                  <span className="text-sm text-[#454545]">
+                    {adminName || t("exploreClassCard.labels.tbd")}
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <img
+                    alt={t("exploreClassCard.altText.users")}
+                    src="/svgs/users.svg"
+                    className="w-4 h-4"
+                  />
+                  {!isPremium && (
+                    <span className="text-sm text-[#454545]">
+                      {classMemberIds.length}/{availableSpots}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>{" "}
-            {/* Book Class Button */}
-            <div className="w-full mt-4">
+            {/* Book Class Button - moved into the flex container */}
+            <div className="mt-auto pt-2">
               {isBooked ? (
                 <button
-                  className="w-full py-3 font-medium text-gray-500 bg-gray-200 border border-gray-400 rounded-full cursor-not-allowed"
+                  className="w-full py-2 font-medium text-gray-500 bg-gray-200 border border-gray-400 rounded-full cursor-not-allowed"
                   disabled
-                  style={{ minHeight: "48px" }}
-                  title="You have already booked this class"
+                  title={t("exploreClassCard.labels.alreadyBooked")}
                 >
-                  {t(
-                    "exploreClassCard.labels.alreadyBooked",
-                    "Class Already Booked"
-                  )}
+                  {t("exploreClassCard.labels.alreadyBooked")}
                 </button>
               ) : (
                 <button
                   onClick={handleBookClass}
-                  className={`w-full py-3 font-medium border rounded-full transition-colors duration-200 ${
-                    hasValidDateTime
-                      ? "text-[#042F0C] border-[#042F0C] bg-[#14b82c] hover:bg-[#119924]"
-                      : "text-gray-500 border-gray-300 bg-gray-200 cursor-not-allowed"
-                  }`}
-                  style={{ minHeight: "48px" }}
+                  className="w-full py-2 font-medium text-black bg-[#00B919] rounded-full hover:bg-[#00A117] border border-black"
                   disabled={!hasValidDateTime}
                 >
                   {hasValidDateTime
@@ -464,8 +455,6 @@ const ExploreClassCard = ({
                 </button>
               )}
             </div>
-            <div className="w-full h-8 mt-2"></div>{" "}
-            {/* Reduced spacer height */}
           </div>
         </div>
       </div>

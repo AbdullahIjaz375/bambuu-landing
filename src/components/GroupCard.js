@@ -21,8 +21,9 @@ const GroupCard = ({ group }) => {
 
   return (
     <div onClick={handleClick}>
+      {" "}
       <div
-        className={`p-6 rounded-[32px] border hover:cursor-pointer ${
+        className={`p-6 rounded-[32px] border hover:cursor-pointer h-[340px] w-full max-w-sm mx-auto ${
           isPremium
             ? "bg-[#f0fdf1] border-[#14B82C]"
             : "bg-[#ffffea] border-[#ffc310]"

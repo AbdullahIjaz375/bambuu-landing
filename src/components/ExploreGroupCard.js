@@ -411,7 +411,6 @@ const GroupCard = ({ group }) => {
       setIsJoining(false);
     }
   };
-
   return (
     <>
       <div
@@ -419,101 +418,98 @@ const GroupCard = ({ group }) => {
         onClick={handleClick}
       >
         <div
-          className={`flex flex-col items-center p-4 rounded-3xl h-[340px] ${
+          className={`rounded-[32px] border h-[340px] overflow-hidden ${
             isPremium
-              ? "bg-[#e8feeb] border border-[#14b82c]"
-              : "bg-white border border-[#ffc310]"
+              ? "bg-[#f0fdf1] border-[#14B82C]"
+              : "bg-[#ffffea] border-[#ffc310]"
           }`}
         >
-          {/* Group Image */}
-          <div className="relative w-32 h-32 mb-4">
-            {isPremium && (
-              <div className="absolute z-10 -translate-x-1/2 w-28 left-1/2 -top-3">
-                <img
-                  alt="bammbuu"
-                  src="/svgs/bammbuu-plus-grp-tag.svg"
-                  className="w-28"
-                />
-              </div>
-            )}
-            <img
-              src={imageUrl}
-              alt={groupName}
-              className="object-cover w-full h-full rounded-full"
-            />
-          </div>
-
-          {/* Group Name */}
-          <h2
-            className="max-w-full mb-2 text-xl font-bold text-center text-gray-900 truncate"
-            title={groupName}
-          >
-            {groupName}
-          </h2>
-
-          {/* Language and Level */}
-          <div className="flex flex-wrap items-center justify-center gap-2 mb-4">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-col items-center p-4 h-full">
+            {/* Group Image */}
+            <div className="relative w-32 h-32 mb-4">
+              {isPremium && (
+                <div className="absolute z-10 -translate-x-1/2 w-28 left-1/2 -top-3">
+                  <img
+                    alt="bammbuu"
+                    src="/svgs/bammbuu-plus-grp-tag.svg"
+                    className="w-28"
+                  />
+                </div>
+              )}
               <img
-                src={
-                  groupLearningLanguage === "English"
-                    ? "/svgs/xs-us.svg"
-                    : groupLearningLanguage === "Spanish"
-                    ? "/svgs/xs-spain.svg"
-                    : "/svgs/eng-spanish-xs.svg"
-                }
-                alt={
-                  groupLearningLanguage === "English" ? "US Flag" : "Spain Flag"
-                }
-                className="w-4 h-4 sm:w-auto"
+                src={imageUrl}
+                alt={groupName}
+                className="object-cover w-full h-full rounded-full"
               />
-              <span className="text-md text-green-900 truncate max-w-[120px]">
-                {groupLearningLanguage}
-              </span>
             </div>
-            {level !== "" ? (
-              <span className="px-3 py-1 text-xs text-gray-800 bg-[#fff885] rounded-full">
-                {level}
-              </span>
-            ) : (
-              <></>
-            )}
-          </div>
 
-          {/* Admin and Members */}
-          <div className="flex flex-wrap items-center justify-between w-full gap-4">
-            <div className="flex items-center gap-2">
-              {groupAdminImageUrl ? (
+            {/* Group Name */}
+            <h2
+              className="max-w-full mb-2 text-xl font-bold text-center text-gray-900 truncate"
+              title={groupName}
+            >
+              {groupName}
+            </h2>
+
+            {/* Language and Level */}
+            <div className="flex flex-wrap items-center justify-center gap-2 mb-4">
+              <div className="flex items-center gap-2">
                 <img
-                  src={groupAdminImageUrl}
-                  alt={groupAdminName}
-                  className="object-cover w-5 h-5 rounded-full"
+                  src={
+                    groupLearningLanguage === "English"
+                      ? "/svgs/xs-us.svg"
+                      : groupLearningLanguage === "Spanish"
+                      ? "/svgs/xs-spain.svg"
+                      : "/svgs/eng-spanish-xs.svg"
+                  }
+                  alt={
+                    groupLearningLanguage === "English"
+                      ? "US Flag"
+                      : "Spain Flag"
+                  }
+                  className="w-4 h-4"
                 />
-              ) : (
-                <User className="w-5 h-5 text-gray-600" />
-              )}{" "}
-              <span
-                className="text-xs text-gray-700 truncate"
-                title={groupAdminName}
-              >
-                {groupAdminName.length > 10
-                  ? `${groupAdminName.slice(0, 10)}...`
-                  : groupAdminName}{" "}
-                <span className="text-gray-500">(Admin)</span>
-              </span>
+                <span className="text-md text-green-900 truncate max-w-[120px]">
+                  {groupLearningLanguage}
+                </span>
+              </div>
+              {level !== "" && (
+                <span className="px-3 py-1 text-xs text-gray-800 bg-[#fff885] rounded-full">
+                  {level}
+                </span>
+              )}
             </div>
-            <div className="flex items-center gap-1">
-              <img alt="user" src="/svgs/users.svg" />
-              <span className="text-xs text-gray-700">
-                {memberIds.length} members
-              </span>
-            </div>
-          </div>
 
-          {/* Join Button */}
-          <div className="w-full ">
+            {/* Admin and Members */}
+            <div className="flex items-center justify-between w-full mb-6">
+              <div className="flex items-center gap-2">
+                {groupAdminImageUrl ? (
+                  <img
+                    src={groupAdminImageUrl}
+                    alt={groupAdminName}
+                    className="object-cover w-5 h-5 rounded-full"
+                  />
+                ) : (
+                  <User className="w-5 h-5 text-gray-600" />
+                )}
+                <span className="text-xs text-gray-700 truncate">
+                  {groupAdminName.length > 10
+                    ? `${groupAdminName.slice(0, 10)}...`
+                    : groupAdminName}{" "}
+                  <span className="text-gray-500">(Admin)</span>
+                </span>
+              </div>
+              <div className="flex items-center gap-1">
+                <img alt="user" src="/svgs/users.svg" />
+                <span className="text-xs text-gray-700">
+                  {memberIds.length}
+                </span>
+              </div>
+            </div>
+
+            {/* Join Button */}
             <button
-              className="w-full mt-4 py-2 font-medium text-black bg-[#ffbf00] rounded-full hover:bg-[#e5ae00] border border-black"
+              className="w-full py-2 font-medium text-black bg-[#ffbf00] rounded-full hover:bg-[#e5ae00] border border-black mt-auto"
               onClick={handleJoinClick}
             >
               Join Group
