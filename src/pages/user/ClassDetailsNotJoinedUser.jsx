@@ -363,191 +363,59 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
           console.log(
             `Adding user ${userId} to premium class channel ${classId}`
           );
-          // Add user to the premium class channel
-          await addMemberToStreamChannel({
-            channelId: classId,
-            userId: userId,
-            type: ChannelType.PREMIUM_INDIVIDUAL_CLASS,
-            role: "channel_member",
-          });
 
-          // Update the channel name and metadata to ensure it displays correctly in the chat UI
-          try {
-            await updateStreamChannelMetadata(
-              ChannelType.PREMIUM_INDIVIDUAL_CLASS,
-              classId,
-              {
-                name: classData.className || "Premium Individual Class",
-                description: `Class chat for ${
-                  classData.className || "Premium Individual Class"
-                }`,
-                image: classData.imageUrl || "",
-              }
-            );
-            console.log(
-              `Updated class channel name to "${classData.className}"`
-            );
-          } catch (nameUpdateError) {
-            console.error(
-              "Error updating class channel name:",
-              nameUpdateError
-            );
-            // Don't block the process for this error
-          }
+          // Import the stream channel helpers
+          const { addUserToChannel } = await import(
+            "../../services/streamChannelHelpers"
+          );
+
+          // Add user to the premium class channel - this is the key fix
+          await addUserToChannel(
+            classId,
+            userId,
+            "premium_individual_class", // Use string instead of ChannelType constant
+            "channel_member"
+          );
 
           console.log(
-            `Successfully added user ${userId} to class ${classId} chat`
-          ); // Create one-on-one chat between student and tutor automatically
-          const tutorId = classData.adminId;
-          const tutorData = tutorDoc.exists() ? tutorDoc.data() : null;
-
-          if (tutorId && tutorData) {
-            try {
-              // Create channel ID by combining student and teacher IDs
-              // Consistently order the IDs to ensure the same channel ID is generated
-              // regardless of who initiates the chat
-              const userIds = [userId, tutorId].sort();
-              const oneToOneChannelId = `${userIds[0]}${userIds[1]}`;
-
-              console.log(
-                `Checking for existing one-to-one chat between ${userId} and ${tutorId}`
-              );
-
-              // Check if a chat already exists between this student and tutor
-              try {
-                // Try to query for an existing channel
-                const existingChannel = streamClient.channel(
-                  ChannelType.ONE_TO_ONE_CHAT,
-                  oneToOneChannelId
-                );
-                const response = await existingChannel.query({
-                  watch: true,
-                  state: true,
-                });
-
-                if (response?.channel?.id) {
-                  console.log(
-                    `Chat already exists between student ${userId} and tutor ${tutorId}, skipping creation`
-                  );
-
-                  // Optionally update the channel name if needed
-                  const currentName = response.channel.data?.name || "";
-                  const desiredName =
-                    classData.className || "Premium Individual Class";
-
-                  if (!currentName.includes(desiredName)) {
-                    // Update the channel with the class name if it's different
-                    await existingChannel.update({
-                      name: desiredName,
-                      description: `Chat for ${desiredName}`,
-                    });
-                    console.log(
-                      `Updated existing chat channel name to "${desiredName}"`
-                    );
-                  }
-
-                  return; // Skip creating a new channel
-                }
-              } catch (checkError) {
-                // Channel doesn't exist, continue with creation
-                console.log(
-                  `No existing chat found between student ${userId} and tutor ${tutorId}, creating new one`
-                );
-              }
-
-              // Check if a chat already exists between this student and tutor
-              try {
-                // Try to query for an existing channel
-                const existingChannel = streamClient.channel(
-                  ChannelType.ONE_TO_ONE_CHAT,
-                  oneToOneChannelId
-                );
-                const response = await existingChannel.query({
-                  watch: true,
-                  state: true,
-                });
-
-                if (response?.channel?.id) {
-                  console.log(
-                    `Chat already exists between student ${userId} and tutor ${tutorId}, skipping creation`
-                  );
-
-                  // Optionally update the channel name if needed
-                  const currentName = response.channel.name || "";
-                  const desiredName =
-                    classData.className || "Premium Individual Class";
-
-                  if (!currentName.includes(desiredName)) {
-                    // Update the channel with the class name if it's different
-                    await existingChannel.update({
-                      name: desiredName,
-                      description: `Chat for ${desiredName}`,
-                    });
-                    console.log(
-                      `Updated existing chat channel name to "${desiredName}"`
-                    );
-                  }
-
-                  return; // Skip creating a new channel
-                }
-              } catch (checkError) {
-                // Channel doesn't exist, continue with creation
-                console.log(
-                  `No existing chat found between student ${userId} and tutor ${tutorId}, creating new one`
-                );
-              } // Use the class name for the chat instead of combining student and tutor names
-              const channelName =
-                classData.className || "Premium Individual Class";
-
-              // Set up member roles
-              const memberRoles = [
-                {
-                  user_id: userId,
-                  role: "member",
-                },
-                {
-                  user_id: tutorId,
-                  role: "member",
-                },
-              ];
-
-              // Create channel data object
-              const channelData = {
-                id: oneToOneChannelId,
-                type: ChannelType.ONE_TO_ONE_CHAT,
-                members: [userId, tutorId],
-                name: channelName,
-                image: tutorData.photoUrl || "",
-                description: `Chat for ${
-                  classData.className || "Premium Individual Class"
-                }`,
-                created_by_id: userId,
-                member_roles: memberRoles,
-              };
-
-              // Create the Stream channel (or get existing one if it exists)
-              const channel = await createStreamChannel(channelData);
-              console.log(
-                `Successfully created/connected to class chat "${channelName}" between student ${userId} and tutor ${tutorId}`
-              );
-            } catch (oneToOneError) {
-              console.error(
-                "Error creating one-on-one chat channel:",
-                oneToOneError
-              );
-              // Don't show this error to the user since the class joining should still work
-            }
-          }
-        } catch (streamError) {
-          console.error("Error adding to stream channel:", streamError);
-          // Log more details about the error for debugging
-          if (streamError.response) {
-            console.error("Stream API error response:", streamError.response);
-          }
-          // Show error to user but don't block class joining
-          toast.error(
-            "Failed to join class chat - you may need to refresh to see messages"
+            `Successfully added user ${userId} to premium class channel ${classId}`
           );
+
+          // Ensure the channel name is synced after adding the user
+          const { syncPremiumClassChannelName } = await import(
+            "../../services/channelNameSync"
+          );
+          await syncPremiumClassChannelName(classId);
+        } catch (streamError) {
+          console.error("Error adding to premium class channel:", streamError);
+
+          // Try alternative approach if direct addition fails
+          try {
+            console.log("Trying alternative channel membership approach...");
+
+            // Get the channel and force add the user
+            const { streamClient } = await import("../../config/stream");
+            const channel = streamClient.channel(
+              "premium_individual_class",
+              classId
+            );
+
+            // Watch the channel first
+            await channel.watch();
+
+            // Try to add members directly
+            await channel.addMembers([
+              { user_id: userId, role: "channel_member" },
+            ]);
+
+            console.log(`Alternative method succeeded for user ${userId}`);
+          } catch (alternativeError) {
+            console.error("Alternative method also failed:", alternativeError);
+            // Don't block class enrollment for chat issues
+            toast.error(
+              "Class enrolled successfully, but chat access may need refresh"
+            );
+          }
         }
       }
 

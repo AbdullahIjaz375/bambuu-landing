@@ -101,7 +101,69 @@ const StudentsTutor = () => {
           }
         );
 
-        console.log("chanel ======= ", channels);
+        // IMPORTANT: For tutors, verify premium individual class channels have all members
+        const premiumClassChannels = allChannels.filter(
+          (ch) => ch.type === "premium_individual_class"
+        );
+
+        if (premiumClassChannels.length > 0) {
+          console.log(
+            `Tutor checking ${premiumClassChannels.length} premium class channels...`
+          );
+
+          const { syncPremiumClassChannelName } = await import(
+            "../../services/channelNameSync"
+          );
+
+          await Promise.all(
+            premiumClassChannels.map(async (channel) => {
+              // Sync the name
+              await syncPremiumClassChannelName(channel.id);
+
+              // For tutors, ensure all enrolled students are in the channel
+              try {
+                const { getDoc, doc } = await import("firebase/firestore");
+                const { db } = await import("../firebaseConfig");
+
+                const classDoc = await getDoc(doc(db, "classes", channel.id));
+                if (classDoc.exists()) {
+                  const classData = classDoc.data();
+                  const enrolledStudents = classData.classMemberIds || [];
+                  const currentMembers = Object.keys(
+                    channel.state?.members || {}
+                  );
+
+                  // Check if any enrolled students are missing from the channel
+                  for (const studentId of enrolledStudents) {
+                    if (!currentMembers.includes(studentId)) {
+                      console.log(
+                        `Student ${studentId} missing from channel ${channel.id}, adding...`
+                      );
+                      try {
+                        await channel.addMembers([
+                          { user_id: studentId, role: "channel_member" },
+                        ]);
+                        console.log(
+                          `Added student ${studentId} to channel ${channel.id}`
+                        );
+                      } catch (addError) {
+                        console.error(
+                          `Failed to add student to channel:`,
+                          addError
+                        );
+                      }
+                    }
+                  }
+                }
+              } catch (memberCheckError) {
+                console.error(
+                  `Error checking channel members:`,
+                  memberCheckError
+                );
+              }
+            })
+          );
+        }
 
         // Initialize unread counts and online status tracking
         const counts = {};

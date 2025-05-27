@@ -213,18 +213,24 @@ const AddClassTutor = () => {
             day: "numeric",
           });
 
-          // Add the date to the channel name
-          const channelName = `${classData.className} (${formattedDate})`;
+          // IMPORTANT: Use className directly, not with date suffix
+          const channelName = classData.className; // This ensures it matches Firebase
 
           const channelData = {
-            id: classId, // Using classId instead of groupId
+            id: classId,
             type: ChannelType.PREMIUM_INDIVIDUAL_CLASS,
             members: [user.uid],
-            name: channelName, // Using the name with date
+            name: channelName, // Use the exact className
             image: imageUrl,
             description: classData.classDescription,
             created_by_id: user.uid,
             member_roles: memberRoles,
+            // Add custom data to ensure name persistence
+            custom: {
+              className: classData.className,
+              classId: classId,
+              firestoreCollection: "classes",
+            },
           };
 
           await createStreamChannel(channelData);

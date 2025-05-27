@@ -11,10 +11,7 @@ import CustomChatComponent from "../../components/ChatComponent";
 import { syncChannelWithFirestore } from "../../services/streamService";
 import { safeMarkChannelRead } from "../../services/streamConnectionService";
 import updateChannelNameFromFirestore from "../../utils/channelNameFix";
-import {
-  enforceChannelNameFromFirestore,
-  refreshUserChannels,
-} from "../../utils/channelRefreshUtil";
+import { syncPremiumClassChannelName } from "../../services/channelNameSync";
 
 const MessagesUser = () => {
   const { user } = useAuth();
@@ -66,15 +63,12 @@ const MessagesUser = () => {
       }
     }
   };
-
   // Helper function to extract the other user's info from a channel
   const getOtherUserFromChannel = (channel) => {
     if (!channel || !user) return null;
 
-    if (
-      channel.type === "premium_individual_class" ||
-      channel.type === "one_to_one_chat"
-    ) {
+    // ONLY for one_to_one_chat channels, return the other user's info
+    if (channel.type === "one_to_one_chat") {
       const members = Object.values(channel.state?.members || {});
       const otherMember = members.find(
         (member) => member.user?.id !== user.uid
@@ -88,6 +82,17 @@ const MessagesUser = () => {
           online: otherMember.user.online || false,
         };
       }
+    }
+    
+    // For premium_individual_class, do NOT return tutor info - let the channel name show instead
+    if (channel.type === "premium_individual_class") {
+      // Return channel info, not user info, so the class name is displayed
+      return {
+        id: channel.id,
+        name: channel.data.name, // This should be the className from Firebase
+        image: channel.data.image,
+        online: false,
+      };
     }
 
     // For group chats, just return the group info
@@ -175,12 +180,11 @@ const MessagesUser = () => {
       try {
         console.log("Loading channels for user:", user.uid);
 
-        // Import our connection helper to ensure we're connected
+        // Import connection helper
         const { ensureStreamConnection } = await import(
           "../../services/streamConnectionService"
         );
 
-        // Use the helper to ensure connection and handle the query
         const channels = await ensureStreamConnection(async () => {
           const filter = {
             members: { $in: [user.uid] },
@@ -204,42 +208,68 @@ const MessagesUser = () => {
           });
         });
 
-        // Force check all channels and their types
-        channels.forEach((channel) => {
-          console.log("Channel details:", {
-            id: channel.id,
-            type: channel.type,
-            name: channel.data?.name || "Unnamed channel",
-            isPremiumGroup: channel.type === "premium_group",
-            data: channel.data,
-          });
-        });
+        console.log(`Found ${channels.length} total channels for user`);
 
-        // Log premium groups specifically
-        const premiumGroups = channels.filter(
-          (ch) => ch.type === "premium_group"
-        );
-        console.log(
-          `Found ${premiumGroups.length} premium groups:`,
-          premiumGroups.map((g) => ({ id: g.id, name: g.data?.name }))
+        // IMPORTANT: For each premium individual class, verify the user is actually a member
+        const premiumClassChannels = channels.filter(
+          (ch) => ch.type === "premium_individual_class"
         );
 
-        console.log("Retrieved channels:", channels.length);
-        console.log(
-          "Channels by type:",
-          channels.reduce((acc, channel) => {
-            acc[channel.type] = (acc[channel.type] || 0) + 1;
-            return acc;
-          }, {})
-        );
+        // Also check if user should be in premium classes they're not seeing
+        try {
+          const { verifyUserPremiumClassChannels } = await import(
+            "../../services/channelNameSync"
+          );
+          await verifyUserPremiumClassChannels(user.uid);
+        } catch (verifyError) {
+          console.error("Error verifying premium class channels:", verifyError);
+        }
 
-        // Initialize unread counts and online status tracking
+        if (premiumClassChannels.length > 0) {
+          console.log(
+            `Processing ${premiumClassChannels.length} premium class channels...`
+          );
+
+          const { syncPremiumClassChannelName } = await import(
+            "../../services/channelNameSync"
+          );
+
+          await Promise.all(
+            premiumClassChannels.map(async (channel) => {
+              // Sync the name
+              await syncPremiumClassChannelName(channel.id);
+
+              // Verify membership
+              const currentMembers = Object.keys(channel.state?.members || {});
+              if (!currentMembers.includes(user.uid)) {
+                console.log(
+                  `User ${user.uid} not in premium class channel ${channel.id}, fixing...`
+                );
+
+                try {
+                  await channel.addMembers([
+                    { user_id: user.uid, role: "channel_member" },
+                  ]);
+                  console.log(
+                    `Added user ${user.uid} to channel ${channel.id}`
+                  );
+                } catch (addError) {
+                  console.error(
+                    `Failed to add user to channel ${channel.id}:`,
+                    addError
+                  );
+                }
+              }
+            })
+          );
+        }
+
+        // Continue with rest of your existing code...
         const counts = {};
         const onlineStatusMap = {};
 
         await Promise.all(
           channels.map(async (channel) => {
-            // Get the channel state including unread counts
             const state = await channel.watch();
             const channelState = channel.state;
             counts[channel.id] = channelState.unreadCount || 0;
@@ -459,27 +489,13 @@ const MessagesUser = () => {
           setSelectedChatInfo(null);
         }
       } catch (error) {
-        console.error("Error loading channels:", error);
+        console.error("Error in loadChannels:", error);
       } finally {
         setLoading(false);
       }
     };
-    loadChannels();
 
-    return () => {
-      // Cleanup channel listeners when component unmounts
-      if (channels && channels.length) {
-        channels.forEach((channel) => {
-          try {
-            channel.off("message.new");
-            channel.off("message.read");
-            channel.off("user.presence.changed");
-          } catch (error) {
-            console.error(`Error cleaning up channel ${channel.id}:`, error);
-          }
-        });
-      }
-    };
+    loadChannels();
   }, [user, streamClientConnected, urlChannelId]);
   const handleChannelSelect = async (channel) => {
     setSelectedChannel(channel);
@@ -576,12 +592,16 @@ const MessagesUser = () => {
       `Rendering channel ${channel.id}, type: ${channel.type}, raw name: "${
         channel.data?.name || "undefined"
       }", firestore name: "${groupName || "none"}"`
-    );
-
-    // Add fallback name for channels without proper names
+    );    // Add fallback name for channels without proper names
     let displayName = "";
+    
+    // SPECIAL HANDLING FOR PREMIUM INDIVIDUAL CLASSES
+    if (channel.type === "premium_individual_class") {
+      // For premium individual classes, ALWAYS use the channel.data.name (which should be synced with className)
+      displayName = channel.data?.name || "Premium Individual Class";
+    }
     // First priority: Use the Firestore group name for group channels
-    if (
+    else if (
       (channel.type === "standard_group" || channel.type === "premium_group") &&
       groupName
     ) {
@@ -596,8 +616,6 @@ const MessagesUser = () => {
       displayName = "Premium Group";
     } else if (channel.type === "standard_group") {
       displayName = "Standard Group";
-    } else if (channel.type === "premium_individual_class") {
-      displayName = "Private Class";
     } else if (channel.type === "one_to_one_chat") {
       displayName = "Private Chat";
     } else {
@@ -662,10 +680,15 @@ const MessagesUser = () => {
             <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
           )}
         </div>{" "}
-        <div className="flex-1">
-          <div className="flex items-center justify-between">
+        <div className="flex-1">          <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold">
-              {otherUser?.name || displayName || "Unnamed Channel"}
+              {/* CRITICAL FIX: For premium individual classes, ALWAYS show displayName (className) */}
+              {channel.type === "premium_individual_class" 
+                ? displayName 
+                : channel.type === "one_to_one_chat"
+                  ? (otherUser?.name || displayName || "Private Chat")
+                  : (displayName || "Unnamed Channel")
+              }
             </h3>
             {isInstructor ? (
               <span

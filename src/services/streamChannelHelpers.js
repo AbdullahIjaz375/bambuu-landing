@@ -32,192 +32,148 @@ export const addUserToChannel = async (
   role = "channel_member"
 ) => {
   try {
-    console.log(`Adding user ${userId} to channel ${channelId}`);
+    console.log(`Adding user ${userId} to channel ${channelId} (${type})`);
 
     // IMPORTANT: Update Firestore first to maintain data consistency
-    try {
-      const { updateDoc, arrayUnion, doc } = await import("firebase/firestore");
-      const { db } = await import("../firebaseConfig");
+    if (type === "premium_individual_class") {
+      try {
+        const { updateDoc, arrayUnion, doc } = await import(
+          "firebase/firestore"
+        );
+        const { db } = await import("../firebaseConfig");
 
-      // Update collections based on channel type
-      if (type === "premium_group" || type === "standard_group") {
-        // For groups, update both the group and the user
-        const groupRef = doc(db, "groups", channelId);
-        await updateDoc(groupRef, {
-          memberIds: arrayUnion(userId),
-        });
-
-        const userRef = doc(db, "students", userId);
-        await updateDoc(userRef, {
-          joinedGroups: arrayUnion(channelId),
-        });
-      } else if (type === "premium_individual_class") {
-        // For individual classes, update the class and user's enrolled classes
+        // Update the class document to include the new member
         const classRef = doc(db, "classes", channelId);
         await updateDoc(classRef, {
           classMemberIds: arrayUnion(userId),
         });
 
-        const userRef = doc(db, "students", userId);
-        await updateDoc(userRef, {
-          enrolledClasses: arrayUnion(channelId),
-        });
-      } else if (type === "one_to_one_chat") {
-        // For one-to-one chats, nothing special to update in Firestore
-        console.log(`One-to-one chat channel created for user ${userId}`);
-        // No Firestore update needed for chat channels
+        console.log(
+          `Updated Firestore class ${channelId} with member ${userId}`
+        );
+      } catch (firestoreError) {
+        console.error(`Firestore update failed: ${firestoreError.message}`);
+        // Continue with Stream operations
       }
-
-      console.log(
-        `Successfully updated Firestore for user ${userId} and channel ${channelId}`
-      );
-    } catch (firestoreError) {
-      console.error(`Firestore update failed: ${firestoreError.message}`);
-      // Continue anyway since we want to try Stream operations
     }
 
-    // Create or get the channel from Stream
+    // Import streamClient here to avoid circular imports
+    const { streamClient } = await import("../config/stream");
+
+    // Get or create the Stream channel
     const channel = streamClient.channel(type, channelId);
 
-    // First check if user is already a member to avoid errors
-    try {
-      await channel.watch();
-      const state = channel.state;
-      const currentMembers = Object.keys(state?.members || {});
-
-      if (currentMembers.includes(userId)) {
-        console.log(
-          `User ${userId} is already a member of channel ${channelId}`
-        );
-        return {
-          message: "User is already a member",
-          channel: { id: channelId, type },
-        };
-      }
-    } catch (watchError) {
-      console.log(`Could not check existing members: ${watchError.message}`);
-      // Continue with attempt to add
-    } // Handle premium channels (premium_group, premium_individual_class)
-    if (type === "premium_group" || type === "premium_individual_class") {
+    // For premium individual classes, we need special handling
+    if (type === "premium_individual_class") {
       try {
-        // Get Firestore data to ensure correct channel name
+        // First ensure the channel exists and watch it
+        await channel.watch();
+
+        // Check if user is already a member
+        const currentMembers = Object.keys(channel.state?.members || {});
+        if (currentMembers.includes(userId)) {
+          console.log(
+            `User ${userId} is already a member of channel ${channelId}`
+          );
+          return { success: true, message: "User already a member" };
+        }
+
+        // Get the class data to ensure correct channel metadata
         const { getDoc, doc } = await import("firebase/firestore");
         const { db } = await import("../firebaseConfig");
 
-        // Get the correct data for channel type
-        if (type === "premium_group") {
-          const groupDoc = await getDoc(doc(db, "groups", channelId));
-          if (groupDoc.exists()) {
-            const groupData = groupDoc.data();
-            // Set the channel name directly in the local data
-            console.log(
-              `Setting premium group name to "${groupData.groupName}"`
-            );
-            channel.data.name = groupData.groupName;
-            if (groupData.imageUrl) channel.data.image = groupData.imageUrl;
-            if (groupData.groupDescription)
-              channel.data.description = groupData.groupDescription;
-          }
-        } else if (type === "premium_individual_class") {
-          const classDoc = await getDoc(doc(db, "classes", channelId));
-          if (classDoc.exists()) {
-            const classData = classDoc.data();
-            console.log(
-              `Setting premium class name to "${classData.className}"`
-            );
-            channel.data.name = classData.className;
-            if (classData.imageUrl) channel.data.image = classData.imageUrl;
-            if (classData.classDescription)
-              channel.data.description = classData.classDescription;
-          }
+        const classDoc = await getDoc(doc(db, "classes", channelId));
+        if (classDoc.exists()) {
+          const classData = classDoc.data();
+
+          // Update channel metadata to ensure correct name and members list
+          await channel.update({
+            name: classData.className,
+            description:
+              classData.classDescription ||
+              `Class chat for ${classData.className}`,
+            image: classData.imageUrl || "",
+            // IMPORTANT: Add the user to the members list in the update
+            add_members: [{ user_id: userId, role: role }],
+          });
+
+          console.log(
+            `Updated channel metadata and added member ${userId} to ${channelId}`
+          );
+        } else {
+          // If no class data, just add the member
+          await channel.addMembers([{ user_id: userId, role: role }]);
         }
 
-        // 1. First try watching - this adds the channel to client's active channels
+        // Force the channel to refresh and ensure the user can see it
         await channel.watch();
-        console.log(
-          `User ${userId} watching premium channel ${channelId} with name: ${
-            channel.data.name || "unnamed"
-          }`
-        );
-
-        // 2. Force the channel to be queried by the client to update cache
-        await streamClient.queryChannels({
-          id: channelId,
-          members: { $in: [userId] },
-        });
-
-        // 3. Attempt to add the user as a member (might fail due to permissions)
-        try {
-          await channel.addMembers([{ user_id: userId, role }]);
-          console.log(
-            `Successfully added user ${userId} to premium channel ${channelId}`
-          );
-        } catch (addError) {
-          console.log(
-            `Could not directly add to channel (expected): ${addError.message}`
-          );
-          // This is expected to fail for most users - continue
-        }
 
         return {
-          message: "User connected to premium channel",
+          success: true,
+          message: "User successfully added to premium class channel",
           channel: { id: channelId, type, name: channel.data.name },
-          members: [{ user: { id: userId }, role }],
         };
       } catch (premiumError) {
-        console.error(`Error with premium channel: ${premiumError.message}`);
+        console.error(`Premium channel error: ${premiumError.message}`);
 
-        // Try one more time with just a query
+        // Alternative approach: Create channel with user as member
         try {
-          await streamClient.queryChannels({ id: channelId });
-          console.log(`Successfully queried premium channel ${channelId}`);
-        } catch (queryError) {
-          console.error(`Failed to query channel: ${queryError.message}`);
-        }
+          console.log("Trying alternative channel creation approach...");
 
-        // Return success since Firestore was updated
-        return {
-          message: "User added in Firestore, channel access pending",
-          channel: { id: channelId, type },
-        };
+          // Get class data for channel creation
+          const { getDoc, doc } = await import("firebase/firestore");
+          const { db } = await import("../firebaseConfig");
+          const classDoc = await getDoc(doc(db, "classes", channelId));
+
+          if (classDoc.exists()) {
+            const classData = classDoc.data();
+            const allMembers = [classData.adminId, userId]; // Include both tutor and student
+
+            // Create/update channel with both members
+            const channelWithMembers = streamClient.channel(type, channelId, {
+              name: classData.className,
+              description:
+                classData.classDescription ||
+                `Class chat for ${classData.className}`,
+              image: classData.imageUrl || "",
+              members: allMembers,
+              created_by_id: classData.adminId,
+            });
+
+            await channelWithMembers.create();
+            await channelWithMembers.watch();
+
+            console.log(
+              `Successfully created channel with members: ${allMembers}`
+            );
+            return {
+              success: true,
+              message: "Channel created with user as member",
+              channel: { id: channelId, type },
+            };
+          }
+        } catch (alternativeError) {
+          console.error(
+            `Alternative approach failed: ${alternativeError.message}`
+          );
+          throw alternativeError;
+        }
       }
     }
 
-    // For standard channels and one-to-one chats, try direct member addition
+    // For other channel types, use standard approach
     try {
-      // Add the member using Stream's API
-      const response = await channel.addMembers([
+      await channel.watch();
+      const addResult = await channel.addMembers([
         { user_id: userId, role: role },
       ]);
-      console.log(
-        `Successfully added user ${userId} to channel ${channelId} in Stream Chat`
+      console.log(`Successfully added user ${userId} to channel ${channelId}`);
+      return addResult;
+    } catch (standardError) {
+      console.error(
+        `Standard channel addition failed: ${standardError.message}`
       );
-      return response;
-    } catch (streamError) {
-      console.error(`Stream API error: ${streamError.message}`);
-
-      // Handle permission errors specifically
-      if (
-        streamError.message.includes("not allowed to perform action") ||
-        streamError.message.includes("403") ||
-        streamError.status === 403
-      ) {
-        // For permission errors, just watch the channel
-        try {
-          await channel.watch();
-          console.log(
-            `Watching channel ${channelId} instead of adding member due to permissions`
-          );
-        } catch (watchError) {
-          console.error(`Even watching failed: ${watchError.message}`);
-        }
-      }
-      // Return a success response since Firestore was updated
-      return {
-        message: "User added to channel in Firestore, Stream Chat sync pending",
-        channel: { id: channelId, type },
-        members: [{ user: { id: userId }, role }],
-      };
+      throw standardError;
     }
   } catch (error) {
     console.error(
