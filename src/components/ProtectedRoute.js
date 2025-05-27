@@ -15,7 +15,7 @@ const ProtectedRoute = ({ children, requiredRole }) => {
       sessionStorage.setItem("redirectAfterLogin", currentPath);
       localStorage.setItem("redirectAfterLogin", currentPath);
       localStorage.setItem("fullRedirectUrl", currentUrl);
-      
+
       // Add timestamp to know when this was saved
       localStorage.setItem("redirectTimestamp", Date.now().toString());
     } else {

@@ -63,105 +63,110 @@ const Login = () => {
       params.set("ref", "class");
       navigate(`/login?${params.toString()}`, { replace: true });
     }
-  }, [location.search, navigate]);  const redirectAfterLogin = useCallback((isFirstTimeLogin = false) => {
-    // Check for saved redirect paths with priority order
-    const sessionRedirectPath = sessionStorage.getItem("redirectAfterLogin");
-    const localRedirectPath = localStorage.getItem("redirectAfterLogin");
-    const redirectTimestamp = localStorage.getItem("redirectTimestamp");
-    const redirectUsed = localStorage.getItem("redirectUsed");
-    
-    // Use session storage first (most recent), then local storage if not too old
-    let savedRedirectPath = sessionRedirectPath;
-    if (!savedRedirectPath && localRedirectPath && !redirectUsed) {
-      // Check if the redirect is not too old (within 24 hours)
-      const now = Date.now();
-      const savedTime = redirectTimestamp ? parseInt(redirectTimestamp) : 0;
-      const hoursDiff = (now - savedTime) / (1000 * 60 * 60);
-      
-      if (hoursDiff < 24) {
-        savedRedirectPath = localRedirectPath;
+  }, [location.search, navigate]);
+  const redirectAfterLogin = useCallback(
+    (isFirstTimeLogin = false) => {
+      // Check for saved redirect paths with priority order
+      const sessionRedirectPath = sessionStorage.getItem("redirectAfterLogin");
+      const localRedirectPath = localStorage.getItem("redirectAfterLogin");
+      const redirectTimestamp = localStorage.getItem("redirectTimestamp");
+      const redirectUsed = localStorage.getItem("redirectUsed");
+
+      // Use session storage first (most recent), then local storage if not too old
+      let savedRedirectPath = sessionRedirectPath;
+      if (!savedRedirectPath && localRedirectPath && !redirectUsed) {
+        // Check if the redirect is not too old (within 24 hours)
+        const now = Date.now();
+        const savedTime = redirectTimestamp ? parseInt(redirectTimestamp) : 0;
+        const hoursDiff = (now - savedTime) / (1000 * 60 * 60);
+
+        if (hoursDiff < 24) {
+          savedRedirectPath = localRedirectPath;
+        }
       }
-    }
-    
-    if (savedRedirectPath) {
-      // Don't redirect back to profile page after logging in
-      if (savedRedirectPath.includes("/ProfileUser")) {
-        console.log("Avoiding redirect loop back to ProfileUser");
+
+      if (savedRedirectPath) {
+        // Don't redirect back to profile page after logging in
+        if (savedRedirectPath.includes("/ProfileUser")) {
+          console.log("Avoiding redirect loop back to ProfileUser");
+        } else {
+          console.log("Redirecting to saved path:", savedRedirectPath);
+          // Clear all redirect data
+          sessionStorage.removeItem("redirectAfterLogin");
+          localStorage.removeItem("redirectAfterLogin");
+          localStorage.removeItem("redirectTimestamp");
+          localStorage.setItem("redirectUsed", "true");
+
+          navigate(savedRedirectPath, { replace: true });
+          setRedirected(true);
+          return;
+        }
+      }
+
+      // Clear any remaining redirect data
+      sessionStorage.removeItem("redirectAfterLogin");
+      localStorage.removeItem("redirectAfterLogin");
+      localStorage.removeItem("redirectTimestamp");
+
+      // Continue with existing special case handling
+      const params = new URLSearchParams(location.search);
+      if (!params.get("ref") && localStorage.getItem("selectedClassUrl")) {
+        params.set("ref", "class");
+      }
+      if (params.get("ref") === "sub") {
+        const savedUrl = localStorage.getItem("selectedPackageUrl");
+        if (savedUrl) {
+          try {
+            const parsedUrl = new URL(savedUrl);
+            const path = parsedUrl.pathname + parsedUrl.search;
+            localStorage.removeItem("selectedPackageUrl");
+            navigate(path, { replace: true });
+            setRedirected(true);
+            return;
+          } catch (error) {
+            console.error("Error parsing saved subscription URL:", error);
+          }
+        }
+      } else if (params.get("ref") === "class") {
+        const savedClassUrl = localStorage.getItem("selectedClassUrl");
+        if (savedClassUrl) {
+          try {
+            const parsedUrl = new URL(savedClassUrl);
+            const path = parsedUrl.pathname + parsedUrl.search;
+            localStorage.removeItem("selectedClassUrl");
+            navigate(path, { replace: true });
+            setRedirected(true);
+            return;
+          } catch (error) {
+            console.error("Error parsing saved class URL:", error);
+          }
+        }
+      } else if (params.get("ref") === "group") {
+        const savedGroupUrl = localStorage.getItem("selectedGroupUrl");
+        if (savedGroupUrl) {
+          try {
+            const parsedUrl = new URL(savedGroupUrl);
+            const path = parsedUrl.pathname + parsedUrl.search;
+            localStorage.removeItem("selectedGroupUrl");
+            navigate(path, { replace: true });
+            setRedirected(true);
+            return;
+          } catch (error) {
+            console.error("Error parsing saved group URL:", error);
+          }
+        }
+      }
+
+      // Fallback redirection.
+      if (isFirstTimeLogin) {
+        navigate("/userEditProfile", { replace: true });
       } else {
-        console.log("Redirecting to saved path:", savedRedirectPath);
-        // Clear all redirect data
-        sessionStorage.removeItem("redirectAfterLogin");
-        localStorage.removeItem("redirectAfterLogin");
-        localStorage.removeItem("redirectTimestamp");
-        localStorage.setItem("redirectUsed", "true");
-        
-        navigate(savedRedirectPath, { replace: true });
-        setRedirected(true);
-        return;
+        navigate("/learn", { replace: true });
       }
-    }
-
-    // Clear any remaining redirect data
-    sessionStorage.removeItem("redirectAfterLogin");
-    localStorage.removeItem("redirectAfterLogin");
-    localStorage.removeItem("redirectTimestamp");
-
-    // Continue with existing special case handling
-    const params = new URLSearchParams(location.search);
-    if (!params.get("ref") && localStorage.getItem("selectedClassUrl")) {
-      params.set("ref", "class");
-    }
-    if (params.get("ref") === "sub") {
-      const savedUrl = localStorage.getItem("selectedPackageUrl");
-      if (savedUrl) {
-        try {
-          const parsedUrl = new URL(savedUrl);
-          const path = parsedUrl.pathname + parsedUrl.search;
-          localStorage.removeItem("selectedPackageUrl");
-          navigate(path, { replace: true });
-          setRedirected(true);
-          return;
-        } catch (error) {
-          console.error("Error parsing saved subscription URL:", error);
-        }
-      }
-    } else if (params.get("ref") === "class") {
-      const savedClassUrl = localStorage.getItem("selectedClassUrl");
-      if (savedClassUrl) {
-        try {
-          const parsedUrl = new URL(savedClassUrl);
-          const path = parsedUrl.pathname + parsedUrl.search;
-          localStorage.removeItem("selectedClassUrl");
-          navigate(path, { replace: true });
-          setRedirected(true);
-          return;
-        } catch (error) {
-          console.error("Error parsing saved class URL:", error);
-        }
-      }
-    } else if (params.get("ref") === "group") {
-      const savedGroupUrl = localStorage.getItem("selectedGroupUrl");
-      if (savedGroupUrl) {
-        try {
-          const parsedUrl = new URL(savedGroupUrl);
-          const path = parsedUrl.pathname + parsedUrl.search;
-          localStorage.removeItem("selectedGroupUrl");
-          navigate(path, { replace: true });
-          setRedirected(true);
-          return;
-        } catch (error) {
-          console.error("Error parsing saved group URL:", error);
-        }
-      }
-    }
-    
-    // Fallback redirection.
-    if (isFirstTimeLogin) {
-      navigate("/userEditProfile", { replace: true });
-    } else {
-      navigate("/learn", { replace: true });
-    }    setRedirected(true);
-  }, [location, navigate, setRedirected]);  // Automatically redirect if the user is already logged in.
+      setRedirected(true);
+    },
+    [location, navigate, setRedirected]
+  ); // Automatically redirect if the user is already logged in.
   useEffect(() => {
     if (user && !redirected) {
       redirectAfterLogin(false);
@@ -287,11 +292,12 @@ const Login = () => {
           }
         } else {
           updatedStreak = 1;
-        }        await updateDoc(userRef, {
+        }
+        await updateDoc(userRef, {
           lastLoggedIn: serverTimestamp(),
           currentStreak: updatedStreak,
         });
-        
+
         // Request notification permission and FCM token after successful authentication
         try {
           const permission = await Notification.requestPermission();
@@ -420,11 +426,12 @@ const Login = () => {
           }
         } else {
           updatedStreak = 1;
-        }        await updateDoc(userRef, {
+        }
+        await updateDoc(userRef, {
           lastLoggedIn: serverTimestamp(),
           currentStreak: updatedStreak,
         });
-        
+
         // Request notification permission and FCM token after successful authentication
         try {
           const permission = await Notification.requestPermission();
@@ -459,32 +466,47 @@ const Login = () => {
         );
         // If redirect fails, go to the default page
         navigate("/learn", { replace: true });
-      }    } catch (error) {
+      }
+    } catch (error) {
       console.error("Error during Google login:", error);
-      updateUserData(null);      // Enhanced error handling for Google login
+      updateUserData(null); // Enhanced error handling for Google login
       switch (error.code) {
         case "auth/popup-closed-by-user":
-          toast.warning("Login was canceled. Please try again.", { autoClose: 3000 });
+          toast.warning("Login was canceled. Please try again.", {
+            autoClose: 3000,
+          });
           break;
         case "auth/popup-blocked":
-          toast.error("Popup was blocked by your browser. Please allow popups for this site and try again.", {
-            autoClose: 7000,
-          });
+          toast.error(
+            "Popup was blocked by your browser. Please allow popups for this site and try again.",
+            {
+              autoClose: 7000,
+            }
+          );
           break;
         case "auth/invalid-credential":
-          toast.error("Invalid credentials. Please try again or use a different login method.", {
-            autoClose: 5000,
-          });
+          toast.error(
+            "Invalid credentials. Please try again or use a different login method.",
+            {
+              autoClose: 5000,
+            }
+          );
           break;
         case "auth/network-request-failed":
-          toast.error("Network error. Please check your internet connection and try again.", {
-            autoClose: 5000,
-          });
+          toast.error(
+            "Network error. Please check your internet connection and try again.",
+            {
+              autoClose: 5000,
+            }
+          );
           break;
         case "auth/too-many-requests":
-          toast.error("Too many failed attempts. Please wait a moment and try again.", {
-            autoClose: 5000,
-          });
+          toast.error(
+            "Too many failed attempts. Please wait a moment and try again.",
+            {
+              autoClose: 5000,
+            }
+          );
           break;
         case "auth/operation-not-allowed":
           toast.error("Google login is not enabled. Please contact support.", {
@@ -492,19 +514,22 @@ const Login = () => {
           });
           break;
         case "auth/user-disabled":
-          toast.error("This account has been disabled. Please contact support.", {
-            autoClose: 5000,
-          });
+          toast.error(
+            "This account has been disabled. Please contact support.",
+            {
+              autoClose: 5000,
+            }
+          );
           break;
         default:
           // Filter out technical FCM errors and show user-friendly message
           if (error.message && error.message.includes("messaging/")) {
-            toast.error("Login failed. Please try again.", { 
-              autoClose: 5000 
+            toast.error("Login failed. Please try again.", {
+              autoClose: 5000,
             });
           } else {
-            toast.error(`Login failed: ${error.message || 'Unknown error'}`, { 
-              autoClose: 5000 
+            toast.error(`Login failed: ${error.message || "Unknown error"}`, {
+              autoClose: 5000,
             });
           }
           break;

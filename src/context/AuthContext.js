@@ -3,10 +3,7 @@ import { auth, db } from "../firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { StreamChat } from "stream-chat";
-import {
-  streamVideoClient,
-  fetchChatToken,
-} from "../config/stream";
+import { streamVideoClient, fetchChatToken } from "../config/stream";
 import i18n from "../i18n";
 import { checkAccess } from "../utils/accessControl";
 
@@ -35,7 +32,8 @@ export const AuthProvider = ({ children }) => {
     };
 
     initializeLanguage();
-  }, []);  const connectStreamUser = async (userData) => {
+  }, []);
+  const connectStreamUser = async (userData) => {
     try {
       // Don't attempt to connect if there's no user data
       if (!userData?.uid) {
@@ -51,10 +49,18 @@ export const AuthProvider = ({ children }) => {
 
       // Use the helper function for better error handling
       try {
-        const { connectStreamUserWithRetry } = await import("../utils/streamConnectionHelper");
-        await connectStreamUserWithRetry(streamClient, streamVideoClient, userData);
+        const { connectStreamUserWithRetry } = await import(
+          "../utils/streamConnectionHelper"
+        );
+        await connectStreamUserWithRetry(
+          streamClient,
+          streamVideoClient,
+          userData
+        );
       } catch (importError) {
-        console.warn("Could not import Stream helper, falling back to basic connection");
+        console.warn(
+          "Could not import Stream helper, falling back to basic connection"
+        );
         // Fallback to basic connection logic
         await connectStreamBasic(userData);
       }

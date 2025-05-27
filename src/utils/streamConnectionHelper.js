@@ -2,9 +2,13 @@
 import { fetchChatToken, fetchVideoToken } from "../config/stream";
 
 // Retry logic with exponential backoff
-export const connectWithRetry = async (connectFn, serviceName, maxRetries = 3) => {
+export const connectWithRetry = async (
+  connectFn,
+  serviceName,
+  maxRetries = 3
+) => {
   let retryCount = 0;
-  
+
   while (retryCount < maxRetries) {
     try {
       await connectFn();
@@ -12,15 +16,20 @@ export const connectWithRetry = async (connectFn, serviceName, maxRetries = 3) =
       return;
     } catch (error) {
       retryCount++;
-      console.error(`Stream ${serviceName} connection attempt ${retryCount} failed:`, error);
-      
+      console.error(
+        `Stream ${serviceName} connection attempt ${retryCount} failed:`,
+        error
+      );
+
       if (retryCount >= maxRetries) {
-        console.error(`Failed to connect Stream ${serviceName} after ${maxRetries} attempts`);
+        console.error(
+          `Failed to connect Stream ${serviceName} after ${maxRetries} attempts`
+        );
         throw error;
       }
-      
+
       // Wait before retrying (exponential backoff)
-      await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+      await new Promise((resolve) => setTimeout(resolve, 1000 * retryCount));
     }
   }
 };
@@ -28,21 +37,25 @@ export const connectWithRetry = async (connectFn, serviceName, maxRetries = 3) =
 // Store connection errors for later retry
 export const storeConnectionError = (userId, service, error) => {
   if (userId) {
-    sessionStorage.setItem(`stream${service}Error_${userId}`, JSON.stringify({
-      error: error.message,
-      timestamp: Date.now()
-    }));
+    sessionStorage.setItem(
+      `stream${service}Error_${userId}`,
+      JSON.stringify({
+        error: error.message,
+        timestamp: Date.now(),
+      })
+    );
   }
 };
 
 // Check if we should retry a connection based on stored error
-export const shouldRetryConnection = (userId, service, maxAge = 300000) => { // 5 minutes
+export const shouldRetryConnection = (userId, service, maxAge = 300000) => {
+  // 5 minutes
   const stored = sessionStorage.getItem(`stream${service}Error_${userId}`);
   if (!stored) return false;
-  
+
   try {
     const errorData = JSON.parse(stored);
-    return (Date.now() - errorData.timestamp) < maxAge;
+    return Date.now() - errorData.timestamp < maxAge;
   } catch {
     return false;
   }
@@ -57,7 +70,11 @@ export const clearConnectionErrors = (userId) => {
 };
 
 // Enhanced Stream connection function
-export const connectStreamUserWithRetry = async (streamClient, streamVideoClient, userData) => {
+export const connectStreamUserWithRetry = async (
+  streamClient,
+  streamVideoClient,
+  userData
+) => {
   if (!userData?.uid) {
     console.log("No user data available for Stream connection");
     return;
@@ -87,7 +104,7 @@ export const connectStreamUserWithRetry = async (streamClient, streamVideoClient
       await connectWithRetry(async () => {
         await streamClient.connectUser(userStreamData, chatToken);
       }, "chat");
-      
+
       // Clear any previous errors on successful connection
       sessionStorage.removeItem(`streamChatError_${userData.uid}`);
     }
@@ -100,11 +117,11 @@ export const connectStreamUserWithRetry = async (streamClient, streamVideoClient
   // Connect to Stream Video
   try {
     const videoToken = await fetchVideoToken(userData.uid);
-    
+
     await connectWithRetry(async () => {
       await streamVideoClient.connectUser(userStreamData, videoToken);
     }, "video");
-    
+
     // Clear any previous errors on successful connection
     sessionStorage.removeItem(`streamVideoError_${userData.uid}`);
   } catch (videoError) {
