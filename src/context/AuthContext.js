@@ -6,7 +6,6 @@ import { StreamChat } from "stream-chat";
 import {
   streamVideoClient,
   fetchChatToken,
-  fetchVideoToken,
 } from "../config/stream";
 import i18n from "../i18n";
 import { checkAccess } from "../utils/accessControl";
@@ -36,69 +35,55 @@ export const AuthProvider = ({ children }) => {
     };
 
     initializeLanguage();
-  }, []);
-  const connectStreamUser = async (userData) => {
+  }, []);  const connectStreamUser = async (userData) => {
     try {
       // Don't attempt to connect if there's no user data
-      if (!userData || !userData.uid) {
+      if (!userData?.uid) {
         console.log("No user data available for Stream connection");
         return;
       }
 
-      try {
-        // Use proper token generation instead of development tokens
-        const chatToken = await fetchChatToken(userData.uid);
-
-        // Check if already connected with the same user ID
-        if (streamClient.userID === userData.uid && streamClient.isConnected) {
-          console.log(
-            "Stream chat client already connected with the same user ID"
-          );
-        } else {
-          // Disconnect previous user if connected with different ID
-          if (streamClient.userID && streamClient.userID !== userData.uid) {
-            await streamClient.disconnectUser();
-          }
-
-          // Connect with chat token
-          await streamClient.connectUser(
-            {
-              id: userData.uid,
-              name: userData.name || "",
-              image: userData.photoUrl || "",
-              userType: userData.userType,
-            },
-            chatToken
-          );
-          console.log("Stream chat client connected successfully");
-        }
-      } catch (chatError) {
-        // Log error but don't throw - this allows auth to proceed even if Stream chat fails
-        console.error("Error connecting Stream chat client:", chatError);
-        // Don't throw the error - allow auth to continue
+      // Check if user is actually authenticated before connecting to Stream
+      if (!auth.currentUser) {
+        console.log("User not authenticated, skipping Stream connection");
+        return;
       }
 
+      // Use the helper function for better error handling
       try {
-        // Set up video client separately so errors don't affect chat
-        const videoToken = await fetchVideoToken(userData.uid);
-        await streamVideoClient.connectUser(
+        const { connectStreamUserWithRetry } = await import("../utils/streamConnectionHelper");
+        await connectStreamUserWithRetry(streamClient, streamVideoClient, userData);
+      } catch (importError) {
+        console.warn("Could not import Stream helper, falling back to basic connection");
+        // Fallback to basic connection logic
+        await connectStreamBasic(userData);
+      }
+    } catch (error) {
+      // This will only catch errors not already caught in the helper
+      console.error("Unexpected error connecting Stream user:", error);
+    }
+  };
+
+  // Fallback basic Stream connection
+  const connectStreamBasic = async (userData) => {
+    try {
+      const chatToken = await fetchChatToken(userData.uid);
+      if (streamClient.userID !== userData.uid) {
+        if (streamClient.userID) {
+          await streamClient.disconnectUser();
+        }
+        await streamClient.connectUser(
           {
             id: userData.uid,
             name: userData.name || "",
             image: userData.photoUrl || "",
             userType: userData.userType,
           },
-          videoToken
+          chatToken
         );
-        console.log("Stream video client connected successfully");
-      } catch (videoError) {
-        // Log error but don't throw - this allows auth to proceed even if Stream video fails
-        console.error("Error connecting Stream video client:", videoError);
-        // Don't throw the error - allow auth to continue
       }
     } catch (error) {
-      // This will only catch errors not already caught in the inner try/catch blocks
-      console.error("Unexpected error connecting Stream user:", error);
+      console.error("Basic Stream connection failed:", error);
     }
   };
   const disconnectStreamUser = async () => {

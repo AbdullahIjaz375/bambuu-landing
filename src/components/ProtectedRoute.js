@@ -8,13 +8,21 @@ const ProtectedRoute = ({ children, requiredRole }) => {
   const location = useLocation();
   const currentUrl = window.location.href;
   const currentPath = location.pathname + location.search + location.hash;
-
   useEffect(() => {
     if (!user) {
       console.log("Saving redirect path:", currentPath);
+      // Save both session and local storage for better persistence
       sessionStorage.setItem("redirectAfterLogin", currentPath);
-
+      localStorage.setItem("redirectAfterLogin", currentPath);
       localStorage.setItem("fullRedirectUrl", currentUrl);
+      
+      // Add timestamp to know when this was saved
+      localStorage.setItem("redirectTimestamp", Date.now().toString());
+    } else {
+      // Clear redirect data when user is logged in
+      sessionStorage.removeItem("redirectAfterLogin");
+      // Keep localStorage redirect for longer persistence but mark as used
+      localStorage.setItem("redirectUsed", "true");
     }
   }, [user, currentPath, currentUrl]);
 
@@ -23,12 +31,9 @@ const ProtectedRoute = ({ children, requiredRole }) => {
   if (currentUrl.includes("subscriptions?offerId=")) {
     localStorage.setItem("selectedPackageUrl", currentUrl);
   }
-
   // Save class details URL if the pathname includes "/classDetailsUser/"
-  // and there's a "ref" query parameter present.
   try {
     const urlObj = new URL(currentUrl);
-    const searchParams = new URLSearchParams(urlObj.search);
 
     // Save all class detail URLs regardless of query params
     if (

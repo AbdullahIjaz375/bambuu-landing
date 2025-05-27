@@ -1,5 +1,5 @@
 // src/Login.js
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { auth, db, messaging } from "../firebaseConfig";
 import {
@@ -63,24 +63,48 @@ const Login = () => {
       params.set("ref", "class");
       navigate(`/login?${params.toString()}`, { replace: true });
     }
-  }, [location.search, navigate]);
-  const redirectAfterLogin = (isFirstTimeLogin = false) => {
-    const savedRedirectPath = sessionStorage.getItem("redirectAfterLogin");
+  }, [location.search, navigate]);  const redirectAfterLogin = useCallback((isFirstTimeLogin = false) => {
+    // Check for saved redirect paths with priority order
+    const sessionRedirectPath = sessionStorage.getItem("redirectAfterLogin");
+    const localRedirectPath = localStorage.getItem("redirectAfterLogin");
+    const redirectTimestamp = localStorage.getItem("redirectTimestamp");
+    const redirectUsed = localStorage.getItem("redirectUsed");
+    
+    // Use session storage first (most recent), then local storage if not too old
+    let savedRedirectPath = sessionRedirectPath;
+    if (!savedRedirectPath && localRedirectPath && !redirectUsed) {
+      // Check if the redirect is not too old (within 24 hours)
+      const now = Date.now();
+      const savedTime = redirectTimestamp ? parseInt(redirectTimestamp) : 0;
+      const hoursDiff = (now - savedTime) / (1000 * 60 * 60);
+      
+      if (hoursDiff < 24) {
+        savedRedirectPath = localRedirectPath;
+      }
+    }
+    
     if (savedRedirectPath) {
       // Don't redirect back to profile page after logging in
       if (savedRedirectPath.includes("/ProfileUser")) {
         console.log("Avoiding redirect loop back to ProfileUser");
+      } else {
+        console.log("Redirecting to saved path:", savedRedirectPath);
+        // Clear all redirect data
         sessionStorage.removeItem("redirectAfterLogin");
-        navigate("/learn", { replace: true });
+        localStorage.removeItem("redirectAfterLogin");
+        localStorage.removeItem("redirectTimestamp");
+        localStorage.setItem("redirectUsed", "true");
+        
+        navigate(savedRedirectPath, { replace: true });
         setRedirected(true);
         return;
       }
-
-      sessionStorage.removeItem("redirectAfterLogin");
-      navigate(savedRedirectPath, { replace: true });
-      setRedirected(true);
-      return;
     }
+
+    // Clear any remaining redirect data
+    sessionStorage.removeItem("redirectAfterLogin");
+    localStorage.removeItem("redirectAfterLogin");
+    localStorage.removeItem("redirectTimestamp");
 
     // Continue with existing special case handling
     const params = new URLSearchParams(location.search);
@@ -115,26 +139,43 @@ const Login = () => {
           console.error("Error parsing saved class URL:", error);
         }
       }
+    } else if (params.get("ref") === "group") {
+      const savedGroupUrl = localStorage.getItem("selectedGroupUrl");
+      if (savedGroupUrl) {
+        try {
+          const parsedUrl = new URL(savedGroupUrl);
+          const path = parsedUrl.pathname + parsedUrl.search;
+          localStorage.removeItem("selectedGroupUrl");
+          navigate(path, { replace: true });
+          setRedirected(true);
+          return;
+        } catch (error) {
+          console.error("Error parsing saved group URL:", error);
+        }
+      }
     }
+    
     // Fallback redirection.
     if (isFirstTimeLogin) {
       navigate("/userEditProfile", { replace: true });
     } else {
       navigate("/learn", { replace: true });
-    }
-    setRedirected(true);
-  };
-
-  // Automatically redirect if the user is already logged in.
+    }    setRedirected(true);
+  }, [location, navigate, setRedirected]);  // Automatically redirect if the user is already logged in.
   useEffect(() => {
     if (user && !redirected) {
       redirectAfterLogin(false);
     }
-  }, [user, redirected, location, navigate]);
-
-  // Helper to get FCM token.
+  }, [user, redirected, redirectAfterLogin]);
+  // Helper to get FCM token with proper authentication check.
   const getFCMToken = async () => {
     try {
+      // Only request FCM token if user is authenticated
+      if (!auth.currentUser) {
+        console.log("No authenticated user, skipping FCM token request");
+        return null;
+      }
+
       const messaging = getMessaging();
       const currentToken = await getToken(messaging, {
         vapidKey: process.env.REACT_APP_FIREBASE_VAPID_KEY,
@@ -145,6 +186,7 @@ const Login = () => {
       return null;
     } catch (error) {
       console.error("Error getting FCM token:", error);
+      // Don't throw the error, just return null to allow login to proceed
       return null;
     }
   };
@@ -245,21 +287,27 @@ const Login = () => {
           }
         } else {
           updatedStreak = 1;
-        }
-        await updateDoc(userRef, {
+        }        await updateDoc(userRef, {
           lastLoggedIn: serverTimestamp(),
           currentStreak: updatedStreak,
         });
-        const permission = await Notification.requestPermission();
-        if (permission === "granted") {
-          const fcmToken = await getToken(messaging, {
-            vapidKey: process.env.REACT_APP_FIREBASE_VAPID_KEY,
-          });
-          await updateDoc(userRef, {
-            fcmToken: fcmToken,
-          });
-        } else {
-          console.warn("Notification permission not granted");
+        
+        // Request notification permission and FCM token after successful authentication
+        try {
+          const permission = await Notification.requestPermission();
+          if (permission === "granted") {
+            const fcmToken = await getFCMToken();
+            if (fcmToken) {
+              await updateDoc(userRef, {
+                fcmToken: fcmToken,
+              });
+            }
+          } else {
+            console.warn("Notification permission not granted");
+          }
+        } catch (notificationError) {
+          console.error("Error handling notifications:", notificationError);
+          // Don't let notification errors break the login flow
         }
         updateUserData({
           ...userData,
@@ -372,19 +420,25 @@ const Login = () => {
           }
         } else {
           updatedStreak = 1;
-        }
-        await updateDoc(userRef, {
+        }        await updateDoc(userRef, {
           lastLoggedIn: serverTimestamp(),
           currentStreak: updatedStreak,
         });
-        const permission = await Notification.requestPermission();
-        if (permission === "granted") {
-          const fcmToken = await getToken(messaging, {
-            vapidKey: process.env.REACT_APP_FIREBASE_VAPID_KEY,
-          });
-          await updateDoc(userRef, { fcmToken });
-        } else {
-          console.warn("Notification permission not granted");
+        
+        // Request notification permission and FCM token after successful authentication
+        try {
+          const permission = await Notification.requestPermission();
+          if (permission === "granted") {
+            const fcmToken = await getFCMToken();
+            if (fcmToken) {
+              await updateDoc(userRef, { fcmToken });
+            }
+          } else {
+            console.warn("Notification permission not granted");
+          }
+        } catch (notificationError) {
+          console.error("Error handling notifications:", notificationError);
+          // Don't let notification errors break the login flow
         }
         updateUserData({
           ...userData,
@@ -405,20 +459,55 @@ const Login = () => {
         );
         // If redirect fails, go to the default page
         navigate("/learn", { replace: true });
-      }
-    } catch (error) {
+      }    } catch (error) {
       console.error("Error during Google login:", error);
-      updateUserData(null);
-
-      // More specific error handling for Google login
-      if (error.code === "auth/popup-closed-by-user") {
-        toast.warning("Login canceled", { autoClose: 3000 });
-      } else if (error.code === "auth/network-request-failed") {
-        toast.error("Network error. Please check your connection", {
-          autoClose: 5000,
-        });
-      } else {
-        toast.error("Login failed", { autoClose: 5000 });
+      updateUserData(null);      // Enhanced error handling for Google login
+      switch (error.code) {
+        case "auth/popup-closed-by-user":
+          toast.warning("Login was canceled. Please try again.", { autoClose: 3000 });
+          break;
+        case "auth/popup-blocked":
+          toast.error("Popup was blocked by your browser. Please allow popups for this site and try again.", {
+            autoClose: 7000,
+          });
+          break;
+        case "auth/invalid-credential":
+          toast.error("Invalid credentials. Please try again or use a different login method.", {
+            autoClose: 5000,
+          });
+          break;
+        case "auth/network-request-failed":
+          toast.error("Network error. Please check your internet connection and try again.", {
+            autoClose: 5000,
+          });
+          break;
+        case "auth/too-many-requests":
+          toast.error("Too many failed attempts. Please wait a moment and try again.", {
+            autoClose: 5000,
+          });
+          break;
+        case "auth/operation-not-allowed":
+          toast.error("Google login is not enabled. Please contact support.", {
+            autoClose: 5000,
+          });
+          break;
+        case "auth/user-disabled":
+          toast.error("This account has been disabled. Please contact support.", {
+            autoClose: 5000,
+          });
+          break;
+        default:
+          // Filter out technical FCM errors and show user-friendly message
+          if (error.message && error.message.includes("messaging/")) {
+            toast.error("Login failed. Please try again.", { 
+              autoClose: 5000 
+            });
+          } else {
+            toast.error(`Login failed: ${error.message || 'Unknown error'}`, { 
+              autoClose: 5000 
+            });
+          }
+          break;
       }
     }
   };
