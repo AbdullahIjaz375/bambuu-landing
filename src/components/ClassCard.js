@@ -95,17 +95,27 @@ const ClassCard = ({
 
     // For weekly recurring classes, show just the day name
     return dayName;
-  };
-
-  // Function to determine if we should show the day name or full date
+  }; // Function to determine if we should show the day name or full date
   const getDateDisplay = (timestamp) => {
-    // Check if the class is recurring (weekly)
-    const isRecurring =
-      recurrenceType === "Weekly" ||
-      (recurrenceTypes && recurrenceTypes.includes("Weekly")) ||
-      selectedRecurrenceType === "Weekly";
+    // Check if it's a recurring premium individual class
+    const isPremiumIndividual = classType === "Individual Premium";
 
-    if (isRecurring) {
+    // Check if the class is recurring (any recurring type)
+    const isRecurring =
+      (recurrenceType &&
+        recurrenceType !== "One-time" &&
+        recurrenceType !== "None") ||
+      (recurrenceTypes &&
+        recurrenceTypes.length > 0 &&
+        recurrenceTypes.some(
+          (type) => type !== "One-time" && type !== "None"
+        )) ||
+      (selectedRecurrenceType &&
+        selectedRecurrenceType !== "One-time" &&
+        selectedRecurrenceType !== "None");
+
+    // For premium individual classes that are recurring, show day of week
+    if (isPremiumIndividual && isRecurring) {
       return getRecurringDayDisplay(timestamp);
     } else {
       return formatDate(timestamp);

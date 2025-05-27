@@ -22,11 +22,11 @@ export const syncPremiumClassChannelName = async (channelId) => {
     if (!correctName) {
       console.error(`No className found for class ${channelId}`);
       return false;
-    }    // Get the Stream channel
+    } // Get the Stream channel
     const channel = streamClient.channel("premium_individual_class", channelId);
     await channel.watch();
 
-    console.log(`Current channel name: "${channel.data.name || 'unnamed'}"`);
+    console.log(`Current channel name: "${channel.data.name || "unnamed"}"`);
     console.log(`Target name from Firestore: "${correctName}"`);
 
     // ALWAYS update the channel name to ensure it matches Firestore
@@ -57,12 +57,12 @@ export const syncPremiumClassChannelName = async (channelId) => {
     channel.data.description =
       classData.classDescription || `Class chat for ${correctName}`;
     channel.data.image = classData.imageUrl || "";
-    
+
     // Also update the channel's internal name property if it exists
     if (channel.name !== correctName) {
       channel.name = correctName;
     }
-    
+
     // Force update the channel state
     if (channel.state) {
       channel.state.name = correctName;
