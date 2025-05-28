@@ -83,7 +83,7 @@ const MessagesUser = () => {
         };
       }
     }
-    
+
     // For premium_individual_class, do NOT return tutor info - let the channel name show instead
     if (channel.type === "premium_individual_class") {
       // Return channel info, not user info, so the class name is displayed
@@ -592,9 +592,9 @@ const MessagesUser = () => {
       `Rendering channel ${channel.id}, type: ${channel.type}, raw name: "${
         channel.data?.name || "undefined"
       }", firestore name: "${groupName || "none"}"`
-    );    // Add fallback name for channels without proper names
+    ); // Add fallback name for channels without proper names
     let displayName = "";
-    
+
     // SPECIAL HANDLING FOR PREMIUM INDIVIDUAL CLASSES
     if (channel.type === "premium_individual_class") {
       // For premium individual classes, ALWAYS use the channel.data.name (which should be synced with className)
@@ -680,15 +680,16 @@ const MessagesUser = () => {
             <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
           )}
         </div>{" "}
-        <div className="flex-1">          <div className="flex items-center justify-between">
+        <div className="flex-1">
+          {" "}
+          <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold">
               {/* CRITICAL FIX: For premium individual classes, ALWAYS show displayName (className) */}
-              {channel.type === "premium_individual_class" 
-                ? displayName 
+              {channel.type === "premium_individual_class"
+                ? displayName
                 : channel.type === "one_to_one_chat"
-                  ? (otherUser?.name || displayName || "Private Chat")
-                  : (displayName || "Unnamed Channel")
-              }
+                ? otherUser?.name || displayName || "Private Chat"
+                : displayName || "Unnamed Channel"}
             </h3>
             {isInstructor ? (
               <span
@@ -709,7 +710,6 @@ const MessagesUser = () => {
               )
             )}
           </div>
-
           <div className="flex flex-row items-center justify-between mt-1">
             <p className="text-sm text-gray-500 truncate">
               {getMessagePreview(latestMessage)}
@@ -947,6 +947,7 @@ const MessagesUser = () => {
                   type={selectedChannel.type}
                   onChannelLeave={handleChannelLeave}
                   chatInfo={selectedChatInfo}
+                  description={selectedChannel.data?.description || ""}
                 />
               ) : (
                 <div className="flex items-center justify-center h-full text-gray-500">

@@ -21,7 +21,13 @@ import "react-toastify/dist/ReactToastify.css";
 import { useTranslation } from "react-i18next";
 Modal.setAppElement("#root");
 
-const CustomChatComponent = ({ channelId, type, onChannelLeave, chatInfo }) => {
+const CustomChatComponent = ({
+  channelId,
+  type,
+  onChannelLeave,
+  chatInfo,
+  description,
+}) => {
   const { user, streamClient } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -378,32 +384,16 @@ const CustomChatComponent = ({ channelId, type, onChannelLeave, chatInfo }) => {
   return (
     <div className="flex flex-col w-full h-screen max-h-[calc(100vh-125px)] overflow-hidden rounded-2xl border border-gray-200 bg-white">
       <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 overflow-hidden bg-purple-100 rounded-full">
-            {chatPartner.image ? (
-              <img
-                src={chatPartner.image}
-                alt={chatPartner.name || "User"}
-                className="object-cover w-full h-full"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = "/default-avatar.png";
-                }}
-              />
-            ) : (
-              <div className="flex items-center justify-center w-full h-full text-gray-500 bg-gray-200"></div>
-            )}
-          </div>
-          <div>
-            <h3 className="font-semibold text-gray-800">
-              {chatPartner.name || "User"}
-            </h3>
-            <span className="text-xs text-gray-500">
-              {chatPartner.online ? "Online" : "Offline"}
+        <div className="flex flex-col gap-0">
+          <h3 className="font-semibold text-gray-800">
+            {chatPartner.name || "User"}
+          </h3>
+          {description && (
+            <span className="text-xs text-gray-500 max-w-xs truncate block">
+              {description}
             </span>
-          </div>
+          )}
         </div>
-
         <div className="relative" ref={dropdownRef}>
           <button
             className="p-2 transition-colors rounded-full hover:bg-gray-200"
@@ -517,42 +507,24 @@ const CustomChatComponent = ({ channelId, type, onChannelLeave, chatInfo }) => {
               <button
                 type="button"
                 className="text-gray-400 hover:text-gray-600"
+                tabIndex={-1}
               >
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M9 22H15C20 22 22 20 22 15V9C22 4 20 2 15 2H9C4 2 2 4 2 9V15C2 20 4 22 9 22Z"
-                    stroke="#6D6D6D"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M9 10C10.1046 10 11 9.10457 11 8C11 6.89543 10.1046 6 9 6C7.89543 6 7 6.89543 7 8C7 9.10457 7.89543 10 9 10Z"
-                    stroke="#6D6D6D"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M2.67004 18.9501L7.60004 15.6401C8.39004 15.1101 9.53004 15.1701 10.24 15.7801L10.57 16.0701C11.35 16.7401 12.61 16.7401 13.39 16.0701L17.55 12.5001C18.33 11.8301 19.59 11.8301 20.37 12.5001L22 13.9001"
-                    stroke="#6D6D6D"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                <img
+                  src="/svgs/link-circle.svg"
+                  alt="Attach link"
+                  className="w-6 h-6"
+                />
               </button>
               <button
                 type="button"
                 className="text-gray-400 hover:text-gray-600"
+                tabIndex={-1}
               >
-                <Smile className="w-5 h-5" />
+                <img
+                  src="/svgs/gallery.svg"
+                  alt="Gallery"
+                  className="w-6 h-6"
+                />
               </button>
             </div>
           </div>
@@ -562,19 +534,7 @@ const CustomChatComponent = ({ channelId, type, onChannelLeave, chatInfo }) => {
             className="p-3 ml-3 text-black bg-[#FFBF00] rounded-full hover:bg-yellow-500"
             disabled={!inputMessage.trim()}
           >
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M16.2982 3.43438L16.2978 3.43454L7.2687 6.43423C7.26857 6.43427 7.26843 6.43432 7.2683 6.43436C5.783 6.93113 4.70809 7.49414 4.01435 8.06773C3.31885 8.64278 3.05762 9.18205 3.05762 9.64379C3.05762 10.1054 3.3187 10.644 4.01397 11.2177C4.70757 11.79 5.78238 12.3512 7.2677 12.8455L16.2982 3.43438ZM16.2982 3.43438C18.2462 2.78505 19.5701 3.04994 20.2626 3.74335C20.9555 4.43727 21.22 5.76424 20.5757 7.71222C20.5756 7.71248 20.5755 7.71273 20.5754 7.71298L17.5658 16.7318L17.5657 16.7322M16.2982 3.43438L17.5657 16.7322M17.5657 16.7322C17.0714 18.2175 16.5096 19.2923 15.9365 19.986M17.5657 16.7322L15.9365 19.986M15.9365 19.986C15.3621 20.6812 14.8226 20.9425 14.3601 20.9425M15.9365 19.986L14.3601 20.9425M14.3601 20.9425C13.8976 20.9425 13.3581 20.6812 12.7837 19.986M14.3601 20.9425L12.7837 19.986M12.7837 19.986C12.2107 19.2924 11.6489 18.2176 11.1546 16.7325L12.7837 19.986ZM9.9477 13.7355L7.268 12.8456L11.1545 16.7322L10.2646 14.0525L10.1856 13.8145L9.9477 13.7355ZM13.0137 12.5136L13.0146 12.5127L16.8137 8.6936C16.8138 8.69346 16.814 8.69332 16.8141 8.69318C17.2989 8.20787 17.2988 7.41161 16.8137 6.92649C16.3284 6.44123 15.5318 6.44123 15.0466 6.92649L15.0456 6.92742L11.2466 10.7465C11.2465 10.7466 11.2464 10.7466 11.2464 10.7467C10.7613 11.232 10.7614 12.0284 11.2466 12.5136C11.4953 12.7623 11.8147 12.88 12.1301 12.88C12.4456 12.88 12.765 12.7623 13.0137 12.5136Z"
-                fill="black"
-                stroke="black"
-              />
-            </svg>
+            <img src="/svgs/chat-send.svg" alt="Send" className="w-6 h-6" />
           </button>
         </form>
       </div>

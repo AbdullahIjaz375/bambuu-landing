@@ -84,42 +84,34 @@ const ClassCard = ({
     return `${day} ${month} ${year}`;
   };
 
-  // New function to get the day name for recurring classes
-  const getRecurringDayDisplay = (timestamp) => {
-    if (!timestamp) return "TBD";
-
+  // Add a helper to get the day name
+  const getDayName = (timestamp) => {
+    if (!timestamp || !timestamp.seconds) return "TBD";
     const date = new Date(timestamp.seconds * 1000);
+    return date.toLocaleString("en-US", { weekday: "long" });
+  };
 
-    // Get the day name
-    const dayName = date.toLocaleDateString("en-US", { weekday: "long" });
-
-    // For weekly recurring classes, show just the day name
-    return dayName;
-  }; // Function to determine if we should show the day name or full date
+  // Update getDateDisplay to use day name for recurring classes
   const getDateDisplay = (timestamp) => {
-    // Check if it's a recurring premium individual class
-    const isPremiumIndividual = classType === "Individual Premium";
-
-    // Check if the class is recurring (any recurring type)
-    const isRecurring =
+    if (
       (recurrenceType &&
         recurrenceType !== "One-time" &&
         recurrenceType !== "None") ||
       (recurrenceTypes &&
+        Array.isArray(recurrenceTypes) &&
         recurrenceTypes.length > 0 &&
-        recurrenceTypes.some(
-          (type) => type !== "One-time" && type !== "None"
-        )) ||
-      (selectedRecurrenceType &&
-        selectedRecurrenceType !== "One-time" &&
-        selectedRecurrenceType !== "None");
-
-    // For premium individual classes that are recurring, show day of week
-    if (isPremiumIndividual && isRecurring) {
-      return getRecurringDayDisplay(timestamp);
-    } else {
-      return formatDate(timestamp);
+        recurrenceTypes[0] !== "One-time" &&
+        recurrenceTypes[0] !== "None")
+    ) {
+      return getDayName(timestamp);
     }
+    if (!timestamp || !timestamp.seconds) return "TBD";
+    const date = new Date(timestamp.seconds * 1000);
+    return date.toLocaleDateString("en-US", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
   };
 
   const handleClick = () => {

@@ -165,34 +165,29 @@ const ExploreClassCard = ({
       minute: "2-digit",
     });
   };
-  const formatDate = (timestamp) => {
+
+  // Add a helper to get the day name
+  const getDayName = (timestamp) => {
     if (!timestamp || !timestamp.seconds)
       return t("exploreClassCard.labels.tbd");
-
-    // Convert Firebase timestamp to a Date object
     const date = new Date(timestamp.seconds * 1000);
+    return date.toLocaleString("en-US", { weekday: "long" });
+  };
 
-    // Check if it's a recurring premium individual class
-    const isPremiumIndividual = classType === "Individual Premium";
-
-    // Check if it's a recurring class - need to use recurrenceTypes array
+  // Update formatDate to use day name for recurring classes
+  const formatDate = (timestamp) => {
     if (
       recurrenceTypes &&
       Array.isArray(recurrenceTypes) &&
-      recurrenceTypes.length > 0
+      recurrenceTypes.length > 0 &&
+      recurrenceTypes[0] !== "One-time" &&
+      recurrenceTypes[0] !== "None"
     ) {
-      // Show the day of week for recurring premium individual classes
-      const firstType = recurrenceTypes[0];
-      if (
-        isPremiumIndividual &&
-        firstType !== "One-time" &&
-        firstType !== "None"
-      ) {
-        return date.toLocaleString("en-US", { weekday: "long" });
-      }
+      return getDayName(timestamp);
     }
-
-    // For one-time classes or non-premium classes, format the date normally
+    if (!timestamp || !timestamp.seconds)
+      return t("exploreClassCard.labels.tbd");
+    const date = new Date(timestamp.seconds * 1000);
     return date.toLocaleDateString("en-US", {
       day: "2-digit",
       month: "short",

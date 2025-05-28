@@ -571,6 +571,7 @@ const StudentsTutor = () => {
                   type={selectedChannel.type}
                   onChannelLeave={handleChannelLeave}
                   chatInfo={selectedChatInfo}
+                  description={selectedChannel.data?.description || ""}
                 />
               ) : (
                 <div className="flex items-center justify-center h-full text-gray-500">
