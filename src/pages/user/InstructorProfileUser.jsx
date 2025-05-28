@@ -43,11 +43,24 @@ const InstructorProfileUser = () => {
 
   const sendMessageClicked = async () => {
     try {
-      // Create channel ID by combining student and teacher IDs
+      // Fetch the other user's name for the channel name
+      let otherUserName = "";
+      let otherUserImage = "";
+      let isTutor = user.userType === "tutor";
+      if (isTutor) {
+        // Tutor: fetch student info
+        const studentDoc = await getDoc(doc(db, "students", user.uid));
+        otherUserName = studentDoc.exists()
+          ? studentDoc.data().name
+          : "Student";
+        otherUserImage = studentDoc.exists() ? studentDoc.data().photoUrl : "";
+      } else {
+        // Student: use tutor info
+        otherUserName = tutor?.name || "Tutor";
+        otherUserImage = tutor?.photoUrl || "";
+      }
       const channelId = `${user.uid}${tutorId}`;
-      const sessionUser = JSON.parse(sessionStorage.getItem("user"));
-      const studentName = sessionUser?.name || "Student";
-      const channelName = `${studentName} - ${tutor.name}`;
+      const channelName = otherUserName;
       const memberRoles = [
         { user_id: user.uid, role: "member" },
         { user_id: tutorId, role: "member" },
@@ -57,7 +70,7 @@ const InstructorProfileUser = () => {
         type: ChannelType.ONE_TO_ONE_CHAT,
         members: [user.uid, tutorId],
         name: channelName,
-        image: tutor.photoUrl || "",
+        image: otherUserImage,
         description: "",
         created_by_id: user.uid,
         member_roles: memberRoles,

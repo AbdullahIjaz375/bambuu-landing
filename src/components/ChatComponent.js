@@ -27,6 +27,7 @@ const CustomChatComponent = ({
   onChannelLeave,
   chatInfo,
   description,
+  name,
 }) => {
   const { user, streamClient } = useAuth();
   const navigate = useNavigate();
@@ -57,6 +58,10 @@ const CustomChatComponent = ({
     online: false,
     image: "",
   };
+
+  const isGroupChat = type === "standard_group" || type === "premium_group";
+  const isOneToOne =
+    type === "one_to_one_chat" || type === "premium_individual_class";
 
   useEffect(() => {
     if (streamClient?.disconnected && user) {
@@ -94,7 +99,9 @@ const CustomChatComponent = ({
         const formattedMessages = channelMessages.map((msg) => ({
           id: msg.id,
           text: msg.text,
-          sender: msg.user.id === user.uid ? "self" : "other",
+          sender: msg.user && msg.user.id === user.uid ? "self" : "other",
+          senderName: msg.user ? msg.user.name : msg.user_id || "Unknown",
+          senderImage: msg.user ? msg.user.image : null,
           timestamp: new Date(msg.created_at).toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
@@ -383,16 +390,31 @@ const CustomChatComponent = ({
 
   return (
     <div className="flex flex-col w-full h-screen max-h-[calc(100vh-125px)] overflow-hidden rounded-2xl border border-gray-200 bg-white">
-      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-        <div className="flex flex-col gap-0">
-          <h3 className="font-semibold text-gray-800">
-            {chatPartner.name || "User"}
-          </h3>
-          {description && (
-            <span className="text-xs text-gray-500 max-w-xs truncate block">
-              {description}
-            </span>
+      {/* Header */}
+      <div
+        className="flex items-center justify-between px-6 py-4 border-b border-gray-200"
+        style={{ background: "#F6F6F6" }}
+      >
+        <div className="flex items-center gap-3">
+          {isOneToOne && chatPartner?.image && (
+            <img
+              src={chatPartner.image}
+              alt={chatPartner.name}
+              className="w-10 h-10 rounded-full object-cover"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = "/default-avatar.png";
+              }}
+            />
           )}
+          <div className="flex flex-col gap-0">
+            <h3 className="font-semibold text-gray-800">{name || "Chat"}</h3>
+            {description && (
+              <span className="text-xs text-gray-500 max-w-xs truncate block">
+                {description}
+              </span>
+            )}
+          </div>
         </div>
         <div className="relative" ref={dropdownRef}>
           <button
@@ -464,32 +486,85 @@ const CustomChatComponent = ({
       </div>
       <div className="flex-1 p-4 overflow-y-auto bg-white">
         <div className="flex flex-col gap-3">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${
-                message.sender === "self" ? "justify-end" : "justify-start"
-              }`}
-            >
-              <div className="max-w-[70%]">
+          {/* Date separator logic */}
+          {messages.map((message, idx) => {
+            const prevMsg = messages[idx - 1];
+            const currDate = new Date(message.date).toDateString();
+            const prevDate = prevMsg
+              ? new Date(prevMsg.date).toDateString()
+              : null;
+            let showDateSeparator = false;
+            if (idx === 0 || currDate !== prevDate) showDateSeparator = true;
+            // Date label logic
+            let dateLabel = currDate;
+            const today = new Date().toDateString();
+            const yesterday = new Date(Date.now() - 86400000).toDateString();
+            if (currDate === today) dateLabel = "Today";
+            else if (currDate === yesterday) dateLabel = "Yesterday";
+            // Debug logs
+            console.log("[ChatComponent] Rendering message:", message);
+            if (isGroupChat && message.sender !== "self") {
+              console.log("[ChatComponent] Group message.user:", message.user);
+            }
+            // Get sender info for group chats
+            let senderName = message.senderName || "Unknown";
+            let senderImage = message.senderImage || null;
+            return (
+              <React.Fragment key={message.id}>
+                {showDateSeparator && (
+                  <div className="flex justify-center my-2">
+                    <span className="px-3 py-1 text-xs bg-gray-200 rounded-full text-gray-600">
+                      {dateLabel}
+                    </span>
+                  </div>
+                )}
                 <div
-                  className={`px-4 py-2 rounded-2xl ${
-                    message.sender === "self"
-                      ? "bg-green-500 text-white rounded-br-none"
-                      : "bg-gray-100 text-gray-800 rounded-bl-none"
+                  className={`flex ${
+                    message.sender === "self" ? "justify-end" : "justify-start"
                   }`}
                 >
-                  {message.text}
+                  <div className="max-w-[70%]">
+                    {/* Group chat: show actual sender avatar above message */}
+                    {isGroupChat && message.sender !== "self" && (
+                      <div className="flex items-center mb-1">
+                        {senderImage && (
+                          <img
+                            src={senderImage}
+                            alt={senderName}
+                            className="w-6 h-6 rounded-full object-cover mr-2"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = "/default-avatar.png";
+                            }}
+                          />
+                        )}
+                        <span className="text-xs text-gray-700 font-medium">
+                          {senderName}
+                        </span>
+                      </div>
+                    )}
+                    <div
+                      className={`px-4 py-2 rounded-2xl ${
+                        message.sender === "self"
+                          ? "bg-green-500 text-white rounded-br-none"
+                          : "bg-gray-100 text-gray-800 rounded-bl-none"
+                      }`}
+                    >
+                      {message.text}
+                    </div>
+                    <div className="flex justify-end mt-1">
+                      <span className="text-xs text-gray-500">
+                        {message.timestamp}
+                      </span>
+                      {message.sender === "self" && (
+                        <span className="ml-2 text-xs text-green-500">✓</span>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <div className="flex justify-end mt-1">
-                  <span className="text-xs text-gray-500">{message.date}</span>
-                  {message.sender === "self" && (
-                    <span className="ml-2 text-xs text-green-500">✓</span>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
+              </React.Fragment>
+            );
+          })}
           <div ref={messagesEndRef} />
         </div>
       </div>

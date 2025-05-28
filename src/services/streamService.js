@@ -60,124 +60,41 @@ export const createStreamChannel = async ({
   member_roles,
 }) => {
   try {
-    // For one-to-one chats, check if the channel already exists first
-    if (type === ChannelType.ONE_TO_ONE_CHAT) {
-      try {
-        console.log(`Checking if one-to-one chat ${id} already exists...`);
-        const existingChannel = streamClient.channel(type, id);
-        const response = await existingChannel.query({
-          watch: true,
-          state: true,
-        });
-
-        if (response?.channel?.id) {
-          console.log(
-            `One-to-one chat ${id} already exists, updating metadata if needed`
-          );
-
-          // Update the channel name if it's different
-          if (name && name !== response.channel.data.name) {
-            await existingChannel.update({
-              name: name,
-              description: description || `Chat for ${name}`,
-              image: image || "",
-            });
-            console.log(`Updated existing one-to-one chat name to "${name}"`);
-          }
-
-          return existingChannel; // Return the existing channel instead of creating a new one
-        }
-      } catch (checkError) {
-        // If channel doesn't exist or error occurred, continue with creation
-        console.log(
-          `No existing one-to-one chat found with ID ${id}, creating new one`
-        );
-      }
-    }
-
-    // Ensure all members exist in Stream before creating the channel
-    await Promise.all(members.map((userId) => ensureUserExists(userId)));
-
-    // Before creating the channel, make sure we have the latest data from Firestore
-    // This ensures that the channel name and image are correctly set
-    let firestoreData = null;
-    try {
-      if (type === "standard_group" || type === "premium_group") {
-        // It's a group channel - fetch from groups collection
-        const groupDoc = await getDoc(doc(db, "groups", id));
-        if (groupDoc.exists()) {
-          firestoreData = groupDoc.data();
-          console.log(
-            `Found Firestore group data for ${id}: ${firestoreData.groupName}`
-          );
-          // Update parameters with Firestore data
-          name = firestoreData.groupName || name;
-          image = firestoreData.imageUrl || image;
-          description = firestoreData.groupDescription || description;
-        }
-      } else if (type === "premium_individual_class") {
-        // It's a class channel - fetch from classes collection
-        const classDoc = await getDoc(doc(db, "classes", id));
-        if (classDoc.exists()) {
-          firestoreData = classDoc.data();
-          console.log(
-            `Found Firestore class data for ${id}: ${firestoreData.className}`
-          );
-          // Update parameters with Firestore data
-          name = firestoreData.className || name;
-          image = firestoreData.imageUrl || image;
-          description = firestoreData.classDescription || description;
-        }
-      }
-    } catch (firestoreErr) {
-      console.error(
-        `Failed to fetch Firestore data for channel ${id}:`,
-        firestoreErr
+    // Ensure all members are unique
+    const uniqueMembers = Array.from(new Set(members));
+    // For group/class channels, ensure all members are added
+    if (
+      type === ChannelType.PREMIUM_GROUP ||
+      type === ChannelType.STANDARD_GROUP ||
+      type === ChannelType.PREMIUM_INDIVIDUAL_CLASS
+    ) {
+      // Log members being added
+      console.log(
+        `[StreamService] Creating channel ${id} with members:`,
+        uniqueMembers
       );
     }
-
-    console.log(
-      `Creating channel ${id} with name: "${name}", image: "${image}"`
-    ); // Create the channel with the provided data
+    // Ensure all members exist in Stream before creating the channel
+    await Promise.all(uniqueMembers.map((userId) => ensureUserExists(userId)));
+    // Create the channel with all members
     const channel = streamClient.channel(type, id, {
       name,
-      members,
+      members: uniqueMembers,
       image,
       description,
       member_roles,
     });
-
-    // Watch the channel
-    await channel.watch(); // For premium groups and classes, use simple configuration without permission changes
-    if (type === "premium_group" || type === "premium_individual_class") {
-      try {
-        // Get the creator ID (usually the first member or explicitly provided)
-        const creatorId = members && members.length > 0 ? members[0] : null;
-
-        // Import helper dynamically to avoid circular dependencies
-        const { setupChannelProperties } = await import(
-          "./streamChannelHelpers"
-        );
-
-        // Set up channel properties (without modifying permissions)
-        await setupChannelProperties(channel, type, creatorId);
-
-        console.log(`Premium channel ${id} configured`);
-      } catch (error) {
-        console.error(`Failed to configure premium channel: ${error.message}`);
-        // Continue anyway - the channel is created
-      }
-    }
-
-    // Verify channel creation (but don't need to save the result)
-    await streamClient.queryChannels({ id });
-
+    // Watch the channel after creation
+    await channel.watch();
+    // Log current members after watch
+    const currentMembers = Object.keys(channel.state?.members || {});
+    console.log(
+      `[StreamService] Channel ${id} current members after watch:`,
+      currentMembers
+    );
     return channel;
   } catch (error) {
-    console.error("Error creating stream channel:", error.message);
-    if (error.response) {
-      console.error("Error response:", error.response);
-    }
+    console.error(`[StreamService] Error creating channel:`, error);
     throw error;
   }
 };
@@ -645,3 +562,59 @@ export const syncChannelWithFirestore = async ({ channelId, type }) => {
     return { success: true, message: "Channel synced successfully" };
   });
 };
+
+export function getChannelDisplayName(channel, user) {
+  if (channel.type === "one_to_one_chat") {
+    const members = Object.values(channel.state?.members || {});
+    const otherMember = members.find((member) => member.user?.id !== user.uid);
+    return otherMember && otherMember.user ? otherMember.user.name : "Chat";
+  }
+  if (channel.data?.name && channel.data.name.trim() !== "") {
+    return channel.data.name;
+  }
+  if (channel.type === "premium_group" || channel.type === "standard_group") {
+    return "Group Chat";
+  }
+  if (channel.type === "premium_individual_class") {
+    return "Class Chat";
+  }
+  return "Chat";
+}
+
+// Helper to add a user to a channel only if not already a member
+export const addUserToChannelIfNeeded = async (channelId, userId, type) => {
+  try {
+    const channel = streamClient.channel(type, channelId);
+    await channel.watch();
+    const currentMembers = Object.keys(channel.state?.members || {});
+    if (!currentMembers.includes(userId)) {
+      console.log(
+        `[StreamService] Adding user ${userId} to channel ${channelId}`
+      );
+      await channel.addMembers([userId]);
+      await channel.watch();
+      const updatedMembers = Object.keys(channel.state?.members || {});
+      console.log(
+        `[StreamService] Channel ${channelId} members after add:`,
+        updatedMembers
+      );
+    } else {
+      console.log(
+        `[StreamService] User ${userId} already a member of channel ${channelId}`
+      );
+    }
+  } catch (error) {
+    console.error(`[StreamService] Error adding user to channel:`, error);
+    throw error;
+  }
+};
+
+async function joinChannelIfNeeded(channelId, userId, type) {
+  const channel = streamClient.channel(type, channelId);
+  await channel.watch();
+  const currentMembers = Object.keys(channel.state?.members || {});
+  if (!currentMembers.includes(userId)) {
+    await channel.addMembers([userId]);
+    await channel.watch(); // Only if needed
+  }
+}

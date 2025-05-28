@@ -5,6 +5,7 @@ import { useAuth } from "../../context/AuthContext";
 import { streamClient } from "../../config/stream";
 import Sidebar from "../../components/Sidebar";
 import { ClipLoader } from "react-spinners";
+import { getChannelDisplayName } from "../../services/streamService";
 
 const StudentsTutor = () => {
   const { user } = useAuth();
@@ -42,28 +43,22 @@ const StudentsTutor = () => {
   // Helper function to extract the other user's info from a channel
   const getOtherUserFromChannel = (channel) => {
     if (!channel || !user) return null;
-
-    // For one-to-one chats
-    if (
-      channel.type === "premium_individual_class" ||
-      channel.type === "one_to_one_chat"
-    ) {
+    // For one-to-one chats, always show the other user's name
+    if (channel.type === "one_to_one_chat") {
       const members = Object.values(channel.state?.members || {});
       const otherMember = members.find(
         (member) => member.user?.id !== user.uid
       );
-
       if (otherMember && otherMember.user) {
         return {
           id: otherMember.user.id,
-          name: otherMember.user.name || channel.data.name,
+          name: otherMember.user.name,
           image: otherMember.user.image,
           online: otherMember.user.online || false,
         };
       }
     }
-
-    // For group chats, just return the group info
+    // For group/class chats, always use channel.data.name
     return {
       id: channel.id,
       name: channel.data.name,
@@ -117,13 +112,18 @@ const StudentsTutor = () => {
 
           await Promise.all(
             premiumClassChannels.map(async (channel) => {
+              // Throttle: Only sync each channel once per session
+              if (!window._syncedChannels) window._syncedChannels = new Set();
+              if (window._syncedChannels.has(channel.id)) return;
+              window._syncedChannels.add(channel.id);
+
               // Sync the name
               await syncPremiumClassChannelName(channel.id);
 
               // For tutors, ensure all enrolled students are in the channel
               try {
                 const { getDoc, doc } = await import("firebase/firestore");
-                const { db } = await import("../firebaseConfig");
+                const { db } = await import("../../firebaseConfig");
 
                 const classDoc = await getDoc(doc(db, "classes", channel.id));
                 if (classDoc.exists()) {
@@ -346,15 +346,23 @@ const StudentsTutor = () => {
   // Filter channels based on type and search query
   const filterChannels = (channelsToFilter) => {
     return channelsToFilter.filter((channel) => {
-      if (!channel.data.name || channel.data.name.trim() === "") {
-        return false;
+      let searchName = "";
+      if (channel.type === "one_to_one_chat") {
+        // Use the other user's name for search
+        const members = Object.values(channel.state?.members || {});
+        const otherMember = members.find(
+          (member) => member.user?.id !== user.uid
+        );
+        searchName =
+          otherMember && otherMember.user
+            ? otherMember.user.name?.toLowerCase() || ""
+            : "";
+      } else {
+        searchName = channel.data.name?.toLowerCase() || "";
       }
-
-      const channelName = channel.data.name.toLowerCase();
       const channelDescription = channel.data.description?.toLowerCase() || "";
       const query = searchQuery.toLowerCase();
-
-      return channelName.includes(query) || channelDescription.includes(query);
+      return searchName.includes(query) || channelDescription.includes(query);
     });
   };
 
@@ -386,6 +394,117 @@ const StudentsTutor = () => {
     const month = date.getMonth() + 1;
     const day = date.getDate();
     return `${day}/${month}/${year}`;
+  };
+
+  const groupLanguages = {};
+  const groupNames = {};
+  const groupMemberCounts = {};
+  // If you want to fetch groupLanguages, groupNames, groupMemberCounts from Firestore, you can add similar logic as in MessagesUser.jsx
+
+  const ChatItem = ({ channel }) => {
+    // One-to-one chat UI (same as MessagesUser.jsx)
+    if (
+      channel.type === "one_to_one_chat" ||
+      channel.type === "premium_individual_class"
+    ) {
+      const otherUser = getOtherUserFromChannel(channel);
+      return (
+        <div
+          key={channel.id}
+          className={`flex items-center gap-3 p-3 border cursor-pointer rounded-3xl ${
+            selectedChannel?.id === channel.id
+              ? "bg-[#f0fdf1] border-[#22bf37]"
+              : "bg-white border-[#fbbf12]"
+          }`}
+          onClick={() => handleChannelSelect(channel)}
+        >
+          <div className="relative">
+            <img
+              src={otherUser?.image || "/default-avatar.png"}
+              alt={otherUser?.name}
+              className="object-cover w-12 h-12 rounded-full"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = "/default-avatar.png";
+              }}
+            />
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">
+                {getChannelDisplayName(channel, user)}
+              </h3>
+            </div>
+          </div>
+          {/* Unread badge for one-to-one chats */}
+          {unreadCounts[channel.id] > 0 && (
+            <span className="flex items-center justify-center w-6 h-6 ml-2 text-xs text-white bg-[#14B82C] rounded-full">
+              {unreadCounts[channel.id]}
+            </span>
+          )}
+        </div>
+      );
+    }
+    // Group chat UI (match MessagesUser.jsx, use users icon for member count if available)
+    const groupName = channel.data?.name || groupNames[channel.id] || "Group";
+    const groupImage = channel.data?.image || "/default-avatar.png";
+    const groupLanguage =
+      channel.data?.language || groupLanguages[channel.id] || "English";
+    let languageFlag = "/svgs/xs-us.svg";
+    if (groupLanguage === "Spanish") languageFlag = "/svgs/xs-spain.svg";
+    else if (groupLanguage === "English/Spanish")
+      languageFlag = "/svgs/eng-spanish-xs.svg";
+    const memberCount = channel.state?.members
+      ? Object.keys(channel.state.members).length
+      : "-";
+    return (
+      <div
+        key={channel.id}
+        className={`flex items-center gap-3 p-3 border cursor-pointer rounded-3xl ${
+          selectedChannel?.id === channel.id
+            ? "bg-[#ffffea] border-[#fbbf12]"
+            : "bg-white border-[#fbbf12]"
+        }`}
+        onClick={() => handleChannelSelect(channel)}
+      >
+        <div className="relative">
+          <img
+            src={groupImage}
+            alt={groupName}
+            className="object-cover w-12 h-12 rounded-full"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = "/default-avatar.png";
+            }}
+          />
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-lg font-bold truncate">{groupName}</span>
+          </div>
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex items-center gap-1">
+              <img src={languageFlag} alt={groupLanguage} className="w-5 h-5" />
+              <span className="text-sm font-medium text-gray-700">
+                {groupLanguage}
+              </span>
+            </div>
+            <div className="flex items-center gap-1">
+              <img src="/svgs/users.svg" alt="members" className="w-5 h-5" />
+              <span className="text-sm font-medium text-gray-700">
+                {memberCount}
+              </span>
+            </div>
+          </div>
+        </div>
+        {/* Unread badge for group chats */}
+        {unreadCounts[channel.id] > 0 && (
+          <span className="flex items-center justify-center w-6 h-6 ml-2 text-xs text-white bg-[#14B82C] rounded-full">
+            {unreadCounts[channel.id]}
+          </span>
+        )}
+      </div>
+    );
   };
 
   if (loading) {
@@ -464,102 +583,9 @@ const StudentsTutor = () => {
 
               <div className="flex-1 space-y-2 overflow-y-auto scrollbar-hide">
                 {(activeTab === "standard" ? standardChats : bammbuuChats).map(
-                  (channel) => {
-                    const channelOnlineStatus = onlineUsers[channel.id];
-                    const isGroupChat =
-                      channel.type === "standard_group" ||
-                      channel.type === "premium_group";
-
-                    const isInstructor =
-                      channel.type === "premium_individual_class" ||
-                      channel.type === "one_to_one_chat";
-
-                    return (
-                      <div
-                        key={channel.id}
-                        className={`flex items-center gap-3 p-3 border ${
-                          isInstructor ? "border-[#22bf37]" : "border-[#fbbf12]"
-                        } cursor-pointer rounded-3xl ${
-                          selectedChannel?.id === channel.id
-                            ? isInstructor
-                              ? "bg-[#f0fdf1]"
-                              : "bg-[#ffffea]"
-                            : "bg-white"
-                        }`}
-                        onClick={() => handleChannelSelect(channel)}
-                        role="button"
-                        tabIndex={0}
-                        onKeyPress={(e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            handleChannelSelect(channel);
-                          }
-                        }}
-                      >
-                        <div className="relative">
-                          <img
-                            src={channel.data.image || "/default-avatar.png"}
-                            alt={channel.data.name}
-                            className="object-cover w-12 h-12 rounded-full"
-                            onError={(e) => {
-                              e.target.onerror = null;
-                              e.target.src = "/default-avatar.png";
-                            }}
-                          />
-                          {!isGroupChat && channelOnlineStatus?.isOnline && (
-                            <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex justify-between">
-                            <h3 className="text-lg font-semibold">
-                              {channel.data.name.split("-")[0]}
-                            </h3>
-                            {isGroupChat ? (
-                              channelOnlineStatus && (
-                                <span className="text-xs text-green-600">
-                                  {channelOnlineStatus.onlineCount}/
-                                  {channelOnlineStatus.totalMembers} online
-                                </span>
-                              )
-                            ) : (
-                              <span
-                                className={`text-xs ${
-                                  channelOnlineStatus?.isOnline
-                                    ? "text-green-600"
-                                    : "text-gray-500"
-                                }`}
-                              >
-                                {channelOnlineStatus?.isOnline
-                                  ? "Online"
-                                  : "Offline"}
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex flex-row items-center justify-between mt-1">
-                            <p className="text-sm text-gray-500 truncate">
-                              {getMessagePreview(
-                                channel.state.messages[
-                                  channel.state.messages.length - 1
-                                ]
-                              )}
-                            </p>
-
-                            {channel.data.created_at && (
-                              <p className="text-sm text-gray-500 truncate">
-                                {FormateDate(channel.data.created_at)}
-                              </p>
-                            )}
-
-                            {unreadCounts[channel.id] > 0 && (
-                              <span className="flex items-center justify-center w-6 h-6 mr-5 text-xs text-white bg-[#14B82C] rounded-full">
-                                {unreadCounts[channel.id]}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  }
+                  (channel) => (
+                    <ChatItem key={channel.id} channel={channel} />
+                  )
                 )}
               </div>
             </div>
@@ -572,6 +598,7 @@ const StudentsTutor = () => {
                   onChannelLeave={handleChannelLeave}
                   chatInfo={selectedChatInfo}
                   description={selectedChannel.data?.description || ""}
+                  name={getChannelDisplayName(selectedChannel, user)}
                 />
               ) : (
                 <div className="flex items-center justify-center h-full text-gray-500">

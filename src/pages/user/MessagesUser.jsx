@@ -12,6 +12,7 @@ import { syncChannelWithFirestore } from "../../services/streamService";
 import { safeMarkChannelRead } from "../../services/streamConnectionService";
 import updateChannelNameFromFirestore from "../../utils/channelNameFix";
 import { syncPremiumClassChannelName } from "../../services/channelNameSync";
+import { getChannelDisplayName } from "../../services/streamService";
 
 const MessagesUser = () => {
   const { user } = useAuth();
@@ -28,6 +29,8 @@ const MessagesUser = () => {
   const [onlineUsers, setOnlineUsers] = useState({});
   const { channelId: urlChannelId } = useParams();
   const [streamClientConnected, setStreamClientConnected] = useState(false);
+  const [groupMemberCounts, setGroupMemberCounts] = useState({});
+
   useEffect(() => {
     const savedActiveTab = localStorage.getItem("activetab");
     if (savedActiveTab) {
@@ -66,36 +69,22 @@ const MessagesUser = () => {
   // Helper function to extract the other user's info from a channel
   const getOtherUserFromChannel = (channel) => {
     if (!channel || !user) return null;
-
-    // ONLY for one_to_one_chat channels, return the other user's info
+    // For one-to-one chats, always show the other user's name
     if (channel.type === "one_to_one_chat") {
       const members = Object.values(channel.state?.members || {});
       const otherMember = members.find(
         (member) => member.user?.id !== user.uid
       );
-
       if (otherMember && otherMember.user) {
         return {
           id: otherMember.user.id,
-          name: otherMember.user.name || channel.data.name,
+          name: otherMember.user.name,
           image: otherMember.user.image,
           online: otherMember.user.online || false,
         };
       }
     }
-
-    // For premium_individual_class, do NOT return tutor info - let the channel name show instead
-    if (channel.type === "premium_individual_class") {
-      // Return channel info, not user info, so the class name is displayed
-      return {
-        id: channel.id,
-        name: channel.data.name, // This should be the className from Firebase
-        image: channel.data.image,
-        online: false,
-      };
-    }
-
-    // For group chats, just return the group info
+    // For group/class chats, always use channel.data.name
     return {
       id: channel.id,
       name: channel.data.name,
@@ -497,6 +486,33 @@ const MessagesUser = () => {
 
     loadChannels();
   }, [user, streamClientConnected, urlChannelId]);
+
+  useEffect(() => {
+    if (!channels.length) return;
+    // Only fetch for group chats
+    const groupChannels = channels.filter(
+      (ch) => ch.type === "standard_group" || ch.type === "premium_group"
+    );
+    groupChannels.forEach(async (channel) => {
+      try {
+        const groupRef = doc(db, "groups", channel.id);
+        const groupDoc = await getDoc(groupRef);
+        if (groupDoc.exists()) {
+          const groupData = groupDoc.data();
+          setGroupMemberCounts((prev) => ({
+            ...prev,
+            [channel.id]: Array.isArray(groupData.memberIds)
+              ? groupData.memberIds.length
+              : 0,
+          }));
+        }
+      } catch (e) {
+        // fallback to 0
+        setGroupMemberCounts((prev) => ({ ...prev, [channel.id]: 0 }));
+      }
+    });
+  }, [channels]);
+
   const handleChannelSelect = async (channel) => {
     setSelectedChannel(channel);
     setSelectedChatInfo(getOtherUserFromChannel(channel));
@@ -517,22 +533,26 @@ const MessagesUser = () => {
     setSearchQuery(event.target.value);
   };
 
-  // Filter helpers
+  // Filter channels based on type and search query
   const filterChannels = (channelsToFilter) => {
     return channelsToFilter.filter((channel) => {
-      // First check if the channel has a valid name
-      if (!channel.data.name || channel.data.name.trim() === "") {
-        return false;
+      let searchName = "";
+      if (channel.type === "one_to_one_chat") {
+        // Use the other user's name for search
+        const members = Object.values(channel.state?.members || {});
+        const otherMember = members.find(
+          (member) => member.user?.id !== user.uid
+        );
+        searchName =
+          otherMember && otherMember.user
+            ? otherMember.user.name?.toLowerCase() || ""
+            : "";
+      } else {
+        searchName = channel.data.name?.toLowerCase() || "";
       }
-
-      const searchTerm = searchQuery.toLowerCase();
-      const channelName = channel.data.name.toLowerCase();
-      const channelDescription = (channel.data.description || "").toLowerCase();
-
-      return (
-        channelName.includes(searchTerm) ||
-        channelDescription.includes(searchTerm)
-      );
+      const channelDescription = channel.data.description?.toLowerCase() || "";
+      const query = searchQuery.toLowerCase();
+      return searchName.includes(query) || channelDescription.includes(query);
     });
   };
 
@@ -579,161 +599,108 @@ const MessagesUser = () => {
     }))
   );
   const ChatItem = ({ channel, isInstructor }) => {
-    const groupLanguage = groupLanguages[channel.id];
-    const groupName = groupNames[channel.id];
-    const latestMessage =
-      channel.state?.messages?.length > 0
-        ? channel.state.messages[channel.state.messages.length - 1]
-        : null;
-    const channelOnlineStatus = onlineUsers[channel.id];
-
-    // Debug channel type for troubleshooting
-    console.log(
-      `Rendering channel ${channel.id}, type: ${channel.type}, raw name: "${
-        channel.data?.name || "undefined"
-      }", firestore name: "${groupName || "none"}"`
-    ); // Add fallback name for channels without proper names
-    let displayName = "";
-
-    // SPECIAL HANDLING FOR PREMIUM INDIVIDUAL CLASSES
-    if (channel.type === "premium_individual_class") {
-      // For premium individual classes, ALWAYS use the channel.data.name (which should be synced with className)
-      displayName = channel.data?.name || "Premium Individual Class";
-    }
-    // First priority: Use the Firestore group name for group channels
-    else if (
-      (channel.type === "standard_group" || channel.type === "premium_group") &&
-      groupName
+    // One-to-one chat UI (unchanged)
+    if (
+      channel.type === "one_to_one_chat" ||
+      channel.type === "premium_individual_class"
     ) {
-      displayName = groupName;
+      const otherUser = getOtherUserFromChannel(channel);
+      return (
+        <div
+          key={channel.id}
+          className={`flex items-center gap-3 p-3 border cursor-pointer rounded-3xl ${
+            selectedChannel?.id === channel.id
+              ? "bg-[#f0fdf1] border-[#22bf37]"
+              : "bg-white border-[#fbbf12]"
+          }`}
+          onClick={() => handleChannelSelect(channel)}
+        >
+          <div className="relative">
+            <img
+              src={otherUser?.image || "/default-avatar.png"}
+              alt={otherUser?.name}
+              className="object-cover w-12 h-12 rounded-full"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = "/default-avatar.png";
+              }}
+            />
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">
+                {getChannelDisplayName(channel, user)}
+              </h3>
+            </div>
+          </div>
+          {/* Unread badge for one-to-one chats */}
+          {unreadCounts[channel.id] > 0 && (
+            <span className="flex items-center justify-center w-6 h-6 ml-2 text-xs text-white bg-[#14B82C] rounded-full">
+              {unreadCounts[channel.id]}
+            </span>
+          )}
+        </div>
+      );
     }
-    // Second priority: Use the Stream channel name if available
-    else if (channel.data?.name && channel.data.name.trim() !== "") {
-      displayName = channel.data.name;
-    }
-    // Fallbacks based on channel type
-    else if (channel.type === "premium_group") {
-      displayName = "Premium Group";
-    } else if (channel.type === "standard_group") {
-      displayName = "Standard Group";
-    } else if (channel.type === "one_to_one_chat") {
-      displayName = "Private Chat";
-    } else {
-      displayName = `Channel (${channel.id})`;
-    }
-
-    const getMessagePreview = (message) => {
-      if (!message) return "No messages yet";
-
-      if (message.attachments && message.attachments.length > 0) {
-        const attachment = message.attachments[0];
-        // Check if it's an image
-        if (
-          attachment.type === "image" ||
-          attachment.mime_type?.startsWith("image/")
-        ) {
-          return "🖼️ Sent an image";
-        }
-        // Handle other attachment types if needed
-        return "📎 Sent an attachment";
-      }
-
-      // Regular text message
-      return message.text?.length > 30
-        ? message.text.slice(0, 30) + "..."
-        : message.text || "No message content";
-    };
-
-    // Get other user's data for display (for one-to-one chats)
-    const otherUser = getOtherUserFromChannel(channel);
-
-    // For premium groups, ensure we show a language even if not in groupLanguages
-    const displayLanguage = isInstructor ? null : groupLanguage || "Unknown";
-
+    // Group chat UI (reverted, but show real member count and new badge)
+    const groupName = channel.data?.name || groupNames[channel.id] || "Group";
+    const groupImage = channel.data?.image || "/default-avatar.png";
+    const groupLanguage =
+      channel.data?.language || groupLanguages[channel.id] || "English";
+    let languageFlag = "/svgs/xs-us.svg";
+    if (groupLanguage === "Spanish") languageFlag = "/svgs/xs-spain.svg";
+    else if (groupLanguage === "English/Spanish")
+      languageFlag = "/svgs/eng-spanish-xs.svg";
+    const memberCount =
+      groupMemberCounts[channel.id] !== undefined
+        ? groupMemberCounts[channel.id]
+        : "-";
     return (
       <div
         key={channel.id}
-        className={`flex items-center gap-3 p-3 border ${
-          isInstructor ? "border-[#22bf37]" : "border-[#fbbf12]"
-        } cursor-pointer rounded-3xl ${
+        className={`flex items-center gap-3 p-3 border cursor-pointer rounded-3xl ${
           selectedChannel?.id === channel.id
-            ? isInstructor
-              ? "bg-[#f0fdf1]"
-              : "bg-[#ffffea]"
-            : "bg-white"
+            ? "bg-[#ffffea] border-[#fbbf12]"
+            : "bg-white border-[#fbbf12]"
         }`}
         onClick={() => handleChannelSelect(channel)}
       >
         <div className="relative">
           <img
-            src={
-              otherUser?.image || channel.data.image || "/default-avatar.png"
-            }
-            alt={otherUser?.name || channel.data.name}
+            src={groupImage}
+            alt={groupName}
             className="object-cover w-12 h-12 rounded-full"
             onError={(e) => {
               e.target.onerror = null;
               e.target.src = "/default-avatar.png";
             }}
           />
-          {isInstructor && channelOnlineStatus?.isOnline && (
-            <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
-          )}
-        </div>{" "}
+        </div>
         <div className="flex-1">
-          {" "}
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold">
-              {/* CRITICAL FIX: For premium individual classes, ALWAYS show displayName (className) */}
-              {channel.type === "premium_individual_class"
-                ? displayName
-                : channel.type === "one_to_one_chat"
-                ? otherUser?.name || displayName || "Private Chat"
-                : displayName || "Unnamed Channel"}
-            </h3>
-            {isInstructor ? (
-              <span
-                className={`text-xs ${
-                  channelOnlineStatus?.isOnline
-                    ? "text-green-600"
-                    : "text-gray-500"
-                }`}
-              >
-                {channelOnlineStatus?.isOnline ? "Online" : "Offline"}
-              </span>
-            ) : (
-              channelOnlineStatus && (
-                <span className="text-xs text-green-600">
-                  {channelOnlineStatus.onlineCount}/
-                  {channelOnlineStatus.totalMembers} online
-                </span>
-              )
-            )}
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-lg font-bold truncate">{groupName}</span>
           </div>
-          <div className="flex flex-row items-center justify-between mt-1">
-            <p className="text-sm text-gray-500 truncate">
-              {getMessagePreview(latestMessage)}
-            </p>
-
-            <div className="flex items-center space-x-2">
-              {isInstructor
-                ? null
-                : displayLanguage && (
-                    <div className="flex flex-row items-center space-x-2">
-                      <span className="px-2 py-0.5 text-xs bg-yellow-100 rounded-full">
-                        {displayLanguage}
-                      </span>
-                    </div>
-                  )}
-            </div>
-
-            {unreadCounts[channel.id] > 0 && (
-              <span className="flex items-center justify-center w-6 h-6 mr-5 text-xs text-white bg-[#14B82C] rounded-full">
-                {unreadCounts[channel.id]}
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex items-center gap-1">
+              <img src={languageFlag} alt={groupLanguage} className="w-5 h-5" />
+              <span className="text-sm font-medium text-gray-700">
+                {groupLanguage}
               </span>
-            )}
+            </div>
+            <div className="flex items-center gap-1">
+              <img src="/svgs/users.svg" alt="members" className="w-5 h-5" />
+              <span className="text-sm font-medium text-gray-700">
+                {memberCount}
+              </span>
+            </div>
           </div>
         </div>
+        {/* Unread badge for group chats */}
+        {unreadCounts[channel.id] > 0 && (
+          <span className="flex items-center justify-center w-6 h-6 ml-2 text-xs text-white bg-[#14B82C] rounded-full">
+            {unreadCounts[channel.id]}
+          </span>
+        )}
       </div>
     );
   };
@@ -948,6 +915,7 @@ const MessagesUser = () => {
                   onChannelLeave={handleChannelLeave}
                   chatInfo={selectedChatInfo}
                   description={selectedChannel.data?.description || ""}
+                  name={getChannelDisplayName(selectedChannel, user)}
                 />
               ) : (
                 <div className="flex items-center justify-center h-full text-gray-500">
