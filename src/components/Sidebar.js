@@ -8,7 +8,7 @@ const Sidebar = ({ user }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  
+
   const studentMenuItems = [
     {
       path: "/learn",
@@ -71,21 +71,28 @@ const Sidebar = ({ user }) => {
       lightImage: "/svgs/saved-resources-light.svg",
       darkImage: "/svgs/saved-resources-dark.svg",
     },
+    {
+      path: "/examPreparation",
+      translationKey: "sidebar.tutor.examPreparation",
+      lightImage: "/svgs/exam-preparation-light.svg",
+      darkImage: "/svgs/exam-preparation-dark.svg",
+    },
   ];
-  
+
   const truncateEmail = (email) => {
     return email && email.length > 20 ? `${email.slice(0, 20)}...` : email;
   };
 
   // Function to check if user has Bammbuu+ subscription
-  const hasBambuuPlus = user?.subscriptions?.some(
-    (sub) =>
-      sub.type === "bammbuu+ Instructor-led group Classes" ||
-      sub.type === "individual_premium" ||
-      sub.type === "group_premium" ||
-      sub.type?.toLowerCase().includes("premium") ||
-      sub.type?.toLowerCase().includes("bambuu+")
-  ) || user?.isPremium === true;
+  const hasBambuuPlus =
+    user?.subscriptions?.some(
+      (sub) =>
+        sub.type === "bammbuu+ Instructor-led group Classes" ||
+        sub.type === "individual_premium" ||
+        sub.type === "group_premium" ||
+        sub.type?.toLowerCase().includes("premium") ||
+        sub.type?.toLowerCase().includes("bambuu+")
+    ) || user?.isPremium === true;
 
   // Determine the appropriate navigation items based on user type
   const menuItems =
@@ -112,11 +119,7 @@ const Sidebar = ({ user }) => {
         {menuItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
-            <div
-              key={item.path}
-              onClick={item.onClick}
-              className="mb-2"
-            >
+            <div key={item.path} onClick={item.onClick} className="mb-2">
               {item.onClick ? (
                 <div
                   className={`flex text-base lg:text-lg items-center gap-3 pl-3 py-2 transition-colors rounded-full cursor-pointer

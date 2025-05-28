@@ -14,7 +14,8 @@
     "tutor": {
       "home": "Home",
       "students": "Students",
-      "resources": "Resources"
+      "resources": "Resources",
+      "examPreparation": "Exam Preparation"
     }
   },
   "onboarding": {
@@ -1021,5 +1022,15 @@
       "noClasses": "No classes booked yet",
       "loading": "Loading student profile..."
     }
+  },
+  "exam-prep": {
+    "title": "Exam Preparation Package",
+    "tabs": {
+      "exam-prep-classes": "Exam Prep Classes",
+      "introductory-calls": "Introductory Calls"
+    },
+    "manage-availability": "Manage Availability",
+    "exam": "EXAM",
+    "preparation": "PREPARATION"
   }
 }

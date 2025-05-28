@@ -4,6 +4,7 @@ module.exports = {
     extend: {
       fontFamily: {
         urbanist: ["Urbanist", "sans-serif"],
+        tanker: ["Tanker", "sans-serif"],
       },
     },
   },

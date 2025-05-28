@@ -73,6 +73,7 @@ import TermsConditions from "./pages/TermsConditions";
 import Subscriptions from "./pages/Subscriptions";
 import TagManager from "react-gtm-module";
 import { initAnalytics, trackPageView } from "./utils/analytics";
+import ExamPreparationTutor from "./pages/tutor/ExamPreparationTutor";
 
 const App = () => {
   const { user, streamClient } = useAuth(); // Use useAuth() inside the component
@@ -272,6 +273,15 @@ const App = () => {
                 element={
                   <ProtectedRoute requiredRole="tutor">
                     <SavedResourcesTutor />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/examPreparation"
+                element={
+                  <ProtectedRoute requiredRole="tutor">
+                    <ExamPreparationTutor />
                   </ProtectedRoute>
                 }
               />

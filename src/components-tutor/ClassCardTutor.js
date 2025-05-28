@@ -1,12 +1,13 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Clock, Calendar, Users, User, X } from "lucide-react";
-import Modal from "react-modal";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import Modal from "react-modal";
 
 Modal.setAppElement("#root");
 
 const ClassCardTutor = ({
+  examPrep,
   classId,
   className,
   language,
@@ -107,87 +108,104 @@ const ClassCardTutor = ({
       <>
         <div className="hover:cursor-pointer" onClick={handleClick}>
           <div
-            className={`flex flex-col h-auto sm:h-[25rem] border ${
-              isPremium ? "border-[#14b82c]" : "border-[#ffc71f]"
+            className={`${
+              examPrep ? "h-[280px] w-full min-w-[220px] max-w-[350px]" : ""
+            } flex h-auto flex-col border sm:h-[25rem] ${
+              isPremium || examPrep ? "border-[#14b82c]" : "border-[#ffc71f]"
             } ${
               classType === "Individual Premium" ? "bg-[#e6fde9]" : "bg-white"
             } rounded-3xl p-2`}
           >
-            <div className="relative w-full aspect-video sm:h-80">
-              <img
-                alt={className}
-                src={imageUrl || "/images/default-class.png"}
-                className="object-cover w-full h-full rounded-t-2xl rounded-b-3xl"
-              />
+            <div className="relative aspect-video w-full sm:h-80">
+              {examPrep ? (
+                <div className="font-tanker flex h-full w-full flex-col items-center justify-center rounded-2xl bg-[#B9F9C2]">
+                  <span className="text-[52.27px]/[100%] font-normal text-[#042F0C]">
+                    {t("exam-prep.exam")}
+                  </span>
+                  <span className="text-[30.49px]/[100%] font-normal text-[#042F0C]">
+                    {t("exam-prep.preparation")}
+                  </span>
+                </div>
+              ) : (
+                <img
+                  alt={className}
+                  src={imageUrl || "/images/default-class.png"}
+                  className="h-full w-full rounded-b-3xl rounded-t-2xl object-cover"
+                />
+              )}
               {isPremium && (
                 <img
                   src="/images/bambuu-plus-tag.png"
                   alt={t("class-card-tutor.labels.premium")}
-                  className="absolute w-24 h-6 sm:h-8 sm:w-28 top-2 left-2"
+                  className="absolute left-2 top-2 h-6 w-24 sm:h-8 sm:w-28"
                 />
               )}
               {isClassOngoing() && (
-                <span className="absolute px-2 sm:px-3 py-1 text-xs sm:text-sm bg-[#B9F9C2BF]/75 backdrop-blur-sm rounded-full top-2 right-2">
+                <span className="absolute right-2 top-2 rounded-full bg-[#B9F9C2BF]/75 px-2 py-1 text-xs backdrop-blur-sm sm:px-3 sm:text-sm">
                   {t("class-card-tutor.labels.ongoing")}
                 </span>
               )}
 
-              <div className="absolute bottom-0 left-0 right-0 bg-[#B9F9C2BF]/75 backdrop-blur-sm rounded-b-2xl p-2 space-y-1">
-                <h2 className="ml-2 text-xl font-bold text-gray-800 sm:text-xl line-clamp-2">
-                  {className}
-                </h2>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center ml-2 space-x-2">
-                    <img
-                      src={
-                        language === "English"
-                          ? "/svgs/xs-us.svg"
-                          : language === "Spanish"
-                          ? "/svgs/xs-spain.svg"
-                          : "/svgs/eng-spanish-xs.svg"
-                      }
-                      alt={
-                        language === "English"
-                          ? t("class-card-tutor.altText.usFlag")
-                          : t("class-card-tutor.altText.spainFlag")
-                      }
-                      className="w-4 h-4 sm:w-auto"
-                    />
-                    <span className="flex items-center">
-                      <span className="text-sm sm:text-base text-[#042f0c]">
-                        {language}
-                      </span>
-                    </span>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    {/* Show 1:1 badge for individual premium classes */}
-                    {classType === "Individual Premium" && (
-                      <span className="px-2 py-[2px] bg-[#fff885] rounded-full text-xs sm:text-sm font-medium">
-                        1:1
-                      </span>
-                    )}
-
-                    {/* Show language level badge if available */}
-                    {languageLevel !== "None" && (
-                      <span className="px-2 sm:px-3 py-1 text-xs sm:text-sm bg-[#fff885] rounded-full">
-                        {languageLevel}
-                      </span>
-                    )}
-                  </div>
+              <div className="absolute bottom-0 left-0 right-0 space-y-1 rounded-b-2xl bg-[#B9F9C2BF]/75 backdrop-blur-sm">
+                <div className="mb-2 h-[1px] w-full rounded bg-[#46E25C]" />
+                <div className="p-2">
+                  <h2 className="ml-2 line-clamp-2 text-xl font-bold text-gray-800 sm:text-xl">
+                    {className}
+                  </h2>
                 </div>
+
+                {!examPrep && (
+                  <div className="flex items-center justify-between">
+                    <div className="ml-2 flex items-center space-x-2">
+                      <img
+                        src={
+                          language === "English"
+                            ? "/svgs/xs-us.svg"
+                            : language === "Spanish"
+                              ? "/svgs/xs-spain.svg"
+                              : "/svgs/eng-spanish-xs.svg"
+                        }
+                        alt={
+                          language === "English"
+                            ? t("class-card-tutor.altText.usFlag")
+                            : t("class-card-tutor.altText.spainFlag")
+                        }
+                        className="h-4 w-4 sm:w-auto"
+                      />
+                      <span className="flex items-center">
+                        <span className="text-sm text-[#042f0c] sm:text-base">
+                          {language}
+                        </span>
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      {/* Show 1:1 badge for individual premium classes */}
+                      {classType === "Individual Premium" && (
+                        <span className="rounded-full bg-[#fff885] px-2 py-[2px] text-xs font-medium sm:text-sm">
+                          1:1
+                        </span>
+                      )}
+
+                      {/* Show language level badge if available */}
+                      {languageLevel !== "None" && (
+                        <span className="rounded-full bg-[#fff885] px-2 py-1 text-xs sm:px-3 sm:text-sm">
+                          {languageLevel}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
-            <div className="flex flex-col items-center justify-end w-full p-2 space-y-2">
-              <div className="flex flex-col items-start justify-between w-full gap-2 sm:flex-row sm:items-center sm:gap-0">
+            <div className="flex w-full flex-col items-center justify-end space-y-2 p-2">
+              <div className="flex w-full flex-col items-start justify-between gap-2 sm:flex-row sm:items-center sm:gap-0">
                 <div className="flex items-center space-x-2">
                   <img
                     alt={t("class-card-tutor.altText.clock")}
                     src="/svgs/clock.svg"
                   />{" "}
-                  <span className="text-sm sm:text-md text-[#454545]">
+                  <span className="sm:text-md text-sm text-[#454545]">
                     {formatTime(classDateTime)} ({classDuration}{" "}
                     {t("class-card-tutor.labels.min")})
                   </span>
@@ -197,35 +215,37 @@ const ClassCardTutor = ({
                     alt={t("class-card-tutor.altText.calendar")}
                     src="/svgs/calendar.svg"
                   />
-                  <span className="text-sm sm:text-md text-[#454545]">
+                  <span className="sm:text-md text-sm text-[#454545]">
                     {getDateDisplay(classDateTime)}
                   </span>
                 </div>
               </div>
-              <div className="flex flex-col items-start justify-between w-full gap-2 sm:flex-row sm:items-center sm:gap-0">
+              <div className="flex w-full flex-col items-start justify-between gap-2 sm:flex-row sm:items-center sm:gap-0">
                 <div className="flex items-center space-x-1">
                   {adminImageUrl ? (
                     <img
                       src={adminImageUrl}
                       alt={adminName}
-                      className="object-cover w-4 h-4 rounded-full sm:w-5 sm:h-5"
+                      className="h-4 w-4 rounded-full object-cover sm:h-5 sm:w-5"
                     />
                   ) : (
-                    <User className="w-4 h-4 text-gray-600 sm:w-5 sm:h-5" />
+                    <User className="h-4 w-4 text-gray-600 sm:h-5 sm:w-5" />
                   )}
-                  <span className="text-sm sm:text-md text-[#454545]">
+                  <span className="sm:text-md text-sm text-[#454545]">
                     {adminName || t("class-card-tutor.labels.tbd")}
                   </span>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <img
-                    alt={t("class-card-tutor.altText.users")}
-                    src="/svgs/users.svg"
-                  />
-                  <span className="text-sm sm:text-md text-[#454545]">
-                    {classMemberIds.length}/{availableSpots}
-                  </span>
-                </div>
+                {!examPrep && (
+                  <div className="flex items-center space-x-2">
+                    <img
+                      alt={t("class-card-tutor.altText.users")}
+                      src="/svgs/users.svg"
+                    />
+                    <span className="sm:text-md text-sm text-[#454545]">
+                      {classMemberIds.length}/{availableSpots}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -235,7 +255,7 @@ const ClassCardTutor = ({
       <Modal
         isOpen={isModalOpen}
         onRequestClose={() => setIsModalOpen(false)}
-        className="max-w-md mx-auto mt-20 bg-white outline-none rounded-3xl font-urbanist"
+        className="mx-auto mt-20 max-w-md rounded-3xl bg-white font-urbanist outline-none"
         overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
         style={{
           content: {
@@ -252,49 +272,49 @@ const ClassCardTutor = ({
             </h2>
             <button
               onClick={() => setIsModalOpen(false)}
-              className="p-2 bg-gray-200 rounded-full hover:bg-gray-300"
+              className="rounded-full bg-gray-200 p-2 hover:bg-gray-300"
             >
-              <X className="w-5 h-5" />
+              <X className="h-5 w-5" />
             </button>
           </div>
 
           <div
             className={`${
               isPremium ? "bg-[#e6fde9]" : "bg-[#ffffea]"
-            } px-6 pt-8 pb-6 rounded-2xl mx-4`}
+            } mx-4 rounded-2xl px-6 pb-6 pt-8`}
           >
             <div className="flex flex-col items-center">
-              <div className="w-24 h-24 mb-4">
+              <div className="mb-4 h-24 w-24">
                 <img
                   src={imageUrl || "/images/panda.png"}
                   alt={className}
-                  className="object-cover w-full h-full rounded-full"
+                  className="h-full w-full rounded-full object-cover"
                 />
               </div>
 
               <h2 className="mb-3 text-2xl font-bold">{className}</h2>
 
-              <div className="flex items-center gap-2 mb-6">
-                <div className="w-6 h-6">
+              <div className="mb-6 flex items-center gap-2">
+                <div className="h-6 w-6">
                   {/* Language flag would go here */}
                 </div>
                 <span>{language}</span>
-                <span className="px-2 py-0.5 text-sm bg-[#fff885] rounded-full">
+                <span className="rounded-full bg-[#fff885] px-2 py-0.5 text-sm">
                   {languageLevel}
                 </span>
               </div>
 
-              <div className="flex justify-center gap-8 mb-6 text-sm">
+              <div className="mb-6 flex justify-center gap-8 text-sm">
                 <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4" />
+                  <Clock className="h-4 w-4" />
                   <span>{formatTime(classDateTime)}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
+                  <Calendar className="h-4 w-4" />
                   <span>{getDateDisplay(classDateTime)}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4" />
+                  <Users className="h-4 w-4" />
                   <span>
                     {classMemberIds.length}/{availableSpots}
                   </span>
@@ -307,30 +327,30 @@ const ClassCardTutor = ({
 
               {groupId && (
                 <div className="w-full">
-                  <h3 className="mb-3 text-lg font-bold text-center">
+                  <h3 className="mb-3 text-center text-lg font-bold">
                     {t("class-card-tutor.modal.languageGroup")}
                   </h3>
                   <div
-                    className={`flex items-center gap-4 p-4 bg-white rounded-xl border ${
+                    className={`flex items-center gap-4 rounded-xl border bg-white p-4 ${
                       isPremium ? "border-[#97e3a2]" : "border-gray-300"
                     }`}
                   >
                     <img
                       src="/images/panda.png"
                       alt={`${language} flag`}
-                      className="w-12 h-12 rounded-full"
+                      className="h-12 w-12 rounded-full"
                     />
                     <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
+                      <div className="mb-1 flex items-center justify-between">
                         <span className="font-medium">{`${language} ${t(
-                          "class-card-tutor.modal.learners"
+                          "class-card-tutor.modal.learners",
                         )}`}</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-gray-600">
                         <img
                           src="/images/panda.png"
                           alt={language}
-                          className="w-4 h-4 rounded-full"
+                          className="h-4 w-4 rounded-full"
                         />
                         <span>{language}</span>
                         <span>•</span>
@@ -338,13 +358,13 @@ const ClassCardTutor = ({
                           <img
                             src={adminImageUrl || "/images/panda.png"}
                             alt={t("class-card-tutor.modal.leader")}
-                            className="w-4 h-4 rounded-full"
+                            className="h-4 w-4 rounded-full"
                           />
                           <span>{adminName}</span>
                         </div>
                         <span>•</span>
                         <div className="flex items-center gap-1">
-                          <Users className="w-3 h-3" />
+                          <Users className="h-3 w-3" />
                           <span>{classMemberIds.length}</span>
                         </div>
                       </div>
@@ -356,7 +376,7 @@ const ClassCardTutor = ({
           </div>
 
           <div className="p-4">
-            <button className="w-full py-3 font-medium text-black bg-[#ffbf00] rounded-full hover:bg-[#e6ac00] border border-black">
+            <button className="w-full rounded-full border border-black bg-[#ffbf00] py-3 font-medium text-black hover:bg-[#e6ac00]">
               {t("class-card-tutor.modal.joinClass")}
             </button>
           </div>
