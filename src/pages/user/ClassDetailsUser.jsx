@@ -760,7 +760,7 @@ const ClassDetailsUser = ({ onClose }) => {
                   <ArrowLeft size={24} />
                 </button>
                 <h1 className="text-2xl font-semibold md:text-4xl">
-                {t("class-details-tutor.title")}
+                  {t("class-details-tutor.title")}
                 </h1>
               </div>
             </div>
@@ -917,21 +917,31 @@ const ClassDetailsUser = ({ onClose }) => {
                       </div>
                     )}
 
-                   
-
-                    <ShowDescription 
-                       description={classData.classDescription} 
-                       maxHeight={100}
-                       />
+                    <ShowDescription
+                      description={classData.classDescription}
+                      maxHeight={100}
+                    />
                   </div>
 
                   {/* Bottom Actions */}
                   <div className="w-full space-y-3">
                     <div className="space-y-1">
-                      <h1 className="text-lg font-semibold md:text-xl">
+                      <h1 className="text-lg font-semibold md:text-xl flex items-center gap-2">
                         {classData.classType.includes("Premium")
-                          ? "Instructor"
-                          : "Group"}
+                          ? t("group-details.languageGroup")
+                          : t("group-details.members")}
+                        {classData.classType !== "Individual Premium" &&
+                          typeof classData.availableSpots !== "undefined" && (
+                            <span className="flex items-center text-base font-normal text-gray-700 ml-2">
+                              <img
+                                src="/svgs/users.svg"
+                                alt="members"
+                                className="w-5 h-5 mr-1 inline-block align-middle"
+                              />
+                              {classData.classMemberIds.length}/
+                              {classData.availableSpots}
+                            </span>
+                          )}
                       </h1>
                       <ClassInfoCard
                         classData={classData}
@@ -954,14 +964,14 @@ const ClassDetailsUser = ({ onClose }) => {
                           className="w-full px-4 py-2 text-black bg-white border border-black rounded-full"
                           onClick={() => setIsEditModalOpen(true)}
                         >
-              {t("class-details-tutor.actions.edit-class")}
+                          {t("class-details-tutor.actions.edit-class")}
                         </button>
                         <button
                           className="w-full px-4 py-2 text-red-500 bg-white border border-red-500 rounded-full"
                           onClick={() => setShowDeleteConfirmation(true)}
                         >
-                      {t("class-details-tutor.actions.delete-class")}
-                      </button>
+                          {t("class-details-tutor.actions.delete-class")}
+                        </button>
                       </>
                     ) : (
                       // <button
@@ -1030,9 +1040,9 @@ const ClassDetailsUser = ({ onClose }) => {
                         className="px-4 py-2 text-black bg-yellow-400 rounded-full"
                         onClick={() => setActiveTab("Members")}
                       >
-                       {t("class-details-tutor.tabs.members", {
-                      count: members.length,
-                    })}
+                        {t("class-details-tutor.tabs.members", {
+                          count: members.length,
+                        })}
                       </button>
                     </div>
                     <div className="flex-1 overflow-y-auto">

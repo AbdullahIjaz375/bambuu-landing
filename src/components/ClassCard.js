@@ -303,11 +303,11 @@ const ClassCard = ({
                     src="/svgs/users.svg"
                     className="w-4 h-4"
                   />
-                  {!isPremium && (
+                  {typeof availableSpots !== "undefined" && (
                     <span className="text-sm text-[#454545]">
                       {classMemberIds.length}/{availableSpots}
                     </span>
-                  )}{" "}
+                  )}
                 </div>
               </div>
             </div>{" "}
@@ -396,7 +396,9 @@ const ClassCard = ({
                 <div className="flex items-center gap-2">
                   <Users className="w-4 h-4" />
                   <span>
-                    {classMemberIds.length}/{availableSpots}
+                    {typeof availableSpots !== "undefined"
+                      ? `${classMemberIds.length}/${availableSpots}`
+                      : classMemberIds.length}
                   </span>
                 </div>
               </div>{" "}

@@ -28,6 +28,8 @@ import ExploreClassCard from "../../components/ExploreClassCard";
 import { ChannelType } from "../../config/stream";
 import EmptyState from "../../components/EmptyState";
 import ShowDescription from "../../components/ShowDescription";
+import { streamClient, fetchChatToken } from "../../config/stream";
+
 const InstructorProfileUser = () => {
   const { tutorId } = useParams();
   const navigate = useNavigate();
@@ -43,27 +45,13 @@ const InstructorProfileUser = () => {
     try {
       // Create channel ID by combining student and teacher IDs
       const channelId = `${user.uid}${tutorId}`;
-
-      // Create channel name by combining student and tutor names
       const sessionUser = JSON.parse(sessionStorage.getItem("user"));
       const studentName = sessionUser?.name || "Student";
-
-      // Create channel name by combining student and tutor names
       const channelName = `${studentName} - ${tutor.name}`;
-
-      // Set up member roles
       const memberRoles = [
-        {
-          user_id: user.uid,
-          role: "member",
-        },
-        {
-          user_id: tutorId,
-          role: "member",
-        },
+        { user_id: user.uid, role: "member" },
+        { user_id: tutorId, role: "member" },
       ];
-
-      // Create channel data object
       const channelData = {
         id: channelId,
         type: ChannelType.ONE_TO_ONE_CHAT,
@@ -75,14 +63,56 @@ const InstructorProfileUser = () => {
         member_roles: memberRoles,
       };
 
-      // Create the Stream channel
-      await createStreamChannel(channelData);
+      // Ensure Stream client is connected as the user
+      if (streamClient.userID !== user.uid || !streamClient.isConnected) {
+        const token = await fetchChatToken(user.uid);
+        if (streamClient.userID) {
+          await streamClient.disconnectUser();
+        }
+        await streamClient.connectUser(
+          {
+            id: user.uid,
+            name: user.name || "",
+            image: user.photoUrl || "",
+            userType: user.userType || "student",
+          },
+          token
+        );
+      }
 
-      // Navigate to community page on success
-      navigate(`/messagesUser/${channelId}`);
+      // Create or get the channel
+      const channel = await createStreamChannel(channelData);
+
+      // Wait for the channel to appear in the user's channel list
+      let found = false;
+      for (let i = 0; i < 5; i++) {
+        // Try up to 5 times
+        const channels = await streamClient.queryChannels(
+          { members: { $in: [user.uid] }, id: { $eq: channel.id } },
+          { last_message_at: -1 },
+          { watch: true, state: true }
+        );
+        if (channels.length > 0) {
+          found = true;
+          break;
+        }
+        await new Promise((res) => setTimeout(res, 500)); // Wait 0.5s
+      }
+
+      // After creating or fetching the channel
+      const currentMembers = Object.keys(channel.state?.members || {});
+      const missingMembers = [user.uid, tutorId].filter(
+        (m) => !currentMembers.includes(m)
+      );
+      if (missingMembers.length > 0) {
+        await channel.addMembers(missingMembers);
+      }
+
+      // Navigate to the messages page
+      navigate(`/messagesUser/${channel.id}`);
     } catch (error) {
       console.error("Error creating chat channel:", error);
-      // You might want to show an error message to the user here
+      // Show error to user if needed
     }
   };
 

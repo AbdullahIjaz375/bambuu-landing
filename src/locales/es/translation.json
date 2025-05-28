@@ -754,6 +754,7 @@
     "admin-label": "(Administrador)",
     "members": "Miembros",
     "classes": "Clases",
+    "languageGroup": "Grupo de Idioma",
     "buttons": {
       "viewChat": "Ver Chat del Grupo",
       "editDetails": "Editar Detalles del Grupo",

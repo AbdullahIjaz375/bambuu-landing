@@ -465,6 +465,7 @@
     "admin-label": "(Admin)",
     "members": "Members",
     "classes": "Classes",
+    "languageGroup": "Language Group",
     "buttons": {
       "viewChat": "View Group Chat",
       "editDetails": "Edit Group Details",
