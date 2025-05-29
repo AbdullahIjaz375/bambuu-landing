@@ -17,6 +17,7 @@ import "react-clock/dist/Clock.css";
 import Modal from "react-modal";
 import { useGroupJoining } from "../hooks/useGroupJoining";
 import PlansModal from "./PlansModal";
+import { useTranslation } from "react-i18next";
 Modal.setAppElement("#root");
 
 const ExploreGroupDetailsModal = ({ group, onClose, onJoinClick }) => {
@@ -411,6 +412,9 @@ const GroupCard = ({ group }) => {
       setIsJoining(false);
     }
   };
+
+  const { t } = useTranslation();
+
   return (
     <>
       <div
@@ -536,20 +540,29 @@ const GroupCard = ({ group }) => {
       >
         <div className="text-center">
           <h2 className="mb-4 text-xl font-semibold">
-            Are you sure you want to join this group?
+            {t("exploreGroupCard.confirmJoining.title")}
           </h2>
+          <p className="mb-6 text-gray-600">
+            {group.classType === "Individual Premium"
+              ? t(
+                  "exploreGroupCard.confirmJoining.descriptionPremiumIndividual"
+                )
+              : t("exploreGroupCard.confirmJoining.description")}
+          </p>
           <div className="flex flex-row gap-2">
             <button
               className="w-full py-2 font-medium border border-gray-300 rounded-full hover:bg-gray-50"
               onClick={() => setShowJoinConfirmation(false)}
             >
-              No, Cancel
+              {t("exploreGroupCard.confirmJoining.cancel")}
             </button>
             <button
               className="w-full py-2 font-medium text-black bg-[#14b82c] rounded-full hover:bg-[#119924] border border-[#042f0c]"
               onClick={handleJoinConfirm}
             >
-              {isJoining ? "Joining..." : "Yes, Join"}
+              {isJoining
+                ? t("exploreGroupCard.confirmJoining.joining")
+                : t("exploreGroupCard.confirmJoining.confirm")}
             </button>
           </div>
         </div>

@@ -679,6 +679,7 @@
     "confirmBooking": {
       "title": "Are you sure you want to book this class?",
       "description": "By booking the class, you will be added to the group and can join the class 5 minutes before it starts. It will also be added to your calendar.",
+      "descriptionPremiumIndividual": "By booking this 1:1 class, you'll connect with your private tutor and you'll be able to join the class 5 minutes before it starts. It will also be added to your calendar.",
       "cancel": "No, Cancel",
       "confirm": "Yes, Book Now",
       "enrolling": "Booking..."
@@ -706,6 +707,7 @@
     "confirmJoining": {
       "title": "Are you sure you want to join this group?",
       "description": "By joining this group, you will have access to all group conversations and classes.",
+      "descriptionPremiumIndividual": "By joining this 1:1 class, you'll connect with your private tutor and you'll be able to join the class 5 minutes before it starts. It will also be added to your calendar.",
       "cancel": "No, Cancel",
       "confirm": "Yes, Join",
       "joining": "Joining..."

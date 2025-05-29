@@ -29,6 +29,26 @@ const getUpdatedQuery = (locationSearch, newRef) => {
   return qs ? `?${qs}` : "";
 };
 
+// Utility function to validate redirect paths
+const isValidRedirectPath = (path) => {
+  if (!path || typeof path !== "string") return false;
+  // Whitelist of valid routes
+  const validPrefixes = [
+    "/groupDetailsTutor/",
+    "/classDetailsTutor/",
+    "/newGroupDetailsTutor/",
+    "/learn",
+    "/learn-tutor",
+    "/userEditProfile",
+    "/groupsTutor",
+    "/classesTutor",
+    "/messagesTutor",
+    "/profileTutor",
+    "/unauthorized",
+  ];
+  return validPrefixes.some((prefix) => path.startsWith(prefix));
+};
+
 const LoginTutor = () => {
   const googleProvider = new GoogleAuthProvider();
   const facebookProvider = new FacebookAuthProvider();
@@ -57,7 +77,7 @@ const LoginTutor = () => {
   const redirectAfterLogin = () => {
     // First check for the general redirect path saved in sessionStorage
     const savedRedirectPath = sessionStorage.getItem("redirectAfterLogin");
-    if (savedRedirectPath) {
+    if (savedRedirectPath && isValidRedirectPath(savedRedirectPath)) {
       sessionStorage.removeItem("redirectAfterLogin");
       navigate(savedRedirectPath, { replace: true });
       return;

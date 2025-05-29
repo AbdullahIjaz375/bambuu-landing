@@ -1019,6 +1019,7 @@
     "confirmJoining": {
       "title": "¿Estás seguro de que quieres unirte a este grupo?",
       "description": "Al unirte a este grupo, tendrás acceso a todas las conversaciones y clases del grupo.",
+      "descriptionPremiumIndividual": "Al unirte a esta clase 1:1, te conectarás con tu tutor privado y podrás unirte a la clase 5 minutos antes de que comience. También se añadirá a tu calendario.",
       "cancel": "No, Cancelar",
       "confirm": "Sí, Unirse",
       "joining": "Uniéndose..."

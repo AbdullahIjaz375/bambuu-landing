@@ -35,6 +35,30 @@ const getUpdatedQuery = (locationSearch, newRef) => {
   return qs ? `?${qs}` : "";
 };
 
+// Utility function to validate redirect paths
+const isValidRedirectPath = (path) => {
+  if (!path || typeof path !== "string") return false;
+  // Whitelist of valid routes
+  const validPrefixes = [
+    "/groupDetailsUser/",
+    "/classDetailsUser/",
+    "/newGroupDetailsUser/",
+    "/learn",
+    "/learn-tutor",
+    "/userEditProfile",
+    "/groupsUser",
+    "/classesUser",
+    "/messagesUser",
+    "/profileUser",
+    "/profileTutor",
+    "/groupDetailsTutor/",
+    "/classDetailsTutor/",
+    "/newGroupDetailsTutor/",
+    "/unauthorized",
+  ];
+  return validPrefixes.some((prefix) => path.startsWith(prefix));
+};
+
 const Login = () => {
   const googleProvider = new GoogleAuthProvider();
   const appleProvider = new OAuthProvider("apple.com");
@@ -85,22 +109,17 @@ const Login = () => {
         }
       }
 
-      if (savedRedirectPath) {
-        // Don't redirect back to profile page after logging in
-        if (savedRedirectPath.includes("/ProfileUser")) {
-          console.log("Avoiding redirect loop back to ProfileUser");
-        } else {
-          console.log("Redirecting to saved path:", savedRedirectPath);
-          // Clear all redirect data
-          sessionStorage.removeItem("redirectAfterLogin");
-          localStorage.removeItem("redirectAfterLogin");
-          localStorage.removeItem("redirectTimestamp");
-          localStorage.setItem("redirectUsed", "true");
+      // Only use the saved redirect path if it is valid
+      if (savedRedirectPath && isValidRedirectPath(savedRedirectPath)) {
+        // Clear all redirect data
+        sessionStorage.removeItem("redirectAfterLogin");
+        localStorage.removeItem("redirectAfterLogin");
+        localStorage.removeItem("redirectTimestamp");
+        localStorage.setItem("redirectUsed", "true");
 
-          navigate(savedRedirectPath, { replace: true });
-          setRedirected(true);
-          return;
-        }
+        navigate(savedRedirectPath, { replace: true });
+        setRedirected(true);
+        return;
       }
 
       // Clear any remaining redirect data

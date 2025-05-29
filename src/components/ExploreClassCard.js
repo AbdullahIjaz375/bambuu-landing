@@ -628,7 +628,11 @@ const ExploreClassCard = ({
           </h2>
           {error && <p className="mb-4 text-red-600">{error}</p>}
           <p className="mb-6 text-gray-600">
-            {t("exploreClassCard.confirmBooking.description")}
+            {classType === "Individual Premium"
+              ? t(
+                  "exploreClassCard.confirmBooking.descriptionPremiumIndividual"
+                )
+              : t("exploreClassCard.confirmBooking.description")}
           </p>
           <div className="flex flex-row gap-2">
             <button

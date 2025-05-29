@@ -9,6 +9,7 @@ import { db, storage } from "../firebaseConfig";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useClassBooking } from "../hooks/useClassBooking";
+import { useTranslation } from "react-i18next";
 
 Modal.setAppElement("#root");
 
@@ -124,6 +125,7 @@ const ProfileSetupClassCard = ({
   const [isBookingConfirmationOpen, setIsBookingConfirmationOpen] =
     useState(false);
   const [isPlansModalOpen, setIsPlansModalOpen] = useState(false);
+  const { t } = useTranslation();
 
   // Determine which user details to display based on isBammbuu flag
   const isPremium =
@@ -529,9 +531,11 @@ const ProfileSetupClassCard = ({
           </h2>
           {error && <p className="mb-4 text-red-600">{error}</p>}
           <p className="mb-6 text-gray-600">
-            By booking class you will be added in the group and you'll be able
-            to join the class 5 minutes before it starts. It will also be added
-            to your calendar.
+            {classType === "Individual Premium"
+              ? t(
+                  "exploreClassCard.confirmBooking.descriptionPremiumIndividual"
+                )
+              : t("exploreClassCard.confirmBooking.description")}
           </p>
           <div className="flex flex-row gap-2">
             <button

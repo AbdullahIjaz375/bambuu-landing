@@ -3,6 +3,30 @@ import React, { useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
+// Utility function to validate redirect paths
+const isValidRedirectPath = (path) => {
+  if (!path || typeof path !== "string") return false;
+  // Whitelist of valid routes
+  const validPrefixes = [
+    "/groupDetailsUser/",
+    "/classDetailsUser/",
+    "/newGroupDetailsUser/",
+    "/learn",
+    "/learn-tutor",
+    "/userEditProfile",
+    "/groupsUser",
+    "/classesUser",
+    "/messagesUser",
+    "/profileUser",
+    "/profileTutor",
+    "/groupDetailsTutor/",
+    "/classDetailsTutor/",
+    "/newGroupDetailsTutor/",
+    "/unauthorized",
+  ];
+  return validPrefixes.some((prefix) => path.startsWith(prefix));
+};
+
 const PublicRoute = ({ children }) => {
   const { user } = useAuth();
   const location = useLocation();
@@ -13,9 +37,12 @@ const PublicRoute = ({ children }) => {
     const redirectPath = sessionStorage.getItem("redirectAfterLogin");
 
     if (redirectPath) {
-      console.log("Redirecting to saved path:", redirectPath); // Debug log
       sessionStorage.removeItem("redirectAfterLogin");
-      return <Navigate to={redirectPath} />;
+      if (isValidRedirectPath(redirectPath)) {
+        return <Navigate to={redirectPath} />;
+      } else {
+        return <Navigate to="/learn" />;
+      }
     }
 
     // Check for backup full URL in localStorage
@@ -24,9 +51,12 @@ const PublicRoute = ({ children }) => {
       try {
         const parsedUrl = new URL(fullRedirectUrl);
         const path = parsedUrl.pathname + parsedUrl.search + parsedUrl.hash;
-        console.log("Redirecting to backup full URL path:", path); // Debug log
         localStorage.removeItem("fullRedirectUrl");
-        return <Navigate to={path} />;
+        if (isValidRedirectPath(path)) {
+          return <Navigate to={path} />;
+        } else {
+          return <Navigate to="/learn" />;
+        }
       } catch (error) {
         console.error("Error parsing full redirect URL:", error);
       }
@@ -41,9 +71,12 @@ const PublicRoute = ({ children }) => {
         try {
           const parsedUrl = new URL(subUrl);
           const path = parsedUrl.pathname + parsedUrl.search;
-          console.log("Redirecting to subscription URL:", path); // Debug log
           localStorage.removeItem("selectedPackageUrl");
-          return <Navigate to={path} />;
+          if (isValidRedirectPath(path)) {
+            return <Navigate to={path} />;
+          } else {
+            return <Navigate to="/learn" />;
+          }
         } catch (error) {
           console.error("Error parsing subscription URL:", error);
         }
@@ -56,9 +89,12 @@ const PublicRoute = ({ children }) => {
         try {
           const parsedUrl = new URL(classUrl);
           const path = parsedUrl.pathname + parsedUrl.search;
-          console.log("Redirecting to class URL:", path); // Debug log
           localStorage.removeItem("selectedClassUrl");
-          return <Navigate to={path} />;
+          if (isValidRedirectPath(path)) {
+            return <Navigate to={path} />;
+          } else {
+            return <Navigate to="/learn" />;
+          }
         } catch (error) {
           console.error("Error parsing class URL:", error);
         }
@@ -76,9 +112,12 @@ const PublicRoute = ({ children }) => {
         try {
           const parsedUrl = new URL(groupUrl);
           const path = parsedUrl.pathname + parsedUrl.search;
-          console.log("Redirecting to group URL:", path); // Debug log
           localStorage.removeItem("selectedGroupUrl");
-          return <Navigate to={path} />;
+          if (isValidRedirectPath(path)) {
+            return <Navigate to={path} />;
+          } else {
+            return <Navigate to="/learn" />;
+          }
         } catch (error) {
           console.error("Error parsing group URL:", error);
           localStorage.removeItem("selectedGroupUrl"); // Always clear if error
@@ -86,6 +125,11 @@ const PublicRoute = ({ children }) => {
       } else {
         localStorage.removeItem("selectedGroupUrl"); // Clear if not valid
       }
+    }
+
+    // If user is on /login or /signup, redirect to /learn
+    if (location.pathname === "/login" || location.pathname === "/signup") {
+      return <Navigate to="/learn" />;
     }
 
     // Default fallback redirect for logged-in users

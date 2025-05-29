@@ -56,6 +56,30 @@ const ProtectedRoute = ({ children, requiredRole }) => {
     console.error("Invalid URL", error);
   }
 
+  // Utility function to validate redirect paths
+  const isValidRedirectPath = (path) => {
+    if (!path || typeof path !== "string") return false;
+    // Whitelist of valid routes
+    const validPrefixes = [
+      "/groupDetailsUser/",
+      "/classDetailsUser/",
+      "/newGroupDetailsUser/",
+      "/learn",
+      "/learn-tutor",
+      "/userEditProfile",
+      "/groupsUser",
+      "/classesUser",
+      "/messagesUser",
+      "/profileUser",
+      "/profileTutor",
+      "/groupDetailsTutor/",
+      "/classDetailsTutor/",
+      "/newGroupDetailsTutor/",
+      "/unauthorized",
+    ];
+    return validPrefixes.some((prefix) => path.startsWith(prefix));
+  };
+
   // If the user is not logged in, redirect to login page with appropriate query param
   if (!user) {
     // Determine the login URL with appropriate query parameter
@@ -77,7 +101,12 @@ const ProtectedRoute = ({ children, requiredRole }) => {
     }
 
     return <Navigate to={loginUrl} />;
-  } // Role-based access checks
+  }
+  // If the user is logged in and the current path is /login or /signup, redirect to /learn
+  if (location.pathname === "/login" || location.pathname === "/signup") {
+    return <Navigate to="/learn" />;
+  }
+  // Role-based access checks
   const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
 
   // Get authentication loading state

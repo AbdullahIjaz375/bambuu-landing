@@ -19,6 +19,7 @@ import EmptyState from "../../components/EmptyState";
 import { toast } from "react-toastify";
 import { checkAccess } from "../../utils/accessControl";
 import { updateStreamChannelMetadata } from "./UpdateStreamChannel";
+import { useTranslation } from "react-i18next";
 
 Modal.setAppElement("#root");
 
@@ -32,6 +33,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
   const [error, setError] = useState(null);
   const { classId } = useParams();
   const [nextClassDate, setNextClassDate] = useState(null);
+  const { t } = useTranslation();
 
   const calculateNextClassDate = (classData) => {
     const originalDate = new Date(classData.classDateTime.seconds * 1000);
@@ -1090,19 +1092,11 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
           </h2>
           {error && <p className="mb-4 text-red-600">{error}</p>}{" "}
           <p className="mb-6 text-gray-600">
-            {classData.classType === "Individual Premium" ? (
-              <>
-                By booking this class, you'll connect with your private tutor
-                and you'll be able to join the class 5 minutes before it starts.
-                It will also be added to your calendar.
-              </>
-            ) : (
-              <>
-                By booking class you will be added in the group and you'll be
-                able to join the class 5 minutes before it starts. It will also
-                be added to your calendar.
-              </>
-            )}
+            {classData.classType === "Individual Premium"
+              ? t(
+                  "exploreClassCard.confirmBooking.descriptionPremiumIndividual"
+                )
+              : t("exploreClassCard.confirmBooking.description")}
           </p>
           <div className="flex flex-row gap-2">
             <button
