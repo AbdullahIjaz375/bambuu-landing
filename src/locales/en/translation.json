@@ -674,7 +674,8 @@
       "languageGroup": "Language Group",
       "learners": "{{language}} learners",
       "leader": "Leader",
-      "bambuuPlus": "Bammbuu+"
+      "bambuuPlus": "Bammbuu+",
+      "classFull": "Class Full"
     },
     "confirmBooking": {
       "title": "Are you sure you want to book this class?",

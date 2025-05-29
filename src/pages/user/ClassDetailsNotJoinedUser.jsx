@@ -34,6 +34,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
   const { classId } = useParams();
   const [nextClassDate, setNextClassDate] = useState(null);
   const { t } = useTranslation();
+  const [showFullDescription, setShowFullDescription] = useState(false);
 
   const calculateNextClassDate = (classData) => {
     const originalDate = new Date(classData.classDateTime.seconds * 1000);
@@ -819,6 +820,15 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
       ? nextClassDate
       : new Date(classData?.classDateTime?.seconds * 1000);
 
+  // Determine if the user has already booked this class
+  const isAlreadyBooked =
+    user &&
+    (classData.classMemberIds.includes(user.uid) ||
+      (user.enrolledClasses && user.enrolledClasses.includes(classData.id)));
+  const isClassFull =
+    typeof classData.availableSpots !== "undefined" &&
+    classData.classMemberIds.length >= classData.availableSpots;
+
   return (
     <>
       <div className="flex min-h-screen">
@@ -838,7 +848,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
 
             <div className="flex flex-1 min-h-0 gap-6">
               <div
-                className={`w-1/4 p-6 rounded-3xl ${getClassTypeColor(
+                className={`w-[420px] max-w-[420px] flex-shrink-0 p-6 rounded-3xl ${getClassTypeColor(
                   classData.classType
                 )}`}
               >
@@ -847,106 +857,110 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
                     <img
                       src={classData.imageUrl}
                       alt={classData.className}
-                      className="w-32 h-32 mb-4 rounded-full"
+                      className="w-24 h-24 mb-4 rounded-full md:w-32 md:h-32"
                     />
-                    <h3 className="mb-2 text-2xl font-medium">
+                    <h3 className="mb-2 text-xl font-medium md:text-3xl">
                       {classData.className}
                     </h3>
-                    <div className="flex items-center gap-4 mb-2 flex-wrap justify-center">
-                      <div className="flex flex-row items-center space-x-1">
-                        <img
-                          src={
-                            classData.language === "English"
-                              ? "/svgs/xs-us.svg"
-                              : classData.language === "Spanish"
-                              ? "/svgs/xs-spain.svg"
-                              : "/svgs/eng-spanish-xs.svg"
-                          }
-                          alt={
-                            classData.language === "English"
-                              ? "US Flag"
-                              : "Spain Flag"
-                          }
-                          className="w-5"
-                        />{" "}
-                        <span className=" text-md">{classData.language}</span>
-                      </div>
-
-                      <span className="px-3 py-[2px] bg-yellow-200 rounded-full text-md">
-                        {classData.languageLevel}
+                    {/* Language, Level, 1:1 Tag Row */}
+                    <div className="flex flex-row items-center gap-2 mb-2 flex-wrap justify-center">
+                      <img
+                        src={
+                          classData.language === "English"
+                            ? "/svgs/xs-us.svg"
+                            : classData.language === "Spanish"
+                            ? "/svgs/xs-spain.svg"
+                            : "/svgs/eng-spanish-xs.svg"
+                        }
+                        alt={
+                          classData.language === "English"
+                            ? "US Flag"
+                            : "Spain Flag"
+                        }
+                        className="w-5"
+                      />
+                      <span className="text-sm md:text-md">
+                        {classData.language}
                       </span>
                       {classData.classType === "Individual Premium" && (
                         <span className="px-2 py-[2px] bg-[#fff885] rounded-full text-xs md:text-sm font-medium text-center">
                           1:1 Class
                         </span>
                       )}
+                      <span className="px-3 py-1 text-sm bg-yellow-200 rounded-full md:text-md">
+                        {classData.languageLevel}
+                      </span>
                     </div>
-
-                    <div className="flex flex-col mt-4 space-y-4">
-                      {/* First Row */}
-                      <div className="flex items-center justify-between space-x-12">
-                        <div className="flex items-center gap-1">
-                          <img alt="bammbuu" src="/svgs/clock.svg" />{" "}
-                          <span className="text-sm">
-                            {displayDate.toLocaleTimeString("en-US", {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                              hour12: true, // for AM/PM format
-                            })}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <img alt="bammbuu" src="/svgs/calendar.svg" />
-                          <span className="text-sm">
-                            {formatDate(displayDate, "full")}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <img alt="bammbuu" src="/svgs/users.svg" />
-                          {classData.classType === "Individual Premium" ? (
-                            <>
-                              {" "}
-                              <span className="text-sm">
-                                {classData.classMemberIds.length}
-                              </span>
-                            </>
-                          ) : (
-                            <span className="text-sm text-[#454545]">
-                              {classData.classMemberIds.length}/
-                              {classData.availableSpots}
-                            </span>
-                          )}
-                        </div>
+                    {/* Time, Date, Participants Row */}
+                    <div className="flex flex-row items-center gap-6 mb-2 flex-wrap justify-center">
+                      <div className="flex items-center gap-1">
+                        <img alt="time" src="/svgs/clock.svg" />
+                        <span className="text-xs sm:text-sm">
+                          {new Date(
+                            classData.classDateTime.seconds * 1000
+                          ).toLocaleTimeString("en-US", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true,
+                          })}
+                        </span>
                       </div>
-
-                      {/* Second Row */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1">
-                          <img alt="bammbuu" src="/svgs/repeate-music.svg" />
-                          {isRecurringClass ? (
-                            <span className="text-sm font-semibold text-green-700">
-                              {classData.recurrenceTypes[0]}
-                            </span>
-                          ) : (
-                            <span className="text-sm">
-                              {classData.classType === "Individual Premium"
-                                ? classData.selectedRecurrenceType || "One-time"
-                                : classData.recurrenceTypes[0]}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <img alt="bammbuu" src="/svgs/location.svg" />
-                          <span className="text-sm">
-                            {classData.classLocation}
-                          </span>
-                        </div>
+                      <div className="flex items-center gap-1">
+                        <img alt="date" src="/svgs/calendar.svg" />
+                        <span className="text-sm">
+                          {new Date(
+                            classData.classDateTime.seconds * 1000
+                          ).toLocaleDateString("en-US")}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <img alt="participants" src="/svgs/users.svg" />
+                        <span className="text-xs sm:text-sm">
+                          {classData.classMemberIds.length}
+                        </span>
                       </div>
                     </div>
-
-                    <p className="mt-4 mb-6 text-gray-600">
-                      {classData.classDescription}
-                    </p>
+                    {/* Recurrence and Location Row */}
+                    <div className="flex flex-row items-center gap-6 mb-2 flex-wrap justify-center">
+                      <div className="flex items-center gap-1">
+                        <img alt="recurrence" src="/svgs/repeate-music.svg" />
+                        <span className="text-xs sm:text-sm">
+                          {classData.classType === "Individual Premium"
+                            ? classData.selectedRecurrenceType || "None"
+                            : classData.recurrenceTypes?.length > 0
+                            ? classData.recurrenceTypes.join(", ")
+                            : "None"}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <img alt="location" src="/svgs/location.svg" />
+                        <span className="text-xs sm:text-sm">
+                          {classData.classLocation}
+                        </span>
+                      </div>
+                    </div>
+                    {/* Class Description with See more/less, never overflowing */}
+                    <div className="mt-4 mb-6 w-full max-w-full px-2 text-gray-600 overflow-hidden">
+                      <p
+                        className={`whitespace-pre-line break-words text-sm text-center mx-auto w-full max-w-full overflow-hidden ${
+                          !showFullDescription ? "line-clamp-3" : ""
+                        }`}
+                        style={{ wordBreak: "break-word" }}
+                      >
+                        {classData.classDescription}
+                      </p>
+                      {classData.classDescription &&
+                        classData.classDescription.length > 180 && (
+                          <button
+                            className="mt-1 text-xs text-[#14b82c] underline hover:text-[#119924] focus:outline-none block mx-auto"
+                            onClick={() =>
+                              setShowFullDescription((prev) => !prev)
+                            }
+                          >
+                            {showFullDescription ? "See less" : "See more"}
+                          </button>
+                        )}
+                    </div>
                   </div>
 
                   <div className="w-full space-y-4">
@@ -962,14 +976,20 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
                         groupTutor={groupTutor}
                       />
                     </div>
-                    {classData.classType === "Individual Premium" &&
-                    classData.classMemberIds.length > 0 ? (
+                    {/* Book Class Button - now disables if already booked or full */}
+                    {isAlreadyBooked || isClassFull ? (
                       <button
                         className="w-full px-4 py-2 text-gray-500 bg-gray-200 border border-gray-400 rounded-full cursor-not-allowed"
                         disabled
-                        title="This individual class has already been booked"
+                        title={
+                          isAlreadyBooked
+                            ? "This class has already been booked"
+                            : "Class is full"
+                        }
                       >
-                        Class Already Booked
+                        {isAlreadyBooked
+                          ? "Class Already Booked"
+                          : "Class Full"}
                       </button>
                     ) : (
                       <button

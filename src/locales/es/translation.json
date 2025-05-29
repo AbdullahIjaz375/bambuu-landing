@@ -528,7 +528,8 @@
       "tbd": "Por determinar",
       "min": "min",
       "premium": "Premium",
-      "ongoing": "En curso"
+      "ongoing": "En curso",
+      "classFull": "Clase llena"
     },
     "altText": {
       "usFlag": "Bandera de EE.UU.",
@@ -1014,7 +1015,8 @@
   },
   "exploreGroupCard": {
     "labels": {
-      "joinGroup": "Unirse al Grupo"
+      "joinGroup": "Unirse al Grupo",
+      "classFull": "Clase llena"
     },
     "confirmJoining": {
       "title": "¿Estás seguro de que quieres unirte a este grupo?",

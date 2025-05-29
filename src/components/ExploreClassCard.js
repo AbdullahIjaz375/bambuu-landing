@@ -289,6 +289,15 @@ const ExploreClassCard = ({
     fetchAdminProfile();
   }, [adminId]);
 
+  // Determine if the user has already booked this class
+  const isAlreadyBooked =
+    user &&
+    (classMemberIds.includes(user.uid) ||
+      (user.enrolledClasses && user.enrolledClasses.includes(validClassId)));
+  const isClassFull =
+    typeof availableSpots !== "undefined" &&
+    classMemberIds.length >= availableSpots;
+
   // If we don't have a valid class ID or a valid class name, don't render the card
   if (!validClassId || !className) {
     return null;
@@ -436,13 +445,19 @@ const ExploreClassCard = ({
             </div>{" "}
             {/* Book Class Button - moved into the flex container */}
             <div className="mt-auto pt-2">
-              {isBooked ? (
+              {isAlreadyBooked || isClassFull ? (
                 <button
                   className="w-full py-2 font-medium text-gray-500 bg-gray-200 border border-gray-400 rounded-full cursor-not-allowed"
                   disabled
-                  title={t("exploreClassCard.labels.alreadyBooked")}
+                  title={
+                    isAlreadyBooked
+                      ? t("exploreClassCard.labels.alreadyBooked")
+                      : t("exploreClassCard.labels.classFull")
+                  }
                 >
-                  {t("exploreClassCard.labels.alreadyBooked")}
+                  {isAlreadyBooked
+                    ? t("exploreClassCard.labels.alreadyBooked")
+                    : t("exploreClassCard.labels.classFull")}
                 </button>
               ) : (
                 <button

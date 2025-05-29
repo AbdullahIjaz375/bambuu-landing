@@ -262,6 +262,15 @@ const ProfileSetupClassCard = ({
     fetchAdminProfile();
   }, [adminId]);
 
+  // Determine if the user has already booked this class
+  const isAlreadyBooked =
+    user &&
+    (classMemberIds.includes(user.uid) ||
+      (user.enrolledClasses && user.enrolledClasses.includes(classId)));
+  const isClassFull =
+    typeof availableSpots !== "undefined" &&
+    classMemberIds.length >= availableSpots;
+
   return (
     <>
       <div className="w-80 hover:cursor-pointer" role="button" tabIndex={0}>
@@ -365,12 +374,28 @@ const ProfileSetupClassCard = ({
                 )}
               </div>
             </div>
-            <button
-              onClick={handleBookClass}
-              className="w-full py-2 font-medium text-black bg-[#14b82c] rounded-full hover:bg-[#119924] border border-[#042f0c]"
-            >
-              Book Class
-            </button>
+            {isAlreadyBooked || isClassFull ? (
+              <button
+                className="w-full py-2 font-medium text-gray-500 bg-gray-200 border border-gray-400 rounded-full cursor-not-allowed"
+                disabled
+                title={
+                  isAlreadyBooked
+                    ? t("exploreClassCard.labels.alreadyBooked")
+                    : t("exploreClassCard.labels.classFull")
+                }
+              >
+                {isAlreadyBooked
+                  ? t("exploreClassCard.labels.alreadyBooked")
+                  : t("exploreClassCard.labels.classFull")}
+              </button>
+            ) : (
+              <button
+                onClick={handleBookClass}
+                className="w-full py-2 font-medium text-black bg-[#14b82c] rounded-full hover:bg-[#119924] border border-[#042f0c]"
+              >
+                Book Class
+              </button>
+            )}
           </div>
         </div>
       </div>

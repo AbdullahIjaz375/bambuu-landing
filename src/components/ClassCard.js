@@ -157,6 +157,15 @@ const ClassCard = ({
     fetchAdminProfile();
   }, [adminId]);
 
+  // Determine if the user has already booked this class
+  const isAlreadyBooked =
+    user &&
+    (classMemberIds.includes(user.uid) ||
+      (user.enrolledClasses && user.enrolledClasses.includes(classId)));
+  const isClassFull =
+    typeof availableSpots !== "undefined" &&
+    classMemberIds.length >= availableSpots;
+
   return (
     <>
       <div
@@ -303,16 +312,24 @@ const ClassCard = ({
                 </div>
               </div>
             </div>{" "}
-            {/* Only show Book Class button if class is not booked and hideBookButton is false */}
-            {!isBooked &&
-              !hideBookButton &&
-              !user?.enrolledClasses?.includes(classId) && (
-                <div className="mt-auto pt-1">
-                  <button className="w-full py-2 font-medium text-black bg-[#00B919] rounded-full hover:bg-[#00A117] border border-black">
-                    Book Class
-                  </button>
-                </div>
-              )}
+            {/* Only show Book Class button if class is not booked, not full, and hideBookButton is false */}
+            {!isAlreadyBooked && !isClassFull && !hideBookButton ? (
+              <div className="mt-auto pt-1">
+                <button className="w-full py-2 font-medium text-black bg-[#00B919] rounded-full hover:bg-[#00A117] border border-black">
+                  Book Class
+                </button>
+              </div>
+            ) : !hideBookButton ? (
+              <div className="mt-auto pt-1">
+                <button
+                  className="w-full py-2 font-medium text-gray-500 bg-gray-200 border border-gray-400 rounded-full cursor-not-allowed"
+                  disabled
+                  title={isAlreadyBooked ? "Already Booked" : "Class Full"}
+                >
+                  {isAlreadyBooked ? "Already Booked" : "Class Full"}
+                </button>
+              </div>
+            ) : null}
           </div>
         </div>
       </div>
