@@ -53,7 +53,7 @@ const GroupCard = ({ group }) => {
           </div>
 
           {/* Group Name */}
-          <h2 className="mb-4 text-2xl font-semibold text-center text-gray-900 line-clamp-2">
+          <h2 className="mb-4 text-2xl font-semibold text-center text-gray-900 truncate whitespace-nowrap max-w-[200px] mx-auto">
             {groupName}
           </h2>
 

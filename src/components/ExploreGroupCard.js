@@ -512,12 +512,14 @@ const GroupCard = ({ group }) => {
             </div>
 
             {/* Join Button */}
-            <button
-              className="w-full py-2 font-medium text-black bg-[#ffbf00] rounded-full hover:bg-[#e5ae00] border border-black mt-auto"
-              onClick={handleJoinClick}
-            >
-              Join Group
-            </button>
+            {!(user && memberIds.includes(user.uid)) && (
+              <button
+                className="w-full py-2 font-medium text-black bg-[#ffbf00] rounded-full hover:bg-[#e5ae00] border border-black mt-auto"
+                onClick={handleJoinClick}
+              >
+                Join Group
+              </button>
+            )}
           </div>
         </div>
       </div>

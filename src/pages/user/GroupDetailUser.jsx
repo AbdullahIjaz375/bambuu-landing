@@ -865,7 +865,7 @@ const GroupDetailsUser = ({ onClose }) => {
             <div className="flex flex-col flex-1 min-h-0 gap-3 lg:flex-row md:gap-6">
               {/* Left sidebar */}
               <div
-                className={`w-full lg:w-1/4 p-3 sm:p-4 md:p-5 rounded-xl md:rounded-3xl flex-shrink-0 ${
+                className={`w-full lg:w-1/3 p-3 sm:p-4 md:p-5 rounded-xl md:rounded-3xl flex-shrink-0 ${
                   group.isPremium ? "bg-[#e6fce8]" : "bg-[#ffffea]"
                 }`}
               >
@@ -901,18 +901,11 @@ const GroupDetailsUser = ({ onClose }) => {
                         </span>
                       </div>
                     </div>
-                    <div className="flex justify-center gap-3 w-full mt-1">
-                      <div className="flex items-center gap-1">
-                        <img
-                          src={group.groupAdminImageUrl || "/images/panda.png"}
-                          alt="admin"
-                          className="w-3 h-3 rounded-full sm:w-4 sm:h-4 lg:w-5 lg:h-5"
-                        />
-                        <span className="text-xs text-gray-800 truncate max-w-[80px] sm:max-w-[100px] md:max-w-[150px]">
-                          {group.groupAdminName} (Admin)
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1">
+                    <div className="flex justify-between items-center w-full gap-x-20">
+                      <span className="text-md text-gray-800 truncate max-w-[120px] sm:max-w-[160px] md:max-w-[200px]">
+                        {group.groupAdminName} (Admin)
+                      </span>
+                      <div className="flex items-center gap-2">
                         <img
                           alt="bammbuu"
                           src="/svgs/users.svg"
@@ -922,7 +915,7 @@ const GroupDetailsUser = ({ onClose }) => {
                           {group?.memberIds.length}
                         </span>
                       </div>
-                    </div>{" "}
+                    </div>
                     <div className="w-full mt-1 sm:mt-2 md:mt-3 px-1">
                       <ShowDescription
                         description={group.groupDescription}

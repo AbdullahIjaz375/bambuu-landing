@@ -926,23 +926,13 @@ const ClassDetailsUser = ({ onClose }) => {
                   {/* Bottom Actions */}
                   <div className="w-full space-y-3">
                     <div className="space-y-1">
-                      <h1 className="text-lg font-semibold md:text-xl flex items-center gap-2">
-                        {classData.classType.includes("Premium")
-                          ? t("group-details.languageGroup")
-                          : t("group-details.members")}
-                        {classData.classType !== "Individual Premium" &&
-                          typeof classData.availableSpots !== "undefined" && (
-                            <span className="flex items-center text-base font-normal text-gray-700 ml-2">
-                              <img
-                                src="/svgs/users.svg"
-                                alt="members"
-                                className="w-5 h-5 mr-1 inline-block align-middle"
-                              />
-                              {classData.classMemberIds.length}/
-                              {classData.availableSpots}
-                            </span>
-                          )}
-                      </h1>
+                      <div className="flex flex-col items-center w-full">
+                        <h1 className="text-lg font-semibold md:text-xl flex items-center gap-2 justify-center">
+                          {classData.classType.includes("Premium")
+                            ? t("group-details.languageGroup")
+                            : t("group-details.members")}
+                        </h1>
+                      </div>
                       <ClassInfoCard
                         classData={classData}
                         groupTutor={groupTutor}

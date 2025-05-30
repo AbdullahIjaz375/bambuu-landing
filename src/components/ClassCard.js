@@ -319,14 +319,14 @@ const ClassCard = ({
                   Book Class
                 </button>
               </div>
-            ) : !hideBookButton ? (
+            ) : !hideBookButton && !isAlreadyBooked ? (
               <div className="mt-auto pt-1">
                 <button
                   className="w-full py-2 font-medium text-gray-500 bg-gray-200 border border-gray-400 rounded-full cursor-not-allowed"
                   disabled
-                  title={isAlreadyBooked ? "Already Booked" : "Class Full"}
+                  title={"Class Full"}
                 >
-                  {isAlreadyBooked ? "Already Booked" : "Class Full"}
+                  Class Full
                 </button>
               </div>
             ) : null}

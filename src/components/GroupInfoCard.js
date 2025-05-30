@@ -25,7 +25,7 @@ const GroupInfoCard = ({ group }) => {
   }, [group]);
 
   const baseCardClass =
-    "flex flex-row items-center w-full max-w-md gap-3 p-4 bg-white border rounded-3xl";
+    "flex flex-row items-center w-full max-w-2xl gap-8 p-5 bg-white border rounded-3xl";
   const imgClass = "object-cover rounded-2xl";
 
   // Function to truncate text to a specific number of words
@@ -43,7 +43,7 @@ const GroupInfoCard = ({ group }) => {
         src={tutorInfo?.photoUrl || "/images/panda.png"}
         className={`${imgClass} w-24 h-24 rounded-xl flex-shrink-0`}
       />
-      <div className="flex flex-col items-start w-full flex-1 gap-2 overflow-hidden">
+      <div className="flex flex-col items-start w-full flex-1 gap-2 overflow-hidden min-w-[220px]">
         <h1 className="text-lg font-medium truncate w-full">
           {tutorInfo?.name}
         </h1>
@@ -72,10 +72,7 @@ const GroupInfoCard = ({ group }) => {
             <div className="flex items-center gap-1">
               <img src="/svgs/users.svg" alt="users" />
               <span className="text-gray-700">
-                {group.memberIds ? group.memberIds.length : 0}{" "}
-                {group.memberIds && group.memberIds.length === 1
-                  ? "member"
-                  : "members"}
+                {group.memberIds ? group.memberIds.length : 0}
               </span>
             </div>
           </div>
