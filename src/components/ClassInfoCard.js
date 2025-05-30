@@ -57,7 +57,7 @@ const ClassInfoCard = ({ classData, groupTutor }) => {
   }, [classData]);
 
   const baseCardClass =
-    "flex flex-row items-center w-full max-w-md gap-3 p-2 bg-white border rounded-2xl";
+    "flex flex-row items-center w-full max-w-md gap-3 p-4 bg-white border rounded-2xl min-h-[80px]";
   const imgClass = "object-cover rounded-2xl";
 
   if (classData?.classType?.includes("Group Premium") && groupTutor) {
@@ -144,7 +144,7 @@ const ClassInfoCard = ({ classData, groupTutor }) => {
 
   if (classData?.classType?.includes("Individual Premium") && tutorInfo) {
     return (
-      <div className={`${baseCardClass} border-green-500`}>
+      <div className={`${baseCardClass} border-green-500 min-h-[140px]`}>
         <img
           alt={`${tutorInfo.name}'s profile`}
           src={tutorInfo.photoUrl || "/images/panda.png"}
@@ -153,12 +153,12 @@ const ClassInfoCard = ({ classData, groupTutor }) => {
         <div className="flex flex-col items-start flex-1 gap-1">
           <h1 className="text-lg font-medium">{tutorInfo.name}</h1>
           <p title={tutorInfo.bio} className="text-xs text-left text-gray-600">
-  {tutorInfo?.bio
-    ? tutorInfo.bio.includes(" ")
-      ? tutorInfo.bio.split(" ").slice(0, 12).join(" ") + "..."
-      : tutorInfo.bio.slice(0, 30) + "...."
-    : ""}
-</p>
+            {tutorInfo?.bio
+              ? tutorInfo.bio.includes(" ")
+                ? tutorInfo.bio.split(" ").slice(0, 12).join(" ") + "..."
+                : tutorInfo.bio.slice(0, 30) + "...."
+              : ""}
+          </p>
 
           <div className="flex items-center gap-4 text-xs">
             <div className="flex flex-col gap-0.5">
