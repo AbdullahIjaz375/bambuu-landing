@@ -125,6 +125,7 @@ const ExploreClassCard = ({
   cardHeight = "h-[340px]", // Adjusted height based on reference images
   cardWidth = "w-full max-w-sm", // Fixed width with max-width for consistency
   imageHeight = "h-[180px]", // Reduced image height to match reference
+  recurringSlots = [],
 }) => {
   const { t } = useTranslation();
   const { user, setUser } = useAuth();
@@ -298,6 +299,31 @@ const ExploreClassCard = ({
     typeof availableSpots !== "undefined" &&
     classMemberIds.length >= availableSpots;
 
+  // Helper to get the next available slot
+  const getNextAvailableSlot = () => {
+    if (!recurringSlots || recurringSlots.length === 0) return null;
+    const now = new Date();
+    // Find the first slot in the future
+    const nextSlot = recurringSlots.find((slot) => {
+      const slotDate = slot.createdAt
+        ? new Date(slot.createdAt.seconds * 1000)
+        : slot.seconds
+        ? new Date(slot.seconds * 1000)
+        : null;
+      return slotDate && slotDate > now;
+    });
+    return nextSlot || null;
+  };
+
+  // Use next available slot for display if recurring
+  const showRecurring =
+    recurrenceTypes &&
+    Array.isArray(recurrenceTypes) &&
+    recurrenceTypes.length > 0 &&
+    recurrenceTypes[0] !== "One-time" &&
+    recurrenceTypes[0] !== "None";
+  const nextSlot = getNextAvailableSlot();
+
   // If we don't have a valid class ID or a valid class name, don't render the card
   if (!validClassId || !className) {
     return null;
@@ -390,26 +416,21 @@ const ExploreClassCard = ({
           <div className="flex flex-col flex-1 w-full px-3 pt-2 pb-2 justify-between">
             <div className="flex flex-col w-full space-y-1.5">
               {/* Time and Date */}{" "}
-              <div className="flex flex-row items-center justify-between w-full">
-                <div className="flex items-center space-x-2">
-                  <img
-                    alt={t("exploreClassCard.altText.clock")}
-                    src="/svgs/clock.svg"
-                    className="w-4 h-4"
-                  />
+              <div className="flex flex-row items-center justify-between w-full mt-2">
+                <div className="flex items-center space-x-1">
+                  <Clock className="w-4 h-4" />
                   <span className="text-sm text-[#454545]">
-                    {formatTime(classDateTime)} ({classDuration}{" "}
-                    {t("exploreClassCard.labels.min")})
+                    {showRecurring && nextSlot
+                      ? formatTime(nextSlot.createdAt || nextSlot)
+                      : formatTime(classDateTime)}
                   </span>
-                </div>{" "}
-                <div className="flex items-center space-x-2">
-                  <img
-                    alt={t("exploreClassCard.altText.calendar")}
-                    src="/svgs/calendar.svg"
-                    className="w-4 h-4"
-                  />
+                </div>
+                <div className="flex items-center space-x-1">
+                  <Calendar className="w-4 h-4" />
                   <span className="text-sm text-[#454545]">
-                    {formatDate(classDateTime)}
+                    {showRecurring && nextSlot
+                      ? formatDate(nextSlot.createdAt || nextSlot)
+                      : formatDate(classDateTime)}
                   </span>
                 </div>
               </div>

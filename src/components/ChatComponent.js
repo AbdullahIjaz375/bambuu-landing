@@ -48,6 +48,7 @@ const CustomChatComponent = ({
   const [savedResources, setSavedResources] = useState([]);
   const [selectedResources, setSelectedResources] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isSending, setIsSending] = useState(false);
 
   const dropdownRef = useRef(null);
   const messagesEndRef = useRef(null);
@@ -193,16 +194,17 @@ const CustomChatComponent = ({
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!inputMessage.trim() || !channel) return;
-
+    if (!inputMessage.trim() || !channel || isSending) return;
+    setIsSending(true);
     try {
       await channel.sendMessage({
         text: inputMessage,
       });
-
       setInputMessage("");
     } catch (error) {
       console.error("Error sending message:", error);
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -607,7 +609,7 @@ const CustomChatComponent = ({
           <button
             type="submit"
             className="p-3 ml-3 text-black bg-[#FFBF00] rounded-full hover:bg-yellow-500"
-            disabled={!inputMessage.trim()}
+            disabled={!inputMessage.trim() || isSending}
           >
             <img src="/svgs/chat-send.svg" alt="Send" className="w-6 h-6" />
           </button>

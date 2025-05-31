@@ -33,6 +33,7 @@ const ClassCard = ({
   hideBookButton = false, // New prop to hide the Book Class button completely  cardHeight = "h-[340px]", // Consistent height for all cards
   cardWidth = "w-full max-w-lg", // Further increased width from max-w-md to max-w-lg
   imageHeight = "h-[210px]", // Slightly taller image
+  recurringSlots = [], // Add recurringSlots prop
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
@@ -166,6 +167,34 @@ const ClassCard = ({
     typeof availableSpots !== "undefined" &&
     classMemberIds.length >= availableSpots;
 
+  // Helper to get the next available slot
+  const getNextAvailableSlot = () => {
+    if (!recurringSlots || recurringSlots.length === 0) return null;
+    const now = new Date();
+    // Find the first slot in the future
+    const nextSlot = recurringSlots.find((slot) => {
+      const slotDate = slot.createdAt
+        ? new Date(slot.createdAt.seconds * 1000)
+        : slot.seconds
+        ? new Date(slot.seconds * 1000)
+        : null;
+      return slotDate && slotDate > now;
+    });
+    return nextSlot || null;
+  };
+
+  // Use next available slot for display if recurring
+  const nextSlot = getNextAvailableSlot();
+  const showRecurring =
+    (recurrenceType &&
+      recurrenceType !== "One-time" &&
+      recurrenceType !== "None") ||
+    (recurrenceTypes &&
+      Array.isArray(recurrenceTypes) &&
+      recurrenceTypes.length > 0 &&
+      recurrenceTypes[0] !== "One-time" &&
+      recurrenceTypes[0] !== "None");
+
   return (
     <>
       <div
@@ -269,7 +298,9 @@ const ClassCard = ({
                     className="w-4 h-4"
                   />
                   <span className="text-sm text-[#454545]">
-                    {formatTime(classDateTime)}
+                    {showRecurring && nextSlot
+                      ? formatTime(nextSlot.createdAt || nextSlot)
+                      : formatTime(classDateTime)}
                   </span>
                 </div>
                 <div className="flex items-center space-x-1">
@@ -279,7 +310,9 @@ const ClassCard = ({
                     className="w-4 h-4"
                   />
                   <span className="text-sm text-[#454545]">
-                    {getDateDisplay(classDateTime)}
+                    {showRecurring && nextSlot
+                      ? getDateDisplay(nextSlot.createdAt || nextSlot)
+                      : getDateDisplay(classDateTime)}
                   </span>
                 </div>
               </div>

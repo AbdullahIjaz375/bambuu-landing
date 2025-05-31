@@ -675,7 +675,8 @@
       "learners": "{{language}} learners",
       "leader": "Leader",
       "bambuuPlus": "Bammbuu+",
-      "classFull": "Class Full"
+      "classFull": "Class Full",
+      "alreadyBooked": "Already Booked"
     },
     "confirmBooking": {
       "title": "Are you sure you want to book this class?",

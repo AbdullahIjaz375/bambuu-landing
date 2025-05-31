@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   X,
   Clock,
@@ -40,8 +40,12 @@ const InstructorProfileUser = () => {
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const channelRef = useRef(null); // Cache for the channel
+  const [isCreatingChannel, setIsCreatingChannel] = useState(false); // Debounce state
 
   const sendMessageClicked = async () => {
+    if (isCreatingChannel) return; // Prevent multiple rapid requests
+    setIsCreatingChannel(true);
     try {
       // Fetch the other user's name for the channel name
       let otherUserName = "";
@@ -93,8 +97,16 @@ const InstructorProfileUser = () => {
         );
       }
 
+      // Use cached channel if available
+      if (channelRef.current && channelRef.current.id === channelId) {
+        navigate(`/messagesUser/${channelId}`);
+        setIsCreatingChannel(false);
+        return;
+      }
+
       // Create or get the channel
       const channel = await createStreamChannel(channelData);
+      channelRef.current = channel; // Cache the channel
 
       // Wait for the channel to appear in the user's channel list
       let found = false;
@@ -126,6 +138,8 @@ const InstructorProfileUser = () => {
     } catch (error) {
       console.error("Error creating chat channel:", error);
       // Show error to user if needed
+    } finally {
+      setIsCreatingChannel(false);
     }
   };
 
