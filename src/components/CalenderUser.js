@@ -43,7 +43,7 @@ const CalendarUser = ({ onDateSelect }) => {
       const q = query(
         classesRef,
         where("classDateTime", ">=", startDate),
-        where("classDateTime", "<=", endDate)
+        where("classDateTime", "<=", endDate),
       );
 
       const querySnapshot = await getDocs(q);
@@ -175,14 +175,14 @@ const CalendarUser = ({ onDateSelect }) => {
 
   return (
     <>
-      <div className="w-full max-w-4xl p-3 bg-white border border-amber-400 rounded-3xl scrollbar-hide">
-        <div className="flex flex-col justify-between gap-4 mb-4 sm:flex-row sm:items-center sm:mb-6">
+      <div className="scrollbar-hide w-full max-w-4xl rounded-3xl border border-amber-400 bg-white p-3">
+        <div className="mb-4 flex flex-col justify-between gap-4 sm:mb-6 sm:flex-row sm:items-center">
           <div className="flex items-center gap-2">
             <button
               onClick={() => navigateMonth("prev")}
               className="p-1 text-gray-600 hover:text-gray-800"
             >
-              <ChevronLeft className="w-5 h-5" />
+              <ChevronLeft className="h-5 w-5" />
             </button>
             <h2 className="text-lg font-medium text-gray-800 sm:text-xl">
               {formatHeader(date)}
@@ -191,13 +191,13 @@ const CalendarUser = ({ onDateSelect }) => {
               onClick={() => navigateMonth("next")}
               className="p-1 text-gray-600 hover:text-gray-800"
             >
-              <ChevronRight className="w-5 h-5" />
+              <ChevronRight className="h-5 w-5" />
             </button>
           </div>
 
-          <div className="relative inline-flex p-1 bg-gray-100 border border-gray-300 rounded-full">
+          <div className="relative inline-flex rounded-full border border-gray-300 bg-gray-100 p-1">
             <div
-              className="absolute top-0 left-0 h-full transition-all duration-300 ease-in-out border border-green-900 rounded-full bg-green-50"
+              className="absolute left-0 top-0 h-full rounded-full border border-green-900 bg-green-50 transition-all duration-300 ease-in-out"
               style={{
                 transform: `translateX(${view === "weekly" ? "0" : "100%"})`,
                 width: "50%",
@@ -205,13 +205,13 @@ const CalendarUser = ({ onDateSelect }) => {
             />
             <button
               onClick={() => handleViewChange("weekly")}
-              className="relative px-3 py-1 text-sm font-medium text-green-900 transition-colors rounded-full z-1 "
+              className="z-1 relative rounded-full px-3 py-1 text-sm font-medium text-green-900 transition-colors"
             >
               Weekly
             </button>
             <button
               onClick={() => handleViewChange("monthly")}
-              className="relative px-3 py-1 text-sm font-medium text-green-900 transition-colors rounded-full z-1 "
+              className="z-1 relative rounded-full px-3 py-1 text-sm font-medium text-green-900 transition-colors"
             >
               Monthly
             </button>
@@ -219,29 +219,27 @@ const CalendarUser = ({ onDateSelect }) => {
         </div>
 
         <div
-          className={`overflow-hidden transition-all duration-300 ease-in-out  ${
+          className={`overflow-hidden transition-all duration-300 ease-in-out ${
             view === "monthly" ? "max-h-96" : "max-h-24"
           }`}
         >
           {view === "weekly" ? (
-            <div className="flex items-center justify-between gap-1 pb-2 overflow-x-auto scrollbar-hide ">
+            <div className="scrollbar-hide flex items-center justify-between gap-1 overflow-x-auto pb-2">
               <button
                 onClick={() => navigateWeek("prev")}
-                className="p-1 text-gray-600 hover:text-gray-800 shrink-0"
+                className="shrink-0 p-1 text-gray-600 hover:text-gray-800"
               >
-                <ChevronLeft className="w-5 h-5 text-gray-800 " />
+                <ChevronLeft className="h-5 w-5 text-gray-800" />
               </button>
 
-              <div className="flex justify-between flex-1 gap-1 sm:gap-2">
+              <div className="flex flex-1 justify-between gap-1 sm:gap-2">
                 {weekDates.map((day) => (
                   <button
                     key={day.toISOString()}
-                    className={`flex flex-col items-center justify-center rounded-full 
-                    py-1 sm:py-3 px-1 lg:px-3 transition-colors shrink-0
-                    ${
+                    className={`flex shrink-0 flex-col items-center justify-center rounded-full px-1 py-1 transition-colors sm:py-3 lg:px-3 ${
                       isToday(day)
                         ? "bg-green-500 text-white"
-                        : "bg-white border border-gray-400"
+                        : "border border-gray-400 bg-white"
                     }`}
                     onClick={() => handleDateSelect(day)}
                   >
@@ -257,22 +255,22 @@ const CalendarUser = ({ onDateSelect }) => {
 
               <button
                 onClick={() => navigateWeek("next")}
-                className="p-1 text-gray-600 hover:text-gray-800 shrink-0"
+                className="shrink-0 p-1 text-gray-600 hover:text-gray-800"
               >
-                <ChevronRight className="w-5 h-5 text-gray-800 " />
+                <ChevronRight className="h-5 w-5 text-gray-800" />
               </button>
             </div>
           ) : (
             <div
               className={`transform transition-all duration-300 ease-in-out ${
-                isTransitioning ? "opacity-0 scale-95" : "opacity-100 scale-100"
+                isTransitioning ? "scale-95 opacity-0" : "scale-100 opacity-100"
               }`}
             >
-              <div className="grid grid-cols-7 gap-1 mb-2">
+              <div className="mb-2 grid grid-cols-7 gap-1">
                 {weekDayLabels.map((day) => (
                   <div
                     key={day}
-                    className="py-1 text-xs font-medium text-center text-gray-600 sm:text-sm"
+                    className="py-1 text-center text-xs font-medium text-gray-600 sm:text-sm"
                   >
                     {day}
                   </div>
@@ -282,17 +280,13 @@ const CalendarUser = ({ onDateSelect }) => {
                 {monthDates.map(({ date: day, isCurrentMonth }) => (
                   <button
                     key={day.toISOString()}
-                    className={`
-                    flex flex-col items-center justify-center rounded-full
-                    py-1 sm:py-2 px-1 sm:px-2 transition-colors text-center
-                    ${
+                    className={`flex flex-col items-center justify-center rounded-full px-1 py-1 text-center transition-colors sm:px-2 sm:py-2 ${
                       isToday(day)
                         ? "bg-green-500 text-white"
                         : isCurrentMonth
-                        ? "bg-white border border-gray-400 hover:bg-gray-50"
-                        : "text-gray-400 border border-gray-200 hover:bg-gray-50"
-                    }
-                  `}
+                          ? "border border-gray-400 bg-white hover:bg-gray-50"
+                          : "border border-gray-200 text-gray-400 hover:bg-gray-50"
+                    } `}
                     onClick={() => handleDateSelect(day)}
                   >
                     <span className="text-xs font-medium sm:text-base">
@@ -312,10 +306,10 @@ const CalendarUser = ({ onDateSelect }) => {
       <Modal
         isOpen={isModalOpen}
         onRequestClose={() => setIsModalOpen(false)}
-        className="p-10 mx-auto mt-10 bg-white shadow-xl rounded-3xl max-w-7xl font-urbanist z-50"
+        className="z-50 mx-auto mt-10 max-w-7xl rounded-3xl bg-white p-10 font-urbanist shadow-xl"
         overlayClassName="fixed inset-0 bg-black bg-opacity-50 z-40"
       >
-        <div className="flex items-center justify-between mb-6">
+        <div className="mb-6 flex items-center justify-between">
           <h2 className="text-3xl font-semibold">
             {date?.toLocaleDateString("en-US", {
               day: "numeric",
@@ -333,7 +327,7 @@ const CalendarUser = ({ onDateSelect }) => {
 
         {loading ? (
           <div className="py-8 text-center">
-            <div className="flex items-center justify-center flex-1">
+            <div className="flex flex-1 items-center justify-center">
               <ClipLoader color="#14B82C" size={50} />
             </div>
           </div>

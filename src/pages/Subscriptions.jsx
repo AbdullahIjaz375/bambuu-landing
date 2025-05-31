@@ -39,7 +39,10 @@ const Subscriptions = () => {
   const checkNewUserEligibility = async (userId) => {
     try {
       const userDoc = await getDocs(
-        query(collection(db, "user_accounts"), where("email", "==", user.email))
+        query(
+          collection(db, "user_accounts"),
+          where("email", "==", user.email),
+        ),
       );
 
       if (!userDoc.empty) {
@@ -101,7 +104,7 @@ const Subscriptions = () => {
           const buyOneGetTwoOffer = offersData.find(
             (plan) =>
               plan.type === "buy_one_get_two" ||
-              plan.title?.includes("Buy one class credit get 2 classes free")
+              plan.title?.includes("Buy one class credit get 2 classes free"),
           );
 
           if (buyOneGetTwoOffer) {
@@ -262,20 +265,20 @@ const Subscriptions = () => {
     return (
       <div
         onClick={() => onSelect(plan)}
-        className={`flex flex-col h-full rounded-3xl cursor-pointer transition-all duration-200 ${
+        className={`flex h-full cursor-pointer flex-col rounded-3xl transition-all duration-200 ${
           isSelected
-            ? "border-2 border-[#14B82C] shadow-lg transform scale-[1.02] bg-[#E6FDE9]"
-            : "border border-[#B0B0B0] hover:border-[#14B82C] hover:shadow-md bg-white"
+            ? "scale-[1.02] transform border-2 border-[#14B82C] bg-[#E6FDE9] shadow-lg"
+            : "border border-[#B0B0B0] bg-white hover:border-[#14B82C] hover:shadow-md"
         } ${isFree && hasActiveFreeTrial ? "relative" : ""}`}
       >
         {plan.isPopular ? (
-          <div className="px-4 py-1.5 text-sm font-semibold bg-[#FFBF00] rounded-t-3xl text-center">
+          <div className="rounded-t-3xl bg-[#FFBF00] px-4 py-1.5 text-center text-sm font-semibold">
             {t("plans-modal.popular-badge")}
           </div>
         ) : (
           <div className="h-[30px]" />
         )}
-        <div className="flex flex-col flex-grow p-5 space-y-4 text-center">
+        <div className="flex flex-grow flex-col space-y-4 p-5 text-center">
           <div className="space-y-4">
             <div className="text-4xl font-semibold">
               {plan.price === 0 ? "FREE" : `$${plan.price}`}
@@ -286,7 +289,7 @@ const Subscriptions = () => {
               )}
             </div>
             <div>
-              <h3 className="mb-2 font-medium text-md">{plan.title}</h3>
+              <h3 className="text-md mb-2 font-medium">{plan.title}</h3>
               <p className="text-sm text-black">{plan.description}</p>
             </div>
           </div>
@@ -301,7 +304,7 @@ const Subscriptions = () => {
                   <img
                     alt="crown"
                     src="/svgs/crown-new.svg"
-                    className="w-4 h-4"
+                    className="h-4 w-4"
                   />
                   <div>
                     <div className="font-sm">{feature.title}</div>
@@ -322,20 +325,20 @@ const Subscriptions = () => {
     return (
       <div
         onClick={() => onSelect(plan)}
-        className={`flex flex-col h-full rounded-3xl cursor-pointer transition-all duration-200 ${
+        className={`flex h-full cursor-pointer flex-col rounded-3xl transition-all duration-200 ${
           isSelected
-            ? "border-2 border-[#14B82C] shadow-lg transform scale-[1.02] bg-[#E6FDE9]"
-            : "border border-[#B0B0B0] hover:border-[#14B82C] hover:shadow-md bg-white"
+            ? "scale-[1.02] transform border-2 border-[#14B82C] bg-[#E6FDE9] shadow-lg"
+            : "border border-[#B0B0B0] bg-white hover:border-[#14B82C] hover:shadow-md"
         }`}
       >
         {plan.isPopular ? (
-          <div className="px-4 py-1.5 text-sm font-semibold bg-[#FFBF00] rounded-t-3xl text-center">
+          <div className="rounded-t-3xl bg-[#FFBF00] px-4 py-1.5 text-center text-sm font-semibold">
             {t("plans-modal.popular-badge")}
           </div>
         ) : (
           <div className="h-[30px]" />
         )}
-        <div className="flex flex-col flex-grow p-6 space-y-6 text-center">
+        <div className="flex flex-grow flex-col space-y-6 p-6 text-center">
           <div className="space-y-4">
             <div className="text-4xl font-bold">${plan.price}</div>
             <h3 className="text-lg font-medium">{plan.title}</h3>
@@ -353,20 +356,20 @@ const Subscriptions = () => {
     return (
       <div
         onClick={() => onSelect(plan)}
-        className={`flex flex-col h-full rounded-3xl cursor-pointer transition-all duration-200 ${
+        className={`flex h-full cursor-pointer flex-col rounded-3xl transition-all duration-200 ${
           isSelected
-            ? "border-2 border-[#14B82C] shadow-lg transform scale-[1.02] bg-[#E6FDE9]"
-            : "border border-[#B0B0B0] hover:border-[#14B82C] hover:shadow-md bg-white"
+            ? "scale-[1.02] transform border-2 border-[#14B82C] bg-[#E6FDE9] shadow-lg"
+            : "border border-[#B0B0B0] bg-white hover:border-[#14B82C] hover:shadow-md"
         }`}
       >
         {plan.isPopular ? (
-          <div className="px-4 py-1.5 text-sm font-semibold bg-[#FFBF00] rounded-t-3xl text-center">
+          <div className="rounded-t-3xl bg-[#FFBF00] px-4 py-1.5 text-center text-sm font-semibold">
             {t("plans-modal.popular-badge")}
           </div>
         ) : (
           <div class="h-[30px]" />
         )}
-        <div className="flex flex-col flex-grow p-6 space-y-6 text-center">
+        <div className="flex flex-grow flex-col space-y-6 p-6 text-center">
           <div className="space-y-4">
             <div className="text-4xl font-bold">
               {plan.price === 0 ? "FREE" : `$${plan.price}`}
@@ -391,7 +394,7 @@ const Subscriptions = () => {
 
   if (isLoadingPlans) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
         <ClipLoader color="#14B82C" size={50} />
       </div>
     );
@@ -399,12 +402,12 @@ const Subscriptions = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
         <div className="text-center">
-          <p className="text-red-500 mb-4">{error}</p>
+          <p className="mb-4 text-red-500">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="px-4 py-2 text-[#042F0C] bg-[#14B82C] rounded-full"
+            className="rounded-full bg-[#14B82C] px-4 py-2 text-[#042F0C]"
           >
             Try Again
           </button>
@@ -414,9 +417,9 @@ const Subscriptions = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-4xl mx-auto bg-white rounded-3xl shadow p-6">
-        <div className="flex items-center justify-between mb-4">
+    <div className="min-h-screen bg-gray-50 px-4 py-8">
+      <div className="mx-auto max-w-4xl rounded-3xl bg-white p-6 shadow">
+        <div className="mb-4 flex items-center justify-between">
           <h2 className="text-2xl font-medium">{t("plans-modal.title")}</h2>
           {/* Optional: Back button */}
           <button
@@ -427,12 +430,12 @@ const Subscriptions = () => {
           </button>
         </div>
 
-        <div className="flex justify-center mb-4">
-          <div className="inline-flex bg-gray-100 border border-gray-300 rounded-full">
+        <div className="mb-4 flex justify-center">
+          <div className="inline-flex rounded-full border border-gray-300 bg-gray-100">
             <button
-              className={`px-6 py-1 rounded-full text-[#042F0C] text-sm font-medium transition-colors ${
+              className={`rounded-full px-6 py-1 text-sm font-medium text-[#042F0C] transition-colors ${
                 activeTab === "subscriptions"
-                  ? "bg-[#FFBF00] border border-[#042F0C]"
+                  ? "border border-[#042F0C] bg-[#FFBF00]"
                   : "bg-transparent"
               }`}
               onClick={() => handleTabChange("subscriptions")}
@@ -440,20 +443,31 @@ const Subscriptions = () => {
               {t("plans-modal.tabs.subscriptions")}
             </button>
             <button
-              className={`px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors ${
+              className={`text-md rounded-full px-6 py-2 font-medium text-[#042F0C] transition-colors ${
                 activeTab === "credits"
-                  ? "bg-[#FFBF00] border border-[#042F0C]"
+                  ? "border border-[#042F0C] bg-[#FFBF00]"
                   : "bg-transparent"
               }`}
               onClick={() => handleTabChange("credits")}
             >
               {t("plans-modal.tabs.credits")}
             </button>
+            <button
+              className={`text-md rounded-full px-6 py-2 font-medium text-[#042F0C] transition-colors ${
+                activeTab === "exam"
+                  ? "border border-[#042F0C] bg-[#FFBF00]"
+                  : "bg-transparent"
+              }`}
+              onClick={() => handleTabChange("exam")}
+            >
+              Exam Preparation
+            </button>
+
             {showOffers && (
               <button
-                className={`px-6 py-2 rounded-full text-[#042F0C] text-sm font-medium transition-colors ${
+                className={`rounded-full px-6 py-2 text-sm font-medium text-[#042F0C] transition-colors ${
                   activeTab === "offers"
-                    ? "bg-[#FFBF00] border border-[#042F0C]"
+                    ? "border border-[#042F0C] bg-[#FFBF00]"
                     : "bg-transparent"
                 }`}
                 onClick={() => handleTabChange("offers")}
@@ -465,7 +479,7 @@ const Subscriptions = () => {
         </div>
 
         {activeTab === "subscriptions" && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {subscriptionPlans.map((plan, index) => (
               <SubscriptionPlan
                 key={index}
@@ -480,7 +494,7 @@ const Subscriptions = () => {
 
         {activeTab === "credits" && (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {creditPlans.map((plan, index) => (
                 <CreditPlan
                   key={index}
@@ -492,7 +506,7 @@ const Subscriptions = () => {
               ))}
             </div>
 
-            <div className="flex items-center gap-2 mt-2 text-sm text-red-500">
+            <div className="mt-2 flex items-center gap-2 text-sm text-red-500">
               <svg
                 width="16"
                 height="16"
@@ -511,7 +525,7 @@ const Subscriptions = () => {
         )}
 
         {activeTab === "offers" && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {offerPlans.map((plan, index) => (
               <OfferPlan
                 key={index}
@@ -524,6 +538,58 @@ const Subscriptions = () => {
           </div>
         )}
 
+        {activeTab === "exam" && (
+          <div className="flex flex-col items-center justify-center py-8">
+            <div className="w-full max-w-md rounded-3xl border border-gray-200 bg-white p-8 text-center shadow-lg">
+              <div className="mb-4 rounded-t-3xl bg-[#FFBF00] py-2 font-semibold text-[#042F0C]">
+                Designed for language exams
+              </div>
+              <div className="mb-2 text-4xl font-bold">$499</div>
+              <div className="mb-4 text-lg font-semibold">
+                Immersive Exam Prep Plan
+              </div>
+              <ul className="mb-4 space-y-2 text-base text-gray-800">
+                <li>10 live 1:1 classes with certified tutors</li>
+                <li>Unlimited instructor-led group conversation classes</li>
+                <li>Personalized support from the bambuu team</li>
+                <li>
+                  Money back guarantee <span className="font-bold">**</span>
+                </li>
+              </ul>
+              <div className="mb-6 text-xs text-gray-500">
+                Package features are provided for 1 month and do not
+                automatically renew.
+                <br />
+                We recommend 2 months of this package to achieve best results.
+              </div>
+              <button
+                className="mb-2 w-full rounded-full bg-[#14B82C] py-3 text-lg font-semibold text-white transition-colors hover:bg-[#12a528]"
+                onClick={() => {
+                  /* Add your purchase logic here */
+                }}
+              >
+                Buy Now
+              </button>
+              <button
+                className="w-full rounded-full border border-[#042F0C] bg-gray-100 py-2 font-medium text-[#042F0C] transition-colors hover:bg-gray-200"
+                onClick={() => {
+                  /* Add your learn more logic here */
+                }}
+              >
+                Learn More
+              </button>
+              <div className="mt-6 text-left text-[10px] text-gray-500">
+                <span className="font-bold">**</span>Money back guarantee
+                requires the student to complete the bambuu recommended plan.
+                Bambuu will refund the student if the student's language goal,
+                as discussed in the introductory call, isn't achieved after
+                completing 2 months of the Immersive Exam Prep plan – completing
+                all 10 1:1 classes and 3 live group classes per month.
+              </div>
+            </div>
+          </div>
+        )}
+
         {selectedPlan && (
           <div className="mt-8">
             <button
@@ -531,22 +597,22 @@ const Subscriptions = () => {
               disabled={
                 isLoading || (hasActiveFreeTrial && selectedPlan.price === 0)
               }
-              className={`w-full max-w-md mx-auto block py-3 text-[#042F0C] transition-colors ${
+              className={`mx-auto block w-full max-w-md py-3 text-[#042F0C] transition-colors ${
                 hasActiveFreeTrial && selectedPlan.price === 0
-                  ? "bg-gray-300 cursor-not-allowed"
+                  ? "cursor-not-allowed bg-gray-300"
                   : "bg-[#14B82C] hover:bg-[#12a528]"
               } rounded-full border border-[#042F0C] disabled:opacity-50`}
             >
               {isLoading
                 ? t("plans-modal.buttons.loading")
                 : hasActiveFreeTrial && selectedPlan.price === 0
-                ? "Already Activated"
-                : selectedPlan.type === "free_trial"
-                ? t("plans-modal.buttons.subscribe")
-                : `${t("plans-modal.buttons.buy")} - $${selectedPlan.price}`}
+                  ? "Already Activated"
+                  : selectedPlan.type === "free_trial"
+                    ? t("plans-modal.buttons.subscribe")
+                    : `${t("plans-modal.buttons.buy")} - $${selectedPlan.price}`}
             </button>
             {hasActiveFreeTrial && selectedPlan.price === 0 && (
-              <p className="mt-2 text-sm text-center text-orange-500">
+              <p className="mt-2 text-center text-sm text-orange-500">
                 You already have an active free subscription
               </p>
             )}
@@ -558,13 +624,13 @@ const Subscriptions = () => {
       <Modal
         isOpen={showFreeTrialModal}
         onRequestClose={() => !isLoading && setShowFreeTrialModal(false)}
-        className="fixed w-full max-w-md p-6 transform -translate-x-1/2 -translate-y-1/2 bg-white outline-none top-1/2 left-1/2 rounded-3xl"
+        className="fixed left-1/2 top-1/2 w-full max-w-md -translate-x-1/2 -translate-y-1/2 transform rounded-3xl bg-white p-6 outline-none"
         overlayClassName="fixed inset-0 bg-black bg-opacity-50 z-50"
       >
         <div className="text-center">
           {!freeTrialActivated ? (
             <>
-              <div className="flex justify-center mb-4">
+              <div className="mb-4 flex justify-center">
                 <img alt="Free Trial" src="/svgs/account-created.svg" />
               </div>
               <h2 className="mb-4 text-2xl font-semibold">
@@ -578,14 +644,14 @@ const Subscriptions = () => {
                 <button
                   onClick={() => setShowFreeTrialModal(false)}
                   disabled={isLoading}
-                  className="w-full py-2 text-gray-700 bg-gray-200 rounded-full hover:bg-gray-300"
+                  className="w-full rounded-full bg-gray-200 py-2 text-gray-700 hover:bg-gray-300"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={activateFreeTrial}
                   disabled={isLoading}
-                  className="w-full py-2 text-[#042F0C] bg-[#14B82C] rounded-full border border-[#042F0C] disabled:opacity-50"
+                  className="w-full rounded-full border border-[#042F0C] bg-[#14B82C] py-2 text-[#042F0C] disabled:opacity-50"
                 >
                   {isLoading ? "Activating..." : "Activate"}
                 </button>
@@ -593,7 +659,7 @@ const Subscriptions = () => {
             </>
           ) : (
             <>
-              <div className="flex justify-center mb-4">
+              <div className="mb-4 flex justify-center">
                 <img alt="Success" src="/svgs/account-created.svg" />
               </div>
               <h2 className="mb-4 text-2xl font-semibold text-gray-900">
@@ -608,7 +674,7 @@ const Subscriptions = () => {
                   setShowFreeTrialModal(false);
                   window.location.href = "/learn";
                 }}
-                className="w-full py-2 text-[#042F0C] bg-[#14B82C] rounded-full border border-[#042F0C]"
+                className="w-full rounded-full border border-[#042F0C] bg-[#14B82C] py-2 text-[#042F0C]"
               >
                 Start Learning
               </button>

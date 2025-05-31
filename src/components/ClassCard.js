@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Clock, Calendar, Users, User, X } from "lucide-react";
-import Modal from "react-modal";
 import { useNavigate } from "react-router-dom";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebaseConfig";
+import Modal from "react-modal";
 import { useAuth } from "../context/AuthContext";
 
 Modal.setAppElement("#root");

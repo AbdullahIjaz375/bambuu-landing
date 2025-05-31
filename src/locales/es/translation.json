@@ -14,7 +14,8 @@
     "tutor": {
       "home": "Inicio",
       "students": "Estudiantes",
-      "resources": "Recursos"
+      "resources": "Recursos",
+      "examPreparation": "Preparación de Exámenes"
     }
   },
   "onboarding": {

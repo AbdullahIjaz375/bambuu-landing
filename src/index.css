@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: "Tanker";
+  src: url("/public/fonts/Tanker-Regular.woff") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+}
+
 /* Custom CSS to hide the scrollbar */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
