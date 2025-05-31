@@ -108,7 +108,7 @@ const CalendarTutor = ({ onNext }) => {
                 </div>
               ))}
             </div>
-            {/* Reduce vertical padding and margin for calendar cells */}
+
             <div className="ml-0 mr-5 grid grid-cols-7 gap-x-1 sm:gap-x-6 sm:gap-y-2 sm:p-1">
               {monthDates
                 .filter(({ isCurrentMonth }) => isCurrentMonth)

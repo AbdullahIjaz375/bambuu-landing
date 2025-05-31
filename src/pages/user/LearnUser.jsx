@@ -34,6 +34,8 @@ import { messaging } from "../../firebaseConfig";
 import EmptyState from "../../components/EmptyState";
 import CalendarUser from "../../components/CalenderUser";
 import TutorialOverlay from "../../components/TutorialOverlay";
+import StartExamPrep from "./StartExamPrep";
+import IntoductoryCallDone from "./ExamPreparation/IntoductoryCallDone";
 // This component must be defined at the top level of your file,
 // outside the LearnUser component but still within the file
 const LanguageCardsSection = ({ languageCards, languageData, navigate }) => {
@@ -102,11 +104,11 @@ const LanguageCardsSection = ({ languageCards, languageData, navigate }) => {
       {/* Left navigation arrow */}
       <div
         ref={leftArrowRef}
-        className="absolute left-0 top-1/2 -translate-y-1/2 z-10"
+        className="absolute left-0 top-1/2 z-10 -translate-y-1/2"
         style={{ display: "none" }}
       >
         <button
-          className="flex items-center justify-center w-12 h-12 rounded-full shadow-2xl bg-white  border  ml-4 hover:bg-gray-100"
+          className="ml-4 flex h-12 w-12 items-center justify-center rounded-full border bg-white shadow-2xl hover:bg-gray-100"
           onClick={scrollLeft}
         >
           <ChevronLeft size={30} color="#14B82C" />
@@ -116,10 +118,10 @@ const LanguageCardsSection = ({ languageCards, languageData, navigate }) => {
       {/* Right navigation arrow */}
       <div
         ref={rightArrowRef}
-        className="absolute right-0 top-1/2 -translate-y-1/2 z-10"
+        className="absolute right-0 top-1/2 z-10 -translate-y-1/2"
       >
         <button
-          className="flex items-center justify-center w-12 h-12 rounded-full shadow-2xl bg-white  border  mr-4 hover:bg-gray-100"
+          className="mr-4 flex h-12 w-12 items-center justify-center rounded-full border bg-white shadow-2xl hover:bg-gray-100"
           onClick={scrollRight}
         >
           <ChevronRight size={30} color="#14B82C" />
@@ -129,7 +131,7 @@ const LanguageCardsSection = ({ languageCards, languageData, navigate }) => {
       {/* Language cards container */}
       <div
         ref={containerRef}
-        className="flex gap-4 pb-4 overflow-x-auto px-4"
+        className="flex gap-4 overflow-x-auto px-4 pb-4"
         onScroll={updateArrows}
         style={{
           scrollbarWidth: "none",
@@ -144,27 +146,27 @@ const LanguageCardsSection = ({ languageCards, languageData, navigate }) => {
           return (
             <div
               key={card.id}
-              className={`flex items-center hover:cursor-pointer gap-3 p-4 ${card.bgColor} rounded-3xl border ${card.borderColor} w-[250px] sm:w-[380px] flex-shrink-0`}
+              className={`flex items-center gap-3 p-4 hover:cursor-pointer ${card.bgColor} rounded-3xl border ${card.borderColor} w-[250px] flex-shrink-0 sm:w-[380px]`}
               onClick={() => navigate(card.path)}
             >
-              <div className="flex-shrink-0 w-12 h-12 overflow-hidden rounded-full sm:w-20 sm:h-20">
+              <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-full sm:h-20 sm:w-20">
                 <img
                   src={card.imgSrc}
                   alt={card.alt}
-                  className="object-cover w-full h-full"
+                  className="h-full w-full object-cover"
                 />
               </div>
               <div className="flex flex-col items-start justify-between space-y-2">
-                <span className="text-xl font-semibold whitespace-nowrap">
+                <span className="whitespace-nowrap text-xl font-semibold">
                   {card.title}
                 </span>
                 <div className="flex items-center">
-                  <div className="flex relative">
+                  <div className="relative flex">
                     {students.length > 0
                       ? students.map((photo, i) => (
                           <div
                             key={i}
-                            className="flex items-center justify-center w-6 h-6 bg-white border-2 border-white rounded-full sm:w-8 sm:h-8 -mr-2"
+                            className="-mr-2 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-white sm:h-8 sm:w-8"
                             style={{
                               zIndex: students.length - i,
                             }}
@@ -173,13 +175,13 @@ const LanguageCardsSection = ({ languageCards, languageData, navigate }) => {
                               <img
                                 src={photo}
                                 alt={`Student ${i + 1}`}
-                                className="object-cover w-full h-full rounded-full"
+                                className="h-full w-full rounded-full object-cover"
                               />
                             ) : (
                               <img
                                 src={"/images/panda.png"}
                                 alt={`Student ${i + 1}`}
-                                className="object-cover w-full h-full rounded-full opacity-75"
+                                className="h-full w-full rounded-full object-cover opacity-75"
                               />
                             )}
                           </div>
@@ -187,7 +189,7 @@ const LanguageCardsSection = ({ languageCards, languageData, navigate }) => {
                       : null}
 
                     {studentCount > students.length && (
-                      <div className="flex items-center justify-center ml-2 text-xs font-medium text-green-800 bg-green-100 rounded-full px-2 py-1 min-w-8">
+                      <div className="ml-2 flex min-w-8 items-center justify-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
                         +{studentCount - students.length}
                       </div>
                     )}
@@ -217,6 +219,8 @@ const LanguageCardsSection = ({ languageCards, languageData, navigate }) => {
 const LearnUser = () => {
   // Get translation and language hooks at the component level
   const { user, setUser } = useAuth();
+  const [showExamPrepModal, setShowExamPrepModal] = useState(false);
+  const [bookExamClass, setBookExamClass] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
   const { t, i18n } = useTranslation();
@@ -302,28 +306,28 @@ const LearnUser = () => {
 
           if (language === "Spanish") {
             classMemberIds.forEach((id) =>
-              tempLanguageData.spanish.studentIds.add(id)
+              tempLanguageData.spanish.studentIds.add(id),
             );
           } else if (language === "English") {
             classMemberIds.forEach((id) =>
-              tempLanguageData.english.studentIds.add(id)
+              tempLanguageData.english.studentIds.add(id),
             );
           } else if (language === "English-Spanish") {
             classMemberIds.forEach((id) =>
-              tempLanguageData.exchange.studentIds.add(id)
+              tempLanguageData.exchange.studentIds.add(id),
             );
           }
         }
 
         // Convert Sets to Arrays
         tempLanguageData.spanish.studentIds = Array.from(
-          tempLanguageData.spanish.studentIds
+          tempLanguageData.spanish.studentIds,
         );
         tempLanguageData.english.studentIds = Array.from(
-          tempLanguageData.english.studentIds
+          tempLanguageData.english.studentIds,
         );
         tempLanguageData.exchange.studentIds = Array.from(
-          tempLanguageData.exchange.studentIds
+          tempLanguageData.exchange.studentIds,
         );
 
         // Fetch student profile pictures (limit to 12 per language)
@@ -338,9 +342,8 @@ const LearnUser = () => {
             }
             return "";
           });
-          tempLanguageData[langKey].studentPhotos = await Promise.all(
-            photoPromises
-          );
+          tempLanguageData[langKey].studentPhotos =
+            await Promise.all(photoPromises);
         }
 
         setLanguageData(tempLanguageData);
@@ -383,7 +386,7 @@ const LearnUser = () => {
       } catch (error) {
         console.error("Error fetching classes:", error);
         setError(
-          "Unable to fetch classes at this time. Please try again later."
+          "Unable to fetch classes at this time. Please try again later.",
         );
       } finally {
         setLoading(false);
@@ -467,7 +470,7 @@ const LearnUser = () => {
     const formatTimeUntil = (milliseconds) => {
       const hours = Math.floor(milliseconds / (1000 * 60 * 60));
       const minutes = Math.floor(
-        (milliseconds % (1000 * 60 * 60)) / (1000 * 60)
+        (milliseconds % (1000 * 60 * 60)) / (1000 * 60),
       );
 
       if (hours > 24) {
@@ -557,19 +560,19 @@ const LearnUser = () => {
 
   return (
     <div className="flex h-screen bg-white">
-      <div className="flex-shrink-0 w-64 h-full">
+      <div className="h-full w-64 flex-shrink-0">
         <Sidebar user={user} />
       </div>
 
-      <div className="flex-1 overflow-x-auto min-w-[calc(100%-16rem)] h-full">
-        <div className="h-[calc(100vh-1rem)] p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl m-2 overflow-y-auto">
+      <div className="h-full min-w-[calc(100%-16rem)] flex-1 overflow-x-auto">
+        <div className="m-2 h-[calc(100vh-1rem)] overflow-y-auto rounded-3xl border-2 border-[#e7e7e7] bg-white p-8">
           {/* Header with Welcome and Notification */}
-          <div className="flex items-center justify-between mb-4 border-b border-[#e7e7e7] pb-4">
+          <div className="mb-4 flex items-center justify-between border-b border-[#e7e7e7] pb-4">
             <div className="flex flex-row items-center space-x-4">
               <h1 className="text-3xl font-semibold">
                 {t("learnUser.welcome.greeting", { name: user.name })}
               </h1>
-              <p className="text-[#616161] text-lg whitespace-nowrap">
+              <p className="whitespace-nowrap text-lg text-[#616161]">
                 {t("learnUser.welcome.question")}{" "}
                 {nextClass
                   ? t("learnUser.welcome.nextClass.upcoming", {
@@ -579,10 +582,10 @@ const LearnUser = () => {
                   : t("learnUser.welcome.nextClass.none")}
               </p>
             </div>
-            <div className="flex items-center flex-shrink-0 gap-2">
+            <div className="flex flex-shrink-0 items-center gap-2">
               <div
                 onClick={() => navigate("/subscriptions")}
-                className="flex flex-col items-center justify-center rounded-full bg-[#E6FDE9] border border-[#14B82C] p-2 cursor-pointer hover:bg-[#d4fad9] transition-colors"
+                className="flex cursor-pointer flex-col items-center justify-center rounded-full border border-[#14B82C] bg-[#E6FDE9] p-2 transition-colors hover:bg-[#d4fad9]"
               >
                 <h1 className="text-xs font-semibold">{user.credits}</h1>
                 <h1 className="text-[10px]">{t("learnUser.credits.label")}</h1>
@@ -592,9 +595,9 @@ const LearnUser = () => {
           </div>
 
           {/* Calendar and Language Learning Section */}
-          <div className="flex flex-col items-start justify-between w-full gap-4 py-4 mb-4 lg:flex-row">
+          <div className="mb-4 flex w-full flex-col items-start justify-between gap-4 py-4 lg:flex-row">
             {/* Calendar section */}
-            <div className="w-full lg:w-[40%] mb-4 lg:mb-0">
+            <div className="mb-4 w-full lg:mb-0 lg:w-[40%]">
               <CalendarUser />
             </div>
 
@@ -606,7 +609,7 @@ const LearnUser = () => {
                     {t("learnUser.languageLearning.title")}
                   </h2>
                   <button
-                    className="w-full sm:w-auto px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+                    className="w-full rounded-full border border-[#5d5d5d] bg-[#e6fde9] px-4 py-2 text-base font-medium text-[#042f0c] hover:bg-[#ccfcd2] sm:w-auto"
                     onClick={() => navigate("/languages")}
                   >
                     {t("learnUser.languageLearning.viewAll")}
@@ -615,9 +618,9 @@ const LearnUser = () => {
               </div>
 
               {/* Language Cards */}
-              <div className="w-full overflow-hidden relative">
+              <div className="relative w-full overflow-hidden">
                 {loadingLanguages ? (
-                  <div className="flex items-center justify-center h-48">
+                  <div className="flex h-48 items-center justify-center">
                     <ClipLoader color="#14B82C" size={50} />
                   </div>
                 ) : (
@@ -632,14 +635,14 @@ const LearnUser = () => {
           </div>
 
           {/* My Classes Section */}
-          <div className="w-full max-w-[165vh] mx-auto mb-8">
-            <div className="flex items-center justify-between mb-4">
+          <div className="mx-auto mb-8 w-full max-w-[165vh]">
+            <div className="mb-4 flex items-center justify-between">
               <h2 className="text-2xl font-bold">
                 {t("learnUser.classes.title")}
               </h2>
               {classes.length > 0 && (
                 <button
-                  className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+                  className="rounded-full border border-[#5d5d5d] bg-[#e6fde9] px-4 py-2 text-base font-medium text-[#042f0c] hover:bg-[#ccfcd2]"
                   onClick={() => navigate("/classesUser")}
                 >
                   {t("learnUser.classes.viewAll")}
@@ -648,24 +651,24 @@ const LearnUser = () => {
             </div>
 
             {loading ? (
-              <div className="flex items-center justify-center h-48">
+              <div className="flex h-48 items-center justify-center">
                 <ClipLoader color="#14B82C" size={50} />
               </div>
             ) : error ? (
-              <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
+              <div className="flex flex-col items-center justify-center space-y-4 rounded-lg bg-white p-8">
                 <p className="text-center text-red-500">{error}</p>
                 <button
-                  className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+                  className="rounded-full border border-[#5d5d5d] bg-[#e6fde9] px-4 py-2 text-base font-medium text-[#042f0c] hover:bg-[#ccfcd2]"
                   onClick={() => window.location.reload()}
                 >
                   {t("learnUser.classes.error.tryAgain")}
                 </button>
               </div>
             ) : classes.length === 0 ? (
-              <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
+              <div className="flex flex-col items-center justify-center space-y-4 rounded-lg bg-white p-8">
                 <EmptyState message="You have not booked a class yet!" />
                 <button
-                  className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+                  className="rounded-full border border-[#5d5d5d] bg-[#e6fde9] px-4 py-2 text-base font-medium text-[#042f0c] hover:bg-[#ccfcd2]"
                   onClick={() => navigate("/learnLanguageUser")}
                 >
                   {t("learnUser.classes.empty.action")}
@@ -673,11 +676,11 @@ const LearnUser = () => {
               </div>
             ) : (
               <div className="relative w-full">
-                <div className="flex gap-2 pb-4 overflow-x-auto scrollbar-hide">
+                <div className="scrollbar-hide flex gap-2 overflow-x-auto pb-4">
                   {classes.map((classItem) => (
                     <div
                       key={classItem.id}
-                      className="flex-none px-1 pt-3 w-72"
+                      className="w-72 flex-none px-1 pt-3"
                     >
                       <ClassCard
                         {...classItem}
@@ -691,14 +694,14 @@ const LearnUser = () => {
           </div>
 
           {/* My Groups Section */}
-          <div className="w-full max-w-[165vh] mx-auto">
-            <div className="flex items-center justify-between mb-4">
+          <div className="mx-auto w-full max-w-[165vh]">
+            <div className="mb-4 flex items-center justify-between">
               <h2 className="text-2xl font-bold">
                 {t("learnUser.groups.title")}
               </h2>
               {groups.length > 0 && (
                 <button
-                  className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+                  className="rounded-full border border-[#5d5d5d] bg-[#e6fde9] px-4 py-2 text-base font-medium text-[#042f0c] hover:bg-[#ccfcd2]"
                   onClick={() => navigate("/groupsUser")}
                 >
                   {t("learnUser.groups.viewAll")}
@@ -707,32 +710,32 @@ const LearnUser = () => {
             </div>
 
             {loadingGroups ? (
-              <div className="flex items-center justify-center h-48">
+              <div className="flex h-48 items-center justify-center">
                 <ClipLoader color="#14B82C" size={50} />
               </div>
             ) : errorGroups ? (
-              <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
+              <div className="flex flex-col items-center justify-center space-y-4 rounded-lg bg-white p-8">
                 <p className="text-center text-red-500">{errorGroups}</p>
                 <button
-                  className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+                  className="rounded-full border border-[#5d5d5d] bg-[#e6fde9] px-4 py-2 text-base font-medium text-[#042f0c] hover:bg-[#ccfcd2]"
                   onClick={() => window.location.reload()}
                 >
                   {t("learnUser.groups.error.tryAgain")}
                 </button>
               </div>
             ) : groups.length === 0 ? (
-              <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
+              <div className="flex flex-col items-center justify-center space-y-4 rounded-lg bg-white p-8">
                 <EmptyState message="You are not part of any group yet!" />
                 <div className="flex flex-row items-center justify-center space-x-4">
                   <button
                     onClick={() => navigate("/learnLanguageUser")}
-                    className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+                    className="rounded-full border border-[#5d5d5d] bg-[#e6fde9] px-4 py-2 text-base font-medium text-[#042f0c] hover:bg-[#ccfcd2]"
                   >
                     {t("learnUser.groups.empty.joinAction")}
                   </button>
                   <button
                     onClick={() => navigate("/groupsUser")}
-                    className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+                    className="rounded-full border border-[#5d5d5d] bg-[#e6fde9] px-4 py-2 text-base font-medium text-[#042f0c] hover:bg-[#ccfcd2]"
                   >
                     {t("learnUser.groups.empty.createAction")}
                   </button>
@@ -740,9 +743,9 @@ const LearnUser = () => {
               </div>
             ) : (
               <div className="relative w-full">
-                <div className="flex gap-2 pb-4 overflow-x-auto scrollbar-hide">
+                <div className="scrollbar-hide flex gap-2 overflow-x-auto pb-4">
                   {groups.map((group) => (
-                    <div key={group.id} className="flex-none px-1 pt-2 w-72">
+                    <div key={group.id} className="w-72 flex-none px-1 pt-2">
                       <GroupCard group={group} />
                     </div>
                   ))}
@@ -752,6 +755,14 @@ const LearnUser = () => {
           </div>
         </div>
       </div>
+      <StartExamPrep
+        showExamPrepModal={showExamPrepModal}
+        setShowExamPrepModal={setShowExamPrepModal}
+      />
+      <IntoductoryCallDone
+        bookExamClass={bookExamClass}
+        setBookExamClass={setBookExamClass}
+      />
     </div>
   );
 };
