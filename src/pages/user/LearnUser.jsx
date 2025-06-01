@@ -1,6 +1,5 @@
-import { Search } from "lucide-react";
+import { useRef, useEffect, useCallback, useState } from "react";
 import NotificationDropdown from "../../components/NotificationDropdown";
-import React, { useRef, useEffect, useCallback, useState } from "react";
 import {
   Bell,
   ChevronLeft,
@@ -33,7 +32,6 @@ import { getToken } from "firebase/messaging";
 import { messaging } from "../../firebaseConfig";
 import EmptyState from "../../components/EmptyState";
 import CalendarUser from "../../components/CalenderUser";
-import TutorialOverlay from "../../components/TutorialOverlay";
 import StartExamPrep from "./StartExamPrep";
 import IntoductoryCallDone from "./ExamPreparation/IntoductoryCallDone";
 // This component must be defined at the top level of your file,
@@ -219,8 +217,8 @@ const LanguageCardsSection = ({ languageCards, languageData, navigate }) => {
 const LearnUser = () => {
   // Get translation and language hooks at the component level
   const { user, setUser } = useAuth();
-  const [showExamPrepModal, setShowExamPrepModal] = useState(false);
-  const [bookExamClass, setBookExamClass] = useState(true);
+  const [showExamPrepModal, setShowExamPrepModal] = useState(true);
+  const [bookExamClass, setBookExamClass] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { t, i18n } = useTranslation();

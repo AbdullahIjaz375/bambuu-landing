@@ -137,6 +137,14 @@ const Subscriptions = () => {
     fetchPlans();
   }, [t, user]);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get("tab");
+    if (tab && ["subscriptions", "credits", "exam", "offers"].includes(tab)) {
+      setActiveTab(tab);
+    }
+  }, []);
+
   // Check URL params for plan selection
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -539,55 +547,65 @@ const Subscriptions = () => {
         )}
 
         {activeTab === "exam" && (
-          <div className="flex flex-col items-center justify-center py-8">
-            <div className="w-full max-w-md rounded-3xl border border-gray-200 bg-white p-8 text-center shadow-lg">
-              <div className="mb-4 rounded-t-3xl bg-[#FFBF00] py-2 font-semibold text-[#042F0C]">
-                Designed for language exams
+          <>
+            <div className="flex flex-col items-center">
+              <div className="w-full max-w-md rounded-3xl bg-white shadow-lg">
+                {/* Yellow Header */}
+                <div className="rounded-t-3xl bg-[#FFBF00] px-4 py-2 text-center">
+                  <span className="text-sm font-semibold text-black">
+                    Designed for language exams
+                  </span>
+                </div>
+                {/* Main Content */}
+                <div className="px-8 py-5 text-center">
+                  <div className="mb-2 text-5xl font-semibold text-black">
+                    $499
+                  </div>
+                  <div className="mb-4 text-xl font-semibold text-black">
+                    Immersive Exam Prep Plan
+                  </div>
+                  {/* Features List */}
+                  <div className="mb-4 space-y-3 text-base font-normal text-black">
+                    <div>10 live 1:1 classes with certified tutors</div>
+                    <div>
+                      Unlimited instructor-led group conversation classes
+                    </div>
+                    <div>Personalized support from the bambuu team</div>
+                    <div>
+                      Money back guarantee <span className="font-bold">**</span>
+                    </div>
+                  </div>
+                  {/* Disclaimer Text */}
+                  <div className="mb-4 px-2 text-sm font-normal leading-relaxed text-black">
+                    Package features are provided for 1 <br />
+                    month and do not automatically renew.
+                    <br />
+                    We recommend 2 months of this package
+                    <br /> to achieve best results.
+                  </div>
+                  {/* Buttons */}
+                  <div className="mb-2">
+                    <button className="w-full rounded-full border border-[#042F0C] bg-[#14B82C] p-3 text-base font-medium text-black transition-colors hover:bg-green-600">
+                      Buy Now
+                    </button>
+                    <button className="w-full rounded-full px-6 py-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50">
+                      Learn More
+                    </button>
+                  </div>
+                </div>
               </div>
-              <div className="mb-2 text-4xl font-bold">$499</div>
-              <div className="mb-4 text-lg font-semibold">
-                Immersive Exam Prep Plan
-              </div>
-              <ul className="mb-4 space-y-2 text-base text-gray-800">
-                <li>10 live 1:1 classes with certified tutors</li>
-                <li>Unlimited instructor-led group conversation classes</li>
-                <li>Personalized support from the bambuu team</li>
-                <li>
-                  Money back guarantee <span className="font-bold">**</span>
-                </li>
-              </ul>
-              <div className="mb-6 text-xs text-gray-500">
-                Package features are provided for 1 month and do not
-                automatically renew.
-                <br />
-                We recommend 2 months of this package to achieve best results.
-              </div>
-              <button
-                className="mb-2 w-full rounded-full bg-[#14B82C] py-3 text-lg font-semibold text-white transition-colors hover:bg-[#12a528]"
-                onClick={() => {
-                  /* Add your purchase logic here */
-                }}
-              >
-                Buy Now
-              </button>
-              <button
-                className="w-full rounded-full border border-[#042F0C] bg-gray-100 py-2 font-medium text-[#042F0C] transition-colors hover:bg-gray-200"
-                onClick={() => {
-                  /* Add your learn more logic here */
-                }}
-              >
-                Learn More
-              </button>
-              <div className="mt-6 text-left text-[10px] text-gray-500">
-                <span className="font-bold">**</span>Money back guarantee
-                requires the student to complete the bambuu recommended plan.
-                Bambuu will refund the student if the student's language goal,
-                as discussed in the introductory call, isn't achieved after
-                completing 2 months of the Immersive Exam Prep plan – completing
-                all 10 1:1 classes and 3 live group classes per month.
-              </div>
+              {/* Fine Print */}
             </div>
-          </div>
+            <div className="mt-4 w-full text-center text-sm font-normal italic leading-relaxed text-gray-500">
+              <span>**</span>
+              Money back guarantee requires the student to complete the bambuu
+              recommended plan. Bambuu will refund the student if the student's
+              language goal, as discussed in the introductory call, isn't
+              achieved after completing 2 months of the Immersive Exam Prep plan
+              – completing all 10 1:1 classes and 3 live group classes per
+              month.
+            </div>
+          </>
         )}
 
         {selectedPlan && (

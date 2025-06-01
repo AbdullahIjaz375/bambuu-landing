@@ -1,23 +1,7 @@
-import React, { useState, useEffect, useRef } from "react";
-import {
-  X,
-  Clock,
-  Calendar,
-  User,
-  Users,
-  Camera,
-  ArrowLeft,
-} from "lucide-react";
-import {
-  doc,
-  getDoc,
-  collection,
-  query,
-  where,
-  getDocs,
-} from "firebase/firestore";
+import { useState, useEffect, useRef } from "react";
+import { ArrowLeft, ChevronRightIcon } from "lucide-react";
+import { doc, getDoc } from "firebase/firestore";
 import { useTranslation } from "react-i18next";
-
 import { createStreamChannel } from "../../services/streamService";
 import { db } from "../../firebaseConfig";
 import { ClipLoader } from "react-spinners";
@@ -29,6 +13,7 @@ import { ChannelType } from "../../config/stream";
 import EmptyState from "../../components/EmptyState";
 import ShowDescription from "../../components/ShowDescription";
 import { streamClient, fetchChatToken } from "../../config/stream";
+import InstructorProfile from "./InstructorProfile";
 
 const InstructorProfileUser = () => {
   const { tutorId } = useParams();
@@ -40,26 +25,69 @@ const InstructorProfileUser = () => {
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const channelRef = useRef(null); // Cache for the channel
-  const [isCreatingChannel, setIsCreatingChannel] = useState(false); // Debounce state
+  const channelRef = useRef(null);
+  const [isCreatingChannel, setIsCreatingChannel] = useState(false);
+  const [bookTutor, setBookTutor] = useState(false);
+
+  // Function to check if user has exam preparation subscription
+  const hasExamPrepSubscription = () => {
+    if (!user?.subscriptions) return false;
+
+    return user.subscriptions.some((sub) => {
+      if (!sub.startDate || !sub.endDate || sub.type === "None") return false;
+
+      // Check if subscription is still active
+      const endDate = new Date(
+        sub.endDate.seconds ? sub.endDate.seconds * 1000 : sub.endDate,
+      );
+      const isActive = endDate > new Date();
+
+      // Check if it's an exam preparation subscription
+      const isExamPrep =
+        sub.type === "Immersive Exam Prep Plan" ||
+        sub.type === "Exam Preparation" ||
+        sub.type.toLowerCase().includes("exam");
+
+      return isActive && isExamPrep;
+    });
+  };
+
+  const getInstructorProfileData = (tutor) => ({
+    img: tutor.photoUrl || "/images/panda.png",
+    name: tutor.name,
+    langs: [
+      (tutor.nativeLanguage || "") + " (Native)",
+      (tutor.teachingLanguage || "") + " (Teaching)",
+    ],
+    country: tutor.country,
+    students: tutor.tutorStudentIds?.length || 0,
+  });
+
+  // Handle exam preparation package click
+  const handleExamPrepClick = () => {
+    if (hasExamPrepSubscription()) {
+      // incase user has permissions write logics here
+    } else {
+      // User doesn't have subscription, redirect to subscription page with exam tab
+      navigate("/subscriptions?tab=exam");
+      // setBookTutor(true);
+    }
+  };
 
   const sendMessageClicked = async () => {
-    if (isCreatingChannel) return; // Prevent multiple rapid requests
+    if (isCreatingChannel) return;
     setIsCreatingChannel(true);
     try {
-      // Fetch the other user's name for the channel name
       let otherUserName = "";
       let otherUserImage = "";
       let isTutor = user.userType === "tutor";
       if (isTutor) {
-        // Tutor: fetch student info
         const studentDoc = await getDoc(doc(db, "students", user.uid));
         otherUserName = studentDoc.exists()
           ? studentDoc.data().name
           : "Student";
         otherUserImage = studentDoc.exists() ? studentDoc.data().photoUrl : "";
       } else {
-        // Student: use tutor info
         otherUserName = tutor?.name || "Tutor";
         otherUserImage = tutor?.photoUrl || "";
       }
@@ -80,7 +108,6 @@ const InstructorProfileUser = () => {
         member_roles: memberRoles,
       };
 
-      // Ensure Stream client is connected as the user
       if (streamClient.userID !== user.uid || !streamClient.isConnected) {
         const token = await fetchChatToken(user.uid);
         if (streamClient.userID) {
@@ -93,51 +120,44 @@ const InstructorProfileUser = () => {
             image: user.photoUrl || "",
             userType: user.userType || "student",
           },
-          token
+          token,
         );
       }
 
-      // Use cached channel if available
       if (channelRef.current && channelRef.current.id === channelId) {
         navigate(`/messagesUser/${channelId}`);
         setIsCreatingChannel(false);
         return;
       }
 
-      // Create or get the channel
       const channel = await createStreamChannel(channelData);
-      channelRef.current = channel; // Cache the channel
+      channelRef.current = channel;
 
-      // Wait for the channel to appear in the user's channel list
       let found = false;
       for (let i = 0; i < 5; i++) {
-        // Try up to 5 times
         const channels = await streamClient.queryChannels(
           { members: { $in: [user.uid] }, id: { $eq: channel.id } },
           { last_message_at: -1 },
-          { watch: true, state: true }
+          { watch: true, state: true },
         );
         if (channels.length > 0) {
           found = true;
           break;
         }
-        await new Promise((res) => setTimeout(res, 500)); // Wait 0.5s
+        await new Promise((res) => setTimeout(res, 500));
       }
 
-      // After creating or fetching the channel
       const currentMembers = Object.keys(channel.state?.members || {});
       const missingMembers = [user.uid, tutorId].filter(
-        (m) => !currentMembers.includes(m)
+        (m) => !currentMembers.includes(m),
       );
       if (missingMembers.length > 0) {
         await channel.addMembers(missingMembers);
       }
 
-      // Navigate to the messages page
       navigate(`/messagesUser/${channel.id}`);
     } catch (error) {
       console.error("Error creating chat channel:", error);
-      // Show error to user if needed
     } finally {
       setIsCreatingChannel(false);
     }
@@ -147,8 +167,6 @@ const InstructorProfileUser = () => {
     const fetchTutorAndClasses = async () => {
       try {
         setLoading(true);
-
-        // Fetch tutor data
         const tutorDoc = await getDoc(doc(db, "tutors", tutorId));
         if (!tutorDoc.exists()) {
           throw new Error("Tutor not found");
@@ -156,17 +174,18 @@ const InstructorProfileUser = () => {
         const tutorData = { id: tutorDoc.id, ...tutorDoc.data() };
         setTutor(tutorData);
 
-        // Fetch classes data
         const tutorClasses = tutorData.tutorOfClasses || [];
         if (tutorClasses.length > 0) {
           const classesPromises = tutorClasses.map((classId) =>
-            getDoc(doc(db, "classes", classId))
+            getDoc(doc(db, "classes", classId)),
           );
           const classSnapshots = await Promise.all(classesPromises);
           const classesData = classSnapshots
             .filter((doc) => doc.exists())
-            .map((doc) => ({ id: doc.id, ...doc.data() }));
+            .map((doc) => ({ classId: doc.id, ...doc.data() }));
           setClasses(classesData);
+        } else {
+          setClasses([]);
         }
       } catch (err) {
         console.error("Error fetching tutor data:", err);
@@ -186,41 +205,35 @@ const InstructorProfileUser = () => {
   };
 
   const renderClasses = () => {
-    // Filter out classes that are:
-    // 1. Individual Premium and already have a member
-    // 2. Group Premium and have no available spots
     const availableClasses = classes.filter((classItem) => {
       if (
         classItem.classType === "Individual Premium" &&
         classItem.classMemberIds?.length > 0
       ) {
-        return false; // Filter out Individual Premium classes that already have a member
+        return false;
       }
-
       if (
         classItem.classType === "Group Premium" &&
         classItem.availableSpots <= 0
       ) {
-        return false; // Filter out Group Premium classes with no available spots
+        return false;
       }
-
-      return true; // Keep all other classes
+      return true;
     });
 
     if (availableClasses.length === 0) {
       return (
-        <div className="flex items-center justify-center h-96">
+        <div className="flex h-96 items-center justify-center">
           <EmptyState message="No classes available" />
         </div>
       );
     }
 
-    // Get enrolled classes from localStorage
     const user = JSON.parse(sessionStorage.getItem("user"));
     const enrolledClasses = user?.enrolledClasses || [];
 
     return (
-      <div className="grid grid-cols-1 gap-4 mt-2 ml-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="ml-2 mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {availableClasses.map((classItem) => {
           const isEnrolled = enrolledClasses.includes(classItem.classId);
 
@@ -277,7 +290,7 @@ const InstructorProfileUser = () => {
   if (loading) {
     return (
       <div className="flex min-h-screen bg-white">
-        <div className="flex items-center justify-center flex-1">
+        <div className="flex flex-1 items-center justify-center">
           <ClipLoader color="#14B82C" size={50} />
         </div>
       </div>
@@ -287,11 +300,11 @@ const InstructorProfileUser = () => {
   if (error) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-        <div className="p-8 bg-white rounded-lg">
+        <div className="rounded-lg bg-white p-8">
           <p className="mb-4 text-red-500">{error}</p>
           <button
             onClick={handleBack}
-            className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
+            className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
           >
             Go Back
           </button>
@@ -306,13 +319,13 @@ const InstructorProfileUser = () => {
 
   return (
     <div className="flex h-screen">
-      <div className="flex flex-1 m-2 border sm:m-6 rounded-3xl">
-        <div className="flex flex-col w-full p-3 mx-2 bg-white sm:p-6 sm:mx-4 rounded-3xl">
+      <div className="m-2 flex flex-1 rounded-3xl border sm:m-6">
+        <div className="mx-2 flex w-full flex-col rounded-3xl bg-white p-3 sm:mx-4 sm:p-6">
           {/* Header */}
-          <div className="flex items-center justify-between pb-4 mb-6 border-b">
+          <div className="mb-6 flex items-center justify-between border-b pb-4">
             <div className="flex items-center gap-2 sm:gap-4">
               <button
-                className="p-2 bg-gray-100 rounded-full sm:p-3"
+                className="rounded-full bg-gray-100 p-2 sm:p-3"
                 onClick={handleBack}
               >
                 <ArrowLeft size={24} />
@@ -324,107 +337,121 @@ const InstructorProfileUser = () => {
           </div>
 
           {/* Content Container */}
-          <div className="flex flex-col flex-1 min-h-0 gap-4 lg:flex-row">
-            {/* Left sidebar - Now responsive */}
-            <div className="w-full lg:w-1/4 p-4 sm:p-6 bg-[#E6FDE9] rounded-3xl shrink-0 overflow-y-auto  scrollbar-hide">
-              <div className="flex flex-col items-center justify-between h-full text-center">
-                <div className="flex flex-col items-center w-full text-center">
-                  <img
-                    src={tutor.photoUrl || "/images/panda.png"}
-                    alt={tutor.name}
-                    className="object-cover w-24 h-24 mb-4 rounded-full sm:w-32 sm:h-32"
-                  />
-                  <h3 className="mb-2 text-xl font-medium sm:text-2xl">
-                    {tutor.name}
-                  </h3>
-
-                  <div className="flex flex-col items-center justify-center my-4 space-y-4 sm:flex-row sm:space-y-0 sm:space-x-8">
-                    <div className="flex flex-col items-center justify-center space-y-2">
-                      <div className="flex items-center gap-1">
-                        <img
-                          alt="language"
-                          src="/svgs/language.svg"
-                          className="h-4 sm:h-5"
-                        />
-                        <span className="text-xs sm:text-sm">
-                          <span className="font-semibold">
-                            {t("instructor-profile.details.native.label")}:
-                          </span>{" "}
-                          {tutor.nativeLanguage}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <img
-                          alt="location"
-                          src="/svgs/location.svg"
-                          className="h-4 sm:h-5"
-                        />
-                        <span className="text-xs sm:text-sm">
-                          <span className="font-semibold">
-                            {t("instructor-profile.details.from.label")}:
-                          </span>{" "}
-                          {tutor.country}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex flex-col items-center justify-center space-y-2">
-                      <div className="flex items-center gap-1">
-                        <img
-                          alt="teaching"
-                          src="/svgs/language.svg"
-                          className="h-4 sm:h-5"
-                        />
-                        <span className="text-xs sm:text-sm">
-                          <span className="font-semibold">
-                            {t("instructor-profile.details.teaching.label")}:
-                          </span>{" "}
-                          {tutor.teachingLanguage}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <img
-                          alt="students"
-                          src="/svgs/users.svg"
-                          className="h-4 sm:h-5"
-                        />
-                        <span className="text-xs sm:text-sm">
-                          <span className="font-semibold">
-                            {t("instructor-profile.details.students.label")}:
-                          </span>{" "}
-                          {tutor.tutorStudentIds.length}
-                        </span>
-                      </div>
-                    </div>
+          <div className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row">
+            {/* Sidebar */}
+            <div className="flex w-full flex-col lg:w-1/4">
+              <div className="scrollbar-hide flex flex-col items-center gap-4 overflow-y-auto rounded-3xl bg-[#E6FDE9] p-5 lg:h-full">
+                <img
+                  src={tutor.photoUrl || "/images/panda.png"}
+                  alt={tutor.name}
+                  className="mb-4 h-28 w-28 rounded-full border-4 border-white object-cover shadow"
+                />
+                <h3 className="mb-2 text-xl font-semibold sm:text-2xl">
+                  {tutor.name}
+                </h3>
+                <div className="mb-4 mt-2 flex flex-wrap items-center justify-center gap-x-8 gap-y-2">
+                  <div className="flex items-center gap-1 text-xs sm:text-sm">
+                    <img
+                      alt="language"
+                      src="/svgs/language.svg"
+                      className="h-4 sm:h-5"
+                    />
+                    <span>
+                      <span className="font-semibold">
+                        {t("instructor-profile.details.native.label")}:
+                      </span>{" "}
+                      {tutor.nativeLanguage}
+                    </span>
                   </div>
-
-                  {/* <ExpandableBio bio={tutor.bio} maxChars={200} /> */}
-
+                  <div className="flex items-center gap-1 text-xs sm:text-sm">
+                    <img
+                      alt="teaching"
+                      src="/svgs/language.svg"
+                      className="h-4 sm:h-5"
+                    />
+                    <span>
+                      <span className="font-semibold">
+                        {t("instructor-profile.details.teaching.label")}:
+                      </span>{" "}
+                      {tutor.teachingLanguage}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1 text-xs sm:text-sm">
+                    <img
+                      alt="location"
+                      src="/svgs/location.svg"
+                      className="h-4 sm:h-5"
+                    />
+                    <span>
+                      <span className="font-semibold">
+                        {t("instructor-profile.details.from.label")}:
+                      </span>{" "}
+                      {tutor.country}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1 text-xs sm:text-sm">
+                    <img
+                      alt="students"
+                      src="/svgs/users.svg"
+                      className="h-4 sm:h-5"
+                    />
+                    <span>
+                      <span className="font-semibold">
+                        {t("instructor-profile.details.students.label")}:
+                      </span>{" "}
+                      {tutor.tutorStudentIds.length}
+                    </span>
+                  </div>
+                </div>
+                <div className="mb-4 mt-2 w-full">
                   <ShowDescription description={tutor.bio} maxHeight={100} />
                 </div>
-
-                <div className="w-full mt-4">
-                  <button
-                    onClick={sendMessageClicked}
-                    className="w-full px-4 py-2 mb-2 text-black border border-black rounded-full bg-[#fffbc5] hover:bg-[#fff9a0]"
-                  >
-                    {t("instructor-profile.buttons.send-message")}
+                <button
+                  onClick={sendMessageClicked}
+                  className="mt-2 w-full rounded-full border border-black bg-[#fffbc5] px-4 py-3 text-base font-normal text-black shadow transition hover:bg-[#fff9a0]"
+                  style={{ borderWidth: 2 }}
+                >
+                  {t("instructor-profile.buttons.send-message")}
+                </button>
+              </div>
+              {/* Exam Preparation Package Button BELOW the green box */}
+              <div className="mt-6 flex w-full items-center justify-center">
+                <div className="w-full">
+                  <button className="flex w-full items-center justify-between rounded-2xl border border-[#FFBF00] bg-[#FFFFEA] px-6 py-4 text-left text-black shadow transition hover:bg-[#fff9a0]">
+                    <div
+                      onClick={handleExamPrepClick}
+                      className="flex items-center gap-3"
+                    >
+                      <img
+                        src="/svgs/preparation-package-icon.svg"
+                        alt="Exam"
+                        className="h-16 w-16"
+                      />
+                      <span className="text-base font-semibold">
+                        Exam Preparation Package
+                      </span>
+                    </div>
+                    <ChevronRightIcon className="h-4 w-4" />
                   </button>
                 </div>
               </div>
             </div>
-
-            {/* Main content - Scrollable */}
-            <div className="flex flex-col flex-1 min-h-0">
+            {/* Main content */}
+            <div className="flex min-h-0 flex-1 flex-col">
               <h2 className="ml-4 text-xl font-semibold sm:text-2xl">
                 {t("instructor-profile.sections.classes")}
               </h2>
-              <div className="flex-1 pr-2 overflow-y-auto sm:pr-4 scrollbar-hide">
+              <div className="scrollbar-hide flex-1 overflow-y-auto pr-2 sm:pr-4">
                 {renderClasses()}
               </div>
             </div>
           </div>
         </div>
       </div>
+      <InstructorProfile
+        selectedInstructor={bookTutor ? getInstructorProfileData(tutor) : null}
+        setSelectedInstructor={() => setBookTutor(false)}
+      />
     </div>
   );
 };
