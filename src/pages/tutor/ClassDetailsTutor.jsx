@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { ArrowLeft } from "lucide-react";
 import { doc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
@@ -12,9 +12,9 @@ import ClassInfoCard from "../../components/ClassInfoCard";
 import EmptyState from "../../components/EmptyState";
 import { useTranslation } from "react-i18next";
 import { ClassContext } from "../../context/ClassContext";
-import { useContext } from "react";
 import UserAvatar from "../../utils/getAvatar";
 import ShowDescription from "../../components/ShowDescription";
+import { Calendar, Clock, Globe } from "lucide-react";
 Modal.setAppElement("#root");
 
 const ClassDetailsTutor = ({ onClose }) => {
@@ -61,7 +61,7 @@ const ClassDetailsTutor = ({ onClose }) => {
           return userDoc.exists()
             ? { id: userDoc.id, ...userDoc.data() }
             : null;
-        })
+        }),
       );
       setMembers(membersData.filter(Boolean));
     } catch (error) {
@@ -129,7 +129,7 @@ const ClassDetailsTutor = ({ onClose }) => {
 
       // Remove user from group's memberIds
       const updatedMemberIds = currentClass.classMemberIds.filter(
-        (id) => id !== userId
+        (id) => id !== userId,
       );
       await updateDoc(classRef, {
         classMemberIds: updatedMemberIds,
@@ -139,7 +139,7 @@ const ClassDetailsTutor = ({ onClose }) => {
       const userDoc = await getDoc(userRef);
       const userData = userDoc.data();
       const updatedEnrolledClasses = (userData.enrolledClasses || []).filter(
-        (id) => id !== classId
+        (id) => id !== classId,
       );
 
       // Update user document
@@ -149,7 +149,7 @@ const ClassDetailsTutor = ({ onClose }) => {
 
       // Update local state
       setMembers((prevMembers) =>
-        prevMembers.filter((member) => member.id !== userId)
+        prevMembers.filter((member) => member.id !== userId),
       );
       setShowRemoveConfirmation(false);
       setSelectedUser(null);
@@ -176,11 +176,11 @@ const ClassDetailsTutor = ({ onClose }) => {
   const [showVideoCall, setShowVideoCall] = useState(false);
 
   const handleJoinClass = () => {
-    setTutorSelectedClassId(classId);
+    // setTutorSelectedClassId(classId);
     // navigate(`/callTutor`, { state: { classId } });
     // Open the new tab with the video call URL
     const callUrl = `/callTutor`; // Update this URL as needed
-    window.open(callUrl, "_blank");
+    // window.open(callUrl, "_blank");
   };
 
   //-----------------------------------------------------------------------------------------------------------//
@@ -207,7 +207,7 @@ const ClassDetailsTutor = ({ onClose }) => {
           (slot) => {
             const slotDate = new Date(slot.createdAt.seconds * 1000);
             return slotDate > now && slot.bookingMethod === "credits";
-          }
+          },
         ).length;
 
         // If there are any future slots using credits, refund that many credits to each class member
@@ -223,7 +223,7 @@ const ClassDetailsTutor = ({ onClose }) => {
                   credits: (studentData.credits || 0) + futureCreditSlotsCount,
                 });
               }
-            })
+            }),
           );
         }
       }
@@ -239,11 +239,11 @@ const ClassDetailsTutor = ({ onClose }) => {
             if (studentData) {
               await updateDoc(studentRef, {
                 enrolledClasses: (studentData.enrolledClasses || []).filter(
-                  (id) => id !== classId
+                  (id) => id !== classId,
                 ),
               });
             }
-          })
+          }),
         );
       }
 
@@ -255,7 +255,7 @@ const ClassDetailsTutor = ({ onClose }) => {
         if (groupDoc.exists()) {
           await updateDoc(groupRef, {
             classIds: (groupDoc.data().classIds || []).filter(
-              (id) => id !== classId
+              (id) => id !== classId,
             ),
           });
         }
@@ -270,22 +270,19 @@ const ClassDetailsTutor = ({ onClose }) => {
         if (userType === "tutor") {
           await updateDoc(adminRef, {
             tutorOfClasses: (adminData.tutorOfClasses || []).filter(
-              (id) => id !== classId
+              (id) => id !== classId,
             ),
             enrolledClasses: (adminData.enrolledClasses || []).filter(
-              (id) => id !== classId
+              (id) => id !== classId,
             ),
-            // tutorStudentIds: (adminData.tutorStudentIds || []).filter(
-            //   (studentId) => !classData.classMemberIds?.includes(studentId)
-            // ),
           });
         } else {
           await updateDoc(adminRef, {
             adminOfClasses: (adminData.adminOfClasses || []).filter(
-              (id) => id !== classId
+              (id) => id !== classId,
             ),
             enrolledClasses: (adminData.enrolledClasses || []).filter(
-              (id) => id !== classId
+              (id) => id !== classId,
             ),
           });
         }
@@ -295,17 +292,14 @@ const ClassDetailsTutor = ({ onClose }) => {
       const updatedUser = JSON.parse(sessionStorage.getItem("user"));
       if (userType === "tutor") {
         updatedUser.tutorOfClasses = (updatedUser.tutorOfClasses || []).filter(
-          (id) => id !== classId
+          (id) => id !== classId,
         );
         updatedUser.enrolledClasses = (
           updatedUser.enrolledClasses || []
         ).filter((id) => id !== classId);
-        // updatedUser.tutorStudentIds = (
-        //   updatedUser.tutorStudentIds || []
-        // ).filter((studentId) => !classData.classMemberIds?.includes(studentId));
       } else {
         updatedUser.adminOfClasses = (updatedUser.adminOfClasses || []).filter(
-          (id) => id !== classId
+          (id) => id !== classId,
         );
         updatedUser.enrolledClasses = (
           updatedUser.enrolledClasses || []
@@ -337,7 +331,7 @@ const ClassDetailsTutor = ({ onClose }) => {
     const now = new Date();
     const classStart = new Date(classData.classDateTime.seconds * 1000);
     const classEnd = new Date(
-      classStart.getTime() + classData?.classDuration * 60 * 1000
+      classStart.getTime() + classData?.classDuration * 60 * 1000,
     );
     return now >= classStart && now <= classEnd;
   };
@@ -347,7 +341,7 @@ const ClassDetailsTutor = ({ onClose }) => {
   const renderMembers = () => {
     if (members.length === 0) {
       return (
-        <div className="flex items-center justify-center h-96">
+        <div className="flex h-96 items-center justify-center">
           <EmptyState
             message={t("class-details-tutor.empty-states.no-members")}
           />
@@ -361,7 +355,7 @@ const ClassDetailsTutor = ({ onClose }) => {
           {members.map((member) => (
             <div
               key={member.id}
-              className="flex items-center justify-between px-4 py-3 border border-gray-200 hover:bg-gray-50 rounded-3xl"
+              className="flex items-center justify-between rounded-3xl border border-gray-200 px-4 py-3 hover:bg-gray-50"
             >
               <div className="flex items-center gap-3">
                 <div className="relative">
@@ -370,7 +364,7 @@ const ClassDetailsTutor = ({ onClose }) => {
                   />
 
                   {member.id === classData.adminId && (
-                    <div className="absolute flex items-center justify-center w-4 h-4 bg-yellow-400 rounded-full -top-1 -right-1">
+                    <div className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-yellow-400">
                       <span className="text-xs text-black">★</span>
                     </div>
                   )}
@@ -394,7 +388,7 @@ const ClassDetailsTutor = ({ onClose }) => {
                       setSelectedUser(member);
                       setShowRemoveConfirmation(true);
                     }}
-                    className="px-3 py-1 text-xs text-red-500 border border-red-500 rounded-full hover:bg-red-50"
+                    className="rounded-full border border-red-500 px-3 py-1 text-xs text-red-500 hover:bg-red-50"
                   >
                     {t("class-details-tutor.actions.remove-member")}
                   </button>
@@ -405,7 +399,7 @@ const ClassDetailsTutor = ({ onClose }) => {
         <Modal
           isOpen={showRemoveConfirmation}
           onRequestClose={() => setShowRemoveConfirmation(false)}
-          className="z-50 max-w-sm p-6 mx-auto mt-40 bg-white outline-none rounded-3xl font-urbanist"
+          className="z-50 mx-auto mt-40 max-w-sm rounded-3xl bg-white p-6 font-urbanist outline-none"
           overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
           style={{
             overlay: {
@@ -431,22 +425,22 @@ const ClassDetailsTutor = ({ onClose }) => {
             </p>
             <div className="flex flex-row gap-2">
               <button
-                className="w-full py-2 font-medium border border-gray-300 rounded-full hover:bg-gray-50"
+                className="w-full rounded-full border border-gray-300 py-2 font-medium hover:bg-gray-50"
                 onClick={() => setShowRemoveConfirmation(false)}
               >
                 {t("class-details-tutor.actions.cancel")}
               </button>
               <button
-                className="w-full py-2 font-medium text-black bg-[#ff4d4d] rounded-full hover:bg-[#ff3333] border border-[#8b0000]"
+                className="w-full rounded-full border border-[#8b0000] bg-[#ff4d4d] py-2 font-medium text-black hover:bg-[#ff3333]"
                 onClick={() => handleRemoveUser(selectedUser.id)}
                 disabled={isRemoving}
               >
                 {isRemoving
                   ? t(
-                      "class-details-tutor.confirmations.remove-member.removing"
+                      "class-details-tutor.confirmations.remove-member.removing",
                     )
                   : t(
-                      "class-details-tutor.confirmations.remove-member.confirm"
+                      "class-details-tutor.confirmations.remove-member.confirm",
                     )}{" "}
               </button>
             </div>
@@ -488,19 +482,19 @@ const ClassDetailsTutor = ({ onClose }) => {
     switch (status) {
       case "completed":
         return (
-          <span className="px-2 py-1 text-sm text-green-600 bg-green-100 rounded-full">
+          <span className="rounded-full bg-green-100 px-2 py-1 text-sm text-green-600">
             Completed
           </span>
         );
       case "current":
         return (
-          <span className="px-2 py-1 text-sm text-green-600 bg-green-100 rounded-full">
+          <span className="rounded-full bg-green-100 px-2 py-1 text-sm text-green-600">
             Current Class
           </span>
         );
       case "upcoming":
         return (
-          <span className="px-2 py-1 text-sm text-gray-600 bg-gray-100 rounded-full">
+          <span className="rounded-full bg-gray-100 px-2 py-1 text-sm text-gray-600">
             Upcoming
           </span>
         );
@@ -508,9 +502,28 @@ const ClassDetailsTutor = ({ onClose }) => {
         return null;
     }
   };
+
+  // --- NEW: Exam Prep/Intro Call Card View ---
+  const formatTimeOnly = (timestamp) => {
+    const date = new Date(timestamp.seconds * 1000);
+    return date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+  const formatDateOnly = (timestamp) => {
+    const date = new Date(timestamp.seconds * 1000);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex h-screen items-center justify-center">
         <ClipLoader color="#FFB800" size={40} />
       </div>
     );
@@ -519,11 +532,11 @@ const ClassDetailsTutor = ({ onClose }) => {
   if (error) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-        <div className="p-8 bg-white rounded-lg">
+        <div className="rounded-lg bg-white p-8">
           <p className="mb-4 text-red-500">{error}</p>
           <button
             onClick={onClose}
-            className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
+            className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
           >
             {t("class-details-tutor.actions.close")}
           </button>
@@ -534,15 +547,123 @@ const ClassDetailsTutor = ({ onClose }) => {
 
   if (!classData) return null;
 
+  // SPECIAL CARD VIEW for Exam Prep or Introductory Call
+  const isExamPrep =
+    classData.classType === "exam_prep" ||
+    classData.classType === "introductory_call" ||
+    classData.examPrep;
+
+  if (isExamPrep) {
+    // Assume only one student for 1:1 exam prep/intro call
+    const student =
+      members && members.length > 0
+        ? members[0]
+        : {
+            name: "Mike Jones",
+            photoUrl: "/images/panda.png",
+            nativeLanguage: "Spanish",
+            targetLanguage: "English (Teaching)",
+            country: "USA",
+          };
+
+    return (
+      <div className="flex min-h-screen">
+        <div className="m-6 flex flex-1 rounded-3xl border">
+          <div className="mx-4 flex w-full flex-col rounded-3xl bg-white p-6">
+            <div className="mb-6 flex items-center justify-between border-b pb-4">
+              <div className="flex items-center gap-4">
+                <button
+                  className="rounded-full bg-[#F6F6F6] p-3"
+                  onClick={() => navigate(-1)}
+                  aria-label={t("class-details-tutor.actions.back")}
+                >
+                  <ArrowLeft size="24" />
+                </button>
+                <h1 className="text-2xl font-medium text-black">
+                  {t("class-details-tutor.title")}
+                </h1>
+              </div>
+            </div>
+            <div className="flex justify-center py-6">
+              <div className="flex w-full max-w-[420px] flex-col items-center rounded-3xl bg-[#E6FDE9] px-8 py-10 shadow-md">
+                <div className="mb-6 flex items-center justify-center">
+                  <div className="flex h-32 w-32 flex-col items-center justify-center rounded-full bg-[#B9F9C2]">
+                    <span className="font-tanker text-2xl font-normal leading-none tracking-wide text-[#042F0C]">
+                      EXAM
+                    </span>
+                    <span className="mt-1 font-tanker text-sm font-normal text-[#042F0C]">
+                      PREPARATION
+                    </span>
+                  </div>
+                </div>
+                <div className="mb-2 text-center text-2xl font-semibold text-black">
+                  {classData.classType === "introductory_call"
+                    ? "Introductory Call"
+                    : "Exam Prep Class"}
+                </div>
+                {/* Time & Date Row */}
+                <div className="my-8 flex w-full flex-row items-center justify-center gap-8">
+                  <div className="flex items-center gap-2 text-lg text-black">
+                    <img src="/svgs/clock.svg" alt="Clock" />{" "}
+                    <span className="text-sm font-medium text-[#454545]">
+                      {formatTimeOnly(classData.classDateTime)} EST
+                    </span>
+                  </div>
+                  <div className="font-mediumss flex items-center gap-1 text-sm text-[#454545]">
+                    <img src="/svgs/calendar.svg" alt="Calendar" />
+                    <span className="font-normal uppercase tracking-wide">
+                      {formatDateOnly(classData.classDateTime)}
+                    </span>
+                  </div>
+                </div>
+                <div className="mb-2 text-base font-semibold text-black">
+                  Student
+                </div>
+                <div className="mb-4 flex h-24 w-full items-center gap-3 rounded-2xl border border-[#14B82C] bg-white px-3 py-2">
+                  <img
+                    src={student.photoUrl || "/images/panda.png"}
+                    alt={student.name}
+                    className="h-20 w-20 rounded-full object-cover"
+                  />
+                  <div className="flex-1">
+                    <div className="text-xl font-semibold text-black">
+                      {student.name}
+                    </div>
+                    <div className="text-sm font-medium tracking-normal text-[#3D3D3D]">
+                      {student.nativeLanguage || "Spanish"} Native
+                      <br />
+                      {student.targetLanguage || "English (Teaching)"}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 text-sm font-medium uppercase text-[#454545]">
+                    <img src="/svgs/location.svg" alt="Location" />
+                    {student.country || "USA"}
+                  </div>
+                </div>
+                <button
+                  className="mt-2 w-full rounded-full border border-black bg-[#FFBF00] py-2 text-base font-medium text-black hover:bg-[#ffd94d]"
+                  onClick={handleJoinClass}
+                >
+                  Join Class, Starting in 5 minutes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // --- DEFAULT VIEW ---
   return (
     <>
       <div className="flex min-h-screen">
-        <div className="flex flex-1 m-6 border rounded-3xl">
-          <div className="flex flex-col w-full p-6 mx-4 bg-white rounded-3xl">
-            <div className="flex items-center justify-between pb-4 mb-6 border-b">
+        <div className="m-6 flex flex-1 rounded-3xl border">
+          <div className="mx-4 flex w-full flex-col rounded-3xl bg-white p-6">
+            <div className="mb-6 flex items-center justify-between border-b pb-4">
               <div className="flex items-center gap-4">
                 <button
-                  className="p-3 bg-gray-100 rounded-full"
+                  className="rounded-full bg-gray-100 p-3"
                   onClick={() => navigate(-1)}
                   aria-label={t("class-details-tutor.actions.back")}
                 >
@@ -554,31 +675,31 @@ const ClassDetailsTutor = ({ onClose }) => {
               </div>
             </div>
 
-            <div className="flex flex-1 min-h-0 gap-6">
+            <div className="flex min-h-0 flex-1 gap-6">
               <div
-                className={`w-1/4 p-6 rounded-3xl ${getClassTypeColor(
-                  classData.classType
+                className={`w-1/4 rounded-3xl p-6 ${getClassTypeColor(
+                  classData.classType,
                 )}`}
               >
-                <div className="flex flex-col items-center justify-between h-full text-center">
+                <div className="flex h-full flex-col items-center justify-between text-center">
                   <div className="flex flex-col items-center text-center">
                     <img
                       src={classData.imageUrl}
                       alt={classData.className}
-                      className="w-32 h-32 mb-4 rounded-full"
+                      className="mb-4 h-32 w-32 rounded-full"
                     />
                     <h3 className="mb-2 text-2xl font-medium">
                       {classData.className}
                     </h3>
-                    <div className="flex items-center gap-4 mb-2">
+                    <div className="mb-2 flex items-center gap-4">
                       <div className="flex flex-row items-center space-x-1">
                         <img
                           src={
                             classData.language === "English"
                               ? "/svgs/xs-us.svg"
                               : classData.language === "Spanish"
-                              ? "/svgs/xs-spain.svg"
-                              : "/svgs/eng-spanish-xs.svg"
+                                ? "/svgs/xs-spain.svg"
+                                : "/svgs/eng-spanish-xs.svg"
                           }
                           alt={
                             classData.language === "English"
@@ -587,30 +708,29 @@ const ClassDetailsTutor = ({ onClose }) => {
                           }
                           className="w-5"
                         />{" "}
-                        <span className=" text-md">{classData.language}</span>
+                        <span className="text-md">{classData.language}</span>
                       </div>{" "}
-                      <span className="px-3 py-[2px] bg-yellow-200 rounded-full text-md">
+                      <span className="text-md rounded-full bg-yellow-200 px-3 py-[2px]">
                         {classData.languageLevel}
                       </span>
                       {isClassOngoing() && (
-                        <span className=" px-2 sm:px-3 py-1 text-xs sm:text-sm bg-[#B9F9C2BF]/75 backdrop-blur-sm rounded-full ">
+                        <span className="rounded-full bg-[#B9F9C2BF]/75 px-2 py-1 text-xs backdrop-blur-sm sm:px-3 sm:text-sm">
                           Ongoing
                         </span>
                       )}
                     </div>
-                    <div className="flex flex-col mt-4 space-y-4">
+                    <div className="mt-4 flex flex-col space-y-4">
                       {/* First Row */}
                       <div className="flex items-center justify-between space-x-12">
                         <div className="flex items-center gap-1">
                           <img alt="bammbuu" src="/svgs/clock.svg" />{" "}
                           <span className="text-sm">
                             {new Date(
-                              classData.classDateTime.seconds * 1000
+                              classData.classDateTime.seconds * 1000,
                             ).toLocaleTimeString("en-US", {
                               hour: "2-digit",
                               minute: "2-digit",
-                              // second: '2-digit' // uncomment if you want seconds
-                              hour12: true, // for AM/PM format
+                              hour12: true,
                             })}
                           </span>
                         </div>
@@ -618,12 +738,11 @@ const ClassDetailsTutor = ({ onClose }) => {
                           <img alt="bammbuu" src="/svgs/calendar.svg" />
                           <span className="text-sm">
                             {new Date(
-                              classData.classDateTime.seconds * 1000
+                              classData.classDateTime.seconds * 1000,
                             ).toLocaleDateString("en-US", {
                               year: "numeric",
                               month: "long",
                               day: "numeric",
-                              // timeZone: "UTC", // Ensure the time is displayed in UTC
                             })}
                           </span>
                         </div>
@@ -686,19 +805,19 @@ const ClassDetailsTutor = ({ onClose }) => {
                       />
                     </div>
                     <button
-                      className="w-full px-4 py-2 text-black bg-[#ffbf00] border border-black rounded-full hover:bg-[#ffbf00]"
+                      className="w-full rounded-full border border-black bg-[#ffbf00] px-4 py-2 text-black hover:bg-[#ffbf00]"
                       onClick={handleJoinClass}
                     >
                       {t("class-details-tutor.actions.join-class")}
                     </button>
                     <button
-                      className="w-full px-4 py-2 text-black bg-white border border-black rounded-full"
+                      className="w-full rounded-full border border-black bg-white px-4 py-2 text-black"
                       onClick={() => navigate(`/edit-class/${classId}`)}
                     >
                       {t("class-details-tutor.actions.edit-class")}
                     </button>
                     <button
-                      className="w-full px-4 py-2 text-red-500 border border-red-500 rounded-full"
+                      className="w-full rounded-full border border-red-500 px-4 py-2 text-red-500"
                       onClick={() => setShowDeleteConfirmation(true)}
                     >
                       {t("class-details-tutor.actions.delete-class")}
@@ -707,10 +826,10 @@ const ClassDetailsTutor = ({ onClose }) => {
                 </div>
               </div>
 
-              <div className="flex flex-col flex-1 min-h-0">
-                <div className="flex flex-row items-center justify-between mb-6">
+              <div className="flex min-h-0 flex-1 flex-col">
+                <div className="mb-6 flex flex-row items-center justify-between">
                   <button
-                    className="px-6 py-2 text-black bg-yellow-400 rounded-full"
+                    className="rounded-full bg-yellow-400 px-6 py-2 text-black"
                     onClick={() => setActiveTab("Members")}
                   >
                     {t("class-details-tutor.tabs.members", {
@@ -719,10 +838,10 @@ const ClassDetailsTutor = ({ onClose }) => {
                   </button>
                 </div>
 
-                <div className="overflow-y-auto ">{renderMembers()}</div>
+                <div className="overflow-y-auto">{renderMembers()}</div>
                 {classData.classType === "Individual Premium" ? (
                   <>
-                    <div className="pt-6 space-y-4">
+                    <div className="space-y-4 pt-6">
                       <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
                         <h2 className="text-lg font-semibold md:text-xl">
                           {t("class-details.slots.title")}
@@ -735,7 +854,7 @@ const ClassDetailsTutor = ({ onClose }) => {
                           return (
                             <div
                               key={index}
-                              className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:px-4 border rounded-2xl sm:rounded-full ${
+                              className={`flex flex-col items-start justify-between rounded-2xl border p-3 sm:flex-row sm:items-center sm:rounded-full sm:px-4 ${
                                 status === "current"
                                   ? "border-green-500"
                                   : "border-gray-200"
@@ -769,7 +888,7 @@ const ClassDetailsTutor = ({ onClose }) => {
       <Modal
         isOpen={showDeleteConfirmation}
         onRequestClose={() => setShowDeleteConfirmation(false)}
-        className="z-50 max-w-sm p-6 mx-auto mt-40 bg-white outline-none rounded-3xl font-urbanist"
+        className="z-50 mx-auto mt-40 max-w-sm rounded-3xl bg-white p-6 font-urbanist outline-none"
         overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
         style={{
           overlay: {
@@ -793,13 +912,13 @@ const ClassDetailsTutor = ({ onClose }) => {
           </p>
           <div className="flex flex-row gap-2">
             <button
-              className="w-full py-2 font-medium border border-gray-300 rounded-full hover:bg-gray-50"
+              className="w-full rounded-full border border-gray-300 py-2 font-medium hover:bg-gray-50"
               onClick={() => setShowDeleteConfirmation(false)}
             >
               {t("class-details-tutor.actions.cancel")}
             </button>
             <button
-              className="w-full py-2 font-medium text-black bg-[#ff4d4d] rounded-full hover:bg-[#ff3333] border border-[#8b0000]"
+              className="w-full rounded-full border border-[#8b0000] bg-[#ff4d4d] py-2 font-medium text-black hover:bg-[#ff3333]"
               onClick={handleDeleteClass}
               disabled={isDeleting}
             >
