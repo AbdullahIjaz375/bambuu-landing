@@ -1,11 +1,36 @@
+import { useEffect, useState } from "react";
+import { getStudentClasses } from "../../../api/examPrepApi";
+import { useAuth } from "../../../context/AuthContext";
 import Modal from "react-modal";
 
 const ClassesBooked = ({
   isOpen,
   onClose,
-  bookedClassesCount = 0,
-  totalAvailableClasses = 10,
+  bookedClassesCount: bookedClassesCountProp = 0,
+  totalAvailableClasses: totalAvailableClassesProp = 10,
 }) => {
+  const { user } = useAuth();
+  const [bookedClassesCount, setBookedClassesCount] = useState(bookedClassesCountProp);
+  const [totalAvailableClasses, setTotalAvailableClasses] = useState(totalAvailableClassesProp);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!isOpen || !user?.uid) return;
+    setLoading(true);
+    setError(null);
+    getStudentClasses(user.uid)
+      .then((res) => {
+        setBookedClassesCount(res.classes?.length || 0);
+        setTotalAvailableClasses(res.totalAvailableClasses || 10);
+      })
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, [isOpen, user]);
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div className="text-red-500">{error}</div>;
+
   return (
     <Modal
       isOpen={isOpen}

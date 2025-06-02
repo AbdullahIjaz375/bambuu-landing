@@ -38,11 +38,14 @@ const ClassCardTutor = ({
 
   const formatTime = (timestamp) => {
     if (!timestamp) return t("class-card-tutor.labels.tbd");
-
-    // Convert Firebase timestamp to a Date object
-    const date = new Date(timestamp.seconds * 1000);
-
-    // Format the time in UTC
+    let date;
+    if (typeof timestamp === "string") {
+      date = new Date(timestamp);
+    } else if (timestamp.seconds) {
+      date = new Date(timestamp.seconds * 1000);
+    } else {
+      date = new Date(timestamp);
+    }
     return date.toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
@@ -51,11 +54,14 @@ const ClassCardTutor = ({
 
   const formatDate = (timestamp) => {
     if (!timestamp) return t("class-card-tutor.labels.tbd");
-
-    // Convert Firebase timestamp to a Date object
-    const date = new Date(timestamp.seconds * 1000);
-
-    // Format the date in UTC
+    let date;
+    if (typeof timestamp === "string") {
+      date = new Date(timestamp);
+    } else if (timestamp.seconds) {
+      date = new Date(timestamp.seconds * 1000);
+    } else {
+      date = new Date(timestamp);
+    }
     return date.toLocaleDateString("en-US", {
       day: "2-digit",
       month: "short",
@@ -66,20 +72,29 @@ const ClassCardTutor = ({
   // New function to get the day name for recurring classes
   const getRecurringDayDisplay = (timestamp) => {
     if (!timestamp) return t("class-card-tutor.labels.tbd");
-
-    const date = new Date(timestamp.seconds * 1000);
-
-    // Get the day name
+    let date;
+    if (typeof timestamp === "string") {
+      date = new Date(timestamp);
+    } else if (timestamp.seconds) {
+      date = new Date(timestamp.seconds * 1000);
+    } else {
+      date = new Date(timestamp);
+    }
     const dayName = date.toLocaleDateString("en-US", { weekday: "long" });
-
-    // For weekly recurring classes, show just the day name
     return dayName;
   };
 
   // Add a helper to get the day name
   const getDayName = (timestamp) => {
-    if (!timestamp || !timestamp.seconds) return "TBD";
-    const date = new Date(timestamp.seconds * 1000);
+    if (!timestamp) return "TBD";
+    let date;
+    if (typeof timestamp === "string") {
+      date = new Date(timestamp);
+    } else if (timestamp.seconds) {
+      date = new Date(timestamp.seconds * 1000);
+    } else {
+      date = new Date(timestamp);
+    }
     return date.toLocaleString("en-US", { weekday: "long" });
   };
 
@@ -97,8 +112,15 @@ const ClassCardTutor = ({
     ) {
       return getDayName(timestamp);
     }
-    if (!timestamp || !timestamp.seconds) return "TBD";
-    const date = new Date(timestamp.seconds * 1000);
+    if (!timestamp) return "TBD";
+    let date;
+    if (typeof timestamp === "string") {
+      date = new Date(timestamp);
+    } else if (timestamp.seconds) {
+      date = new Date(timestamp.seconds * 1000);
+    } else {
+      date = new Date(timestamp);
+    }
     return date.toLocaleDateString("en-US", {
       day: "2-digit",
       month: "short",
@@ -111,9 +133,16 @@ const ClassCardTutor = ({
   };
 
   const isClassOngoing = () => {
-    if (!classDateTime || !classDateTime.seconds) return false;
+    if (!classDateTime) return false;
+    let classStart;
+    if (typeof classDateTime === "string") {
+      classStart = new Date(classDateTime);
+    } else if (classDateTime.seconds) {
+      classStart = new Date(classDateTime.seconds * 1000);
+    } else {
+      classStart = new Date(classDateTime);
+    }
     const now = new Date();
-    const classStart = new Date(classDateTime.seconds * 1000);
     const classEnd = new Date(classStart.getTime() + classDuration * 60 * 1000);
     return now >= classStart && now <= classEnd;
   };

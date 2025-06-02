@@ -2,6 +2,8 @@ import { Trash2 } from "lucide-react";
 import Modal from "react-modal";
 import ClassesBooked from "./ClassesBooked";
 import { useState } from "react";
+import { bookExamPrepClass } from "../../../api/examPrepApi";
+import { useAuth } from "../../../context/AuthContext";
 
 const ConfirmClassesModal = ({
   isOpen,
@@ -12,7 +14,10 @@ const ConfirmClassesModal = ({
   selectedTimes,
   onRemoveClass,
 }) => {
+  const { user } = useAuth();
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   // Convert dates and times to the format expected for booking
   const formatBookingData = () => {
@@ -33,13 +38,22 @@ const ConfirmClassesModal = ({
     };
   };
 
-  const handleConfirmBooking = () => {
-    // Show success modal first
-    setShowSuccessModal(true);
-
-    // Here you can add API call later
-    // const bookingData = formatBookingData();
-    // onConfirm(bookingData);
+  const handleConfirmBooking = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const classes = selectedDates.map((date) => ({
+        date: `${String(date).padStart(2, "0")}-05-25`,
+        time: selectedTimes[date],
+        title: "Exam Prep Class",
+      }));
+      await bookExamPrepClass({ studentId: user.uid, classes });
+      setShowSuccessModal(true);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSuccessClose = () => {
@@ -136,6 +150,8 @@ const ConfirmClassesModal = ({
         bookedClassesCount={selectedDates.length}
         totalAvailableClasses={10}
       />
+      {loading && <div>Booking classes...</div>}
+      {error && <div className="text-red-500">{error}</div>}
     </>
   );
 };

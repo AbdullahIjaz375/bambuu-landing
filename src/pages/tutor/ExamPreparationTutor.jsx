@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { ClipLoader } from "react-spinners";
 import Modal from "react-modal";
@@ -9,35 +9,14 @@ import ClassCardTutor from "../../components-tutor/ClassCardTutor";
 import CalendarTutor from "../../components/CalendarTutor";
 import TimeSlotModal from "./TimeSlotModal";
 import SuccessModal from "./SuccessModal";
-
-const dummyClasses = Array.from({ length: 8 }).map((_, i) => ({
-  classId: `${i + 1}`,
-  className: "Exam Prep Class",
-  language: "English",
-  languageLevel: "None",
-  classDateTime: { seconds: 1734710400 }, // 20 DEC 2024, 16:00 UTC
-  classDuration: 120,
-  adminId: "admin1",
-  adminName: "Mike Jhones",
-  adminImageUrl: "/images/panda.png",
-  classMemberIds: ["u1", "u2"],
-  availableSpots: 10,
-  imageUrl: "/images/exam-prep-green.png",
-  classDescription: "Exam Preparation",
-  classAddress: "Online",
-  groupId: "",
-  recurrenceType: "None",
-  selectedRecurrenceType: "None",
-  recurrenceTypes: [],
-  //   classType: "Group Premium",
-  classLocation: "Online",
-}));
+import { getTutorClasses, setExamPrepClassSlots, setIntroCallSlots } from "../../api/examPrepApi";
 
 const ExamPreparationTutor = () => {
   const { t } = useTranslation();
 
   const { user, setUser } = useAuth();
   const [loading, setLoading] = useState(true);
+  const [classes, setClasses] = useState([]);
   const [availibilityModal, setAvailibilityModal] = useState(false);
   const [showTimeModal, setShowTimeModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -45,6 +24,24 @@ const ExamPreparationTutor = () => {
   const [activeTab, setActiveTab] = useState(
     t("exam-prep.tabs.exam-prep-classes"),
   );
+  const [availabilityLoading, setAvailabilityLoading] = useState(false);
+  const [availabilityError, setAvailabilityError] = useState(null);
+
+  useEffect(() => {
+    if (!user?.uid) return;
+    setLoading(true);
+    console.log("[ExamPrep] Fetching tutor classes for:", user.uid);
+    getTutorClasses(user.uid)
+      .then((res) => {
+        setClasses(res.classes || []);
+        console.log("[ExamPrep] Tutor classes fetched:", res.classes);
+      })
+      .catch((err) => {
+        setClasses([]);
+        console.error("[ExamPrep] Error fetching tutor classes:", err);
+      })
+      .finally(() => setLoading(false));
+  }, [user]);
 
   const handleCalendarNext = (dates) => {
     setSelectedDates(dates);
@@ -59,21 +56,78 @@ const ExamPreparationTutor = () => {
     }
   };
 
-  const handleTimeSlotNext = () => {
+  const handleTimeSlotNext = (slotsByDate = null) => {
     setShowTimeModal(false);
-    setShowSuccessModal(true);
+    setAvailabilityLoading(true);
+    setAvailabilityError(null);
+    const slots = slotsByDate || selectedDates.map(date => ({
+      date: new Date(2025, 4, date).toISOString(),
+      time: "10:00 AM"
+    }));
+    const payload = {
+      tutorId: user.uid,
+      slots,
+    };
+    if (activeTab === t("exam-prep.tabs.introductory-calls")) {
+      console.log("[ExamPrep] Setting introductory call slots:", payload);
+      setIntroCallSlots(payload)
+        .then((res) => {
+          console.log("[ExamPrep] Intro call availability set successfully:", res);
+          setShowSuccessModal(true);
+          setLoading(true);
+          return getTutorClasses(user.uid)
+            .then((res) => {
+              setClasses(res.classes || []);
+              console.log("[ExamPrep] Tutor classes refreshed:", res.classes);
+            })
+            .catch((err) => {
+              setClasses([]);
+              console.error("[ExamPrep] Error refreshing tutor classes:", err);
+            })
+            .finally(() => setLoading(false));
+        })
+        .catch((err) => {
+          setAvailabilityError(err.message);
+          console.error("[ExamPrep] Error setting intro call availability:", err);
+        })
+        .finally(() => setAvailabilityLoading(false));
+    } else {
+      console.log("[ExamPrep] Setting exam prep class slots:", payload);
+      setExamPrepClassSlots(payload)
+        .then((res) => {
+          console.log("[ExamPrep] Availability set successfully:", res);
+          setShowSuccessModal(true);
+          setLoading(true);
+          return getTutorClasses(user.uid)
+            .then((res) => {
+              setClasses(res.classes || []);
+              console.log("[ExamPrep] Tutor classes refreshed:", res.classes);
+            })
+            .catch((err) => {
+              setClasses([]);
+              console.error("[ExamPrep] Error refreshing tutor classes:", err);
+            })
+            .finally(() => setLoading(false));
+        })
+        .catch((err) => {
+          setAvailabilityError(err.message);
+          console.error("[ExamPrep] Error setting availability:", err);
+        })
+        .finally(() => setAvailabilityLoading(false));
+    }
   };
 
-  //   if (loading) {
-  //     return (
-  //       <div className="flex min-h-screen bg-white">
-  //         <Sidebar user={user} />
-  //         <div className="flex items-center justify-center flex-1">
-  //           <ClipLoader color="#FFB800" size={40} />
-  //         </div>
-  //       </div>
-  //     );
-  //   }
+  // Filter classes based on activeTab
+  const filteredClasses = classes.filter((classData) => {
+    if (activeTab === t("exam-prep.tabs.exam-prep-classes")) {
+      // Show only exam prep classes
+      return classData.classType === "exam_prep";
+    } else if (activeTab === t("exam-prep.tabs.introductory-calls")) {
+      // Show only introductory calls
+      return classData.classType === "introductory_call";
+    }
+    return true;
+  });
 
   return (
     <div className="flex h-screen bg-white">
@@ -125,15 +179,21 @@ const ExamPreparationTutor = () => {
             </button>
           </div>
           <div className="relative mt-2 w-full">
-            <div className="grid grid-cols-1 gap-6 pb-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              {dummyClasses.map((classData) => (
-                <ClassCardTutor
-                  key={classData.classId}
-                  {...classData}
-                  examPrep
-                />
-              ))}
-            </div>
+            {loading ? (
+              <div className="flex items-center justify-center flex-1">
+                <ClipLoader color="#FFB800" size={40} />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-6 pb-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                {filteredClasses.map((classData) => (
+                  <ClassCardTutor
+                    key={classData.classId || classData.id}
+                    {...classData}
+                    examPrep={classData.classType === "exam_prep"}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
         <div />
@@ -169,6 +229,8 @@ const ExamPreparationTutor = () => {
             onClose={handleTimeSlotClose}
             onNext={handleTimeSlotNext}
           />
+          {availabilityLoading && <div>Setting availability...</div>}
+          {availabilityError && <div className="text-red-500">{availabilityError}</div>}
         </Modal>
       )}
 
