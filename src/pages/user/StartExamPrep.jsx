@@ -2,10 +2,11 @@ import { useState } from "react";
 import Modal from "react-modal";
 import ExploreInstructors from "./ExploreInstructors";
 
-const StartExamPrep = ({ showExamPrepModal, setShowExamPrepModal }) => {
-  const [showExploreInstructorsModal, setShowExploreInstructorsModal] =
-    useState(false);
-
+const StartExamPrep = ({
+  showExamPrepModal,
+  setShowExamPrepModal,
+  onFindTutor,
+}) => {
   return (
     <>
       <Modal
@@ -73,7 +74,7 @@ const StartExamPrep = ({ showExamPrepModal, setShowExamPrepModal }) => {
           <button
             className="mb-4 w-full max-w-md rounded-full bg-[#14B82C] py-3 text-base font-medium text-black transition-colors hover:bg-[#12a528]"
             onClick={() => {
-              setShowExploreInstructorsModal(true);
+              if (onFindTutor) onFindTutor();
               setShowExamPrepModal(false);
             }}
           >
@@ -90,12 +91,6 @@ const StartExamPrep = ({ showExamPrepModal, setShowExamPrepModal }) => {
           </div>
         </div>
       </Modal>
-      {showExploreInstructorsModal && (
-        <ExploreInstructors
-          showExploreInstructorsModal={showExploreInstructorsModal}
-          setShowExploreInstructorsModal={setShowExploreInstructorsModal}
-        />
-      )}
     </>
   );
 };

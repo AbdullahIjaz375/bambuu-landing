@@ -1,17 +1,6 @@
 import { useRef, useEffect, useCallback, useState } from "react";
 import NotificationDropdown from "../../components/NotificationDropdown";
-import {
-  Bell,
-  ChevronLeft,
-  ChevronRight,
-  Users,
-  BookOpen,
-  Star,
-  Database,
-  UserCircle,
-  User,
-} from "lucide-react";
-import Slider from "react-slick";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import Sidebar from "../../components/Sidebar";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "../../context/LanguageContext";
@@ -19,6 +8,11 @@ import ClassCard from "../../components/ClassCard";
 import { useAuth } from "../../context/AuthContext";
 import GroupCard from "../../components/GroupCard";
 import { useNavigate, useLocation } from "react-router-dom";
+import {
+  bookIntroductoryCall,
+  getIntroCallSlots,
+  getStudentExamPrepTutorialStatus,
+} from "../../api/examPrepApi";
 import { db } from "../../firebaseConfig";
 import {
   doc,
@@ -33,7 +27,11 @@ import { messaging } from "../../firebaseConfig";
 import EmptyState from "../../components/EmptyState";
 import CalendarUser from "../../components/CalenderUser";
 import StartExamPrep from "./StartExamPrep";
-import IntoductoryCallDone from "./ExamPreparation/IntoductoryCallDone";
+import ExploreInstructors from "./ExploreInstructors";
+import InstructorProfile from "./InstructorProfile";
+import SlotPickerModal from "./SlotPickerModal";
+import ExamBookingConfirmation from "./ExamBookingConfirmation";
+import IntoductoryCallDone from "./IntroductoryCallDone";
 // This component must be defined at the top level of your file,
 // outside the LearnUser component but still within the file
 const LanguageCardsSection = ({ languageCards, languageData, navigate }) => {
@@ -223,12 +221,138 @@ const LearnUser = () => {
   const location = useLocation();
   const { t, i18n } = useTranslation();
   const { currentLanguage, changeLanguage } = useLanguage();
+  const [examPrepStatus, setExamPrepStatus] = useState(false);
+  const [showExploreInstructorsModal, setShowExploreInstructorsModal] =
+    useState(false);
+  const [selectedInstructor, setSelectedInstructor] = useState(null);
+  const [confirmedInstructor, setConfirmedInstructor] = useState(null);
+  const [showSlotPicker, setShowSlotPicker] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedTime, setSelectedTime] = useState(null);
+  const [showBookingConfirmation, setShowBookingConfirmation] = useState(false);
+  const [showBookedModal, setShowBookedModal] = useState(false);
+  const [introCallSlots, setIntroCallSlots] = useState([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+  const [bookingLoading, setBookingLoading] = useState(false);
+
+  // Handler to start the flow
+  const handleFindTutor = () => {
+    setShowExploreInstructorsModal(true);
+  };
+
+  // Handler when instructor is selected
+  const handleInstructorSelect = (instructor) => {
+    setSelectedInstructor(instructor);
+    setShowExploreInstructorsModal(false);
+  };
+
+  // Handler when slot picker is opened from instructor profile
+  const handleBookIntroCall = async () => {
+    if (!selectedInstructor?.uid) return;
+    setLoadingSlots(true);
+    setShowSlotPicker(true);
+    setSelectedInstructor(null); // Close InstructorProfile modal
+    setConfirmedInstructor(selectedInstructor); // <-- Save instructor for later
+
+    try {
+      const data = await getIntroCallSlots(selectedInstructor.uid);
+      // Flatten and format the slots for the modal
+      // We'll convert the API response to a map: { [date]: [times] }
+      const slotMap = {};
+      (data.introductoryCallSlots || []).forEach((slotDay) => {
+        slotDay.times.forEach((slot) => {
+          if (!slot.booked) {
+            const dateObj = new Date(slot.time);
+            const dateStr = dateObj.toISOString().slice(0, 10); // YYYY-MM-DD
+            const timeStr = dateObj
+              .toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+                timeZone: "UTC",
+              })
+              .replace(/^0/, "");
+            if (!slotMap[dateStr]) slotMap[dateStr] = [];
+            slotMap[dateStr].push(timeStr);
+          }
+        });
+      });
+      setIntroCallSlots(slotMap);
+    } catch (err) {
+      setIntroCallSlots({});
+    } finally {
+      setLoadingSlots(false);
+    }
+  };
+
+  // Handler when slot is picked
+  const handleSlotPicked = (date, time) => {
+    setSelectedDate(date);
+    setSelectedTime(time);
+    setShowSlotPicker(false);
+    setShowBookingConfirmation(true);
+  };
+
+  // Handler for booking confirmation
+  const handleBookingConfirmed = async () => {
+    if (
+      !user?.uid ||
+      !confirmedInstructor?.uid ||
+      !selectedDate ||
+      !selectedTime
+    )
+      return;
+    setBookingLoading(true);
+    try {
+      const slotISO = new Date(
+        `${selectedDate}T${selectedTime.replace(" ", "")}:00.000Z`,
+      ).toISOString();
+
+      await bookIntroductoryCall({
+        studentId: user?.uid,
+        tutorId: confirmedInstructor?.uid,
+        slot: { time: slotISO },
+      });
+
+      setShowBookingConfirmation(false);
+      setShowBookedModal(true); // Show success modal
+      // Optionally refresh data here
+    } catch (err) {
+      alert("Booking failed: " + err.message);
+    } finally {
+      setBookingLoading(false);
+    }
+  };
+
+  // Handler for closing success modal
+  const handleBookedModalClose = () => {
+    setShowBookedModal(false);
+    setSelectedInstructor(null);
+    setShowExploreInstructorsModal(false);
+    setShowSlotPicker(false);
+    setShowBookingConfirmation(false);
+    // Optionally update state to reflect that intro call is booked
+  };
+
+  // if the user purchased the plan but not booked the introductory call, show the modal
+  useEffect(() => {
+    if (
+      examPrepStatus?.hasPurchasedPlan &&
+      !examPrepStatus.hasBookedIntroCall
+    ) {
+      setShowExamPrepModal(true);
+    } else {
+      setShowExamPrepModal(false);
+    }
+  }, [examPrepStatus]);
 
   // Maintain language from navigation when redirected from profile setup
   useEffect(() => {
     // Check if we're coming from profile setup with a language preference
     const languageToUse =
-      location.state?.language || localStorage.getItem("i18nextLng") || "en";
+      location.state?.language ||
+      localStorage.getItem("iwhite8nextLng") ||
+      "en";
 
     // Apply the language to ensure consistency throughout the app
     if (i18n.language !== languageToUse || currentLanguage !== languageToUse) {
@@ -359,6 +483,40 @@ const LearnUser = () => {
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const handleOnboarding = () => {
+    if (
+      examPrepStatus &&
+      examPrepStatus.hasPurchasedPlan &&
+      !examPrepStatus.hasBookedIntroCall
+    ) {
+      setShowExploreInstructorsModal(true);
+      return;
+    }
+    if (
+      examPrepStatus &&
+      examPrepStatus.hasPurchasedPlan &&
+      examPrepStatus.doneWithIntroCall &&
+      !examPrepStatus.hasBookedExamPrepClass
+    ) {
+      setShowSlotPicker(true);
+      return;
+    }
+    // Add other onboarding steps here if needed
+  };
+
+  // Fetch exam prep status on mount
+  useEffect(() => {
+    const fetchStatus = async () => {
+      try {
+        const status = await getStudentExamPrepTutorialStatus(user.uid);
+        setExamPrepStatus(status);
+      } catch (err) {
+        setExamPrepStatus(null);
+      }
+    };
+    fetchStatus();
+  }, [user.uid]);
 
   useEffect(() => {
     const fetchClasses = async () => {
@@ -592,6 +750,36 @@ const LearnUser = () => {
             </div>
           </div>
 
+          {/* Complete Onboarding Banner */}
+          {examPrepStatus &&
+            examPrepStatus.hasPurchasedPlan &&
+            !(
+              examPrepStatus.doneWithExamPrepClass &&
+              examPrepStatus.doneWithIntroCall &&
+              examPrepStatus.hasBookedExamPrepClass &&
+              examPrepStatus.hasBookedIntroCall
+            ) && (
+              <div className="mb-6 flex w-full items-center justify-between rounded-3xl border border-[#B0B0B0] bg-white px-6 py-3">
+                <div className="flex items-center gap-3">
+                  <img
+                    src="/svgs/preparation-package-icon.svg"
+                    alt="Onboarding"
+                    className="h-10 w-10"
+                  />
+                  <span className="text-base font-normal text-[#454545]">
+                    You purchased exam prep package. Let&apos;s complete your
+                    onboarding process!
+                  </span>
+                </div>
+                <button
+                  className="rounded-3xl border border-[#5D5D5D] bg-[#E6FDE9] px-5 py-2 text-base font-medium text-[#042F0C] transition hover:bg-[#E6FDE9]"
+                  onClick={handleOnboarding}
+                >
+                  Complete Onboarding
+                </button>
+              </div>
+            )}
+
           {/* Calendar and Language Learning Section */}
           <div className="mb-4 flex w-full flex-col items-start justify-between gap-4 py-4 lg:flex-row">
             {/* Calendar section */}
@@ -756,10 +944,38 @@ const LearnUser = () => {
       <StartExamPrep
         showExamPrepModal={showExamPrepModal}
         setShowExamPrepModal={setShowExamPrepModal}
+        onFindTutor={handleFindTutor}
+      />
+      <ExploreInstructors
+        showExploreInstructorsModal={showExploreInstructorsModal}
+        setShowExploreInstructorsModal={setShowExploreInstructorsModal}
+        onInstructorSelect={handleInstructorSelect}
+      />
+      <InstructorProfile
+        selectedInstructor={selectedInstructor}
+        setSelectedInstructor={setSelectedInstructor}
+        onBookIntroCall={handleBookIntroCall}
+      />
+      <SlotPickerModal
+        isOpen={showSlotPicker}
+        onClose={() => setShowSlotPicker(false)}
+        onSlotPicked={handleSlotPicked}
+        slots={introCallSlots}
+        loading={loadingSlots}
+      />
+      <ExamBookingConfirmation
+        showConfirm={showBookingConfirmation}
+        setShowConfirm={setShowBookingConfirmation}
+        selectedDate={selectedDate}
+        selectedTime={selectedTime}
+        onConfirm={handleBookingConfirmed}
+        tutor={confirmedInstructor}
+        loading={bookingLoading}
       />
       <IntoductoryCallDone
-        bookExamClass={bookExamClass}
-        setBookExamClass={setBookExamClass}
+        bookExamClass={showBookedModal}
+        setBookExamClass={setShowBookedModal}
+        onClose={handleBookedModalClose}
       />
     </div>
   );

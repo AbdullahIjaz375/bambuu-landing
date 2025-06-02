@@ -1,47 +1,7 @@
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useState } from "react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ClipLoader } from "react-spinners";
 import Modal from "react-modal";
-import ExamBookingConfirmation from "./ExamBookingConfirmation";
-
-// Dummy slot data for available/unavailable days
-const dummySlots = {
-  "2025-05-04": [
-    "10:00 AM",
-    "11:00 AM",
-    "12:00 AM",
-    "01:00 PM",
-    "02:00 PM",
-    "03:00 PM",
-    "04:00 PM",
-    "05:00 PM",
-  ],
-  "2025-05-06": ["10:00 AM"],
-  "2025-05-07": ["10:00 AM"],
-  "2025-05-08": ["10:00 AM"],
-  "2025-05-09": ["10:00 AM"],
-  "2025-05-10": ["10:00 AM"],
-  "2025-05-13": ["10:00 AM"],
-  "2025-05-14": ["10:00 AM"],
-  "2025-05-16": ["10:00 AM"],
-  "2025-05-17": [
-    "10:00 AM",
-    "11:00 AM",
-    "12:00 AM",
-    "01:00 PM",
-    "02:00 PM",
-    "03:00 PM",
-    "04:00 PM",
-    "05:00 PM",
-  ],
-  "2025-05-20": ["10:00 AM"],
-  "2025-05-21": ["10:00 AM"],
-  "2025-05-23": ["10:00 AM"],
-  "2025-05-24": ["10:00 AM"],
-  "2025-05-27": ["10:00 AM"],
-  "2025-05-28": ["10:00 AM"],
-  "2025-05-29": ["10:00 AM"],
-  "2025-05-30": ["10:00 AM"],
-};
 
 const getDaysInMonth = (year, month) => {
   const date = new Date(year, month, 1);
@@ -52,11 +12,17 @@ const getDaysInMonth = (year, month) => {
   }
   return days;
 };
-const SlotPickerModal = ({ isOpen, onClose }) => {
+
+const SlotPickerModal = ({
+  isOpen,
+  onClose,
+  onSlotPicked,
+  slots = {},
+  loading,
+}) => {
   const [date, setDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
-  const [showConfirm, setShowConfirm] = useState(false);
 
   const year = date.getFullYear();
   const month = date.getMonth();
@@ -69,8 +35,11 @@ const SlotPickerModal = ({ isOpen, onClose }) => {
   // Adjust so Monday is first column
   const offset = firstDay === 0 ? 6 : firstDay - 1;
 
-  // For time slot grid
-  const timeSlots = (selectedDate && dummySlots[selectedDate]) || [];
+  // Use the real slots prop for available dates
+  const availableDates = Object.keys(slots);
+
+  // Use the real slots prop for time slots
+  const timeSlots = (selectedDate && slots[selectedDate]) || [];
 
   const navigateMonth = (direction) => {
     const newDate = new Date(date);
@@ -89,7 +58,7 @@ const SlotPickerModal = ({ isOpen, onClose }) => {
   return (
     <>
       <Modal
-        isOpen={isOpen && !showConfirm}
+        isOpen={isOpen}
         onRequestClose={onClose}
         className="fixed left-1/2 top-1/2 flex w-auto max-w-[98vw] -translate-x-1/2 -translate-y-1/2 flex-col rounded-[2.5rem] bg-white p-0 font-urbanist shadow-xl outline-none"
         overlayClassName="fixed inset-0 bg-black bg-opacity-20 z-50 flex items-center justify-center backdrop-blur-sm"
@@ -105,9 +74,15 @@ const SlotPickerModal = ({ isOpen, onClose }) => {
               <X className="h-6 w-6 text-[#3D3D3D]" />
             </button>
           </div>
-          <div className="flex gap-8">
-            {/* Calendar Section - Always visible */}
-            <div className="scrollbar-hide w-full max-w-4xl rounded-3xl border border-amber-400 bg-white p-3">
+          <div className="flex min-h-[340px] gap-8">
+            {/* Calendar Section - Always visible, loader overlays calendar */}
+            <div className="scrollbar-hide relative flex w-full max-w-4xl flex-col rounded-3xl border border-amber-400 bg-white p-3">
+              {/* Loader overlay */}
+              {loading && (
+                <div className="absolute inset-0 z-10 flex items-center justify-center rounded-3xl bg-white bg-opacity-80">
+                  <ClipLoader color="#14B82C" size={48} />
+                </div>
+              )}
               {/* Calendar header */}
               <div className="mb-4 flex flex-col items-center gap-4 sm:mb-6">
                 <div className="flex items-center justify-center gap-2">
@@ -146,9 +121,13 @@ const SlotPickerModal = ({ isOpen, onClose }) => {
                   <div key={`empty-${i}`} />
                 ))}
                 {days.map((date) => {
-                  // const dateStr = date.toISOString().slice(0, 10);
-                  const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-                  const available = !!dummySlots[dateStr];
+                  const dateStr = `${date.getFullYear()}-${String(
+                    date.getMonth() + 1,
+                  ).padStart(2, "0")}-${String(date.getDate()).padStart(
+                    2,
+                    "0",
+                  )}`;
+                  const available = !!slots[dateStr];
                   const isSelected = selectedDate === dateStr;
                   return (
                     <button
@@ -170,8 +149,8 @@ const SlotPickerModal = ({ isOpen, onClose }) => {
               </div>
             </div>
 
-            {/* Time slots section - Only visible when date is selected */}
-            {selectedDate && (
+            {/* Time slots section - Only visible when date is selected and not loading */}
+            {!loading && selectedDate && (
               <div className="flex min-w-[230px] flex-col justify-start pt-2">
                 <div className="mb-2 text-[15px]">
                   <span className="text-[#222]">Duration:</span>{" "}
@@ -187,7 +166,7 @@ const SlotPickerModal = ({ isOpen, onClose }) => {
                       key={slot}
                       onClick={() => {
                         setSelectedTime(slot);
-                        setShowConfirm(true); // Open confirmation modal immediately
+                        if (onSlotPicked) onSlotPicked(selectedDate, slot);
                       }}
                       className={`rounded-xl border px-4 py-2 text-[15px] font-medium transition ${
                         selectedTime === slot
@@ -204,14 +183,6 @@ const SlotPickerModal = ({ isOpen, onClose }) => {
           </div>
         </div>
       </Modal>
-      {showConfirm && (
-        <ExamBookingConfirmation
-          showConfirm={showConfirm}
-          setShowConfirm={setShowConfirm}
-          selectedDate={selectedDate}
-          selectedTime={selectedTime}
-        />
-      )}
     </>
   );
 };

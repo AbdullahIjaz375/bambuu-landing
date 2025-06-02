@@ -3,15 +3,17 @@ import { X } from "lucide-react";
 import Modal from "react-modal";
 import SlotPickerModal from "./SlotPickerModal";
 
-const InstructorProfile = ({ selectedInstructor, setSelectedInstructor }) => {
-  const [showSlotPicker, setShowSlotPicker] = useState(false);
-
+const InstructorProfile = ({
+  selectedInstructor,
+  setSelectedInstructor,
+  onBookIntroCall,
+}) => {
   if (!selectedInstructor) return null;
 
   return (
     <>
       <Modal
-        isOpen={!!selectedInstructor && !showSlotPicker}
+        isOpen={!!selectedInstructor}
         onRequestClose={() => setSelectedInstructor(null)}
         className="fixed left-1/2 top-1/2 flex w-[468px] max-w-[95vw] -translate-x-1/2 -translate-y-1/2 flex-col items-center rounded-[2.5rem] border border-blue-200 bg-white p-0 font-urbanist shadow-xl outline-none"
         overlayClassName="fixed inset-0 bg-black bg-opacity-20 z-50 flex items-center justify-center backdrop-blur-sm"
@@ -31,7 +33,7 @@ const InstructorProfile = ({ selectedInstructor, setSelectedInstructor }) => {
         {/* Main Card */}
         <div className="mx-6 my-6 flex w-[calc(100%-3rem)] flex-1 flex-col items-center rounded-[2rem] bg-[#E6FDE9] px-6 py-5">
           <img
-            src={selectedInstructor.img}
+            src={selectedInstructor.photoUrl || "/images/panda.png"}
             alt={selectedInstructor.name}
             className="mb-2 mt-1 h-24 w-24 rounded-full border-4 border-white object-cover shadow"
           />
@@ -56,9 +58,7 @@ const InstructorProfile = ({ selectedInstructor, setSelectedInstructor }) => {
                   />{" "}
                   Native:
                 </span>
-                <span>
-                  {selectedInstructor.langs[0]?.replace("(Native)", "").trim()}
-                </span>
+                <span>{selectedInstructor.nativeLanguage || "N/A"}</span>
               </div>
               <div className="flex items-center gap-1">
                 <span className="font-medium">
@@ -69,11 +69,7 @@ const InstructorProfile = ({ selectedInstructor, setSelectedInstructor }) => {
                   />{" "}
                   Teaching:
                 </span>
-                <span>
-                  {selectedInstructor.langs[1]
-                    ?.replace("(Teaching)", "")
-                    .trim()}
-                </span>
+                <span>{selectedInstructor.teachingLanguage || "N/A"}</span>
               </div>
             </div>
             <div className="flex flex-col items-end">
@@ -83,7 +79,7 @@ const InstructorProfile = ({ selectedInstructor, setSelectedInstructor }) => {
                   alt="location"
                   className="inline-block"
                 />
-                <span>From: {selectedInstructor.country}</span>
+                <span>From: {selectedInstructor.country || "N/A"}</span>
               </div>
               <div className="flex items-center gap-1">
                 <img
@@ -91,7 +87,9 @@ const InstructorProfile = ({ selectedInstructor, setSelectedInstructor }) => {
                   alt="students"
                   className="inline-block"
                 />
-                <span>Students: {selectedInstructor.students}</span>
+                <span>
+                  Students: {selectedInstructor.tutorStudentIds?.length || 0}
+                </span>
               </div>
             </div>
           </div>
@@ -106,17 +104,16 @@ const InstructorProfile = ({ selectedInstructor, setSelectedInstructor }) => {
         </div>
         <div className="mx-6 my-6 w-[calc(100%-3rem)]">
           <button
-            onClick={() => setShowSlotPicker(true)}
+            onClick={() => {
+              setSelectedInstructor(null);
+              if (onBookIntroCall) onBookIntroCall();
+            }}
             className="w-full rounded-full border border-[#042F0C] bg-[#14B82C] py-3 text-base font-medium text-black transition hover:bg-[#129e25]"
           >
             Book Introductory Call
           </button>
         </div>
       </Modal>
-      <SlotPickerModal
-        isOpen={showSlotPicker}
-        onClose={() => setShowSlotPicker(false)}
-      />
     </>
   );
 };
