@@ -223,7 +223,7 @@ const LearnUser = () => {
   const { currentLanguage, changeLanguage } = useLanguage();
   const [examPrepStatus, setExamPrepStatus] = useState(false);
   const [showExploreInstructorsModal, setShowExploreInstructorsModal] =
-    useState(false);
+    useState(true);
   const [selectedInstructor, setSelectedInstructor] = useState(null);
   const [confirmedInstructor, setConfirmedInstructor] = useState(null);
   const [showSlotPicker, setShowSlotPicker] = useState(false);
@@ -245,6 +245,22 @@ const LearnUser = () => {
     setSelectedInstructor(instructor);
     setShowExploreInstructorsModal(false);
   };
+
+  // Helper to convert date and time to ISO string in UTC
+  function getISODateTime(dateStr, timeStr) {
+    // dateStr: 'YYYY-MM-DD', timeStr: '10:00 AM'
+    const [year, month, day] = dateStr.split("-").map(Number);
+    let [h, m] = timeStr.split(":");
+    m = m.slice(0, 2);
+    let hour = parseInt(h, 10);
+    let minute = parseInt(m, 10);
+    const isPM = timeStr.toLowerCase().includes("pm");
+    if (isPM && hour !== 12) hour += 12;
+    if (!isPM && hour === 12) hour = 0;
+    // JS Date: months are 0-indexed
+    const d = new Date(Date.UTC(year, month - 1, day, hour, minute, 0, 0));
+    return d.toISOString();
+  }
 
   // Handler when slot picker is opened from instructor profile
   const handleBookIntroCall = async () => {
@@ -304,16 +320,12 @@ const LearnUser = () => {
       return;
     setBookingLoading(true);
     try {
-      const slotISO = new Date(
-        `${selectedDate}T${selectedTime.replace(" ", "")}:00.000Z`,
-      ).toISOString();
-
+      const slotISO = getISODateTime(selectedDate, selectedTime);
       await bookIntroductoryCall({
         studentId: user?.uid,
         tutorId: confirmedInstructor?.uid,
         slot: { time: slotISO },
       });
-
       setShowBookingConfirmation(false);
       setShowBookedModal(true); // Show success modal
       // Optionally refresh data here
@@ -484,25 +496,54 @@ const LearnUser = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const handleOnboarding = () => {
-    if (
-      examPrepStatus &&
-      examPrepStatus.hasPurchasedPlan &&
-      !examPrepStatus.hasBookedIntroCall
-    ) {
-      setShowExploreInstructorsModal(true);
-      return;
+  const handleOnboarding = async () => {
+    try {
+      console.log("[ExamPrep][LearnUser] Complete Onboarding clicked", { studentId: user.uid });
+      const status = await getStudentExamPrepTutorialStatus(user.uid);
+      console.log("[ExamPrep][LearnUser] getStudentExamPrepTutorialStatus response:", status);
+      // 1. No plan
+      if (!status.hasPurchasedPlan) {
+        console.log("[ExamPrep][LearnUser] No active plan. Redirecting to subscriptions.");
+        navigate("/subscriptions?tab=exam");
+        return;
+      }
+      // 2. No intro call
+      if (!status.hasBookedIntroCall) {
+        console.log("[ExamPrep][LearnUser] No intro call. Showing explore tutors modal.");
+        setShowExploreInstructorsModal(true);
+        setShowSlotPicker(false);
+        return;
+      }
+      // 3. Intro call booked but not completed
+      if (status.hasBookedIntroCall && !status.doneWithIntroCall) {
+        console.log("[ExamPrep][LearnUser] Intro call booked but not completed. Redirecting to class details.");
+        if (status.introCallClassId) {
+          navigate(`/class-details/${status.introCallClassId}`);
+        } else {
+          navigate(`/class-details/intro-call`);
+        }
+        return;
+      }
+      // 4. Intro call done, no exam prep class
+      if (status.doneWithIntroCall && !status.hasBookedExamPrepClass) {
+        console.log("[ExamPrep][LearnUser] Intro call done, no exam prep class. Showing book classes modal.");
+        setShowSlotPicker(true);
+        setShowExploreInstructorsModal(false);
+        return;
+      }
+      // 5. Exam prep class booked
+      if (status.hasBookedExamPrepClass) {
+        console.log("[ExamPrep][LearnUser] Exam prep class booked. Redirecting to all classes page.");
+        navigate("/exam-prep/classes");
+        return;
+      }
+      // Fallback
+      console.log("[ExamPrep][LearnUser] Unhandled state. Redirecting to exam prep home.");
+      navigate("/exam-prep");
+    } catch (err) {
+      console.error("[ExamPrep][LearnUser] getStudentExamPrepTutorialStatus error:", err);
+      // Optionally show an error modal or toast
     }
-    if (
-      examPrepStatus &&
-      examPrepStatus.hasPurchasedPlan &&
-      examPrepStatus.doneWithIntroCall &&
-      !examPrepStatus.hasBookedExamPrepClass
-    ) {
-      setShowSlotPicker(true);
-      return;
-    }
-    // Add other onboarding steps here if needed
   };
 
   // Fetch exam prep status on mount

@@ -9,11 +9,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import ClassCard from "../../components/ClassCard";
 import ExploreClassCard from "../../components/ExploreClassCard";
-import { ChannelType } from "../../config/stream";
 import EmptyState from "../../components/EmptyState";
 import ShowDescription from "../../components/ShowDescription";
-import { streamClient, fetchChatToken } from "../../config/stream";
+import { streamClient, fetchChatToken, ChannelType } from "../../config/stream";
 import InstructorProfile from "./InstructorProfile";
+import { getExamPrepStepStatus } from "../../api/examPrepApi";
+import Modal from "react-modal";
 
 const InstructorProfileUser = () => {
   const { tutorId } = useParams();
@@ -28,6 +29,9 @@ const InstructorProfileUser = () => {
   const channelRef = useRef(null);
   const [isCreatingChannel, setIsCreatingChannel] = useState(false);
   const [bookTutor, setBookTutor] = useState(false);
+  const [stepStatusLoading, setStepStatusLoading] = useState(false);
+  const [stepStatusError, setStepStatusError] = useState(null);
+  const [showTutorExploreModal, setShowTutorExploreModal] = useState(false);
 
   // Function to check if user has exam preparation subscription
   const hasExamPrepSubscription = () => {
@@ -64,13 +68,57 @@ const InstructorProfileUser = () => {
   });
 
   // Handle exam preparation package click
-  const handleExamPrepClick = () => {
-    if (hasExamPrepSubscription()) {
-      // incase user has permissions write logics here
-    } else {
-      // User doesn't have subscription, redirect to subscription page with exam tab
-      navigate("/subscriptions?tab=exam");
-      // setBookTutor(true);
+  const handleExamPrepClick = async () => {
+    console.log("[ExamPrep][InstructorProfileUser] Exam prep button clicked", { studentId: user.uid, tutorId });
+    setStepStatusLoading(true);
+    setStepStatusError(null);
+    try {
+      console.log("[ExamPrep][InstructorProfileUser] Calling getExamPrepStepStatus", { studentId: user.uid, tutorId });
+      const res = await getExamPrepStepStatus(user.uid, tutorId);
+      console.log("[ExamPrep][InstructorProfileUser] getExamPrepStepStatus response:", res);
+      // 1. No active plan
+      if (!res.hasPurchasedPlan) {
+        console.log("[ExamPrep][InstructorProfileUser] No active plan. Redirecting to subscriptions.");
+        navigate("/subscriptions?tab=exam");
+        return;
+      }
+      // 2. No intro call with this tutor
+      if (!res.hasBookedIntroCall) {
+        console.log("[ExamPrep][InstructorProfileUser] No intro call with this tutor. Showing tutor explore modal.");
+        setShowTutorExploreModal(true);
+        return;
+      }
+      // 3. Intro call booked but not completed
+      if (res.hasBookedIntroCall && !res.doneWithIntroCall) {
+        console.log("[ExamPrep][InstructorProfileUser] Intro call booked but not completed. Redirecting to class details.");
+        // You may want to pass the classId if available in the response
+        if (res.introCallClassId) {
+          navigate(`/class-details/${res.introCallClassId}`);
+        } else {
+          navigate(`/class-details/intro-call`);
+        }
+        return;
+      }
+      // 4. Intro call completed, no exam prep class booked
+      if (res.doneWithIntroCall && !res.hasBookedExamPrepClass) {
+        console.log("[ExamPrep][InstructorProfileUser] Intro call completed, no exam prep class. Showing booking modal for this tutor.");
+        navigate(`/exam-prep/book-classes?tutorId=${tutorId}`);
+        return;
+      }
+      // 5. Exam prep class booked
+      if (res.hasBookedExamPrepClass) {
+        console.log("[ExamPrep][InstructorProfileUser] Exam prep class booked. Redirecting to all classes with this tutor.");
+        navigate(`/exam-prep/classes?tutorId=${tutorId}`);
+        return;
+      }
+      // Fallback
+      console.log("[ExamPrep][InstructorProfileUser] Unhandled state. Redirecting to exam prep home.");
+      navigate(`/exam-prep?tutorId=${tutorId}`);
+    } catch (err) {
+      console.error("[ExamPrep][InstructorProfileUser] getExamPrepStepStatus error:", err);
+      setStepStatusError(err.message || "Failed to check exam prep status.");
+    } finally {
+      setStepStatusLoading(false);
     }
   };
 
@@ -430,9 +478,15 @@ const InstructorProfileUser = () => {
                       <span className="text-base font-semibold">
                         Exam Preparation Package
                       </span>
+                      {stepStatusLoading && (
+                        <ClipLoader color="#14B82C" size={18} className="ml-2" />
+                      )}
                     </div>
                     <ChevronRightIcon className="h-4 w-4" />
                   </button>
+                  {stepStatusError && (
+                    <div className="mt-2 text-sm text-red-500">{stepStatusError}</div>
+                  )}
                 </div>
               </div>
             </div>
@@ -452,6 +506,19 @@ const InstructorProfileUser = () => {
         selectedInstructor={bookTutor ? getInstructorProfileData(tutor) : null}
         setSelectedInstructor={() => setBookTutor(false)}
       />
+      {showTutorExploreModal && (
+        <Modal
+          isOpen={showTutorExploreModal}
+          onRequestClose={() => setShowTutorExploreModal(false)}
+          className="fixed left-1/2 top-1/2 flex w-[90%] max-w-[640px] -translate-x-1/2 -translate-y-1/2 transform flex-col rounded-[40px] bg-white p-6 font-urbanist shadow-2xl outline-none"
+          overlayClassName="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center backdrop-blur-sm"
+          ariaHideApp={false}
+        >
+          <h2 className="text-xl font-bold mb-4">Explore Tutors</h2>
+          <p>Show a list of tutors here for the user to book an intro call with.</p>
+          <button onClick={() => setShowTutorExploreModal(false)} className="mt-4 rounded-full border border-[#042F0C] bg-white px-5 py-2 text-base font-medium text-black transition-colors hover:bg-gray-50">Close</button>
+        </Modal>
+      )}
     </div>
   );
 };

@@ -13,6 +13,7 @@ const ConfirmClassesModal = ({
   selectedDates,
   selectedTimes,
   onRemoveClass,
+  tutorId,
 }) => {
   const { user } = useAuth();
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -42,12 +43,28 @@ const ConfirmClassesModal = ({
     setLoading(true);
     setError(null);
     try {
-      const classes = selectedDates.map((date) => ({
-        date: `${String(date).padStart(2, "0")}-05-25`,
-        time: selectedTimes[date],
-        title: "Exam Prep Class",
-      }));
-      await bookExamPrepClass({ studentId: user.uid, classes });
+      if (!tutorId) {
+        setError("No tutor selected. Please select a tutor.");
+        setLoading(false);
+        return;
+      }
+      // Build slots array: [{ time: ISOString }]
+      const slots = selectedDates.map((date) => {
+        const timeStr = selectedTimes[date];
+        // Assume date is a day number in May 2025 (as in your UI)
+        const d = new Date(2025, 4, date); // May is month 4 (0-indexed)
+        // Parse time string (e.g., "10:00 AM")
+        let [h, m] = timeStr.split(":");
+        m = m.slice(0, 2);
+        let hour = parseInt(h, 10);
+        let minute = parseInt(m, 10);
+        const isPM = timeStr.toLowerCase().includes("pm");
+        if (isPM && hour !== 12) hour += 12;
+        if (!isPM && hour === 12) hour = 0;
+        d.setHours(hour, minute, 0, 0);
+        return { time: d.toISOString() };
+      });
+      await bookExamPrepClass({ studentId: user.uid, tutorId, slots });
       setShowSuccessModal(true);
     } catch (err) {
       setError(err.message);
