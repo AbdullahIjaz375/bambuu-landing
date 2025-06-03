@@ -566,6 +566,25 @@ const ClassDetailsTutor = ({ onClose }) => {
             country: "USA",
           };
 
+    const now = new Date();
+    const classStart = new Date(classData.classDateTime.seconds * 1000);
+    const diffMs = classStart - now;
+    let joinLabel = "Join Class";
+    if (diffMs > 0) {
+      const diffMin = Math.round(diffMs / 60000);
+      if (diffMin >= 1440) {
+        const days = Math.floor(diffMin / 1440);
+        joinLabel = `Join Class, Starting in ${days} day${days === 1 ? "" : "s"}`;
+      } else if (diffMin >= 60) {
+        const hours = Math.floor(diffMin / 60);
+        joinLabel = `Join Class, Starting in ${hours} hour${hours === 1 ? "" : "s"}`;
+      } else {
+        joinLabel = `Join Class, Starting in ${diffMin} minute${diffMin === 1 ? "" : "s"}`;
+      }
+    } else {
+      joinLabel = "Join Class (Ongoing)";
+    }
+
     return (
       <div className="flex min-h-screen">
         <div className="m-6 flex flex-1 rounded-3xl border">
@@ -644,7 +663,7 @@ const ClassDetailsTutor = ({ onClose }) => {
                   className="mt-2 w-full rounded-full border border-black bg-[#FFBF00] py-2 text-base font-medium text-black hover:bg-[#ffd94d]"
                   onClick={handleJoinClass}
                 >
-                  Join Class, Starting in 5 minutes
+                  {joinLabel}
                 </button>
               </div>
             </div>
