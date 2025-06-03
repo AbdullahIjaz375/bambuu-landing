@@ -10,6 +10,7 @@ import GroupCard from "../../components/GroupCard";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   bookIntroductoryCall,
+  getExamPrepPlanTimeline,
   getIntroCallSlots,
   getStudentExamPrepTutorialStatus,
 } from "../../api/examPrepApi";
@@ -31,7 +32,7 @@ import ExploreInstructors from "./ExploreInstructors";
 import InstructorProfile from "./InstructorProfile";
 import SlotPickerModal from "./SlotPickerModal";
 import ExamBookingConfirmation from "./ExamBookingConfirmation";
-import IntoductoryCallDone from "./IntroductoryCallDone";
+import IntoductoryCallBooked from "./IntroductoryCallBooked";
 // This component must be defined at the top level of your file,
 // outside the LearnUser component but still within the file
 const LanguageCardsSection = ({ languageCards, languageData, navigate }) => {
@@ -216,14 +217,9 @@ const LearnUser = () => {
   // Get translation and language hooks at the component level
   const { user, setUser } = useAuth();
   const [showExamPrepModal, setShowExamPrepModal] = useState(true);
-  const [bookExamClass, setBookExamClass] = useState(false);
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { t, i18n } = useTranslation();
-  const { currentLanguage, changeLanguage } = useLanguage();
   const [examPrepStatus, setExamPrepStatus] = useState(false);
   const [showExploreInstructorsModal, setShowExploreInstructorsModal] =
-    useState(true);
+    useState(false);
   const [selectedInstructor, setSelectedInstructor] = useState(null);
   const [confirmedInstructor, setConfirmedInstructor] = useState(null);
   const [showSlotPicker, setShowSlotPicker] = useState(false);
@@ -234,6 +230,11 @@ const LearnUser = () => {
   const [introCallSlots, setIntroCallSlots] = useState([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [bookingLoading, setBookingLoading] = useState(false);
+  const [showRenewalBanner, setShowRenewalBanner] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { t, i18n } = useTranslation();
+  const { currentLanguage, changeLanguage } = useLanguage();
 
   // Handler to start the flow
   const handleFindTutor = () => {
@@ -345,6 +346,37 @@ const LearnUser = () => {
     setShowBookingConfirmation(false);
     // Optionally update state to reflect that intro call is booked
   };
+
+  // Fetch plan timeline on mount or when user changes
+  useEffect(() => {
+    const fetchPlanTimeline = async () => {
+      if (!user?.uid) return;
+      try {
+        const timeline = await getExamPrepPlanTimeline(user.uid);
+
+        // Check for renewal condition
+        if (
+          timeline?.activePlan &&
+          !timeline?.nextPlan &&
+          timeline.activePlan.expiryDate
+        ) {
+          const expiry = new Date(timeline.activePlan.expiryDate);
+          const now = new Date();
+          const diffDays = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
+          if (diffDays <= 5 && diffDays >= 0) {
+            setShowRenewalBanner(true);
+          } else {
+            setShowRenewalBanner(false);
+          }
+        } else {
+          setShowRenewalBanner(false);
+        }
+      } catch (err) {
+        setShowRenewalBanner(false);
+      }
+    };
+    fetchPlanTimeline();
+  }, [user?.uid]);
 
   // if the user purchased the plan but not booked the introductory call, show the modal
   useEffect(() => {
@@ -498,51 +530,20 @@ const LearnUser = () => {
 
   const handleOnboarding = async () => {
     try {
-      console.log("[ExamPrep][LearnUser] Complete Onboarding clicked", { studentId: user.uid });
       const status = await getStudentExamPrepTutorialStatus(user.uid);
-      console.log("[ExamPrep][LearnUser] getStudentExamPrepTutorialStatus response:", status);
+
       // 1. No plan
       if (!status.hasPurchasedPlan) {
-        console.log("[ExamPrep][LearnUser] No active plan. Redirecting to subscriptions.");
         navigate("/subscriptions?tab=exam");
         return;
       }
-      // 2. No intro call
-      if (!status.hasBookedIntroCall) {
-        console.log("[ExamPrep][LearnUser] No intro call. Showing explore tutors modal.");
-        setShowExploreInstructorsModal(true);
-        setShowSlotPicker(false);
-        return;
-      }
-      // 3. Intro call booked but not completed
-      if (status.hasBookedIntroCall && !status.doneWithIntroCall) {
-        console.log("[ExamPrep][LearnUser] Intro call booked but not completed. Redirecting to class details.");
-        if (status.introCallClassId) {
-          navigate(`/class-details/${status.introCallClassId}`);
-        } else {
-          navigate(`/class-details/intro-call`);
-        }
-        return;
-      }
-      // 4. Intro call done, no exam prep class
-      if (status.doneWithIntroCall && !status.hasBookedExamPrepClass) {
-        console.log("[ExamPrep][LearnUser] Intro call done, no exam prep class. Showing book classes modal.");
-        setShowSlotPicker(true);
-        setShowExploreInstructorsModal(false);
-        return;
-      }
-      // 5. Exam prep class booked
-      if (status.hasBookedExamPrepClass) {
-        console.log("[ExamPrep][LearnUser] Exam prep class booked. Redirecting to all classes page.");
-        navigate("/exam-prep/classes");
-        return;
-      }
-      // Fallback
-      console.log("[ExamPrep][LearnUser] Unhandled state. Redirecting to exam prep home.");
-      navigate("/exam-prep");
+      // For all other cases, show the onboarding modal
+      setShowExamPrepModal(true);
     } catch (err) {
-      console.error("[ExamPrep][LearnUser] getStudentExamPrepTutorialStatus error:", err);
-      // Optionally show an error modal or toast
+      console.error(
+        "[ExamPrep][LearnUser] getStudentExamPrepTutorialStatus error:",
+        err,
+      );
     }
   };
 
@@ -791,8 +792,30 @@ const LearnUser = () => {
             </div>
           </div>
 
-          {/* Complete Onboarding Banner */}
-          {examPrepStatus &&
+          {/* Renewal Banner */}
+          {showRenewalBanner ? (
+            <div className="mb-6 flex w-full items-center justify-between rounded-3xl border border-[#B0B0B0] bg-white px-6 py-3">
+              <div className="flex items-center gap-3">
+                <img
+                  src="/svgs/preparation-package-icon.svg"
+                  alt="Renewal"
+                  className="h-10 w-10"
+                />
+                <span className="text-base font-normal text-[#454545]">
+                  You're making excellent progress with your exam prep. Continue
+                  your journey by unlocking Month 2 for even better results.
+                </span>
+              </div>
+              <button
+                className="rounded-3xl border border-[#5D5D5D] bg-[#E6FDE9] px-5 py-2 text-base font-medium text-[#042F0C] transition hover:bg-[#E6FDE9]"
+                onClick={() => navigate("/subscriptions?tab=exam")}
+              >
+                Continue
+              </button>
+            </div>
+          ) : (
+            // ...existing onboarding banner...
+            examPrepStatus &&
             examPrepStatus.hasPurchasedPlan &&
             !(
               examPrepStatus.doneWithExamPrepClass &&
@@ -819,7 +842,8 @@ const LearnUser = () => {
                   Complete Onboarding
                 </button>
               </div>
-            )}
+            )
+          )}
 
           {/* Calendar and Language Learning Section */}
           <div className="mb-4 flex w-full flex-col items-start justify-between gap-4 py-4 lg:flex-row">
@@ -1013,7 +1037,7 @@ const LearnUser = () => {
         tutor={confirmedInstructor}
         loading={bookingLoading}
       />
-      <IntoductoryCallDone
+      <IntoductoryCallBooked
         bookExamClass={showBookedModal}
         setBookExamClass={setShowBookedModal}
         onClose={handleBookedModalClose}

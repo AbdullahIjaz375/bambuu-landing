@@ -1,14 +1,94 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { X } from "lucide-react";
 import Modal from "react-modal";
-import SlotPickerModal from "./SlotPickerModal";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { ChannelType, fetchChatToken, streamClient } from "../../config/stream";
+import { createStreamChannel } from "../../services/streamService";
 
 const InstructorProfile = ({
   selectedInstructor,
   setSelectedInstructor,
   onBookIntroCall,
+  onBookClass,
 }) => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [isCreatingChannel, setIsCreatingChannel] = useState(false);
+
   if (!selectedInstructor) return null;
+
+  const sendMessageClicked = async () => {
+    if (isCreatingChannel) return;
+    setIsCreatingChannel(true);
+    try {
+      let otherUserName = selectedInstructor.name || "Tutor";
+      let otherUserImage = selectedInstructor.photoUrl || "";
+      const tutorId = selectedInstructor.id || selectedInstructor.uid;
+      const channelId = `${user.uid}${tutorId}`;
+      const channelName = otherUserName;
+      const memberRoles = [
+        { user_id: user.uid, role: "member" },
+        { user_id: tutorId, role: "member" },
+      ];
+      const channelData = {
+        id: channelId,
+        type: ChannelType.ONE_TO_ONE_CHAT,
+        members: [user.uid, tutorId],
+        name: channelName,
+        image: otherUserImage,
+        description: "",
+        created_by_id: user.uid,
+        member_roles: memberRoles,
+      };
+
+      if (streamClient.userID !== user.uid || !streamClient.isConnected) {
+        const token = await fetchChatToken(user.uid);
+        if (streamClient.userID) {
+          await streamClient.disconnectUser();
+        }
+        await streamClient.connectUser(
+          {
+            id: user.uid,
+            name: user.name || "",
+            image: user.photoUrl || "",
+            userType: user.userType || "student",
+          },
+          token,
+        );
+      }
+
+      const channel = await createStreamChannel(channelData);
+
+      let found = false;
+      for (let i = 0; i < 5; i++) {
+        const channels = await streamClient.queryChannels(
+          { members: { $in: [user.uid] }, id: { $eq: channel.id } },
+          { last_message_at: -1 },
+          { watch: true, state: true },
+        );
+        if (channels.length > 0) {
+          found = true;
+          break;
+        }
+        await new Promise((res) => setTimeout(res, 500));
+      }
+
+      const currentMembers = Object.keys(channel.state?.members || {});
+      const missingMembers = [user.uid, tutorId].filter(
+        (m) => !currentMembers.includes(m),
+      );
+      if (missingMembers.length > 0) {
+        await channel.addMembers(missingMembers);
+      }
+
+      navigate(`/messagesUser/${channel.id}`);
+    } catch (error) {
+      console.error("Error creating chat channel:", error);
+    } finally {
+      setIsCreatingChannel(false);
+    }
+  };
 
   return (
     <>
@@ -94,23 +174,44 @@ const InstructorProfile = ({
             </div>
           </div>
           {/* Video Section */}
-          <div className="mb-4 min-h-[176px] w-full rounded-2xl border border-dashed bg-white py-10 text-center text-[#D1D1D1]">
-            Video Section
+          <div className="mb-4 flex min-h-[176px] w-full items-center justify-center rounded-2xl border border-dashed bg-white py-4 text-center text-[#D1D1D1]">
+            <iframe
+              width="100%"
+              height="176"
+              style={{
+                minHeight: 176,
+                aspectRatio: "16/9",
+                borderRadius: "1rem",
+                border: "none",
+                maxWidth: 400,
+                background: "#000",
+              }}
+              src="https://www.youtube.com/embed/W8qJOBrmNkw"
+              title="Instructor Introduction Video"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            ></iframe>
           </div>
           {/* Buttons */}
-          <button className="mb-2 w-full rounded-full border border-[#D7D7D7] bg-[#FFFDEB] py-3 text-base font-medium transition hover:bg-[#f7f7e6]">
-            Send Message
+          <button
+            className="mb-2 w-full rounded-full border border-[#D7D7D7] bg-[#FFFDEB] py-3 text-base font-medium transition hover:bg-[#f7f7e6]"
+            onClick={sendMessageClicked}
+            disabled={isCreatingChannel}
+          >
+            {isCreatingChannel ? "Processing" : "Send Message"}
           </button>
         </div>
         <div className="mx-6 my-6 w-[calc(100%-3rem)]">
           <button
             onClick={() => {
               setSelectedInstructor(null);
-              if (onBookIntroCall) onBookIntroCall();
+              onBookIntroCall ? onBookIntroCall() : onBookClass();
             }}
             className="w-full rounded-full border border-[#042F0C] bg-[#14B82C] py-3 text-base font-medium text-black transition hover:bg-[#129e25]"
           >
-            Book Introductory Call
+            {onBookIntroCall
+              ? "Book Introductory Call:"
+              : "Book Exam Preparation Classes "}
           </button>
         </div>
       </Modal>
