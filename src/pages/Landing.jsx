@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import "../styles/LandingStyles.css";
 import Footer from "../components/Footer";
 import { Info, Star } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Card = ({ icon, title, description, index }) => {
   return (
@@ -35,6 +36,7 @@ const features = [
 
 const Landing = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <>
@@ -61,14 +63,30 @@ const Landing = () => {
               <button className="rounded-full border border-black px-6 py-2 text-black transition hover:bg-gray-100">
                 Schedule a Call
               </button>
-              <button className="rounded-full border border-[black] bg-[#FFBF00] px-6 py-2 text-base font-medium text-black transition hover:bg-[#ffd94d]">
+              <button
+                className="rounded-full border border-[black] bg-[#FFBF00] px-6 py-2 text-base font-medium text-black transition hover:bg-[#ffd94d]"
+                onClick={() => navigate("/subscriptions")}
+              >
                 Enroll Today
               </button>
             </div>
           </div>
           <div className="mt-10 flex w-full flex-col items-center">
             <div className="flex max-h-[720px] w-full max-w-[1280px] items-center justify-center rounded-[3rem] bg-[#eaeaea] text-5xl font-medium text-[#b3b3b3] lg:h-[720px]">
-              Add Video Here
+              <iframe
+                width="100%"
+                height="100%"
+                style={{
+                  minHeight: 320,
+                  minWidth: 320,
+                  aspectRatio: "16/9",
+                  borderRadius: "2rem",
+                }}
+                src="https://www.youtube.com/embed/W8qJOBrmNkw"
+                title="YouTube video player"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              ></iframe>
             </div>
             <div className="mt-4 w-full text-center">
               <span className="text-base font-normal italic text-[#5D5D5D]">
