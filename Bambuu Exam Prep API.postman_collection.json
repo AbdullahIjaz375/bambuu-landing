@@ -1,0 +1,477 @@
+{
+	"info": {
+		"_postman_id": "7e8bc4d5-9760-4f3c-a4d2-465ad71fa985",
+		"name": "Bambuu Exam Prep API",
+		"description": "Postman collection for all Bambuu Exam Prep and Tutor endpoints (Cloud Run).",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25932531",
+		"_collection_link": "https://warped-eclipse-866789.postman.co/workspace/closs-circle~63fbb497-b345-4185-bfad-ee456255c047/collection/25932531-7e8bc4d5-9760-4f3c-a4d2-465ad71fa985?action=share&source=collection_link&creator=25932531"
+	},
+	"item": [
+		{
+			"name": "purchaseExamPrepPlan",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"content-type": true
+				}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"studentId\":\"wQwzFUAAC6TJtArt346f3Cg4LOE2\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://purchaseexamprepplan-zzpsx27htq-uc.a.run.app",
+					"protocol": "https",
+					"host": [
+						"purchaseexamprepplan-zzpsx27htq-uc",
+						"a",
+						"run",
+						"app"
+					]
+				},
+				"description": "POST: Purchase a new exam prep plan for a student."
+			},
+			"response": []
+		},
+		{
+			"name": "bookIntroductoryCall",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"content-type": true
+				}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"studentId\": \"wQwzFUAAC6TJtArt346f3Cg4LOE2\",\n    \"tutorId\": \"TmOJR8aOHgNwYoiUN3zf0lCw7PH2\",\n    \"slot\": {\n        \"time\": \"2024-07-01T19:00:00.000Z\"\n    }\n}"
+				},
+				"url": {
+					"raw": "https://bookintroductorycall-zzpsx27htq-uc.a.run.app",
+					"protocol": "https",
+					"host": [
+						"bookintroductorycall-zzpsx27htq-uc",
+						"a",
+						"run",
+						"app"
+					]
+				},
+				"description": "POST: Book an introductory call for a student with a tutor.\n\n- Always creates a video call room (videoChatId) for the class.\n- Does NOT create a chat channel for introductory calls.\n- The classId is returned for reference.\n\n**Response Example:**\n```json\n{\n  \"success\": true,\n  \"channelId\": \"examPrep_testStudentId_testTutorId\",\n  \"classId\": \"def456\"\n}\n```"
+			},
+			"response": []
+		},
+		{
+			"name": "markIntroCallDone",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"studentId\": \"testStudentId\",\n  \"tutorId\": \"testTutorId\"\n}"
+				},
+				"url": {
+					"raw": "https://markintrocalldone-zzpsx27htq-uc.a.run.app",
+					"protocol": "https",
+					"host": [
+						"markintrocalldone-zzpsx27htq-uc",
+						"a",
+						"run",
+						"app"
+					]
+				},
+				"description": "POST: Mark the introductory call as completed/booked."
+			},
+			"response": []
+		},
+		{
+			"name": "bookExamPrepClass",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"content-type": true
+				}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"studentId\": \"wQwzFUAAC6TJtArt346f3Cg4LOE2\",\n  \"tutorId\": \"TmOJR8aOHgNwYoiUN3zf0lCw7PH2\",\n  \"slots\": [\n    { \"time\": \"2025-05-31T08:00:00.000Z\" },\n    { \"time\": \"2025-05-31T11:00:00.000Z\" }\n  ]\n}"
+				},
+				"url": {
+					"raw": "https://bookexamprepclass-zzpsx27htq-uc.a.run.app",
+					"protocol": "https",
+					"host": [
+						"bookexamprepclass-zzpsx27htq-uc",
+						"a",
+						"run",
+						"app"
+					]
+				},
+				"description": "POST: Book one or more exam prep class slots for a student. Provide studentId, tutorId, and an array of slots (each with date and time).\n\n- The 'date' field in each slot should be a valid ISO date string (YYYY-MM-DD) or a JS Date object. The backend will validate and store as a date.\n- The backend ensures both users exist on GetStream.\n- A chat channel and a joinable video room (GetStream video) are created for each class.\n- The response includes channelId and videoChatId for each booked slot.\n- The frontend can use these IDs to join the chat and video call.\n\n**Request Example:**\n```json\n{\n  \"studentId\": \"testStudentId\",\n  \"tutorId\": \"testTutorId\",\n  \"slots\": [\n    { \"date\": \"2024-07-01\", \"time\": \"08:00\" },\n    { \"date\": \"2024-07-02\", \"time\": \"09:00\" }\n  ]\n}\n```\n\n**Response Example:**\n```json\n{\n  \"success\": true,\n  \"booked\": [\n    {\n      \"date\": \"2024-07-01\",\n      \"time\": \"08:00\",\n      \"classId\": \"abc123\",\n      \"channelId\": \"examPrepClass_abc123\",\n      \"videoChatId\": \"videoRoom_abc123\"\n    },\n    {\n      \"date\": \"2024-07-02\",\n      \"time\": \"09:00\",\n      \"classId\": \"def456\",\n      \"channelId\": \"examPrepClass_def456\",\n      \"videoChatId\": \"videoRoom_def456\"\n    }\n  ],\n  \"failed\": [\n    { \"date\": \"2024-07-03\", \"time\": \"10:00\", \"reason\": \"Not enough credits\" }\n  ]\n}\n```\n\n*Note: videoChatId is a GetStream video room ID for joining the video call. channelId is only for exam_prep classes.*"
+			},
+			"response": []
+		},
+		{
+			"name": "getExamPrepStatus",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://getexamprepstatus-zzpsx27htq-uc.a.run.app?studentId=wQwzFUAAC6TJtArt346f3Cg4LOE2",
+					"protocol": "https",
+					"host": [
+						"getexamprepstatus-zzpsx27htq-uc",
+						"a",
+						"run",
+						"app"
+					],
+					"query": [
+						{
+							"key": "studentId",
+							"value": "wQwzFUAAC6TJtArt346f3Cg4LOE2"
+						}
+					]
+				},
+				"description": "GET: Get the current exam prep status for a student. Pass studentId as a query parameter."
+			},
+			"response": []
+		},
+		{
+			"name": "setIntroductoryCallSlots",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"content-type": true
+				}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"tutorId\": \"TmOJR8aOHgNwYoiUN3zf0lCw7PH2\",\n  \"slots\": [\n    {\n      \"times\": [\n        { \"time\": \"2024-07-01T08:00:00.000Z\", \"booked\": false },\n        { \"time\": \"2024-07-01T09:00:00.000Z\", \"booked\": false }\n      ]\n    }\n  ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://setintroductorycallslots-zzpsx27htq-uc.a.run.app",
+					"protocol": "https",
+					"host": [
+						"setintroductorycallslots-zzpsx27htq-uc",
+						"a",
+						"run",
+						"app"
+					]
+				},
+				"description": "POST: Tutor sets their available introductory call slots.\n\n**Sample Request:**\n```json\n{\n  \"tutorId\": \"testTutorId\",\n  \"slots\": [\n    {\n      \"date\": \"2024-07-01\",\n      \"times\": [\n        { \"time\": \"08:00\", \"booked\": false },\n        { \"time\": \"09:00\", \"booked\": false }\n      ]\n    }\n  ]\n}\n```\n\nEach 'date' should be a valid ISO date string (YYYY-MM-DD) or JS Date object."
+			},
+			"response": []
+		},
+		{
+			"name": "setExamPrepClassSlots",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"tutorId\": \"testTutorId\",\n  \"slots\": [\n    {\n      \"times\": [\n        { \"time\": \"2024-07-01T08:00:00.000Z\", \"booked\": false },\n        { \"time\": \"2024-07-01T09:00:00.000Z\", \"booked\": false }\n      ]\n    }\n  ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://setexamprepclassslots-zzpsx27htq-uc.a.run.app",
+					"protocol": "https",
+					"host": [
+						"setexamprepclassslots-zzpsx27htq-uc",
+						"a",
+						"run",
+						"app"
+					]
+				},
+				"description": "POST: Tutor sets their available exam prep class slots.\n\n**Sample Request:**\n```json\n{\n  \"tutorId\": \"testTutorId\",\n  \"slots\": [\n    {\n      \"date\": \"2024-07-01\",\n      \"times\": [\n        { \"time\": \"08:00\", \"booked\": false },\n        { \"time\": \"09:00\", \"booked\": false }\n      ]\n    }\n  ]\n}\n```\n\nEach 'date' should be a valid ISO date string (YYYY-MM-DD) or JS Date object."
+			},
+			"response": []
+		},
+		{
+			"name": "getIntroductoryCallSlots",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://getintroductorycallslots-zzpsx27htq-uc.a.run.app?tutorId=TmOJR8aOHgNwYoiUN3zf0lCw7PH2",
+					"protocol": "https",
+					"host": [
+						"getintroductorycallslots-zzpsx27htq-uc",
+						"a",
+						"run",
+						"app"
+					],
+					"query": [
+						{
+							"key": "tutorId",
+							"value": "TmOJR8aOHgNwYoiUN3zf0lCw7PH2"
+						}
+					]
+				},
+				"description": "GET: Get available introductory call slots for a tutor. Pass tutorId as a query parameter."
+			},
+			"response": []
+		},
+		{
+			"name": "getExamPrepClassSlots",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://getexamprepclassslots-zzpsx27htq-uc.a.run.app?tutorId=TmOJR8aOHgNwYoiUN3zf0lCw7PH2",
+					"protocol": "https",
+					"host": [
+						"getexamprepclassslots-zzpsx27htq-uc",
+						"a",
+						"run",
+						"app"
+					],
+					"query": [
+						{
+							"key": "tutorId",
+							"value": "TmOJR8aOHgNwYoiUN3zf0lCw7PH2"
+						}
+					]
+				},
+				"description": "GET: Get available exam prep class slots for a tutor. Pass tutorId as a query parameter."
+			},
+			"response": []
+		},
+		{
+			"name": "testGrantExamPrepPlan (testing only)",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"studentId\": \"testStudentId\",\n  \"tutorId\": \"testTutorId\"\n}"
+				},
+				"url": {
+					"raw": "https://testgrantexamprepplan-zzpsx27htq-uc.a.run.app",
+					"protocol": "https",
+					"host": [
+						"testgrantexamprepplan-zzpsx27htq-uc",
+						"a",
+						"run",
+						"app"
+					]
+				},
+				"description": "POST: Grant a student an exam prep plan for testing (no payment required)."
+			},
+			"response": []
+		},
+		{
+			"name": "getClassChannelOrVideo",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"content-type": true
+				}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"userId\": \"wQwzFUAAC6TJtArt346f3Cg4LOE2\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://getuserchannels-zzpsx27htq-uc.a.run.app",
+					"protocol": "https",
+					"host": [
+						"getuserchannels-zzpsx27htq-uc",
+						"a",
+						"run",
+						"app"
+					]
+				},
+				"description": "GET: Fetch the GetStream chat channel and/or video call room for a class.\n\n- For exam_prep classes: returns both channelId and videoChatId.\n- For introductory_call classes: returns only videoChatId.\n\n**Response Example (exam_prep):**\n```json\n{\n  \"channelId\": \"examPrepClass_abc123\",\n  \"videoChatId\": \"videoRoom_abc123\"\n}\n```\n**Response Example (introductory_call):**\n```json\n{\n  \"videoChatId\": \"videoRoom_def456\"\n}\n```"
+			},
+			"response": []
+		},
+		{
+			"name": "getTutorClasses",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://gettutorclasses-zzpsx27htq-uc.a.run.app?tutorId=testTutorId",
+					"protocol": "https",
+					"host": [
+						"gettutorclasses-zzpsx27htq-uc",
+						"a",
+						"run",
+						"app"
+					],
+					"query": [
+						{
+							"key": "tutorId",
+							"value": "testTutorId"
+						}
+					]
+				},
+				"description": "GET: Fetch all classes (introductory_call and exam_prep) for a tutor. Pass tutorId as a query parameter.\n\n**Response Example:**\n```json\n{\n  \"classes\": [\n    {\n      \"id\": \"abc123\",\n      \"classType\": \"introductory_call\",\n      ...\n    },\n    {\n      \"id\": \"def456\",\n      \"classType\": \"exam_prep\",\n      ...\n    }\n  ]\n}\n```"
+			},
+			"response": []
+		},
+		{
+			"name": "getStudentClasses",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://getstudentclasses-zzpsx27htq-uc.a.run.app?studentId=wDFnCRmLccMBrq2gXbxXsmOS3eF3",
+					"protocol": "https",
+					"host": [
+						"getstudentclasses-zzpsx27htq-uc",
+						"a",
+						"run",
+						"app"
+					],
+					"query": [
+						{
+							"key": "studentId",
+							"value": "wDFnCRmLccMBrq2gXbxXsmOS3eF3"
+						}
+					]
+				},
+				"description": "GET: Fetch all classes (introductory_call and exam_prep) for a student. Pass studentId as a query parameter.\n\n**Response Example:**\n```json\n{\n  \"classes\": [\n    {\n      \"id\": \"abc123\",\n      \"classType\": \"introductory_call\",\n      ...\n    },\n    {\n      \"id\": \"def456\",\n      \"classType\": \"exam_prep\",\n      ...\n    }\n  ]\n}\n```"
+			},
+			"response": []
+		},
+		{
+			"name": "getExamPrepStepStatus",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://getexamprepstepstatus-zzpsx27htq-uc.a.run.app?studentId=wQwzFUAAC6TJtArt346f3Cg4LOE2&tutorId=TmOJR8aOHgNwYoiUN3zf0lCw7PH2",
+					"protocol": "https",
+					"host": [
+						"getexamprepstepstatus-zzpsx27htq-uc",
+						"a",
+						"run",
+						"app"
+					],
+					"query": [
+						{
+							"key": "studentId",
+							"value": "wQwzFUAAC6TJtArt346f3Cg4LOE2"
+						},
+						{
+							"key": "tutorId",
+							"value": "TmOJR8aOHgNwYoiUN3zf0lCw7PH2"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getExamPrepPlanTimeline",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://getexamprepplantimeline-zzpsx27htq-uc.a.run.app/getExamPrepPlanTimeline?studentId=wQwzFUAAC6TJtArt346f3Cg4LOE2",
+					"protocol": "https",
+					"host": [
+						"getexamprepplantimeline-zzpsx27htq-uc",
+						"a",
+						"run",
+						"app"
+					],
+					"path": [
+						"getExamPrepPlanTimeline"
+					],
+					"query": [
+						{
+							"key": "studentId",
+							"value": "wQwzFUAAC6TJtArt346f3Cg4LOE2"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getStudentExamPrepTutorialStatus",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://getstudentexampreptutorialstatus-zzpsx27htq-uc.a.run.app?studentId=wQwzFUAAC6TJtArt346f3Cg4LOE2",
+					"protocol": "https",
+					"host": [
+						"getstudentexampreptutorialstatus-zzpsx27htq-uc",
+						"a",
+						"run",
+						"app"
+					],
+					"query": [
+						{
+							"key": "studentId",
+							"value": "wQwzFUAAC6TJtArt346f3Cg4LOE2"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

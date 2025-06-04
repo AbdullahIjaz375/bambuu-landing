@@ -14,11 +14,14 @@ const ConfirmClassesModal = ({
   selectedTimes,
   onRemoveClass,
   tutorId,
+  user,
+  ...props
 }) => {
-  const { user } = useAuth();
+  const { user: authUser } = useAuth();
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [booking, setBooking] = useState(false);
 
   // Convert dates and times to the format expected for booking
   const formatBookingData = () => {
@@ -40,20 +43,18 @@ const ConfirmClassesModal = ({
   };
 
   const handleConfirmBooking = async () => {
-    setLoading(true);
+    setBooking(true);
     setError(null);
     try {
       if (!tutorId) {
         setError("No tutor selected. Please select a tutor.");
-        setLoading(false);
+        setBooking(false);
         return;
       }
       // Build slots array: [{ time: ISOString }]
       const slots = selectedDates.map((date) => {
         const timeStr = selectedTimes[date];
-        // Assume date is a day number in May 2025 (as in your UI)
-        const d = new Date(2025, 4, date); // May is month 4 (0-indexed)
-        // Parse time string (e.g., "10:00 AM")
+        const [year, month, day] = date.split("-").map(Number);
         let [h, m] = timeStr.split(":");
         m = m.slice(0, 2);
         let hour = parseInt(h, 10);
@@ -61,15 +62,24 @@ const ConfirmClassesModal = ({
         const isPM = timeStr.toLowerCase().includes("pm");
         if (isPM && hour !== 12) hour += 12;
         if (!isPM && hour === 12) hour = 0;
-        d.setHours(hour, minute, 0, 0);
+        const d = new Date(Date.UTC(year, month - 1, day, hour, minute, 0, 0));
         return { time: d.toISOString() };
       });
-      await bookExamPrepClass({ studentId: user.uid, tutorId, slots });
+      const payload = {
+        studentId: user?.uid || authUser?.uid,
+        tutorId: tutorId,
+        slots,
+      };
+      console.log("[ConfirmClassesModal] Booking payload:", payload);
+      const resp = await bookExamPrepClass(payload);
+      console.log("[ConfirmClassesModal] API response:", resp);
+      setBooking(false);
       setShowSuccessModal(true);
+      if (onConfirm) onConfirm();
     } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+      setBooking(false);
+      setError(err.message || "Booking failed");
+      console.log("[ConfirmClassesModal] API error:", err);
     }
   };
 

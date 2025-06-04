@@ -2,14 +2,25 @@ import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import React, { useState } from "react";
 import Modal from "react-modal";
 import ConfirmClassesModal from "./ConfirmClassesModal";
+import { bookExamPrepClass } from "../../../api/examPrepApi";
 
-const ExamClassSlots = ({ isOpen, onClose, onBookingComplete }) => {
+const ExamClassSlots = ({
+  isOpen,
+  onClose,
+  onBookingComplete,
+  slots = {},
+  user,
+  tutorId,
+}) => {
+  console.log("[ExamClassSlots] slots prop received:", slots);
   const [currentStep, setCurrentStep] = useState(1); // 1: date selection, 2: time selection, 3: confirmation
   const [selectedDates, setSelectedDates] = useState([]);
   const [selectedTimes, setSelectedTimes] = useState({}); // Object to store time for each date
   const [currentMonth, setCurrentMonth] = useState(new Date(2025, 4)); // May 2025
   const [sameTime, setSameTime] = useState(false);
   const [currentDateIndex, setCurrentDateIndex] = useState(0);
+  const [booking, setBooking] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleRemoveClass = (dateToRemove) => {
     setSelectedDates(selectedDates.filter((d) => d !== dateToRemove));
@@ -44,15 +55,16 @@ const ExamClassSlots = ({ isOpen, onClose, onBookingComplete }) => {
 
   const handleDateClick = (day) => {
     if (!day) return;
-
-    const dateKey = day;
+    const year = currentMonth.getFullYear();
+    const month = String(currentMonth.getMonth() + 1).padStart(2, "0");
+    const dayStr = String(day).padStart(2, "0");
+    const dateKey = `${year}-${month}-${dayStr}`;
     if (selectedDates.includes(dateKey)) {
       setSelectedDates(selectedDates.filter((d) => d !== dateKey));
-      // Remove time for this date
       const newTimes = { ...selectedTimes };
       delete newTimes[dateKey];
       setSelectedTimes(newTimes);
-    } else if (selectedDates.length < 10) {
+    } else if (selectedDates.length < MAX_DATES) {
       setSelectedDates([...selectedDates, dateKey]);
     }
   };
@@ -71,21 +83,10 @@ const ExamClassSlots = ({ isOpen, onClose, onBookingComplete }) => {
 
   const handleTimeSelection = (time) => {
     const currentDate = selectedDates[currentDateIndex];
-
-    if (sameTime) {
-      // Apply same time to all dates
-      const newTimes = {};
-      selectedDates.forEach((date) => {
-        newTimes[date] = time;
-      });
-      setSelectedTimes(newTimes);
-    } else {
-      // Apply time only to current date
-      setSelectedTimes((prev) => ({
-        ...prev,
-        [currentDate]: time,
-      }));
-    }
+    setSelectedTimes((prev) => ({
+      ...prev,
+      [currentDate]: time,
+    }));
   };
 
   const handleNextDate = () => {
@@ -112,15 +113,39 @@ const ExamClassSlots = ({ isOpen, onClose, onBookingComplete }) => {
     setCurrentStep(2);
   };
 
-  const handleFinalBooking = (bookingData) => {
-    onBookingComplete && onBookingComplete(bookingData);
-    onClose();
-    // Reset state for next time
-    setCurrentStep(1);
-    setSelectedDates([]);
-    setSelectedTimes({});
-    setCurrentDateIndex(0);
-    setSameTime(false);
+  const handleFinalBooking = async () => {
+    setBooking(true);
+    setError(null);
+    try {
+      const slots = selectedDates.map((date) => {
+        const timeStr = selectedTimes[date];
+        const [year, month, day] = date.split("-").map(Number);
+        let [h, m] = timeStr.split(":");
+        m = m.slice(0, 2);
+        let hour = parseInt(h, 10);
+        let minute = parseInt(m, 10);
+        const isPM = timeStr.toLowerCase().includes("pm");
+        if (isPM && hour !== 12) hour += 12;
+        if (!isPM && hour === 12) hour = 0;
+        const d = new Date(Date.UTC(year, month - 1, day, hour, minute, 0, 0));
+        return { time: d.toISOString() };
+      });
+      const payload = {
+        studentId: user?.uid,
+        tutorId: tutorId,
+        slots,
+      };
+      console.log("[ExamClassSlots] Booking payload:", payload);
+      const resp = await bookExamPrepClass(payload);
+      console.log("[ExamClassSlots] API response:", resp);
+      setBooking(false);
+      if (onBookingComplete)
+        onBookingComplete({ dates: selectedDates, times: selectedTimes });
+      if (onClose) onClose();
+    } catch (err) {
+      setBooking(false);
+      setError(err.message || "Booking failed");
+    }
   };
 
   const handleSameTimeToggle = () => {
@@ -171,11 +196,24 @@ const ExamClassSlots = ({ isOpen, onClose, onBookingComplete }) => {
   const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
   // Check if we can proceed to next step
-  const canProceedToConfirmation = selectedDates.every(
-    (date) => selectedTimes[date],
-  );
-  const currentDate = selectedDates[currentDateIndex];
-  const selectedTime = selectedTimes[currentDate] || "";
+  const canProceedToConfirmation =
+    selectedDates.length > 0 &&
+    selectedDates.every((date) => selectedTimes[date]);
+  // Use selectedDates and currentDateIndex to get the selected date key
+  const selectedDateKey = selectedDates[0];
+  let availableTimes =
+    slots && selectedDateKey ? slots[selectedDateKey] || [] : [];
+  // Remove duplicate times
+  availableTimes = Array.from(new Set(availableTimes));
+  const currentDate = selectedDateKey;
+  const selectedTime = selectedTimes[selectedDateKey] || "";
+
+  // Only allow selection of dates that have available slots
+  // Use date keys in 'YYYY-MM-DD' format
+  const availableDates = Object.keys(slots);
+  console.log("[ExamClassSlots] availableDates:", availableDates);
+
+  const MAX_DATES = 10;
 
   return (
     <>
@@ -253,22 +291,37 @@ const ExamClassSlots = ({ isOpen, onClose, onBookingComplete }) => {
 
                   {/* Calendar Grid */}
                   <div className="ml-0 mr-5 grid grid-cols-7 gap-x-1 sm:gap-x-6 sm:gap-y-2 sm:p-1">
-                    {generateCalendarDays().map((day, index) => (
-                      <button
-                        key={index}
-                        onClick={() => handleDateClick(day)}
-                        disabled={!day}
-                        className={`flex h-11 w-11 items-center justify-center rounded-full border text-center text-xl font-semibold transition-colors sm:h-12 sm:w-12 sm:text-[26px] ${
-                          !day
-                            ? "invisible"
-                            : selectedDates.includes(day)
-                              ? "border-[#888888] bg-[#DBFDDF] text-[#14B82C]"
-                              : "border-[#888888] bg-white text-[#14B82C] hover:bg-gray-50"
-                        }`}
-                      >
-                        {day}
-                      </button>
-                    ))}
+                    {generateCalendarDays().map((day, index) => {
+                      // Build date key for this day in current month
+                      const year = currentMonth.getFullYear();
+                      const month = String(
+                        currentMonth.getMonth() + 1,
+                      ).padStart(2, "0");
+                      const dayStr = String(day).padStart(2, "0");
+                      const dateKey = day ? `${year}-${month}-${dayStr}` : null;
+                      const enabled = !!day && availableDates.includes(dateKey);
+                      if (typeof window !== "undefined") {
+                        console.log(
+                          `[ExamClassSlots] day: ${day}, dateKey: ${dateKey}, enabled: ${enabled}`,
+                        );
+                      }
+                      return (
+                        <button
+                          key={index}
+                          onClick={() => handleDateClick(day)}
+                          disabled={!enabled}
+                          className={`flex h-11 w-11 items-center justify-center rounded-full border text-center text-xl font-semibold transition-colors sm:h-12 sm:w-12 sm:text-[26px] ${
+                            !enabled
+                              ? "cursor-not-allowed border-[#e0e0e0] bg-gray-100 text-gray-400"
+                              : selectedDates.includes(dateKey)
+                                ? "border-[#888888] bg-[#DBFDDF] text-[#14B82C]"
+                                : "border-[#888888] bg-white text-[#14B82C] hover:bg-gray-50"
+                          }`}
+                        >
+                          {day}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -301,7 +354,7 @@ const ExamClassSlots = ({ isOpen, onClose, onBookingComplete }) => {
                 <h2 className="text-2xl/[100%] font-medium">
                   {sameTime
                     ? "Choose time for all dates"
-                    : `Choose time for ${currentDate} May (${currentDateIndex + 1}/${selectedDates.length})`}
+                    : `Choose time for ${currentDate}`}
                 </h2>
                 <button
                   className="relative flex h-10 w-10 items-center justify-center rounded-full border-none bg-[#F6F6F6] p-0 transition hover:bg-[#ededed]"
@@ -322,19 +375,25 @@ const ExamClassSlots = ({ isOpen, onClose, onBookingComplete }) => {
 
             {/* Time Slots Grid */}
             <div className="mb-4 grid grid-cols-2 gap-3">
-              {timeSlots.map((time) => (
-                <button
-                  key={time}
-                  onClick={() => handleTimeSelection(time)}
-                  className={`rounded-[16px] border px-2 py-3 text-base font-normal transition ${
-                    selectedTime === time
-                      ? "border-[#14B82C] bg-[#DBFDDF] text-base font-semibold text-[#14B82C]"
-                      : "border-[#B0B0B0] bg-white text-[#14B82C] hover:bg-[#DBFDDF]"
-                  }`}
-                >
-                  {time}
-                </button>
-              ))}
+              {availableTimes.length === 0 ? (
+                <div className="col-span-2 text-center text-gray-500">
+                  No available times for this date.
+                </div>
+              ) : (
+                availableTimes.map((time, idx) => (
+                  <button
+                    key={time + "-" + idx}
+                    onClick={() => handleTimeSelection(time)}
+                    className={`rounded-[16px] border px-2 py-3 text-base font-normal transition ${
+                      selectedTime === time
+                        ? "border-[#14B82C] bg-[#DBFDDF] text-base font-semibold text-[#14B82C]"
+                        : "border-[#B0B0B0] bg-white text-[#14B82C] hover:bg-[#DBFDDF]"
+                    }`}
+                  >
+                    {time}
+                  </button>
+                ))
+              )}
             </div>
 
             {/* Date Navigation (only show when not same time) */}
@@ -433,10 +492,22 @@ const ExamClassSlots = ({ isOpen, onClose, onBookingComplete }) => {
         onClose={onClose}
         onConfirm={handleFinalBooking}
         onBack={handleBackFromConfirmation}
-        selectedDates={selectedDates}
+        selectedDates={
+          Array.isArray(selectedDates)
+            ? selectedDates
+            : selectedDates
+              ? [selectedDates]
+              : []
+        }
         selectedTimes={selectedTimes}
         onRemoveClass={handleRemoveClass}
+        user={user}
+        tutorId={tutorId}
       />
+      {console.log("[ExamClassSlots] Passing to ConfirmClassesModal:", {
+        user,
+        tutorId,
+      })}
     </>
   );
 };

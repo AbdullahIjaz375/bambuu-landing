@@ -26,12 +26,9 @@ import { getToken } from "firebase/messaging";
 import { messaging } from "../../firebaseConfig";
 import EmptyState from "../../components/EmptyState";
 import CalendarUser from "../../components/CalenderUser";
-import StartExamPrep from "./StartExamPrep";
-import ExploreInstructors from "./ExploreInstructors";
-import InstructorProfile from "./InstructorProfile";
-import SlotPickerModal from "./SlotPickerModal";
-import ExamBookingConfirmation from "./ExamBookingConfirmation";
-import IntoductoryCallDone from "./IntroductoryCallDone";
+import BookingFlowModal from "../../components/BookingFlowModal";
+import IntoductoryCallBooked from "./IntroductoryCallBooked";
+
 // This component must be defined at the top level of your file,
 // outside the LearnUser component but still within the file
 const LanguageCardsSection = ({ languageCards, languageData, navigate }) => {
@@ -215,13 +212,6 @@ const LanguageCardsSection = ({ languageCards, languageData, navigate }) => {
 const LearnUser = () => {
   // Get translation and language hooks at the component level
   const { user, setUser } = useAuth();
-  const [showExamPrepModal, setShowExamPrepModal] = useState(true);
-  const [bookExamClass, setBookExamClass] = useState(false);
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { t, i18n } = useTranslation();
-  const { currentLanguage, changeLanguage } = useLanguage();
-  const [examPrepStatus, setExamPrepStatus] = useState(false);
   const [showExploreInstructorsModal, setShowExploreInstructorsModal] =
     useState(true);
   const [selectedInstructor, setSelectedInstructor] = useState(null);
@@ -234,6 +224,16 @@ const LearnUser = () => {
   const [introCallSlots, setIntroCallSlots] = useState([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [bookingLoading, setBookingLoading] = useState(false);
+  const [showRenewalBanner, setShowRenewalBanner] = useState(false);
+  const [examPrepStatus, setExamPrepStatus] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { t, i18n } = useTranslation();
+  const { currentLanguage, changeLanguage } = useLanguage();
+
+  // Add state for the unified booking flow modal
+  const [showIntroBookingFlow, setShowIntroBookingFlow] = useState(false);
+  const [showExamPrepBookingFlow, setShowExamPrepBookingFlow] = useState(false);
 
   // Handler to start the flow
   const handleFindTutor = () => {
@@ -275,23 +275,21 @@ const LearnUser = () => {
       // Flatten and format the slots for the modal
       // We'll convert the API response to a map: { [date]: [times] }
       const slotMap = {};
-      (data.introductoryCallSlots || []).forEach((slotDay) => {
-        slotDay.times.forEach((slot) => {
-          if (!slot.booked) {
-            const dateObj = new Date(slot.time);
-            const dateStr = dateObj.toISOString().slice(0, 10); // YYYY-MM-DD
-            const timeStr = dateObj
-              .toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: true,
-                timeZone: "UTC",
-              })
-              .replace(/^0/, "");
-            if (!slotMap[dateStr]) slotMap[dateStr] = [];
-            slotMap[dateStr].push(timeStr);
-          }
-        });
+      (data.introductoryCallSlots || []).forEach((slot) => {
+        if (!slot.time) return; // skip if no time
+        const dateObj = new Date(slot.time);
+        if (isNaN(dateObj.getTime())) return; // skip if invalid date
+        const dateStr = dateObj.toISOString().slice(0, 10); // 'YYYY-MM-DD'
+        const timeStr = dateObj
+          .toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+            timeZone: "UTC",
+          })
+          .replace(/^0/, "");
+        if (!slotMap[dateStr]) slotMap[dateStr] = [];
+        slotMap[dateStr].push(timeStr);
       });
       setIntroCallSlots(slotMap);
     } catch (err) {
@@ -346,17 +344,36 @@ const LearnUser = () => {
     // Optionally update state to reflect that intro call is booked
   };
 
-  // if the user purchased the plan but not booked the introductory call, show the modal
+  // Fetch plan timeline on mount or when user changes
   useEffect(() => {
-    if (
-      examPrepStatus?.hasPurchasedPlan &&
-      !examPrepStatus.hasBookedIntroCall
-    ) {
-      setShowExamPrepModal(true);
-    } else {
-      setShowExamPrepModal(false);
-    }
-  }, [examPrepStatus]);
+    const fetchPlanTimeline = async () => {
+      if (!user?.uid) return;
+      try {
+        const timeline = await getExamPrepPlanTimeline(user.uid);
+
+        // Check for renewal condition
+        if (
+          timeline?.activePlan &&
+          !timeline?.nextPlan &&
+          timeline.activePlan.expiryDate
+        ) {
+          const expiry = new Date(timeline.activePlan.expiryDate);
+          const now = new Date();
+          const diffDays = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
+          if (diffDays <= 5 && diffDays >= 0) {
+            setShowRenewalBanner(true);
+          } else {
+            setShowRenewalBanner(false);
+          }
+        } else {
+          setShowRenewalBanner(false);
+        }
+      } catch (err) {
+        setShowRenewalBanner(false);
+      }
+    };
+    fetchPlanTimeline();
+  }, [user?.uid]);
 
   // Maintain language from navigation when redirected from profile setup
   useEffect(() => {
@@ -498,50 +515,34 @@ const LearnUser = () => {
 
   const handleOnboarding = async () => {
     try {
-      console.log("[ExamPrep][LearnUser] Complete Onboarding clicked", { studentId: user.uid });
+      console.log("[ExamPrep][LearnUser] Complete Onboarding clicked", {
+        studentId: user.uid,
+      });
       const status = await getStudentExamPrepTutorialStatus(user.uid);
-      console.log("[ExamPrep][LearnUser] getStudentExamPrepTutorialStatus response:", status);
       // 1. No plan
       if (!status.hasPurchasedPlan) {
-        console.log("[ExamPrep][LearnUser] No active plan. Redirecting to subscriptions.");
+        console.log(
+          "[ExamPrep][LearnUser] No active plan. Redirecting to subscriptions.",
+        );
         navigate("/subscriptions?tab=exam");
         return;
       }
-      // 2. No intro call
-      if (!status.hasBookedIntroCall) {
-        console.log("[ExamPrep][LearnUser] No intro call. Showing explore tutors modal.");
-        setShowExploreInstructorsModal(true);
-        setShowSlotPicker(false);
+      // 2. Needs to book intro call or complete intro call
+      if (!status.hasBookedIntroCall || !status.doneWithIntroCall) {
+        setShowIntroBookingFlow(true);
         return;
       }
-      // 3. Intro call booked but not completed
-      if (status.hasBookedIntroCall && !status.doneWithIntroCall) {
-        console.log("[ExamPrep][LearnUser] Intro call booked but not completed. Redirecting to class details.");
-        if (status.introCallClassId) {
-          navigate(`/class-details/${status.introCallClassId}`);
-        } else {
-          navigate(`/class-details/intro-call`);
-        }
-        return;
-      }
-      // 4. Intro call done, no exam prep class
+      // 3. Intro call done, needs to book exam prep class
       if (status.doneWithIntroCall && !status.hasBookedExamPrepClass) {
-        console.log("[ExamPrep][LearnUser] Intro call done, no exam prep class. Showing book classes modal.");
-        setShowSlotPicker(true);
-        setShowExploreInstructorsModal(false);
+        setShowExamPrepBookingFlow(true);
         return;
       }
-      // 5. Exam prep class booked
-      if (status.hasBookedExamPrepClass) {
-        console.log("[ExamPrep][LearnUser] Exam prep class booked. Redirecting to all classes page.");
-        navigate("/exam-prep/classes");
-        return;
-      }
-      // Fallback
-      console.log("[ExamPrep][LearnUser] Unhandled state. Redirecting to exam prep home.");
-      navigate("/exam-prep");
+      // 4. All done, do nothing or show a message
     } catch (err) {
-      console.error("[ExamPrep][LearnUser] getStudentExamPrepTutorialStatus error:", err);
+      console.error(
+        "[ExamPrep][LearnUser] getStudentExamPrepTutorialStatus error:",
+        err,
+      );
       // Optionally show an error modal or toast
     }
   };
@@ -982,41 +983,21 @@ const LearnUser = () => {
           </div>
         </div>
       </div>
-      <StartExamPrep
-        showExamPrepModal={showExamPrepModal}
-        setShowExamPrepModal={setShowExamPrepModal}
-        onFindTutor={handleFindTutor}
+      <BookingFlowModal
+        isOpen={showIntroBookingFlow}
+        onClose={() => setShowIntroBookingFlow(false)}
+        user={user}
+        mode="intro"
       />
-      <ExploreInstructors
-        showExploreInstructorsModal={showExploreInstructorsModal}
-        setShowExploreInstructorsModal={setShowExploreInstructorsModal}
-        onInstructorSelect={handleInstructorSelect}
-      />
-      <InstructorProfile
-        selectedInstructor={selectedInstructor}
-        setSelectedInstructor={setSelectedInstructor}
-        onBookIntroCall={handleBookIntroCall}
-      />
-      <SlotPickerModal
-        isOpen={showSlotPicker}
-        onClose={() => setShowSlotPicker(false)}
-        onSlotPicked={handleSlotPicked}
-        slots={introCallSlots}
-        loading={loadingSlots}
-      />
-      <ExamBookingConfirmation
-        showConfirm={showBookingConfirmation}
-        setShowConfirm={setShowBookingConfirmation}
-        selectedDate={selectedDate}
-        selectedTime={selectedTime}
-        onConfirm={handleBookingConfirmed}
-        tutor={confirmedInstructor}
-        loading={bookingLoading}
-      />
-      <IntoductoryCallDone
-        bookExamClass={showBookedModal}
-        setBookExamClass={setShowBookedModal}
-        onClose={handleBookedModalClose}
+      <BookingFlowModal
+        isOpen={showExamPrepBookingFlow}
+        onClose={() => setShowExamPrepBookingFlow(false)}
+        user={{
+          ...user,
+          completedIntroCallTutorId: examPrepStatus?.completedIntroCallTutorId,
+        }}
+        mode="exam"
+        initialStep={6}
       />
     </div>
   );
