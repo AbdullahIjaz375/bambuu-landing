@@ -28,74 +28,48 @@ import { messaging } from "../../firebaseConfig";
 import EmptyState from "../../components/EmptyState";
 import CalendarUser from "../../components/CalenderUser";
 import BookingFlowModal from "../../components/BookingFlowModal";
-import IntoductoryCallBooked from "./IntroductoryCallBooked";
 
-// This component must be defined at the top level of your file,
-// outside the LearnUser component but still within the file
 const LanguageCardsSection = ({ languageCards, languageData, navigate }) => {
-  // Reference to the container for scrolling
   const containerRef = useRef(null);
   const leftArrowRef = useRef(null);
   const rightArrowRef = useRef(null);
 
-  // Function to update arrow visibility
   const updateArrows = useCallback(() => {
     const container = containerRef.current;
     const leftArrow = leftArrowRef.current;
     const rightArrow = rightArrowRef.current;
-
     if (container && leftArrow && rightArrow) {
-      // Show left arrow only if scrolled away from the start
-      if (container.scrollLeft > 20) {
-        leftArrow.style.display = "block";
-      } else {
-        leftArrow.style.display = "none";
-      }
-
-      // Show right arrow only if there's more content to scroll
-      if (
+      leftArrow.style.display = container.scrollLeft > 20 ? "block" : "none";
+      rightArrow.style.display =
         container.scrollLeft + container.clientWidth + 20 >=
         container.scrollWidth
-      ) {
-        rightArrow.style.display = "none";
-      } else {
-        rightArrow.style.display = "block";
-      }
+          ? "none"
+          : "block";
     }
   }, []);
 
-  // Scroll left
   const scrollLeft = useCallback(() => {
     if (containerRef.current) {
       containerRef.current.scrollBy({ left: -300, behavior: "smooth" });
-      setTimeout(updateArrows, 300); // Update after scroll animation
+      setTimeout(updateArrows, 300);
     }
   }, [updateArrows]);
 
-  // Scroll right
   const scrollRight = useCallback(() => {
     if (containerRef.current) {
       containerRef.current.scrollBy({ left: 300, behavior: "smooth" });
-      setTimeout(updateArrows, 300); // Update after scroll animation
+      setTimeout(updateArrows, 300);
     }
   }, [updateArrows]);
 
-  // Set up initial arrow visibility and window resize listener
   useEffect(() => {
     updateArrows();
-
-    // Handle window resize
     window.addEventListener("resize", updateArrows);
-
-    // Cleanup
-    return () => {
-      window.removeEventListener("resize", updateArrows);
-    };
+    return () => window.removeEventListener("resize", updateArrows);
   }, [updateArrows]);
 
   return (
     <div className="flex flex-col">
-      {/* Left navigation arrow */}
       <div
         ref={leftArrowRef}
         className="absolute left-0 top-1/2 z-10 -translate-y-1/2"
@@ -108,8 +82,6 @@ const LanguageCardsSection = ({ languageCards, languageData, navigate }) => {
           <ChevronLeft size={30} color="#14B82C" />
         </button>
       </div>
-
-      {/* Right navigation arrow */}
       <div
         ref={rightArrowRef}
         className="absolute right-0 top-1/2 z-10 -translate-y-1/2"
@@ -121,8 +93,6 @@ const LanguageCardsSection = ({ languageCards, languageData, navigate }) => {
           <ChevronRight size={30} color="#14B82C" />
         </button>
       </div>
-
-      {/* Language cards container */}
       <div
         ref={containerRef}
         className="flex gap-4 overflow-x-auto px-4 pb-4"
@@ -136,7 +106,6 @@ const LanguageCardsSection = ({ languageCards, languageData, navigate }) => {
           const students =
             languageData[card.id]?.studentPhotos?.slice(0, 8) || [];
           const studentCount = languageData[card.id]?.studentIds?.length || 0;
-
           return (
             <div
               key={card.id}
@@ -156,32 +125,19 @@ const LanguageCardsSection = ({ languageCards, languageData, navigate }) => {
                 </span>
                 <div className="flex items-center">
                   <div className="relative flex">
-                    {students.length > 0
-                      ? students.map((photo, i) => (
-                          <div
-                            key={i}
-                            className="-mr-2 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-white sm:h-8 sm:w-8"
-                            style={{
-                              zIndex: students.length - i,
-                            }}
-                          >
-                            {photo ? (
-                              <img
-                                src={photo}
-                                alt={`Student ${i + 1}`}
-                                className="h-full w-full rounded-full object-cover"
-                              />
-                            ) : (
-                              <img
-                                src={"/images/panda.png"}
-                                alt={`Student ${i + 1}`}
-                                className="h-full w-full rounded-full object-cover opacity-75"
-                              />
-                            )}
-                          </div>
-                        ))
-                      : null}
-
+                    {students.map((photo, i) => (
+                      <div
+                        key={i}
+                        className="-mr-2 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-white sm:h-8 sm:w-8"
+                        style={{ zIndex: students.length - i }}
+                      >
+                        <img
+                          src={photo || "/images/panda.png"}
+                          alt={`Student ${i + 1}`}
+                          className={`h-full w-full rounded-full object-cover${photo ? "" : "opacity-75"}`}
+                        />
+                      </div>
+                    ))}
                     {studentCount > students.length && (
                       <div className="ml-2 flex min-w-8 items-center justify-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
                         +{studentCount - students.length}
@@ -194,14 +150,12 @@ const LanguageCardsSection = ({ languageCards, languageData, navigate }) => {
           );
         })}
       </div>
-
       <style jsx global>{`
         div[ref="containerRef"]::-webkit-scrollbar {
           width: 0;
           height: 0;
           display: none;
         }
-
         div[ref="containerRef"] {
           -ms-overflow-style: none;
           scrollbar-width: none;
@@ -210,8 +164,8 @@ const LanguageCardsSection = ({ languageCards, languageData, navigate }) => {
     </div>
   );
 };
+
 const LearnUser = () => {
-  // Get translation and language hooks at the component level
   const { user, setUser } = useAuth();
   const [showExploreInstructorsModal, setShowExploreInstructorsModal] =
     useState(false);
@@ -227,29 +181,43 @@ const LearnUser = () => {
   const [bookingLoading, setBookingLoading] = useState(false);
   const [showRenewalBanner, setShowRenewalBanner] = useState(false);
   const [examPrepStatus, setExamPrepStatus] = useState(false);
+  const [showIntroBookingFlow, setShowIntroBookingFlow] = useState(false);
+  const [showExamPrepBookingFlow, setShowExamPrepBookingFlow] = useState(false);
+  const [languageData, setLanguageData] = useState({
+    spanish: { studentIds: [], studentPhotos: [] },
+    english: { studentIds: [], studentPhotos: [] },
+    exchange: { studentIds: [], studentPhotos: [] },
+  });
+  const [loadingLanguages, setLoadingLanguages] = useState(true);
+  const [classes, setClasses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [groups, setGroups] = useState([]);
+  const [loadingGroups, setLoadingGroups] = useState(true);
+  const [errorGroups, setErrorGroups] = useState(null);
+  const [nextClass, setNextClass] = useState(null);
+
   const navigate = useNavigate();
   const location = useLocation();
   const { t, i18n } = useTranslation();
   const { currentLanguage, changeLanguage } = useLanguage();
 
-  // Add state for the unified booking flow modal
-  const [showIntroBookingFlow, setShowIntroBookingFlow] = useState(false);
-  const [showExamPrepBookingFlow, setShowExamPrepBookingFlow] = useState(false);
+  const shouldShowOnboardingBanner =
+    !!examPrepStatus?.hasPurchasedPlan &&
+    (!examPrepStatus?.hasBookedIntroCall ||
+      !examPrepStatus?.hasBookedExamPrepClass);
 
-  // Handler to start the flow
-  const handleFindTutor = () => {
-    setShowExploreInstructorsModal(true);
-  };
+  console.log("examPrepStatus", examPrepStatus);
+  console.log("user", user);
 
-  // Handler when instructor is selected
+  // --- Handlers ---
+  const handleFindTutor = () => setShowExploreInstructorsModal(true);
   const handleInstructorSelect = (instructor) => {
     setSelectedInstructor(instructor);
     setShowExploreInstructorsModal(false);
   };
 
-  // Helper to convert date and time to ISO string in UTC
   function getISODateTime(dateStr, timeStr) {
-    // dateStr: 'YYYY-MM-DD', timeStr: '10:00 AM'
     const [year, month, day] = dateStr.split("-").map(Number);
     let [h, m] = timeStr.split(":");
     m = m.slice(0, 2);
@@ -258,29 +226,25 @@ const LearnUser = () => {
     const isPM = timeStr.toLowerCase().includes("pm");
     if (isPM && hour !== 12) hour += 12;
     if (!isPM && hour === 12) hour = 0;
-    // JS Date: months are 0-indexed
-    const d = new Date(Date.UTC(year, month - 1, day, hour, minute, 0, 0));
-    return d.toISOString();
+    return new Date(
+      Date.UTC(year, month - 1, day, hour, minute, 0, 0),
+    ).toISOString();
   }
 
-  // Handler when slot picker is opened from instructor profile
   const handleBookIntroCall = async () => {
     if (!selectedInstructor?.uid) return;
     setLoadingSlots(true);
     setShowSlotPicker(true);
-    setSelectedInstructor(null); // Close InstructorProfile modal
-    setConfirmedInstructor(selectedInstructor); // <-- Save instructor for later
-
+    setSelectedInstructor(null);
+    setConfirmedInstructor(selectedInstructor);
     try {
       const data = await getIntroCallSlots(selectedInstructor.uid);
-      // Flatten and format the slots for the modal
-      // We'll convert the API response to a map: { [date]: [times] }
       const slotMap = {};
       (data.introductoryCallSlots || []).forEach((slot) => {
-        if (!slot.time) return; // skip if no time
+        if (!slot.time) return;
         const dateObj = new Date(slot.time);
-        if (isNaN(dateObj.getTime())) return; // skip if invalid date
-        const dateStr = dateObj.toISOString().slice(0, 10); // 'YYYY-MM-DD'
+        if (isNaN(dateObj.getTime())) return;
+        const dateStr = dateObj.toISOString().slice(0, 10);
         const timeStr = dateObj
           .toLocaleTimeString([], {
             hour: "2-digit",
@@ -293,14 +257,13 @@ const LearnUser = () => {
         slotMap[dateStr].push(timeStr);
       });
       setIntroCallSlots(slotMap);
-    } catch (err) {
+    } catch {
       setIntroCallSlots({});
     } finally {
       setLoadingSlots(false);
     }
   };
 
-  // Handler when slot is picked
   const handleSlotPicked = (date, time) => {
     setSelectedDate(date);
     setSelectedTime(time);
@@ -308,7 +271,6 @@ const LearnUser = () => {
     setShowBookingConfirmation(true);
   };
 
-  // Handler for booking confirmation
   const handleBookingConfirmed = async () => {
     if (
       !user?.uid ||
@@ -326,8 +288,7 @@ const LearnUser = () => {
         slot: { time: slotISO },
       });
       setShowBookingConfirmation(false);
-      setShowBookedModal(true); // Show success modal
-      // Optionally refresh data here
+      setShowBookedModal(true);
     } catch (err) {
       alert("Booking failed: " + err.message);
     } finally {
@@ -335,24 +296,20 @@ const LearnUser = () => {
     }
   };
 
-  // Handler for closing success modal
   const handleBookedModalClose = () => {
     setShowBookedModal(false);
     setSelectedInstructor(null);
     setShowExploreInstructorsModal(false);
     setShowSlotPicker(false);
     setShowBookingConfirmation(false);
-    // Optionally update state to reflect that intro call is booked
   };
 
-  // Fetch plan timeline on mount or when user changes
+  // --- Effects ---
   useEffect(() => {
     const fetchPlanTimeline = async () => {
       if (!user?.uid) return;
       try {
         const timeline = await getExamPrepPlanTimeline(user.uid);
-
-        // Check for renewal condition
         if (
           timeline?.activePlan &&
           !timeline?.nextPlan &&
@@ -361,34 +318,24 @@ const LearnUser = () => {
           const expiry = new Date(timeline.activePlan.expiryDate);
           const now = new Date();
           const diffDays = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
-          if (diffDays <= 5 && diffDays >= 0) {
-            setShowRenewalBanner(true);
-          } else {
-            setShowRenewalBanner(false);
-          }
+          setShowRenewalBanner(diffDays <= 5 && diffDays >= 0);
         } else {
           setShowRenewalBanner(false);
         }
-      } catch (err) {
+      } catch {
         setShowRenewalBanner(false);
       }
     };
     fetchPlanTimeline();
   }, [user?.uid]);
 
-  // Maintain language from navigation when redirected from profile setup
   useEffect(() => {
-    // Check if we're coming from profile setup with a language preference
     const languageToUse =
       location.state?.language ||
       localStorage.getItem("iwhite8nextLng") ||
       "en";
-
-    // Apply the language to ensure consistency throughout the app
     if (i18n.language !== languageToUse || currentLanguage !== languageToUse) {
       changeLanguage(languageToUse);
-
-      // Force language application with small delay to ensure it applies
       setTimeout(() => {
         if (i18n.language !== languageToUse) {
           i18n.changeLanguage(languageToUse);
@@ -396,49 +343,9 @@ const LearnUser = () => {
         }
       }, 50);
     }
-
-    // Ensure language persistence
     localStorage.setItem("i18nextLng", languageToUse);
   }, [location.state, i18n, currentLanguage, changeLanguage]);
 
-  const settings = {
-    dots: false,
-    infinite: false,
-    speed: 500,
-    slidesToShow: 4,
-    slidesToScroll: 1,
-    arrows: true,
-    responsive: [
-      {
-        breakpoint: 1024,
-        settings: {
-          slidesToShow: 3,
-        },
-      },
-      {
-        breakpoint: 768,
-        settings: {
-          slidesToShow: 2,
-        },
-      },
-      {
-        breakpoint: 480,
-        settings: {
-          slidesToShow: 1,
-        },
-      },
-    ],
-  };
-
-  // State for language student data
-  const [languageData, setLanguageData] = useState({
-    spanish: { studentIds: [], studentPhotos: [] },
-    english: { studentIds: [], studentPhotos: [] },
-    exchange: { studentIds: [], studentPhotos: [] },
-  });
-  const [loadingLanguages, setLoadingLanguages] = useState(true);
-
-  // Fetch classes and student data for languages
   useEffect(() => {
     const fetchClassesAndStudents = async () => {
       try {
@@ -449,13 +356,10 @@ const LearnUser = () => {
           english: { studentIds: new Set(), studentPhotos: [] },
           exchange: { studentIds: new Set(), studentPhotos: [] },
         };
-
-        // Aggregate student IDs by language
         for (const classDoc of classesSnapshot.docs) {
           const classData = classDoc.data();
           const language = classData.language;
           const classMemberIds = classData.classMemberIds || [];
-
           if (language === "Spanish") {
             classMemberIds.forEach((id) =>
               tempLanguageData.spanish.studentIds.add(id),
@@ -470,8 +374,6 @@ const LearnUser = () => {
             );
           }
         }
-
-        // Convert Sets to Arrays
         tempLanguageData.spanish.studentIds = Array.from(
           tempLanguageData.spanish.studentIds,
         );
@@ -481,23 +383,16 @@ const LearnUser = () => {
         tempLanguageData.exchange.studentIds = Array.from(
           tempLanguageData.exchange.studentIds,
         );
-
-        // Fetch student profile pictures (limit to 12 per language)
         for (const langKey of ["spanish", "english", "exchange"]) {
           const studentIds = tempLanguageData[langKey].studentIds.slice(0, 12);
           const photoPromises = studentIds.map(async (studentId) => {
             const studentRef = doc(db, "students", studentId);
             const studentDoc = await getDoc(studentRef);
-            if (studentDoc.exists()) {
-              const studentData = studentDoc.data();
-              return studentData.photoUrl || "";
-            }
-            return "";
+            return studentDoc.exists() ? studentDoc.data().photoUrl || "" : "";
           });
           tempLanguageData[langKey].studentPhotos =
             await Promise.all(photoPromises);
         }
-
         setLanguageData(tempLanguageData);
       } catch (error) {
         console.error("Error fetching classes or students:", error);
@@ -505,61 +400,8 @@ const LearnUser = () => {
         setLoadingLanguages(false);
       }
     };
-
     fetchClassesAndStudents();
   }, []);
-
-  // Fetch My Classes
-  const [classes, setClasses] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  const handleOnboarding = async () => {
-    try {
-      console.log("[ExamPrep][LearnUser] Complete Onboarding clicked", {
-        studentId: user.uid,
-      });
-      const status = await getStudentExamPrepTutorialStatus(user.uid);
-      // 1. No plan
-      if (!status.hasPurchasedPlan) {
-        console.log(
-          "[ExamPrep][LearnUser] No active plan. Redirecting to subscriptions.",
-        );
-        navigate("/subscriptions?tab=exam");
-        return;
-      }
-      // 2. Needs to book intro call or complete intro call
-      if (!status.hasBookedIntroCall || !status.doneWithIntroCall) {
-        setShowIntroBookingFlow(true);
-        return;
-      }
-      // 3. Intro call done, needs to book exam prep class
-      if (status.doneWithIntroCall && !status.hasBookedExamPrepClass) {
-        setShowExamPrepBookingFlow(true);
-        return;
-      }
-      // 4. All done, do nothing or show a message
-    } catch (err) {
-      console.error(
-        "[ExamPrep][LearnUser] getStudentExamPrepTutorialStatus error:",
-        err,
-      );
-      // Optionally show an error modal or toast
-    }
-  };
-
-  // Fetch exam prep status on mount
-  useEffect(() => {
-    const fetchStatus = async () => {
-      try {
-        const status = await getStudentExamPrepTutorialStatus(user.uid);
-        setExamPrepStatus(status);
-      } catch (err) {
-        setExamPrepStatus(null);
-      }
-    };
-    fetchStatus();
-  }, [user.uid]);
 
   useEffect(() => {
     const fetchClasses = async () => {
@@ -567,15 +409,12 @@ const LearnUser = () => {
         setLoading(false);
         return;
       }
-
       setLoading(true);
       const classesData = [];
-
       try {
         for (const classId of user.enrolledClasses) {
           const classRef = doc(db, "classes", classId);
           const classDoc = await getDoc(classRef);
-
           if (classDoc.exists()) {
             const classData = classDoc.data();
             classesData.push({ id: classId, ...classData });
@@ -591,14 +430,8 @@ const LearnUser = () => {
         setLoading(false);
       }
     };
-
     fetchClasses();
   }, [user]);
-
-  // Fetch My Groups
-  const [groups, setGroups] = useState([]);
-  const [loadingGroups, setLoadingGroups] = useState(true);
-  const [errorGroups, setErrorGroups] = useState(null);
 
   useEffect(() => {
     const fetchGroups = async () => {
@@ -606,23 +439,15 @@ const LearnUser = () => {
         setLoadingGroups(false);
         return;
       }
-
       try {
         const fetchedGroups = [];
-        const groupsToFetch = user.joinedGroups;
-
-        for (let groupId of groupsToFetch) {
+        for (let groupId of user.joinedGroups) {
           const groupRef = doc(db, "groups", groupId);
           const groupDoc = await getDoc(groupRef);
-
           if (groupDoc.exists()) {
-            fetchedGroups.push({
-              id: groupDoc.id,
-              ...groupDoc.data(),
-            });
+            fetchedGroups.push({ id: groupDoc.id, ...groupDoc.data() });
           }
         }
-
         setGroups(fetchedGroups);
         setErrorGroups(null);
       } catch (error) {
@@ -632,24 +457,17 @@ const LearnUser = () => {
         setLoadingGroups(false);
       }
     };
-
     fetchGroups();
   }, [user]);
-
-  // Calculate Next Class
-  const [nextClass, setNextClass] = useState(null);
 
   useEffect(() => {
     const calculateNextClass = () => {
       if (!classes || classes.length === 0) return null;
-
       const now = new Date();
       let closestClass = null;
       let smallestTimeDiff = Infinity;
-
       classes.forEach((classItem) => {
         const classTime = classItem.classDateTime?.toDate();
-
         if (classTime && classTime > now) {
           const timeDiff = classTime - now;
           if (timeDiff < smallestTimeDiff) {
@@ -662,68 +480,86 @@ const LearnUser = () => {
           }
         }
       });
-
       return closestClass;
     };
-
     const formatTimeUntil = (milliseconds) => {
       const hours = Math.floor(milliseconds / (1000 * 60 * 60));
       const minutes = Math.floor(
         (milliseconds % (1000 * 60 * 60)) / (1000 * 60),
       );
-
       if (hours > 24) {
         const days = Math.floor(hours / 24);
         return `${days} day${days > 1 ? "s" : ""} away`;
       } else if (hours > 0) {
-        return `${hours} hour${
-          hours > 1 ? "s" : ""
-        } and ${minutes} minutes away`;
+        return `${hours} hour${hours > 1 ? "s" : ""} and ${minutes} minutes away`;
       } else {
         return `${minutes} minute${minutes > 1 ? "s" : ""} away`;
       }
     };
-
-    const updateNextClass = () => {
-      setNextClass(calculateNextClass());
-    };
-
+    const updateNextClass = () => setNextClass(calculateNextClass());
     updateNextClass();
     const interval = setInterval(updateNextClass, 60000);
-
     return () => clearInterval(interval);
   }, [classes]);
 
-  // Update FCM Token
   useEffect(() => {
     const updateFCMToken = async () => {
       try {
         const currentToken = await getToken(messaging, {
           vapidKey: process.env.REACT_APP_FIREBASE_VAPID_KEY,
         });
-
         if (currentToken && user) {
           await updateDoc(doc(db, "students", user.uid), {
             fcmToken: currentToken,
           });
-
           const sessionUser = JSON.parse(sessionStorage.getItem("user"));
           sessionUser.fcmToken = currentToken;
           sessionStorage.setItem("user", JSON.stringify(sessionUser));
-
           setUser((prev) => ({ ...prev, fcmToken: currentToken }));
         }
       } catch (error) {
         console.error("Error updating FCM token:", error);
       }
     };
-
-    if (user?.uid) {
-      updateFCMToken();
-    }
+    if (user?.uid) updateFCMToken();
   }, []);
 
-  // Language cards configuration
+  const handleOnboarding = async () => {
+    try {
+      const status = await getStudentExamPrepTutorialStatus(user.uid);
+      if (!status.hasPurchasedPlan) {
+        navigate("/subscriptions?tab=exam");
+        return;
+      }
+      if (!status.hasBookedIntroCall || !status.doneWithIntroCall) {
+        setShowIntroBookingFlow(true);
+        return;
+      }
+      if (status.doneWithIntroCall && !status.hasBookedExamPrepClass) {
+        setShowExamPrepBookingFlow(true);
+        return;
+      }
+    } catch (err) {
+      console.error(
+        "[ExamPrep][LearnUser] getStudentExamPrepTutorialStatus error:",
+        err,
+      );
+    }
+  };
+
+  useEffect(() => {
+    const fetchStatus = async () => {
+      try {
+        const status = await getStudentExamPrepTutorialStatus(user.uid);
+        setExamPrepStatus(status);
+      } catch {
+        setExamPrepStatus(null);
+      }
+    };
+    fetchStatus();
+  }, [user.uid]);
+
+  // --- Language Cards ---
   const languageCards = [
     {
       id: "spanish",
@@ -757,15 +593,15 @@ const LearnUser = () => {
     },
   ];
 
+  // --- Render ---
   return (
     <div className="flex h-screen bg-white">
       <div className="h-full w-64 flex-shrink-0">
         <Sidebar user={user} />
       </div>
-
       <div className="h-full min-w-[calc(100%-16rem)] flex-1 overflow-x-auto">
         <div className="m-2 h-[calc(100vh-1rem)] overflow-y-auto rounded-3xl border-2 border-[#e7e7e7] bg-white p-8">
-          {/* Header with Welcome and Notification */}
+          {/* Header */}
           <div className="mb-4 flex items-center justify-between border-b border-[#e7e7e7] pb-4">
             <div className="flex flex-row items-center space-x-4">
               <h1 className="text-3xl font-semibold">
@@ -792,8 +628,7 @@ const LearnUser = () => {
               <NotificationDropdown />
             </div>
           </div>
-
-          {/* Renewal Banner */}
+          {/* Renewal/Onboarding Banner */}
           {showRenewalBanner ? (
             <div className="mb-6 flex w-full items-center justify-between rounded-3xl border border-[#B0B0B0] bg-white px-6 py-3">
               <div className="flex items-center gap-3">
@@ -815,15 +650,7 @@ const LearnUser = () => {
               </button>
             </div>
           ) : (
-            // ...existing onboarding banner...
-            examPrepStatus &&
-            examPrepStatus.hasPurchasedPlan &&
-            !(
-              examPrepStatus.doneWithExamPrepClass &&
-              examPrepStatus.doneWithIntroCall &&
-              examPrepStatus.hasBookedExamPrepClass &&
-              examPrepStatus.hasBookedIntroCall
-            ) && (
+            shouldShowOnboardingBanner && (
               <div className="mb-6 flex w-full items-center justify-between rounded-3xl border border-[#B0B0B0] bg-white px-6 py-3">
                 <div className="flex items-center gap-3">
                   <img
@@ -845,15 +672,11 @@ const LearnUser = () => {
               </div>
             )
           )}
-
           {/* Calendar and Language Learning Section */}
           <div className="mb-4 flex w-full flex-col items-start justify-between gap-4 py-4 lg:flex-row">
-            {/* Calendar section */}
             <div className="mb-4 w-full lg:mb-0 lg:w-[40%]">
               <CalendarUser />
             </div>
-
-            {/* Content section */}
             <div className="w-full lg:w-[60%]">
               <div className="mb-3">
                 <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
@@ -868,8 +691,6 @@ const LearnUser = () => {
                   </button>
                 </div>
               </div>
-
-              {/* Language Cards */}
               <div className="relative w-full overflow-hidden">
                 {loadingLanguages ? (
                   <div className="flex h-48 items-center justify-center">
@@ -885,7 +706,6 @@ const LearnUser = () => {
               </div>
             </div>
           </div>
-
           {/* My Classes Section */}
           <div className="mx-auto mb-8 w-full max-w-[165vh]">
             <div className="mb-4 flex items-center justify-between">
@@ -901,7 +721,6 @@ const LearnUser = () => {
                 </button>
               )}
             </div>
-
             {loading ? (
               <div className="flex h-48 items-center justify-center">
                 <ClipLoader color="#14B82C" size={50} />
@@ -944,7 +763,6 @@ const LearnUser = () => {
               </div>
             )}
           </div>
-
           {/* My Groups Section */}
           <div className="mx-auto w-full max-w-[165vh]">
             <div className="mb-4 flex items-center justify-between">
@@ -960,7 +778,6 @@ const LearnUser = () => {
                 </button>
               )}
             </div>
-
             {loadingGroups ? (
               <div className="flex h-48 items-center justify-center">
                 <ClipLoader color="#14B82C" size={50} />

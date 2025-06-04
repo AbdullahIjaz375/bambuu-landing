@@ -15,6 +15,7 @@ import { streamClient, fetchChatToken, ChannelType } from "../../config/stream";
 import InstructorProfile from "./InstructorProfile";
 import { getExamPrepStepStatus } from "../../api/examPrepApi";
 import Modal from "react-modal";
+import BookingFlowModal from "../../components/BookingFlowModal";
 
 const InstructorProfileUser = () => {
   const { tutorId } = useParams();
@@ -32,7 +33,15 @@ const InstructorProfileUser = () => {
   const [stepStatusLoading, setStepStatusLoading] = useState(false);
   const [stepStatusError, setStepStatusError] = useState(null);
   const [showTutorExploreModal, setShowTutorExploreModal] = useState(false);
-
+  const [
+    hasBookedExamPrepClassWithOtherTutor,
+    setHasBookedExamPrepClassWithOtherTutor,
+  ] = useState(true);
+  const [showIntroBookingFlow, setShowIntroBookingFlow] = useState(false);
+  const [introBookingInitialStep, setIntroBookingInitialStep] = useState(0);
+  const [showExamPrepBookingFlow, setShowExamPrepBookingFlow] = useState(false);
+  const [examPrepBookingInitialStep, setExamPrepBookingInitialStep] =
+    useState(6);
   const getInstructorProfileData = (tutor) => ({
     img: tutor.photoUrl || "/images/panda.png",
     name: tutor.name,
@@ -58,24 +67,19 @@ const InstructorProfileUser = () => {
         { studentId: user.uid, tutorId },
       );
       const res = await getExamPrepStepStatus(user.uid, tutorId);
-      console.log(
-        "[ExamPrep][InstructorProfileUser] getExamPrepStepStatus response:",
-        res,
-      );
+
       // 1. No active plan
       if (!res.hasPurchasedPlan) {
-        console.log(
-          "[ExamPrep][InstructorProfileUser] No active plan. Redirecting to subscriptions.",
-        );
         navigate("/subscriptions?tab=exam");
         return;
       }
       // 2. No intro call with this tutor
       if (!res.hasBookedIntroCall) {
         console.log(
-          "[ExamPrep][InstructorProfileUser] No intro call with this tutor. Showing tutor explore modal.",
+          "[ExamPrep][InstructorProfileUser] No intro call with this tutor. Opening BookingFlowModal at InstructorProfile step.",
         );
-        setShowTutorExploreModal(true);
+        setIntroBookingInitialStep(2); // step 2 = InstructorProfile
+        setShowIntroBookingFlow(true);
         return;
       }
       // 3. Intro call booked but not completed
@@ -84,21 +88,26 @@ const InstructorProfileUser = () => {
           "[ExamPrep][InstructorProfileUser] Intro call booked but not completed. Redirecting to class details.",
         );
         // You may want to pass the classId if available in the response
-        if (res.introCallClassId) {
-          navigate(`/class-details/${res.introCallClassId}`);
-        } else {
-          navigate(`/class-details/intro-call`);
-        }
-        return;
+        if (res.pendingIntroCallClassId) {
+          navigate(`/class-details/${res.pendingIntroCallClassId}`);
+        } else return;
       }
       // 4. Intro call completed, no exam prep class booked
       if (res.doneWithIntroCall && !res.hasBookedExamPrepClass) {
         console.log(
           "[ExamPrep][InstructorProfileUser] Intro call completed, no exam prep class. Showing booking modal for this tutor.",
         );
-        navigate(`/exam-prep/book-classes?tutorId=${tutorId}`);
+        setExamPrepBookingInitialStep(2); // step 3
+        setShowExamPrepBookingFlow(true);
         return;
       }
+      // if (res.doneWithIntroCall && !res.hasBookedExamPrepClass) {
+      //   console.log(
+      //     "[ExamPrep][InstructorProfileUser] Intro call completed, no exam prep class. Showing booking modal for this tutor.",
+      //   );
+      //   navigate(`/exam-prep/book-classes?tutorId=${tutorId}`);
+      //   return;
+      // }
       // 5. Exam prep class booked
       if (res.hasBookedExamPrepClass) {
         console.log(
@@ -336,6 +345,21 @@ const InstructorProfileUser = () => {
     );
   };
 
+  useEffect(() => {
+    const fetchExamPrepStatus = async () => {
+      if (!user?.uid || !tutorId) return;
+      try {
+        const res = await getExamPrepStepStatus(user.uid, tutorId);
+        setHasBookedExamPrepClassWithOtherTutor(
+          res.hasBookedExamPrepClassWithOtherTutor,
+        );
+      } catch (err) {
+        setHasBookedExamPrepClassWithOtherTutor(false); // fallback
+      }
+    };
+    fetchExamPrepStatus();
+  }, [user?.uid, tutorId]);
+
   if (loading) {
     return (
       <div className="flex min-h-screen bg-white">
@@ -464,38 +488,40 @@ const InstructorProfileUser = () => {
                 </button>
               </div>
               {/* Exam Preparation Package Button BELOW the green box */}
-              <div className="mt-6 flex w-full items-center justify-center">
-                <div className="w-full">
-                  <button className="flex w-full items-center justify-between rounded-2xl border border-[#FFBF00] bg-[#FFFFEA] px-6 py-4 text-left text-black shadow transition hover:bg-[#fff9a0]">
-                    <div
-                      onClick={handleExamPrepClick}
-                      className="flex items-center gap-3"
-                    >
-                      <img
-                        src="/svgs/preparation-package-icon.svg"
-                        alt="Exam"
-                        className="h-16 w-16"
-                      />
-                      <span className="text-base font-semibold">
-                        Exam Preparation Package
-                      </span>
-                      {stepStatusLoading && (
-                        <ClipLoader
-                          color="#14B82C"
-                          size={18}
-                          className="ml-2"
+              {!hasBookedExamPrepClassWithOtherTutor && (
+                <div className="mt-6 flex w-full items-center justify-center">
+                  <div className="w-full">
+                    <button className="flex w-full items-center justify-between rounded-2xl border border-[#FFBF00] bg-[#FFFFEA] px-6 py-4 text-left text-black shadow transition hover:bg-[#fff9a0]">
+                      <div
+                        onClick={handleExamPrepClick}
+                        className="flex items-center gap-3"
+                      >
+                        <img
+                          src="/svgs/preparation-package-icon.svg"
+                          alt="Exam"
+                          className="h-16 w-16"
                         />
-                      )}
-                    </div>
-                    <ChevronRightIcon className="h-4 w-4" />
-                  </button>
-                  {stepStatusError && (
-                    <div className="mt-2 text-sm text-red-500">
-                      {stepStatusError}
-                    </div>
-                  )}
+                        <span className="text-base font-semibold">
+                          Exam Preparation Package
+                        </span>
+                        {stepStatusLoading && (
+                          <ClipLoader
+                            color="#14B82C"
+                            size={18}
+                            className="ml-2"
+                          />
+                        )}
+                      </div>
+                      <ChevronRightIcon className="h-4 w-4" />
+                    </button>
+                    {stepStatusError && (
+                      <div className="mt-2 text-sm text-red-500">
+                        {stepStatusError}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
             {/* Main content */}
             <div className="flex min-h-0 flex-1 flex-col">
@@ -509,6 +535,23 @@ const InstructorProfileUser = () => {
           </div>
         </div>
       </div>
+
+      <BookingFlowModal
+        isOpen={showIntroBookingFlow}
+        onClose={() => setShowIntroBookingFlow(false)}
+        user={user}
+        mode="intro"
+        initialStep={introBookingInitialStep}
+      />
+
+      <BookingFlowModal
+        isOpen={showExamPrepBookingFlow}
+        onClose={() => setShowExamPrepBookingFlow(false)}
+        user={user}
+        mode="exam"
+        initialStep={examPrepBookingInitialStep}
+      />
+
       <InstructorProfile
         selectedInstructor={bookTutor ? getInstructorProfileData(tutor) : null}
         setSelectedInstructor={() => setBookTutor(false)}

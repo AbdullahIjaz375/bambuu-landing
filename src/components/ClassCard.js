@@ -43,6 +43,7 @@ const ClassCard = ({
     classType === "Individual Premium" || classType === "Group Premium";
   const isIndividualPremium = classType === "Individual Premium";
   const introClass = classType === "introductory_call";
+  const examPrepClass = classType === "exam_prep";
   const [profileUrl, setProfileUrl] = useState(null);
   // We need loading state for the profile fetch
   const [, setLoading] = useState(true);
@@ -212,11 +213,11 @@ const ClassCard = ({
       >
         <div
           className={`flex h-[340px] w-full max-w-lg flex-col border ${
-            introClass
+            introClass || examPrepClass
               ? "h-[280px] w-full min-w-[220px] max-w-[350px] bg-[#E6FDE9]"
               : ""
-          } ${isPremium || introClass ? "border-[#14b82c]" : "border-[#ffc71f]"} ${
-            introClass
+          } ${isPremium || introClass || examPrepClass ? "border-[#14b82c]" : "border-[#ffc71f]"} ${
+            introClass || examPrepClass
               ? "bg-[#E6FDE9]"
               : isIndividualPremium
                 ? "bg-[#e6fde9]"
@@ -232,7 +233,7 @@ const ClassCard = ({
                 : "h-[190px]"
             } overflow-hidden`}
           >
-            {introClass ? (
+            {introClass || examPrepClass ? (
               <div className="flex h-full w-full flex-col items-center justify-center rounded-2xl bg-[#B9F9C2] font-tanker">
                 <span className="text-[52.27px]/[100%] font-normal text-[#042F0C]">
                   {t("exam-prep.exam")}
@@ -267,7 +268,7 @@ const ClassCard = ({
                   {className}
                 </h2>
               </div>
-              {!introClass && (
+              {!(introClass || examPrepClass) && (
                 <div className="flex items-center justify-between">
                   <div className="ml-2 flex items-center space-x-2">
                     <img
@@ -350,7 +351,7 @@ const ClassCard = ({
                     {adminName || t("class-card-tutor.labels.tbd")}
                   </span>
                 </div>
-                {!introClass && (
+                {!(introClass || examPrepClass) && (
                   <div className="flex items-center space-x-2">
                     <img
                       alt="bammbuu"

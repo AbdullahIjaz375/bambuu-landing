@@ -91,7 +91,7 @@ const Sidebar = ({ user }) => {
         sub.type === "individual_premium" ||
         sub.type === "group_premium" ||
         sub.type?.toLowerCase().includes("premium") ||
-        sub.type?.toLowerCase().includes("bambuu+")
+        sub.type?.toLowerCase().includes("bambuu+"),
     ) || user?.isPremium === true;
 
   // Determine the appropriate navigation items based on user type
@@ -101,9 +101,9 @@ const Sidebar = ({ user }) => {
     user?.userType === "tutor" ? "/profileTutor" : "/profileUser";
 
   return (
-    <div className="sticky ml-2 top-2 left-2 flex flex-col h-[calc(100vh-1rem)] min-w-[15.5rem] max-w-[15.5rem] bg-[#e6fde9] pt-6 pb-4 rounded-3xl border-2 border-[#b9f9c2] overflow-y-auto">
+    <div className="sticky left-2 top-2 ml-2 flex h-[calc(100vh-1rem)] min-w-[15.5rem] max-w-[15.5rem] flex-col overflow-y-auto rounded-3xl border-2 border-[#b9f9c2] bg-[#e6fde9] pb-4 pt-6">
       {/* Logo */}
-      <Link to="/" className="px-6 mb-8">
+      <Link to="/" className="mb-8 px-6">
         <img
           alt="bambuu"
           src="/svgs/bammbuu-dashboard-logo.svg"
@@ -112,7 +112,7 @@ const Sidebar = ({ user }) => {
       </Link>
 
       {/* Navigation Menu */}
-      <nav className="relative flex-1 px-4 overflow-y-auto">
+      <nav className="relative flex-1 overflow-y-auto px-4">
         <div>
           <TutorialOverlay />
         </div>
@@ -122,34 +122,32 @@ const Sidebar = ({ user }) => {
             <div key={item.path} onClick={item.onClick} className="mb-2">
               {item.onClick ? (
                 <div
-                  className={`flex text-base lg:text-lg items-center gap-3 pl-3 py-2 transition-colors rounded-full cursor-pointer
-                    ${
-                      isActive
-                        ? "bg-[#14B82C] text-white"
-                        : "text-[#042F0C] hover:bg-[#6fdb55]"
-                    }`}
+                  className={`flex cursor-pointer items-center gap-3 rounded-full py-2 pl-3 text-base transition-colors lg:text-lg ${
+                    isActive
+                      ? "bg-[#14B82C] text-white"
+                      : "text-[#042F0C] hover:bg-[#6fdb55]"
+                  }`}
                 >
                   <img
                     src={isActive ? item.lightImage : item.darkImage}
                     alt={t(item.translationKey)}
-                    className="w-6 h-6"
+                    className="h-6 w-6"
                   />
                   <span>{t(item.translationKey)}</span>
                 </div>
               ) : (
                 <Link
                   to={item.path}
-                  className={`flex text-base lg:text-lg items-center gap-3 pl-3 py-2 transition-colors rounded-full
-                    ${
-                      isActive
-                        ? "bg-[#14B82C] text-white"
-                        : "text-[#042F0C] hover:bg-[#6fdb55]"
-                    }`}
+                  className={`flex items-center gap-3 rounded-full py-2 pl-3 text-base transition-colors lg:text-lg ${
+                    isActive
+                      ? "bg-[#14B82C] text-white"
+                      : "text-[#042F0C] hover:bg-[#6fdb55]"
+                  }`}
                 >
                   <img
                     src={isActive ? item.lightImage : item.darkImage}
                     alt={t(item.translationKey)}
-                    className="w-6 h-6"
+                    className="h-6 w-6"
                   />
                   <span>{t(item.translationKey)}</span>
                 </Link>
@@ -164,42 +162,44 @@ const Sidebar = ({ user }) => {
         {user ? (
           <Link
             to={profilePath}
-            className="flex items-center justify-between p-2 transition-colors bg-white rounded-2xl"
+            className="flex items-center justify-between rounded-2xl bg-white p-2 transition-colors"
           >
             <div className="flex flex-row items-center space-x-2">
-              <div className="relative flex-shrink-0 w-8 h-8 overflow-hidden bg-white rounded-full lg:w-10 lg:h-10">
+              <div className="relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-full bg-white lg:h-10 lg:w-10">
                 {hasBambuuPlus && (
-                  <div className="absolute z-10 -top-1 -right-1 w-4 h-4 lg:w-5 lg:h-5">
+                  <div className="absolute -right-1 -top-1 z-10 h-4 w-4 lg:h-5 lg:w-5">
                     <img
                       alt="bammbuu plus"
                       src="/svgs/bambuu-plus-user.svg"
-                      className="w-full h-full"
+                      className="h-full w-full"
                     />
                   </div>
                 )}
                 <div
-                  className={`w-full h-full rounded-full ${
+                  className={`h-full w-full rounded-full ${
                     hasBambuuPlus ? "ring-2 ring-green-500" : ""
                   }`}
                 >
                   <img
                     src={user?.photoUrl || "/svgs/supertutor-panda.svg"}
                     alt="Profile"
-                    className="object-cover w-full h-full"
+                    className="h-full w-full object-cover"
                   />
                 </div>
               </div>
-              <div className="flex flex-col min-w-0">
-                <span className="text-base font-semibold text-black truncate lg:text-lg">
+              <div className="flex min-w-0 max-w-[8rem] flex-col">
+                {" "}
+                {/* limit width here */}
+                <span className="overflow-hidden truncate whitespace-nowrap text-base font-semibold text-black lg:text-lg">
                   {user.name || "User"}
                 </span>
-                <span className="text-xs text-gray-700 truncate lg:text-sm">
+                <span className="overflow-hidden truncate whitespace-nowrap text-xs text-gray-700 lg:text-sm">
                   {truncateEmail(user.email) || "email"}
                 </span>
               </div>
             </div>
             <div className="flex-shrink-0">
-              <ChevronRight className="text-[#14B82C] w-5 h-5" />
+              <ChevronRight className="h-5 w-5 text-[#14B82C]" />
             </div>
           </Link>
         ) : null}
