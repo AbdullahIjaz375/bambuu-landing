@@ -10,6 +10,7 @@ import GroupCard from "../../components/GroupCard";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   bookIntroductoryCall,
+  getExamPrepPlanTimeline,
   getIntroCallSlots,
   getStudentExamPrepTutorialStatus,
 } from "../../api/examPrepApi";
@@ -213,7 +214,7 @@ const LearnUser = () => {
   // Get translation and language hooks at the component level
   const { user, setUser } = useAuth();
   const [showExploreInstructorsModal, setShowExploreInstructorsModal] =
-    useState(true);
+    useState(false);
   const [selectedInstructor, setSelectedInstructor] = useState(null);
   const [confirmedInstructor, setConfirmedInstructor] = useState(null);
   const [showSlotPicker, setShowSlotPicker] = useState(false);
@@ -792,8 +793,30 @@ const LearnUser = () => {
             </div>
           </div>
 
-          {/* Complete Onboarding Banner */}
-          {examPrepStatus &&
+          {/* Renewal Banner */}
+          {showRenewalBanner ? (
+            <div className="mb-6 flex w-full items-center justify-between rounded-3xl border border-[#B0B0B0] bg-white px-6 py-3">
+              <div className="flex items-center gap-3">
+                <img
+                  src="/svgs/preparation-package-icon.svg"
+                  alt="Renewal"
+                  className="h-10 w-10"
+                />
+                <span className="text-base font-normal text-[#454545]">
+                  You're making excellent progress with your exam prep. Continue
+                  your journey by unlocking Month 2 for even better results.
+                </span>
+              </div>
+              <button
+                className="rounded-3xl border border-[#5D5D5D] bg-[#E6FDE9] px-5 py-2 text-base font-medium text-[#042F0C] transition hover:bg-[#E6FDE9]"
+                onClick={() => navigate("/subscriptions?tab=exam")}
+              >
+                Continue
+              </button>
+            </div>
+          ) : (
+            // ...existing onboarding banner...
+            examPrepStatus &&
             examPrepStatus.hasPurchasedPlan &&
             !(
               examPrepStatus.doneWithExamPrepClass &&
@@ -820,7 +843,8 @@ const LearnUser = () => {
                   Complete Onboarding
                 </button>
               </div>
-            )}
+            )
+          )}
 
           {/* Calendar and Language Learning Section */}
           <div className="mb-4 flex w-full flex-col items-start justify-between gap-4 py-4 lg:flex-row">

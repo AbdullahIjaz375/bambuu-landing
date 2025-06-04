@@ -33,29 +33,6 @@ const InstructorProfileUser = () => {
   const [stepStatusError, setStepStatusError] = useState(null);
   const [showTutorExploreModal, setShowTutorExploreModal] = useState(false);
 
-  // Function to check if user has exam preparation subscription
-  const hasExamPrepSubscription = () => {
-    if (!user?.subscriptions) return false;
-
-    return user.subscriptions.some((sub) => {
-      if (!sub.startDate || !sub.endDate || sub.type === "None") return false;
-
-      // Check if subscription is still active
-      const endDate = new Date(
-        sub.endDate.seconds ? sub.endDate.seconds * 1000 : sub.endDate,
-      );
-      const isActive = endDate > new Date();
-
-      // Check if it's an exam preparation subscription
-      const isExamPrep =
-        sub.type === "Immersive Exam Prep Plan" ||
-        sub.type === "Exam Preparation" ||
-        sub.type.toLowerCase().includes("exam");
-
-      return isActive && isExamPrep;
-    });
-  };
-
   const getInstructorProfileData = (tutor) => ({
     img: tutor.photoUrl || "/images/panda.png",
     name: tutor.name,
@@ -69,28 +46,43 @@ const InstructorProfileUser = () => {
 
   // Handle exam preparation package click
   const handleExamPrepClick = async () => {
-    console.log("[ExamPrep][InstructorProfileUser] Exam prep button clicked", { studentId: user.uid, tutorId });
+    console.log("[ExamPrep][InstructorProfileUser] Exam prep button clicked", {
+      studentId: user.uid,
+      tutorId,
+    });
     setStepStatusLoading(true);
     setStepStatusError(null);
     try {
-      console.log("[ExamPrep][InstructorProfileUser] Calling getExamPrepStepStatus", { studentId: user.uid, tutorId });
+      console.log(
+        "[ExamPrep][InstructorProfileUser] Calling getExamPrepStepStatus",
+        { studentId: user.uid, tutorId },
+      );
       const res = await getExamPrepStepStatus(user.uid, tutorId);
-      console.log("[ExamPrep][InstructorProfileUser] getExamPrepStepStatus response:", res);
+      console.log(
+        "[ExamPrep][InstructorProfileUser] getExamPrepStepStatus response:",
+        res,
+      );
       // 1. No active plan
       if (!res.hasPurchasedPlan) {
-        console.log("[ExamPrep][InstructorProfileUser] No active plan. Redirecting to subscriptions.");
+        console.log(
+          "[ExamPrep][InstructorProfileUser] No active plan. Redirecting to subscriptions.",
+        );
         navigate("/subscriptions?tab=exam");
         return;
       }
       // 2. No intro call with this tutor
       if (!res.hasBookedIntroCall) {
-        console.log("[ExamPrep][InstructorProfileUser] No intro call with this tutor. Showing tutor explore modal.");
+        console.log(
+          "[ExamPrep][InstructorProfileUser] No intro call with this tutor. Showing tutor explore modal.",
+        );
         setShowTutorExploreModal(true);
         return;
       }
       // 3. Intro call booked but not completed
       if (res.hasBookedIntroCall && !res.doneWithIntroCall) {
-        console.log("[ExamPrep][InstructorProfileUser] Intro call booked but not completed. Redirecting to class details.");
+        console.log(
+          "[ExamPrep][InstructorProfileUser] Intro call booked but not completed. Redirecting to class details.",
+        );
         // You may want to pass the classId if available in the response
         if (res.introCallClassId) {
           navigate(`/class-details/${res.introCallClassId}`);
@@ -101,21 +93,30 @@ const InstructorProfileUser = () => {
       }
       // 4. Intro call completed, no exam prep class booked
       if (res.doneWithIntroCall && !res.hasBookedExamPrepClass) {
-        console.log("[ExamPrep][InstructorProfileUser] Intro call completed, no exam prep class. Showing booking modal for this tutor.");
+        console.log(
+          "[ExamPrep][InstructorProfileUser] Intro call completed, no exam prep class. Showing booking modal for this tutor.",
+        );
         navigate(`/exam-prep/book-classes?tutorId=${tutorId}`);
         return;
       }
       // 5. Exam prep class booked
       if (res.hasBookedExamPrepClass) {
-        console.log("[ExamPrep][InstructorProfileUser] Exam prep class booked. Redirecting to all classes with this tutor.");
+        console.log(
+          "[ExamPrep][InstructorProfileUser] Exam prep class booked. Redirecting to all classes with this tutor.",
+        );
         navigate(`/exam-prep/classes?tutorId=${tutorId}`);
         return;
       }
       // Fallback
-      console.log("[ExamPrep][InstructorProfileUser] Unhandled state. Redirecting to exam prep home.");
+      console.log(
+        "[ExamPrep][InstructorProfileUser] Unhandled state. Redirecting to exam prep home.",
+      );
       navigate(`/exam-prep?tutorId=${tutorId}`);
     } catch (err) {
-      console.error("[ExamPrep][InstructorProfileUser] getExamPrepStepStatus error:", err);
+      console.error(
+        "[ExamPrep][InstructorProfileUser] getExamPrepStepStatus error:",
+        err,
+      );
       setStepStatusError(err.message || "Failed to check exam prep status.");
     } finally {
       setStepStatusLoading(false);
@@ -479,13 +480,19 @@ const InstructorProfileUser = () => {
                         Exam Preparation Package
                       </span>
                       {stepStatusLoading && (
-                        <ClipLoader color="#14B82C" size={18} className="ml-2" />
+                        <ClipLoader
+                          color="#14B82C"
+                          size={18}
+                          className="ml-2"
+                        />
                       )}
                     </div>
                     <ChevronRightIcon className="h-4 w-4" />
                   </button>
                   {stepStatusError && (
-                    <div className="mt-2 text-sm text-red-500">{stepStatusError}</div>
+                    <div className="mt-2 text-sm text-red-500">
+                      {stepStatusError}
+                    </div>
                   )}
                 </div>
               </div>
@@ -514,9 +521,16 @@ const InstructorProfileUser = () => {
           overlayClassName="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center backdrop-blur-sm"
           ariaHideApp={false}
         >
-          <h2 className="text-xl font-bold mb-4">Explore Tutors</h2>
-          <p>Show a list of tutors here for the user to book an intro call with.</p>
-          <button onClick={() => setShowTutorExploreModal(false)} className="mt-4 rounded-full border border-[#042F0C] bg-white px-5 py-2 text-base font-medium text-black transition-colors hover:bg-gray-50">Close</button>
+          <h2 className="mb-4 text-xl font-bold">Explore Tutors</h2>
+          <p>
+            Show a list of tutors here for the user to book an intro call with.
+          </p>
+          <button
+            onClick={() => setShowTutorExploreModal(false)}
+            className="mt-4 rounded-full border border-[#042F0C] bg-white px-5 py-2 text-base font-medium text-black transition-colors hover:bg-gray-50"
+          >
+            Close
+          </button>
         </Modal>
       )}
     </div>

@@ -153,16 +153,22 @@ const ClassCardTutor = ({
         <div className="hover:cursor-pointer" onClick={handleClick}>
           <div
             className={`${
-              examPrep ? "h-[280px] w-full min-w-[220px] max-w-[350px]" : ""
+              examPrep
+                ? "h-[280px] w-full min-w-[220px] max-w-[350px] bg-[#E6FDE9]"
+                : ""
             } flex h-auto flex-col border sm:h-[25rem] ${
               isPremium || examPrep ? "border-[#14b82c]" : "border-[#ffc71f]"
             } ${
-              classType === "Individual Premium" ? "bg-[#e6fde9]" : "bg-white"
+              examPrep
+                ? "bg-[#E6FDE9]"
+                : classType === "Individual Premium"
+                  ? "bg-[#e6fde9]"
+                  : "bg-white"
             } rounded-3xl p-2`}
           >
             <div className="relative aspect-video w-full sm:h-80">
               {examPrep ? (
-                <div className="font-tanker flex h-full w-full flex-col items-center justify-center rounded-2xl bg-[#B9F9C2]">
+                <div className="flex h-full w-full flex-col items-center justify-center rounded-2xl bg-[#B9F9C2] font-tanker">
                   <span className="text-[52.27px]/[100%] font-normal text-[#042F0C]">
                     {t("exam-prep.exam")}
                   </span>

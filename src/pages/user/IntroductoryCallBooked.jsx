@@ -1,5 +1,9 @@
 import Modal from "react-modal";
-const IntoductoryCallDone = ({ bookExamClass, setBookExamClass, onClose }) => (
+const IntoductoryCallBooked = ({
+  bookExamClass,
+  setBookExamClass,
+  onClose,
+}) => (
   <Modal
     isOpen={bookExamClass}
     onRequestClose={() => {
@@ -35,4 +39,4 @@ const IntoductoryCallDone = ({ bookExamClass, setBookExamClass, onClose }) => (
     </div>
   </Modal>
 );
-export default IntoductoryCallDone;
+export default IntoductoryCallBooked;

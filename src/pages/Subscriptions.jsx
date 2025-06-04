@@ -329,36 +329,36 @@ const Subscriptions = () => {
     );
   };
 
-  const CreditPlan = ({ plan, userId, isSelected, onSelect }) => {
-    return (
-      <div
-        onClick={() => onSelect(plan)}
-        className={`flex h-full cursor-pointer flex-col rounded-3xl transition-all duration-200 ${
-          isSelected
-            ? "scale-[1.02] transform border-2 border-[#14B82C] bg-[#E6FDE9] shadow-lg"
-            : "border border-[#B0B0B0] bg-white hover:border-[#14B82C] hover:shadow-md"
-        }`}
-      >
-        {plan.isPopular ? (
-          <div className="rounded-t-3xl bg-[#FFBF00] px-4 py-1.5 text-center text-sm font-semibold">
-            {t("plans-modal.popular-badge")}
-          </div>
-        ) : (
-          <div className="h-[30px]" />
-        )}
-        <div className="flex flex-grow flex-col space-y-6 p-6 text-center">
-          <div className="space-y-4">
-            <div className="text-4xl font-bold">${plan.price}</div>
-            <h3 className="text-lg font-medium">{plan.title}</h3>
-            {plan.description && (
-              <p className="text-sm text-black">{plan.description}</p>
-            )}
-          </div>
-          <div className="flex-grow" />
-        </div>
-      </div>
-    );
-  };
+  // const CreditPlan = ({ plan, userId, isSelected, onSelect }) => {
+  //   return (
+  //     <div
+  //       onClick={() => onSelect(plan)}
+  //       className={`flex h-full cursor-pointer flex-col rounded-3xl transition-all duration-200 ${
+  //         isSelected
+  //           ? "scale-[1.02] transform border-2 border-[#14B82C] bg-[#E6FDE9] shadow-lg"
+  //           : "border border-[#B0B0B0] bg-white hover:border-[#14B82C] hover:shadow-md"
+  //       }`}
+  //     >
+  //       {plan.isPopular ? (
+  //         <div className="rounded-t-3xl bg-[#FFBF00] px-4 py-1.5 text-center text-sm font-semibold">
+  //           {t("plans-modal.popular-badge")}
+  //         </div>
+  //       ) : (
+  //         <div className="h-[30px]" />
+  //       )}
+  //       <div className="flex flex-grow flex-col space-y-6 p-6 text-center">
+  //         <div className="space-y-4">
+  //           <div className="text-4xl font-bold">${plan.price}</div>
+  //           <h3 className="text-lg font-medium">{plan.title}</h3>
+  //           {plan.description && (
+  //             <p className="text-sm text-black">{plan.description}</p>
+  //           )}
+  //         </div>
+  //         <div className="flex-grow" />
+  //       </div>
+  //     </div>
+  //   );
+  // };
 
   const OfferPlan = ({ plan, userId, isSelected, onSelect }) => {
     return (
@@ -450,7 +450,7 @@ const Subscriptions = () => {
             >
               {t("plans-modal.tabs.subscriptions")}
             </button>
-            <button
+            {/* <button
               className={`text-md rounded-full px-6 py-2 font-medium text-[#042F0C] transition-colors ${
                 activeTab === "credits"
                   ? "border border-[#042F0C] bg-[#FFBF00]"
@@ -459,7 +459,7 @@ const Subscriptions = () => {
               onClick={() => handleTabChange("credits")}
             >
               {t("plans-modal.tabs.credits")}
-            </button>
+            </button> */}
             <button
               className={`text-md rounded-full px-6 py-2 font-medium text-[#042F0C] transition-colors ${
                 activeTab === "exam"
@@ -487,20 +487,22 @@ const Subscriptions = () => {
         </div>
 
         {activeTab === "subscriptions" && (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {subscriptionPlans.map((plan, index) => (
-              <SubscriptionPlan
-                key={index}
-                plan={plan}
-                userId={user?.uid}
-                isSelected={selectedPlan?.id === plan.id}
-                onSelect={handlePlanSelect}
-              />
-            ))}
+          <div className="flex justify-center">
+            <div className="w-full max-w-md">
+              {subscriptionPlans.slice(0, 1).map((plan, index) => (
+                <SubscriptionPlan
+                  key={index}
+                  plan={plan}
+                  userId={user?.uid}
+                  isSelected={selectedPlan?.id === plan.id}
+                  onSelect={handlePlanSelect}
+                />
+              ))}
+            </div>
           </div>
         )}
 
-        {activeTab === "credits" && (
+        {/* {activeTab === "credits" && (
           <>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {creditPlans.map((plan, index) => (
@@ -530,7 +532,7 @@ const Subscriptions = () => {
               {t("plans-modal.credits-warning")}
             </div>
           </>
-        )}
+        )} */}
 
         {activeTab === "offers" && (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
