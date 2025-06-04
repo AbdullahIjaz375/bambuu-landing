@@ -17,6 +17,7 @@ import {
 import { ClipLoader } from "react-spinners";
 import Modal from "react-modal";
 import { fetchPlansFromFirebase } from "../utils/fetchPlansFromFirebase";
+import { purchaseExamPrepPlan } from "../api/examPrepApi";
 
 Modal.setAppElement("#root");
 
@@ -587,8 +588,31 @@ const Subscriptions = () => {
                   </div>
                   {/* Buttons */}
                   <div className="mb-2">
-                    <button className="w-full rounded-full border border-[#042F0C] bg-[#14B82C] p-3 text-base font-medium text-black transition-colors hover:bg-green-600">
-                      Buy Now
+                    <button
+                      className="w-full rounded-full border border-[#042F0C] bg-[#14B82C] p-3 text-base font-medium text-black transition-colors hover:bg-green-600"
+                      onClick={async () => {
+                        if (!user?.uid) {
+                          toast.error("You must be logged in to purchase.");
+                          return;
+                        }
+                        setIsLoading(true);
+                        try {
+                          await purchaseExamPrepPlan(user.uid);
+                          toast.success(
+                            "Exam Prep Plan purchased successfully!",
+                          );
+                        } catch (err) {
+                          toast.error(
+                            err?.message ||
+                              "Failed to purchase Exam Prep Plan.",
+                          );
+                        } finally {
+                          setIsLoading(false);
+                        }
+                      }}
+                      disabled={isLoading}
+                    >
+                      {isLoading ? "Processing..." : "Buy Now"}
                     </button>
                     <button className="w-full rounded-full px-6 py-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50">
                       Learn More
