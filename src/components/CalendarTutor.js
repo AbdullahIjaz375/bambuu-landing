@@ -1,11 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const MAX_SELECTION = 60;
 
-const CalendarTutor = ({ onNext }) => {
+const CalendarTutor = ({ onNext, prefilledDates = [] }) => {
   const [date, setDate] = useState(new Date());
   const [selectedDates, setSelectedDates] = useState([]);
+
+  useEffect(() => {
+    if (prefilledDates && prefilledDates.length > 0) {
+      setSelectedDates(
+        prefilledDates.map((d) => {
+          if (d instanceof Date) return d;
+          // d is string in YYYY-MM-DD
+          const [year, month, day] = d.split("-").map(Number);
+          return new Date(Date.UTC(year, month - 1, day));
+        }),
+      );
+    }
+  }, [prefilledDates]);
 
   const getMonthDates = (current) => {
     const year = current.getFullYear();

@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const timeSlots = [
   "01:00 AM",
@@ -42,7 +42,12 @@ function getDateWithTime(date, timeStr) {
   return d.toISOString();
 }
 
-const TimeSlotModal = ({ selectedDates, onClose, onNext }) => {
+const TimeSlotModal = ({
+  selectedDates,
+  onClose,
+  onNext,
+  prefilledSlotsByDate = {},
+}) => {
   // selectedSlotsByDate: { [dateString]: ["10:00 AM", ...] }
   const [selectedSlotsByDate, setSelectedSlotsByDate] = useState(() => {
     const obj = {};
@@ -53,6 +58,23 @@ const TimeSlotModal = ({ selectedDates, onClose, onNext }) => {
   });
   const [sameTime, setSameTime] = useState(false);
   const [activeDateIdx, setActiveDateIdx] = useState(0);
+
+  useEffect(() => {
+    // Prefill slots if provided and not already selected
+    setSelectedSlotsByDate((prev) => {
+      const obj = { ...prev };
+      selectedDates.forEach((date) => {
+        if (
+          prefilledSlotsByDate[date] &&
+          (!prev[date] || prev[date].length === 0)
+        ) {
+          obj[date] = [...prefilledSlotsByDate[date]];
+        }
+      });
+      return obj;
+    });
+    // eslint-disable-next-line
+  }, [prefilledSlotsByDate, selectedDates]);
 
   const currentDate = selectedDates[activeDateIdx];
   const handleSlotClick = (slot) => {
@@ -72,31 +94,38 @@ const TimeSlotModal = ({ selectedDates, onClose, onNext }) => {
     if (sameTime) {
       // Use the slots from the first date for all dates
       const firstDate = selectedDates[0];
-      const times = (selectedSlotsByDate[firstDate] || []).map((slot) =>
-        selectedDates.map((date) => ({
-          date,
-          time: slot,
-        }))
-      ).flat();
+      const times = (selectedSlotsByDate[firstDate] || [])
+        .map((slot) =>
+          selectedDates.map((date) => ({
+            date,
+            time: slot,
+          })),
+        )
+        .flat();
       // Group by date
       const grouped = {};
       times.forEach(({ date, time }) => {
         if (!grouped[date]) grouped[date] = [];
-        grouped[date].push({ time: getDateWithTime(date, time), booked: false });
+        grouped[date].push({
+          time: getDateWithTime(date, time),
+          booked: false,
+        });
       });
       slots = Object.values(
         Object.keys(grouped).reduce((acc, date) => {
           acc[date] = { times: grouped[date] };
           return acc;
-        }, {})
+        }, {}),
       );
     } else {
-      slots = selectedDates.map((date) => ({
-        times: (selectedSlotsByDate[date] || []).map((slot) => ({
-          time: getDateWithTime(date, slot),
-          booked: false,
-        })),
-      })).filter((slotObj) => slotObj.times.length > 0);
+      slots = selectedDates
+        .map((date) => ({
+          times: (selectedSlotsByDate[date] || []).map((slot) => ({
+            time: getDateWithTime(date, slot),
+            booked: false,
+          })),
+        }))
+        .filter((slotObj) => slotObj.times.length > 0);
     }
     onNext(slots);
   };
@@ -105,7 +134,12 @@ const TimeSlotModal = ({ selectedDates, onClose, onNext }) => {
     <div className="flex h-full flex-col">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-2xl/[100%] font-medium">
-          Choose time for {new Date(currentDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+          Choose time for{" "}
+          {new Date(currentDate).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          })}
         </h2>
         <button onClick={onClose}>
           <X className="h-6 w-6 text-gray-500 hover:text-gray-700" />
@@ -121,7 +155,9 @@ const TimeSlotModal = ({ selectedDates, onClose, onNext }) => {
       </div>
       <div className="mb-4 grid grid-cols-4 gap-3">
         {timeSlots.map((slot) => {
-          const selected = (selectedSlotsByDate[currentDate] || []).includes(slot);
+          const selected = (selectedSlotsByDate[currentDate] || []).includes(
+            slot,
+          );
           return (
             <button
               key={slot}
@@ -162,7 +198,7 @@ const TimeSlotModal = ({ selectedDates, onClose, onNext }) => {
           </span>
         </label>
       </div>
-      <div className="flex justify-between mb-2">
+      <div className="mb-2 flex justify-between">
         <button
           className="rounded-full border border-[#5D5D5D] bg-white px-8 py-2 font-semibold text-[#042f0c]"
           onClick={() => {
@@ -184,7 +220,11 @@ const TimeSlotModal = ({ selectedDates, onClose, onNext }) => {
               <button
                 className="rounded-full border border-[#5D5D5D] bg-white px-4 py-2 font-semibold text-[#042f0c]"
                 disabled={activeDateIdx === selectedDates.length - 1}
-                onClick={() => setActiveDateIdx((idx) => Math.min(selectedDates.length - 1, idx + 1))}
+                onClick={() =>
+                  setActiveDateIdx((idx) =>
+                    Math.min(selectedDates.length - 1, idx + 1),
+                  )
+                }
               >
                 Next Date
               </button>
@@ -195,7 +235,9 @@ const TimeSlotModal = ({ selectedDates, onClose, onNext }) => {
           disabled={
             sameTime
               ? (selectedSlotsByDate[selectedDates[0]] || []).length === 0
-              : selectedDates.some((date) => (selectedSlotsByDate[date] || []).length === 0)
+              : selectedDates.some(
+                  (date) => (selectedSlotsByDate[date] || []).length === 0,
+                )
           }
           onClick={handleNext}
           className={`rounded-full bg-[#14B82C] px-8 py-2 font-semibold text-black ${
@@ -203,9 +245,11 @@ const TimeSlotModal = ({ selectedDates, onClose, onNext }) => {
               ? (selectedSlotsByDate[selectedDates[0]] || []).length === 0
                 ? "cursor-not-allowed bg-[#b6e7c0]"
                 : "bg-[#14B82C]"
-              : selectedDates.some((date) => (selectedSlotsByDate[date] || []).length === 0)
-              ? "cursor-not-allowed bg-[#b6e7c0]"
-              : "bg-[#14B82C]"
+              : selectedDates.some(
+                    (date) => (selectedSlotsByDate[date] || []).length === 0,
+                  )
+                ? "cursor-not-allowed bg-[#b6e7c0]"
+                : "bg-[#14B82C]"
           }`}
         >
           Next

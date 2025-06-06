@@ -13,6 +13,8 @@ import {
   getTutorClasses,
   setExamPrepClassSlots,
   setIntroCallSlots,
+  getIntroCallSlots,
+  getExamPrepClassSlots,
 } from "../../api/examPrepApi";
 
 const ExamPreparationTutor = () => {
@@ -30,6 +32,8 @@ const ExamPreparationTutor = () => {
   );
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
   const [availabilityError, setAvailabilityError] = useState(null);
+  const [prefilledDates, setPrefilledDates] = useState([]);
+  const [prefilledSlotsByDate, setPrefilledSlotsByDate] = useState({});
 
   useEffect(() => {
     if (!user?.uid) return;
@@ -129,6 +133,76 @@ const ExamPreparationTutor = () => {
     }
   };
 
+  const handleManageAvailability = async () => {
+    if (!user?.uid) return;
+    setAvailabilityLoading(true);
+    setAvailabilityError(null);
+    try {
+      let slotsRes;
+      if (activeTab === t("exam-prep.tabs.introductory-calls")) {
+        slotsRes = await getIntroCallSlots(user.uid);
+        const slotsArr = slotsRes.introductoryCallSlots || [];
+        // Flatten all times into a map by date
+        const slotsByDate = {};
+        slotsArr.forEach((slotDay) => {
+          (slotDay.times || []).forEach((slot) => {
+            if (!slot.time || slot.booked) return;
+            const dateObj = new Date(slot.time);
+            if (isNaN(dateObj.getTime())) return;
+            const year = dateObj.getUTCFullYear();
+            const month = String(dateObj.getUTCMonth() + 1).padStart(2, "0");
+            const day = String(dateObj.getUTCDate()).padStart(2, "0");
+            const dateKey = `${year}-${month}-${day}`;
+            const timeStr = dateObj
+              .toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+                timeZone: "UTC",
+              })
+              .replace(/^0/, "");
+            if (!slotsByDate[dateKey]) slotsByDate[dateKey] = [];
+            slotsByDate[dateKey].push(timeStr);
+          });
+        });
+        setPrefilledSlotsByDate(slotsByDate);
+        setPrefilledDates(Object.keys(slotsByDate));
+      } else {
+        slotsRes = await getExamPrepClassSlots(user.uid);
+        const slotsArr = slotsRes.examPrepSlots || [];
+        const slotsByDate = {};
+        slotsArr.forEach((slotDay) => {
+          (slotDay.times || []).forEach((slot) => {
+            if (!slot.time || slot.booked) return;
+            const dateObj = new Date(slot.time);
+            if (isNaN(dateObj.getTime())) return;
+            const year = dateObj.getUTCFullYear();
+            const month = String(dateObj.getUTCMonth() + 1).padStart(2, "0");
+            const day = String(dateObj.getUTCDate()).padStart(2, "0");
+            const dateKey = `${year}-${month}-${day}`;
+            const timeStr = dateObj
+              .toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+                timeZone: "UTC",
+              })
+              .replace(/^0/, "");
+            if (!slotsByDate[dateKey]) slotsByDate[dateKey] = [];
+            slotsByDate[dateKey].push(timeStr);
+          });
+        });
+        setPrefilledSlotsByDate(slotsByDate);
+        setPrefilledDates(Object.keys(slotsByDate));
+      }
+      setAvailibilityModal(true);
+    } catch (err) {
+      setAvailabilityError(err.message || "Failed to fetch slots");
+    } finally {
+      setAvailabilityLoading(false);
+    }
+  };
+
   // Filter classes based on activeTab
   const filteredClasses = classes.filter((classData) => {
     if (activeTab === t("exam-prep.tabs.exam-prep-classes")) {
@@ -184,7 +258,7 @@ const ExamPreparationTutor = () => {
               </button>
             </div>
             <button
-              onClick={() => setAvailibilityModal(true)}
+              onClick={handleManageAvailability}
               className="flex w-full items-center justify-center rounded-full border border-[#5D5D5D] bg-[#14b82c] px-3 py-2 text-lg font-semibold text-[#042f0c] sm:w-auto sm:justify-start"
             >
               {t("exam-prep.manage-availability")}
@@ -227,8 +301,10 @@ const ExamPreparationTutor = () => {
               <X className="h-6 w-6 text-gray-500 hover:text-gray-700" />
             </button>
           </div>
-
-          <CalendarTutor onNext={handleCalendarNext} />
+          <CalendarTutor
+            onNext={handleCalendarNext}
+            prefilledDates={prefilledDates}
+          />
         </Modal>
       )}
 
@@ -243,6 +319,7 @@ const ExamPreparationTutor = () => {
             selectedDates={selectedDates}
             onClose={handleTimeSlotClose}
             onNext={handleTimeSlotNext}
+            prefilledSlotsByDate={prefilledSlotsByDate}
           />
           {availabilityLoading && <div>Setting availability...</div>}
           {availabilityError && (
