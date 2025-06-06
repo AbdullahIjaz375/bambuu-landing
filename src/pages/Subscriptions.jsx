@@ -619,7 +619,15 @@ const Subscriptions = () => {
                     >
                       {isLoading ? "Processing..." : "Buy Now"}
                     </button>
-                    <button className="w-full rounded-full px-6 py-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50">
+                    <button
+                      className="w-full rounded-full px-6 py-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+                      onClick={() =>
+                        window.open(
+                          "https://calendly.com/bammbuu-languages/info-call-llamada-de-informacion",
+                          "_blank",
+                        )
+                      }
+                    >
                       Learn More
                     </button>
                   </div>

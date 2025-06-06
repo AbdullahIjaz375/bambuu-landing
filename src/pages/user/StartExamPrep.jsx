@@ -60,14 +60,14 @@ const StartExamPrep = ({
             <li className="flex items-start gap-2">
               <img className="mt-1" src="/svgs/tick-circle.svg" alt="Check" />
               <span>
-                Practice what you’re learning through live instructor-led group
+                Practice what you're learning through live instructor-led group
                 conversation classes with native speakers.
               </span>
             </li>
             <li className="flex items-start gap-2">
               <img className="mt-1" src="/svgs/tick-circle.svg" alt="Check" />
               <span>
-                You’re well on your way to fluency and achieving your goals!
+                You're well on your way to fluency and achieving your goals!
               </span>
             </li>
           </ol>
@@ -83,7 +83,9 @@ const StartExamPrep = ({
           <div className="w-full max-w-md text-center text-base/5 font-normal text-[#5D5D5D]">
             Questions or need assistance?
             <a
-              href="/schedule-call"
+              href="https://calendly.com/bammbuu-languages/info-call-llamada-de-informacion"
+              target="_blank"
+              rel="noopener noreferrer"
               className="ml-1 text-base/5 font-semibold text-[#14B82C]"
             >
               Schedule a Call
