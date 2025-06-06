@@ -5,6 +5,7 @@ import { doc, updateDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "../../firebaseConfig";
 import { ImagePlus, ArrowLeft, Camera } from "lucide-react";
+import { getTutorProfile, updateTutorProfile } from "../../api/examPrepApi";
 
 import Sidebar from "../../components/Sidebar";
 
@@ -239,25 +240,54 @@ const TutorEditProfile = () => {
       user?.teachingLanguageProficiency || "Intermediate",
     country: user?.country || "",
     bio: user?.bio || "",
+    videoLink: user?.videoLink || "",
   });
   const [image, setImage] = useState(null);
   const [selectedImage, setSelectedImage] = useState(user?.photoUrl || null);
 
   useEffect(() => {
-    // Initialize form data from user object when it becomes available
-    if (user) {
-      setFormData({
-        name: user.name || "",
-        email: user.email || "",
-        nativeLanguage: user.nativeLanguage || "",
-        teachingLanguage: user.teachingLanguage || "",
-        teachingLanguageProficiency:
-          user.teachingLanguageProficiency || "Intermediate",
-        country: user.country || "",
-        bio: user.bio || "",
-      });
-      setSelectedImage(user.photoUrl || null);
-    }
+    // Fetch tutor profile from API
+    const fetchProfile = async () => {
+      if (!user?.uid) return;
+      setLoading(true);
+      try {
+        const profileResponse = await getTutorProfile(
+          user.uid,
+          user?.accessToken,
+        );
+        const profile = profileResponse.tutor || {};
+        setFormData({
+          name: profile.name || "",
+          email: profile.email || "",
+          nativeLanguage: profile.nativeLanguage || "",
+          teachingLanguage: profile.teachingLanguage || "",
+          teachingLanguageProficiency:
+            profile.teachingLanguageProficiency || "Intermediate",
+          country: profile.country || "",
+          bio: profile.bio || "",
+          videoLink: profile.videoLink || "",
+        });
+        setSelectedImage(profile.photoUrl || null);
+      } catch (err) {
+        // fallback to user context if API fails
+        setFormData({
+          name: user.name || "",
+          email: user.email || "",
+          nativeLanguage: user.nativeLanguage || "",
+          teachingLanguage: user.teachingLanguage || "",
+          teachingLanguageProficiency:
+            user.teachingLanguageProficiency || "Intermediate",
+          country: user.country || "",
+          bio: user.bio || "",
+          videoLink: user.videoLink || "",
+        });
+        setSelectedImage(user.photoUrl || null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const handleImageChange = (e) => {
@@ -298,24 +328,27 @@ const TutorEditProfile = () => {
     setLoading(true);
     try {
       const photoUrl = await handleImageUpload(user.uid);
-
       const updatedUserData = {
         ...formData,
-        photoUrl: photoUrl || user.photoUrl,
+        photoUrl: photoUrl || selectedImage || user.photoUrl,
+        tutorId: user.uid,
       };
-
-      // Update Firestore
-      const userRef = doc(db, "tutors", user.uid);
-      await updateDoc(userRef, updatedUserData);
-
+      // Update profile via API
+      const updatedProfile = await updateTutorProfile(
+        updatedUserData,
+        user?.accessToken,
+      );
+      // Optionally update Firestore only for the image (if needed)
+      // const userRef = doc(db, "tutors", user.uid);
+      // await updateDoc(userRef, { photoUrl: updatedUserData.photoUrl });
       // Update context and session storage
       const newUserData = {
         ...user,
-        ...updatedUserData,
+        ...updatedProfile,
+        photoUrl: updatedUserData.photoUrl, // ensure image is updated
       };
       setUser(newUserData);
       sessionStorage.setItem("user", JSON.stringify(newUserData));
-
       navigate("/profileTutor");
     } catch (error) {
       console.error("Error updating profile:", error);

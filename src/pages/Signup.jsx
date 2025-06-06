@@ -25,8 +25,19 @@ import { TEACHINGLANGUAGES } from "../config/teachingLanguages";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "../context/LanguageContext"; // Import the language context
 import i18n from "../i18n";
+import MobileModal from "../components/MobileModal";
 
 Modal.setAppElement("#root");
+
+function useIsMobile(breakpoint = 640) {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < breakpoint);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < breakpoint);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [breakpoint]);
+  return isMobile;
+}
 
 const Signup = () => {
   const [email, setEmail] = useState("");
@@ -54,6 +65,36 @@ const Signup = () => {
   const navigate = useNavigate();
   const { user, loading, updateUserData } = useAuth();
   const [loading1, setLoading1] = useState(false);
+
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    let verificationTimer;
+
+    const checkEmailVerification = async () => {
+      try {
+        if (auth.currentUser) {
+          await auth.currentUser.reload();
+          if (auth.currentUser.emailVerified) {
+            setIsEmailVerified(true);
+            clearInterval(verificationTimer);
+          }
+        }
+      } catch (error) {
+        console.error("Error checking verification:", error);
+      }
+    };
+
+    if (verificationSent && !isEmailVerified) {
+      verificationTimer = setInterval(checkEmailVerification, 3000);
+    }
+
+    return () => {
+      if (verificationTimer) {
+        clearInterval(verificationTimer);
+      }
+    };
+  }, [verificationSent, isEmailVerified]);
 
   const handleLanguageChange = (lang) => {
     changeLanguage(lang);
@@ -103,7 +144,7 @@ const Signup = () => {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
-        password
+        password,
       );
 
       // Send verification email
@@ -119,34 +160,6 @@ const Signup = () => {
     }
   };
 
-  useEffect(() => {
-    let verificationTimer;
-
-    const checkEmailVerification = async () => {
-      try {
-        if (auth.currentUser) {
-          await auth.currentUser.reload();
-          if (auth.currentUser.emailVerified) {
-            setIsEmailVerified(true);
-            clearInterval(verificationTimer);
-          }
-        }
-      } catch (error) {
-        console.error("Error checking verification:", error);
-      }
-    };
-
-    if (verificationSent && !isEmailVerified) {
-      verificationTimer = setInterval(checkEmailVerification, 3000);
-    }
-
-    return () => {
-      if (verificationTimer) {
-        clearInterval(verificationTimer);
-      }
-    };
-  }, [verificationSent, isEmailVerified]);
-
   const handleResendEmail = async () => {
     try {
       if (auth.currentUser) {
@@ -157,7 +170,7 @@ const Signup = () => {
         const userCredential = await createUserWithEmailAndPassword(
           auth,
           email,
-          password
+          password,
         );
         await sendEmailVerification(userCredential.user);
         toast.success("Verification email sent to new account!");
@@ -246,7 +259,7 @@ const Signup = () => {
 
       await setDoc(
         doc(db, "notification_preferences", auth.currentUser.uid),
-        notificationPreferences
+        notificationPreferences,
       );
 
       const userAccountRef = doc(db, "user_accounts", auth.currentUser.uid);
@@ -323,7 +336,7 @@ const Signup = () => {
       // Get the provider data to confirm Google sign-in
       const providerData = user.providerData;
       const isGoogleProvider = providerData.some(
-        (provider) => provider.providerId === "google.com"
+        (provider) => provider.providerId === "google.com",
       );
 
       // Log authentication information for debugging
@@ -336,7 +349,7 @@ const Signup = () => {
       const notificationPrefsRef = doc(
         db,
         "notification_preferences",
-        user.uid
+        user.uid,
       );
       const notificationPrefsDoc = await getDoc(notificationPrefsRef);
 
@@ -391,11 +404,11 @@ const Signup = () => {
         if (userAccountDoc.exists()) {
           console.log(
             "User account data from database (Google):",
-            userAccountDoc.data()
+            userAccountDoc.data(),
           );
         } else {
           console.log(
-            "Failed to retrieve user account document for Google login"
+            "Failed to retrieve user account document for Google login",
           );
         }
 
@@ -429,12 +442,12 @@ const Signup = () => {
           const lastLoginDate = new Date(
             lastLoggedIn.getFullYear(),
             lastLoggedIn.getMonth(),
-            lastLoggedIn.getDate()
+            lastLoggedIn.getDate(),
           );
           const currentDate = new Date(
             now.getFullYear(),
             now.getMonth(),
-            now.getDate()
+            now.getDate(),
           );
 
           const differenceInDays =
@@ -502,7 +515,7 @@ const Signup = () => {
       const notificationPrefsRef = doc(
         db,
         "notification_preferences",
-        user.uid
+        user.uid,
       );
       const notificationPrefsDoc = await getDoc(notificationPrefsRef);
 
@@ -553,11 +566,11 @@ const Signup = () => {
         if (userAccountDoc.exists()) {
           console.log(
             "User account data from database (Apple):",
-            userAccountDoc.data()
+            userAccountDoc.data(),
           );
         } else {
           console.log(
-            "Failed to retrieve user account document for Apple login"
+            "Failed to retrieve user account document for Apple login",
           );
         }
 
@@ -591,12 +604,12 @@ const Signup = () => {
           const lastLoginDate = new Date(
             lastLoggedIn.getFullYear(),
             lastLoggedIn.getMonth(),
-            lastLoggedIn.getDate()
+            lastLoggedIn.getDate(),
           );
           const currentDate = new Date(
             now.getFullYear(),
             now.getMonth(),
-            now.getDate()
+            now.getDate(),
           );
 
           const differenceInDays =
@@ -658,7 +671,7 @@ const Signup = () => {
 
   if (loading || loading1) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex min-h-screen items-center justify-center">
         <ClipLoader color="#14B82C" size={50} />
       </div>
     );
@@ -666,10 +679,10 @@ const Signup = () => {
 
   if (verificationSent && !isEmailVerified) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-white ">
-        <div className="w-full max-w-md p-8 bg-white rounded-3xl border border-[#e7e7e7]">
+      <div className="flex min-h-screen items-center justify-center bg-white">
+        <div className="w-full max-w-md rounded-3xl border border-[#e7e7e7] bg-white p-8">
           <div className="space-y-4 text-center">
-            <div className="flex justify-center mb-6">
+            <div className="mb-6 flex justify-center">
               <img alt="bambuu" src="/svgs/email-verify.svg" />
             </div>
             <h2 className="text-3xl font-bold">
@@ -678,17 +691,17 @@ const Signup = () => {
             <p className="text-lg text-gray-600">
               {t(
                 "signup.verification.message",
-                "An email with verification link has been sent to"
+                "An email with verification link has been sent to",
               )}{" "}
               {email}
             </p>
             <button
               onClick={handleBackToSignup}
-              className="w-full py-3 text-black border border-black bg-[#ffbf00] rounded-full hover:bg-[#cc9900] focus:outline-none"
+              className="w-full rounded-full border border-black bg-[#ffbf00] py-3 text-black hover:bg-[#cc9900] focus:outline-none"
             >
               {t(
                 "signup.verification.changeEmail",
-                "Sign up with different email"
+                "Sign up with different email",
               )}
             </button>
           </div>
@@ -699,20 +712,20 @@ const Signup = () => {
 
   if (isEmailVerified && !hasProfile) {
     return (
-      <div className="flex items-center justify-center min-h-screen p-4 bg-white">
-        <div className="w-full max-w-md p-6 my-4 bg-white border border-gray-200 rounded-3xl">
+      <div className="flex min-h-screen items-center justify-center bg-white p-4">
+        <div className="my-4 w-full max-w-md rounded-3xl border border-gray-200 bg-white p-6">
           <div className="space-y-3">
             <div className="flex justify-center">
               <img alt="babuu" src="/svgs/signup.svg" />
             </div>
 
-            <h2 className="text-2xl font-bold text-center md:text-3xl">
+            <h2 className="text-center text-2xl font-bold md:text-3xl">
               {t("signup.profile.title", "Complete Profile")}
             </h2>
-            <p className="text-sm text-center text-gray-600 md:text-base">
+            <p className="text-center text-sm text-gray-600 md:text-base">
               {t(
                 "signup.profile.subtitle",
-                "Add your personal details to gets started."
+                "Add your personal details to gets started.",
               )}
             </p>
 
@@ -729,9 +742,9 @@ const Signup = () => {
                   }
                   placeholder={t(
                     "signup.profile.namePlaceholder",
-                    "Enter your name"
+                    "Enter your name",
                   )}
-                  className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
+                  className="w-full rounded-3xl border border-gray-300 p-2 focus:border-[#14B82C] focus:outline-none focus:ring-0"
                   required
                 />
               </div>
@@ -748,13 +761,13 @@ const Signup = () => {
                       nativeLanguage: e.target.value,
                     })
                   }
-                  className="w-full px-4 py-2 text-gray-600 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full rounded-full border border-gray-200 px-4 py-2 text-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500"
                   required
                 >
                   <option value="">
                     {t(
                       "signup.profile.selectNativeLanguage",
-                      "Select your native language"
+                      "Select your native language",
                     )}
                   </option>
                   {LANGUAGES.map((language) => (
@@ -777,13 +790,13 @@ const Signup = () => {
                       learningLanguage: e.target.value,
                     })
                   }
-                  className="w-full px-4 py-2 text-gray-600 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full rounded-full border border-gray-200 px-4 py-2 text-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500"
                   required
                 >
                   <option value="">
                     {t(
                       "signup.profile.selectLearningLanguage",
-                      "Select language you want to learn"
+                      "Select language you want to learn",
                     )}
                   </option>
                   {TEACHINGLANGUAGES.map((lang) => (
@@ -807,7 +820,7 @@ const Signup = () => {
                       onClick={() =>
                         setProfileData({ ...profileData, proficiency: level })
                       }
-                      className={`flex-1 py-1.5 px-2 text-sm rounded-full border ${
+                      className={`flex-1 rounded-full border px-2 py-1.5 text-sm ${
                         profileData.proficiency === level
                           ? "border-green-500 bg-green-50 text-green-600"
                           : "border-gray-200 text-gray-600"
@@ -828,7 +841,7 @@ const Signup = () => {
                   onChange={(e) =>
                     setProfileData({ ...profileData, country: e.target.value })
                   }
-                  className="w-full px-4 py-2 text-gray-600 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full rounded-full border border-gray-200 px-4 py-2 text-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500"
                   required
                 >
                   <option value="">
@@ -847,7 +860,7 @@ const Signup = () => {
                   <input
                     type="checkbox"
                     id="ageVerification"
-                    className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                    className="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
                     required
                   />
                   <label
@@ -856,7 +869,7 @@ const Signup = () => {
                   >
                     {t(
                       "signup.profile.ageVerification",
-                      "I confirm that I am at least 18 years old"
+                      "I confirm that I am at least 18 years old",
                     )}
                   </label>
                 </div>
@@ -867,14 +880,14 @@ const Signup = () => {
                 >
                   {t(
                     "signup.profile.ageWarning",
-                    "You must be at least 18 years old to use this application."
+                    "You must be at least 18 years old to use this application.",
                   )}
                 </p>
               </div>
 
               <button
                 type="submit"
-                className="w-full py-2.5 mt-4 text-black bg-[#14B82C] border border-black rounded-full focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                className="mt-4 w-full rounded-full border border-black bg-[#14B82C] py-2.5 text-black focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
                 onClick={(e) => {
                   const checkbox = document.getElementById("ageVerification");
                   const warning = document.getElementById("ageWarning");
@@ -896,16 +909,226 @@ const Signup = () => {
     );
   }
 
-  return (
-    <>
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <div className="w-full max-w-md p-8 bg-white rounded-3xl">
-          {/* Language Selector */}
-          <div className="flex justify-end mb-4">
+  if (isMobile) {
+    return (
+      <MobileModal open={true} onClose={() => {}}>
+        <div className="flex w-full flex-col items-center justify-center">
+          <div className="mb-4 flex w-full justify-end">
             <select
               value={currentLanguage}
               onChange={(e) => handleLanguageChange(e.target.value)}
-              className="px-2 py-1 text-sm border border-gray-200 rounded-full focus:outline-none focus:ring-1 focus:ring-green-500"
+              className="rounded-full border border-gray-200 px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-green-500"
+            >
+              <option value="en">English</option>
+              <option value="es">Español</option>
+            </select>
+          </div>
+          <div className="mb-8 w-full space-y-2 text-center">
+            <h1 className="text-3xl font-bold">
+              {t("signup.title", "Sign Up")}
+            </h1>
+            <p className="text-lg text-gray-600">
+              {t("signup.subtitle", "Let's create a new account!")}
+            </p>
+          </div>
+          <form onSubmit={handleInitialSignup} className="w-full space-y-6">
+            <div className="space-y-1">
+              <label className="block text-sm font-medium">Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+                className="w-full rounded-3xl border border-gray-300 p-2 focus:border-[#14B82C] focus:outline-none focus:ring-0"
+                required
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="block text-sm font-medium">Password</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  className="w-full rounded-3xl border border-gray-300 p-2 focus:border-[#14B82C] focus:outline-none focus:ring-0"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 transform"
+                >
+                  {showPassword ? (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="h-5 w-5 text-gray-500"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"
+                      />
+                    </svg>
+                  ) : (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="h-5 w-5 text-gray-500"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                    </svg>
+                  )}
+                </button>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <label className="block text-sm font-medium">
+                Confirm Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Re-enter your password"
+                  className="w-full rounded-3xl border border-gray-300 p-2 focus:border-[#14B82C] focus:outline-none focus:ring-0"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 transform text-gray-500"
+                >
+                  {showConfirmPassword ? (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="h-5 w-5 text-gray-500"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"
+                      />
+                    </svg>
+                  ) : (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="h-5 w-5 text-gray-500"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                    </svg>
+                  )}
+                </button>
+              </div>
+            </div>
+            <button
+              type="submit"
+              className="mt-8 w-full rounded-full border border-black bg-[#14b82c] py-3 text-black hover:bg-[#119523] focus:outline-none focus:ring-2 focus:ring-[#119523] focus:ring-offset-2"
+            >
+              Create Account
+            </button>
+          </form>
+          <div className="relative my-8 w-full">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="bg-white px-2 text-gray-500">
+                {t("signup.orContinueWith", "or continue with")}
+              </span>
+            </div>
+          </div>
+          <div className="grid w-full grid-cols-2 gap-4">
+            <button
+              onClick={handleGoogleLoginStudent}
+              className="flex items-center justify-center space-x-4 rounded-full border border-gray-300 px-4 py-2 hover:bg-gray-50"
+            >
+              <img alt="google" src="/svgs/login-insta.svg" />
+              <span>{t("signup.google", "google")}</span>
+            </button>
+            <button
+              onClick={handleAppleLoginStudent}
+              className="flex items-center justify-center space-x-4 rounded-full border border-black bg-black px-4 py-2 text-white"
+            >
+              <img
+                alt="apple"
+                className="h-6 w-auto"
+                src="/images/apple-white.png"
+              />
+              <span>{t("signup.apple", "apple")}</span>
+            </button>
+          </div>
+          <div className="mb-4 w-full text-center text-sm text-gray-500">
+            <p>
+              {t("signup.termsConditions", "By signing up, you agree to our")}{" "}
+              <Link to="/terms" className="text-black hover:underline">
+                {t("signup.terms", "Terms & Conditions")}
+              </Link>{" "}
+              {t("signup.and", "and")}{" "}
+              <Link to="/privacy" className="text-black hover:underline">
+                {t("signup.privacyPolicy", "Privacy Policy")}
+              </Link>
+              .
+            </p>
+          </div>
+          <div className="w-full text-center text-sm text-gray-600">
+            {t("signup.haveAccount", "Already have an account?")}{" "}
+            <Link
+              to="/login"
+              className="font-semibold text-green-600 hover:text-green-700"
+            >
+              {t("signup.login", "Login")}
+            </Link>
+          </div>
+        </div>
+      </MobileModal>
+    );
+  }
+
+  return (
+    <>
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="w-full max-w-md rounded-3xl bg-white p-8">
+          {/* Language Selector */}
+          <div className="mb-4 flex justify-end">
+            <select
+              value={currentLanguage}
+              onChange={(e) => handleLanguageChange(e.target.value)}
+              className="rounded-full border border-gray-200 px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-green-500"
             >
               <option value="en">English</option>
               <option value="es">Español</option>
@@ -930,7 +1153,7 @@ const Signup = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
-                className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
+                className="w-full rounded-3xl border border-gray-300 p-2 focus:border-[#14B82C] focus:outline-none focus:ring-0"
                 required
               />
             </div>
@@ -943,13 +1166,13 @@ const Signup = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
-                  className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
+                  className="w-full rounded-3xl border border-gray-300 p-2 focus:border-[#14B82C] focus:outline-none focus:ring-0"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute transform -translate-y-1/2 right-3 top-1/2"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 transform"
                 >
                   {showPassword ? (
                     <svg
@@ -958,7 +1181,7 @@ const Signup = () => {
                       viewBox="0 0 24 24"
                       strokeWidth={1.5}
                       stroke="currentColor"
-                      className="w-5 h-5 text-gray-500"
+                      className="h-5 w-5 text-gray-500"
                     >
                       <path
                         strokeLinecap="round"
@@ -973,7 +1196,7 @@ const Signup = () => {
                       viewBox="0 0 24 24"
                       strokeWidth={1.5}
                       stroke="currentColor"
-                      className="w-5 h-5 text-gray-500"
+                      className="h-5 w-5 text-gray-500"
                     >
                       <path
                         strokeLinecap="round"
@@ -1001,13 +1224,13 @@ const Signup = () => {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Re-enter your password"
-                  className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
+                  className="w-full rounded-3xl border border-gray-300 p-2 focus:border-[#14B82C] focus:outline-none focus:ring-0"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute text-gray-500 transform -translate-y-1/2 right-3 top-1/2"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 transform text-gray-500"
                 >
                   {showConfirmPassword ? (
                     <svg
@@ -1016,7 +1239,7 @@ const Signup = () => {
                       viewBox="0 0 24 24"
                       strokeWidth={1.5}
                       stroke="currentColor"
-                      className="w-5 h-5 text-gray-500"
+                      className="h-5 w-5 text-gray-500"
                     >
                       <path
                         strokeLinecap="round"
@@ -1031,7 +1254,7 @@ const Signup = () => {
                       viewBox="0 0 24 24"
                       strokeWidth={1.5}
                       stroke="currentColor"
-                      className="w-5 h-5 text-gray-500"
+                      className="h-5 w-5 text-gray-500"
                     >
                       <path
                         strokeLinecap="round"
@@ -1051,7 +1274,7 @@ const Signup = () => {
 
             <button
               type="submit"
-              className="w-full py-3 mt-8 border border-black text-black bg-[#14b82c] rounded-full hover:bg-[#119523] focus:outline-none focus:ring-2 focus:ring-[#119523] focus:ring-offset-2"
+              className="mt-8 w-full rounded-full border border-black bg-[#14b82c] py-3 text-black hover:bg-[#119523] focus:outline-none focus:ring-2 focus:ring-[#119523] focus:ring-offset-2"
             >
               Create Account
             </button>
@@ -1063,7 +1286,7 @@ const Signup = () => {
               <div className="w-full border-t border-gray-300"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 text-gray-500 bg-white">
+              <span className="bg-white px-2 text-gray-500">
                 {t("signup.orContinueWith", "or continue with")}
               </span>
             </div>
@@ -1073,18 +1296,18 @@ const Signup = () => {
           <div className="grid grid-cols-2 gap-4">
             <button
               onClick={handleGoogleLoginStudent}
-              className="flex items-center justify-center px-4 py-2 space-x-4 border border-gray-300 rounded-full hover:bg-gray-50"
+              className="flex items-center justify-center space-x-4 rounded-full border border-gray-300 px-4 py-2 hover:bg-gray-50"
             >
               <img alt="google" src="/svgs/login-insta.svg" />
               <span>{t("signup.google", "google")}</span>
             </button>
             <button
               onClick={handleAppleLoginStudent}
-              className="flex items-center justify-center px-4 py-2 space-x-4 text-white bg-black border border-black rounded-full"
+              className="flex items-center justify-center space-x-4 rounded-full border border-black bg-black px-4 py-2 text-white"
             >
               <img
                 alt="apple"
-                className="w-auto h-6"
+                className="h-6 w-auto"
                 src="/images/apple-white.png"
               />
               <span>{t("signup.apple", "apple")}</span>
@@ -1092,7 +1315,7 @@ const Signup = () => {
           </div>
 
           {/* Terms & Privacy */}
-          <div className="mb-4 text-sm text-center text-gray-500">
+          <div className="mb-4 text-center text-sm text-gray-500">
             <p>
               {t("signup.termsConditions", "By signing up, you agree to our")}{" "}
               <Link to="/terms" className="text-black hover:underline">
@@ -1107,7 +1330,7 @@ const Signup = () => {
           </div>
 
           {/* Login Link */}
-          <div className="text-sm text-center text-gray-600">
+          <div className="text-center text-sm text-gray-600">
             {t("signup.haveAccount", "Already have an account?")}{" "}
             <Link
               to="/login"
@@ -1122,13 +1345,13 @@ const Signup = () => {
       <Modal
         isOpen={showSuccessModal}
         onRequestClose={() => {}}
-        className="fixed w-full max-w-xl p-6 transform -translate-x-1/2 -translate-y-1/2 bg-white outline-none font-urbanist top-1/2 left-1/2 rounded-3xl"
+        className="fixed left-1/2 top-1/2 w-full max-w-xl -translate-x-1/2 -translate-y-1/2 transform rounded-3xl bg-white p-6 font-urbanist outline-none"
         overlayClassName="fixed inset-0 bg-black bg-opacity-50 z-[1000]"
         shouldCloseOnOverlayClick={false}
         shouldCloseOnEsc={false}
       >
         <div className="text-center">
-          <div className="flex justify-center mb-4">
+          <div className="mb-4 flex justify-center">
             <img alt="bammbuu" src="/svgs/account-created.svg" />
           </div>
 
@@ -1139,25 +1362,25 @@ const Signup = () => {
           <p className="mb-6 text-gray-600">
             {t(
               "signup.successModal.description",
-              "Great! All set. You can book your first class and start learning."
+              "Great! All set. You can book your first class and start learning.",
             )}
           </p>
 
           <div className="flex flex-row items-center space-x-3">
             <button
               onClick={handleSkip}
-              className="w-full py-2 font-medium border rounded-full text-[#042F0C] border-[#042F0C]"
+              className="w-full rounded-full border border-[#042F0C] py-2 font-medium text-[#042F0C]"
             >
               {t("signup.successModal.skipButton", "Skip Now")}
             </button>
 
             <button
               onClick={handleOnboarding}
-              className="w-full py-2 px-2 font-medium text-[#042F0C] bg-[#14B82C] rounded-full border border-[#042F0C]"
+              className="w-full rounded-full border border-[#042F0C] bg-[#14B82C] px-2 py-2 font-medium text-[#042F0C]"
             >
               {t(
                 "signup.successModal.startLearningButton",
-                "Start Learning with bammbuu"
+                "Start Learning with bammbuu",
               )}
             </button>
           </div>

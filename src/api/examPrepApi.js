@@ -228,4 +228,25 @@ export function getStudentExamPrepTutorialStatus(studentId, token) {
   );
 }
 
+export function getTutorProfile(tutorId, token) {
+  return apiRequest(
+    `https://gettutorprofile-zzpsx27htq-uc.a.run.app?tutorId=${encodeURIComponent(tutorId)}`,
+    {
+      method: "GET",
+    },
+    token,
+  );
+}
+
+export function updateTutorProfile(data, token) {
+  return apiRequest(
+    "https://updatetutorprofile-zzpsx27htq-uc.a.run.app",
+    {
+      method: "POST",
+      body: JSON.stringify(data),
+    },
+    token,
+  );
+}
+
 // Add more as needed for new endpoints

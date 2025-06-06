@@ -6,6 +6,9 @@ import Footer from "../components/Footer";
 import { Info, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ComparisonTable from "../components/ComparisonTable";
+import { useState, useEffect } from "react";
+import MobileModal from "../components/MobileModal";
+import { useLanguage } from "../context/LanguageContext";
 
 const Card = ({ icon, title, description, index }) => {
   return (
@@ -35,9 +38,27 @@ const features = [
   "Money-Back Guarantee if your goals aren't met*",
 ];
 
+function useIsMobile(breakpoint = 640) {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < breakpoint);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < breakpoint);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [breakpoint]);
+  return isMobile;
+}
+
 const Landing = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
+  const [showMobileModal, setShowMobileModal] = useState(false);
+  const { currentLanguage, changeLanguage } = useLanguage();
+  const handleLanguageChange = (lang) => {
+    changeLanguage(lang);
+    localStorage.setItem("i18nextLng", lang);
+    document.documentElement.lang = lang;
+  };
 
   return (
     <>
@@ -80,7 +101,13 @@ const Landing = () => {
               </button>
               <button
                 className="w-full rounded-full border border-[black] bg-[#FFBF00] px-6 py-2 text-base font-medium text-black transition hover:bg-[#ffd94d] sm:w-auto"
-                onClick={() => navigate("/signup")}
+                onClick={() => {
+                  if (isMobile) {
+                    setShowMobileModal(true);
+                  } else {
+                    navigate("/signup");
+                  }
+                }}
               >
                 Enroll Today
               </button>
@@ -300,7 +327,16 @@ const Landing = () => {
 
                       {/* Buttons */}
                       <div className="space-y-2 sm:space-y-3">
-                        <button className="w-full rounded-full border border-[#042F0C] bg-[#14B82C] px-6 py-2 text-base font-semibold text-black transition-colors hover:bg-green-700 sm:text-lg">
+                        <button
+                          className="w-full rounded-full border border-[#042F0C] bg-[#14B82C] px-6 py-2 text-base font-semibold text-black transition-colors hover:bg-green-700 sm:text-lg"
+                          onClick={() => {
+                            if (isMobile) {
+                              setShowMobileModal(true);
+                            } else {
+                              navigate("/signup");
+                            }
+                          }}
+                        >
                           Enroll Today
                         </button>
                         <button
@@ -333,6 +369,136 @@ const Landing = () => {
           <ComparisonTable />
         </motion.div>
       </div>
+      <MobileModal
+        open={showMobileModal}
+        onClose={() => setShowMobileModal(false)}
+      >
+        <div className="flex w-full flex-col items-center justify-center">
+          {/* Language Selector */}
+          <div className="mb-4 flex w-full justify-end">
+            <select
+              value={currentLanguage}
+              onChange={(e) => handleLanguageChange(e.target.value)}
+              className="rounded-full border border-gray-200 px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-green-500"
+            >
+              <option value="en">English</option>
+              <option value="es">Español</option>
+            </select>
+          </div>
+          <div className="mb-8 w-full space-y-2 text-center">
+            <h1 className="text-3xl font-bold">Sign Up</h1>
+            <p className="text-lg text-gray-600">Let's create a new account!</p>
+          </div>
+          <form
+            /* onSubmit={handleInitialSignup} */ className="w-full space-y-6"
+          >
+            {/* Email, Password, Confirm Password fields, and buttons (copy from Signup) */}
+            <div className="space-y-1">
+              <label className="block text-sm font-medium">Email</label>
+              <input
+                type="email"
+                /* value={email} */
+                /* onChange={(e) => setEmail(e.target.value)} */
+                placeholder="Enter your email"
+                className="w-full rounded-3xl border border-gray-300 p-2 focus:border-[#14B82C] focus:outline-none focus:ring-0"
+                required
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="block text-sm font-medium">Password</label>
+              <div className="relative">
+                <input
+                  type="password"
+                  /* value={password} */
+                  /* onChange={(e) => setPassword(e.target.value)} */
+                  placeholder="Enter your password"
+                  className="w-full rounded-3xl border border-gray-300 p-2 focus:border-[#14B82C] focus:outline-none focus:ring-0"
+                  required
+                />
+                {/* Eye icon SVGs (copy from Signup) */}
+              </div>
+            </div>
+            <div className="space-y-1">
+              <label className="block text-sm font-medium">
+                Confirm Password
+              </label>
+              <div className="relative">
+                <input
+                  type="password"
+                  /* value={confirmPassword} */
+                  /* onChange={(e) => setConfirmPassword(e.target.value)} */
+                  placeholder="Re-enter your password"
+                  className="w-full rounded-3xl border border-gray-300 p-2 focus:border-[#14B82C] focus:outline-none focus:ring-0"
+                  required
+                />
+                {/* Eye icon SVGs (copy from Signup) */}
+              </div>
+            </div>
+            <button
+              type="submit"
+              className="mt-8 w-full rounded-full border border-black bg-[#14b82c] py-3 text-black hover:bg-[#119523] focus:outline-none focus:ring-2 focus:ring-[#119523] focus:ring-offset-2"
+            >
+              Create Account
+            </button>
+          </form>
+          {/* Social Login Separator */}
+          <div className="relative my-8 w-full">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="bg-white px-2 text-gray-500">
+                or continue with
+              </span>
+            </div>
+          </div>
+          {/* Social Login Buttons */}
+          <div className="grid w-full grid-cols-2 gap-4">
+            <button
+              /* onClick={handleGoogleLoginStudent} */
+              className="flex items-center justify-center space-x-4 rounded-full border border-gray-300 px-4 py-2 hover:bg-gray-50"
+            >
+              <img alt="google" src="/svgs/login-insta.svg" />
+              <span>google</span>
+            </button>
+            <button
+              /* onClick={handleAppleLoginStudent} */
+              className="flex items-center justify-center space-x-4 rounded-full border border-black bg-black px-4 py-2 text-white"
+            >
+              <img
+                alt="apple"
+                className="h-6 w-auto"
+                src="/images/apple-white.png"
+              />
+              <span>apple</span>
+            </button>
+          </div>
+          {/* Terms & Privacy */}
+          <div className="mb-4 w-full text-center text-sm text-gray-500">
+            <p>
+              By signing up, you agree to our{" "}
+              <a href="/terms" className="text-black hover:underline">
+                Terms & Conditions
+              </a>{" "}
+              and{" "}
+              <a href="/privacy" className="text-black hover:underline">
+                Privacy Policy
+              </a>
+              .
+            </p>
+          </div>
+          {/* Login Link */}
+          <div className="w-full text-center text-sm text-gray-600">
+            Already have an account?{" "}
+            <a
+              href="/login"
+              className="font-semibold text-green-600 hover:text-green-700"
+            >
+              Login
+            </a>
+          </div>
+        </div>
+      </MobileModal>
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
