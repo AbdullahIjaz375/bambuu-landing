@@ -18,6 +18,7 @@ import { ClipLoader } from "react-spinners";
 import Modal from "react-modal";
 import { fetchPlansFromFirebase } from "../utils/fetchPlansFromFirebase";
 import { purchaseExamPrepPlan } from "../api/examPrepApi";
+import { useNavigate } from "react-router-dom";
 
 Modal.setAppElement("#root");
 
@@ -36,6 +37,7 @@ const Subscriptions = () => {
   const [showFreeTrialModal, setShowFreeTrialModal] = useState(false);
   const [freeTrialActivated, setFreeTrialActivated] = useState(false);
   const [hasActiveFreeTrial, setHasActiveFreeTrial] = useState(false);
+  const navigate = useNavigate();
 
   const checkNewUserEligibility = async (userId) => {
     try {
@@ -601,6 +603,9 @@ const Subscriptions = () => {
                           toast.success(
                             "Exam Prep Plan purchased successfully!",
                           );
+                          navigate("/learnUser", {
+                            state: { showIntroBookingFlow: true },
+                          });
                         } catch (err) {
                           toast.error(
                             err?.message ||

@@ -9,7 +9,11 @@ import ClassCardTutor from "../../components-tutor/ClassCardTutor";
 import CalendarTutor from "../../components/CalendarTutor";
 import TimeSlotModal from "./TimeSlotModal";
 import SuccessModal from "./SuccessModal";
-import { getTutorClasses, setExamPrepClassSlots, setIntroCallSlots } from "../../api/examPrepApi";
+import {
+  getTutorClasses,
+  setExamPrepClassSlots,
+  setIntroCallSlots,
+} from "../../api/examPrepApi";
 
 const ExamPreparationTutor = () => {
   const { t } = useTranslation();
@@ -60,10 +64,12 @@ const ExamPreparationTutor = () => {
     setShowTimeModal(false);
     setAvailabilityLoading(true);
     setAvailabilityError(null);
-    const slots = slotsByDate || selectedDates.map(date => ({
-      date: new Date(2025, 4, date).toISOString(),
-      time: "10:00 AM"
-    }));
+    const slots =
+      slotsByDate ||
+      selectedDates.map((date) => ({
+        date: new Date(2025, 4, date).toISOString(),
+        time: "10:00 AM",
+      }));
     const payload = {
       tutorId: user.uid,
       slots,
@@ -72,7 +78,10 @@ const ExamPreparationTutor = () => {
       console.log("[ExamPrep] Setting introductory call slots:", payload);
       setIntroCallSlots(payload)
         .then((res) => {
-          console.log("[ExamPrep] Intro call availability set successfully:", res);
+          console.log(
+            "[ExamPrep] Intro call availability set successfully:",
+            res,
+          );
           setShowSuccessModal(true);
           setLoading(true);
           return getTutorClasses(user.uid)
@@ -88,7 +97,10 @@ const ExamPreparationTutor = () => {
         })
         .catch((err) => {
           setAvailabilityError(err.message);
-          console.error("[ExamPrep] Error setting intro call availability:", err);
+          console.error(
+            "[ExamPrep] Error setting intro call availability:",
+            err,
+          );
         })
         .finally(() => setAvailabilityLoading(false));
     } else {
@@ -180,7 +192,7 @@ const ExamPreparationTutor = () => {
           </div>
           <div className="relative mt-2 w-full">
             {loading ? (
-              <div className="flex items-center justify-center flex-1">
+              <div className="flex flex-1 items-center justify-center">
                 <ClipLoader color="#FFB800" size={40} />
               </div>
             ) : (
@@ -189,7 +201,10 @@ const ExamPreparationTutor = () => {
                   <ClassCardTutor
                     key={classData.classId || classData.id}
                     {...classData}
-                    examPrep={classData.classType === "exam_prep"}
+                    examPrep={
+                      classData.classType === "exam_prep" ||
+                      classData.classType === "introductory_call"
+                    }
                   />
                 ))}
               </div>
@@ -230,7 +245,9 @@ const ExamPreparationTutor = () => {
             onNext={handleTimeSlotNext}
           />
           {availabilityLoading && <div>Setting availability...</div>}
-          {availabilityError && <div className="text-red-500">{availabilityError}</div>}
+          {availabilityError && (
+            <div className="text-red-500">{availabilityError}</div>
+          )}
         </Modal>
       )}
 

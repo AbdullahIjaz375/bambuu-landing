@@ -550,21 +550,46 @@ const ClassDetailsTutor = ({ onClose }) => {
   // SPECIAL CARD VIEW for Exam Prep or Introductory Call
   const isExamPrep =
     classData.classType === "exam_prep" ||
-    classData.classType === "introductory_call" ||
-    classData.examPrep;
+    classData.classType === "introductory_call";
+  console.log(members, "members in class details tutor");
 
   if (isExamPrep) {
-    // Assume only one student for 1:1 exam prep/intro call
-    const student =
-      members && members.length > 0
-        ? members[0]
-        : {
-            name: "Mike Jones",
-            photoUrl: "/images/panda.png",
-            nativeLanguage: "Spanish",
-            targetLanguage: "English (Teaching)",
-            country: "USA",
-          };
+    if (loading) {
+      return (
+        <div className="flex h-screen items-center justify-center">
+          <ClipLoader color="#FFB800" size={40} />
+        </div>
+      );
+    }
+
+    // Only show empty state if classData.classMemberIds exists and is empty
+    if (
+      Array.isArray(classData.classMemberIds) &&
+      classData.classMemberIds.length === 0
+    ) {
+      return (
+        <div className="flex h-screen items-center justify-center">
+          <EmptyState
+            message={t("class-details-tutor.empty-states.no-members")}
+          />
+        </div>
+      );
+    }
+
+    // If there should be members but members haven't loaded yet, show loader
+    if (
+      Array.isArray(classData.classMemberIds) &&
+      classData.classMemberIds.length > 0 &&
+      (!members || members.length === 0)
+    ) {
+      return (
+        <div className="flex h-screen items-center justify-center">
+          <ClipLoader color="#FFB800" size={40} />
+        </div>
+      );
+    }
+
+    const student = members[0];
 
     const now = new Date();
     const classStart = new Date(classData.classDateTime.seconds * 1000);
@@ -644,8 +669,11 @@ const ClassDetailsTutor = ({ onClose }) => {
                     alt={student.name}
                     className="h-20 w-20 rounded-full object-cover"
                   />
-                  <div className="flex-1">
-                    <div className="text-xl font-semibold text-black">
+                  <div className="min-w-0 flex-1">
+                    <div
+                      className="truncate text-xl font-semibold text-black"
+                      title={student.name}
+                    >
                       {student.name}
                     </div>
                     <div className="text-sm font-medium tracking-normal text-[#3D3D3D]">
@@ -654,7 +682,10 @@ const ClassDetailsTutor = ({ onClose }) => {
                       {student.targetLanguage || "English (Teaching)"}
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 text-sm font-medium uppercase text-[#454545]">
+                  <div
+                    className="flex max-w-[80px] items-center gap-1 truncate text-sm font-medium uppercase text-[#454545]"
+                    title={student.country}
+                  >
                     <img src="/svgs/location.svg" alt="Location" />
                     {student.country || "USA"}
                   </div>

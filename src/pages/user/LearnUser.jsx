@@ -1,17 +1,11 @@
 import { useRef, useEffect, useCallback, useState } from "react";
-import NotificationDropdown from "../../components/NotificationDropdown";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import Sidebar from "../../components/Sidebar";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "../../context/LanguageContext";
-import ClassCard from "../../components/ClassCard";
 import { useAuth } from "../../context/AuthContext";
-import GroupCard from "../../components/GroupCard";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
-  bookIntroductoryCall,
   getExamPrepPlanTimeline,
-  getIntroCallSlots,
   getStudentExamPrepTutorialStatus,
 } from "../../api/examPrepApi";
 import { db } from "../../firebaseConfig";
@@ -28,6 +22,10 @@ import { messaging } from "../../firebaseConfig";
 import EmptyState from "../../components/EmptyState";
 import CalendarUser from "../../components/CalenderUser";
 import BookingFlowModal from "../../components/BookingFlowModal";
+import NotificationDropdown from "../../components/NotificationDropdown";
+import ClassCard from "../../components/ClassCard";
+import GroupCard from "../../components/GroupCard";
+import Sidebar from "../../components/Sidebar";
 
 const LanguageCardsSection = ({ languageCards, languageData, navigate }) => {
   const containerRef = useRef(null);
@@ -167,18 +165,6 @@ const LanguageCardsSection = ({ languageCards, languageData, navigate }) => {
 
 const LearnUser = () => {
   const { user, setUser } = useAuth();
-  const [showExploreInstructorsModal, setShowExploreInstructorsModal] =
-    useState(false);
-  const [selectedInstructor, setSelectedInstructor] = useState(null);
-  const [confirmedInstructor, setConfirmedInstructor] = useState(null);
-  const [showSlotPicker, setShowSlotPicker] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [selectedTime, setSelectedTime] = useState(null);
-  const [showBookingConfirmation, setShowBookingConfirmation] = useState(false);
-  const [showBookedModal, setShowBookedModal] = useState(false);
-  const [introCallSlots, setIntroCallSlots] = useState([]);
-  const [loadingSlots, setLoadingSlots] = useState(false);
-  const [bookingLoading, setBookingLoading] = useState(false);
   const [showRenewalBanner, setShowRenewalBanner] = useState(false);
   const [examPrepStatus, setExamPrepStatus] = useState(false);
   const [showIntroBookingFlow, setShowIntroBookingFlow] = useState(false);
@@ -206,103 +192,6 @@ const LearnUser = () => {
     !!examPrepStatus?.hasPurchasedPlan &&
     (!examPrepStatus?.hasBookedIntroCall ||
       !examPrepStatus?.hasBookedExamPrepClass);
-
-  console.log("examPrepStatus", examPrepStatus);
-  console.log("user", user);
-
-  // --- Handlers ---
-  const handleFindTutor = () => setShowExploreInstructorsModal(true);
-  const handleInstructorSelect = (instructor) => {
-    setSelectedInstructor(instructor);
-    setShowExploreInstructorsModal(false);
-  };
-
-  function getISODateTime(dateStr, timeStr) {
-    const [year, month, day] = dateStr.split("-").map(Number);
-    let [h, m] = timeStr.split(":");
-    m = m.slice(0, 2);
-    let hour = parseInt(h, 10);
-    let minute = parseInt(m, 10);
-    const isPM = timeStr.toLowerCase().includes("pm");
-    if (isPM && hour !== 12) hour += 12;
-    if (!isPM && hour === 12) hour = 0;
-    return new Date(
-      Date.UTC(year, month - 1, day, hour, minute, 0, 0),
-    ).toISOString();
-  }
-
-  const handleBookIntroCall = async () => {
-    if (!selectedInstructor?.uid) return;
-    setLoadingSlots(true);
-    setShowSlotPicker(true);
-    setSelectedInstructor(null);
-    setConfirmedInstructor(selectedInstructor);
-    try {
-      const data = await getIntroCallSlots(selectedInstructor.uid);
-      const slotMap = {};
-      (data.introductoryCallSlots || []).forEach((slot) => {
-        if (!slot.time) return;
-        const dateObj = new Date(slot.time);
-        if (isNaN(dateObj.getTime())) return;
-        const dateStr = dateObj.toISOString().slice(0, 10);
-        const timeStr = dateObj
-          .toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: true,
-            timeZone: "UTC",
-          })
-          .replace(/^0/, "");
-        if (!slotMap[dateStr]) slotMap[dateStr] = [];
-        slotMap[dateStr].push(timeStr);
-      });
-      setIntroCallSlots(slotMap);
-    } catch {
-      setIntroCallSlots({});
-    } finally {
-      setLoadingSlots(false);
-    }
-  };
-
-  const handleSlotPicked = (date, time) => {
-    setSelectedDate(date);
-    setSelectedTime(time);
-    setShowSlotPicker(false);
-    setShowBookingConfirmation(true);
-  };
-
-  const handleBookingConfirmed = async () => {
-    if (
-      !user?.uid ||
-      !confirmedInstructor?.uid ||
-      !selectedDate ||
-      !selectedTime
-    )
-      return;
-    setBookingLoading(true);
-    try {
-      const slotISO = getISODateTime(selectedDate, selectedTime);
-      await bookIntroductoryCall({
-        studentId: user?.uid,
-        tutorId: confirmedInstructor?.uid,
-        slot: { time: slotISO },
-      });
-      setShowBookingConfirmation(false);
-      setShowBookedModal(true);
-    } catch (err) {
-      alert("Booking failed: " + err.message);
-    } finally {
-      setBookingLoading(false);
-    }
-  };
-
-  const handleBookedModalClose = () => {
-    setShowBookedModal(false);
-    setSelectedInstructor(null);
-    setShowExploreInstructorsModal(false);
-    setShowSlotPicker(false);
-    setShowBookingConfirmation(false);
-  };
 
   // --- Effects ---
   useEffect(() => {
@@ -559,6 +448,14 @@ const LearnUser = () => {
     fetchStatus();
   }, [user.uid]);
 
+  useEffect(() => {
+    // Show intro booking flow if navigated from purchase
+    if (location.state?.showIntroBookingFlow) {
+      setShowIntroBookingFlow(true);
+      // Optionally clear the state so it doesn't show again on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
   // --- Language Cards ---
   const languageCards = [
     {

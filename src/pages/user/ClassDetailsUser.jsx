@@ -676,17 +676,17 @@ const ClassDetailsUser = ({ onClose }) => {
     classData.examPrep;
 
   if (isExamPrep) {
-    const teacher =
-      groupTutor && groupTutor.name
-        ? groupTutor
-        : {
-            name: "Mike Jones",
-            photoUrl: "/images/panda.png",
-            nativeLanguage: "Spanish",
-            targetLanguage: "English (Teaching)",
-            country: "USA",
-          };
+    // Wait for groupTutor to load if needed
+    const teacher = groupTutor && groupTutor.name ? groupTutor : null;
 
+    // Only show loader if groupTutor is still loading and adminId exists
+    if (classData.adminId && !teacher) {
+      return (
+        <div className="flex h-screen items-center justify-center">
+          <ClipLoader color="#FFB800" size={40} />
+        </div>
+      );
+    }
     // Calculate time until class starts (in minutes)
     const now = new Date();
     const classStart = new Date(classData.classDateTime.seconds * 1000);
@@ -765,8 +765,11 @@ const ClassDetailsUser = ({ onClose }) => {
                     alt={teacher.name}
                     className="h-20 w-20 rounded-full object-cover"
                   />
-                  <div className="flex-1">
-                    <div className="text-xl font-semibold text-black">
+                  <div className="min-w-0 flex-1">
+                    <div
+                      className="truncate text-xl font-semibold text-black"
+                      title={teacher.name}
+                    >
                       {teacher.name}
                     </div>
                     <div className="text-sm font-medium tracking-normal text-[#3D3D3D]">
@@ -775,9 +778,14 @@ const ClassDetailsUser = ({ onClose }) => {
                       {teacher.targetLanguage || "English (Teaching)"}
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 text-sm font-medium uppercase text-[#454545]">
+                  <div className="flex min-w-0 items-center gap-1 text-sm font-medium uppercase text-[#454545]">
                     <img src="/svgs/location.svg" alt="Location" />
-                    {teacher.country || "USA"}
+                    <span
+                      className="max-w-[80px] truncate"
+                      title={teacher.country || "USA"}
+                    >
+                      {teacher.country || "USA"}
+                    </span>
                   </div>
                 </div>
                 <button

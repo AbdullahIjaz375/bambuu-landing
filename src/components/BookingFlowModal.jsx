@@ -334,8 +334,9 @@ const BookingFlowModal = ({
     console.log("[BookingFlowModal] handleBookedModalClose");
     setShowBookedModal(false);
     if (mode === "intro") {
-      setShowExamPrepStart(true);
-      setStep(6);
+      // Just close the modal, do NOT start exam prep flow
+      if (onClose) onClose();
+      if (onComplete) onComplete();
     } else {
       if (onComplete) onComplete();
       if (onClose) onClose();

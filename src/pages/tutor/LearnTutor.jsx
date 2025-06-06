@@ -43,7 +43,7 @@ const LearnTutor = () => {
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(
-    t("learn-tutor.tabs.booked-classes")
+    t("learn-tutor.tabs.booked-classes"),
   );
 
   const [classes, setClasses] = useState([]);
@@ -70,12 +70,12 @@ const LearnTutor = () => {
 
         // Fetch classes
         const classPromises = tutorClasses.map((classId) =>
-          getDoc(doc(db, "classes", classId))
+          getDoc(doc(db, "classes", classId)),
         );
 
         // Fetch groups
         const groupPromises = tutorGroups.map((groupId) =>
-          getDoc(doc(db, "groups", groupId))
+          getDoc(doc(db, "groups", groupId)),
         );
 
         const [classSnapshots, groupSnapshots] = await Promise.all([
@@ -83,12 +83,18 @@ const LearnTutor = () => {
           Promise.all(groupPromises),
         ]);
 
+        // Filter out classes with classType "exam_prep" or "introductory_call"
         const fetchedClasses = classSnapshots
           .filter((doc) => doc.exists())
           .map((doc) => ({
             ...doc.data(),
             classId: doc.id,
-          }));
+          }))
+          .filter(
+            (class_) =>
+              class_.classType !== "exam_prep" &&
+              class_.classType !== "introductory_call",
+          );
 
         const fetchedGroups = groupSnapshots
           .filter((doc) => doc.exists())
@@ -101,10 +107,10 @@ const LearnTutor = () => {
         const filteredClasses =
           activeTab === "Booked Classes"
             ? fetchedClasses.filter(
-                (class_) => class_.classMemberIds?.length > 0
+                (class_) => class_.classMemberIds?.length > 0,
               )
             : fetchedClasses.filter(
-                (class_) => class_.classMemberIds?.length === 0
+                (class_) => class_.classMemberIds?.length === 0,
               );
 
         setClasses(filteredClasses);
@@ -143,33 +149,33 @@ const LearnTutor = () => {
   return (
     <>
       <div className="flex h-screen bg-white">
-        <div className="flex-shrink-0 w-64 h-full">
+        <div className="h-full w-64 flex-shrink-0">
           <Sidebar user={user} />
         </div>
 
-        <div className="flex-1 overflow-x-auto min-w-[calc(100%-16rem)] h-full">
-          <div className="h-[calc(100vh-1rem)] p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl m-2 overflow-y-auto">
-            <div className="flex items-center justify-between mb-4 border-b border-[#e7e7e7] pb-4">
+        <div className="h-full min-w-[calc(100%-16rem)] flex-1 overflow-x-auto">
+          <div className="m-2 h-[calc(100vh-1rem)] overflow-y-auto rounded-3xl border-2 border-[#e7e7e7] bg-white p-8">
+            <div className="mb-4 flex items-center justify-between border-b border-[#e7e7e7] pb-4">
               <div className="flex flex-row items-center space-x-4">
                 <h1 className="text-3xl font-semibold">
                   {t("learn-tutor.greeting", { name: user.name })}
                 </h1>
-                <p className="text-[#616161] text-lg">
+                <p className="text-lg text-[#616161]">
                   {t("learn-tutor.greeting-subtitle")}
                 </p>
               </div>
-              <div className="flex items-center flex-shrink-0 gap-4">
+              <div className="flex flex-shrink-0 items-center gap-4">
                 <NotificationDropdown />
               </div>
             </div>
 
             <CalenderTutor />
 
-            <div className="w-full max-w-[160vh] mx-auto">
+            <div className="mx-auto w-full max-w-[160vh]">
               <div className="flex flex-row items-center justify-between pt-4">
-                <div className="relative inline-flex p-1 bg-gray-100 border border-gray-300 rounded-full">
+                <div className="relative inline-flex rounded-full border border-gray-300 bg-gray-100 p-1">
                   <div
-                    className="absolute top-0 left-0 h-full bg-[#FFBF00] border border-[#042F0C] rounded-full transition-all duration-300 ease-in-out"
+                    className="absolute left-0 top-0 h-full rounded-full border border-[#042F0C] bg-[#FFBF00] transition-all duration-300 ease-in-out"
                     style={{
                       transform: `translateX(${
                         activeTab === t("learn-tutor.tabs.booked-classes")
@@ -183,7 +189,7 @@ const LearnTutor = () => {
                     onClick={() =>
                       setActiveTab(t("learn-tutor.tabs.booked-classes"))
                     }
-                    className="relative z-1 px-4 sm:px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap"
+                    className="z-1 text-md relative whitespace-nowrap rounded-full px-4 py-2 font-medium text-[#042F0C] transition-colors sm:px-6"
                   >
                     {t("learn-tutor.tabs.booked-classes")}
                   </button>
@@ -191,21 +197,21 @@ const LearnTutor = () => {
                     onClick={() =>
                       setActiveTab(t("learn-tutor.tabs.available-classes"))
                     }
-                    className="relative z-1 px-4 sm:px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap"
+                    className="z-1 text-md relative whitespace-nowrap rounded-full px-4 py-2 font-medium text-[#042F0C] transition-colors sm:px-6"
                   >
                     {t("learn-tutor.tabs.available-classes")}
                   </button>
                 </div>
                 <div className="flex flex-row items-center space-x-2">
                   <button
-                    className="px-3 py-2 text-[#042f0c] text-lg font-semibold bg-[#14b82c] border border-black rounded-full flex items-center"
+                    className="flex items-center rounded-full border border-black bg-[#14b82c] px-3 py-2 text-lg font-semibold text-[#042f0c]"
                     onClick={() => setShowClassTypeModal(true)}
                   >
                     <Plus /> {t("learn-tutor.actions.new-class")}
                   </button>
 
                   <button
-                    className="px-3 py-2 text-[#042f0c] text-lg font-semibold bg-[#e6fde9] border border-black rounded-full flex items-center"
+                    className="flex items-center rounded-full border border-black bg-[#e6fde9] px-3 py-2 text-lg font-semibold text-[#042f0c]"
                     onClick={() => navigate("/classesTutor")}
                   >
                     {t("learn-tutor.actions.view-all")}
@@ -214,20 +220,20 @@ const LearnTutor = () => {
               </div>
 
               {loading ? (
-                <div className="flex items-center justify-center h-48">
+                <div className="flex h-48 items-center justify-center">
                   <ClipLoader color="#14b82c" />
                 </div>
               ) : classes.length === 0 ? (
-                <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
+                <div className="flex flex-col items-center justify-center space-y-4 rounded-lg bg-white p-8">
                   <EmptyState message="No class yet!" />
                 </div>
               ) : (
-                <div className="relative w-full mt-2">
-                  <div className="flex gap-2 pb-4 overflow-x-auto scrollbar-hide">
+                <div className="relative mt-2 w-full">
+                  <div className="scrollbar-hide flex gap-2 overflow-x-auto pb-4">
                     {classes.map((classData) => (
                       <div
                         key={classData.classId}
-                        className="flex-none px-1 pt-3 w-72"
+                        className="w-72 flex-none px-1 pt-3"
                       >
                         <ClassCardTutor
                           {...classData}
@@ -240,7 +246,7 @@ const LearnTutor = () => {
               )}
             </div>
 
-            <div className="w-full max-w-[160vh] mx-auto">
+            <div className="mx-auto w-full max-w-[160vh]">
               <div className="flex flex-row items-center justify-between pt-4">
                 <div>
                   <h2 className="text-2xl font-bold">
@@ -249,14 +255,14 @@ const LearnTutor = () => {
                 </div>
                 <div className="flex flex-row items-center space-x-2">
                   <button
-                    className="px-3 py-2 text-[#042f0c] text-lg font-semibold bg-[#14b82c] border border-black rounded-full flex items-center"
+                    className="flex items-center rounded-full border border-black bg-[#14b82c] px-3 py-2 text-lg font-semibold text-[#042f0c]"
                     onClick={() => navigate("/addGroupsTutor")}
                   >
                     <Plus /> {t("learn-tutor.actions.new-group")}
                   </button>
 
                   <button
-                    className="px-3 py-2 text-[#042f0c] text-lg font-semibold bg-[#e6fde9] border border-black rounded-full flex items-center"
+                    className="flex items-center rounded-full border border-black bg-[#e6fde9] px-3 py-2 text-lg font-semibold text-[#042f0c]"
                     onClick={() => navigate("/groupsTutor")}
                   >
                     {t("learn-tutor.actions.view-all")}
@@ -265,20 +271,20 @@ const LearnTutor = () => {
               </div>
 
               {loading ? (
-                <div className="flex items-center justify-center h-48">
+                <div className="flex h-48 items-center justify-center">
                   <ClipLoader color="#14b82c" size={50} />
                 </div>
               ) : groups.length === 0 ? (
-                <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
+                <div className="flex flex-col items-center justify-center space-y-4 rounded-lg bg-white p-8">
                   <EmptyState message="No group yet!" />
                 </div>
               ) : (
                 <div className="relative w-full">
-                  <div className="flex gap-2 pb-4 overflow-x-auto scrollbar-hide">
+                  <div className="scrollbar-hide flex gap-2 overflow-x-auto pb-4">
                     {groups.map((group) => (
                       <div
                         key={group.groupId}
-                        className="flex-none px-1 pt-2 w-72"
+                        className="w-72 flex-none px-1 pt-2"
                       >
                         <GroupCardTutor group={group} />
                       </div>

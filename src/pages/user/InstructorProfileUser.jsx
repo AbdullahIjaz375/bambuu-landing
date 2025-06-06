@@ -97,7 +97,7 @@ const InstructorProfileUser = () => {
         console.log(
           "[ExamPrep][InstructorProfileUser] Intro call completed, no exam prep class. Showing booking modal for this tutor.",
         );
-        setExamPrepBookingInitialStep(2); // step 3
+        setExamPrepBookingInitialStep(3); // step 4
         setShowExamPrepBookingFlow(true);
         return;
       }
@@ -113,14 +113,9 @@ const InstructorProfileUser = () => {
         console.log(
           "[ExamPrep][InstructorProfileUser] Exam prep class booked. Redirecting to all classes with this tutor.",
         );
-        navigate(`/exam-prep/classes?tutorId=${tutorId}`);
+        navigate(`/examPreparationUser/${tutorId}`);
         return;
       }
-      // Fallback
-      console.log(
-        "[ExamPrep][InstructorProfileUser] Unhandled state. Redirecting to exam prep home.",
-      );
-      navigate(`/exam-prep?tutorId=${tutorId}`);
     } catch (err) {
       console.error(
         "[ExamPrep][InstructorProfileUser] getExamPrepStepStatus error:",
@@ -263,7 +258,14 @@ const InstructorProfileUser = () => {
   };
 
   const renderClasses = () => {
+    // Filter out classes with type "exam_prep" or "introductory_call"
     const availableClasses = classes.filter((classItem) => {
+      if (
+        classItem.classType === "exam_prep" ||
+        classItem.classType === "introductory_call"
+      ) {
+        return false;
+      }
       if (
         classItem.classType === "Individual Premium" &&
         classItem.classMemberIds?.length > 0
@@ -278,7 +280,6 @@ const InstructorProfileUser = () => {
       }
       return true;
     });
-
     if (availableClasses.length === 0) {
       return (
         <div className="flex h-96 items-center justify-center">
@@ -489,13 +490,13 @@ const InstructorProfileUser = () => {
               </div>
               {/* Exam Preparation Package Button BELOW the green box */}
               {!hasBookedExamPrepClassWithOtherTutor && (
-                <div className="mt-6 flex w-full items-center justify-center">
+                <div
+                  onClick={handleExamPrepClick}
+                  className="mt-6 flex w-full items-center justify-center"
+                >
                   <div className="w-full">
                     <button className="flex w-full items-center justify-between rounded-2xl border border-[#FFBF00] bg-[#FFFFEA] px-6 py-4 text-left text-black shadow transition hover:bg-[#fff9a0]">
-                      <div
-                        onClick={handleExamPrepClick}
-                        className="flex items-center gap-3"
-                      >
+                      <div className="flex items-center gap-3">
                         <img
                           src="/svgs/preparation-package-icon.svg"
                           alt="Exam"

@@ -60,12 +60,20 @@ const Landing = () => {
               unlock the opportunities you deserve.
             </h1>
             <div className="mt-6 flex flex-row gap-5 text-base font-medium text-black">
-              <button className="rounded-full border border-black px-6 py-2 text-black transition hover:bg-gray-100">
+              <button
+                onClick={() =>
+                  window.open(
+                    "https://calendly.com/bammbuu-languages/info-call-llamada-de-informacion",
+                    "_blank",
+                  )
+                }
+                className="rounded-full border border-black px-6 py-2 text-black transition hover:bg-gray-100"
+              >
                 Schedule a Call
               </button>
               <button
                 className="rounded-full border border-[black] bg-[#FFBF00] px-6 py-2 text-base font-medium text-black transition hover:bg-[#ffd94d]"
-                onClick={() => navigate("/subscriptions")}
+                onClick={() => navigate("/signup")}
               >
                 Enroll Today
               </button>

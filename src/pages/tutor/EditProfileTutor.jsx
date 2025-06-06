@@ -224,14 +224,11 @@ const COUNTRIES = [
   "Zimbabwe",
 ];
 
-
-
-
 const TutorEditProfile = () => {
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  
+
   // Form state
   const [formData, setFormData] = useState({
     name: user?.name || "",
@@ -254,7 +251,8 @@ const TutorEditProfile = () => {
         email: user.email || "",
         nativeLanguage: user.nativeLanguage || "",
         teachingLanguage: user.teachingLanguage || "",
-        teachingLanguageProficiency: user.teachingLanguageProficiency || "Intermediate",
+        teachingLanguageProficiency:
+          user.teachingLanguageProficiency || "Intermediate",
         country: user.country || "",
         bio: user.bio || "",
       });
@@ -296,7 +294,7 @@ const TutorEditProfile = () => {
       alert("Please select a teaching language");
       return;
     }
-    
+
     setLoading(true);
     try {
       const photoUrl = await handleImageUpload(user.uid);
@@ -328,18 +326,18 @@ const TutorEditProfile = () => {
 
   return (
     <div className="flex h-screen bg-white">
-      <div className="flex-shrink-0 w-64 h-full">
+      <div className="h-full w-64 flex-shrink-0">
         <Sidebar user={user} />
       </div>
-      <div className="flex-1 overflow-x-auto min-w-[calc(100%-16rem)] h-full">
-        <div className="flex flex-col h-full">
-          <div className="flex-1 p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl m-2">
+      <div className="h-full min-w-[calc(100%-16rem)] flex-1 overflow-x-auto">
+        <div className="flex h-full flex-col">
+          <div className="m-2 flex-1 rounded-3xl border-2 border-[#e7e7e7] bg-white p-8">
             {/* Fixed Header Section */}
             <div className="sticky top-0 z-10 bg-white">
-              <div className="flex items-center justify-between pb-4 mb-6 border-b">
+              <div className="mb-6 flex items-center justify-between border-b pb-4">
                 <div className="flex items-center gap-4">
                   <button
-                    className="p-3 bg-gray-100 rounded-full"
+                    className="rounded-full bg-gray-100 p-3"
                     onClick={() => navigate(-1)}
                   >
                     <ArrowLeft size="30" />
@@ -352,7 +350,7 @@ const TutorEditProfile = () => {
               <div className="max-w-3xl">
                 <div className="mb-8">
                   <div
-                    className="relative flex items-center justify-center w-32 h-32 mb-4 bg-gray-100 rounded-full cursor-pointer hover:bg-gray-200"
+                    className="relative mb-4 flex h-32 w-32 cursor-pointer items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200"
                     onClick={() =>
                       document.getElementById("profileImage").click()
                     }
@@ -361,13 +359,13 @@ const TutorEditProfile = () => {
                       <img
                         src={selectedImage}
                         alt="Profile"
-                        className="object-cover w-full h-full rounded-full"
+                        className="h-full w-full rounded-full object-cover"
                       />
                     ) : (
-                      <ImagePlus className="w-8 h-8 text-gray-400" />
+                      <ImagePlus className="h-8 w-8 text-gray-400" />
                     )}
-                    <div className="absolute bottom-0 right-0 flex items-center justify-center w-8 h-8 bg-white rounded-full shadow-md border border-gray-200">
-                      <Camera className="w-4 h-4 text-gray-700" />
+                    <div className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 bg-white shadow-md">
+                      <Camera className="h-4 w-4 text-gray-700" />
                     </div>
                     <input
                       id="profileImage"
@@ -381,7 +379,7 @@ const TutorEditProfile = () => {
 
                 <div className="space-y-6">
                   <div>
-                    <label className="block mb-1 text-lg font-medium">
+                    <label className="mb-1 block text-lg font-medium">
                       Name
                     </label>
                     <input
@@ -389,13 +387,13 @@ const TutorEditProfile = () => {
                       name="name"
                       value={formData.name}
                       onChange={handleInputChange}
-                      className="w-full p-3 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
+                      className="w-full rounded-3xl border border-gray-300 p-3 focus:border-[#14B82C] focus:outline-none focus:ring-0"
                       placeholder="Enter your name"
                     />
                   </div>
 
                   <div>
-                    <label className="block mb-1 text-lg font-medium">
+                    <label className="mb-1 block text-lg font-medium">
                       Email
                     </label>
                     <input
@@ -403,20 +401,20 @@ const TutorEditProfile = () => {
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="w-full p-3 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
+                      className="w-full rounded-3xl border border-gray-300 p-3 focus:border-[#14B82C] focus:outline-none focus:ring-0"
                       disabled
                     />
                   </div>
 
                   <div>
-                    <label className="block mb-1 text-lg font-medium">
+                    <label className="mb-1 block text-lg font-medium">
                       Native Language
                     </label>
                     <select
                       name="nativeLanguage"
                       value={formData.nativeLanguage}
                       onChange={handleInputChange}
-                      className="w-full p-3 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
+                      className="w-full rounded-3xl border border-gray-300 p-3 focus:border-[#14B82C] focus:outline-none focus:ring-0"
                     >
                       <option value="">Select your native language</option>
                       {LANGUAGES.map((language) => (
@@ -428,14 +426,14 @@ const TutorEditProfile = () => {
                   </div>
 
                   <div>
-                    <label className="block mb-1 text-lg font-medium">
+                    <label className="mb-1 block text-lg font-medium">
                       Teaching Language
                     </label>
                     <select
                       name="teachingLanguage"
                       value={formData.teachingLanguage}
                       onChange={handleInputChange}
-                      className="w-full p-3 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
+                      className="w-full rounded-3xl border border-gray-300 p-3 focus:border-[#14B82C] focus:outline-none focus:ring-0"
                     >
                       <option value="">
                         Select language you want to teach
@@ -447,13 +445,16 @@ const TutorEditProfile = () => {
                       ))}
                     </select>
                     {!formData.teachingLanguage && (
-                      <p className="mt-1 text-red-500 text-sm">Please select a teaching language</p>
+                      <p className="mt-1 text-sm text-red-500">
+                        Please select a teaching language
+                      </p>
                     )}
                   </div>
 
                   <div>
-                    <label className="block mb-2 text-lg font-medium">
-                      Your Proficiency in {formData.teachingLanguage || "Teaching Language"}
+                    <label className="mb-2 block text-lg font-medium">
+                      Your Proficiency in{" "}
+                      {formData.teachingLanguage || "Teaching Language"}
                     </label>
                     <div className="flex gap-2">
                       {["Beginner", "Intermediate", "Advanced", "Native"].map(
@@ -462,28 +463,47 @@ const TutorEditProfile = () => {
                             key={level}
                             type="button"
                             onClick={() => handleProficiencyChange(level)}
-                            className={`flex-1 py-2 px-4 text-xl rounded-3xl border ${
+                            className={`flex-1 rounded-3xl border px-4 py-2 text-xl ${
                               formData.teachingLanguageProficiency === level
-                                ? "bg-[#e6fde9] border-[#14B82C] text-black"
+                                ? "border-[#14B82C] bg-[#e6fde9] text-black"
                                 : "bg-gray-100 text-gray-600"
                             }`}
                           >
                             {level}
                           </button>
-                        )
+                        ),
                       )}
                     </div>
                   </div>
-
                   <div>
-                    <label className="block mb-1 text-lg font-medium">
+                    <label className="mb-1 block text-lg font-medium">
+                      Video Link
+                    </label>
+                    <div className="flex items-center rounded-3xl border border-[#E7E7E7] p-3">
+                      <img
+                        src="/svgs/video-play.svg"
+                        alt="Link"
+                        className="mr-2 h-6 w-6 text-[#14B82C]"
+                      />
+                      <input
+                        type="text"
+                        name="videoLink"
+                        value={formData.videoLink || ""}
+                        onChange={handleInputChange}
+                        className="flex-1 border-none bg-transparent p-0 text-base font-normal text-black focus:outline-none"
+                        placeholder="http://youtube.video..."
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-lg font-medium">
                       Country
                     </label>
                     <select
                       name="country"
                       value={formData.country}
                       onChange={handleInputChange}
-                      className="w-full p-3 text-xl border rounded-2xl"
+                      className="w-full rounded-2xl border p-3 text-xl"
                     >
                       <option value="">Select your country</option>
                       {COUNTRIES.map((country) => (
@@ -495,31 +515,31 @@ const TutorEditProfile = () => {
                   </div>
 
                   <div>
-                    <label className="block mb-1 text-lg font-medium">
+                    <label className="mb-1 block text-lg font-medium">
                       Bio
                     </label>
                     <textarea
                       name="bio"
                       value={formData.bio}
                       onChange={handleInputChange}
-                      className="w-full p-3 text-xl border rounded-2xl"
+                      className="w-full rounded-2xl border p-3 text-xl"
                       placeholder="Tell us about yourself"
                       rows={5}
                     />
                   </div>
                 </div>
               </div>
-              <div className="flex justify-between mt-12">
+              <div className="mt-12 flex justify-between">
                 <button
                   onClick={() => navigate(-1)}
-                  className="px-8 py-3 text-[#042f0c] border border-[#5d5d5d] rounded-full"
+                  className="rounded-full border border-[#5d5d5d] px-8 py-3 text-[#042f0c]"
                 >
                   Discard Changes
                 </button>
                 <button
                   onClick={handleSaveChanges}
                   disabled={loading}
-                  className="px-8 py-3 text-[#042f0c] bg-[#14b82c] border border-[#5d5d5d] rounded-full disabled:bg-[#b9f9c2] disabled:text-[#b0b0b0] disabled:border-[#b0b0b0]"
+                  className="rounded-full border border-[#5d5d5d] bg-[#14b82c] px-8 py-3 text-[#042f0c] disabled:border-[#b0b0b0] disabled:bg-[#b9f9c2] disabled:text-[#b0b0b0]"
                 >
                   {loading ? "Saving..." : "Save Changes"}
                 </button>

@@ -50,6 +50,12 @@ const Sidebar = ({ user }) => {
       lightImage: "/svgs/bambuu-plu-groups-light.svg",
       darkImage: "/svgs/bambuu-plu-groups-dark.svg",
     },
+    {
+      path: "/examPreparationUser/:tutorId",
+      translationKey: "sidebar.tutor.examPreparation",
+      lightImage: "/svgs/exam-preparation-light.svg",
+      darkImage: "/svgs/exam-preparation-dark.svg",
+    },
   ];
 
   const tutorMenuItems = [
