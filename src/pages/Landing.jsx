@@ -54,9 +54,9 @@ const Landing = () => {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="mt-8 flex w-full flex-col items-start justify-start space-y-8 rounded-3xl px-4 lg:mt-16 lg:items-center lg:justify-center lg:space-y-16 lg:rounded-[20vh] lg:px-0"
+          className="mt-8 flex w-full flex-col items-center justify-center space-y-8 rounded-3xl lg:mt-16 lg:space-y-16 lg:rounded-[20vh] lg:px-0"
         >
-          <div className="mt-6 flex w-full flex-col items-start justify-start space-y-4 lg:items-center lg:justify-center">
+          <div className="mx-auto mt-6 flex w-full flex-col items-center justify-center space-y-4">
             <h1 className="w-full text-center text-2xl font-bold text-black sm:text-3xl lg:text-6xl">
               Immersive Exam
               <br /> Preparation Package
@@ -66,7 +66,7 @@ const Landing = () => {
               confidence, and <br className="hidden sm:block" />
               unlock the opportunities you deserve.
             </h1>
-            <div className="mt-6 flex w-full flex-col gap-3 text-base font-medium text-black sm:w-auto sm:flex-row sm:gap-5">
+            <div className="mx-auto mt-6 flex w-full flex-col items-center justify-center gap-3 text-base font-medium text-black sm:w-auto sm:flex-row sm:gap-5">
               <button
                 onClick={() =>
                   window.open(
@@ -86,7 +86,7 @@ const Landing = () => {
               </button>
             </div>
           </div>
-          <div className="mt-10 flex w-full flex-col items-start lg:items-center">
+          <div className="mx-auto mt-10 flex w-full flex-col items-center">
             <div className="flex min-h-[200px] w-full max-w-full items-center justify-center rounded-2xl bg-[#eaeaea] text-2xl font-medium text-[#b3b3b3] sm:min-h-[320px] sm:max-w-[1280px] sm:rounded-[3rem] sm:text-5xl lg:h-[720px]">
               <iframe
                 width="100%"
@@ -117,7 +117,7 @@ const Landing = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="mb-10 mt-10 flex w-full flex-col items-start justify-start space-y-4 px-2 sm:mb-20 sm:mt-20 sm:space-y-6 sm:px-4 lg:mb-32 lg:mt-40 lg:items-center lg:justify-center lg:px-0"
+          className="mx-auto mb-10 mt-10 flex w-full flex-col items-center justify-center space-y-4 sm:mb-20 sm:mt-20 sm:space-y-6 sm:px-4 lg:mb-32 lg:mt-40 lg:px-0"
         >
           <h1 className="w-full text-center text-2xl font-semibold text-black sm:text-4xl lg:text-[56px]">
             Why Choose bammbuu?
@@ -139,10 +139,10 @@ const Landing = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="mb-10 w-full max-w-7xl px-2 sm:mb-16 sm:px-4 lg:mx-auto lg:mb-32 lg:px-6 xl:px-8"
+          className="mx-auto mb-10 flex w-full max-w-7xl flex-col items-center justify-center px-2 sm:mb-16 sm:px-4 lg:mx-auto lg:mb-32 lg:px-6 xl:px-8"
         >
           {/* First row: 3 cards */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 md:grid-cols-3">
+          <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 md:grid-cols-3">
             {[0, 1, 2].map((i) => (
               <motion.div
                 key={i}
@@ -151,35 +151,37 @@ const Landing = () => {
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: i * 0.1 }}
               >
-                <Card
-                  index={i}
-                  icon={
-                    i === 0
-                      ? "/svgs/conversation-first.svg"
-                      : i === 1
-                        ? "/svgs/personalized-plans.svg"
-                        : "/svgs/certified-experts.svg"
-                  }
-                  title={
-                    i === 0
-                      ? "Conversation First"
-                      : i === 1
-                        ? "Personalized Plans"
-                        : "Certified Experts"
-                  }
-                  description={
-                    i === 0
-                      ? "We prioritize real speaking practice over rote memorization to help you build fluency fast."
-                      : i === 1
-                        ? "Every learner gets a custom plan built around their exam goals and speaking level."
-                        : "Learn from qualified tutors and native speakers with proven experience in language instruction."
-                  }
-                />
+                <div className="mx-auto flex w-full justify-center">
+                  <Card
+                    index={i}
+                    icon={
+                      i === 0
+                        ? "/svgs/conversation-first.svg"
+                        : i === 1
+                          ? "/svgs/personalized-plans.svg"
+                          : "/svgs/certified-experts.svg"
+                    }
+                    title={
+                      i === 0
+                        ? "Conversation First"
+                        : i === 1
+                          ? "Personalized Plans"
+                          : "Certified Experts"
+                    }
+                    description={
+                      i === 0
+                        ? "We prioritize real speaking practice over rote memorization to help you build fluency fast."
+                        : i === 1
+                          ? "Every learner gets a custom plan built around their exam goals and speaking level."
+                          : "Learn from qualified tutors and native speakers with proven experience in language instruction."
+                    }
+                  />
+                </div>
               </motion.div>
             ))}
           </div>
           {/* Second row: 2 cards */}
-          <div className="mt-4 grid grid-cols-1 gap-4 sm:mt-6 sm:grid-cols-2 sm:gap-6">
+          <div className="mt-4 grid w-full grid-cols-1 gap-4 sm:mt-6 sm:grid-cols-2 sm:gap-6">
             {[3, 4].map((i) => (
               <motion.div
                 key={i}
@@ -188,20 +190,22 @@ const Landing = () => {
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: (i - 3) * 0.1 }}
               >
-                <Card
-                  index={i}
-                  icon={
-                    i === 3
-                      ? "/svgs/all-one.svg"
-                      : "/svgs/confidence-guarantee.svg"
-                  }
-                  title={i === 3 ? "All-in-One Tool" : "Confidence Guarantee"}
-                  description={
-                    i === 3
-                      ? "Practice anytime with SuperTutor AI, join live group classes, and access saved learning materials."
-                      : "Our plan works — or you get your money back after completing the recommended program.*"
-                  }
-                />
+                <div className="mx-auto flex w-full justify-center">
+                  <Card
+                    index={i}
+                    icon={
+                      i === 3
+                        ? "/svgs/all-one.svg"
+                        : "/svgs/confidence-guarantee.svg"
+                    }
+                    title={i === 3 ? "All-in-One Tool" : "Confidence Guarantee"}
+                    description={
+                      i === 3
+                        ? "Practice anytime with SuperTutor AI, join live group classes, and access saved learning materials."
+                        : "Our plan works — or you get your money back after completing the recommended program.*"
+                    }
+                  />
+                </div>
               </motion.div>
             ))}
           </div>
@@ -213,7 +217,7 @@ const Landing = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="mb-10 mt-20 flex w-full flex-col items-start justify-start space-y-6 px-2 sm:mt-40 sm:px-4 lg:mb-10 lg:mt-40 lg:items-center lg:justify-center lg:px-0"
+          className="mx-auto mb-10 mt-20 flex w-full flex-col items-center justify-center space-y-6 sm:mt-40 sm:px-4 lg:mb-10 lg:mt-40 lg:px-0"
         >
           <div className="min-h-[60vh] px-2 sm:min-h-screen sm:px-4">
             <div className="mx-auto max-w-6xl">
