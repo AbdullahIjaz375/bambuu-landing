@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "../../context/LanguageContext";
 import { useAuth } from "../../context/AuthContext";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Navigate } from "react-router-dom";
 import {
   getExamPrepPlanTimeline,
   getStudentExamPrepTutorialStatus,
@@ -164,7 +164,7 @@ const LanguageCardsSection = ({ languageCards, languageData, navigate }) => {
 };
 
 const LearnUser = () => {
-  const { user, setUser } = useAuth();
+  const { user, setUser, loading: authLoading } = useAuth();
   const [showRenewalBanner, setShowRenewalBanner] = useState(false);
   const [examPrepStatus, setExamPrepStatus] = useState(false);
   const [showIntroBookingFlow, setShowIntroBookingFlow] = useState(false);
@@ -456,6 +456,19 @@ const LearnUser = () => {
       window.history.replaceState({}, document.title);
     }
   }, [location.state]);
+
+  // Place the auth loading and user check here, after all hooks
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <ClipLoader color="#14B82C" size={50} />
+      </div>
+    );
+  }
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
   // --- Language Cards ---
   const languageCards = [
     {

@@ -16,7 +16,7 @@ import Sidebar from "../../components/Sidebar";
 import ClassCardTutor from "../../components-tutor/ClassCardTutor";
 import { useAuth } from "../../context/AuthContext";
 import GroupCard from "../../components/GroupCard";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import { db } from "../../firebaseConfig";
 import { useTranslation } from "react-i18next";
 
@@ -39,8 +39,7 @@ import CalenderTutor from "../../components-tutor/CalenderTutor";
 
 const LearnTutor = () => {
   const { t } = useTranslation();
-
-  const { user, setUser } = useAuth();
+  const { user, setUser, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(
     t("learn-tutor.tabs.booked-classes"),
@@ -145,6 +144,17 @@ const LearnTutor = () => {
   };
 
   //------------------------------------------------------------------------------------//
+
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <ClipLoader color="#14b82c" size={50} />
+      </div>
+    );
+  }
+  if (!user) {
+    return <Navigate to="/login-tutor" replace />;
+  }
 
   return (
     <>
