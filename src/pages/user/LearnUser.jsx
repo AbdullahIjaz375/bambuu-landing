@@ -182,6 +182,7 @@ const LearnUser = () => {
   const [loadingGroups, setLoadingGroups] = useState(true);
   const [errorGroups, setErrorGroups] = useState(null);
   const [nextClass, setNextClass] = useState(null);
+  const [examPrepCredits, setExamPrepCredits] = useState(null);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -199,19 +200,26 @@ const LearnUser = () => {
       if (!user?.uid) return;
       try {
         const timeline = await getExamPrepPlanTimeline(user.uid);
-        if (
-          timeline?.activePlan &&
-          !timeline?.nextPlan &&
-          timeline.activePlan.expiryDate
-        ) {
-          const expiry = new Date(timeline.activePlan.expiryDate);
-          const now = new Date();
-          const diffDays = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
-          setShowRenewalBanner(diffDays <= 5 && diffDays >= 0);
+        if (timeline?.activePlan) {
+          setExamPrepCredits(
+            Array.isArray(timeline.activePlan.credits)
+              ? timeline.activePlan.credits.length
+              : 0,
+          );
+          if (!timeline?.nextPlan && timeline.activePlan.expiryDate) {
+            const expiry = new Date(timeline.activePlan.expiryDate);
+            const now = new Date();
+            const diffDays = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
+            setShowRenewalBanner(diffDays <= 5 && diffDays >= 0);
+          } else {
+            setShowRenewalBanner(false);
+          }
         } else {
+          setExamPrepCredits(0);
           setShowRenewalBanner(false);
         }
       } catch {
+        setExamPrepCredits(0);
         setShowRenewalBanner(false);
       }
     };
@@ -532,7 +540,9 @@ const LearnUser = () => {
                 onClick={() => navigate("/subscriptions")}
                 className="flex cursor-pointer flex-col items-center justify-center rounded-full border border-[#14B82C] bg-[#E6FDE9] p-2 transition-colors hover:bg-[#d4fad9]"
               >
-                <h1 className="text-xs font-semibold">{user.credits}</h1>
+                <h1 className="text-xs font-semibold">
+                  {examPrepCredits !== null ? examPrepCredits : "--"}
+                </h1>
                 <h1 className="text-[10px]">{t("learnUser.credits.label")}</h1>
               </div>
               <NotificationDropdown />

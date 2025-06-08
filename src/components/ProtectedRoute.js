@@ -104,6 +104,12 @@ const ProtectedRoute = ({ children, requiredRole }) => {
   }
   // If the user is logged in and the current path is /login or /signup, redirect to /learn
   if (location.pathname === "/login" || location.pathname === "/signup") {
+    // Check if user is in mobile modal flow and should not be redirected
+    const inMobileFlow = localStorage.getItem("inMobileModalFlow");
+    if (inMobileFlow === "true") {
+      // Don't redirect if user is in mobile modal flow
+      return children;
+    }
     return <Navigate to="/learn" />;
   }
   // Role-based access checks
@@ -114,8 +120,8 @@ const ProtectedRoute = ({ children, requiredRole }) => {
   if (loading) {
     // Show a loading indicator or nothing while authentication data is being loaded
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
+      <div className="flex h-screen items-center justify-center">
+        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-green-500"></div>
       </div>
     );
   }
@@ -131,14 +137,14 @@ const ProtectedRoute = ({ children, requiredRole }) => {
         "Access denied: Required role(s):",
         roles,
         "User type:",
-        effectiveUserType
+        effectiveUserType,
       );
 
       // Instead of immediately redirecting to unauthorized, redirect to login if it seems
       // like there might be authentication problems
       if (!effectiveUserType || effectiveUserType === "undefined") {
         console.log(
-          "No user type detected, redirecting to login instead of unauthorized"
+          "No user type detected, redirecting to login instead of unauthorized",
         );
         return <Navigate to="/login" />;
       } else {

@@ -33,6 +33,13 @@ const PublicRoute = ({ children }) => {
 
   // If user is logged in, check for redirect paths and navigate accordingly
   if (user) {
+    // Check if user is in mobile modal flow and should not be redirected
+    const inMobileFlow = localStorage.getItem("inMobileModalFlow");
+    if (inMobileFlow === "true") {
+      // Don't redirect if user is in mobile modal flow
+      return children;
+    }
+
     // Check for sessionStorage redirect path first (this is most reliable)
     const redirectPath = sessionStorage.getItem("redirectAfterLogin");
 
