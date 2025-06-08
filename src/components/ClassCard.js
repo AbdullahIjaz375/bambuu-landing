@@ -49,42 +49,40 @@ const ClassCard = ({
   const [, setLoading] = useState(true);
   const formatTime = (timestamp) => {
     if (!timestamp) return "TBD";
-
-    // Convert Firebase timestamp to a Date object
-    const date = new Date(timestamp.seconds * 1000);
-
-    // Format as "HH:MM-HH:MM EST" (with end time calculated using duration)
-    const startHour = date.getHours();
-    const startMinutes = date.getMinutes();
-
-    // Calculate end time
+    // Support both Firebase timestamp and ISO string
+    let date;
+    if (typeof timestamp === "string") {
+      date = new Date(timestamp);
+    } else if (timestamp.seconds) {
+      date = new Date(timestamp.seconds * 1000);
+    } else {
+      return "TBD";
+    }
+    // Use UTC methods
+    const startHour = date.getUTCHours();
+    const startMinutes = date.getUTCMinutes();
     const endDate = new Date(date.getTime() + classDuration * 60000);
-    const endHour = endDate.getHours();
-    const endMinutes = endDate.getMinutes();
-
-    // Format with leading zeros
+    const endHour = endDate.getUTCHours();
+    const endMinutes = endDate.getUTCMinutes();
     const formatDigit = (num) => num.toString().padStart(2, "0");
-
-    // Get timezone abbreviation (EST, PST, etc)
-    const timezone = "EST"; // Hardcoding to EST to match the design
-
-    return `${formatDigit(startHour)}:${formatDigit(
-      startMinutes,
-    )}-${formatDigit(endHour)}:${formatDigit(endMinutes)} ${timezone}`;
+    const timezone = "UTC";
+    return `${formatDigit(startHour)}:${formatDigit(startMinutes)}-${formatDigit(endHour)}:${formatDigit(endMinutes)} ${timezone}`;
   };
   const formatDate = (timestamp) => {
     if (!timestamp) return "TBD";
-
-    // Convert Firebase timestamp to a Date object
-    const date = new Date(timestamp.seconds * 1000);
-
-    // Format to match "20 DEC 2024" format as in the screenshot
-    const day = date.getDate();
+    let date;
+    if (typeof timestamp === "string") {
+      date = new Date(timestamp);
+    } else if (timestamp.seconds) {
+      date = new Date(timestamp.seconds * 1000);
+    } else {
+      return "TBD";
+    }
+    const day = date.getUTCDate();
     const month = date
-      .toLocaleString("en-US", { month: "short" })
+      .toLocaleString("en-US", { month: "short", timeZone: "UTC" })
       .toUpperCase();
-    const year = date.getFullYear();
-
+    const year = date.getUTCFullYear();
     return `${day} ${month} ${year}`;
   };
 

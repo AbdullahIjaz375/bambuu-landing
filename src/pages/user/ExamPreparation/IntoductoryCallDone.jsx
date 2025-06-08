@@ -11,9 +11,6 @@ const IntroductoryCallDone = ({ bookExamClass, setBookExamClass }) => {
   };
 
   const handleSlotBookingComplete = (bookingData) => {
-    console.log("Booking completed:", bookingData);
-    // Here you can handle the booking completion
-    // e.g., make API call, show success message, etc.
     setShowSlotBooking(false);
   };
 

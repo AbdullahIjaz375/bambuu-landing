@@ -44,15 +44,6 @@ const ProfileTutor = () => {
           if (userDoc.exists()) {
             const tutorData = userDoc.data();
             setUserData(tutorData);
-
-            // Log for debugging
-            console.log("Tutor data loaded:", {
-              photoUrl: tutorData.photoUrl,
-              name: tutorData.name,
-              teachingLanguage: tutorData.teachingLanguage,
-              tutorOfClasses: tutorData.tutorOfClasses?.length || 0,
-              tutorOfGroups: tutorData.tutorOfGroups?.length || 0,
-            });
           }
         }
       } catch (error) {
@@ -71,13 +62,13 @@ const ProfileTutor = () => {
       sessionStorage.removeItem("userType");
       sessionStorage.removeItem("user");
       sessionStorage.removeItem("redirectAfterLogin");
-      
+
       // Clear saved URLs that could cause redirection issues
       localStorage.removeItem("selectedClassUrl");
       localStorage.removeItem("selectedGroupUrl");
       localStorage.removeItem("selectedPackageUrl");
       localStorage.removeItem("fullRedirectUrl");
-      
+
       toast.success("Logged out successfully!");
     } catch (error) {
       toast.error("Error during logout");
@@ -117,13 +108,13 @@ const ProfileTutor = () => {
 
   return (
     <div className="flex h-screen bg-white">
-      <div className="flex-shrink-0 w-64 h-full">
+      <div className="h-full w-64 flex-shrink-0">
         <Sidebar user={user} />
       </div>
 
-      <div className="flex-1 overflow-x-auto min-w-[calc(100%-16rem)] h-full">
-        <div className="h-[calc(100vh-1rem)] p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl m-2 overflow-y-auto">
-          <div className="flex items-center justify-between pb-4 mb-6 border-b">
+      <div className="h-full min-w-[calc(100%-16rem)] flex-1 overflow-x-auto">
+        <div className="m-2 h-[calc(100vh-1rem)] overflow-y-auto rounded-3xl border-2 border-[#e7e7e7] bg-white p-8">
+          <div className="mb-6 flex items-center justify-between border-b pb-4">
             <div className="flex items-center gap-4">
               <h1 className="text-4xl font-semibold">{t("profile.title")}</h1>
             </div>
@@ -131,9 +122,9 @@ const ProfileTutor = () => {
 
           <div className="grid grid-cols-2 gap-10">
             {/* Profile Info Card */}
-            <div className="bg-[#e6fde9] rounded-3xl p-8 flex flex-col items-center">
+            <div className="flex flex-col items-center rounded-3xl bg-[#e6fde9] p-8">
               {" "}
-              <div className="flex items-center justify-center w-32 h-32 mb-4 bg-white rounded-full">
+              <div className="mb-4 flex h-32 w-32 items-center justify-center rounded-full bg-white">
                 <img
                   src={
                     userData?.photoUrl ||
@@ -143,11 +134,8 @@ const ProfileTutor = () => {
                   alt={t("instructor-profile.alt-text.profile-image", {
                     name: userData?.name || user?.name || "",
                   })}
-                  className="object-cover w-full h-full rounded-full"
+                  className="h-full w-full rounded-full object-cover"
                   onError={(e) => {
-                    console.log(
-                      "Profile image failed to load, using default panda"
-                    );
                     e.target.src = "/svgs/supertutor-panda.svg";
                   }}
                   referrerPolicy="no-referrer"
@@ -156,8 +144,8 @@ const ProfileTutor = () => {
               <h2 className="mb-4 text-3xl font-semibold">
                 {userData?.name || user?.name || t("common.user", "User")}
               </h2>
-              <div className="flex items-center gap-2 px-3 py-1 mb-6 text-xl bg-white rounded-full">
-                <img alt="bambbuu" src="/svgs/fire.svg" className="w-6 h-6" />
+              <div className="mb-6 flex items-center gap-2 rounded-full bg-white px-3 py-1 text-xl">
+                <img alt="bambbuu" src="/svgs/fire.svg" className="h-6 w-6" />
                 <span className="font-semibold text-[#6D6D6D]">
                   {t("profile.appStreak")}
                 </span>{" "}
@@ -165,53 +153,53 @@ const ProfileTutor = () => {
                   {userData?.currentStreak || user?.currentStreak || 0}
                 </span>
               </div>
-              <div className="grid w-full grid-cols-3 gap-4 mb-6 text-xl">
+              <div className="mb-6 grid w-full grid-cols-3 gap-4 text-xl">
                 {/* Language and Location Info */}{" "}
-                <div className="flex items-center min-w-0 gap-1">
+                <div className="flex min-w-0 items-center gap-1">
                   <img
                     alt="bambbuu"
                     src="/svgs/language-circle.svg"
-                    className="flex-shrink-0 w-6 h-6"
+                    className="h-6 w-6 flex-shrink-0"
                   />
-                  <span className="font-semibold text-black whitespace-nowrap">
+                  <span className="whitespace-nowrap font-semibold text-black">
                     {t("profile.native")}:
                   </span>
-                  <span className="font-medium text-gray-600 truncate">
+                  <span className="truncate font-medium text-gray-600">
                     {userData?.nativeLanguage || user?.nativeLanguage || "-"}
                   </span>
                 </div>
-                <div className="flex items-center min-w-0 gap-1">
+                <div className="flex min-w-0 items-center gap-1">
                   <img
                     alt="bambbuu"
                     src="/svgs/language-circle.svg"
-                    className="flex-shrink-0 w-6 h-6"
+                    className="h-6 w-6 flex-shrink-0"
                   />
-                  <span className="font-semibold text-black whitespace-nowrap">
+                  <span className="whitespace-nowrap font-semibold text-black">
                     {t("profile.teaching")}:
                   </span>
-                  <span className="font-medium text-gray-600 truncate">
+                  <span className="truncate font-medium text-gray-600">
                     {userData?.teachingLanguage ||
                       user?.teachingLanguage ||
                       "-"}
                   </span>
                 </div>{" "}
-                <div className="flex items-center min-w-0 gap-1">
+                <div className="flex min-w-0 items-center gap-1">
                   <img
                     alt="bambbuu"
                     src="/svgs/location.svg"
-                    className="flex-shrink-0 w-6 h-6"
+                    className="h-6 w-6 flex-shrink-0"
                   />
-                  <span className="font-semibold text-black whitespace-nowrap">
+                  <span className="whitespace-nowrap font-semibold text-black">
                     {t("profile.from")}:
                   </span>
-                  <span className="font-medium text-gray-600 truncate">
+                  <span className="truncate font-medium text-gray-600">
                     {userData?.country || user?.country || "-"}
                   </span>
                 </div>
               </div>{" "}
               <div className="grid w-full grid-cols-2 gap-4 text-xl">
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-black whitespace-nowrap">
+                  <span className="whitespace-nowrap font-semibold text-black">
                     {t("instructor-profile.stats.totalClassesTaught")}:
                   </span>
                   <span className="font-medium text-gray-600">
@@ -221,7 +209,7 @@ const ProfileTutor = () => {
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-black whitespace-nowrap">
+                  <span className="whitespace-nowrap font-semibold text-black">
                     {t("instructor-profile.stats.totalGroupsCreated")}:
                   </span>
                   <span className="font-medium text-gray-600">
@@ -239,31 +227,31 @@ const ProfileTutor = () => {
                 <button
                   key={item.path}
                   onClick={() => handleItemClick(item.path)}
-                  className="flex items-center justify-between w-full px-6 py-4 text-green-600 border border-green-500 rounded-full hover:bg-green-50"
+                  className="flex w-full items-center justify-between rounded-full border border-green-500 px-6 py-4 text-green-600 hover:bg-green-50"
                 >
                   <div className="flex items-center gap-3">
-                    <img alt="bambbuu" src={item.icon} className="w-6 h-6" />
+                    <img alt="bambbuu" src={item.icon} className="h-6 w-6" />
                     <span className="text-xl text-black">{item.label}</span>
                   </div>
-                  <ChevronRight className="w-5 h-5 text-black" />
+                  <ChevronRight className="h-5 w-5 text-black" />
                 </button>
               ))}
 
               <button
                 onClick={handleSignOut}
-                className="flex items-center justify-between w-full px-6 py-4 text-red-600 border border-red-500 rounded-full hover:bg-red-50"
+                className="flex w-full items-center justify-between rounded-full border border-red-500 px-6 py-4 text-red-600 hover:bg-red-50"
               >
                 <div className="flex items-center gap-3">
                   <img
                     alt="bambbuu"
                     src="/svgs/logout.svg"
-                    className="w-6 h-6"
+                    className="h-6 w-6"
                   />
                   <span className="text-xl">
                     {t("profile.navigation.logout")}
                   </span>
                 </div>
-                <ChevronRight className="w-5 h-5 text-red-600" />
+                <ChevronRight className="h-5 w-5 text-red-600" />
               </button>
             </div>
           </div>

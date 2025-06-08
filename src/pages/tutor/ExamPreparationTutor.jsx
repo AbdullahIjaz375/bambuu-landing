@@ -38,11 +38,9 @@ const ExamPreparationTutor = () => {
   useEffect(() => {
     if (!user?.uid) return;
     setLoading(true);
-    console.log("[ExamPrep] Fetching tutor classes for:", user.uid);
     getTutorClasses(user.uid)
       .then((res) => {
         setClasses(res.classes || []);
-        console.log("[ExamPrep] Tutor classes fetched:", res.classes);
       })
       .catch((err) => {
         setClasses([]);
@@ -79,19 +77,13 @@ const ExamPreparationTutor = () => {
       slots,
     };
     if (activeTab === t("exam-prep.tabs.introductory-calls")) {
-      console.log("[ExamPrep] Setting introductory call slots:", payload);
       setIntroCallSlots(payload)
         .then((res) => {
-          console.log(
-            "[ExamPrep] Intro call availability set successfully:",
-            res,
-          );
           setShowSuccessModal(true);
           setLoading(true);
           return getTutorClasses(user.uid)
             .then((res) => {
               setClasses(res.classes || []);
-              console.log("[ExamPrep] Tutor classes refreshed:", res.classes);
             })
             .catch((err) => {
               setClasses([]);
@@ -108,16 +100,13 @@ const ExamPreparationTutor = () => {
         })
         .finally(() => setAvailabilityLoading(false));
     } else {
-      console.log("[ExamPrep] Setting exam prep class slots:", payload);
       setExamPrepClassSlots(payload)
         .then((res) => {
-          console.log("[ExamPrep] Availability set successfully:", res);
           setShowSuccessModal(true);
           setLoading(true);
           return getTutorClasses(user.uid)
             .then((res) => {
               setClasses(res.classes || []);
-              console.log("[ExamPrep] Tutor classes refreshed:", res.classes);
             })
             .catch((err) => {
               setClasses([]);

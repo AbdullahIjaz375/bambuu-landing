@@ -64,8 +64,6 @@ const ExamPreparationUser = () => {
     if (tutorId && user?.uid) fetchData();
   }, [tutorId, user?.uid]);
 
-  console.log("ExamPrepStatus:", examPrepStatus);
-
   // Fetch exam prep status
   useEffect(() => {
     const fetchExamPrepStatus = async () => {

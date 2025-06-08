@@ -13,10 +13,6 @@ import { streamClient } from "../config/stream";
  */
 export const refreshChannelMetadata = async (channelId, type) => {
   try {
-    console.log(
-      `Refreshing channel metadata for channel: ${channelId} (${type})`
-    );
-
     // Step 1: Get channel from Stream
     const channel = streamClient.channel(type, channelId);
     await channel.watch();
@@ -32,39 +28,26 @@ export const refreshChannelMetadata = async (channelId, type) => {
       const groupDoc = await getDoc(doc(db, "groups", channelId));
       if (groupDoc.exists()) {
         firestoreData = groupDoc.data();
-        console.log(
-          `Found group data for ${channelId}: ${
-            firestoreData.groupName || "unnamed"
-          }`
-        );
       }
     } else if (type === "premium_individual_class") {
       const classDoc = await getDoc(doc(db, "classes", channelId));
       if (classDoc.exists()) {
         firestoreData = classDoc.data();
-        console.log(
-          `Found class data for ${channelId}: ${
-            firestoreData.className || "unnamed"
-          }`
-        );
       }
     }
 
     if (!firestoreData) {
-      console.log(`No Firestore data found for channel ${channelId}`);
       return false;
     }
 
     // Step 3: Update channel's local data
     if (type === "premium_group" || type === "standard_group") {
       channel.data.name = firestoreData.groupName;
-      console.log(`Updated channel name to: ${firestoreData.groupName}`);
       if (firestoreData.imageUrl) channel.data.image = firestoreData.imageUrl;
       if (firestoreData.groupDescription)
         channel.data.description = firestoreData.groupDescription;
     } else if (type === "premium_individual_class") {
       channel.data.name = firestoreData.className;
-      console.log(`Updated channel name to: ${firestoreData.className}`);
       if (firestoreData.imageUrl) channel.data.image = firestoreData.imageUrl;
       if (firestoreData.classDescription)
         channel.data.description = firestoreData.classDescription;
@@ -88,8 +71,6 @@ export const refreshChannelMetadata = async (channelId, type) => {
  */
 export const fixAllChannelNames = async (userId) => {
   try {
-    console.log(`Fixing all channel names for user ${userId}`);
-
     // Query all channels for this user
     const filter = {
       members: { $in: [userId] },
@@ -105,10 +86,8 @@ export const fixAllChannelNames = async (userId) => {
       {
         watch: true,
         state: true,
-      }
+      },
     );
-
-    console.log(`Found ${channels.length} channels to fix`);
 
     // Get Firestore data for each channel
     const { getDoc, doc } = await import("firebase/firestore");
@@ -138,10 +117,6 @@ export const fixAllChannelNames = async (userId) => {
               newName: channel.data.name,
               fixed: true,
             });
-
-            console.log(
-              `Fixed group channel name: "${oldName}" → "${channel.data.name}"`
-            );
           }
         } else if (channel.type === "premium_individual_class") {
           const classDoc = await getDoc(doc(db, "classes", channel.id));
@@ -159,10 +134,6 @@ export const fixAllChannelNames = async (userId) => {
               newName: channel.data.name,
               fixed: true,
             });
-
-            console.log(
-              `Fixed class channel name: "${oldName}" → "${channel.data.name}"`
-            );
           }
         }
       } catch (error) {

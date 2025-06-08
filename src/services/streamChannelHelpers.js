@@ -5,8 +5,6 @@ import { streamClient } from "../config/stream";
  */
 export const setupChannelProperties = async (channel, type, creatorId) => {
   try {
-    console.log(`Setting up channel properties for ${channel.id}`);
-
     // No role modifications - just ensuring basic channel settings
     const updates = {
       frozen: false, // Ensure channel is not frozen
@@ -29,11 +27,9 @@ export const addUserToChannel = async (
   channelId,
   userId,
   type,
-  role = "channel_member"
+  role = "channel_member",
 ) => {
   try {
-    console.log(`Adding user ${userId} to channel ${channelId} (${type})`);
-
     // IMPORTANT: Update Firestore first to maintain data consistency
     if (type === "premium_individual_class") {
       try {
@@ -47,10 +43,6 @@ export const addUserToChannel = async (
         await updateDoc(classRef, {
           classMemberIds: arrayUnion(userId),
         });
-
-        console.log(
-          `Updated Firestore class ${channelId} with member ${userId}`
-        );
       } catch (firestoreError) {
         console.error(`Firestore update failed: ${firestoreError.message}`);
         // Continue with Stream operations
@@ -72,9 +64,6 @@ export const addUserToChannel = async (
         // Check if user is already a member
         const currentMembers = Object.keys(channel.state?.members || {});
         if (currentMembers.includes(userId)) {
-          console.log(
-            `User ${userId} is already a member of channel ${channelId}`
-          );
           return { success: true, message: "User already a member" };
         }
 
@@ -96,10 +85,6 @@ export const addUserToChannel = async (
             // IMPORTANT: Add the user to the members list in the update
             add_members: [{ user_id: userId, role: role }],
           });
-
-          console.log(
-            `Updated channel metadata and added member ${userId} to ${channelId}`
-          );
         } else {
           // If no class data, just add the member
           await channel.addMembers([{ user_id: userId, role: role }]);
@@ -118,8 +103,6 @@ export const addUserToChannel = async (
 
         // Alternative approach: Create channel with user as member
         try {
-          console.log("Trying alternative channel creation approach...");
-
           // Get class data for channel creation
           const { getDoc, doc } = await import("firebase/firestore");
           const { db } = await import("../firebaseConfig");
@@ -143,9 +126,6 @@ export const addUserToChannel = async (
             await channelWithMembers.create();
             await channelWithMembers.watch();
 
-            console.log(
-              `Successfully created channel with members: ${allMembers}`
-            );
             return {
               success: true,
               message: "Channel created with user as member",
@@ -154,7 +134,7 @@ export const addUserToChannel = async (
           }
         } catch (alternativeError) {
           console.error(
-            `Alternative approach failed: ${alternativeError.message}`
+            `Alternative approach failed: ${alternativeError.message}`,
           );
           throw alternativeError;
         }
@@ -167,17 +147,16 @@ export const addUserToChannel = async (
       const addResult = await channel.addMembers([
         { user_id: userId, role: role },
       ]);
-      console.log(`Successfully added user ${userId} to channel ${channelId}`);
       return addResult;
     } catch (standardError) {
       console.error(
-        `Standard channel addition failed: ${standardError.message}`
+        `Standard channel addition failed: ${standardError.message}`,
       );
       throw standardError;
     }
   } catch (error) {
     console.error(
-      `Failed to add user ${userId} to channel ${channelId}: ${error.message}`
+      `Failed to add user ${userId} to channel ${channelId}: ${error.message}`,
     );
     throw error;
   }

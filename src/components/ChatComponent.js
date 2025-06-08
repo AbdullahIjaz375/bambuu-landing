@@ -68,7 +68,7 @@ const CustomChatComponent = ({
     if (streamClient?.disconnected && user) {
       streamClient.connectUser(
         { id: user.uid },
-        streamClient.devToken(user.uid)
+        streamClient.devToken(user.uid),
       );
     }
   }, [streamClient, user]);
@@ -126,7 +126,7 @@ const CustomChatComponent = ({
             sender: event.user.id === user.uid ? "self" : "other",
             timestamp: new Date(event.message.created_at).toLocaleTimeString(
               [],
-              { hour: "2-digit", minute: "2-digit" }
+              { hour: "2-digit", minute: "2-digit" },
             ),
             date: new Date(event.message.created_at).toLocaleDateString([], {
               weekday: "long",
@@ -330,7 +330,7 @@ const CustomChatComponent = ({
     setSelectedResources((prev) =>
       prev.some((res) => res.docId === resource.docId)
         ? prev.filter((res) => res.docId !== resource.docId)
-        : [...prev, resource]
+        : [...prev, resource],
     );
   };
 
@@ -363,12 +363,12 @@ const CustomChatComponent = ({
   };
 
   const filteredResources = savedResources.filter((resource) =>
-    resource.documentName.toLowerCase().includes(searchQuery.toLowerCase())
+    resource.documentName.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center w-full h-full min-h-64">
+      <div className="flex h-full min-h-64 w-full items-center justify-center">
         <ClipLoader color="#FFB800" size={40} />
       </div>
     );
@@ -376,7 +376,7 @@ const CustomChatComponent = ({
 
   if (error) {
     return (
-      <div className="flex items-center justify-center w-full h-full min-h-64">
+      <div className="flex h-full min-h-64 w-full items-center justify-center">
         <div className="text-lg text-red-600">Error: {error}</div>
       </div>
     );
@@ -384,17 +384,17 @@ const CustomChatComponent = ({
 
   if (!channel && !isLoading) {
     return (
-      <div className="flex items-center justify-center w-full h-full min-h-64">
+      <div className="flex h-full min-h-64 w-full items-center justify-center">
         <div className="text-lg text-gray-600">No channel selected</div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col w-full h-screen max-h-[calc(100vh-125px)] overflow-hidden rounded-2xl border border-gray-200 bg-white">
+    <div className="flex h-screen max-h-[calc(100vh-125px)] w-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white">
       {/* Header */}
       <div
-        className="flex items-center justify-between px-6 py-4 border-b border-gray-200"
+        className="flex items-center justify-between border-b border-gray-200 px-6 py-4"
         style={{ background: "#F6F6F6" }}
       >
         <div className="flex items-center gap-3">
@@ -402,7 +402,7 @@ const CustomChatComponent = ({
             <img
               src={chatPartner.image}
               alt={chatPartner.name}
-              className="w-10 h-10 rounded-full object-cover"
+              className="h-10 w-10 rounded-full object-cover"
               onError={(e) => {
                 e.target.onerror = null;
                 e.target.src = "/default-avatar.png";
@@ -412,7 +412,7 @@ const CustomChatComponent = ({
           <div className="flex flex-col gap-0">
             <h3 className="font-semibold text-gray-800">{name || "Chat"}</h3>
             {description && (
-              <span className="text-xs text-gray-500 max-w-xs truncate block">
+              <span className="block max-w-xs truncate text-xs text-gray-500">
                 {description}
               </span>
             )}
@@ -420,7 +420,7 @@ const CustomChatComponent = ({
         </div>
         <div className="relative" ref={dropdownRef}>
           <button
-            className="p-2 transition-colors rounded-full hover:bg-gray-200"
+            className="rounded-full p-2 transition-colors hover:bg-gray-200"
             onClick={() => setShowDropdown(!showDropdown)}
             disabled={isLoading}
           >
@@ -452,7 +452,7 @@ const CustomChatComponent = ({
             </svg>
           </button>{" "}
           {showDropdown && (
-            <div className="absolute right-0 z-10 w-40 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg">
+            <div className="absolute right-0 z-10 mt-2 w-40 rounded-lg border border-gray-200 bg-white shadow-lg">
               {" "}
               <button
                 className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-50"
@@ -486,7 +486,7 @@ const CustomChatComponent = ({
           )}
         </div>
       </div>
-      <div className="flex-1 p-4 overflow-y-auto bg-white">
+      <div className="flex-1 overflow-y-auto bg-white p-4">
         <div className="flex flex-col gap-3">
           {/* Date separator logic */}
           {messages.map((message, idx) => {
@@ -503,10 +503,7 @@ const CustomChatComponent = ({
             const yesterday = new Date(Date.now() - 86400000).toDateString();
             if (currDate === today) dateLabel = "Today";
             else if (currDate === yesterday) dateLabel = "Yesterday";
-            // Debug logs
-            console.log("[ChatComponent] Rendering message:", message);
             if (isGroupChat && message.sender !== "self") {
-              console.log("[ChatComponent] Group message.user:", message.user);
             }
             // Get sender info for group chats
             let senderName = message.senderName || "Unknown";
@@ -514,8 +511,8 @@ const CustomChatComponent = ({
             return (
               <React.Fragment key={message.id}>
                 {showDateSeparator && (
-                  <div className="flex justify-center my-2">
-                    <span className="px-3 py-1 text-xs bg-gray-200 rounded-full text-gray-600">
+                  <div className="my-2 flex justify-center">
+                    <span className="rounded-full bg-gray-200 px-3 py-1 text-xs text-gray-600">
                       {dateLabel}
                     </span>
                   </div>
@@ -528,33 +525,33 @@ const CustomChatComponent = ({
                   <div className="max-w-[70%]">
                     {/* Group chat: show actual sender avatar above message */}
                     {isGroupChat && message.sender !== "self" && (
-                      <div className="flex items-center mb-1">
+                      <div className="mb-1 flex items-center">
                         {senderImage && (
                           <img
                             src={senderImage}
                             alt={senderName}
-                            className="w-6 h-6 rounded-full object-cover mr-2"
+                            className="mr-2 h-6 w-6 rounded-full object-cover"
                             onError={(e) => {
                               e.target.onerror = null;
                               e.target.src = "/default-avatar.png";
                             }}
                           />
                         )}
-                        <span className="text-xs text-gray-700 font-medium">
+                        <span className="text-xs font-medium text-gray-700">
                           {senderName}
                         </span>
                       </div>
                     )}
                     <div
-                      className={`px-4 py-2 rounded-2xl ${
+                      className={`rounded-2xl px-4 py-2 ${
                         message.sender === "self"
-                          ? "bg-green-500 text-white rounded-br-none"
-                          : "bg-gray-100 text-gray-800 rounded-bl-none"
+                          ? "rounded-br-none bg-green-500 text-white"
+                          : "rounded-bl-none bg-gray-100 text-gray-800"
                       }`}
                     >
                       {message.text}
                     </div>
-                    <div className="flex justify-end mt-1">
+                    <div className="mt-1 flex justify-end">
                       <span className="text-xs text-gray-500">
                         {message.timestamp}
                       </span>
@@ -570,15 +567,15 @@ const CustomChatComponent = ({
           <div ref={messagesEndRef} />
         </div>
       </div>
-      <div className="px-4 py-3 bg-white border-t border-gray-200">
+      <div className="border-t border-gray-200 bg-white px-4 py-3">
         <form onSubmit={handleSendMessage} className="flex items-center">
-          <div className="relative flex items-center flex-1">
+          <div className="relative flex flex-1 items-center">
             <input
               type="text"
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               placeholder="Type your message..."
-              className="w-full px-4 py-3 pr-20 border border-gray-200 rounded-full focus:outline-none focus:ring-1 focus:ring-green-500"
+              className="w-full rounded-full border border-gray-200 px-4 py-3 pr-20 focus:outline-none focus:ring-1 focus:ring-green-500"
             />
             <div className="absolute right-3 flex items-center space-x-2">
               <button
@@ -589,7 +586,7 @@ const CustomChatComponent = ({
                 <img
                   src="/svgs/link-circle.svg"
                   alt="Attach link"
-                  className="w-6 h-6"
+                  className="h-6 w-6"
                 />
               </button>
               <button
@@ -600,7 +597,7 @@ const CustomChatComponent = ({
                 <img
                   src="/svgs/gallery.svg"
                   alt="Gallery"
-                  className="w-6 h-6"
+                  className="h-6 w-6"
                 />
               </button>
             </div>
@@ -608,10 +605,10 @@ const CustomChatComponent = ({
 
           <button
             type="submit"
-            className="p-3 ml-3 text-black bg-[#FFBF00] rounded-full hover:bg-yellow-500"
+            className="ml-3 rounded-full bg-[#FFBF00] p-3 text-black hover:bg-yellow-500"
             disabled={!inputMessage.trim() || isSending}
           >
-            <img src="/svgs/chat-send.svg" alt="Send" className="w-6 h-6" />
+            <img src="/svgs/chat-send.svg" alt="Send" className="h-6 w-6" />
           </button>
         </form>
       </div>
@@ -619,7 +616,7 @@ const CustomChatComponent = ({
       <Modal
         isOpen={showConfirmModal}
         onRequestClose={() => setShowConfirmModal(false)}
-        className="z-50 max-w-sm p-6 mx-auto mt-40 bg-white outline-none rounded-3xl font-urbanist"
+        className="z-50 mx-auto mt-40 max-w-sm rounded-3xl bg-white p-6 font-urbanist outline-none"
         overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
         style={{
           overlay: {
@@ -640,13 +637,13 @@ const CustomChatComponent = ({
           </h2>
           <div className="flex flex-row gap-2">
             <button
-              className="w-full py-2 font-medium border border-gray-300 rounded-full hover:bg-gray-50"
+              className="w-full rounded-full border border-gray-300 py-2 font-medium hover:bg-gray-50"
               onClick={() => setShowConfirmModal(false)}
             >
               {t("chat.confirmDelete.cancel")}
             </button>
             <button
-              className="w-full py-2 font-medium text-black bg-[#ff4d4d] rounded-full hover:bg-[#ff3333] border border-[#8b0000]"
+              className="w-full rounded-full border border-[#8b0000] bg-[#ff4d4d] py-2 font-medium text-black hover:bg-[#ff3333]"
               onClick={handleLeaveChat}
               disabled={isLoading}
             >
@@ -661,7 +658,7 @@ const CustomChatComponent = ({
         <Modal
           isOpen={showProfileModal}
           onRequestClose={() => setShowProfileModal(false)}
-          className="z-50 max-w-lg p-6 mx-auto mt-40 bg-white outline-none rounded-3xl"
+          className="z-50 mx-auto mt-40 max-w-lg rounded-3xl bg-white p-6 outline-none"
           overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
           style={{
             overlay: {
@@ -678,38 +675,38 @@ const CustomChatComponent = ({
         >
           {studentProfile ? (
             <div className="font-urbanist">
-              <div className="flex items-center justify-between p-4 border-b">
+              <div className="flex items-center justify-between border-b p-4">
                 <h2 className="text-2xl font-bold">
                   {t("chat.profile.title")}
                 </h2>
                 <div className="flex items-center">
-                  <div className="flex items-center bg-blue-100 rounded-full px-2 py-1 mr-2">
-                    <span className="text-blue-500 font-medium text-sm">B</span>
+                  <div className="mr-2 flex items-center rounded-full bg-blue-100 px-2 py-1">
+                    <span className="text-sm font-medium text-blue-500">B</span>
                   </div>
                   <button
                     onClick={() => setShowProfileModal(false)}
-                    className="p-1 rounded-full"
+                    className="rounded-full p-1"
                   >
-                    <X className="w-5 h-5" />
+                    <X className="h-5 w-5" />
                   </button>
                 </div>
               </div>
 
-              <div className="p-4 bg-green-50">
+              <div className="bg-green-50 p-4">
                 <div className="flex flex-col items-center">
-                  <div className="w-20 h-20 bg-green-500 rounded-full mb-2 flex items-center justify-center">
+                  <div className="mb-2 flex h-20 w-20 items-center justify-center rounded-full bg-green-500">
                     {studentProfile.photoUrl ? (
                       <img
                         src={studentProfile.photoUrl}
                         alt={studentProfile.name}
-                        className="w-full h-full rounded-full object-cover"
+                        className="h-full w-full rounded-full object-cover"
                         onError={(e) => {
                           e.target.onerror = null;
                           e.target.src = "/default-avatar.png";
                         }}
                       />
                     ) : (
-                      <div className="text-white text-4xl font-bold">
+                      <div className="text-4xl font-bold text-white">
                         {studentProfile.name?.charAt(0) || "S"}
                       </div>
                     )}
@@ -717,9 +714,9 @@ const CustomChatComponent = ({
                   <h3 className="text-xl font-bold">
                     {studentProfile.name || "Student"}
                   </h3>
-                  <div className="flex items-center mt-1">
+                  <div className="mt-1 flex items-center">
                     <svg
-                      className="w-5 h-5 mr-1"
+                      className="mr-1 h-5 w-5"
                       viewBox="0 0 24 24"
                       fill="none"
                       xmlns="http://www.w3.org/2000/svg"
@@ -777,10 +774,10 @@ const CustomChatComponent = ({
                       From: {studentProfile.country || "Not specified"}
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 gap-16 mt-4 w-full">
+                  <div className="mt-4 grid w-full grid-cols-2 gap-16">
                     <div className="flex items-center">
                       <svg
-                        className="w-5 h-5 mr-1"
+                        className="mr-1 h-5 w-5"
                         viewBox="0 0 24 24"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
@@ -828,7 +825,7 @@ const CustomChatComponent = ({
                     </div>
                     <div className="flex items-center">
                       <svg
-                        className="w-5 h-5 mr-1"
+                        className="mr-1 h-5 w-5"
                         viewBox="0 0 24 24"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
@@ -879,7 +876,7 @@ const CustomChatComponent = ({
               </div>
 
               <div className="p-4">
-                <h3 className="text-lg font-semibold mb-3">
+                <h3 className="mb-3 text-lg font-semibold">
                   Your classes booked by this student
                 </h3>
 
@@ -888,14 +885,14 @@ const CustomChatComponent = ({
                     {studentProfile.classes.map((classItem, index) => (
                       <div
                         key={index}
-                        className="border border-green-300 rounded-lg p-3 bg-[#f8fff9]"
+                        className="rounded-lg border border-green-300 bg-[#f8fff9] p-3"
                       >
                         {/* Class details here */}
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-4 bg-gray-50 rounded-lg">
+                  <div className="rounded-lg bg-gray-50 py-4 text-center">
                     <p className="text-gray-500">No classes booked yet</p>
                   </div>
                 )}
@@ -903,7 +900,7 @@ const CustomChatComponent = ({
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center p-8">
-              <div className="w-12 h-12 border-4 border-t-4 border-gray-200 border-t-blue-500 rounded-full animate-spin mb-4"></div>
+              <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-t-4 border-gray-200 border-t-blue-500"></div>
               <p>Loading student profile...</p>
             </div>
           )}
@@ -914,7 +911,7 @@ const CustomChatComponent = ({
         <Modal
           isOpen={showAssignModal}
           onRequestClose={() => setShowAssignModal(false)}
-          className="z-50  w-[350px]  max-w-md p-6 mx-auto mt-40 bg-white outline-none rounded-3xl"
+          className="z-50 mx-auto mt-40 w-[350px] max-w-md rounded-3xl bg-white p-6 outline-none"
           overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
           style={{
             overlay: {
@@ -930,36 +927,36 @@ const CustomChatComponent = ({
           }}
         >
           <div className="p-4">
-            <div className="flex items-center justify-between mb-4">
+            <div className="mb-4 flex items-center justify-between">
               <h2 className="text-xl font-bold">
                 {t("chat.resources.assign")}
               </h2>
               <button
                 onClick={() => setShowAssignModal(false)}
-                className="p-1 rounded-full"
+                className="rounded-full p-1"
               >
-                <X className="w-5 h-5" />
+                <X className="h-5 w-5" />
               </button>
             </div>
 
             <div className="relative mb-4">
-              <Search className="absolute w-5 h-5 text-gray-400 left-3 top-1/2 transform -translate-y-1/2" />
+              <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 transform text-gray-400" />
               <input
                 type="text"
                 placeholder={t("chat.resources.searchPlaceholder")}
-                className="w-full py-2 pl-10 pr-4 border border-gray-200 rounded-full focus:outline-none focus:ring-1 focus:ring-green-500"
+                className="w-full rounded-full border border-gray-200 py-2 pl-10 pr-4 focus:outline-none focus:ring-1 focus:ring-green-500"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
 
             <div className="mb-4">
-              <div className="flex justify-between items-center mb-2">
+              <div className="mb-2 flex items-center justify-between">
                 <h3 className="font-semibold">
                   {t("chat.resources.myResources")}
                 </h3>
                 <button
-                  className="text-sm text-green-600 bg-green-100 rounded-full px-3 py-1"
+                  className="rounded-full bg-green-100 px-3 py-1 text-sm text-green-600"
                   onClick={() => {
                     navigate("/savedRecourcesTutor");
                     setShowAssignModal(false);
@@ -968,14 +965,14 @@ const CustomChatComponent = ({
                   + {t("chat.resources.newResource")}
                 </button>
               </div>
-              <div className="space-y-2 max-h-60 overflow-y-auto">
+              <div className="max-h-60 space-y-2 overflow-y-auto">
                 {filteredResources.length > 0 ? (
                   filteredResources.map((resource) => (
                     <div
                       key={resource.docId}
-                      className={`p-3 rounded-lg border cursor-pointer ${
+                      className={`cursor-pointer rounded-lg border p-3 ${
                         selectedResources.some(
-                          (res) => res.docId === resource.docId
+                          (res) => res.docId === resource.docId,
                         )
                           ? "border-green-500 bg-green-50"
                           : "border-gray-200 bg-yellow-50"
@@ -983,7 +980,7 @@ const CustomChatComponent = ({
                       onClick={() => toggleResource(resource)}
                     >
                       <div className="flex items-center">
-                        <div className="w-8 h-8 flex items-center justify-center bg-yellow-200 rounded-md mr-2">
+                        <div className="mr-2 flex h-8 w-8 items-center justify-center rounded-md bg-yellow-200">
                           <img
                             src={
                               resource.documentType.toLowerCase() === "pdf"
@@ -991,7 +988,7 @@ const CustomChatComponent = ({
                                 : "/svgs/word-logo.svg"
                             }
                             alt={resource.documentType}
-                            className="w-5 h-5"
+                            className="h-5 w-5"
                           />
                         </div>
                         <div className="flex-1">
@@ -1002,7 +999,7 @@ const CustomChatComponent = ({
                             Uploaded:{" "}
                             {resource.createdAt
                               ? new Date(
-                                  resource.createdAt.seconds * 1000
+                                  resource.createdAt.seconds * 1000,
                                 ).toLocaleDateString()
                               : "Recent"}
                           </p>
@@ -1011,25 +1008,25 @@ const CustomChatComponent = ({
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-4 text-gray-500">
+                  <div className="py-4 text-center text-gray-500">
                     No resources found
                   </div>
                 )}
               </div>
             </div>
 
-            <div className="flex justify-between mt-6">
+            <div className="mt-6 flex justify-between">
               <button
-                className="px-6 py-2 border border-gray-300 rounded-full"
+                className="rounded-full border border-gray-300 px-6 py-2"
                 onClick={() => setShowAssignModal(false)}
               >
                 Cancel
               </button>
               <button
-                className={`px-6 py-2 rounded-full ${
+                className={`rounded-full px-6 py-2 ${
                   selectedResources.length > 0
                     ? "bg-green-500 text-white"
-                    : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                    : "cursor-not-allowed bg-gray-200 text-gray-500"
                 }`}
                 disabled={selectedResources.length === 0}
                 onClick={handleAssign}

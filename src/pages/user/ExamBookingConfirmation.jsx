@@ -12,8 +12,6 @@ const ExamBookingConfirmation = ({
   loading,
   // type = "Introductory Call",
 }) => {
-  console.log("tutor", tutor);
-
   return (
     <>
       <Modal

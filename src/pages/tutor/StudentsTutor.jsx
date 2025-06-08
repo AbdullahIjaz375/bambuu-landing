@@ -20,12 +20,12 @@ const StudentsTutor = () => {
 
   const handleChannelLeave = (channelId) => {
     setChannels((prevChannels) =>
-      prevChannels.filter((channel) => channel.id !== channelId)
+      prevChannels.filter((channel) => channel.id !== channelId),
     );
 
     if (selectedChannel?.id === channelId) {
       const remainingChannels = channels.filter(
-        (channel) => channel.id !== channelId
+        (channel) => channel.id !== channelId,
       );
 
       if (remainingChannels.length > 0) {
@@ -47,7 +47,7 @@ const StudentsTutor = () => {
     if (channel.type === "one_to_one_chat") {
       const members = Object.values(channel.state?.members || {});
       const otherMember = members.find(
-        (member) => member.user?.id !== user.uid
+        (member) => member.user?.id !== user.uid,
       );
       if (otherMember && otherMember.user) {
         return {
@@ -93,19 +93,15 @@ const StudentsTutor = () => {
             watch: true,
             state: true,
             presence: true,
-          }
+          },
         );
 
         // IMPORTANT: For tutors, verify premium individual class channels have all members
         const premiumClassChannels = allChannels.filter(
-          (ch) => ch.type === "premium_individual_class"
+          (ch) => ch.type === "premium_individual_class",
         );
 
         if (premiumClassChannels.length > 0) {
-          console.log(
-            `Tutor checking ${premiumClassChannels.length} premium class channels...`
-          );
-
           const { syncPremiumClassChannelName } = await import(
             "../../services/channelNameSync"
           );
@@ -130,26 +126,20 @@ const StudentsTutor = () => {
                   const classData = classDoc.data();
                   const enrolledStudents = classData.classMemberIds || [];
                   const currentMembers = Object.keys(
-                    channel.state?.members || {}
+                    channel.state?.members || {},
                   );
 
                   // Check if any enrolled students are missing from the channel
                   for (const studentId of enrolledStudents) {
                     if (!currentMembers.includes(studentId)) {
-                      console.log(
-                        `Student ${studentId} missing from channel ${channel.id}, adding...`
-                      );
                       try {
                         await channel.addMembers([
                           { user_id: studentId, role: "channel_member" },
                         ]);
-                        console.log(
-                          `Added student ${studentId} to channel ${channel.id}`
-                        );
                       } catch (addError) {
                         console.error(
                           `Failed to add student to channel:`,
-                          addError
+                          addError,
                         );
                       }
                     }
@@ -158,10 +148,10 @@ const StudentsTutor = () => {
               } catch (memberCheckError) {
                 console.error(
                   `Error checking channel members:`,
-                  memberCheckError
+                  memberCheckError,
                 );
               }
-            })
+            }),
           );
         }
 
@@ -183,7 +173,7 @@ const StudentsTutor = () => {
               // For group chats, count online members
               const members = Object.values(channel.state?.members || {});
               const onlineCount = members.filter(
-                (member) => member.user?.online
+                (member) => member.user?.online,
               ).length;
               const totalMembers = members.length;
               onlineStatusMap[channel.id] = { onlineCount, totalMembers };
@@ -191,7 +181,7 @@ const StudentsTutor = () => {
               // For individual student chats, track student's online status
               const members = Object.values(channel.state?.members || {});
               const otherMember = members.find(
-                (member) => member.user?.id !== user.uid
+                (member) => member.user?.id !== user.uid,
               );
               onlineStatusMap[channel.id] = {
                 isOnline: otherMember?.user?.online || false,
@@ -216,7 +206,7 @@ const StudentsTutor = () => {
               // Re-sort channels based on the latest message
               setChannels((prevChannels) => {
                 const updatedChannels = prevChannels.map((ch) =>
-                  ch.id === channel.id ? channel : ch
+                  ch.id === channel.id ? channel : ch,
                 );
                 return updatedChannels.sort((a, b) => {
                   const aLastMessage = a.state.last_message_at
@@ -239,7 +229,7 @@ const StudentsTutor = () => {
                 // Update group online count
                 const members = Object.values(channel.state?.members || {});
                 const onlineCount = members.filter(
-                  (member) => member.user?.online
+                  (member) => member.user?.online,
                 ).length;
                 const totalMembers = members.length;
 
@@ -254,7 +244,7 @@ const StudentsTutor = () => {
                 // Update student online status
                 const members = Object.values(channel.state?.members || {});
                 const otherMember = members.find(
-                  (member) => member.user?.id !== user.uid
+                  (member) => member.user?.id !== user.uid,
                 );
 
                 setOnlineUsers((prev) => ({
@@ -265,7 +255,7 @@ const StudentsTutor = () => {
                 }));
               }
             });
-          })
+          }),
         );
 
         setUnreadCounts(counts);
@@ -282,7 +272,7 @@ const StudentsTutor = () => {
           return bLastMessage - aLastMessage;
         });
         const validChannels = sortedChannels.filter(
-          (channel) => channel.data.name && channel.data.name.trim() !== ""
+          (channel) => channel.data.name && channel.data.name.trim() !== "",
         );
         setChannels(validChannels);
 
@@ -351,7 +341,7 @@ const StudentsTutor = () => {
         // Use the other user's name for search
         const members = Object.values(channel.state?.members || {});
         const otherMember = members.find(
-          (member) => member.user?.id !== user.uid
+          (member) => member.user?.id !== user.uid,
         );
         searchName =
           otherMember && otherMember.user
@@ -372,8 +362,8 @@ const StudentsTutor = () => {
       (channel) =>
         channel.type === "standard_group" &&
         channel.data.name &&
-        channel.data.name.trim() !== ""
-    )
+        channel.data.name.trim() !== "",
+    ),
   );
 
   // Bammbuu+ chats - premium groups and individual chats
@@ -384,8 +374,8 @@ const StudentsTutor = () => {
           channel.type === "premium_individual_class" ||
           channel.type === "one_to_one_chat") &&
         channel.data.name &&
-        channel.data.name.trim() !== ""
-    )
+        channel.data.name.trim() !== "",
+    ),
   );
 
   const FormateDate = (created_at) => {
@@ -411,10 +401,10 @@ const StudentsTutor = () => {
       return (
         <div
           key={channel.id}
-          className={`flex items-center gap-3 p-3 border cursor-pointer rounded-3xl ${
+          className={`flex cursor-pointer items-center gap-3 rounded-3xl border p-3 ${
             selectedChannel?.id === channel.id
-              ? "bg-[#f0fdf1] border-[#22bf37]"
-              : "bg-white border-[#fbbf12]"
+              ? "border-[#22bf37] bg-[#f0fdf1]"
+              : "border-[#fbbf12] bg-white"
           }`}
           onClick={() => handleChannelSelect(channel)}
         >
@@ -422,7 +412,7 @@ const StudentsTutor = () => {
             <img
               src={otherUser?.image || "/default-avatar.png"}
               alt={otherUser?.name}
-              className="object-cover w-12 h-12 rounded-full"
+              className="h-12 w-12 rounded-full object-cover"
               onError={(e) => {
                 e.target.onerror = null;
                 e.target.src = "/default-avatar.png";
@@ -438,7 +428,7 @@ const StudentsTutor = () => {
           </div>
           {/* Unread badge for one-to-one chats */}
           {unreadCounts[channel.id] > 0 && (
-            <span className="flex items-center justify-center w-6 h-6 ml-2 text-xs text-white bg-[#14B82C] rounded-full">
+            <span className="ml-2 flex h-6 w-6 items-center justify-center rounded-full bg-[#14B82C] text-xs text-white">
               {unreadCounts[channel.id]}
             </span>
           )}
@@ -460,10 +450,10 @@ const StudentsTutor = () => {
     return (
       <div
         key={channel.id}
-        className={`flex items-center gap-3 p-3 border cursor-pointer rounded-3xl ${
+        className={`flex cursor-pointer items-center gap-3 rounded-3xl border p-3 ${
           selectedChannel?.id === channel.id
-            ? "bg-[#ffffea] border-[#fbbf12]"
-            : "bg-white border-[#fbbf12]"
+            ? "border-[#fbbf12] bg-[#ffffea]"
+            : "border-[#fbbf12] bg-white"
         }`}
         onClick={() => handleChannelSelect(channel)}
       >
@@ -471,7 +461,7 @@ const StudentsTutor = () => {
           <img
             src={groupImage}
             alt={groupName}
-            className="object-cover w-12 h-12 rounded-full"
+            className="h-12 w-12 rounded-full object-cover"
             onError={(e) => {
               e.target.onerror = null;
               e.target.src = "/default-avatar.png";
@@ -479,18 +469,18 @@ const StudentsTutor = () => {
           />
         </div>
         <div className="flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-lg font-bold truncate">{groupName}</span>
+          <div className="mb-1 flex items-center gap-2">
+            <span className="truncate text-lg font-bold">{groupName}</span>
           </div>
-          <div className="flex items-center gap-4 flex-wrap">
+          <div className="flex flex-wrap items-center gap-4">
             <div className="flex items-center gap-1">
-              <img src={languageFlag} alt={groupLanguage} className="w-5 h-5" />
+              <img src={languageFlag} alt={groupLanguage} className="h-5 w-5" />
               <span className="text-sm font-medium text-gray-700">
                 {groupLanguage}
               </span>
             </div>
             <div className="flex items-center gap-1">
-              <img src="/svgs/users.svg" alt="members" className="w-5 h-5" />
+              <img src="/svgs/users.svg" alt="members" className="h-5 w-5" />
               <span className="text-sm font-medium text-gray-700">
                 {memberCount}
               </span>
@@ -499,7 +489,7 @@ const StudentsTutor = () => {
         </div>
         {/* Unread badge for group chats */}
         {unreadCounts[channel.id] > 0 && (
-          <span className="flex items-center justify-center w-6 h-6 ml-2 text-xs text-white bg-[#14B82C] rounded-full">
+          <span className="ml-2 flex h-6 w-6 items-center justify-center rounded-full bg-[#14B82C] text-xs text-white">
             {unreadCounts[channel.id]}
           </span>
         )}
@@ -511,7 +501,7 @@ const StudentsTutor = () => {
     return (
       <div className="flex min-h-screen bg-white">
         <Sidebar user={user} />
-        <div className="flex items-center justify-center flex-1">
+        <div className="flex flex-1 items-center justify-center">
           <ClipLoader color="#FFB800" size={40} />
         </div>
       </div>
@@ -521,28 +511,28 @@ const StudentsTutor = () => {
   return (
     <div className="flex h-screen bg-white">
       {/* Sidebar */}
-      <div className="flex-shrink-0 w-64 h-full">
+      <div className="h-full w-64 flex-shrink-0">
         <Sidebar user={user} />
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-x-auto min-w-[calc(100%-16rem)] h-full">
-        <div className="flex-1 px-6 pt-4 bg-white border-2 border-[#e7e7e7] rounded-3xl m-2">
-          <div className="flex items-center justify-between pb-4 mb-6 border-b">
+      <div className="h-full min-w-[calc(100%-16rem)] flex-1 overflow-x-auto">
+        <div className="m-2 flex-1 rounded-3xl border-2 border-[#e7e7e7] bg-white px-6 pt-4">
+          <div className="mb-6 flex items-center justify-between border-b pb-4">
             <div className="flex items-center gap-4">
               <h1 className="text-4xl font-semibold">Students</h1>
             </div>
-            <button className="rounded-full hover:bg-gray-100 border border-[#ffbf00] p-2">
-              <Bell className="w-6 h-6" />
+            <button className="rounded-full border border-[#ffbf00] p-2 hover:bg-gray-100">
+              <Bell className="h-6 w-6" />
             </button>
           </div>
 
-          <div className="flex-1 flex bg-white rounded-3xl m-2 h-[calc(100vh-125px)]">
-            <div className="p-4 bg-[#f6f6f6] w-96 rounded-2xl overflow-hidden flex flex-col">
-              <div className="flex justify-center w-full mb-4 sm:w-auto">
-                <div className="relative inline-flex p-1 bg-gray-100 border border-gray-300 rounded-full">
+          <div className="m-2 flex h-[calc(100vh-125px)] flex-1 rounded-3xl bg-white">
+            <div className="flex w-96 flex-col overflow-hidden rounded-2xl bg-[#f6f6f6] p-4">
+              <div className="mb-4 flex w-full justify-center sm:w-auto">
+                <div className="relative inline-flex rounded-full border border-gray-300 bg-gray-100 p-1">
                   <div
-                    className="absolute top-0 left-0 h-full transition-all duration-300 ease-in-out border border-gray-800 rounded-full bg-amber-400"
+                    className="absolute left-0 top-0 h-full rounded-full border border-gray-800 bg-amber-400 transition-all duration-300 ease-in-out"
                     style={{
                       transform:
                         activeTab === "standard"
@@ -553,13 +543,13 @@ const StudentsTutor = () => {
                   />
                   <button
                     onClick={() => setActiveTab("standard")}
-                    className="relative z-10 w-2/5 px-6 py-1 font-medium text-gray-800 transition-colors rounded-full text-md whitespace-nowrap"
+                    className="text-md relative z-10 w-2/5 whitespace-nowrap rounded-full px-6 py-1 font-medium text-gray-800 transition-colors"
                   >
                     Standard Chats
                   </button>
                   <button
                     onClick={() => setActiveTab("bammbuu")}
-                    className="relative z-10 w-3/5 px-6 py-1 font-medium text-gray-800 transition-colors rounded-full text-md whitespace-nowrap"
+                    className="text-md relative z-10 w-3/5 whitespace-nowrap rounded-full px-6 py-1 font-medium text-gray-800 transition-colors"
                   >
                     bammbuuu+ Chats
                   </button>
@@ -567,7 +557,7 @@ const StudentsTutor = () => {
               </div>
 
               <div className="relative mb-4">
-                <Search className="absolute w-5 h-5 text-[#5d5d5d] left-3 top-3" />
+                <Search className="absolute left-3 top-3 h-5 w-5 text-[#5d5d5d]" />
                 <input
                   type="text"
                   placeholder={
@@ -575,22 +565,22 @@ const StudentsTutor = () => {
                       ? "Search standard chats"
                       : "Search bammbuuu+ chats"
                   }
-                  className="w-full py-2 pl-12 pr-4 border border-gray-200 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
+                  className="w-full rounded-3xl border border-gray-200 py-2 pl-12 pr-4 focus:border-[#14B82C] focus:outline-none focus:ring-0"
                   value={searchQuery}
                   onChange={handleSearchChange}
                 />
               </div>
 
-              <div className="flex-1 space-y-2 overflow-y-auto scrollbar-hide">
+              <div className="scrollbar-hide flex-1 space-y-2 overflow-y-auto">
                 {(activeTab === "standard" ? standardChats : bammbuuChats).map(
                   (channel) => (
                     <ChatItem key={channel.id} channel={channel} />
-                  )
+                  ),
                 )}
               </div>
             </div>
 
-            <div className="flex-1 ml-4">
+            <div className="ml-4 flex-1">
               {selectedChannel ? (
                 <CustomChatComponent
                   channelId={selectedChannel.id}
@@ -601,7 +591,7 @@ const StudentsTutor = () => {
                   name={getChannelDisplayName(selectedChannel, user)}
                 />
               ) : (
-                <div className="flex items-center justify-center h-full text-gray-500">
+                <div className="flex h-full items-center justify-center text-gray-500">
                   Select a chat to start messaging
                 </div>
               )}

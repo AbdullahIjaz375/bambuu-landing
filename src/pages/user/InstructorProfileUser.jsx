@@ -55,17 +55,9 @@ const InstructorProfileUser = () => {
 
   // Handle exam preparation package click
   const handleExamPrepClick = async () => {
-    console.log("[ExamPrep][InstructorProfileUser] Exam prep button clicked", {
-      studentId: user.uid,
-      tutorId,
-    });
     setStepStatusLoading(true);
     setStepStatusError(null);
     try {
-      console.log(
-        "[ExamPrep][InstructorProfileUser] Calling getExamPrepStepStatus",
-        { studentId: user.uid, tutorId },
-      );
       const res = await getExamPrepStepStatus(user.uid, tutorId);
 
       // 1. No active plan
@@ -75,18 +67,12 @@ const InstructorProfileUser = () => {
       }
       // 2. No intro call with this tutor
       if (!res.hasBookedIntroCall) {
-        console.log(
-          "[ExamPrep][InstructorProfileUser] No intro call with this tutor. Opening BookingFlowModal at InstructorProfile step.",
-        );
         setIntroBookingInitialStep(2); // step 2 = InstructorProfile
         setShowIntroBookingFlow(true);
         return;
       }
       // 3. Intro call booked but not completed
       if (res.hasBookedIntroCall && !res.doneWithIntroCall) {
-        console.log(
-          "[ExamPrep][InstructorProfileUser] Intro call booked but not completed. Redirecting to class details.",
-        );
         // You may want to pass the classId if available in the response
         if (res.pendingIntroCallClassId) {
           navigate(`/class-details/${res.pendingIntroCallClassId}`);
@@ -94,25 +80,13 @@ const InstructorProfileUser = () => {
       }
       // 4. Intro call completed, no exam prep class booked
       if (res.doneWithIntroCall && !res.hasBookedExamPrepClass) {
-        console.log(
-          "[ExamPrep][InstructorProfileUser] Intro call completed, no exam prep class. Showing booking modal for this tutor.",
-        );
         setExamPrepBookingInitialStep(3); // step 4
         setShowExamPrepBookingFlow(true);
         return;
       }
-      // if (res.doneWithIntroCall && !res.hasBookedExamPrepClass) {
-      //   console.log(
-      //     "[ExamPrep][InstructorProfileUser] Intro call completed, no exam prep class. Showing booking modal for this tutor.",
-      //   );
-      //   navigate(`/exam-prep/book-classes?tutorId=${tutorId}`);
-      //   return;
-      // }
+
       // 5. Exam prep class booked
       if (res.hasBookedExamPrepClass) {
-        console.log(
-          "[ExamPrep][InstructorProfileUser] Exam prep class booked. Redirecting to all classes with this tutor.",
-        );
         navigate(`/examPreparationUser/${tutorId}`);
         return;
       }

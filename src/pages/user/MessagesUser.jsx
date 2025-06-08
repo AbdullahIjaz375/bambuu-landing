@@ -47,15 +47,15 @@ const MessagesUser = () => {
 
   const handleChannelLeave = (channelId) => {
     setChannels((prevChannels) =>
-      prevChannels.filter((channel) => channel.id !== channelId)
+      prevChannels.filter((channel) => channel.id !== channelId),
     );
 
     if (selectedChannel?.id === channelId) {
       const remainingChannels = channels.filter(
-        (channel) => channel.id !== channelId
+        (channel) => channel.id !== channelId,
       );
       setSelectedChannel(
-        remainingChannels.length > 0 ? remainingChannels[0] : null
+        remainingChannels.length > 0 ? remainingChannels[0] : null,
       );
       if (remainingChannels.length > 0) {
         const firstChannel = remainingChannels[0];
@@ -73,7 +73,7 @@ const MessagesUser = () => {
     if (channel.type === "one_to_one_chat") {
       const members = Object.values(channel.state?.members || {});
       const otherMember = members.find(
-        (member) => member.user?.id !== user.uid
+        (member) => member.user?.id !== user.uid,
       );
       if (otherMember && otherMember.user) {
         return {
@@ -100,18 +100,15 @@ const MessagesUser = () => {
       try {
         // Check if we're already connected as this user
         if (streamClient.userID === user.uid && streamClient.isConnected) {
-          console.log(`Stream client already connected as ${user.uid}`);
           setStreamClientConnected(true);
           return;
         }
 
         // If connected as different user or disconnected, reconnect
         if (streamClient.userID) {
-          console.log(`Disconnecting current user: ${streamClient.userID}`);
           await streamClient.disconnectUser();
         }
 
-        console.log(`Connecting Stream client as ${user.uid}`);
         const token = await fetchChatToken(user.uid);
 
         // Import helper to record the user ID for reconnection attempts
@@ -127,10 +124,9 @@ const MessagesUser = () => {
             image: user.photoUrl || "",
             userType: user.userType || "student",
           },
-          token
+          token,
         );
 
-        console.log(`Stream client connected successfully as ${user.uid}`);
         setStreamClientConnected(true);
       } catch (error) {
         console.error(`Error connecting to Stream client: ${error.message}`);
@@ -138,7 +134,6 @@ const MessagesUser = () => {
 
         // Try one more time after a short delay
         setTimeout(() => {
-          console.log("Retrying Stream connection...");
           connectStreamClient();
         }, 3000);
       }
@@ -154,21 +149,15 @@ const MessagesUser = () => {
   useEffect(() => {
     const loadChannels = async () => {
       if (!user) {
-        console.log("No user, skipping channel load");
         setLoading(false);
         return;
       }
 
       if (!streamClientConnected) {
-        console.log(
-          "Stream client not connected, will try again when connected"
-        );
         return;
       }
 
       try {
-        console.log("Loading channels for user:", user.uid);
-
         // Import connection helper
         const { ensureStreamConnection } = await import(
           "../../services/streamConnectionService"
@@ -197,11 +186,9 @@ const MessagesUser = () => {
           });
         });
 
-        console.log(`Found ${channels.length} total channels for user`);
-
         // IMPORTANT: For each premium individual class, verify the user is actually a member
         const premiumClassChannels = channels.filter(
-          (ch) => ch.type === "premium_individual_class"
+          (ch) => ch.type === "premium_individual_class",
         );
 
         // Also check if user should be in premium classes they're not seeing
@@ -215,10 +202,6 @@ const MessagesUser = () => {
         }
 
         if (premiumClassChannels.length > 0) {
-          console.log(
-            `Processing ${premiumClassChannels.length} premium class channels...`
-          );
-
           const { syncPremiumClassChannelName } = await import(
             "../../services/channelNameSync"
           );
@@ -231,25 +214,18 @@ const MessagesUser = () => {
               // Verify membership
               const currentMembers = Object.keys(channel.state?.members || {});
               if (!currentMembers.includes(user.uid)) {
-                console.log(
-                  `User ${user.uid} not in premium class channel ${channel.id}, fixing...`
-                );
-
                 try {
                   await channel.addMembers([
                     { user_id: user.uid, role: "channel_member" },
                   ]);
-                  console.log(
-                    `Added user ${user.uid} to channel ${channel.id}`
-                  );
                 } catch (addError) {
                   console.error(
                     `Failed to add user to channel ${channel.id}:`,
-                    addError
+                    addError,
                   );
                 }
               }
-            })
+            }),
           );
         }
 
@@ -271,7 +247,7 @@ const MessagesUser = () => {
               // For group chats, count online members
               const members = Object.values(channel.state?.members || {});
               const onlineCount = members.filter(
-                (member) => member.user?.online
+                (member) => member.user?.online,
               ).length;
               const totalMembers = members.length;
               onlineStatusMap[channel.id] = { onlineCount, totalMembers };
@@ -279,7 +255,7 @@ const MessagesUser = () => {
               // For one-to-one chats, track tutor's online status
               const members = Object.values(channel.state?.members || {});
               const otherMember = members.find(
-                (member) => member.user?.id !== user.uid
+                (member) => member.user?.id !== user.uid,
               );
               onlineStatusMap[channel.id] = {
                 isOnline: otherMember?.user?.online || false,
@@ -311,7 +287,7 @@ const MessagesUser = () => {
                 // Update group online count
                 const members = Object.values(channel.state?.members || {});
                 const onlineCount = members.filter(
-                  (member) => member.user?.online
+                  (member) => member.user?.online,
                 ).length;
                 const totalMembers = members.length;
 
@@ -326,7 +302,7 @@ const MessagesUser = () => {
                 // Update tutor online status
                 const members = Object.values(channel.state?.members || {});
                 const otherMember = members.find(
-                  (member) => member.user?.id !== user.uid
+                  (member) => member.user?.id !== user.uid,
                 );
 
                 setOnlineUsers((prev) => ({
@@ -337,17 +313,15 @@ const MessagesUser = () => {
                 }));
               }
             });
-          })
+          }),
         );
         const groupIds = channels
           .filter(
             (channel) =>
               channel.type === "standard_group" ||
-              channel.type === "premium_group"
+              channel.type === "premium_group",
           )
           .map((channel) => channel.id);
-
-        console.log("Group IDs for language data:", groupIds);
 
         // Get group data from Firestore and sync with Stream
         const groupLanguagesData = {};
@@ -364,7 +338,6 @@ const MessagesUser = () => {
                   channelId: groupId,
                   type: channel.type,
                 });
-                console.log(`Channel sync result for ${groupId}:`, result);
               }
 
               // Get group data for local display
@@ -381,7 +354,7 @@ const MessagesUser = () => {
 
                 // Update the channel data with the correct name from Firestore
                 const channelToUpdate = channels.find(
-                  (ch) => ch.id === groupId
+                  (ch) => ch.id === groupId,
                 );
                 if (channelToUpdate) {
                   if (channelToUpdate.data) {
@@ -396,12 +369,8 @@ const MessagesUser = () => {
                       image: groupData.imageUrl || null,
                     };
                   }
-                  console.log(
-                    `Updated channel ${groupId} with name from Firestore: ${groupData.groupName}`
-                  );
                 }
               } else {
-                console.log(`Group document not found for ID: ${groupId}`);
                 // Set defaults for groups without document data
                 groupLanguagesData[groupId] = "Unknown";
                 groupNamesData[groupId] = "Unnamed Group";
@@ -409,10 +378,8 @@ const MessagesUser = () => {
             } catch (syncError) {
               console.error(`Error syncing channel ${groupId}:`, syncError);
             }
-          })
+          }),
         );
-        console.log("Group language data:", groupLanguagesData);
-        console.log("Group name data:", groupNamesData);
 
         setGroupLanguages(groupLanguagesData);
         setGroupNames(groupNamesData);
@@ -422,11 +389,9 @@ const MessagesUser = () => {
 
         // Select channel from URL parameter
         if (urlChannelId) {
-          console.log("URL Channel ID:", urlChannelId);
-
           // First try to find a direct match
           let channelToSelect = channels.find(
-            (channel) => channel.id === urlChannelId
+            (channel) => channel.id === urlChannelId,
           );
 
           // If not found and we're coming from a tutor profile, the channel ID might be combined IDs
@@ -437,12 +402,12 @@ const MessagesUser = () => {
               if (channel.type === "one_to_one_chat") {
                 // Check if channel members include the tutor from the URL
                 const channelMembers = Object.keys(
-                  channel.state?.members || {}
+                  channel.state?.members || {},
                 );
                 // Since urlChannelId might be a combination of userIds, check if it contains the member IDs
                 return channelMembers.some(
                   (memberId) =>
-                    urlChannelId.includes(memberId) && memberId !== user.uid
+                    urlChannelId.includes(memberId) && memberId !== user.uid,
                 );
               }
               return false;
@@ -491,7 +456,7 @@ const MessagesUser = () => {
     if (!channels.length) return;
     // Only fetch for group chats
     const groupChannels = channels.filter(
-      (ch) => ch.type === "standard_group" || ch.type === "premium_group"
+      (ch) => ch.type === "standard_group" || ch.type === "premium_group",
     );
     groupChannels.forEach(async (channel) => {
       try {
@@ -541,7 +506,7 @@ const MessagesUser = () => {
         // Use the other user's name for search
         const members = Object.values(channel.state?.members || {});
         const otherMember = members.find(
-          (member) => member.user?.id !== user.uid
+          (member) => member.user?.id !== user.uid,
         );
         searchName =
           otherMember && otherMember.user
@@ -556,30 +521,9 @@ const MessagesUser = () => {
     });
   };
 
-  console.log("Channels:  --", channels);
-  // Log all channels with types for debugging
-  console.log(
-    "All channels:",
-    channels.map((ch) => ({
-      id: ch.id,
-      type: ch.type,
-      name: ch.data.name,
-      members: Object.keys(ch.state?.members || {}),
-    }))
-  );
   // Standard chats - only standard_group
   const standardChats = filterChannels(
-    channels.filter((channel) => channel.type === "standard_group")
-  );
-
-  console.log(
-    "Filtered for standard tab:",
-    standardChats.length,
-    standardChats.map((ch) => ({
-      id: ch.id,
-      type: ch.type,
-      name: ch.data?.name || "Unnamed channel",
-    }))
+    channels.filter((channel) => channel.type === "standard_group"),
   );
 
   // Bammbuu+ chats - all other types (premium_group, premium_individual_class, one_to_one_chat)
@@ -587,17 +531,9 @@ const MessagesUser = () => {
     (channel) =>
       channel.type === "premium_group" ||
       channel.type === "premium_individual_class" ||
-      channel.type === "one_to_one_chat"
+      channel.type === "one_to_one_chat",
   );
-  console.log(
-    "Filtered for bammbuu+ tab:",
-    filteredForBammbuu.length,
-    filteredForBammbuu.map((ch) => ({
-      id: ch.id,
-      type: ch.type,
-      name: ch.data?.name || "Unnamed",
-    }))
-  );
+
   const ChatItem = ({ channel, isInstructor }) => {
     // One-to-one chat UI (unchanged)
     if (
@@ -608,10 +544,10 @@ const MessagesUser = () => {
       return (
         <div
           key={channel.id}
-          className={`flex items-center gap-3 p-3 border cursor-pointer rounded-3xl ${
+          className={`flex cursor-pointer items-center gap-3 rounded-3xl border p-3 ${
             selectedChannel?.id === channel.id
-              ? "bg-[#f0fdf1] border-[#22bf37]"
-              : "bg-white border-[#fbbf12]"
+              ? "border-[#22bf37] bg-[#f0fdf1]"
+              : "border-[#fbbf12] bg-white"
           }`}
           onClick={() => handleChannelSelect(channel)}
         >
@@ -619,7 +555,7 @@ const MessagesUser = () => {
             <img
               src={otherUser?.image || "/default-avatar.png"}
               alt={otherUser?.name}
-              className="object-cover w-12 h-12 rounded-full"
+              className="h-12 w-12 rounded-full object-cover"
               onError={(e) => {
                 e.target.onerror = null;
                 e.target.src = "/default-avatar.png";
@@ -635,7 +571,7 @@ const MessagesUser = () => {
           </div>
           {/* Unread badge for one-to-one chats */}
           {unreadCounts[channel.id] > 0 && (
-            <span className="flex items-center justify-center w-6 h-6 ml-2 text-xs text-white bg-[#14B82C] rounded-full">
+            <span className="ml-2 flex h-6 w-6 items-center justify-center rounded-full bg-[#14B82C] text-xs text-white">
               {unreadCounts[channel.id]}
             </span>
           )}
@@ -658,10 +594,10 @@ const MessagesUser = () => {
     return (
       <div
         key={channel.id}
-        className={`flex items-center gap-3 p-3 border cursor-pointer rounded-3xl ${
+        className={`flex cursor-pointer items-center gap-3 rounded-3xl border p-3 ${
           selectedChannel?.id === channel.id
-            ? "bg-[#ffffea] border-[#fbbf12]"
-            : "bg-white border-[#fbbf12]"
+            ? "border-[#fbbf12] bg-[#ffffea]"
+            : "border-[#fbbf12] bg-white"
         }`}
         onClick={() => handleChannelSelect(channel)}
       >
@@ -669,7 +605,7 @@ const MessagesUser = () => {
           <img
             src={groupImage}
             alt={groupName}
-            className="object-cover w-12 h-12 rounded-full"
+            className="h-12 w-12 rounded-full object-cover"
             onError={(e) => {
               e.target.onerror = null;
               e.target.src = "/default-avatar.png";
@@ -677,18 +613,18 @@ const MessagesUser = () => {
           />
         </div>
         <div className="flex-1">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-lg font-bold truncate">{groupName}</span>
+          <div className="mb-1 flex items-center gap-2">
+            <span className="truncate text-lg font-bold">{groupName}</span>
           </div>
-          <div className="flex items-center gap-4 flex-wrap">
+          <div className="flex flex-wrap items-center gap-4">
             <div className="flex items-center gap-1">
-              <img src={languageFlag} alt={groupLanguage} className="w-5 h-5" />
+              <img src={languageFlag} alt={groupLanguage} className="h-5 w-5" />
               <span className="text-sm font-medium text-gray-700">
                 {groupLanguage}
               </span>
             </div>
             <div className="flex items-center gap-1">
-              <img src="/svgs/users.svg" alt="members" className="w-5 h-5" />
+              <img src="/svgs/users.svg" alt="members" className="h-5 w-5" />
               <span className="text-sm font-medium text-gray-700">
                 {memberCount}
               </span>
@@ -697,7 +633,7 @@ const MessagesUser = () => {
         </div>
         {/* Unread badge for group chats */}
         {unreadCounts[channel.id] > 0 && (
-          <span className="flex items-center justify-center w-6 h-6 ml-2 text-xs text-white bg-[#14B82C] rounded-full">
+          <span className="ml-2 flex h-6 w-6 items-center justify-center rounded-full bg-[#14B82C] text-xs text-white">
             {unreadCounts[channel.id]}
           </span>
         )}
@@ -711,11 +647,10 @@ const MessagesUser = () => {
       try {
         // Only fix channel names if we have channels and the stream client is connected
         if (channels.length > 0 && streamClientConnected) {
-          console.log("Fixing channel names for display...");
           const premiumChannels = channels.filter(
             (ch) =>
               ch.type === "premium_group" ||
-              ch.type === "premium_individual_class"
+              ch.type === "premium_individual_class",
           );
 
           // Update names for premium channels
@@ -723,16 +658,13 @@ const MessagesUser = () => {
             try {
               const result = await updateChannelNameFromFirestore(
                 channel.id,
-                channel.type
+                channel.type,
               );
               if (result.fixed) {
-                console.log(
-                  `Fixed channel name for ${channel.id} to "${result.name}"`
-                );
               }
             } catch (error) {
               console.warn(
-                `Error fixing channel ${channel.id} name: ${error.message}`
+                `Error fixing channel ${channel.id} name: ${error.message}`,
               );
             }
           }
@@ -750,7 +682,7 @@ const MessagesUser = () => {
     return (
       <div className="flex min-h-screen bg-white">
         <Sidebar user={user} />
-        <div className="flex items-center justify-center flex-1">
+        <div className="flex flex-1 items-center justify-center">
           <ClipLoader color="#14B82C" size={50} />
         </div>
       </div>
@@ -760,24 +692,24 @@ const MessagesUser = () => {
   return (
     <div className="flex h-screen bg-white">
       {/* Sidebar */}
-      <div className="flex-shrink-0 w-64 h-full">
+      <div className="h-full w-64 flex-shrink-0">
         <Sidebar user={user} />
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-x-auto min-w-[calc(100%-16rem)] h-full">
-        <div className="flex-1 px-6 pt-4 bg-white border-2 border-[#e7e7e7] rounded-3xl m-2">
-          <div className="flex items-center justify-between pb-4 mb-6 border-b">
+      <div className="h-full min-w-[calc(100%-16rem)] flex-1 overflow-x-auto">
+        <div className="m-2 flex-1 rounded-3xl border-2 border-[#e7e7e7] bg-white px-6 pt-4">
+          <div className="mb-6 flex items-center justify-between border-b pb-4">
             <div className="flex items-center gap-4">
               <h1 className="text-4xl font-semibold">Community</h1>
             </div>
           </div>
-          <div className="flex-1 flex bg-white rounded-3xl m-2 h-[calc(100vh-125px)]">
-            <div className="p-4 bg-[#f6f6f6] w-96 rounded-2xl overflow-hidden flex flex-col">
-              <div className="flex justify-center w-full mb-4 sm:w-auto">
-                <div className="relative inline-flex p-1 bg-gray-100 border border-gray-300 rounded-full">
+          <div className="m-2 flex h-[calc(100vh-125px)] flex-1 rounded-3xl bg-white">
+            <div className="flex w-96 flex-col overflow-hidden rounded-2xl bg-[#f6f6f6] p-4">
+              <div className="mb-4 flex w-full justify-center sm:w-auto">
+                <div className="relative inline-flex rounded-full border border-gray-300 bg-gray-100 p-1">
                   <div
-                    className="absolute top-0 left-0 h-full transition-all duration-300 ease-in-out border border-gray-800 rounded-full bg-amber-400"
+                    className="absolute left-0 top-0 h-full rounded-full border border-gray-800 bg-amber-400 transition-all duration-300 ease-in-out"
                     style={{
                       transform:
                         activeTab === "standard"
@@ -788,20 +720,20 @@ const MessagesUser = () => {
                   />
                   <button
                     onClick={() => setActiveTab("standard")}
-                    className="relative z-10 w-2/5 px-6 py-1 font-medium text-gray-800 transition-colors rounded-full text-md whitespace-nowrap"
+                    className="text-md relative z-10 w-2/5 whitespace-nowrap rounded-full px-6 py-1 font-medium text-gray-800 transition-colors"
                   >
                     Standard Chats
                   </button>
                   <button
                     onClick={() => setActiveTab("bammbuu")}
-                    className="relative z-10 w-3/5 px-6 py-1 font-medium text-gray-800 transition-colors rounded-full text-md whitespace-nowrap"
+                    className="text-md relative z-10 w-3/5 whitespace-nowrap rounded-full px-6 py-1 font-medium text-gray-800 transition-colors"
                   >
                     bammbuuu+ Chats
                   </button>
                 </div>
               </div>
               <div className="relative mb-4">
-                <Search className="absolute w-5 h-5 text-[#5d5d5d] left-3 top-3" />
+                <Search className="absolute left-3 top-3 h-5 w-5 text-[#5d5d5d]" />
                 <input
                   type="text"
                   value={searchQuery}
@@ -811,10 +743,10 @@ const MessagesUser = () => {
                       ? "Search standard chats"
                       : "Search bammbuuu+ chats"
                   }
-                  className="w-full py-2 pl-12 pr-4 border border-gray-200 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
+                  className="w-full rounded-3xl border border-gray-200 py-2 pl-12 pr-4 focus:border-[#14B82C] focus:outline-none focus:ring-0"
                 />
               </div>{" "}
-              <div className="flex-1 space-y-2 overflow-y-auto scrollbar-hide">
+              <div className="scrollbar-hide flex-1 space-y-2 overflow-y-auto">
                 {activeTab === "bammbuu" ? (
                   // For bammbuu+ chats
                   <>
@@ -840,7 +772,7 @@ const MessagesUser = () => {
                           console.log(
                             `Rendering bammbuu+ chat: ${channel.id}, type: ${
                               channel.type
-                            }, name: ${channel.data?.name || "Unnamed"}`
+                            }, name: ${channel.data?.name || "Unnamed"}`,
                           );
 
                           return (
@@ -855,7 +787,7 @@ const MessagesUser = () => {
                           );
                         })
                     ) : (
-                      <div className="flex flex-col items-center justify-center h-64">
+                      <div className="flex h-64 flex-col items-center justify-center">
                         <p className="text-xl font-semibold text-gray-500">
                           No Bammbuu+ chats found
                         </p>
@@ -875,7 +807,7 @@ const MessagesUser = () => {
                         console.log(
                           `Rendering standard chat: ${channel.id}, type: ${
                             channel.type
-                          }, name: ${channel.data?.name || "Unnamed"}`
+                          }, name: ${channel.data?.name || "Unnamed"}`,
                         );
 
                         return (
@@ -887,7 +819,7 @@ const MessagesUser = () => {
                         );
                       })
                     ) : (
-                      <div className="flex flex-col items-center justify-center h-64">
+                      <div className="flex h-64 flex-col items-center justify-center">
                         <p className="text-xl font-semibold text-gray-500">
                           No standard chats found
                         </p>
@@ -895,7 +827,7 @@ const MessagesUser = () => {
                           (Looking for{" "}
                           {
                             channels.filter(
-                              (ch) => ch.type === "standard_group"
+                              (ch) => ch.type === "standard_group",
                             ).length
                           }{" "}
                           standard_group channels)
@@ -907,7 +839,7 @@ const MessagesUser = () => {
               </div>
             </div>
 
-            <div className="flex-1 ml-4">
+            <div className="ml-4 flex-1">
               {selectedChannel ? (
                 <CustomChatComponent
                   channelId={selectedChannel.id}
@@ -918,7 +850,7 @@ const MessagesUser = () => {
                   name={getChannelDisplayName(selectedChannel, user)}
                 />
               ) : (
-                <div className="flex items-center justify-center h-full text-gray-500">
+                <div className="flex h-full items-center justify-center text-gray-500">
                   Select a chat to start messaging
                 </div>
               )}

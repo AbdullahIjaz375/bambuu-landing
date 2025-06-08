@@ -10,7 +10,6 @@ const ProtectedRoute = ({ children, requiredRole }) => {
   const currentPath = location.pathname + location.search + location.hash;
   useEffect(() => {
     if (!user) {
-      console.log("Saving redirect path:", currentPath);
       // Save both session and local storage for better persistence
       sessionStorage.setItem("redirectAfterLogin", currentPath);
       localStorage.setItem("redirectAfterLogin", currentPath);
@@ -133,19 +132,9 @@ const ProtectedRoute = ({ children, requiredRole }) => {
 
     // If we still don't have a user type, or it's not in the allowed roles
     if (!effectiveUserType || !roles.includes(effectiveUserType)) {
-      console.log(
-        "Access denied: Required role(s):",
-        roles,
-        "User type:",
-        effectiveUserType,
-      );
-
       // Instead of immediately redirecting to unauthorized, redirect to login if it seems
       // like there might be authentication problems
       if (!effectiveUserType || effectiveUserType === "undefined") {
-        console.log(
-          "No user type detected, redirecting to login instead of unauthorized",
-        );
         return <Navigate to="/login" />;
       } else {
         return <Navigate to="/unauthorized" />;

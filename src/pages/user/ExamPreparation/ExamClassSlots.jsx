@@ -12,7 +12,6 @@ const ExamClassSlots = ({
   user,
   tutorId,
 }) => {
-  console.log("[ExamClassSlots] slots prop received:", slots);
   const [currentStep, setCurrentStep] = useState(1); // 1: date selection, 2: time selection, 3: confirmation
   const [selectedDates, setSelectedDates] = useState([]);
   const [selectedTimes, setSelectedTimes] = useState({}); // Object to store time for each date
@@ -135,9 +134,7 @@ const ExamClassSlots = ({
         tutorId: tutorId,
         slots,
       };
-      console.log("[ExamClassSlots] Booking payload:", payload);
       const resp = await bookExamPrepClass(payload);
-      console.log("[ExamClassSlots] API response:", resp);
       setBooking(false);
       if (onBookingComplete)
         onBookingComplete({ dates: selectedDates, times: selectedTimes });

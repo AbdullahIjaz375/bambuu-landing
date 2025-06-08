@@ -53,12 +53,6 @@ export const enforceChannelNameFromFirestore = async (channel) => {
 
           // Check if the channel name is incorrect
           if (correctName && channel.data.name !== correctName) {
-            console.log(
-              `Fixing channel name from "${
-                channel.data.name || "unnamed"
-              }" to "${correctName}"`
-            );
-
             // Fix local state - this is what affects the UI immediately
             channel.data.name = correctName;
             if (correctImage) channel.data.image = correctImage;
@@ -72,22 +66,20 @@ export const enforceChannelNameFromFirestore = async (channel) => {
                 image: correctImage,
                 description: correctDescription,
               });
-              console.log(`Successfully updated ${channel.id} server data`);
             } catch (updateError) {
               console.warn(
-                `Server-side update failed, but local data was fixed: ${updateError.message}`
+                `Server-side update failed, but local data was fixed: ${updateError.message}`,
               );
               // We don't reject here since local data is more important for UI
             }
 
             return { fixed: true, name: correctName };
           } else {
-            console.log(`Channel name "${correctName}" already correct`);
             return { fixed: false, message: "Name already correct" };
           }
         } else {
           console.warn(
-            `No Firestore document found for ${channel.id} in ${collectionName}`
+            `No Firestore document found for ${channel.id} in ${collectionName}`,
           );
           return { fixed: false, error: "No Firestore data found" };
         }
@@ -176,7 +168,7 @@ export const refreshUserChannels = async () => {
         });
       } catch (error) {
         console.error(
-          `Error refreshing channel ${channel.id}: ${error.message}`
+          `Error refreshing channel ${channel.id}: ${error.message}`,
         );
         results.push({
           id: channel.id,

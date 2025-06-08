@@ -128,7 +128,7 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
             return classDoc.exists()
               ? { id: classDoc.id, ...classDoc.data() }
               : null;
-          })
+          }),
         );
         setClasses(classesData.filter(Boolean));
       }
@@ -149,7 +149,7 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
   const renderClasses = () => {
     if (classes.length === 0) {
       return (
-        <div className="flex items-center justify-center h-96">
+        <div className="flex h-96 items-center justify-center">
           <EmptyState message="No classes available" />
         </div>
       );
@@ -255,9 +255,6 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
         const groupData = groupDoc.data();
 
         if (groupData.memberIds.includes(user.uid)) {
-          console.log(
-            `User ${user.uid} is already a member of group ${groupId}`
-          );
           return;
         }
 
@@ -285,10 +282,6 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
             type: channelType,
             role: "channel_member",
           });
-
-          console.log(
-            `Successfully added user ${user.uid} to group ${groupId} and its chat`
-          );
         } catch (error) {
           console.error("Error joining group:", error);
           throw new Error("Failed to join group");
@@ -315,7 +308,7 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
       const eligibility = checkJoiningEligibility(
         user,
         group.isPremium ? "Premium" : "Standard",
-        user.subscriptions
+        user.subscriptions,
       );
 
       if (!eligibility.canJoin) {
@@ -331,7 +324,6 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
       const groupData = groupDoc.data();
 
       if (groupData.memberIds.includes(user.uid)) {
-        console.log(`User ${user.uid} is already a member of group ${groupId}`);
         return;
       }
 
@@ -360,16 +352,9 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
             type: channelType,
             role: "channel_member",
           });
-
-          console.log(
-            `User ${user.uid} added to group ${groupId} and its channel`
-          );
         } catch (streamError) {
           console.error("Stream error (continuing anyway):", streamError);
           // Don't throw here - we've already updated Firestore, which is the source of truth
-          console.log(
-            `User ${user.uid} added to group ${groupId} in Firestore, Stream sync pending`
-          );
         }
       } catch (error) {
         console.error("Error joining group:", error);
@@ -391,9 +376,8 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
                 name: user.name || "",
                 image: user.photoUrl || "",
               },
-              token
+              token,
             );
-            console.log(`Stream client reconnected for user ${user.uid}`);
 
             // Now force refresh all channels for this user
             const { refreshUserChannels } = await import(
@@ -422,8 +406,8 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-[100vh] ">
-        <div className="p-8 bg-white rounded-lg">
+      <div className="flex h-[100vh] items-center justify-center">
+        <div className="rounded-lg bg-white p-8">
           <ClipLoader color="#FFB800" size={40} />
         </div>
       </div>
@@ -433,11 +417,11 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
   if (error) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-        <div className="p-8 bg-white rounded-lg">
+        <div className="rounded-lg bg-white p-8">
           <p className="mb-4 text-red-500">{error}</p>
           <button
             onClick={onClose}
-            className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
+            className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
           >
             Close
           </button>
@@ -453,12 +437,12 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
   return (
     <>
       <div className="flex min-h-screen">
-        <div className="flex flex-1 m-6 border rounded-3xl">
-          <div className="flex flex-col w-full p-6 mx-4 bg-white rounded-3xl">
-            <div className="flex items-center justify-between pb-4 mb-6 border-b">
+        <div className="m-6 flex flex-1 rounded-3xl border">
+          <div className="mx-4 flex w-full flex-col rounded-3xl bg-white p-6">
+            <div className="mb-6 flex items-center justify-between border-b pb-4">
               <div className="flex items-center gap-4">
                 <button
-                  className="p-3 bg-gray-100 rounded-full"
+                  className="rounded-full bg-gray-100 p-3"
                   onClick={handleBack}
                 >
                   <ArrowLeft size="30" />
@@ -469,48 +453,48 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
               </div>
             </div>
 
-            <div className="flex flex-1 h-screen gap-6 overflow-hidden">
+            <div className="flex h-screen flex-1 gap-6 overflow-hidden">
               {/* Left sidebar */}
               <div
-                className={`w-1/4 h-[90vh]  p-6 rounded-3xl shrink-0 ${
+                className={`h-[90vh] w-1/4 shrink-0 rounded-3xl p-6 ${
                   group.isPremium ? "bg-[#e6fce8]" : "bg-[#ffffea]"
                 }`}
               >
                 {" "}
-                <div className="flex flex-col items-center justify-between h-full text-center">
+                <div className="flex h-full flex-col items-center justify-between text-center">
                   <div className="flex flex-col items-center text-center">
                     <img
                       src={group.imageUrl}
                       alt={group.groupName}
-                      className="object-cover w-24 h-24 mb-4 rounded-full md:w-32 md:h-32"
+                      className="mb-4 h-24 w-24 rounded-full object-cover md:h-32 md:w-32"
                     />
                     <h3 className="mb-2 text-xl font-semibold md:text-2xl">
                       {group.groupName}
                     </h3>
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="mb-2 flex items-center gap-2">
                       <div className="flex flex-row items-center space-x-1">
                         <img
                           src={
                             group.groupLearningLanguage === "English"
                               ? "/svgs/xs-us.svg"
                               : group.groupLearningLanguage === "Spanish"
-                              ? "/svgs/xs-spain.svg"
-                              : "/svgs/eng-spanish-xs.svg"
+                                ? "/svgs/xs-spain.svg"
+                                : "/svgs/eng-spanish-xs.svg"
                           }
                           alt={
                             group.groupLearningLanguage === "English"
                               ? "US Flag"
                               : "Spain Flag"
                           }
-                          className="w-5 h-5 sm:w-auto"
+                          className="h-5 w-5 sm:w-auto"
                         />
-                        <span className="text-sm md:text-md">
+                        <span className="md:text-md text-sm">
                           {group.groupLearningLanguage}
                         </span>
                       </div>
                     </div>
-                    <div className="flex flex-col items-center mt-2 md:flex-row md:space-x-40">
-                      <div className="flex items-center gap-1 mb-2 md:mb-4">
+                    <div className="mt-2 flex flex-col items-center md:flex-row md:space-x-40">
+                      <div className="mb-2 flex items-center gap-1 md:mb-4">
                         <img
                           src={group.groupAdminImageUrl}
                           alt="admin"
@@ -521,7 +505,7 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
                           {t("group-details.admin-label")}
                         </span>
                       </div>
-                      <div className="flex items-center gap-1 mb-2 md:mb-4">
+                      <div className="mb-2 flex items-center gap-1 md:mb-4">
                         <img
                           alt="bammbuu"
                           src="/svgs/users.svg"
@@ -555,10 +539,10 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
               </div>
 
               {/* Main content */}
-              <div className="flex-1 h-[90vh] overflow-y-auto scrollbar-hide">
-                <div className="h-full overflow-y-auto scrollbar-hide">
+              <div className="scrollbar-hide h-[90vh] flex-1 overflow-y-auto">
+                <div className="scrollbar-hide h-full overflow-y-auto">
                   {loading ? (
-                    <div className="flex items-center justify-center h-full">
+                    <div className="flex h-full items-center justify-center">
                       <ClipLoader color="#FFB800" size={40} />
                     </div>
                   ) : (
@@ -567,15 +551,15 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
                 </div>
               </div>
             </div>
-            <div className="flex flex-row items-center justify-between mt-2">
+            <div className="mt-2 flex flex-row items-center justify-between">
               <button
-                className="px-8 py-2 text-lg text-black border border-black rounded-full "
+                className="rounded-full border border-black px-8 py-2 text-lg text-black"
                 onClick={handleBack}
               >
                 {t("group-details.buttons.cancel")}
               </button>
               <button
-                className="px-8 text-lg py-2 text-black bg-[#ffbf00] border border-black rounded-full "
+                className="rounded-full border border-black bg-[#ffbf00] px-8 py-2 text-lg text-black"
                 onClick={handleJoinConfirm}
               >
                 {isJoining

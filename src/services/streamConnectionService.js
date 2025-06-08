@@ -14,7 +14,6 @@ export const ensureStreamConnection = async (operation) => {
   try {
     // If client is not connected and we're not already trying to connect
     if (!streamClient.isConnected && !isConnecting) {
-      console.log("Stream client not connected, reconnecting...");
       isConnecting = true;
 
       try {
@@ -24,7 +23,6 @@ export const ensureStreamConnection = async (operation) => {
         if (userId) {
           // Store the user ID for future reconnections
           lastUserId = userId;
-          console.log(`Reconnecting as user ${userId}`);
 
           try {
             // Try to get user from session storage
@@ -41,30 +39,20 @@ export const ensureStreamConnection = async (operation) => {
                   {
                     id: userId,
                   },
-                  token
-                );
-
-                console.log(
-                  "Stream client reconnected successfully with fresh token"
+                  token,
                 );
               } catch (tokenError) {
                 console.warn(
                   "Token fetch failed, using dev token fallback:",
-                  tokenError.message
+                  tokenError.message,
                 );
 
                 await streamClient.connectUser(
                   {
                     id: userId,
                   },
-                  streamClient.devToken(userId)
+                  streamClient.devToken(userId),
                 );
-                console.log(
-                  "Stream client reconnected with dev token fallback"
-                );
-
-                // No need to update user role after connection
-                console.log("Using default user roles");
               }
             } else {
               // If no user info in session, use dev token
@@ -72,12 +60,8 @@ export const ensureStreamConnection = async (operation) => {
                 {
                   id: userId,
                 },
-                streamClient.devToken(userId)
+                streamClient.devToken(userId),
               );
-              console.log("Stream client reconnected with dev token");
-
-              // No need to update user role - using default Stream permissions
-              console.log("Using default Stream role settings");
             }
           } catch (connectionError) {
             console.error("Connection error:", connectionError);
@@ -135,8 +119,6 @@ export const setLastUserId = (userId) => {
  */
 export const refreshUserChannels = async (userId) => {
   try {
-    console.log(`Refreshing channels for user ${userId}`);
-
     // Step 1: Make sure we have a fresh token that includes the new group membership
     // Disconnect and reconnect to refresh the token
     if (streamClient.userID) {
@@ -152,10 +134,8 @@ export const refreshUserChannels = async (userId) => {
       {
         id: userId,
       },
-      token
+      token,
     );
-
-    console.log(`Reconnected with fresh token for user ${userId}`);
 
     // Step 2: Now query all channels with this fresh connection
     const filter = {
@@ -179,7 +159,7 @@ export const refreshUserChannels = async (userId) => {
         state: true,
         presence: true,
         limit: 100, // Increased limit to catch more channels
-      }
+      },
     );
 
     // Step 4: Update channel names from Firestore for all channels
@@ -196,7 +176,6 @@ export const refreshUserChannels = async (userId) => {
       try {
         // Use the enhanced channel name enforcement utility
         const result = await enforceChannelNameFromFirestore(channel);
-        console.log(`Channel name enforcement result: `, result);
 
         // Additional fallback - for groups, sync with groups collection
         if (
@@ -207,12 +186,6 @@ export const refreshUserChannels = async (userId) => {
           if (groupDoc.exists()) {
             const groupData = groupDoc.data();
             if (groupData.groupName) {
-              // Update the channel data locally - this affects the UI display
-              console.log(
-                `Ensuring channel name: "${groupData.groupName}" (was: "${
-                  channel.data.name || "unnamed"
-                }")`
-              );
               channel.data.name = groupData.groupName;
               if (channel.name !== groupData.groupName) {
                 channel.name = groupData.groupName; // Also set directly on channel object
@@ -232,11 +205,6 @@ export const refreshUserChannels = async (userId) => {
           if (classDoc.exists()) {
             const classData = classDoc.data();
             if (classData.className) {
-              console.log(
-                `Ensuring class channel name: "${classData.className}" (was: "${
-                  channel.data.name || "unnamed"
-                }")`
-              );
               channel.data.name = classData.className;
               if (channel.name !== classData.className) {
                 channel.name = classData.className; // Also set directly on channel object
@@ -253,17 +221,10 @@ export const refreshUserChannels = async (userId) => {
 
         // Force watch the channel to refresh local state
         await channel.watch();
-        console.log(
-          `Force watched channel: ${channel.id} with name: ${
-            channel.data.name || "unnamed"
-          }`
-        );
       } catch (error) {
         console.error(`Error updating channel ${channel.id}: ${error.message}`);
       }
     }
-
-    console.log(`Refreshed ${channels.length} channels for user ${userId}`);
 
     // Return detailed channel info for debugging
     return channels.map((channel) => ({

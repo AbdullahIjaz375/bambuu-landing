@@ -7,8 +7,6 @@ import { db } from "../firebaseConfig";
  */
 export const syncPremiumClassChannelName = async (channelId) => {
   try {
-    console.log(`Syncing channel name for premium class: ${channelId}`);
-
     // Get the class data from Firestore
     const classDoc = await getDoc(doc(db, "classes", channelId));
     if (!classDoc.exists()) {
@@ -25,16 +23,6 @@ export const syncPremiumClassChannelName = async (channelId) => {
     } // Get the Stream channel
     const channel = streamClient.channel("premium_individual_class", channelId);
     await channel.watch();
-
-    console.log(`Current channel name: "${channel.data.name || "unnamed"}"`);
-    console.log(`Target name from Firestore: "${correctName}"`);
-
-    // ALWAYS update the channel name to ensure it matches Firestore
-    console.log(
-      `Updating channel name from "${
-        channel.data.name || "unnamed"
-      }" to "${correctName}"`
-    );
 
     // Update the channel metadata
     await channel.update({
@@ -68,7 +56,6 @@ export const syncPremiumClassChannelName = async (channelId) => {
       channel.state.name = correctName;
     }
 
-    console.log(`Successfully updated channel name to: ${correctName}`);
     return true;
   } catch (error) {
     console.error(`Error syncing channel name for ${channelId}:`, error);
@@ -87,16 +74,11 @@ export const syncAllPremiumClassChannels = async (userId) => {
       members: { $in: [userId] },
     });
 
-    console.log(`Found ${channels.length} premium class channels to sync`);
-
     const results = await Promise.all(
-      channels.map((channel) => syncPremiumClassChannelName(channel.id))
+      channels.map((channel) => syncPremiumClassChannelName(channel.id)),
     );
 
     const successCount = results.filter(Boolean).length;
-    console.log(
-      `Successfully synced ${successCount}/${channels.length} channels`
-    );
 
     return { total: channels.length, synced: successCount };
   } catch (error) {
@@ -110,22 +92,17 @@ export const syncAllPremiumClassChannels = async (userId) => {
  */
 export const verifyUserPremiumClassChannels = async (userId) => {
   try {
-    console.log(`Verifying premium class channels for user ${userId}`);
-
     // Get user's enrolled classes
     const { getDoc, doc } = await import("firebase/firestore");
     const { db } = await import("../firebaseConfig");
 
     const userDoc = await getDoc(doc(db, "students", userId));
     if (!userDoc.exists()) {
-      console.log(`User ${userId} not found in students collection`);
       return;
     }
 
     const userData = userDoc.data();
     const enrolledClasses = userData.enrolledClasses || [];
-
-    console.log(`User ${userId} is enrolled in classes: ${enrolledClasses}`);
 
     // For each enrolled class, check if it's an Individual Premium class
     for (const classId of enrolledClasses) {
@@ -135,34 +112,23 @@ export const verifyUserPremiumClassChannels = async (userId) => {
           const classData = classDoc.data();
 
           if (classData.classType === "Individual Premium") {
-            console.log(
-              `Checking premium class channel ${classId} for user ${userId}`
-            );
-
             // Check if user is in the Stream channel
             const channel = streamClient.channel(
               "premium_individual_class",
-              classId
+              classId,
             );
             await channel.watch();
 
             const currentMembers = Object.keys(channel.state?.members || {});
             if (!currentMembers.includes(userId)) {
-              console.log(
-                `User ${userId} missing from channel ${classId}, adding...`
-              );
-
               try {
                 await channel.addMembers([
                   { user_id: userId, role: "channel_member" },
                 ]);
-                console.log(
-                  `Successfully added user ${userId} to channel ${classId}`
-                );
               } catch (addError) {
                 console.error(
                   `Failed to add user ${userId} to channel ${classId}:`,
-                  addError
+                  addError,
                 );
               }
             }
@@ -177,7 +143,7 @@ export const verifyUserPremiumClassChannels = async (userId) => {
     }
   } catch (error) {
     console.error(
-      `Error verifying user premium class channels: ${error.message}`
+      `Error verifying user premium class channels: ${error.message}`,
     );
   }
 };

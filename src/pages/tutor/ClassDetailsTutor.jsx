@@ -551,7 +551,6 @@ const ClassDetailsTutor = ({ onClose }) => {
   const isExamPrep =
     classData.classType === "exam_prep" ||
     classData.classType === "introductory_call";
-  console.log(members, "members in class details tutor");
 
   if (isExamPrep) {
     if (loading) {

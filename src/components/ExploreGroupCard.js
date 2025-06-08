@@ -36,7 +36,7 @@ const ExploreGroupDetailsModal = ({ group, onClose, onJoinClick }) => {
             return classDoc.exists()
               ? { id: classDoc.id, ...classDoc.data() }
               : null;
-          })
+          }),
         );
         setClasses(classesData.filter(Boolean));
       }
@@ -55,7 +55,7 @@ const ExploreGroupDetailsModal = ({ group, onClose, onJoinClick }) => {
   const renderClasses = () => {
     if (classes.length === 0) {
       return (
-        <div className="flex items-center justify-center h-64">
+        <div className="flex h-64 items-center justify-center">
           <p className="text-gray-500">No classes available</p>
         </div>
       );
@@ -64,20 +64,20 @@ const ExploreGroupDetailsModal = ({ group, onClose, onJoinClick }) => {
     return (
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {classes.map((classItem) => (
-          <div key={classItem.id} className="p-4 bg-white rounded-lg shadow">
-            <div className="relative w-full h-48 mb-4 overflow-hidden rounded-lg">
+          <div key={classItem.id} className="rounded-lg bg-white p-4 shadow">
+            <div className="relative mb-4 h-48 w-full overflow-hidden rounded-lg">
               <img
                 src={classItem.imageUrl || "/images/panda.png"}
                 alt={classItem.className}
-                className="object-cover w-full h-full"
+                className="h-full w-full object-cover"
               />
             </div>
             <h3 className="mb-2 text-xl font-medium">{classItem.className}</h3>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="px-3 py-1 text-sm bg-yellow-200 rounded-full">
+            <div className="mb-2 flex items-center gap-2">
+              <span className="rounded-full bg-yellow-200 px-3 py-1 text-sm">
                 {group.groupLearningLanguage}
               </span>
-              <span className="px-3 py-1 text-sm bg-yellow-200 rounded-full">
+              <span className="rounded-full bg-yellow-200 px-3 py-1 text-sm">
                 Advanced
               </span>
             </div>
@@ -86,7 +86,7 @@ const ExploreGroupDetailsModal = ({ group, onClose, onJoinClick }) => {
                 <img
                   src={classItem.teacherImageUrl || "/images/panda.png"}
                   alt={classItem.teacherName}
-                  className="w-6 h-6 rounded-full"
+                  className="h-6 w-6 rounded-full"
                 />
                 <span className="text-sm text-gray-600">
                   {classItem.teacherName} (Admin)
@@ -105,12 +105,12 @@ const ExploreGroupDetailsModal = ({ group, onClose, onJoinClick }) => {
   return (
     <>
       <div className="fixed inset-0 z-40 flex items-center justify-center bg-black bg-opacity-50">
-        <div className="w-full max-w-5xl p-6 mx-4 bg-white rounded-3xl">
-          <div className="flex items-center justify-between mb-6">
+        <div className="mx-4 w-full max-w-5xl rounded-3xl bg-white p-6">
+          <div className="mb-6 flex items-center justify-between">
             <h2 className="text-2xl font-semibold">Group Details</h2>
             <button
               onClick={onClose}
-              className="p-2 rounded-full hover:bg-gray-100"
+              className="rounded-full p-2 hover:bg-gray-100"
             >
               <X size={24} />
             </button>
@@ -118,27 +118,27 @@ const ExploreGroupDetailsModal = ({ group, onClose, onJoinClick }) => {
 
           <div className="flex gap-6">
             {/* Left sidebar */}
-            <div className="w-1/3 p-6 bg-[#fffef0] rounded-2xl">
+            <div className="w-1/3 rounded-2xl bg-[#fffef0] p-6">
               <div className="flex flex-col items-center text-center">
                 <img
                   src={group.imageUrl}
                   alt={group.groupName}
-                  className="w-32 h-32 mb-4 rounded-full"
+                  className="mb-4 h-32 w-32 rounded-full"
                 />
                 <h3 className="mb-2 text-2xl font-medium">{group.groupName}</h3>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="px-3 py-1 text-sm bg-yellow-200 rounded-full">
+                <div className="mb-2 flex items-center gap-2">
+                  <span className="rounded-full bg-yellow-200 px-3 py-1 text-sm">
                     {group.groupLearningLanguage}
                   </span>
-                  <span className="px-3 py-1 text-sm bg-yellow-200 rounded-full">
+                  <span className="rounded-full bg-yellow-200 px-3 py-1 text-sm">
                     Advanced
                   </span>
                 </div>
-                <div className="flex items-center gap-2 mb-4">
+                <div className="mb-4 flex items-center gap-2">
                   <img
                     src={group.groupAdminImageUrl || "/images/panda.png"}
                     alt={group.groupAdminName}
-                    className="w-6 h-6 rounded-full"
+                    className="h-6 w-6 rounded-full"
                   />
                   <span className="text-sm">
                     {group.groupAdminName} (Admin)
@@ -151,11 +151,11 @@ const ExploreGroupDetailsModal = ({ group, onClose, onJoinClick }) => {
             {/* Main content */}
             <div className="flex-1">
               {loading ? (
-                <div className="flex items-center justify-center h-64">
+                <div className="flex h-64 items-center justify-center">
                   <ClipLoader color="#FFB800" size={40} />
                 </div>
               ) : (
-                <div className="overflow-y-auto max-h-[600px]">
+                <div className="max-h-[600px] overflow-y-auto">
                   {renderClasses()}
                 </div>
               )}
@@ -163,13 +163,13 @@ const ExploreGroupDetailsModal = ({ group, onClose, onJoinClick }) => {
           </div>
           <div className="flex flex-row items-center justify-between">
             <button
-              className="w-40 py-2 mt-2 font-medium text-black border border-black rounded-full"
+              className="mt-2 w-40 rounded-full border border-black py-2 font-medium text-black"
               onClick={onClose}
             >
               Cancel
             </button>
             <button
-              className="w-40 mt-2 py-2 font-medium text-black bg-[#ffbf00] rounded-full hover:bg-[#ffbf00] border border-black"
+              className="mt-2 w-40 rounded-full border border-black bg-[#ffbf00] py-2 font-medium text-black hover:bg-[#ffbf00]"
               onClick={onJoinClick}
             >
               Join
@@ -315,7 +315,7 @@ const GroupCard = ({ group }) => {
       const eligibility = checkJoiningEligibility(
         user,
         isPremium ? "Premium" : "Standard",
-        user.subscriptions
+        user.subscriptions,
       );
 
       if (!eligibility.canJoin) {
@@ -360,9 +360,6 @@ const GroupCard = ({ group }) => {
       } catch (streamError) {
         console.error("Stream error (continuing anyway):", streamError);
         // Don't throw here - we've already updated Firestore, which is the source of truth
-        console.log(
-          `User ${user.uid} added to group ${groupId} in Firestore, Stream sync pending`
-        );
       }
       // For premium groups, refresh channels to ensure they appear in the user's channel list
       if (isPremium) {
@@ -381,9 +378,8 @@ const GroupCard = ({ group }) => {
                 name: user.name || "",
                 image: user.photoUrl || "",
               },
-              token
+              token,
             );
-            console.log(`Stream client reconnected for user ${user.uid}`);
 
             // Now force refresh all channels for this user
             const { refreshUserChannels } = await import(
@@ -418,21 +414,21 @@ const GroupCard = ({ group }) => {
   return (
     <>
       <div
-        className="w-full max-w-sm mx-auto hover:cursor-pointer"
+        className="mx-auto w-full max-w-sm hover:cursor-pointer"
         onClick={handleClick}
       >
         <div
-          className={`rounded-[32px] border h-[340px] overflow-hidden ${
+          className={`h-[340px] overflow-hidden rounded-[32px] border ${
             isPremium
-              ? "bg-[#f0fdf1] border-[#14B82C]"
-              : "bg-[#ffffea] border-[#ffc310]"
+              ? "border-[#14B82C] bg-[#f0fdf1]"
+              : "border-[#ffc310] bg-[#ffffea]"
           }`}
         >
-          <div className="flex flex-col items-center p-4 h-full">
+          <div className="flex h-full flex-col items-center p-4">
             {/* Group Image */}
-            <div className="relative w-32 h-32 mb-4">
+            <div className="relative mb-4 h-32 w-32">
               {isPremium && (
-                <div className="absolute z-10 -translate-x-1/2 w-28 left-1/2 -top-3">
+                <div className="absolute -top-3 left-1/2 z-10 w-28 -translate-x-1/2">
                   <img
                     alt="bammbuu"
                     src="/svgs/bammbuu-plus-grp-tag.svg"
@@ -443,60 +439,60 @@ const GroupCard = ({ group }) => {
               <img
                 src={imageUrl}
                 alt={groupName}
-                className="object-cover w-full h-full rounded-full"
+                className="h-full w-full rounded-full object-cover"
               />
             </div>
 
             {/* Group Name */}
             <h2
-              className="max-w-full mb-2 text-xl font-bold text-center text-gray-900 truncate"
+              className="mb-2 max-w-full truncate text-center text-xl font-bold text-gray-900"
               title={groupName}
             >
               {groupName}
             </h2>
 
             {/* Language and Level */}
-            <div className="flex flex-wrap items-center justify-center gap-2 mb-4">
+            <div className="mb-4 flex flex-wrap items-center justify-center gap-2">
               <div className="flex items-center gap-2">
                 <img
                   src={
                     groupLearningLanguage === "English"
                       ? "/svgs/xs-us.svg"
                       : groupLearningLanguage === "Spanish"
-                      ? "/svgs/xs-spain.svg"
-                      : "/svgs/eng-spanish-xs.svg"
+                        ? "/svgs/xs-spain.svg"
+                        : "/svgs/eng-spanish-xs.svg"
                   }
                   alt={
                     groupLearningLanguage === "English"
                       ? "US Flag"
                       : "Spain Flag"
                   }
-                  className="w-4 h-4"
+                  className="h-4 w-4"
                 />
-                <span className="text-md text-green-900 truncate max-w-[120px]">
+                <span className="text-md max-w-[120px] truncate text-green-900">
                   {groupLearningLanguage}
                 </span>
               </div>
               {level !== "" && (
-                <span className="px-3 py-1 text-xs text-gray-800 bg-[#fff885] rounded-full">
+                <span className="rounded-full bg-[#fff885] px-3 py-1 text-xs text-gray-800">
                   {level}
                 </span>
               )}
             </div>
 
             {/* Admin and Members */}
-            <div className="flex items-center justify-between w-full mb-6">
+            <div className="mb-6 flex w-full items-center justify-between">
               <div className="flex items-center gap-2">
                 {groupAdminImageUrl ? (
                   <img
                     src={groupAdminImageUrl}
                     alt={groupAdminName}
-                    className="object-cover w-5 h-5 rounded-full"
+                    className="h-5 w-5 rounded-full object-cover"
                   />
                 ) : (
-                  <User className="w-5 h-5 text-gray-600" />
+                  <User className="h-5 w-5 text-gray-600" />
                 )}
-                <span className="text-xs text-gray-700 truncate">
+                <span className="truncate text-xs text-gray-700">
                   {groupAdminName.length > 10
                     ? `${groupAdminName.slice(0, 10)}...`
                     : groupAdminName}{" "}
@@ -514,7 +510,7 @@ const GroupCard = ({ group }) => {
             {/* Join Button */}
             {!(user && memberIds.includes(user.uid)) && (
               <button
-                className="w-full py-2 font-medium text-black bg-[#ffbf00] rounded-full hover:bg-[#e5ae00] border border-black mt-auto"
+                className="mt-auto w-full rounded-full border border-black bg-[#ffbf00] py-2 font-medium text-black hover:bg-[#e5ae00]"
                 onClick={handleJoinClick}
               >
                 Join Group
@@ -537,7 +533,7 @@ const GroupCard = ({ group }) => {
       <Modal
         isOpen={showJoinConfirmation}
         onRequestClose={() => setShowJoinConfirmation(false)}
-        className="z-50 max-w-sm p-6 mx-auto mt-40 bg-white outline-none rounded-3xl font-urbanist"
+        className="z-50 mx-auto mt-40 max-w-sm rounded-3xl bg-white p-6 font-urbanist outline-none"
         overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
       >
         <div className="text-center">
@@ -547,19 +543,19 @@ const GroupCard = ({ group }) => {
           <p className="mb-6 text-gray-600">
             {group.classType === "Individual Premium"
               ? t(
-                  "exploreGroupCard.confirmJoining.descriptionPremiumIndividual"
+                  "exploreGroupCard.confirmJoining.descriptionPremiumIndividual",
                 )
               : t("exploreGroupCard.confirmJoining.description")}
           </p>
           <div className="flex flex-row gap-2">
             <button
-              className="w-full py-2 font-medium border border-gray-300 rounded-full hover:bg-gray-50"
+              className="w-full rounded-full border border-gray-300 py-2 font-medium hover:bg-gray-50"
               onClick={() => setShowJoinConfirmation(false)}
             >
               {t("exploreGroupCard.confirmJoining.cancel")}
             </button>
             <button
-              className="w-full py-2 font-medium text-black bg-[#14b82c] rounded-full hover:bg-[#119924] border border-[#042f0c]"
+              className="w-full rounded-full border border-[#042f0c] bg-[#14b82c] py-2 font-medium text-black hover:bg-[#119924]"
               onClick={handleJoinConfirm}
             >
               {isJoining

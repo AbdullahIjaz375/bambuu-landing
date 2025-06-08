@@ -22,12 +22,6 @@ const updateChannelNameFromFirestore = async (channelId, channelType) => {
 
         // Update the channel's local data to show the correct name in the UI
         if (groupData.groupName && channel.data.name !== groupData.groupName) {
-          console.log(
-            `Fixing channel name from "${channel.data.name || "unnamed"}" to "${
-              groupData.groupName
-            }"`
-          );
-
           // Update local channel data
           channel.data.name = groupData.groupName;
           channel.data.image = groupData.imageUrl || channel.data.image;
@@ -50,12 +44,6 @@ const updateChannelNameFromFirestore = async (channelId, channelType) => {
 
         // Update the channel's local data to show the correct name in the UI
         if (classData.className && channel.data.name !== classData.className) {
-          console.log(
-            `Fixing class channel name from "${
-              channel.data.name || "unnamed"
-            }" to "${classData.className}"`
-          );
-
           // Update local channel data
           channel.data.name = classData.className;
           channel.data.image = classData.imageUrl || channel.data.image;

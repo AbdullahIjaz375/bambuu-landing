@@ -340,8 +340,6 @@ const Signup = () => {
       );
 
       // Log authentication information for debugging
-      console.log("Auth provider data:", providerData);
-      console.log("Is Google provider:", isGoogleProvider);
 
       const userRef = doc(db, "students", user.uid);
       const userDoc = await getDoc(userRef);
@@ -402,10 +400,6 @@ const Signup = () => {
         // Log what was actually stored
         const userAccountDoc = await getDoc(doc(db, "user_accounts", user.uid));
         if (userAccountDoc.exists()) {
-          console.log(
-            "User account data from database (Google):",
-            userAccountDoc.data(),
-          );
         } else {
           console.log(
             "Failed to retrieve user account document for Google login",
@@ -554,7 +548,6 @@ const Signup = () => {
 
         await setDoc(userRef, newUserData);
 
-        console.log("User data set in Firestore:", newUserData);
         await setDoc(doc(db, "user_accounts", user.uid), {
           uid: user.uid,
           email: user.email,
@@ -634,7 +627,6 @@ const Signup = () => {
           const fcmToken = await getToken(messaging, {
             vapidKey: process.env.REACT_APP_FIREBASE_VAPID_KEY,
           });
-          console.log("FCM Token:", fcmToken);
 
           await updateDoc(userRef, {
             fcmToken: fcmToken,

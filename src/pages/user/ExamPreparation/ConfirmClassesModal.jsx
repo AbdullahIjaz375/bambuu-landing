@@ -70,16 +70,13 @@ const ConfirmClassesModal = ({
         tutorId: tutorId,
         slots,
       };
-      console.log("[ConfirmClassesModal] Booking payload:", payload);
       const resp = await bookExamPrepClass(payload);
-      console.log("[ConfirmClassesModal] API response:", resp);
       setBooking(false);
       setShowSuccessModal(true);
       if (onConfirm) onConfirm();
     } catch (err) {
       setBooking(false);
       setError(err.message || "Booking failed");
-      console.log("[ConfirmClassesModal] API error:", err);
     }
   };
 

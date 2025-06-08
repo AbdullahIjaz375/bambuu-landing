@@ -296,6 +296,7 @@ const ClassDetailsUser = ({ onClose }) => {
   const [error, setError] = useState(null);
   const { classId } = useParams();
   const { t } = useTranslation();
+  const { setSelectedClassId } = useContext(ClassContext);
 
   const fetchClass = async () => {
     if (!classId) {
@@ -789,10 +790,10 @@ const ClassDetailsUser = ({ onClose }) => {
                   </div>
                 </div>
                 <button
-                  className="mt-2 w-full rounded-full border border-black bg-[#FFBF00] py-2 text-base font-medium text-black hover:bg-[#ffd94d]"
+                  className="mt-2 w-full rounded-full border border-black bg-[#ffbf00] px-4 py-2 text-black hover:bg-[#ffbf00]"
                   onClick={() => {
-                    const callUrl = `/call`;
-                    window.open(callUrl, "_blank");
+                    setSelectedClassId(classId);
+                    window.open(`/call?classId=${classId}`, "_blank");
                   }}
                 >
                   {joinLabel}

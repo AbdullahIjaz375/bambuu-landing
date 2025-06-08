@@ -19,12 +19,7 @@ async function apiRequest(url, options = {}, token) {
       ...(options.headers || {}),
     },
   };
-  console.log("[ExamPrep][API REQUEST]", {
-    url,
-    method: requestOptions.method,
-    headers: requestOptions.headers,
-    body: requestOptions.body,
-  });
+
   try {
     const res = await fetch(url, requestOptions);
     const text = await res.text();
@@ -43,11 +38,7 @@ async function apiRequest(url, options = {}, token) {
       });
       throw new Error((data && data.message) || res.statusText);
     }
-    console.log("[ExamPrep][API RESPONSE]", {
-      url,
-      status: res.status,
-      response: data,
-    });
+
     return data;
   } catch (err) {
     console.error("[ExamPrep][API FETCH ERROR]", {

@@ -146,7 +146,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
           return userDoc.exists()
             ? { id: userDoc.id, ...userDoc.data() }
             : null;
-        })
+        }),
       );
       setMembers(membersData.filter(Boolean));
     } catch (error) {
@@ -209,7 +209,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
   const renderMembers = () => {
     if (members.length === 0) {
       return (
-        <div className="flex items-center justify-center h-96">
+        <div className="flex h-96 items-center justify-center">
           <EmptyState message="No members available" />
         </div>
       );
@@ -220,17 +220,17 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
         {members.map((member) => (
           <div
             key={member.id}
-            className="flex items-center justify-between px-4 py-3 border border-gray-200 hover:bg-gray-50 rounded-3xl"
+            className="flex items-center justify-between rounded-3xl border border-gray-200 px-4 py-3 hover:bg-gray-50"
           >
             <div className="flex items-center gap-3">
               <div className="relative">
                 <img
                   src={member.photoUrl || "/images/panda.png"}
                   alt={member.name}
-                  className="object-cover rounded-full w-9 h-9"
+                  className="h-9 w-9 rounded-full object-cover"
                 />
                 {member.id === classData.adminId && (
-                  <div className="absolute flex items-center justify-center w-4 h-4 bg-yellow-400 rounded-full -top-1 -right-1">
+                  <div className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-yellow-400">
                     <span className="text-xs text-black">★</span>
                   </div>
                 )}
@@ -277,7 +277,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
     classId,
     userId,
     tutorId,
-    shouldDeductCredits = false
+    shouldDeductCredits = false,
   ) => {
     setIsEnrolling(true);
     setError(null);
@@ -338,7 +338,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
       if (slots.length > 0) {
         updateData.classDateTime = new Timestamp(
           Math.floor(slots[0].getTime() / 1000),
-          0
+          0,
         );
       }
 
@@ -357,16 +357,12 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
         updates.push(
           updateDoc(tutorRef, {
             tutorStudentIds: arrayUnion(userId),
-          })
+          }),
         );
       } // Execute all updates in parallel
       await Promise.all(updates); // For Individual Premium classes, add the user to the Stream chat channel
       if (classData.classType === "Individual Premium") {
         try {
-          console.log(
-            `Adding user ${userId} to premium class channel ${classId}`
-          );
-
           // Import the stream channel helpers
           const { addUserToChannel } = await import(
             "../../services/streamChannelHelpers"
@@ -377,11 +373,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
             classId,
             userId,
             "premium_individual_class", // Use string instead of ChannelType constant
-            "channel_member"
-          );
-
-          console.log(
-            `Successfully added user ${userId} to premium class channel ${classId}`
+            "channel_member",
           );
 
           // Ensure the channel name is synced after adding the user
@@ -394,13 +386,11 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
 
           // Try alternative approach if direct addition fails
           try {
-            console.log("Trying alternative channel membership approach...");
-
             // Get the channel and force add the user
             const { streamClient } = await import("../../config/stream");
             const channel = streamClient.channel(
               "premium_individual_class",
-              classId
+              classId,
             );
 
             // Watch the channel first
@@ -410,13 +400,11 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
             await channel.addMembers([
               { user_id: userId, role: "channel_member" },
             ]);
-
-            console.log(`Alternative method succeeded for user ${userId}`);
           } catch (alternativeError) {
             console.error("Alternative method also failed:", alternativeError);
             // Don't block class enrollment for chat issues
             toast.error(
-              "Class enrolled successfully, but chat access may need refresh"
+              "Class enrolled successfully, but chat access may need refresh",
             );
           }
         }
@@ -489,12 +477,12 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
       },
       // Enrollment function
       (useCredits) =>
-        enrollInClass(classId, user.uid, classData.adminId, useCredits)
+        enrollInClass(classId, user.uid, classData.adminId, useCredits),
     );
   };
 
   const [selectedRecurrenceType, setSelectedRecurrenceType] = useState(
-    classData?.recurrenceTypes?.[0] || ""
+    classData?.recurrenceTypes?.[0] || "",
   );
   const [totalClasses, setTotalClasses] = useState("1");
   const [languageLevel, setLanguageLevel] = useState("Beginner");
@@ -502,7 +490,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
   const calculateRecurringSlots = (
     startDateTimeMillis, // Expect milliseconds
     recurrenceType,
-    numberOfClasses
+    numberOfClasses,
   ) => {
     if (typeof startDateTimeMillis !== "number") {
       console.error("Invalid startDateTime:", startDateTimeMillis);
@@ -546,19 +534,17 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
     return slots;
   };
   const renderRecurrenceOptions = () => (
-    <div className="space-y-4 ">
+    <div className="space-y-4">
       <label className="block text-xl font-semibold">Class Type</label>
       <div className="flex flex-wrap gap-3">
         {classData?.recurrenceTypes?.map((type) => (
           <label
             key={type}
-            className={`
-              inline-flex text-lg items-center px-4 py-1.5 rounded-full cursor-pointer border border-black
-              ${
-                selectedRecurrenceType === type
-                  ? "bg-[#e6fce8] text-black"
-                  : "bg-gray-50 text-gray-500"
-              }`}
+            className={`inline-flex cursor-pointer items-center rounded-full border border-black px-4 py-1.5 text-lg ${
+              selectedRecurrenceType === type
+                ? "bg-[#e6fce8] text-black"
+                : "bg-gray-50 text-gray-500"
+            }`}
           >
             <input
               type="radio"
@@ -576,19 +562,17 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
   const languageLevels = ["Beginner", "Intermediate", "Advanced"];
 
   const renderLanguageLevel = () => (
-    <div className="space-y-4 ">
+    <div className="space-y-4">
       <label className="block text-xl font-semibold">Language Level</label>
       <div className="flex flex-wrap gap-3">
         {languageLevels?.map((level) => (
           <label
             key={level}
-            className={`
-              inline-flex text-lg items-center px-4 py-1.5 rounded-full cursor-pointer border border-black
-              ${
-                languageLevel === level
-                  ? "bg-[#e6fce8] text-black"
-                  : "bg-gray-50 text-gray-500"
-              }`}
+            className={`inline-flex cursor-pointer items-center rounded-full border border-black px-4 py-1.5 text-lg ${
+              languageLevel === level
+                ? "bg-[#e6fce8] text-black"
+                : "bg-gray-50 text-gray-500"
+            }`}
           >
             <input
               type="radio"
@@ -614,10 +598,10 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
 
     return (
       <div className="space-y-2">
-        <label className="block text-xl font-medium ">Total Classes</label>
+        <label className="block text-xl font-medium">Total Classes</label>
         <input
           type="number"
-          className="w-full p-3 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
+          className="w-full rounded-3xl border border-gray-300 p-3 focus:border-[#14B82C] focus:outline-none focus:ring-0"
           placeholder="Enter total number of classes"
           value={totalClasses}
           onChange={(e) => setTotalClasses(e.target.value)}
@@ -662,7 +646,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
             currentTime.getDate() + 1,
             classHours,
             classMinutes,
-            classSeconds
+            classSeconds,
           );
         } else
           switch (selectedRecurrenceType) {
@@ -675,7 +659,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
                 currentTime.getDate() + 1,
                 classHours,
                 classMinutes,
-                classSeconds
+                classSeconds,
               );
               break;
 
@@ -693,7 +677,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
                 currentTime.getDate() + daysUntilNext,
                 classHours,
                 classMinutes,
-                classSeconds
+                classSeconds,
               );
               break;
 
@@ -719,7 +703,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
                 baseDate.getDate(),
                 classHours,
                 classMinutes,
-                classSeconds
+                classSeconds,
               );
               break;
             default:
@@ -774,7 +758,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex h-screen items-center justify-center">
         <ClipLoader color="#FFB800" size={40} />
       </div>
     );
@@ -783,11 +767,11 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
   if (error) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-        <div className="p-8 bg-white rounded-lg">
+        <div className="rounded-lg bg-white p-8">
           <p className="mb-4 text-red-500">{error}</p>
           <button
             onClick={onClose}
-            className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
+            className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
           >
             Close
           </button>
@@ -832,12 +816,12 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
   return (
     <>
       <div className="flex min-h-screen">
-        <div className="flex flex-1 m-6 border rounded-3xl">
-          <div className="flex flex-col w-full p-6 mx-4 bg-white rounded-3xl">
-            <div className="flex items-center justify-between pb-4 mb-6 border-b">
+        <div className="m-6 flex flex-1 rounded-3xl border">
+          <div className="mx-4 flex w-full flex-col rounded-3xl bg-white p-6">
+            <div className="mb-6 flex items-center justify-between border-b pb-4">
               <div className="flex items-center gap-4">
                 <button
-                  className="p-3 bg-gray-100 rounded-full"
+                  className="rounded-full bg-gray-100 p-3"
                   onClick={() => navigate(-1)}
                 >
                   <ArrowLeft size="30" />
@@ -846,31 +830,31 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
               </div>
             </div>
 
-            <div className="flex flex-1 min-h-0 gap-6">
+            <div className="flex min-h-0 flex-1 gap-6">
               <div
-                className={`w-[420px] max-w-[420px] flex-shrink-0 p-6 rounded-3xl ${getClassTypeColor(
-                  classData.classType
+                className={`w-[420px] max-w-[420px] flex-shrink-0 rounded-3xl p-6 ${getClassTypeColor(
+                  classData.classType,
                 )}`}
               >
-                <div className="flex flex-col items-center justify-between h-full text-center">
+                <div className="flex h-full flex-col items-center justify-between text-center">
                   <div className="flex flex-col items-center text-center">
                     <img
                       src={classData.imageUrl}
                       alt={classData.className}
-                      className="w-24 h-24 mb-4 rounded-full md:w-32 md:h-32"
+                      className="mb-4 h-24 w-24 rounded-full md:h-32 md:w-32"
                     />
                     <h3 className="mb-2 text-xl font-medium md:text-3xl">
                       {classData.className}
                     </h3>
                     {/* Language, Level, 1:1 Tag Row */}
-                    <div className="flex flex-row items-center gap-2 mb-2 flex-wrap justify-center">
+                    <div className="mb-2 flex flex-row flex-wrap items-center justify-center gap-2">
                       <img
                         src={
                           classData.language === "English"
                             ? "/svgs/xs-us.svg"
                             : classData.language === "Spanish"
-                            ? "/svgs/xs-spain.svg"
-                            : "/svgs/eng-spanish-xs.svg"
+                              ? "/svgs/xs-spain.svg"
+                              : "/svgs/eng-spanish-xs.svg"
                         }
                         alt={
                           classData.language === "English"
@@ -879,25 +863,25 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
                         }
                         className="w-5"
                       />
-                      <span className="text-sm md:text-md">
+                      <span className="md:text-md text-sm">
                         {classData.language}
                       </span>
                       {classData.classType === "Individual Premium" && (
-                        <span className="px-2 py-[2px] bg-[#fff885] rounded-full text-xs md:text-sm font-medium text-center">
+                        <span className="rounded-full bg-[#fff885] px-2 py-[2px] text-center text-xs font-medium md:text-sm">
                           1:1 Class
                         </span>
                       )}
-                      <span className="px-3 py-1 text-sm bg-yellow-200 rounded-full md:text-md">
+                      <span className="md:text-md rounded-full bg-yellow-200 px-3 py-1 text-sm">
                         {classData.languageLevel}
                       </span>
                     </div>
                     {/* Time, Date, Participants Row */}
-                    <div className="flex flex-row items-center gap-6 mb-2 flex-wrap justify-center">
+                    <div className="mb-2 flex flex-row flex-wrap items-center justify-center gap-6">
                       <div className="flex items-center gap-1">
                         <img alt="time" src="/svgs/clock.svg" />
                         <span className="text-xs sm:text-sm">
                           {new Date(
-                            classData.classDateTime.seconds * 1000
+                            classData.classDateTime.seconds * 1000,
                           ).toLocaleTimeString("en-US", {
                             hour: "2-digit",
                             minute: "2-digit",
@@ -909,7 +893,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
                         <img alt="date" src="/svgs/calendar.svg" />
                         <span className="text-sm">
                           {new Date(
-                            classData.classDateTime.seconds * 1000
+                            classData.classDateTime.seconds * 1000,
                           ).toLocaleDateString("en-US")}
                         </span>
                       </div>
@@ -921,15 +905,15 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
                       </div>
                     </div>
                     {/* Recurrence and Location Row */}
-                    <div className="flex flex-row items-center gap-6 mb-2 flex-wrap justify-center">
+                    <div className="mb-2 flex flex-row flex-wrap items-center justify-center gap-6">
                       <div className="flex items-center gap-1">
                         <img alt="recurrence" src="/svgs/repeate-music.svg" />
                         <span className="text-xs sm:text-sm">
                           {classData.classType === "Individual Premium"
                             ? classData.selectedRecurrenceType || "None"
                             : classData.recurrenceTypes?.length > 0
-                            ? classData.recurrenceTypes.join(", ")
-                            : "None"}
+                              ? classData.recurrenceTypes.join(", ")
+                              : "None"}
                         </span>
                       </div>
                       <div className="flex items-center gap-1">
@@ -940,9 +924,9 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
                       </div>
                     </div>
                     {/* Class Description with See more/less, never overflowing */}
-                    <div className="mt-4 mb-6 w-full max-w-full px-2 text-gray-600 overflow-hidden">
+                    <div className="mb-6 mt-4 w-full max-w-full overflow-hidden px-2 text-gray-600">
                       <p
-                        className={`whitespace-pre-line break-words text-sm text-center mx-auto w-full max-w-full overflow-hidden ${
+                        className={`mx-auto w-full max-w-full overflow-hidden whitespace-pre-line break-words text-center text-sm ${
                           !showFullDescription ? "line-clamp-3" : ""
                         }`}
                         style={{ wordBreak: "break-word" }}
@@ -952,7 +936,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
                       {classData.classDescription &&
                         classData.classDescription.length > 180 && (
                           <button
-                            className="mt-1 text-xs text-[#14b82c] underline hover:text-[#119924] focus:outline-none block mx-auto"
+                            className="mx-auto mt-1 block text-xs text-[#14b82c] underline hover:text-[#119924] focus:outline-none"
                             onClick={() =>
                               setShowFullDescription((prev) => !prev)
                             }
@@ -979,7 +963,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
                     {/* Book Class Button - now disables if already booked or full */}
                     {isAlreadyBooked || isClassFull ? (
                       <button
-                        className="w-full px-4 py-2 text-gray-500 bg-gray-200 border border-gray-400 rounded-full cursor-not-allowed"
+                        className="w-full cursor-not-allowed rounded-full border border-gray-400 bg-gray-200 px-4 py-2 text-gray-500"
                         disabled
                         title={
                           isAlreadyBooked
@@ -993,7 +977,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
                       </button>
                     ) : (
                       <button
-                        className="w-full px-4 py-2 text-black bg-[#14b82c] border border-black rounded-full hover:bg-[#14b82c]"
+                        className="w-full rounded-full border border-black bg-[#14b82c] px-4 py-2 text-black hover:bg-[#14b82c]"
                         onClick={handleBookClass}
                       >
                         Book Class
@@ -1003,13 +987,13 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
                 </div>
               </div>
               <div className="flex flex-row space-x-4">
-                <div className="flex flex-col flex-1 min-h-0 ">
+                <div className="flex min-h-0 flex-1 flex-col">
                   {classData.classType === "Group Premium" ? (
                     <>
                       {/* Group Premium UI */}
-                      <div className="flex flex-row items-center justify-between mb-6">
+                      <div className="mb-6 flex flex-row items-center justify-between">
                         <button
-                          className="px-6 py-2 text-black bg-yellow-400 rounded-full"
+                          className="rounded-full bg-yellow-400 px-6 py-2 text-black"
                           onClick={() => setActiveTab("Members")}
                         >
                           Members ({members.length})
@@ -1029,9 +1013,9 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
                     </>
                   ) : (
                     <>
-                      <div className="flex flex-row items-center justify-between mb-6">
+                      <div className="mb-6 flex flex-row items-center justify-between">
                         <button
-                          className="px-6 py-2 text-black bg-yellow-400 rounded-full"
+                          className="rounded-full bg-yellow-400 px-6 py-2 text-black"
                           onClick={() => setActiveTab("Members")}
                         >
                           Members ({members.length})
@@ -1044,12 +1028,12 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
                   )}
                 </div>
                 {classData.classType === "Individual Premium" ? (
-                  <div className="space-y-4 w-96">
+                  <div className="w-96 space-y-4">
                     <h3 className="text-xl font-semibold">Class Schedule</h3>
                     <div className="space-y-2">
                       {slots.map((slot, index) => (
                         <div key={index}>
-                          <div className="flex flex-col items-start justify-between p-3 border border-green-500 sm:flex-row sm:items-center sm:px-4 rounded-2xl sm:rounded-full">
+                          <div className="flex flex-col items-start justify-between rounded-2xl border border-green-500 p-3 sm:flex-row sm:items-center sm:rounded-full sm:px-4">
                             <div className="flex items-center gap-2">
                               <span className="text-sm font-medium">
                                 {selectedRecurrenceType === "One-time"
@@ -1096,7 +1080,7 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
       <Modal
         isOpen={isBookingConfirmationOpen}
         onRequestClose={() => setIsBookingConfirmationOpen(false)}
-        className="max-w-sm p-6 mx-auto mt-40 bg-white outline-none rounded-3xl font-urbanist"
+        className="mx-auto mt-40 max-w-sm rounded-3xl bg-white p-6 font-urbanist outline-none"
         overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
         style={{
           content: {
@@ -1114,20 +1098,20 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
           <p className="mb-6 text-gray-600">
             {classData.classType === "Individual Premium"
               ? t(
-                  "exploreClassCard.confirmBooking.descriptionPremiumIndividual"
+                  "exploreClassCard.confirmBooking.descriptionPremiumIndividual",
                 )
               : t("exploreClassCard.confirmBooking.description")}
           </p>
           <div className="flex flex-row gap-2">
             <button
               onClick={() => setIsBookingConfirmationOpen(false)}
-              className="w-full py-2 font-medium border border-gray-300 rounded-full hover:bg-gray-50"
+              className="w-full rounded-full border border-gray-300 py-2 font-medium hover:bg-gray-50"
             >
               No, Cancel
             </button>
             <button
               onClick={handleConfirmBooking}
-              className="w-full py-2 font-medium text-black bg-[#14b82c] rounded-full hover:bg-[#119924] border border-[#042f0c]"
+              className="w-full rounded-full border border-[#042f0c] bg-[#14b82c] py-2 font-medium text-black hover:bg-[#119924]"
             >
               {isEnrolling ? "Enrolling..." : "Yes, Book Now"}
             </button>

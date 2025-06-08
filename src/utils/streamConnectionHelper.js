@@ -5,25 +5,24 @@ import { fetchChatToken, fetchVideoToken } from "../config/stream";
 export const connectWithRetry = async (
   connectFn,
   serviceName,
-  maxRetries = 3
+  maxRetries = 3,
 ) => {
   let retryCount = 0;
 
   while (retryCount < maxRetries) {
     try {
       await connectFn();
-      console.log(`Stream ${serviceName} connected successfully`);
       return;
     } catch (error) {
       retryCount++;
       console.error(
         `Stream ${serviceName} connection attempt ${retryCount} failed:`,
-        error
+        error,
       );
 
       if (retryCount >= maxRetries) {
         console.error(
-          `Failed to connect Stream ${serviceName} after ${maxRetries} attempts`
+          `Failed to connect Stream ${serviceName} after ${maxRetries} attempts`,
         );
         throw error;
       }
@@ -42,7 +41,7 @@ export const storeConnectionError = (userId, service, error) => {
       JSON.stringify({
         error: error.message,
         timestamp: Date.now(),
-      })
+      }),
     );
   }
 };
@@ -73,10 +72,9 @@ export const clearConnectionErrors = (userId) => {
 export const connectStreamUserWithRetry = async (
   streamClient,
   streamVideoClient,
-  userData
+  userData,
 ) => {
   if (!userData?.uid) {
-    console.log("No user data available for Stream connection");
     return;
   }
 
@@ -93,7 +91,6 @@ export const connectStreamUserWithRetry = async (
 
     // Check if already connected with the same user ID
     if (streamClient.userID === userData.uid && streamClient.isConnected) {
-      console.log("Stream chat client already connected with the same user ID");
     } else {
       // Disconnect previous user if connected with different ID
       if (streamClient.userID && streamClient.userID !== userData.uid) {

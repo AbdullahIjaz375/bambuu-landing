@@ -65,14 +65,6 @@ const BookingFlowModal = ({
   const [bookingExamPrep, setBookingExamPrep] = useState(false);
 
   useEffect(() => {
-    console.log(
-      "[BookingFlowModal] isOpen:",
-      isOpen,
-      "mode:",
-      mode,
-      "initialStep:",
-      initialStep,
-    );
     if (isOpen) {
       // If mode is 'exam', always start at step 6
       const startStep = mode === "exam" ? 6 : initialStep;
@@ -101,11 +93,7 @@ const BookingFlowModal = ({
       setBookingExamPrep(false);
       if (mode === "exam" && startStep === 6) {
         setShowExamPrepStart(true);
-        console.log(
-          "[BookingFlowModal] showExamPrepStart set to true for exam mode",
-        );
       }
-      console.log("[BookingFlowModal] State reset, startStep:", startStep);
     }
   }, [isOpen, initialStep, mode]);
 
@@ -115,29 +103,20 @@ const BookingFlowModal = ({
         // Use completedIntroCallTutorId if available
         if (user.completedIntroCallTutorId) {
           setConfirmedInstructor({ uid: user.completedIntroCallTutorId });
-          console.log(
-            "[BookingFlowModal] Set confirmedInstructor from completedIntroCallTutorId:",
-            user.completedIntroCallTutorId,
-          );
+
           return;
         }
         // Fallback: fetch from getStudentClasses
-        console.log(
-          "[BookingFlowModal] Fetching last intro call tutor for exam prep flow (fallback)",
-        );
+
         try {
           const res = await getStudentClasses(user.uid);
-          console.log("[BookingFlowModal] getStudentClasses response:", res);
           const introCallClasses = (res.classes || []).filter(
             (cls) =>
               cls.classType &&
               cls.classType.toLowerCase().includes("intro") &&
               cls.tutorId,
           );
-          console.log(
-            "[BookingFlowModal] Filtered intro call classes:",
-            introCallClasses,
-          );
+
           introCallClasses.sort((a, b) => {
             const aTime = new Date(a.classDateTime || a.time || 0).getTime();
             const bTime = new Date(b.classDateTime || b.time || 0).getTime();
@@ -145,10 +124,6 @@ const BookingFlowModal = ({
           });
           if (introCallClasses.length > 0) {
             setConfirmedInstructor({ uid: introCallClasses[0].tutorId });
-            console.log(
-              "[BookingFlowModal] Set confirmedInstructor:",
-              introCallClasses[0].tutorId,
-            );
           } else {
             console.log("[BookingFlowModal] No intro call classes found");
           }
@@ -198,23 +173,12 @@ const BookingFlowModal = ({
             });
           });
           setExamPrepSlots(slotMap);
-          console.log(
-            "[BookingFlowModal] Set examPrepSlots (step 6):",
-            slotMap,
-          );
-          console.log(
-            "[BookingFlowModal] Final examPrepSlots slotMap:",
-            slotMap,
-          );
+
           setShowExamClassSlots(true);
           setStep(7);
         })
         .catch((err) => {
           setExamPrepSlots({});
-          console.log(
-            "[BookingFlowModal] Error fetching exam prep slots (step 6):",
-            err,
-          );
         })
         .finally(() => {
           setLoadingExamPrepSlots(false);
@@ -224,19 +188,16 @@ const BookingFlowModal = ({
 
   // --- Handlers for intro call flow ---
   const handleFindTutor = () => {
-    console.log("[BookingFlowModal] handleFindTutor");
     setShowExamPrepModal(false);
     setShowExploreInstructorsModal(true);
     setStep(1);
   };
   const handleInstructorSelect = (instructor) => {
-    console.log("[BookingFlowModal] handleInstructorSelect", instructor);
     setSelectedInstructor(instructor);
     setShowExploreInstructorsModal(false);
     setStep(2);
   };
   const handleBookIntroCall = async () => {
-    console.log("[BookingFlowModal] handleBookIntroCall", selectedInstructor);
     if (!selectedInstructor?.uid) return;
     setLoadingSlots(true);
     setShowSlotPicker(true);
@@ -246,7 +207,6 @@ const BookingFlowModal = ({
     try {
       // Fetch available slots from backend
       const data = await getIntroCallSlots(selectedInstructor.uid);
-      console.log("[BookingFlowModal] getIntroCallSlots response:", data);
       // Flatten and format the slots for the modal
       const slotMap = {};
       (data.introductoryCallSlots || []).forEach((slotDay) => {
@@ -271,16 +231,13 @@ const BookingFlowModal = ({
         });
       });
       setIntroCallSlots(slotMap);
-      console.log("[BookingFlowModal] Set introCallSlots:", slotMap);
     } catch (err) {
       setIntroCallSlots({});
-      console.log("[BookingFlowModal] Error fetching intro call slots:", err);
     } finally {
       setLoadingSlots(false);
     }
   };
   const handleSlotPicked = (date, time) => {
-    console.log("[BookingFlowModal] handleSlotPicked", date, time);
     setSelectedDate(date);
     setSelectedTime(time);
     setShowSlotPicker(false);
@@ -288,12 +245,6 @@ const BookingFlowModal = ({
     setStep(4);
   };
   const handleBookingConfirmed = async () => {
-    console.log(
-      "[BookingFlowModal] handleBookingConfirmed",
-      selectedDate,
-      selectedTime,
-      confirmedInstructor,
-    );
     setBookingLoading(true);
     try {
       if (
@@ -322,16 +273,13 @@ const BookingFlowModal = ({
       setShowBookingConfirmation(false);
       setShowBookedModal(true);
       setStep(5);
-      console.log("[BookingFlowModal] Intro call booked successfully");
     } catch (err) {
       alert("Booking failed: " + (err.message || err));
-      console.log("[BookingFlowModal] Error booking intro call:", err);
     } finally {
       setBookingLoading(false);
     }
   };
   const handleBookedModalClose = () => {
-    console.log("[BookingFlowModal] handleBookedModalClose");
     setShowBookedModal(false);
     if (mode === "intro") {
       // Just close the modal, do NOT start exam prep flow
@@ -344,20 +292,15 @@ const BookingFlowModal = ({
   };
   // --- Handlers for exam prep flow ---
   const handleExamPrepStart = async () => {
-    console.log("[BookingFlowModal] handleExamPrepStart", confirmedInstructor);
     setShowExamPrepStart(false);
     setShowExamClassSlots(true);
     setStep(7);
     if (!confirmedInstructor?.uid) {
-      console.log(
-        "[BookingFlowModal] No confirmedInstructor for exam prep slots",
-      );
       return;
     }
     setLoadingExamPrepSlots(true);
     try {
       const data = await getExamPrepClassSlots(confirmedInstructor.uid);
-      console.log("[BookingFlowModal] getExamPrepClassSlots response:", data);
       const slotMap = {};
       (data.examPrepSlots || []).forEach((slotDay) => {
         (slotDay.times || []).forEach((slot) => {
@@ -381,25 +324,16 @@ const BookingFlowModal = ({
         });
       });
       setExamPrepSlots(slotMap);
-      console.log(
-        "[BookingFlowModal] Final slotMap for ExamClassSlots:",
-        slotMap,
-      );
+
       setShowExamClassSlots(true);
       setStep(7);
     } catch (err) {
       setExamPrepSlots({});
-      console.log("[BookingFlowModal] Error fetching exam prep slots:", err);
     } finally {
       setLoadingExamPrepSlots(false);
     }
   };
   const handleExamClassSlotsComplete = (dates, times) => {
-    console.log(
-      "[BookingFlowModal] handleExamClassSlotsComplete",
-      dates,
-      times,
-    );
     setShowExamClassSlots(false);
     setSelectedExamPrepDates(dates);
     setSelectedExamPrepTimes(times);
@@ -407,12 +341,6 @@ const BookingFlowModal = ({
     setStep(8);
   };
   const handleExamConfirmComplete = async () => {
-    console.log(
-      "[BookingFlowModal] handleExamConfirmComplete",
-      selectedExamPrepDates,
-      selectedExamPrepTimes,
-      confirmedInstructor,
-    );
     setBookingExamPrep(true);
     try {
       if (
@@ -441,35 +369,22 @@ const BookingFlowModal = ({
         tutorId: confirmedInstructor.uid,
         slots,
       });
-      console.log("[BookingFlowModal] bookExamPrepClass response:", resp);
       setShowExamConfirm(false);
       setShowExamBooked(true);
       setStep(9);
-      console.log("[BookingFlowModal] Exam prep class booked successfully");
     } catch (err) {
       alert("Booking failed: " + (err.message || err));
-      console.log("[BookingFlowModal] Error booking exam prep class:", err);
     } finally {
       setBookingExamPrep(false);
     }
   };
   const handleExamBookedClose = () => {
-    console.log("[BookingFlowModal] handleExamBookedClose");
     setShowExamBooked(false);
     if (onComplete) onComplete();
     if (onClose) onClose();
   };
   // --- Render logic ---
-  console.log(
-    "[BookingFlowModal] Render, isOpen:",
-    isOpen,
-    "step:",
-    step,
-    "mode:",
-    mode,
-    "confirmedInstructor:",
-    confirmedInstructor,
-  );
+
   if (!isOpen) return null;
   // Stepper rendering
   if (step === 0) {
@@ -568,23 +483,12 @@ const BookingFlowModal = ({
               });
             });
             setExamPrepSlots(slotMap);
-            console.log(
-              "[BookingFlowModal] Set examPrepSlots (button):",
-              slotMap,
-            );
+
             setShowExamPrepStart(false);
             setShowExamClassSlots(true);
             setStep(7);
-            console.log(
-              "[BookingFlowModal] Final examPrepSlots slotMap:",
-              slotMap,
-            );
           } catch (err) {
             setExamPrepSlots({});
-            console.log(
-              "[BookingFlowModal] Error fetching exam prep slots (button):",
-              err,
-            );
           } finally {
             setLoadingExamPrepSlots(false);
           }
