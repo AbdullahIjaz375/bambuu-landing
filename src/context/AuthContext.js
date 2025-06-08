@@ -9,7 +9,7 @@ import { checkAccess } from "../utils/accessControl";
 
 const AuthContext = createContext();
 const streamClient = StreamChat.getInstance(
-  process.env.REACT_APP_STREAM_API_KEY
+  process.env.REACT_APP_STREAM_API_KEY,
 );
 
 export const AuthProvider = ({ children }) => {
@@ -37,13 +37,11 @@ export const AuthProvider = ({ children }) => {
     try {
       // Don't attempt to connect if there's no user data
       if (!userData?.uid) {
-        console.log("No user data available for Stream connection");
         return;
       }
 
       // Check if user is actually authenticated before connecting to Stream
       if (!auth.currentUser) {
-        console.log("User not authenticated, skipping Stream connection");
         return;
       }
 
@@ -55,11 +53,11 @@ export const AuthProvider = ({ children }) => {
         await connectStreamUserWithRetry(
           streamClient,
           streamVideoClient,
-          userData
+          userData,
         );
       } catch (importError) {
         console.warn(
-          "Could not import Stream helper, falling back to basic connection"
+          "Could not import Stream helper, falling back to basic connection",
         );
         // Fallback to basic connection logic
         await connectStreamBasic(userData);
@@ -85,7 +83,7 @@ export const AuthProvider = ({ children }) => {
             image: userData.photoUrl || "",
             userType: userData.userType,
           },
-          chatToken
+          chatToken,
         );
       }
     } catch (error) {
@@ -98,7 +96,6 @@ export const AuthProvider = ({ children }) => {
       try {
         if (streamClient.userID) {
           await streamClient.disconnectUser();
-          console.log("Stream chat client disconnected successfully");
         }
       } catch (chatError) {
         console.error("Error disconnecting Stream chat client:", chatError);
@@ -108,7 +105,6 @@ export const AuthProvider = ({ children }) => {
       try {
         if (streamVideoClient.user?.id) {
           await streamVideoClient.disconnectUser();
-          console.log("Stream video client disconnected successfully");
         }
       } catch (videoError) {
         console.error("Error disconnecting Stream video client:", videoError);
@@ -147,7 +143,7 @@ export const AuthProvider = ({ children }) => {
           try {
             const latestData = await fetchLatestUserData(
               userData.uid,
-              userData.userType
+              userData.userType,
             );
             if (latestData) {
               userData = latestData;
@@ -174,7 +170,7 @@ export const AuthProvider = ({ children }) => {
         } catch (streamError) {
           console.error(
             "Stream connection error during user update:",
-            streamError
+            streamError,
           );
           // Don't block auth flow if Stream connection fails
         }
@@ -231,7 +227,7 @@ export const AuthProvider = ({ children }) => {
           // Fetch latest data even for stored user
           const latestData = await fetchLatestUserData(
             userData.uid,
-            userData.userType
+            userData.userType,
           );
           if (latestData) {
             await updateUserData(latestData);
@@ -294,7 +290,7 @@ export const AuthProvider = ({ children }) => {
             const result = checkAccess(
               user,
               "premium-class",
-              "Individual Premium"
+              "Individual Premium",
             );
             return result.hasAccess;
           })(),

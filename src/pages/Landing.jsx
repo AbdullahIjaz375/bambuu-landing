@@ -13,6 +13,7 @@ import MobileSignupStep from "../components/mobile-flow/MobileSignupStep";
 import MobileProfileStep from "../components/mobile-flow/MobileProfileStep";
 import MobileSubscriptionStep from "../components/mobile-flow/MobileSubscriptionStep";
 import MobileConfirmationStep from "../components/mobile-flow/MobileConfirmationStep";
+import LandingMobile from "./LandingMobile";
 
 const Card = ({ icon, title, description, index }) => {
   return (
@@ -75,6 +76,11 @@ const Landing = () => {
     localStorage.removeItem("inMobileModalFlow");
     setMobileModalStep(null);
   };
+
+  // Render mobile landing page if on mobile
+  if (isMobile) {
+    return <LandingMobile />;
+  }
 
   return (
     <>

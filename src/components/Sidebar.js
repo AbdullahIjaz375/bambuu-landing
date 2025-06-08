@@ -4,7 +4,7 @@ import { ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import TutorialOverlay from "./TutorialOverlay";
 
-const Sidebar = ({ user }) => {
+const Sidebar = ({ user, onExamPrepClick }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -55,6 +55,7 @@ const Sidebar = ({ user }) => {
       translationKey: "sidebar.tutor.examPreparation",
       lightImage: "/svgs/exam-preparation-light.svg",
       darkImage: "/svgs/exam-preparation-dark.svg",
+      onClick: onExamPrepClick,
     },
   ];
 

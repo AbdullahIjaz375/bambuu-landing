@@ -169,6 +169,13 @@ const LearnUser = () => {
   const [examPrepStatus, setExamPrepStatus] = useState(false);
   const [showIntroBookingFlow, setShowIntroBookingFlow] = useState(false);
   const [showExamPrepBookingFlow, setShowExamPrepBookingFlow] = useState(false);
+  const [showSidebarIntroBookingFlow, setShowSidebarIntroBookingFlow] =
+    useState(false);
+  const [showSidebarExamPrepBookingFlow, setShowSidebarExamPrepBookingFlow] =
+    useState(false);
+  const [sidebarExamPrepInitialStep, setSidebarExamPrepInitialStep] =
+    useState(0);
+  const [sidebarExamPrepUser, setSidebarExamPrepUser] = useState(null);
   const [languageData, setLanguageData] = useState({
     spanish: { studentIds: [], studentPhotos: [] },
     english: { studentIds: [], studentPhotos: [] },
@@ -465,6 +472,54 @@ const LearnUser = () => {
     }
   }, [location.state]);
 
+  // Handler for sidebar exam prep click
+  const handleExamPrepSidebarClick = async (e) => {
+    e?.preventDefault?.();
+    if (!user?.uid) return;
+    try {
+      const status = await getStudentExamPrepTutorialStatus(user.uid);
+      // 1. Not purchased: go to subscriptions
+      if (!status.hasPurchasedPlan) {
+        navigate("/subscriptions?tab=exam");
+        return;
+      }
+      // 2. Purchased, not booked intro call: open BookingFlowModal step 0
+      if (!status.hasBookedIntroCall) {
+        setSidebarExamPrepUser(user);
+        setSidebarExamPrepInitialStep(0);
+        setShowSidebarIntroBookingFlow(true);
+        return;
+      }
+      // 3. Booked intro call, not done: open class details page for that class
+      if (status.hasBookedIntroCall && !status.doneWithIntroCall) {
+        // You may need to fetch the classId for the intro call class
+        // For now, navigate to a placeholder route
+        navigate("/classesUser?highlight=introcall");
+        return;
+      }
+      // 4. Done with intro call, not booked exam prep class: open BookingFlowModal step 6
+      if (status.doneWithIntroCall && !status.hasBookedExamPrepClass) {
+        setSidebarExamPrepUser({
+          ...user,
+          completedIntroCallTutorId: status.completedIntroCallTutorId,
+        });
+        setSidebarExamPrepInitialStep(6);
+        setShowSidebarExamPrepBookingFlow(true);
+        return;
+      }
+      // 5. Booked exam prep class: open exam prep tutor profile
+      if (status.hasBookedExamPrepClass && status.completedIntroCallTutorId) {
+        navigate(`/tutorProfile/${status.completedIntroCallTutorId}`);
+        return;
+      }
+      // fallback
+      navigate("/learn");
+    } catch (err) {
+      console.error("[Sidebar ExamPrep] Error:", err);
+      navigate("/learn");
+    }
+  };
+
   // Place the auth loading and user check here, after all hooks
   if (authLoading) {
     return (
@@ -515,7 +570,7 @@ const LearnUser = () => {
   return (
     <div className="flex h-screen bg-white">
       <div className="h-full w-64 flex-shrink-0">
-        <Sidebar user={user} />
+        <Sidebar user={user} onExamPrepClick={handleExamPrepSidebarClick} />
       </div>
       <div className="h-full min-w-[calc(100%-16rem)] flex-1 overflow-x-auto">
         <div className="m-2 h-[calc(100vh-1rem)] overflow-y-auto rounded-3xl border-2 border-[#e7e7e7] bg-white p-8">
@@ -759,6 +814,21 @@ const LearnUser = () => {
         }}
         mode="exam"
         initialStep={6}
+      />
+      {/* Sidebar-triggered modals */}
+      <BookingFlowModal
+        isOpen={showSidebarIntroBookingFlow}
+        onClose={() => setShowSidebarIntroBookingFlow(false)}
+        user={sidebarExamPrepUser}
+        mode="intro"
+        initialStep={sidebarExamPrepInitialStep}
+      />
+      <BookingFlowModal
+        isOpen={showSidebarExamPrepBookingFlow}
+        onClose={() => setShowSidebarExamPrepBookingFlow(false)}
+        user={sidebarExamPrepUser}
+        mode="exam"
+        initialStep={sidebarExamPrepInitialStep}
       />
     </div>
   );

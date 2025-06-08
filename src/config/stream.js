@@ -48,7 +48,7 @@ export const fetchChatToken = async (userId) => {
           (sub) =>
             sub.type === "Bammbuu Groups" &&
             (!sub.endDate || new Date(sub.endDate) > new Date()) &&
-            (!sub.startDate || new Date(sub.startDate) <= new Date())
+            (!sub.startDate || new Date(sub.startDate) <= new Date()),
         ));
 
     const isTutor = userInfo.userType === "tutor";
@@ -68,7 +68,7 @@ export const fetchChatToken = async (userId) => {
         headers: {
           "Content-Type": "application/json",
         },
-      }
+      },
     );
 
     if (!response.data?.token) {
@@ -87,18 +87,18 @@ export const fetchChatToken = async (userId) => {
       console.error(
         "Server returned error:",
         error.response.status,
-        error.response.data
+        error.response.data,
       );
       throw new Error(
         `Token service error: ${error.response.status} - ${
           error.response.data?.message || "Unknown error"
-        }`
+        }`,
       );
     } else if (error.request) {
       // The request was made but no response was received
       console.error("No response from token server");
       throw new Error(
-        "Token service unavailable. Please check your connection and try again."
+        "Token service unavailable. Please check your connection and try again.",
       );
     } else {
       // Something happened in setting up the request that triggered an Error
@@ -123,7 +123,7 @@ export const fetchVideoToken = async (userId) => {
         headers: {
           "Content-Type": "application/json",
         },
-      }
+      },
     );
 
     if (!response.data?.token) {
@@ -140,17 +140,17 @@ export const fetchVideoToken = async (userId) => {
       console.error(
         "Server returned error:",
         error.response.status,
-        error.response.data
+        error.response.data,
       );
       throw new Error(
         `Video token service error: ${error.response.status} - ${
           error.response.data?.message || "Unknown error"
-        }`
+        }`,
       );
     } else if (error.request) {
       console.error("No response from video token server");
       throw new Error(
-        "Video token service unavailable. Please check your connection and try again."
+        "Video token service unavailable. Please check your connection and try again.",
       );
     } else {
       throw new Error(`Video token fetch error: ${error.message}`);
@@ -180,7 +180,7 @@ export const generateStreamToken = async (userId) => {
     } else {
       // In production, we must have a proper token
       throw new Error(
-        "Authentication service unavailable. Please try again later."
+        "Authentication service unavailable. Please try again later.",
       );
     }
   }
@@ -196,7 +196,6 @@ export const connectStreamUser = async (user) => {
   try {
     // If already connected with this user, don't reconnect
     if (streamClient.userID === user.uid) {
-      console.log("User already connected to Stream Chat");
       return true;
     }
 
@@ -211,10 +210,9 @@ export const connectStreamUser = async (user) => {
         image: user.photoUrl || "",
         userType: user.userType || "guest",
       },
-      token
+      token,
     );
 
-    console.log("User successfully connected to Stream Chat");
     return true;
   } catch (error) {
     console.error("Failed to connect to Stream Chat:", error);
@@ -231,7 +229,6 @@ export const connectStreamVideoUser = async (user) => {
   try {
     // If already connected with this user, don't reconnect
     if (streamVideoClient.user?.id === user.uid) {
-      console.log("User already connected to Stream Video");
       return true;
     }
 
@@ -249,10 +246,9 @@ export const connectStreamVideoUser = async (user) => {
           email: user.email || "",
         },
       },
-      token
+      token,
     );
 
-    console.log("User successfully connected to Stream Video");
     return true;
   } catch (error) {
     console.error("Failed to connect to Stream Video:", error);
@@ -264,7 +260,6 @@ export const connectStreamVideoUser = async (user) => {
 export const disconnectStreamUser = async () => {
   try {
     await streamClient.disconnectUser();
-    console.log("User disconnected from Stream Chat");
     return true;
   } catch (error) {
     console.error("Error disconnecting from Stream Chat:", error);
@@ -276,7 +271,6 @@ export const disconnectStreamUser = async () => {
 export const disconnectStreamVideoUser = async () => {
   try {
     await streamVideoClient.disconnectUser();
-    console.log("User disconnected from Stream Video");
     return true;
   } catch (error) {
     console.error("Error disconnecting from Stream Video:", error);
