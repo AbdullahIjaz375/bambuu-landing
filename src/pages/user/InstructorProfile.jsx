@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import Modal from "react-modal";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { ChannelType, fetchChatToken, streamClient } from "../../config/stream";
 import { createStreamChannel } from "../../services/streamService";
+import { getTutorProfile } from "../../api/examPrepApi";
+import { ClipLoader } from "react-spinners";
 
 const InstructorProfile = ({
   selectedInstructor,
@@ -15,6 +17,29 @@ const InstructorProfile = ({
   const navigate = useNavigate();
   const { user } = useAuth();
   const [isCreatingChannel, setIsCreatingChannel] = useState(false);
+  const [tutorProfile, setTutorProfile] = useState(null);
+  const [loadingProfile, setLoadingProfile] = useState(false);
+
+  useEffect(() => {
+    if (!selectedInstructor) {
+      setTutorProfile(null);
+      return;
+    }
+    const fetchProfile = async () => {
+      setLoadingProfile(true);
+      try {
+        const res = await getTutorProfile(
+          selectedInstructor.id || selectedInstructor.uid,
+        );
+        setTutorProfile(res.tutor);
+      } catch (err) {
+        setTutorProfile(null);
+      } finally {
+        setLoadingProfile(false);
+      }
+    };
+    fetchProfile();
+  }, [selectedInstructor]);
 
   if (!selectedInstructor) return null;
 
@@ -95,8 +120,8 @@ const InstructorProfile = ({
       <Modal
         isOpen={!!selectedInstructor}
         onRequestClose={() => setSelectedInstructor(null)}
-        className="fixed left-1/2 top-1/2 flex w-[468px] max-w-[95vw] -translate-x-1/2 -translate-y-1/2 flex-col items-center rounded-[2.5rem] border border-blue-200 bg-white p-0 font-urbanist shadow-xl outline-none"
-        overlayClassName="fixed inset-0 bg-black bg-opacity-20 z-50 flex items-center justify-center backdrop-blur-sm"
+        className="custom-modal-content fixed left-1/2 top-1/2 flex w-[468px] max-w-[95vw] -translate-x-1/2 -translate-y-1/2 flex-col items-center rounded-[2.5rem] border border-blue-200 bg-white p-0 font-urbanist shadow-xl outline-none"
+        overlayClassName="custom-modal-overlay fixed inset-0 bg-black bg-opacity-20 z-50 flex items-center justify-center"
         ariaHideApp={false}
       >
         <div className="relative flex w-full items-center justify-between px-6 pb-1 pt-4">
@@ -121,11 +146,7 @@ const InstructorProfile = ({
             {selectedInstructor.name}
           </div>
           <div className="my-2 text-center text-sm text-[#042F0C]">
-            Experienced English tutor and native Spanish speaker with a deep
-            commitment to student success. Specializes in making English
-            accessible, enjoyable, and practical for learners of all levels.
-            Passionate about fostering confidence and fluency in students
-            through personalized lessons.
+            {selectedInstructor.bio}
           </div>
           <div className="mb-3 flex w-full justify-between text-sm">
             <div>
@@ -175,22 +196,43 @@ const InstructorProfile = ({
           </div>
           {/* Video Section */}
           <div className="mb-4 flex min-h-[176px] w-full items-center justify-center rounded-2xl border border-dashed bg-white py-4 text-center text-[#D1D1D1]">
-            <iframe
-              width="100%"
-              height="176"
-              style={{
-                minHeight: 176,
-                aspectRatio: "16/9",
-                borderRadius: "1rem",
-                border: "none",
-                maxWidth: 400,
-                background: "#000",
-              }}
-              src="https://www.youtube.com/embed/W8qJOBrmNkw"
-              title="Instructor Introduction Video"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-            ></iframe>
+            {loadingProfile ? (
+              <div className="flex h-[176px] w-full items-center justify-center">
+                <ClipLoader color="#14B82C" size={40} />
+              </div>
+            ) : (
+              <div className="aspect-video w-full max-w-[400px] overflow-hidden rounded-2xl">
+                <iframe
+                  width="100%"
+                  height="100%"
+                  style={{
+                    minHeight: 176,
+                    aspectRatio: "16/9",
+                    borderRadius: "1rem",
+                    border: "none",
+                    background: "#000",
+                  }}
+                  src={(() => {
+                    const link = tutorProfile?.videoLink;
+                    if (link) {
+                      // Convert to embed format
+                      let videoId = null;
+                      const regExp =
+                        /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
+                      const match = link.match(regExp);
+                      videoId = match ? match[1] : null;
+                      if (videoId) {
+                        return `https://www.youtube.com/embed/${videoId}`;
+                      }
+                    }
+                    return "https://www.youtube.com/embed/W8qJOBrmNkw";
+                  })()}
+                  title="Instructor Introduction Video"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                ></iframe>
+              </div>
+            )}
           </div>
           {/* Buttons */}
           <button

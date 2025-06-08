@@ -147,3 +147,13 @@
 .str-video__video--mirror {
   width: 100% !important;
 }
+
+.custom-modal-overlay {
+  pointer-events: auto !important;
+  z-index: 9999 !important;
+}
+.custom-modal-content {
+  pointer-events: auto !important;
+  z-index: 10000 !important;
+  background: white;
+}
