@@ -240,4 +240,14 @@ export function updateTutorProfile(data, token) {
   );
 }
 
+export function getExamPrepCurrentStep(studentId, token) {
+  return apiRequest(
+    `https://getexamprepcurrentstep-zzpsx27htq-uc.a.run.app?studentId=${encodeURIComponent(studentId)}`,
+    {
+      method: "GET",
+    },
+    token,
+  );
+}
+
 // Add more as needed for new endpoints
