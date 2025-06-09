@@ -44,8 +44,11 @@ export default function LandingMobile() {
     <div className="min-h-screen w-full bg-[#F0FDF1] font-['Urbanist'] text-black">
       {/* Hero Section */}
       <div className="relative flex w-full flex-col items-center rounded-b-[40px] bg-white pb-8 pt-8">
-        {/* Logo (optional, if needed) */}
-        {/* <img src="/svgs/png-logo.svg" alt="bammbuu logo" className="h-6 mb-6" /> */}
+        <img
+          src="/images/bambuu-new-logo.png"
+          alt="bammbuu logo"
+          className="mx-auto mb-6 h-8"
+        />
         <h1 className="px-4 text-center text-[32px] font-extrabold leading-tight">
           Immersive Exam
           <br />
