@@ -1,8 +1,8 @@
+import { useState } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
-import React, { useState } from "react";
-import Modal from "react-modal";
-import ConfirmClassesModal from "./ConfirmClassesModal";
 import { bookExamPrepClass } from "../../../api/examPrepApi";
+import ConfirmClassesModal from "./ConfirmClassesModal";
+import Modal from "react-modal";
 
 const ExamClassSlots = ({
   isOpen,
@@ -126,7 +126,7 @@ const ExamClassSlots = ({
         const isPM = timeStr.toLowerCase().includes("pm");
         if (isPM && hour !== 12) hour += 12;
         if (!isPM && hour === 12) hour = 0;
-        const d = new Date(Date.UTC(year, month - 1, day, hour, minute, 0, 0));
+        const d = new Date(year, month - 1, day, hour, minute, 0, 0);
         return { time: d.toISOString() };
       });
       const payload = {
@@ -157,23 +157,6 @@ const ExamClassSlots = ({
       setSelectedTimes(newTimes);
     }
   };
-
-  const timeSlots = [
-    "10:00 AM",
-    "11:00 AM",
-    "12:00 PM",
-    "01:00 PM",
-    "02:00 PM",
-    "03:00 PM",
-    "04:00 PM",
-    "05:00 PM",
-    "06:00 PM",
-    "07:00 PM",
-    "08:00 PM",
-    "09:00 PM",
-    "10:00 PM",
-    "11:00 PM",
-  ];
 
   const monthNames = [
     "January",
@@ -367,7 +350,6 @@ const ExamClassSlots = ({
               <span className="text-sm font-medium">
                 Duration: <b>60 minutes</b>
               </span>
-              <span>Time zone: UTC</span>
             </div>
 
             {/* Time Slots Grid */}
@@ -501,10 +483,6 @@ const ExamClassSlots = ({
         user={user}
         tutorId={tutorId}
       />
-      {console.log("[ExamClassSlots] Passing to ConfirmClassesModal:", {
-        user,
-        tutorId,
-      })}
     </>
   );
 };

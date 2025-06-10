@@ -114,7 +114,7 @@ const EditClassPage = () => {
       if (classImage) {
         const imageRef = ref(
           storage,
-          `classes/${classId}/image_${Date.now()}_${classImage.name}`
+          `classes/${classId}/image_${Date.now()}_${classImage.name}`,
         );
         await uploadBytes(imageRef, classImage);
         imageUrl = await getDownloadURL(imageRef);
@@ -130,13 +130,13 @@ const EditClassPage = () => {
         dateValue.getMonth(),
         dateValue.getDate(),
         dateValue.getHours(),
-        dateValue.getMinutes()
+        dateValue.getMinutes(),
       );
 
       const updatedClass = {
         ...classData,
         classAddress,
-        classDateTime: localDate, // Use the UTC date
+        classDateTime: localDate,
 
         imageUrl,
         // updatedAt: serverTimestamp(),
@@ -169,7 +169,7 @@ const EditClassPage = () => {
         existingDateTime.getHours(),
         existingDateTime.getMinutes(),
         existingDateTime.getSeconds(),
-        existingDateTime.getMilliseconds()
+        existingDateTime.getMilliseconds(),
       );
 
       handleClassDataChange("classDateTime", selectedDate);
@@ -215,7 +215,7 @@ const EditClassPage = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex h-screen items-center justify-center">
         <ClipLoader color="#FFB800" size={40} />
       </div>
     );
@@ -223,18 +223,18 @@ const EditClassPage = () => {
 
   return (
     <div className="flex h-screen bg-white">
-      <div className="flex-shrink-0 w-64 h-full">
+      <div className="h-full w-64 flex-shrink-0">
         <Sidebar user={user} />
       </div>
-      <div className="flex-1 overflow-x-auto min-w-[calc(100%-16rem)] h-full">
-        <div className="flex flex-col h-full">
-          <div className="flex-1 p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl m-2">
+      <div className="h-full min-w-[calc(100%-16rem)] flex-1 overflow-x-auto">
+        <div className="flex h-full flex-col">
+          <div className="m-2 flex-1 rounded-3xl border-2 border-[#e7e7e7] bg-white p-8">
             {/* Fixed Header Section */}
             <div className="sticky top-0 z-10 bg-white">
-              <div className="flex items-center justify-between pb-4 mb-6 border-b">
+              <div className="mb-6 flex items-center justify-between border-b pb-4">
                 <div className="flex items-center gap-4">
                   <button
-                    className="p-3 bg-gray-100 rounded-full"
+                    className="rounded-full bg-gray-100 p-3"
                     onClick={() => navigate(-1)}
                   >
                     <ArrowLeft size="30" />
@@ -247,9 +247,9 @@ const EditClassPage = () => {
               <div className="max-w-6xl">
                 <div className="space-y-6">
                   {/* Image Upload */}
-                  <div className="flex justify-start mb-8">
+                  <div className="mb-8 flex justify-start">
                     <div
-                      className="relative flex items-center justify-center border border-gray-300 border-dashed rounded-full cursor-pointer w-28 h-28 bg-gray-50"
+                      className="relative flex h-28 w-28 cursor-pointer items-center justify-center rounded-full border border-dashed border-gray-300 bg-gray-50"
                       onClick={() =>
                         document.getElementById("classImage").click()
                       }
@@ -258,7 +258,7 @@ const EditClassPage = () => {
                         <img
                           src={classPreviewImage}
                           alt="Preview"
-                          className="object-cover w-full h-full rounded-full"
+                          className="h-full w-full rounded-full object-cover"
                         />
                       ) : (
                         <Camera size={24} className="text-gray-400" />
@@ -286,7 +286,7 @@ const EditClassPage = () => {
                         onChange={(e) =>
                           handleClassDataChange("className", e.target.value)
                         }
-                        className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
+                        className="w-full rounded-3xl border border-gray-300 p-2 focus:border-[#14B82C] focus:outline-none focus:ring-0"
                       />
                     </div>
 
@@ -294,7 +294,7 @@ const EditClassPage = () => {
                       <label className="text-sm font-medium text-gray-700">
                         Class Language
                       </label>
-                      <div className="flex gap-2 mt-1">
+                      <div className="mt-1 flex gap-2">
                         {["English", "Spanish", "English-Spanish Exchange"].map(
                           (lang) => (
                             <button
@@ -302,15 +302,15 @@ const EditClassPage = () => {
                               onClick={() =>
                                 handleClassDataChange("language", lang)
                               }
-                              className={`px-4 py-2 rounded-full text-sm ${
+                              className={`rounded-full px-4 py-2 text-sm ${
                                 classData.language === lang
-                                  ? "bg-yellow-400 border border-yellow-500"
+                                  ? "border border-yellow-500 bg-yellow-400"
                                   : "border border-gray-200"
                               }`}
                             >
                               {lang}
                             </button>
-                          )
+                          ),
                         )}
                       </div>
                     </div>
@@ -327,14 +327,14 @@ const EditClassPage = () => {
                       onChange={(e) =>
                         handleClassDataChange(
                           "classDescription",
-                          e.target.value
+                          e.target.value,
                         )
                       }
                       maxLength={400}
                       rows={3}
-                      className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
+                      className="w-full rounded-3xl border border-gray-300 p-2 focus:border-[#14B82C] focus:outline-none focus:ring-0"
                     />
-                    <div className="text-xs text-right text-gray-500 mt-1">
+                    <div className="mt-1 text-right text-xs text-gray-500">
                       {classData.classDescription.length}/400 characters
                     </div>
                   </div>
@@ -346,7 +346,7 @@ const EditClassPage = () => {
                         <label className="text-sm font-medium text-gray-700">
                           Class Level
                         </label>
-                        <div className="flex gap-2 mt-1">
+                        <div className="mt-1 flex gap-2">
                           {["Beginner", "Intermediate", "Advanced"].map(
                             (level) => (
                               <button
@@ -354,15 +354,15 @@ const EditClassPage = () => {
                                 onClick={() =>
                                   handleClassDataChange("languageLevel", level)
                                 }
-                                className={`px-4 py-2 rounded-full text-sm ${
+                                className={`rounded-full px-4 py-2 text-sm ${
                                   classData.languageLevel === level
-                                    ? "bg-yellow-400 border border-yellow-500"
+                                    ? "border border-yellow-500 bg-yellow-400"
                                     : "border border-gray-200"
                                 }`}
                               >
                                 {level}
                               </button>
-                            )
+                            ),
                           )}
                         </div>
                       </div>
@@ -374,7 +374,7 @@ const EditClassPage = () => {
                       <label className="text-sm font-medium text-gray-700">
                         Class Recurrence Type
                       </label>
-                      <div className="flex flex-wrap gap-2 mt-1">
+                      <div className="mt-1 flex flex-wrap gap-2">
                         {[
                           "None",
                           "One-time",
@@ -386,9 +386,9 @@ const EditClassPage = () => {
                           <button
                             key={type}
                             onClick={() => handleClassTypeSelect(type)}
-                            className={`px-4 py-2 rounded-full text-sm ${
+                            className={`rounded-full px-4 py-2 text-sm ${
                               classData.recurrenceTypes.includes(type)
-                                ? "bg-yellow-400 border border-yellow-500"
+                                ? "border border-yellow-500 bg-yellow-400"
                                 : "border border-gray-200"
                             }`}
                           >
@@ -406,16 +406,16 @@ const EditClassPage = () => {
                         <label className="text-sm font-medium text-gray-700">
                           Class Location
                         </label>
-                        <div className="flex gap-2 mt-1">
+                        <div className="mt-1 flex gap-2">
                           {["Physical", "Virtual"].map((location) => (
                             <button
                               key={location}
                               onClick={() =>
                                 handleClassDataChange("classLocation", location)
                               }
-                              className={`px-4 py-2 rounded-full text-sm ${
+                              className={`rounded-full px-4 py-2 text-sm ${
                                 classData.classLocation === location
-                                  ? "bg-yellow-400 border border-yellow-500"
+                                  ? "border border-yellow-500 bg-yellow-400"
                                   : "border border-gray-200"
                               }`}
                             >
@@ -436,10 +436,10 @@ const EditClassPage = () => {
                             onChange={(e) =>
                               handleClassDataChange(
                                 "classAddress",
-                                e.target.value
+                                e.target.value,
                               )
                             }
-                            className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
+                            className="w-full rounded-3xl border border-gray-300 p-2 focus:border-[#14B82C] focus:outline-none focus:ring-0"
                           />
                         </div>
                       )}
@@ -476,16 +476,16 @@ const EditClassPage = () => {
                       <label className="text-sm font-medium text-gray-700">
                         Class Duration
                       </label>
-                      <div className="flex gap-2 mt-1">
+                      <div className="mt-1 flex gap-2">
                         {[30, 60].map((duration) => (
                           <button
                             key={duration}
                             onClick={() =>
                               handleClassDataChange("classDuration", duration)
                             }
-                            className={`px-4 py-2 rounded-full text-sm ${
+                            className={`rounded-full px-4 py-2 text-sm ${
                               classData.classDuration === duration
-                                ? "bg-yellow-400 border border-yellow-500"
+                                ? "border border-yellow-500 bg-yellow-400"
                                 : "border border-gray-200"
                             }`}
                           >
@@ -507,12 +507,12 @@ const EditClassPage = () => {
                         value={
                           classData.classDateTime
                             ? new Date(
-                                classData.classDateTime
+                                classData.classDateTime,
                               ).toLocaleDateString("en-CA") // Use toLocaleDateString
                             : ""
                         }
                         onChange={handleDateChange}
-                        className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
+                        className="w-full rounded-3xl border border-gray-300 p-2 focus:border-[#14B82C] focus:outline-none focus:ring-0"
                       />
                     </div>
                     <div>
@@ -527,7 +527,7 @@ const EditClassPage = () => {
                             : ""
                         }
                         onChange={handleTimeChange}
-                        className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
+                        className="w-full rounded-3xl border border-gray-300 p-2 focus:border-[#14B82C] focus:outline-none focus:ring-0"
                       />
                     </div>
                   </div>
@@ -535,20 +535,20 @@ const EditClassPage = () => {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex justify-between pt-8 mt-8">
+              <div className="mt-8 flex justify-between pt-8">
                 <button
                   onClick={() => navigate("/classesTutor")}
-                  className="px-8 py-3 font-medium border border-gray-200 rounded-full text-md hover:bg-gray-50"
+                  className="text-md rounded-full border border-gray-200 px-8 py-3 font-medium hover:bg-gray-50"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleUpdateClass}
                   disabled={!isFormValid || isUpdating}
-                  className={`px-8 py-3 rounded-full text-md font-medium min-w-[120px] flex items-center justify-center ${
+                  className={`text-md flex min-w-[120px] items-center justify-center rounded-full px-8 py-3 font-medium ${
                     isFormValid && !isUpdating
-                      ? "bg-[#a6fab6] border border-[#042f0c] cursor-pointer hover:bg-[#95e1a4]"
-                      : "bg-gray-200 border border-gray-300 cursor-not-allowed"
+                      ? "cursor-pointer border border-[#042f0c] bg-[#a6fab6] hover:bg-[#95e1a4]"
+                      : "cursor-not-allowed border border-gray-300 bg-gray-200"
                   }`}
                 >
                   {isUpdating ? "Updating..." : "Save Changes"}

@@ -49,7 +49,6 @@ const ClassCard = ({
   const [, setLoading] = useState(true);
   const formatTime = (timestamp) => {
     if (!timestamp) return "TBD";
-    // Support both Firebase timestamp and ISO string
     let date;
     if (typeof timestamp === "string") {
       date = new Date(timestamp);
@@ -58,34 +57,20 @@ const ClassCard = ({
     } else {
       return "TBD";
     }
-    // Use UTC methods
-    const startHour = date.getUTCHours();
-    const startMinutes = date.getUTCMinutes();
+    // Use local time
+    const startHour = date.getHours();
+    const startMinutes = date.getMinutes();
     const endDate = new Date(date.getTime() + classDuration * 60000);
-    const endHour = endDate.getUTCHours();
-    const endMinutes = endDate.getUTCMinutes();
+    const endHour = endDate.getHours();
+    const endMinutes = endDate.getMinutes();
     const formatDigit = (num) => num.toString().padStart(2, "0");
-    const timezone = "UTC";
-    return `${formatDigit(startHour)}:${formatDigit(startMinutes)}-${formatDigit(endHour)}:${formatDigit(endMinutes)} ${timezone}`;
+    // Show local time zone abbreviation
+    const tz = Intl.DateTimeFormat(undefined, { timeZoneName: "short" })
+      .format(date)
+      .split(" ")
+      .pop();
+    return `${formatDigit(startHour)}:${formatDigit(startMinutes)}-${formatDigit(endHour)}:${formatDigit(endMinutes)} ${tz}`;
   };
-  const formatDate = (timestamp) => {
-    if (!timestamp) return "TBD";
-    let date;
-    if (typeof timestamp === "string") {
-      date = new Date(timestamp);
-    } else if (timestamp.seconds) {
-      date = new Date(timestamp.seconds * 1000);
-    } else {
-      return "TBD";
-    }
-    const day = date.getUTCDate();
-    const month = date
-      .toLocaleString("en-US", { month: "short", timeZone: "UTC" })
-      .toUpperCase();
-    const year = date.getUTCFullYear();
-    return `${day} ${month} ${year}`;
-  };
-
   // Add a helper to get the day name
   const getDayName = (timestamp) => {
     if (!timestamp || !timestamp.seconds) return "TBD";

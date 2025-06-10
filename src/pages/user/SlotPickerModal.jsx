@@ -156,10 +156,6 @@ const SlotPickerModal = ({
                   <span className="text-[#222]">Duration:</span>{" "}
                   <span className="font-semibold">30 minutes</span>
                 </div>
-                <div className="mb-4 text-[15px]">
-                  <span className="text-[#222]">Time zone:</span>{" "}
-                  <span className="font-semibold">UTC</span>
-                </div>
                 <div className="grid grid-cols-2 gap-2">
                   {timeSlots.map((slot) => (
                     <button

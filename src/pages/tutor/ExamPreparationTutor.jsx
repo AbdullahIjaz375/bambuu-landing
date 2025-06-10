@@ -138,16 +138,15 @@ const ExamPreparationTutor = () => {
             if (!slot.time || slot.booked) return;
             const dateObj = new Date(slot.time);
             if (isNaN(dateObj.getTime())) return;
-            const year = dateObj.getUTCFullYear();
-            const month = String(dateObj.getUTCMonth() + 1).padStart(2, "0");
-            const day = String(dateObj.getUTCDate()).padStart(2, "0");
+            const year = dateObj.getFullYear();
+            const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+            const day = String(dateObj.getDate()).padStart(2, "0");
             const dateKey = `${year}-${month}-${day}`;
             const timeStr = dateObj
               .toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",
                 hour12: true,
-                timeZone: "UTC",
               })
               .replace(/^0/, "");
             if (!slotsByDate[dateKey]) slotsByDate[dateKey] = [];
@@ -165,16 +164,15 @@ const ExamPreparationTutor = () => {
             if (!slot.time || slot.booked) return;
             const dateObj = new Date(slot.time);
             if (isNaN(dateObj.getTime())) return;
-            const year = dateObj.getUTCFullYear();
-            const month = String(dateObj.getUTCMonth() + 1).padStart(2, "0");
-            const day = String(dateObj.getUTCDate()).padStart(2, "0");
+            const year = dateObj.getFullYear();
+            const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+            const day = String(dateObj.getDate()).padStart(2, "0");
             const dateKey = `${year}-${month}-${day}`;
             const timeStr = dateObj
               .toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",
                 hour12: true,
-                timeZone: "UTC",
               })
               .replace(/^0/, "");
             if (!slotsByDate[dateKey]) slotsByDate[dateKey] = [];

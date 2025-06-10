@@ -12,9 +12,7 @@ import ExploreClassCard from "../../components/ExploreClassCard";
 import EmptyState from "../../components/EmptyState";
 import ShowDescription from "../../components/ShowDescription";
 import { streamClient, fetchChatToken, ChannelType } from "../../config/stream";
-import InstructorProfile from "./InstructorProfile";
 import { getExamPrepStepStatus } from "../../api/examPrepApi";
-import Modal from "react-modal";
 import BookingFlowModal from "../../components/BookingFlowModal";
 
 const InstructorProfileUser = () => {
@@ -29,10 +27,8 @@ const InstructorProfileUser = () => {
   const [error, setError] = useState(null);
   const channelRef = useRef(null);
   const [isCreatingChannel, setIsCreatingChannel] = useState(false);
-  const [bookTutor, setBookTutor] = useState(false);
   const [stepStatusLoading, setStepStatusLoading] = useState(false);
   const [stepStatusError, setStepStatusError] = useState(null);
-  const [showTutorExploreModal, setShowTutorExploreModal] = useState(false);
   const [
     hasBookedExamPrepClassWithOtherTutor,
     setHasBookedExamPrepClassWithOtherTutor,
@@ -42,16 +38,7 @@ const InstructorProfileUser = () => {
   const [showExamPrepBookingFlow, setShowExamPrepBookingFlow] = useState(false);
   const [examPrepBookingInitialStep, setExamPrepBookingInitialStep] =
     useState(6);
-  const getInstructorProfileData = (tutor) => ({
-    img: tutor.photoUrl || "/images/panda.png",
-    name: tutor.name,
-    langs: [
-      (tutor.nativeLanguage || "") + " (Native)",
-      (tutor.teachingLanguage || "") + " (Teaching)",
-    ],
-    country: tutor.country,
-    students: tutor.tutorStudentIds?.length || 0,
-  });
+  const [hasPurchasedPlan, setHasPurchasedPlan] = useState(null);
 
   // Handle exam preparation package click
   const handleExamPrepClick = async () => {
@@ -65,6 +52,13 @@ const InstructorProfileUser = () => {
         navigate("/subscriptions?tab=exam");
         return;
       }
+
+      // if (!res.pendingIntroCallClassId || res.pendingIntroCallClassId === "") {
+      //   setIntroBookingInitialStep(2); // step 2 = InstructorProfile
+      //   setShowIntroBookingFlow(true);
+      //   setStepStatusLoading(false);
+      //   return;
+      // }
       // 2. No intro call with this tutor
       if (!res.hasBookedIntroCall) {
         setIntroBookingInitialStep(2); // step 2 = InstructorProfile
@@ -73,9 +67,8 @@ const InstructorProfileUser = () => {
       }
       // 3. Intro call booked but not completed
       if (res.hasBookedIntroCall && !res.doneWithIntroCall) {
-        // You may want to pass the classId if available in the response
         if (res.pendingIntroCallClassId) {
-          navigate(`/class-details/${res.pendingIntroCallClassId}`);
+          navigate(`/classDetailsUser/${res.pendingIntroCallClassId}`);
         } else return;
       }
       // 4. Intro call completed, no exam prep class booked
@@ -328,8 +321,10 @@ const InstructorProfileUser = () => {
         setHasBookedExamPrepClassWithOtherTutor(
           res.hasBookedExamPrepClassWithOtherTutor,
         );
+        setHasPurchasedPlan(res.hasPurchasedPlan); // <-- set plan purchase status
       } catch (err) {
         setHasBookedExamPrepClassWithOtherTutor(false); // fallback
+        setHasPurchasedPlan(null);
       }
     };
     fetchExamPrepStatus();
@@ -463,7 +458,8 @@ const InstructorProfileUser = () => {
                 </button>
               </div>
               {/* Exam Preparation Package Button BELOW the green box */}
-              {!hasBookedExamPrepClassWithOtherTutor && (
+              {(!hasBookedExamPrepClassWithOtherTutor ||
+                hasPurchasedPlan === false) && (
                 <div
                   onClick={handleExamPrepClick}
                   className="mt-6 flex w-full items-center justify-center"
@@ -526,31 +522,6 @@ const InstructorProfileUser = () => {
         mode="exam"
         initialStep={examPrepBookingInitialStep}
       />
-
-      <InstructorProfile
-        selectedInstructor={bookTutor ? getInstructorProfileData(tutor) : null}
-        setSelectedInstructor={() => setBookTutor(false)}
-      />
-      {showTutorExploreModal && (
-        <Modal
-          isOpen={showTutorExploreModal}
-          onRequestClose={() => setShowTutorExploreModal(false)}
-          className="fixed left-1/2 top-1/2 flex w-[90%] max-w-[640px] -translate-x-1/2 -translate-y-1/2 transform flex-col rounded-[40px] bg-white p-6 font-urbanist shadow-2xl outline-none"
-          overlayClassName="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center backdrop-blur-sm"
-          ariaHideApp={false}
-        >
-          <h2 className="mb-4 text-xl font-bold">Explore Tutors</h2>
-          <p>
-            Show a list of tutors here for the user to book an intro call with.
-          </p>
-          <button
-            onClick={() => setShowTutorExploreModal(false)}
-            className="mt-4 rounded-full border border-[#042F0C] bg-white px-5 py-2 text-base font-medium text-black transition-colors hover:bg-gray-50"
-          >
-            Close
-          </button>
-        </Modal>
-      )}
     </div>
   );
 };

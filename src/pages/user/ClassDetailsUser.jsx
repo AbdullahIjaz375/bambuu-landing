@@ -747,7 +747,7 @@ const ClassDetailsUser = ({ onClose }) => {
                   <div className="flex items-center gap-2 text-lg text-black">
                     <img src="/svgs/clock.svg" alt="Clock" />{" "}
                     <span className="text-sm font-medium text-[#454545]">
-                      {formatTimeOnly(classData.classDateTime)} EST
+                      {formatTimeOnly(classData.classDateTime)}
                     </span>
                   </div>
                   <div className="font-mediumss flex items-center gap-1 text-sm text-[#454545]">

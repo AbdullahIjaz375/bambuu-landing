@@ -41,7 +41,7 @@ const ExamBookingConfirmation = ({
               <div className="mb-2 mr-3 flex items-center justify-between gap-6">
                 <span className="flex items-center gap-1 text-sm font-medium text-gray-700">
                   <Clock className="mr-1 h-4 w-4 text-gray-500" />
-                  {selectedTime} UTC
+                  {selectedTime}
                 </span>
                 <span className="flex items-center gap-1 text-xs font-medium text-[#454545]">
                   <img

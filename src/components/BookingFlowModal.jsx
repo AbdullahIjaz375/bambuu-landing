@@ -159,16 +159,15 @@ const BookingFlowModal = ({
               if (!slot.time || slot.booked) return;
               const dateObj = new Date(slot.time);
               if (isNaN(dateObj.getTime())) return;
-              const year = dateObj.getUTCFullYear();
-              const month = String(dateObj.getUTCMonth() + 1).padStart(2, "0");
-              const day = String(dateObj.getUTCDate()).padStart(2, "0");
+              const year = dateObj.getFullYear();
+              const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+              const day = String(dateObj.getDate()).padStart(2, "0");
               const dateKey = `${year}-${month}-${day}`;
               const timeStr = dateObj
                 .toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",
                   hour12: true,
-                  timeZone: "UTC",
                 })
                 .replace(/^0/, "");
               if (!slotMap[dateKey]) slotMap[dateKey] = [];
@@ -249,16 +248,15 @@ const BookingFlowModal = ({
         slotDay.times.forEach((slot) => {
           if (!slot.booked) {
             const dateObj = new Date(slot.time);
-            const year = dateObj.getUTCFullYear();
-            const month = String(dateObj.getUTCMonth() + 1).padStart(2, "0");
-            const day = String(dateObj.getUTCDate()).padStart(2, "0");
+            const year = dateObj.getFullYear();
+            const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+            const day = String(dateObj.getDate()).padStart(2, "0");
             const dateKey = `${year}-${month}-${day}`;
             const timeStr = dateObj
               .toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",
                 hour12: true,
-                timeZone: "UTC",
               })
               .replace(/^0/, "");
             if (!slotMap[dateKey]) slotMap[dateKey] = [];
@@ -299,7 +297,7 @@ const BookingFlowModal = ({
       const isPM = selectedTime.toLowerCase().includes("pm");
       if (isPM && hour !== 12) hour += 12;
       if (!isPM && hour === 12) hour = 0;
-      const d = new Date(Date.UTC(year, month - 1, day, hour, minute, 0, 0));
+      const d = new Date(year, month - 1, day, hour, minute, 0, 0);
       const slotISO = d.toISOString();
       await bookIntroductoryCall({
         studentId: user.uid,
@@ -343,16 +341,15 @@ const BookingFlowModal = ({
           if (!slot.time || slot.booked) return;
           const dateObj = new Date(slot.time);
           if (isNaN(dateObj.getTime())) return;
-          const year = dateObj.getUTCFullYear();
-          const month = String(dateObj.getUTCMonth() + 1).padStart(2, "0");
-          const day = String(dateObj.getUTCDate()).padStart(2, "0");
+          const year = dateObj.getFullYear();
+          const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+          const day = String(dateObj.getDate()).padStart(2, "0");
           const dateKey = `${year}-${month}-${day}`;
           const timeStr = dateObj
             .toLocaleTimeString([], {
               hour: "2-digit",
               minute: "2-digit",
               hour12: true,
-              timeZone: "UTC",
             })
             .replace(/^0/, "");
           if (!slotMap[dateKey]) slotMap[dateKey] = [];
@@ -397,7 +394,7 @@ const BookingFlowModal = ({
         const isPM = timeStr.toLowerCase().includes("pm");
         if (isPM && hour !== 12) hour += 12;
         if (!isPM && hour === 12) hour = 0;
-        const d = new Date(Date.UTC(year, month - 1, day, hour, minute, 0, 0));
+        const d = new Date(year, month - 1, day, hour, minute, 0, 0);
         return { time: d.toISOString() };
       });
       const resp = await bookExamPrepClass({

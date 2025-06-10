@@ -149,9 +149,6 @@ const TimeSlotModal = ({
         <span className="text-sm text-gray-700">
           Duration: <b>60 minutes</b>
         </span>
-        <span className="ml-auto text-sm text-gray-700">
-          Time zone: <b>UTC</b>
-        </span>
       </div>
       <div className="mb-4 grid grid-cols-4 gap-3">
         {timeSlots.map((slot) => {

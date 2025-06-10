@@ -14,7 +14,7 @@ const CalendarTutor = ({ onNext, prefilledDates = [] }) => {
           if (d instanceof Date) return d;
           // d is string in YYYY-MM-DD
           const [year, month, day] = d.split("-").map(Number);
-          return new Date(Date.UTC(year, month - 1, day));
+          return new Date(year, month - 1, day);
         }),
       );
     }

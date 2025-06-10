@@ -250,4 +250,15 @@ export function getExamPrepCurrentStep(studentId, token) {
   );
 }
 
+//dummy just to check if the api is working
+export function getExamPrepStepStatusMock(studentId, tutorId, token) {
+  return apiRequest(
+    `https://getexamprepstepstatusdev-zzpsx27htq-uc.a.run.app?studentId=${encodeURIComponent(studentId)}&tutorId=${encodeURIComponent(tutorId)}`,
+    {
+      method: "GET",
+    },
+    token,
+  );
+}
+
 // Add more as needed for new endpoints

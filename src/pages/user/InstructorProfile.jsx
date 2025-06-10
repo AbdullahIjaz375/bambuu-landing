@@ -252,8 +252,8 @@ const InstructorProfile = ({
             className="w-full rounded-full border border-[#042F0C] bg-[#14B82C] py-3 text-base font-medium text-black transition hover:bg-[#129e25]"
           >
             {onBookIntroCall
-              ? "Book Introductory Call:"
-              : "Book Exam Preparation Classes "}
+              ? "Book Introductory Call"
+              : "Book Exam Preparation Classes"}
           </button>
         </div>
       </Modal>

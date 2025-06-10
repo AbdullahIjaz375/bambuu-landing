@@ -62,7 +62,7 @@ const ConfirmClassesModal = ({
         const isPM = timeStr.toLowerCase().includes("pm");
         if (isPM && hour !== 12) hour += 12;
         if (!isPM && hour === 12) hour = 0;
-        const d = new Date(Date.UTC(year, month - 1, day, hour, minute, 0, 0));
+        const d = new Date(year, month - 1, day, hour, minute, 0, 0);
         return { time: d.toISOString() };
       });
       const payload = {
@@ -145,7 +145,7 @@ const ConfirmClassesModal = ({
                   {classItem.date}
                 </p>
                 <p className="text-xs font-medium text-[#3D3D3D]">
-                  {classItem.time} <span className="align-middle">(UTC)</span>
+                  {classItem.time}
                 </p>
               </div>
             </div>
