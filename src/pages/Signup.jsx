@@ -904,7 +904,7 @@ const Signup = () => {
   if (isMobile) {
     return (
       <MobileModal open={true} onClose={() => {}}>
-        <div className="flex w-full flex-col items-center justify-center">
+        <div className="flex w-full flex-col items-center justify-center p-8">
           <div className="mb-4 flex w-full justify-end">
             <select
               value={currentLanguage}
@@ -926,24 +926,32 @@ const Signup = () => {
           <form onSubmit={handleInitialSignup} className="w-full space-y-6">
             <div className="space-y-1">
               <label className="block text-sm font-medium">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                className="w-full rounded-3xl border border-gray-300 p-2 focus:border-[#14B82C] focus:outline-none focus:ring-0"
-                required
-              />
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                  <img src="/svgs/email-icon.svg" alt="Email" />
+                </span>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  className="w-full rounded-3xl border border-gray-300 p-2 pl-10 focus:border-[#14B82C] focus:outline-none focus:ring-0"
+                  required
+                />
+              </div>
             </div>
             <div className="space-y-1">
               <label className="block text-sm font-medium">Password</label>
               <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                  <img src="/svgs/lock-icon.svg" alt="Lock" />
+                </span>
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
-                  className="w-full rounded-3xl border border-gray-300 p-2 focus:border-[#14B82C] focus:outline-none focus:ring-0"
+                  className="w-full rounded-3xl border border-gray-300 p-2 pl-10 focus:border-[#14B82C] focus:outline-none focus:ring-0"
                   required
                 />
                 <button
@@ -995,12 +1003,15 @@ const Signup = () => {
                 Confirm Password
               </label>
               <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                  <img src="/svgs/lock-icon.svg" alt="Lock" />
+                </span>
                 <input
                   type={showConfirmPassword ? "text" : "password"}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Re-enter your password"
-                  className="w-full rounded-3xl border border-gray-300 p-2 focus:border-[#14B82C] focus:outline-none focus:ring-0"
+                  className="w-full rounded-3xl border border-gray-300 p-2 pl-10 focus:border-[#14B82C] focus:outline-none focus:ring-0"
                   required
                 />
                 <button
@@ -1051,7 +1062,7 @@ const Signup = () => {
               type="submit"
               className="mt-8 w-full rounded-full border border-black bg-[#14b82c] py-3 text-black hover:bg-[#119523] focus:outline-none focus:ring-2 focus:ring-[#119523] focus:ring-offset-2"
             >
-              Create Account
+              Create an Account
             </button>
           </form>
           <div className="relative my-8 w-full">
@@ -1060,7 +1071,7 @@ const Signup = () => {
             </div>
             <div className="relative flex justify-center text-sm">
               <span className="bg-white px-2 text-gray-500">
-                {t("signup.orContinueWith", "or continue with")}
+                {t("signup.orContinueWith", "or sign up with")}
               </span>
             </div>
           </div>
@@ -1084,7 +1095,7 @@ const Signup = () => {
               <span>{t("signup.apple", "apple")}</span>
             </button>
           </div>
-          <div className="mb-4 w-full text-center text-sm text-gray-500">
+          <div className="mb-4 mt-10 w-full text-center text-sm text-gray-500">
             <p>
               {t("signup.termsConditions", "By signing up, you agree to our")}{" "}
               <Link to="/terms" className="text-black hover:underline">
