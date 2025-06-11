@@ -8,6 +8,7 @@ const ProtectedRoute = ({ children, requiredRole }) => {
   const location = useLocation();
   const currentUrl = window.location.href;
   const currentPath = location.pathname + location.search + location.hash;
+
   useEffect(() => {
     if (!user) {
       // Save both session and local storage for better persistence
@@ -101,6 +102,7 @@ const ProtectedRoute = ({ children, requiredRole }) => {
 
     return <Navigate to={loginUrl} />;
   }
+
   // If the user is logged in and the current path is /login or /signup, redirect to /learn
   if (location.pathname === "/login" || location.pathname === "/signup") {
     // Check if user is in mobile modal flow and should not be redirected
@@ -111,6 +113,7 @@ const ProtectedRoute = ({ children, requiredRole }) => {
     }
     return <Navigate to="/learn" />;
   }
+
   // Role-based access checks
   const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
 
@@ -124,6 +127,7 @@ const ProtectedRoute = ({ children, requiredRole }) => {
       </div>
     );
   }
+
   // Only perform role checks if there are required roles and we're not in a loading state
   if (roles.length > 0) {
     // Get user type from context first, then fallback to sessionStorage
@@ -131,14 +135,28 @@ const ProtectedRoute = ({ children, requiredRole }) => {
     const effectiveUserType = userTypeFromContext || userType;
 
     // If we still don't have a user type, or it's not in the allowed roles
-    if (!effectiveUserType || !roles.includes(effectiveUserType)) {
-      // Instead of immediately redirecting to unauthorized, redirect to login if it seems
-      // like there might be authentication problems
-      if (!effectiveUserType || effectiveUserType === "undefined") {
-        return <Navigate to="/login" />;
-      } else {
-        return <Navigate to="/unauthorized" />;
-      }
+
+    // if (!effectiveUserType || !roles.includes(effectiveUserType)) {
+    //   // Instead of immediately redirecting to unauthorized, redirect to login if it seems
+    //   // like there might be authentication problems
+    //   if (!effectiveUserType || effectiveUserType === "undefined") {
+    //     return <Navigate to="/login" />;
+    //   } else {
+    //     return <Navigate to="/unauthorized" />;
+    //   }
+    // }
+    // If user is authenticated but userType/profile is not yet loaded, show spinner
+    if (!effectiveUserType || effectiveUserType === "undefined") {
+      return (
+        <div className="flex h-screen items-center justify-center">
+          <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-green-500"></div>
+        </div>
+      );
+    }
+
+    // If userType is loaded but not allowed, redirect to unauthorized
+    if (!roles.includes(effectiveUserType)) {
+      return <Navigate to="/unauthorized" />;
     }
   }
 

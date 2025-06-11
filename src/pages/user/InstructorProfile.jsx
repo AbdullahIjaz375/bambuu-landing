@@ -120,7 +120,7 @@ const InstructorProfile = ({
       <Modal
         isOpen={!!selectedInstructor}
         onRequestClose={() => setSelectedInstructor(null)}
-        className="custom-modal-content fixed left-1/2 top-1/2 flex w-[468px] max-w-[95vw] -translate-x-1/2 -translate-y-1/2 flex-col items-center rounded-[2.5rem] border border-blue-200 bg-white p-0 font-urbanist shadow-xl outline-none"
+        className="custom-modal-content scrollbar-hide fixed left-1/2 top-1/2 flex max-h-[90vh] w-[468px] max-w-[95vw] -translate-x-1/2 -translate-y-1/2 flex-col items-center overflow-y-auto rounded-[2.5rem] border border-blue-200 bg-white p-0 font-urbanist shadow-xl outline-none"
         overlayClassName="custom-modal-overlay fixed inset-0 bg-black bg-opacity-20 z-50 flex items-center justify-center"
         ariaHideApp={false}
       >

@@ -603,7 +603,7 @@ const Subscriptions = () => {
                           toast.success(
                             "Exam Prep Plan purchased successfully!",
                           );
-                          navigate("/learnUser", {
+                          navigate("/learn", {
                             state: { showIntroBookingFlow: true },
                           });
                         } catch (err) {

@@ -39,6 +39,7 @@ const InstructorProfileUser = () => {
   const [examPrepBookingInitialStep, setExamPrepBookingInitialStep] =
     useState(6);
   const [hasPurchasedPlan, setHasPurchasedPlan] = useState(null);
+  const [selectedInstructor, setSelectedInstructor] = useState(null);
 
   // Handle exam preparation package click
   const handleExamPrepClick = async () => {
@@ -54,14 +55,16 @@ const InstructorProfileUser = () => {
       }
 
       // if (!res.pendingIntroCallClassId || res.pendingIntroCallClassId === "") {
-      //   setIntroBookingInitialStep(2); // step 2 = InstructorProfile
+      //   setIntroBookingInitialStep(2);
+      //   setSelectedInstructor(tutor);
       //   setShowIntroBookingFlow(true);
-      //   setStepStatusLoading(false);
       //   return;
       // }
+
       // 2. No intro call with this tutor
       if (!res.hasBookedIntroCall) {
-        setIntroBookingInitialStep(2); // step 2 = InstructorProfile
+        setIntroBookingInitialStep(2);
+        setSelectedInstructor(tutor);
         setShowIntroBookingFlow(true);
         return;
       }
@@ -458,41 +461,53 @@ const InstructorProfileUser = () => {
                 </button>
               </div>
               {/* Exam Preparation Package Button BELOW the green box */}
-              {(!hasBookedExamPrepClassWithOtherTutor ||
-                hasPurchasedPlan === false) && (
-                <div
-                  onClick={handleExamPrepClick}
-                  className="mt-6 flex w-full items-center justify-center"
-                >
-                  <div className="w-full">
-                    <button className="flex w-full items-center justify-between rounded-2xl border border-[#FFBF00] bg-[#FFFFEA] px-6 py-4 text-left text-black shadow transition hover:bg-[#fff9a0]">
-                      <div className="flex items-center gap-3">
-                        <img
-                          src="/svgs/preparation-package-icon.svg"
-                          alt="Exam"
-                          className="h-16 w-16"
+              <div className="mt-6 flex w-full items-center justify-center">
+                <div className="w-full">
+                  <button
+                    className="flex w-full items-center justify-between rounded-2xl border border-[#FFBF00] bg-[#FFFFEA] px-6 py-4 text-left text-black shadow transition hover:bg-[#fff9a0]"
+                    onClick={handleExamPrepClick}
+                    disabled={stepStatusLoading}
+                    style={{
+                      opacity:
+                        stepStatusLoading ||
+                        (hasBookedExamPrepClassWithOtherTutor &&
+                          hasPurchasedPlan !== false)
+                          ? 0.6
+                          : 1,
+                      pointerEvents:
+                        stepStatusLoading ||
+                        (hasBookedExamPrepClassWithOtherTutor &&
+                          hasPurchasedPlan !== false)
+                          ? "none"
+                          : "auto",
+                    }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <img
+                        src="/svgs/preparation-package-icon.svg"
+                        alt="Exam"
+                        className="h-16 w-16"
+                      />
+                      <span className="text-base font-semibold">
+                        Exam Preparation Package
+                      </span>
+                      {stepStatusLoading && (
+                        <ClipLoader
+                          color="#14B82C"
+                          size={18}
+                          className="ml-2"
                         />
-                        <span className="text-base font-semibold">
-                          Exam Preparation Package
-                        </span>
-                        {stepStatusLoading && (
-                          <ClipLoader
-                            color="#14B82C"
-                            size={18}
-                            className="ml-2"
-                          />
-                        )}
-                      </div>
-                      <ChevronRightIcon className="h-4 w-4" />
-                    </button>
-                    {stepStatusError && (
-                      <div className="mt-2 text-sm text-red-500">
-                        {stepStatusError}
-                      </div>
-                    )}
-                  </div>
+                      )}
+                    </div>
+                    <ChevronRightIcon className="h-4 w-4" />
+                  </button>
+                  {stepStatusError && (
+                    <div className="mt-2 text-sm text-red-500">
+                      {stepStatusError}
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
             {/* Main content */}
             <div className="flex min-h-0 flex-1 flex-col">
@@ -513,6 +528,8 @@ const InstructorProfileUser = () => {
         user={user}
         mode="intro"
         initialStep={introBookingInitialStep}
+        selectedInstructor={selectedInstructor}
+        setSelectedInstructor={setSelectedInstructor}
       />
 
       <BookingFlowModal

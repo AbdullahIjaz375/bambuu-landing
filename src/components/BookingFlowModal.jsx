@@ -36,13 +36,15 @@ const BookingFlowModal = ({
   mode = "intro",
   initialStep = 0,
   onComplete,
+  selectedInstructor,
+  setSelectedInstructor,
 }) => {
   // Step index: 0=Start, 1=Explore, 2=Profile, 3=Slot, 4=Confirm, 5=Booked, 6=ExamPrepStart, 7=ExamClassSlots, 8=ExamConfirm, 9=ExamBooked
   const [step, setStep] = useState(initialStep);
   const [showExamPrepModal, setShowExamPrepModal] = useState(isOpen);
   const [showExploreInstructorsModal, setShowExploreInstructorsModal] =
     useState(false);
-  const [selectedInstructor, setSelectedInstructor] = useState(null);
+  // const [selectedInstructor, setSelectedInstructor] = useState(null);
   const [confirmedInstructor, setConfirmedInstructor] = useState(null);
   const [showSlotPicker, setShowSlotPicker] = useState(false);
   const [introCallSlots, setIntroCallSlots] = useState({});
@@ -74,7 +76,7 @@ const BookingFlowModal = ({
       setStep(startStep);
       setShowExamPrepModal(true);
       setShowExploreInstructorsModal(false);
-      setSelectedInstructor(null);
+      // setSelectedInstructor(null);
       setConfirmedInstructor(null);
       setShowSlotPicker(false);
       setIntroCallSlots({});
@@ -425,7 +427,8 @@ const BookingFlowModal = ({
 
   return (
     <>
-      {showStepper && (
+      {/* Stepper hidden */}
+      {/* {showStepper && (
         <div className="mb-6 flex items-center justify-center">
           {stepLabels.map((label, idx) => {
             let status = "upcoming";
@@ -469,7 +472,7 @@ const BookingFlowModal = ({
             </span>
           )}
         </div>
-      )}
+      )} */}
       {/* Step content rendering logic restored below */}
       {step === 0 && (
         <StartExamPrep

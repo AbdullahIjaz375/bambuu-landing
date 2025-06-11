@@ -190,6 +190,7 @@ const LearnUser = () => {
   const [errorGroups, setErrorGroups] = useState(null);
   const [nextClass, setNextClass] = useState(null);
   const [examPrepCredits, setExamPrepCredits] = useState(null);
+  const [selectedInstructor, setSelectedInstructor] = useState(null);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -804,6 +805,8 @@ const LearnUser = () => {
         onClose={() => setShowIntroBookingFlow(false)}
         user={user}
         mode="intro"
+        selectedInstructor={selectedInstructor}
+        setSelectedInstructor={setSelectedInstructor}
       />
       <BookingFlowModal
         isOpen={showExamPrepBookingFlow}

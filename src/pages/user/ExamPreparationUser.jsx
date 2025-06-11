@@ -16,6 +16,7 @@ import {
 import { db } from "../../firebaseConfig";
 import ClassCard from "../../components/ClassCard";
 import { getExamPrepStatus } from "../../api/examPrepApi";
+import BookingFlowModal from "../../components/BookingFlowModal";
 
 const ExamPreparationUser = () => {
   const { tutorId } = useParams();
@@ -26,6 +27,7 @@ const ExamPreparationUser = () => {
   const [loading, setLoading] = useState(true);
   const [isCreatingChannel, setIsCreatingChannel] = useState(false);
   const [examPrepStatus, setExamPrepStatus] = useState(null);
+  const [showExamPrepBookingFlow, setShowExamPrepBookingFlow] = useState(false);
 
   const channelRef = useRef(null);
 
@@ -176,6 +178,7 @@ const ExamPreparationUser = () => {
     }
   };
 
+  // Loader covers the entire content area while loading
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-white">
@@ -324,23 +327,50 @@ const ExamPreparationUser = () => {
                 </div>
               </div>
               {/* Progress & Unlock */}
-              <div className="flex items-center gap-4 rounded-3xl border border-[#B0B0B0] bg-white px-4 py-2">
-                <div className="flex items-center text-sm font-medium">
-                  <img
-                    src="/svgs/preparation-package-icon.svg"
-                    alt="Exam"
-                    className="mr-1 h-10 w-10"
-                  />
-                  <span className="text-base font-normal text-[#454545]">
-                    You're making excellent progress with your exam prep.
-                    Continue your journey by unlocking Month 2 for even better
-                    results.
-                  </span>
+              {expiryDate &&
+              (expiryDate - new Date()) / (1000 * 60 * 60 * 24) <= 10 ? (
+                <div className="flex items-center gap-4 rounded-3xl border border-[#B0B0B0] bg-white px-4 py-2">
+                  <div className="flex items-center text-sm font-medium">
+                    <img
+                      src="/svgs/preparation-package-icon.svg"
+                      alt="Exam"
+                      className="mr-1 h-10 w-10"
+                    />
+                    <span className="text-base font-normal text-[#454545]">
+                      You're making excellent progress with your exam prep.
+                      Continue your journey by unlocking Month 2 for even better
+                      results.
+                    </span>
+                  </div>
+                  <button className="ml-auto rounded-3xl border border-[#5D5D5D] bg-[#E6FDE9] px-6 py-2 text-base font-medium text-[#042F0C] shadow transition hover:bg-[#E6FDE9]">
+                    Unlock Next Plan
+                  </button>
                 </div>
-                <button className="ml-auto rounded-3xl border border-[#5D5D5D] bg-[#E6FDE9] px-6 py-2 text-base font-medium text-[#042F0C] shadow transition hover:bg-[#E6FDE9]">
-                  Unlock Next Plan
-                </button>
-              </div>
+              ) : (
+                <div className="flex items-center gap-4 rounded-3xl border border-[#B0B0B0] bg-white px-4 py-2">
+                  <div className="flex items-center text-sm font-medium">
+                    <img
+                      src="/svgs/preparation-package-icon.svg"
+                      alt="Exam"
+                      className="mr-2 h-7 w-7"
+                    />
+                    <span className="text-base font-normal text-[#454545]">
+                      You can book {remainingClasses} more classes until{" "}
+                      {expiryDate?.toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "long",
+                      })}
+                      .
+                    </span>
+                  </div>
+                  <button
+                    className="ml-auto rounded-3xl border border-[#5D5D5D] bg-[#E6FDE9] px-6 py-2 text-base font-medium text-[#042F0C] shadow transition hover:bg-[#E6FDE9]"
+                    onClick={() => setShowExamPrepBookingFlow(true)}
+                  >
+                    Book Classes
+                  </button>
+                </div>
+              )}
               {/* Booked Classes Cards */}
               <div className="flex flex-wrap gap-8">
                 {classes.length === 0 ? (
@@ -384,6 +414,13 @@ const ExamPreparationUser = () => {
           </div>
         </div>
       </div>
+      <BookingFlowModal
+        isOpen={showExamPrepBookingFlow}
+        onClose={() => setShowExamPrepBookingFlow(false)}
+        user={user}
+        mode="exam"
+        initialStep={6}
+      />
     </div>
   );
 };
