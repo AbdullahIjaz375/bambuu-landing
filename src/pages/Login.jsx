@@ -184,7 +184,7 @@ const Login = () => {
       }
       setRedirected(true);
     },
-    [location, navigate, setRedirected]
+    [location, navigate, setRedirected],
   ); // Automatically redirect if the user is already logged in.
   useEffect(() => {
     if (user && !redirected) {
@@ -225,7 +225,7 @@ const Login = () => {
       const notificationPrefsRef = doc(
         db,
         "notification_preferences",
-        user.uid
+        user.uid,
       );
       const notificationPrefsDoc = await getDoc(notificationPrefsRef);
       const userAccountRef = doc(db, "user_accounts", user.uid);
@@ -235,8 +235,10 @@ const Login = () => {
       if (!userDoc.exists()) {
         isFirstTimeLogin = true;
         const newUserData = {
-          email: user.email,
-          name: user.displayName || "",
+          email: user.email || "",
+          name:
+            user.displayName ||
+            (user.email ? user.email.split("@")[0] : "User"),
           uid: user.uid,
           enrolledClasses: [],
           joinedGroups: [],
@@ -295,12 +297,12 @@ const Login = () => {
           const lastLoginDate = new Date(
             lastLoggedIn.getFullYear(),
             lastLoggedIn.getMonth(),
-            lastLoggedIn.getDate()
+            lastLoggedIn.getDate(),
           );
           const currentDate = new Date(
             now.getFullYear(),
             now.getMonth(),
-            now.getDate()
+            now.getDate(),
           );
           const differenceInDays =
             (currentDate - lastLoginDate) / (1000 * 60 * 60 * 24);
@@ -334,15 +336,29 @@ const Login = () => {
           console.error("Error handling notifications:", notificationError);
           // Don't let notification errors break the login flow
         }
-        updateUserData({
+        const sessionUserData = {
           ...userData,
+          uid: user.uid,
           currentStreak: updatedStreak,
           lastLoggedIn: now,
           userType: "student",
-        });
+        };
+        updateUserData(sessionUserData);
+        toast.success("Logged in successfully!", { autoClose: 3000 });
+
+        // Use a try-catch for the redirect to prevent auth errors from breaking login flow
+        try {
+          if (!sessionUserData.name || !sessionUserData.email) {
+            navigate("/userEditProfile", { replace: true });
+          } else {
+            redirectAfterLogin(false);
+          }
+        } catch (redirectError) {
+          console.error("Error during redirect after login:", redirectError);
+          // If redirect fails, go to the default page
+          navigate("/learn", { replace: true });
+        }
       }
-      toast.success("Logged in successfully!", { autoClose: 3000 });
-      redirectAfterLogin(isFirstTimeLogin);
     } catch (error) {
       console.error("Error during Apple login:", error);
       updateUserData(null);
@@ -360,7 +376,7 @@ const Login = () => {
       const notificationPrefsRef = doc(
         db,
         "notification_preferences",
-        user.uid
+        user.uid,
       );
       const notificationPrefsDoc = await getDoc(notificationPrefsRef);
       const userAccountRef = doc(db, "user_accounts", user.uid);
@@ -369,8 +385,10 @@ const Login = () => {
       if (!userDoc.exists()) {
         isFirstTimeLogin = true;
         const newUserData = {
-          email: user.email,
-          name: user.displayName || "",
+          email: user.email || "",
+          name:
+            user.displayName ||
+            (user.email ? user.email.split("@")[0] : "User"),
           uid: user.uid,
           enrolledClasses: [],
           joinedGroups: [],
@@ -429,12 +447,12 @@ const Login = () => {
           const lastLoginDate = new Date(
             lastLoggedIn.getFullYear(),
             lastLoggedIn.getMonth(),
-            lastLoggedIn.getDate()
+            lastLoggedIn.getDate(),
           );
           const currentDate = new Date(
             now.getFullYear(),
             now.getMonth(),
-            now.getDate()
+            now.getDate(),
           );
           const differenceInDays =
             (currentDate - lastLoginDate) / (1000 * 60 * 60 * 24);
@@ -466,25 +484,28 @@ const Login = () => {
           console.error("Error handling notifications:", notificationError);
           // Don't let notification errors break the login flow
         }
-        updateUserData({
+        const sessionUserData = {
           ...userData,
+          uid: user.uid,
           currentStreak: updatedStreak,
           lastLoggedIn: now,
           userType: "student",
-        });
-      }
-      toast.success("Logged in successfully!", { autoClose: 3000 });
+        };
+        updateUserData(sessionUserData);
+        toast.success("Logged in successfully!", { autoClose: 3000 });
 
-      // Use a try-catch for the redirect to prevent auth errors from breaking login flow
-      try {
-        redirectAfterLogin(isFirstTimeLogin);
-      } catch (redirectError) {
-        console.error(
-          "Error during redirect after Google login:",
-          redirectError
-        );
-        // If redirect fails, go to the default page
-        navigate("/learn", { replace: true });
+        // Use a try-catch for the redirect to prevent auth errors from breaking login flow
+        try {
+          if (!sessionUserData.name || !sessionUserData.email) {
+            navigate("/userEditProfile", { replace: true });
+          } else {
+            redirectAfterLogin(false);
+          }
+        } catch (redirectError) {
+          console.error("Error during redirect after login:", redirectError);
+          // If redirect fails, go to the default page
+          navigate("/learn", { replace: true });
+        }
       }
     } catch (error) {
       console.error("Error during Google login:", error);
@@ -500,7 +521,7 @@ const Login = () => {
             "Popup was blocked by your browser. Please allow popups for this site and try again.",
             {
               autoClose: 7000,
-            }
+            },
           );
           break;
         case "auth/invalid-credential":
@@ -508,7 +529,7 @@ const Login = () => {
             "Invalid credentials. Please try again or use a different login method.",
             {
               autoClose: 5000,
-            }
+            },
           );
           break;
         case "auth/network-request-failed":
@@ -516,7 +537,7 @@ const Login = () => {
             "Network error. Please check your internet connection and try again.",
             {
               autoClose: 5000,
-            }
+            },
           );
           break;
         case "auth/too-many-requests":
@@ -524,7 +545,7 @@ const Login = () => {
             "Too many failed attempts. Please wait a moment and try again.",
             {
               autoClose: 5000,
-            }
+            },
           );
           break;
         case "auth/operation-not-allowed":
@@ -537,20 +558,12 @@ const Login = () => {
             "This account has been disabled. Please contact support.",
             {
               autoClose: 5000,
-            }
+            },
           );
           break;
         default:
-          // Filter out technical FCM errors and show user-friendly message
-          if (error.message && error.message.includes("messaging/")) {
-            toast.error("Login failed. Please try again.", {
-              autoClose: 5000,
-            });
-          } else {
-            toast.error(`Login failed: ${error.message || "Unknown error"}`, {
-              autoClose: 5000,
-            });
-          }
+          console.warn("Non-critical error during login:", error);
+          navigate("/learn", { replace: true });
           break;
       }
     }
@@ -563,7 +576,7 @@ const Login = () => {
       const userCredential = await signInWithEmailAndPassword(
         auth,
         email,
-        password
+        password,
       );
       const user = userCredential.user;
       const userRef = doc(db, "students", user.uid);
@@ -584,12 +597,12 @@ const Login = () => {
         const lastLoginDate = new Date(
           lastLoggedIn.getFullYear(),
           lastLoggedIn.getMonth(),
-          lastLoggedIn.getDate()
+          lastLoggedIn.getDate(),
         );
         const currentDate = new Date(
           now.getFullYear(),
           now.getMonth(),
-          now.getDate()
+          now.getDate(),
         );
         const differenceInDays =
           (currentDate - lastLoginDate) / (1000 * 60 * 60 * 24);
@@ -627,7 +640,11 @@ const Login = () => {
 
       // Use a try-catch for the redirect to prevent auth errors from breaking login flow
       try {
-        redirectAfterLogin(false);
+        if (!sessionUserData.name || !sessionUserData.email) {
+          navigate("/userEditProfile", { replace: true });
+        } else {
+          redirectAfterLogin(false);
+        }
       } catch (redirectError) {
         console.error("Error during redirect after login:", redirectError);
         // If redirect fails, go to the default page
@@ -652,14 +669,10 @@ const Login = () => {
       } else if (error.code === "auth/wrong-password") {
         setPasswordError("Wrong password.");
       } else {
-        // For other errors, show a generic message but don't block login
+        // For other errors, do not show a warning toast, just proceed to /learn
         console.warn("Non-critical error during login:", error);
-        toast.warning("Login succeeded but some services may be unavailable", {
-          autoClose: 5000,
-        });
         navigate("/learn", { replace: true });
       }
-      toast.error("Invalid email or password", { autoClose: 5000 });
     }
   };
 
@@ -701,21 +714,21 @@ const Login = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex min-h-screen items-center justify-center">
         <ClipLoader color="#14B82C" size={50} />
       </div>
     );
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50 ">
-      <div className="w-full max-w-md p-6 space-y-4 bg-white rounded-3xl border border-[#e7e7e7]">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <div className="w-full max-w-md space-y-4 rounded-3xl border border-[#e7e7e7] bg-white p-6">
         {/* Language Selector */}
         <div className="flex justify-end">
           <select
             value={currentLanguage}
             onChange={(e) => handleLanguageChange(e.target.value)}
-            className="px-2 py-1 text-sm border border-gray-200 rounded-full focus:outline-none focus:ring-1 focus:ring-green-500"
+            className="rounded-full border border-gray-200 px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-green-500"
           >
             <option value="en">English</option>
             <option value="es">Español</option>
@@ -756,20 +769,20 @@ const Login = () => {
                 value={email}
                 onChange={handleEmailChange}
                 placeholder={t("login.emailPlaceholder", "Enter your email")}
-                className={`w-full p-2 border rounded-3xl ${
+                className={`w-full rounded-3xl border p-2 ${
                   emailError
                     ? "border-red-500 focus:border-red-500"
                     : "border-gray-300 focus:border-green-500"
-                } focus:ring-0 focus:outline-none`}
+                } focus:outline-none focus:ring-0`}
                 required
               />
               {emailError && (
-                <div className="absolute transform -translate-y-1/2 right-3 top-1/2">
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 transform">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="currentColor"
-                    className="w-5 h-5 text-red-500"
+                    className="h-5 w-5 text-red-500"
                   >
                     <path
                       fillRule="evenodd"
@@ -797,19 +810,19 @@ const Login = () => {
                 onChange={handlePasswordChange}
                 placeholder={t(
                   "login.passwordPlaceholder",
-                  "Enter your password"
+                  "Enter your password",
                 )}
-                className={`w-full p-2 border rounded-3xl ${
+                className={`w-full rounded-3xl border p-2 ${
                   passwordError
                     ? "border-red-500 focus:border-red-500"
                     : "border-gray-300 focus:border-green-500"
-                } focus:ring-0 focus:outline-none`}
+                } focus:outline-none focus:ring-0`}
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute transform -translate-y-1/2 right-3 top-1/2"
+                className="absolute right-3 top-1/2 -translate-y-1/2 transform"
               >
                 {showPassword ? (
                   <svg
@@ -818,7 +831,7 @@ const Login = () => {
                     viewBox="0 0 24 24"
                     strokeWidth={1.5}
                     stroke="currentColor"
-                    className="w-5 h-5 text-gray-500"
+                    className="h-5 w-5 text-gray-500"
                   >
                     <path
                       strokeLinecap="round"
@@ -833,7 +846,7 @@ const Login = () => {
                     viewBox="0 0 24 24"
                     strokeWidth={1.5}
                     stroke="currentColor"
-                    className="w-5 h-5 text-gray-500"
+                    className="h-5 w-5 text-gray-500"
                   >
                     <path
                       strokeLinecap="round"
@@ -863,7 +876,7 @@ const Login = () => {
             {/* When switching to tutor login, update the query string to set ref=tutor */}
             <Link
               to={`/login-tutor${getUpdatedQuery(location.search, "class")}`}
-              className="text-[#14b82c] font-semibold"
+              className="font-semibold text-[#14b82c]"
             >
               {t("login.loginAsTutor", "Login as Tutor")}
             </Link>
@@ -871,8 +884,8 @@ const Login = () => {
           {/* Login Button */}
           <button
             type="submit"
-            className={`w-full py-3 rounded-full focus:outline-none border border-[#042F0C] text-[#042F0C] ${
-              email && password ? " bg-[#14B82C] " : " bg-[#b9f9c2]"
+            className={`w-full rounded-full border border-[#042F0C] py-3 text-[#042F0C] focus:outline-none ${
+              email && password ? "bg-[#14B82C]" : "bg-[#b9f9c2]"
             }`}
           >
             {t("login.loginButton", "Login")}
@@ -885,7 +898,7 @@ const Login = () => {
             <div className="w-full border-t border-gray-300"></div>
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 text-gray-500 bg-white">
+            <span className="bg-white px-2 text-gray-500">
               {t("login.orSignInWith", "or sign in with")}
             </span>
           </div>
@@ -894,18 +907,18 @@ const Login = () => {
         <div className="grid grid-cols-2 gap-4">
           <button
             onClick={handleGoogleLoginStudent}
-            className="flex items-center justify-center px-4 py-2 space-x-4 border border-gray-300 rounded-full hover:bg-gray-50"
+            className="flex items-center justify-center space-x-4 rounded-full border border-gray-300 px-4 py-2 hover:bg-gray-50"
           >
             <img alt="google" src="/svgs/login-insta.svg" />
             <span>{t("login.google", "Google")}</span>
           </button>
           <button
             onClick={handleAppleLoginStudent}
-            className="flex items-center justify-center px-4 py-2 space-x-4 text-white bg-black border border-black rounded-full"
+            className="flex items-center justify-center space-x-4 rounded-full border border-black bg-black px-4 py-2 text-white"
           >
             <img
               alt="apple"
-              className="w-auto h-6"
+              className="h-6 w-auto"
               src="/images/apple-white.png"
             />
             <span>{t("login.apple", "Apple")}</span>
@@ -913,7 +926,7 @@ const Login = () => {
         </div>
 
         {/* Terms */}
-        <div className="text-sm text-center text-[#9e9e9e] pt-6">
+        <div className="pt-6 text-center text-sm text-[#9e9e9e]">
           <p>
             {t("login.termsConditions", "By logging, you agree to our")}{" "}
             <a href="#" className="text-black">
@@ -930,7 +943,7 @@ const Login = () => {
         </div>
 
         {/* Sign Up Link */}
-        <div className="text-sm text-center text-[#5d5d5d]">
+        <div className="text-center text-sm text-[#5d5d5d]">
           <p>
             {t("login.noAccount", "Don't have an account?")}{" "}
             <Link to="/signup" className="text-[#14B82C]">

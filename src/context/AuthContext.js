@@ -120,10 +120,15 @@ export const AuthProvider = ({ children }) => {
     const userDoc = await getDoc(userRef);
 
     if (userDoc.exists()) {
+      const docData = userDoc.data();
       const userData = {
-        ...userDoc.data(),
+        ...docData,
         uid,
         userType,
+        name:
+          docData.name ||
+          (docData.email ? docData.email.split("@")[0] : "User"),
+        email: docData.email || "",
       };
 
       // Set language when fetching latest data

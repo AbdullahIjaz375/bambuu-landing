@@ -533,6 +533,10 @@ const LearnUser = () => {
     return <Navigate to="/login" replace />;
   }
 
+  if (!user?.name || !user?.email) {
+    return <Navigate to="/userEditProfile" replace />;
+  }
+
   // --- Language Cards ---
   const languageCards = [
     {

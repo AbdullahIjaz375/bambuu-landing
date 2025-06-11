@@ -223,13 +223,17 @@ const Signup = () => {
         adminOfGroups: [],
         country: profileData.country,
         currentStreak: 1, // Set initial streak to 1 for first login
-        email: auth.currentUser.email,
+        email: auth.currentUser.email || "",
+        name:
+          profileData.name ||
+          (auth.currentUser.email
+            ? auth.currentUser.email.split("@")[0]
+            : "User"),
         enrolledClasses: [],
         joinedGroups: [],
         lastLoggedIn: new Date(),
         learningLanguage: profileData.learningLanguage,
         learningLanguageProficiency: profileData.proficiency,
-        name: profileData.name,
         nativeLanguage: profileData.nativeLanguage,
         photoUrl: "/images/panda.png",
         savedDocuments: [],
@@ -290,6 +294,12 @@ const Signup = () => {
       // Show success modal instead of navigating
       setHasProfile(true);
       setShowSuccessModal(true);
+
+      if (!sessionUserData.name || !sessionUserData.email) {
+        navigate("/userEditProfile", { replace: true });
+      } else {
+        navigate("/learn", { replace: true });
+      }
     } catch (error) {
       toast.update(loadingToastId, {
         render: `Profile creation failed: ${error.message}`,
