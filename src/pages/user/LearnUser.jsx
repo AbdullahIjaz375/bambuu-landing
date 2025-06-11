@@ -191,6 +191,8 @@ const LearnUser = () => {
   const [nextClass, setNextClass] = useState(null);
   const [examPrepCredits, setExamPrepCredits] = useState(null);
   const [selectedInstructor, setSelectedInstructor] = useState(null);
+  const [examPrepBookingInitialStep, setExamPrepBookingInitialStep] =
+    useState(6);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -199,8 +201,8 @@ const LearnUser = () => {
 
   const shouldShowOnboardingBanner =
     !!examPrepStatus?.hasPurchasedPlan &&
-    (!examPrepStatus?.hasBookedIntroCall ||
-      !examPrepStatus?.hasBookedExamPrepClass);
+    !examPrepStatus?.hasBookedIntroCall &&
+    !examPrepStatus?.hasBookedExamPrepClass;
 
   // --- Effects ---
   useEffect(() => {
@@ -436,11 +438,9 @@ const LearnUser = () => {
         navigate("/subscriptions?tab=exam");
         return;
       }
-      if (!status.hasBookedIntroCall || !status.doneWithIntroCall) {
-        setShowIntroBookingFlow(true);
-        return;
-      }
+
       if (status.doneWithIntroCall && !status.hasBookedExamPrepClass) {
+        setExamPrepBookingInitialStep(6);
         setShowExamPrepBookingFlow(true);
         return;
       }
@@ -816,7 +816,7 @@ const LearnUser = () => {
           completedIntroCallTutorId: examPrepStatus?.completedIntroCallTutorId,
         }}
         mode="exam"
-        initialStep={6}
+        initialStep={examPrepBookingInitialStep}
       />
       {/* Sidebar-triggered modals */}
       <BookingFlowModal

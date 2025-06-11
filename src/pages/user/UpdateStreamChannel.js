@@ -11,7 +11,7 @@ import { streamClient } from "../../config/stream";
 export const updateStreamChannelMetadata = async (
   channelType,
   channelId,
-  updateData
+  updateData,
 ) => {
   try {
     // Get a reference to the channel
@@ -25,9 +25,6 @@ export const updateStreamChannelMetadata = async (
       // Add any other metadata you want to update
     });
 
-    console.log(
-      `Successfully updated ${channelType} channel ${channelId} with name: ${updateData.name}`
-    );
     return channel;
   } catch (error) {
     console.error(`Error updating ${channelType} channel ${channelId}:`, error);

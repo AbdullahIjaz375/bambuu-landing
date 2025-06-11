@@ -71,13 +71,20 @@ const BookingFlowModal = ({
 
   useEffect(() => {
     if (isOpen) {
-      // If mode is 'exam', always start at step 6
-      const startStep = mode === "exam" ? 6 : initialStep;
+      // Use initialStep if provided, otherwise default to 6 for exam mode
+      const startStep =
+        typeof initialStep === "number" ? initialStep : mode === "exam" ? 6 : 0;
       setStep(startStep);
       setShowExamPrepModal(true);
       setShowExploreInstructorsModal(false);
-      // setSelectedInstructor(null);
-      setConfirmedInstructor(null);
+      // Only reset confirmedInstructor if not in exam prep step 6 with a known tutor
+      if (
+        !(mode === "exam" && startStep === 6 && user?.completedIntroCallTutorId)
+      ) {
+        setConfirmedInstructor(null);
+      } else {
+        setConfirmedInstructor({ uid: user.completedIntroCallTutorId });
+      }
       setShowSlotPicker(false);
       setIntroCallSlots({});
       setLoadingSlots(false);
@@ -100,7 +107,7 @@ const BookingFlowModal = ({
         setShowExamPrepStart(true);
       }
     }
-  }, [isOpen, initialStep, mode]);
+  }, [isOpen, initialStep, mode, user?.completedIntroCallTutorId]);
 
   useEffect(() => {
     async function fetchLastIntroCallTutor() {
@@ -165,7 +172,7 @@ const BookingFlowModal = ({
               const month = String(dateObj.getMonth() + 1).padStart(2, "0");
               const day = String(dateObj.getDate()).padStart(2, "0");
               const dateKey = `${year}-${month}-${day}`;
-              const timeStr = dateObj
+              const display = dateObj
                 .toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",
@@ -173,7 +180,7 @@ const BookingFlowModal = ({
                 })
                 .replace(/^0/, "");
               if (!slotMap[dateKey]) slotMap[dateKey] = [];
-              slotMap[dateKey].push(timeStr);
+              slotMap[dateKey].push({ display, utc: slot.time });
             });
           });
           setExamPrepSlots(slotMap);
@@ -347,7 +354,7 @@ const BookingFlowModal = ({
           const month = String(dateObj.getMonth() + 1).padStart(2, "0");
           const day = String(dateObj.getDate()).padStart(2, "0");
           const dateKey = `${year}-${month}-${day}`;
-          const timeStr = dateObj
+          const display = dateObj
             .toLocaleTimeString([], {
               hour: "2-digit",
               minute: "2-digit",
@@ -355,7 +362,7 @@ const BookingFlowModal = ({
             })
             .replace(/^0/, "");
           if (!slotMap[dateKey]) slotMap[dateKey] = [];
-          slotMap[dateKey].push(timeStr);
+          slotMap[dateKey].push({ display, utc: slot.time });
         });
       });
       setExamPrepSlots(slotMap);
@@ -427,140 +434,111 @@ const BookingFlowModal = ({
 
   return (
     <>
-      {/* Stepper hidden */}
-      {/* {showStepper && (
-        <div className="mb-6 flex items-center justify-center">
-          {stepLabels.map((label, idx) => {
-            let status = "upcoming";
-            if (currentApiStep !== null) {
-              if (idx < currentApiStep) status = "completed";
-              else if (idx === currentApiStep) status = "current";
-            }
-            return (
-              <div key={label} className="flex items-center">
-                <div
-                  className={`mx-2 flex flex-col items-center ${
-                    status === "completed"
-                      ? "text-green-600"
-                      : status === "current"
-                        ? "font-bold text-blue-600"
-                        : "text-gray-400"
-                  }`}
-                >
-                  <div
-                    className={`mb-1 flex h-8 w-8 items-center justify-center rounded-full border-2 ${
-                      status === "completed"
-                        ? "border-green-600 bg-green-500 text-white"
-                        : status === "current"
-                          ? "border-blue-600 bg-blue-100"
-                          : "border-gray-300 bg-gray-100"
-                    }`}
-                  >
-                    {status === "completed" ? <span>&#10003;</span> : idx + 1}
-                  </div>
-                  <span className="w-16 text-center text-xs">{label}</span>
-                </div>
-                {idx < stepLabels.length - 1 && (
-                  <div className="mx-1 h-1 w-8 rounded-full bg-gray-300" />
-                )}
-              </div>
-            );
-          })}
-          {stepperLoading && (
-            <span className="ml-4 text-xs text-gray-400">
-              Loading progress...
-            </span>
+      {/* Modal overlay and content wrapper */}
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm"
+        onClick={onClose}
+      >
+        <div
+          className="relative w-full max-w-lg rounded-3xl bg-white font-['Urbanist'] shadow-2xl"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Step content rendering logic restored below */}
+          {step === 0 && (
+            <StartExamPrep
+              showExamPrepModal={showExamPrepModal}
+              setShowExamPrepModal={setShowExamPrepModal}
+              onFindTutor={handleFindTutor}
+              currentApiStep={currentApiStep}
+            />
+          )}
+          {step === 1 && (
+            <ExploreInstructors
+              showExploreInstructorsModal={showExploreInstructorsModal}
+              setShowExploreInstructorsModal={setShowExploreInstructorsModal}
+              onInstructorSelect={handleInstructorSelect}
+            />
+          )}
+          {step === 2 && (
+            <InstructorProfile
+              selectedInstructor={selectedInstructor}
+              setSelectedInstructor={setSelectedInstructor}
+              onBookIntroCall={handleBookIntroCall}
+            />
+          )}
+          {step === 3 && (
+            <SlotPickerModal
+              isOpen={showSlotPicker}
+              onClose={() => setShowSlotPicker(false)}
+              onSlotPicked={handleSlotPicked}
+              slots={introCallSlots}
+              loading={loadingSlots}
+            />
+          )}
+          {step === 4 && (
+            <ExamBookingConfirmation
+              showConfirm={showBookingConfirmation}
+              setShowConfirm={setShowBookingConfirmation}
+              selectedDate={selectedDate}
+              selectedTime={selectedTime}
+              onConfirm={handleBookingConfirmed}
+              tutor={confirmedInstructor}
+              loading={bookingLoading}
+            />
+          )}
+          {step === 5 && (
+            <IntroductoryCallBooked
+              bookExamClass={showBookedModal}
+              setBookExamClass={setShowBookedModal}
+              onClose={handleBookedModalClose}
+            />
+          )}
+          {step === 6 && (
+            <IntoductoryCallDone
+              bookExamClass={showExamPrepStart}
+              setBookExamClass={setShowExamPrepStart}
+              onBookExamPreparation={handleExamPrepStart}
+              loadingSlots={loadingExamPrepSlots}
+              slotsLoaded={Object.keys(examPrepSlots).length > 0}
+            />
+          )}
+          {step === 7 && (
+            <ExamClassSlots
+              isOpen={showExamClassSlots}
+              onClose={() => setShowExamClassSlots(false)}
+              onBookingComplete={handleExamClassSlotsComplete}
+              slots={examPrepSlots}
+              loading={loadingExamPrepSlots}
+              user={user}
+              tutorId={confirmedInstructor?.uid}
+            />
+          )}
+          {step === 8 && (
+            <ConfirmClassesModal
+              isOpen={showExamConfirm}
+              onClose={() => setShowExamConfirm(false)}
+              onConfirm={handleExamConfirmComplete}
+              selectedDates={
+                Array.isArray(selectedExamPrepDates)
+                  ? selectedExamPrepDates
+                  : selectedExamPrepDates
+                    ? [selectedExamPrepDates]
+                    : []
+              }
+              selectedTimes={selectedExamPrepTimes}
+              tutorId={confirmedInstructor?.uid}
+              user={user}
+              loading={bookingExamPrep}
+            />
+          )}
+          {step === 9 && (
+            <ClassesBooked
+              isOpen={showExamBooked}
+              onClose={handleExamBookedClose}
+            />
           )}
         </div>
-      )} */}
-      {/* Step content rendering logic restored below */}
-      {step === 0 && (
-        <StartExamPrep
-          showExamPrepModal={showExamPrepModal}
-          setShowExamPrepModal={setShowExamPrepModal}
-          onFindTutor={handleFindTutor}
-          currentApiStep={currentApiStep}
-        />
-      )}
-      {step === 1 && (
-        <ExploreInstructors
-          showExploreInstructorsModal={showExploreInstructorsModal}
-          setShowExploreInstructorsModal={setShowExploreInstructorsModal}
-          onInstructorSelect={handleInstructorSelect}
-        />
-      )}
-      {step === 2 && (
-        <InstructorProfile
-          selectedInstructor={selectedInstructor}
-          setSelectedInstructor={setSelectedInstructor}
-          onBookIntroCall={handleBookIntroCall}
-        />
-      )}
-      {step === 3 && (
-        <SlotPickerModal
-          isOpen={showSlotPicker}
-          onClose={() => setShowSlotPicker(false)}
-          onSlotPicked={handleSlotPicked}
-          slots={introCallSlots}
-          loading={loadingSlots}
-        />
-      )}
-      {step === 4 && (
-        <ExamBookingConfirmation
-          showConfirm={showBookingConfirmation}
-          setShowConfirm={setShowBookingConfirmation}
-          selectedDate={selectedDate}
-          selectedTime={selectedTime}
-          onConfirm={handleBookingConfirmed}
-          tutor={confirmedInstructor}
-          loading={bookingLoading}
-        />
-      )}
-      {step === 5 && (
-        <IntroductoryCallBooked
-          bookExamClass={showBookedModal}
-          setBookExamClass={setShowBookedModal}
-          onClose={handleBookedModalClose}
-        />
-      )}
-      {step === 6 && (
-        <IntoductoryCallDone
-          bookExamClass={showExamPrepStart}
-          setBookExamClass={setShowExamPrepStart}
-          onBookExamPreparation={handleExamPrepStart}
-          loadingSlots={loadingExamPrepSlots}
-          slotsLoaded={Object.keys(examPrepSlots).length > 0}
-        />
-      )}
-      {step === 7 && (
-        <ExamClassSlots
-          isOpen={showExamClassSlots}
-          onClose={() => setShowExamClassSlots(false)}
-          onBookingComplete={handleExamClassSlotsComplete}
-          slots={examPrepSlots}
-          loading={loadingExamPrepSlots}
-          user={user}
-          tutorId={confirmedInstructor?.uid}
-        />
-      )}
-      {step === 8 && (
-        <ConfirmClassesModal
-          isOpen={showExamConfirm}
-          onClose={() => setShowExamConfirm(false)}
-          onConfirm={handleExamConfirmComplete}
-          selectedDates={selectedExamPrepDates}
-          selectedTimes={selectedExamPrepTimes}
-          tutorId={confirmedInstructor?.uid}
-          user={user}
-          loading={bookingExamPrep}
-        />
-      )}
-      {step === 9 && (
-        <ClassesBooked
-          isOpen={showExamBooked}
-          onClose={handleExamBookedClose}
-        />
-      )}
+      </div>
     </>
   );
 };

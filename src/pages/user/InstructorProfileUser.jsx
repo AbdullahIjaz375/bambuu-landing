@@ -54,13 +54,6 @@ const InstructorProfileUser = () => {
         return;
       }
 
-      // if (!res.pendingIntroCallClassId || res.pendingIntroCallClassId === "") {
-      //   setIntroBookingInitialStep(2);
-      //   setSelectedInstructor(tutor);
-      //   setShowIntroBookingFlow(true);
-      //   return;
-      // }
-
       // 2. No intro call with this tutor
       if (!res.hasBookedIntroCall) {
         setIntroBookingInitialStep(2);

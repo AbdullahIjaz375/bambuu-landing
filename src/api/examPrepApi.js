@@ -158,15 +158,12 @@ export function testGrantExamPrepPlan(studentId, tutorId, token) {
   );
 }
 
-export function getUserChannels(data, token) {
+export function getUserChannels(userId, token) {
   return apiRequest(
-    "https://getuserchannels-zzpsx27htq-uc.a.run.app",
-    {
-      method: "POST",
-      body: JSON.stringify(data),
-    },
+    `https://getuserchannels-zzpsx27htq-uc.a.run.app?userId=${encodeURIComponent(userId)}`,
+    { method: "GET" },
     token,
-  );
+  ).then((res) => res.channels || []);
 }
 
 export function getTutorClasses(tutorId, token) {

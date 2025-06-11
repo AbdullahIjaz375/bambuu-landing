@@ -58,9 +58,10 @@ export default function LandingMobile() {
           Ditch the dry drills. Learn through real conversation, gain
           confidence, and unlock the opportunities you deserve.
         </p>
-        <div className="mt-6 flex w-full flex-col gap-3 px-6">
+        <div className="mt-6 flex w-full flex-row items-center justify-center gap-3 px-6">
           <button
-            className="w-full rounded-[24px] border border-black bg-white py-3 text-base font-semibold text-black"
+            className="min-w-[140px] rounded-[18px] border border-black bg-white px-4 py-2 text-sm font-semibold text-black"
+            style={{ width: "fit-content" }}
             onClick={() =>
               window.open(
                 "https://calendly.com/bammbuu-languages/info-call-llamada-de-informacion",
@@ -71,7 +72,8 @@ export default function LandingMobile() {
             Schedule a Call
           </button>
           <button
-            className="w-full rounded-[24px] border border-black bg-[#FFBF00] py-3 text-base font-semibold text-black"
+            className="min-w-[140px] rounded-[18px] border border-black bg-[#FFBF00] px-4 py-2 text-sm font-semibold text-black"
+            style={{ width: "fit-content" }}
             onClick={() => window.open("/signup", "_self")}
           >
             Enroll Today

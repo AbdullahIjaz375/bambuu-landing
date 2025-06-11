@@ -13,6 +13,7 @@ import { safeMarkChannelRead } from "../../services/streamConnectionService";
 import updateChannelNameFromFirestore from "../../utils/channelNameFix";
 import { syncPremiumClassChannelName } from "../../services/channelNameSync";
 import { getChannelDisplayName } from "../../services/streamService";
+import { getUserChannels } from "../../api/examPrepApi";
 
 const MessagesUser = () => {
   const { user } = useAuth();
@@ -36,9 +37,6 @@ const MessagesUser = () => {
     if (savedActiveTab) {
       setActiveTab(savedActiveTab);
     }
-
-    // Force select the bammbuu+ tab if there's a channel ID in the URL
-    // This helps ensure the correct tab is selected when navigating directly to a channel
     if (urlChannelId) {
       setActiveTab("bammbuu");
       localStorage.setItem("activetab", "bammbuu");
@@ -69,6 +67,15 @@ const MessagesUser = () => {
   // Helper function to extract the other user's info from a channel
   const getOtherUserFromChannel = (channel) => {
     if (!channel || !user) return null;
+    // For exam_prep channels, use created_by as the other user (tutor)
+    if (channel.type === "exam_prep" && channel.created_by) {
+      return {
+        id: channel.created_by.id,
+        name: channel.created_by.name,
+        image: channel.created_by.image,
+        online: channel.created_by.online || false,
+      };
+    }
     // For one-to-one chats, always show the other user's name
     if (channel.type === "one_to_one_chat") {
       const members = Object.values(channel.state?.members || {});
@@ -87,8 +94,8 @@ const MessagesUser = () => {
     // For group/class chats, always use channel.data.name
     return {
       id: channel.id,
-      name: channel.data.name,
-      image: channel.data.image,
+      name: channel.data?.name || channel.name || "Group",
+      image: channel.data?.image || "/default-avatar.png",
       online: false,
     };
   };
@@ -98,25 +105,18 @@ const MessagesUser = () => {
       if (!user) return;
 
       try {
-        // Check if we're already connected as this user
         if (streamClient.userID === user.uid && streamClient.isConnected) {
           setStreamClientConnected(true);
           return;
         }
-
-        // If connected as different user or disconnected, reconnect
         if (streamClient.userID) {
           await streamClient.disconnectUser();
         }
-
         const token = await fetchChatToken(user.uid);
-
-        // Import helper to record the user ID for reconnection attempts
         const { setLastUserId } = await import(
           "../../services/streamConnectionService"
         );
         setLastUserId(user.uid);
-
         await streamClient.connectUser(
           {
             id: user.uid,
@@ -126,331 +126,41 @@ const MessagesUser = () => {
           },
           token,
         );
-
         setStreamClientConnected(true);
       } catch (error) {
-        console.error(`Error connecting to Stream client: ${error.message}`);
+        console.error(
+          `[MessagesUser] Error connecting to Stream client: ${error.message}`,
+        );
         setStreamClientConnected(false);
-
-        // Try one more time after a short delay
         setTimeout(() => {
           connectStreamClient();
         }, 3000);
       }
     };
-
     connectStreamClient();
-
     return () => {
       // We'll keep the connection alive - disconnection is handled elsewhere
     };
   }, [user]);
 
   useEffect(() => {
-    const loadChannels = async () => {
+    const fetchUserChannels = async () => {
       if (!user) {
         setLoading(false);
         return;
       }
-
-      if (!streamClientConnected) {
-        return;
-      }
-
       try {
-        // Import connection helper
-        const { ensureStreamConnection } = await import(
-          "../../services/streamConnectionService"
-        );
-
-        const channels = await ensureStreamConnection(async () => {
-          const filter = {
-            members: { $in: [user.uid] },
-            type: {
-              $in: [
-                "standard_group",
-                "premium_group",
-                "premium_individual_class",
-                "one_to_one_chat",
-              ],
-            },
-          };
-
-          const sort = { last_message_at: -1 };
-
-          return streamClient.queryChannels(filter, sort, {
-            watch: true,
-            state: true,
-            presence: true,
-            message_retention: "infinite",
-          });
-        });
-
-        // IMPORTANT: For each premium individual class, verify the user is actually a member
-        const premiumClassChannels = channels.filter(
-          (ch) => ch.type === "premium_individual_class",
-        );
-
-        // Also check if user should be in premium classes they're not seeing
-        try {
-          const { verifyUserPremiumClassChannels } = await import(
-            "../../services/channelNameSync"
-          );
-          await verifyUserPremiumClassChannels(user.uid);
-        } catch (verifyError) {
-          console.error("Error verifying premium class channels:", verifyError);
-        }
-
-        if (premiumClassChannels.length > 0) {
-          const { syncPremiumClassChannelName } = await import(
-            "../../services/channelNameSync"
-          );
-
-          await Promise.all(
-            premiumClassChannels.map(async (channel) => {
-              // Sync the name
-              await syncPremiumClassChannelName(channel.id);
-
-              // Verify membership
-              const currentMembers = Object.keys(channel.state?.members || {});
-              if (!currentMembers.includes(user.uid)) {
-                try {
-                  await channel.addMembers([
-                    { user_id: user.uid, role: "channel_member" },
-                  ]);
-                } catch (addError) {
-                  console.error(
-                    `Failed to add user to channel ${channel.id}:`,
-                    addError,
-                  );
-                }
-              }
-            }),
-          );
-        }
-
-        // Continue with rest of your existing code...
-        const counts = {};
-        const onlineStatusMap = {};
-
-        await Promise.all(
-          channels.map(async (channel) => {
-            const state = await channel.watch();
-            const channelState = channel.state;
-            counts[channel.id] = channelState.unreadCount || 0;
-
-            // Initialize online users status tracking
-            if (
-              channel.type === "standard_group" ||
-              channel.type === "premium_group"
-            ) {
-              // For group chats, count online members
-              const members = Object.values(channel.state?.members || {});
-              const onlineCount = members.filter(
-                (member) => member.user?.online,
-              ).length;
-              const totalMembers = members.length;
-              onlineStatusMap[channel.id] = { onlineCount, totalMembers };
-            } else {
-              // For one-to-one chats, track tutor's online status
-              const members = Object.values(channel.state?.members || {});
-              const otherMember = members.find(
-                (member) => member.user?.id !== user.uid,
-              );
-              onlineStatusMap[channel.id] = {
-                isOnline: otherMember?.user?.online || false,
-              };
-            }
-
-            // Set up message.new event listener
-            channel.on("message.new", async (event) => {
-              // Check if message is from another user and channel is not selected
-              if (
-                event.user?.id !== user.uid &&
-                channel.id !== selectedChannel?.id
-              ) {
-                const state = channel.state;
-                const unreadCount = state.unreadCount || 1;
-                setUnreadCounts((prev) => ({
-                  ...prev,
-                  [channel.id]: unreadCount,
-                }));
-              }
-            });
-
-            // Add presence change listeners
-            channel.on("user.presence.changed", async (event) => {
-              if (
-                channel.type === "standard_group" ||
-                channel.type === "premium_group"
-              ) {
-                // Update group online count
-                const members = Object.values(channel.state?.members || {});
-                const onlineCount = members.filter(
-                  (member) => member.user?.online,
-                ).length;
-                const totalMembers = members.length;
-
-                setOnlineUsers((prev) => ({
-                  ...prev,
-                  [channel.id]: { onlineCount, totalMembers },
-                }));
-              } else if (
-                channel.type === "premium_individual_class" ||
-                channel.type === "one_to_one_chat"
-              ) {
-                // Update tutor online status
-                const members = Object.values(channel.state?.members || {});
-                const otherMember = members.find(
-                  (member) => member.user?.id !== user.uid,
-                );
-
-                setOnlineUsers((prev) => ({
-                  ...prev,
-                  [channel.id]: {
-                    isOnline: otherMember?.user?.online || false,
-                  },
-                }));
-              }
-            });
-          }),
-        );
-        const groupIds = channels
-          .filter(
-            (channel) =>
-              channel.type === "standard_group" ||
-              channel.type === "premium_group",
-          )
-          .map((channel) => channel.id);
-
-        // Get group data from Firestore and sync with Stream
-        const groupLanguagesData = {};
-        const groupNamesData = {};
-
-        await Promise.all(
-          groupIds.map(async (groupId) => {
-            try {
-              // First sync the channel with Firestore to ensure names and images are correct
-              const channel = channels.find((ch) => ch.id === groupId);
-              if (channel) {
-                // Sync channel data with Firestore
-                const result = await syncChannelWithFirestore({
-                  channelId: groupId,
-                  type: channel.type,
-                });
-              }
-
-              // Get group data for local display
-              const groupRef = doc(db, "groups", groupId);
-              const groupDoc = await getDoc(groupRef);
-              if (groupDoc.exists()) {
-                const groupData = groupDoc.data();
-                groupLanguagesData[groupId] =
-                  groupData.groupLearningLanguage || "Unknown";
-
-                // Store the actual group name from Firestore
-                groupNamesData[groupId] =
-                  groupData.groupName || "Unnamed Group";
-
-                // Update the channel data with the correct name from Firestore
-                const channelToUpdate = channels.find(
-                  (ch) => ch.id === groupId,
-                );
-                if (channelToUpdate) {
-                  if (channelToUpdate.data) {
-                    channelToUpdate.data.name = groupData.groupName;
-                    // Also update the image if available
-                    if (groupData.imageUrl) {
-                      channelToUpdate.data.image = groupData.imageUrl;
-                    }
-                  } else {
-                    channelToUpdate.data = {
-                      name: groupData.groupName,
-                      image: groupData.imageUrl || null,
-                    };
-                  }
-                }
-              } else {
-                // Set defaults for groups without document data
-                groupLanguagesData[groupId] = "Unknown";
-                groupNamesData[groupId] = "Unnamed Group";
-              }
-            } catch (syncError) {
-              console.error(`Error syncing channel ${groupId}:`, syncError);
-            }
-          }),
-        );
-
-        setGroupLanguages(groupLanguagesData);
-        setGroupNames(groupNamesData);
-        setUnreadCounts(counts);
-        setOnlineUsers(onlineStatusMap);
+        setLoading(true);
+        const channels = await getUserChannels(user.uid);
         setChannels(channels);
-
-        // Select channel from URL parameter
-        if (urlChannelId) {
-          // First try to find a direct match
-          let channelToSelect = channels.find(
-            (channel) => channel.id === urlChannelId,
-          );
-
-          // If not found and we're coming from a tutor profile, the channel ID might be combined IDs
-          if (!channelToSelect) {
-            // Look for channels that might be a one-to-one chat with this tutor
-            channelToSelect = channels.find((channel) => {
-              // Check if it's a one-to-one chat
-              if (channel.type === "one_to_one_chat") {
-                // Check if channel members include the tutor from the URL
-                const channelMembers = Object.keys(
-                  channel.state?.members || {},
-                );
-                // Since urlChannelId might be a combination of userIds, check if it contains the member IDs
-                return channelMembers.some(
-                  (memberId) =>
-                    urlChannelId.includes(memberId) && memberId !== user.uid,
-                );
-              }
-              return false;
-            });
-          }
-
-          if (channelToSelect) {
-            // Auto-switch to bammbuu+ tab if it's a one-to-one chat
-            if (
-              channelToSelect.type === "one_to_one_chat" ||
-              channelToSelect.type === "premium_individual_class" ||
-              channelToSelect.type === "premium_group"
-            ) {
-              setActiveTab("bammbuu");
-            }
-            setSelectedChannel(channelToSelect);
-            setSelectedChatInfo(getOtherUserFromChannel(channelToSelect));
-
-            // Use safe mark read function to prevent disconnect errors
-            try {
-              await safeMarkChannelRead(channelToSelect);
-              setUnreadCounts((prev) => ({
-                ...prev,
-                [channelToSelect.id]: 0,
-              }));
-            } catch (markReadError) {
-              console.error("Error marking channel as read:", markReadError);
-            }
-          }
-        } else {
-          // Don't select any channel by default
-          setSelectedChannel(null);
-          setSelectedChatInfo(null);
-        }
-      } catch (error) {
-        console.error("Error in loadChannels:", error);
+      } catch (err) {
+        setChannels([]);
       } finally {
         setLoading(false);
       }
     };
-
-    loadChannels();
-  }, [user, streamClientConnected, urlChannelId]);
+    fetchUserChannels();
+  }, [user]);
 
   useEffect(() => {
     if (!channels.length) return;
@@ -478,19 +188,38 @@ const MessagesUser = () => {
     });
   }, [channels]);
 
-  const handleChannelSelect = async (channel) => {
-    setSelectedChannel(channel);
-    setSelectedChatInfo(getOtherUserFromChannel(channel));
-
+  const handleChannelSelect = async (channelData) => {
+    if (!streamClientConnected) {
+      console.warn(
+        "[MessagesUser] Tried to select channel before Stream client connected",
+      );
+      return;
+    }
+    // Create a real Stream channel instance
+    const streamChannel = streamClient.channel(
+      channelData.type,
+      channelData.id,
+    );
+    await streamChannel.watch();
+    // Ensure user is a member of the channel
+    const members = streamChannel.state.members || {};
+    if (!members[user.uid]) {
+      try {
+        await streamChannel.addMembers([user.uid]);
+      } catch (err) {
+        console.error("[MessagesUser] Error adding user to channel:", err);
+      }
+    }
+    setSelectedChannel(streamChannel);
+    setSelectedChatInfo(getOtherUserFromChannel(channelData));
     try {
-      // Mark channel as read when selected - use safe function to prevent disconnect errors
-      await safeMarkChannelRead(channel);
+      await safeMarkChannelRead(streamChannel);
       setUnreadCounts((prev) => ({
         ...prev,
-        [channel.id]: 0,
+        [channelData.id]: 0,
       }));
     } catch (error) {
-      console.error("Error marking channel as read:", error);
+      console.error("[MessagesUser] Error marking channel as read:", error);
     }
   };
 
@@ -521,20 +250,59 @@ const MessagesUser = () => {
     });
   };
 
-  // Standard chats - only standard_group
-  const standardChats = filterChannels(
-    channels.filter((channel) => channel.type === "standard_group"),
+  // Categorize channels
+  const standardChats = channels.filter((ch) => ch.type === "standard_group");
+  const filteredForBammbuu = channels.filter(
+    (ch) => ch.type !== "standard_group",
   );
 
-  // Bammbuu+ chats - all other types (premium_group, premium_individual_class, one_to_one_chat)
-  const filteredForBammbuu = channels.filter(
-    (channel) =>
-      channel.type === "premium_group" ||
-      channel.type === "premium_individual_class" ||
-      channel.type === "one_to_one_chat",
-  );
+  // Helper to get display name and image for a channel
+  const getExamPrepDisplay = (channel) => {
+    if (channel.type === "exam_prep" && channel.created_by) {
+      return {
+        name: channel.created_by.name || "Exam Prep",
+        image: channel.created_by.image || "/images/exam-prep-icon.png",
+      };
+    }
+    return {
+      name: channel.data?.name || channel.name || "Group",
+      image: channel.data?.image || "/default-avatar.png",
+    };
+  };
 
   const ChatItem = ({ channel, isInstructor }) => {
+    // Exam prep one-to-one chat UI
+    if (channel.type === "exam_prep") {
+      const { name, image } = getExamPrepDisplay(channel);
+      return (
+        <div
+          key={channel.id}
+          className={`flex cursor-pointer items-center gap-3 rounded-3xl border p-3 ${
+            selectedChannel?.id === channel.id
+              ? "border-[#22bf37] bg-[#f0fdf1]"
+              : "border-[#fbbf12] bg-white"
+          }`}
+          onClick={() => handleChannelSelect(channel)}
+        >
+          <div className="relative">
+            <img
+              src={image}
+              alt={name}
+              className="h-12 w-12 rounded-full object-cover"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = "/default-avatar.png";
+              }}
+            />
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">{name}</h3>
+            </div>
+          </div>
+        </div>
+      );
+    }
     // One-to-one chat UI (unchanged)
     if (
       channel.type === "one_to_one_chat" ||
@@ -769,11 +537,6 @@ const MessagesUser = () => {
                         })
                         .map((channel) => {
                           // Debug why this specific channel is being rendered
-                          console.log(
-                            `Rendering bammbuu+ chat: ${channel.id}, type: ${
-                              channel.type
-                            }, name: ${channel.data?.name || "Unnamed"}`,
-                          );
 
                           return (
                             <ChatItem
@@ -804,12 +567,6 @@ const MessagesUser = () => {
                   <>
                     {standardChats.length > 0 ? (
                       standardChats.map((channel) => {
-                        console.log(
-                          `Rendering standard chat: ${channel.id}, type: ${
-                            channel.type
-                          }, name: ${channel.data?.name || "Unnamed"}`,
-                        );
-
                         return (
                           <ChatItem
                             key={channel.id}
@@ -840,18 +597,26 @@ const MessagesUser = () => {
             </div>
 
             <div className="ml-4 flex-1">
-              {selectedChannel ? (
-                <CustomChatComponent
-                  channelId={selectedChannel.id}
-                  type={selectedChannel.type}
-                  onChannelLeave={handleChannelLeave}
-                  chatInfo={selectedChatInfo}
-                  description={selectedChannel.data?.description || ""}
-                  name={getChannelDisplayName(selectedChannel, user)}
-                />
+              {streamClientConnected && selectedChannel ? (
+                <>
+                  <CustomChatComponent
+                    channelId={selectedChannel.id}
+                    type={selectedChannel.type}
+                    onChannelLeave={handleChannelLeave}
+                    chatInfo={selectedChatInfo}
+                    description={
+                      selectedChannel.data?.description ||
+                      selectedChannel.data?.name ||
+                      ""
+                    }
+                    name={getChannelDisplayName(selectedChannel, user)}
+                  />
+                </>
               ) : (
                 <div className="flex h-full items-center justify-center text-gray-500">
-                  Select a chat to start messaging
+                  {streamClientConnected
+                    ? "Select a chat to start messaging"
+                    : "Connecting to chat..."}
                 </div>
               )}
             </div>

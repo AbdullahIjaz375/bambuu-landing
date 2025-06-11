@@ -196,25 +196,10 @@ const MobileSignupStep = ({ onNext, onClose }) => {
     <MobileModal open={true} onClose={onClose}>
       <MobileModalHeader onClose={onClose} />
       <div className="px-6 pb-6 text-center">
-        <div className="mx-auto mt-2 flex w-full max-w-xs flex-col items-center px-4">
-          <img src="/svgs/signup.svg" alt="Sign up" className="mb-4 h-24" />
-          <div className="mb-4 flex w-full justify-end">
-            <select
-              value={currentLanguage}
-              onChange={(e) => handleLanguageChange(e.target.value)}
-              className="rounded-full border border-gray-200 px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-green-500"
-            >
-              <option value="en">English</option>
-              <option value="es">Español</option>
-            </select>
-          </div>
+        <div className="mx-auto mt-2 flex w-full max-w-xs flex-col items-center px-6">
           <div className="mb-8 w-full space-y-2 text-center">
-            <h1 className="text-3xl font-bold">
-              {t("signup.title", "Sign Up")}
-            </h1>
-            <p className="text-lg text-gray-600">
-              {t("signup.subtitle", "Let's create a new account!")}
-            </p>
+            <h1 className="text-3xl font-bold">Sign Up</h1>
+            <p className="text-lg text-gray-600">Let's create a new account!</p>
           </div>
           {loading ? (
             <div className="flex h-32 items-center justify-center">
@@ -222,54 +207,79 @@ const MobileSignupStep = ({ onNext, onClose }) => {
             </div>
           ) : verificationSent && !isEmailVerified ? (
             <div className="w-full max-w-xs text-center">
-              <h2 className="mb-2 text-xl font-bold">
-                {t("signup.verification.title", "Email Verification")}
-              </h2>
+              <h2 className="mb-2 text-xl font-bold">Email Verification</h2>
               <p className="mb-4 text-gray-600">
-                {t(
-                  "signup.verification.message",
-                  "An email with verification link has been sent to",
-                )}{" "}
-                {email}
+                An email with verification link has been sent to {email}
               </p>
               <button
                 onClick={handleResendEmail}
                 className="mb-2 w-full rounded-full border border-black bg-[#ffbf00] py-3 text-black hover:bg-[#cc9900] focus:outline-none"
               >
-                {t("signup.verification.resend", "Resend Email")}
+                Resend Email
               </button>
               <button
                 onClick={resetStates}
                 className="w-full rounded-full border border-black py-3 text-black hover:bg-gray-100 focus:outline-none"
               >
-                {t(
-                  "signup.verification.changeEmail",
-                  "Sign up with different email",
-                )}
+                Sign up with different email
               </button>
             </div>
           ) : (
             <form onSubmit={handleInitialSignup} className="w-full space-y-6">
               <div className="space-y-1">
                 <label className="block text-sm font-medium">Email</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  className="w-full rounded-3xl border border-gray-300 p-2 focus:border-[#14B82C] focus:outline-none focus:ring-0"
-                  required
-                />
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="h-5 w-5"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25H4.5a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-.659 1.591l-7.5 7.5a2.25 2.25 0 01-3.182 0l-7.5-7.5A2.25 2.25 0 012.25 6.993V6.75"
+                      />
+                    </svg>
+                  </span>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="enter your email"
+                    className="w-full rounded-3xl border border-gray-300 p-2 pl-10 focus:border-[#14B82C] focus:outline-none focus:ring-0"
+                    required
+                  />
+                </div>
               </div>
               <div className="space-y-1">
                 <label className="block text-sm font-medium">Password</label>
                 <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="h-5 w-5"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M16.5 10.5V7.125A4.125 4.125 0 008.25 7.125V10.5m8.25 0a2.25 2.25 0 012.25 2.25v4.125a2.25 2.25 0 01-2.25 2.25H7.5a2.25 2.25 0 01-2.25-2.25V12.75a2.25 2.25 0 012.25-2.25m8.25 0h-8.25"
+                      />
+                    </svg>
+                  </span>
                   <input
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
-                    className="w-full rounded-3xl border border-gray-300 p-2 focus:border-[#14B82C] focus:outline-none focus:ring-0"
+                    placeholder="enter your password"
+                    className="w-full rounded-3xl border border-gray-300 p-2 pl-10 focus:border-[#14B82C] focus:outline-none focus:ring-0"
                     required
                   />
                   <button
@@ -321,12 +331,28 @@ const MobileSignupStep = ({ onNext, onClose }) => {
                   Confirm Password
                 </label>
                 <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="h-5 w-5"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M16.5 10.5V7.125A4.125 4.125 0 008.25 7.125V10.5m8.25 0a2.25 2.25 0 012.25 2.25v4.125a2.25 2.25 0 01-2.25 2.25H7.5a2.25 2.25 0 01-2.25-2.25V12.75a2.25 2.25 0 012.25-2.25m8.25 0h-8.25"
+                      />
+                    </svg>
+                  </span>
                   <input
                     type={showConfirmPassword ? "text" : "password"}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Re-enter your password"
-                    className="w-full rounded-3xl border border-gray-300 p-2 focus:border-[#14B82C] focus:outline-none focus:ring-0"
+                    placeholder="re-enter your password"
+                    className="w-full rounded-3xl border border-gray-300 p-2 pl-10 focus:border-[#14B82C] focus:outline-none focus:ring-0"
                     required
                   />
                   <button
@@ -375,9 +401,9 @@ const MobileSignupStep = ({ onNext, onClose }) => {
               </div>
               <button
                 type="submit"
-                className="mt-8 w-full rounded-full border border-black bg-[#14b82c] py-3 text-black hover:bg-[#119523] focus:outline-none focus:ring-2 focus:ring-[#119523] focus:ring-offset-2"
+                className="mt-8 w-full rounded-full border border-black bg-[#14b82c] py-3 font-semibold text-white hover:bg-[#119523] focus:outline-none focus:ring-2 focus:ring-[#119523] focus:ring-offset-2"
               >
-                {t("signup.createAccount", "Create Account")}
+                Create an Account
               </button>
             </form>
           )}
@@ -388,7 +414,7 @@ const MobileSignupStep = ({ onNext, onClose }) => {
             </div>
             <div className="relative flex justify-center text-sm">
               <span className="bg-white px-2 text-gray-500">
-                {t("signup.orContinueWith", "or continue with")}
+                or sign up with
               </span>
             </div>
           </div>
@@ -396,45 +422,49 @@ const MobileSignupStep = ({ onNext, onClose }) => {
           <div className="grid w-full grid-cols-2 gap-4">
             <button
               onClick={handleGoogleLogin}
-              className="flex items-center justify-center space-x-4 rounded-full border border-gray-300 px-4 py-2 hover:bg-gray-50"
+              className="flex items-center justify-center space-x-2 rounded-full border border-gray-300 bg-white px-4 py-2 hover:bg-gray-50"
             >
-              <img alt="google" src="/svgs/login-insta.svg" />
-              <span>{t("signup.google", "google")}</span>
+              <img
+                alt="Google"
+                src="/svgs/login-insta.svg"
+                className="h-5 w-5"
+              />
+              <span className="font-medium text-black">Google</span>
             </button>
             <button
               onClick={handleAppleLogin}
-              className="flex items-center justify-center space-x-4 rounded-full border border-black bg-black px-4 py-2 text-white"
+              className="flex items-center justify-center space-x-2 rounded-full border border-gray-300 bg-white px-4 py-2 hover:bg-gray-50"
             >
               <img
-                alt="apple"
-                className="h-6 w-auto"
-                src="/images/apple-white.png"
+                alt="Facebook"
+                src="/svgs/facebook.svg"
+                className="h-5 w-5"
               />
-              <span>{t("signup.apple", "apple")}</span>
+              <span className="font-medium text-black">Facebook</span>
             </button>
           </div>
           {/* Terms & Privacy */}
-          <div className="mb-4 w-full text-center text-sm text-gray-500">
+          <div className="mb-4 mt-6 w-full text-center text-xs text-gray-500">
             <p>
-              {t("signup.termsConditions", "By signing up, you agree to our")}{" "}
+              By signing up, you agree to our{" "}
               <a href="/terms" className="text-black hover:underline">
-                {t("signup.terms", "Terms & Conditions")}
+                Terms & Conditions
               </a>{" "}
-              {t("signup.and", "and")}{" "}
+              and{" "}
               <a href="/privacy" className="text-black hover:underline">
-                {t("signup.privacyPolicy", "Privacy Policy")}
+                Privacy Policy
               </a>
               .
             </p>
           </div>
           {/* Login Link */}
-          <div className="w-full text-center text-sm text-gray-600">
-            {t("signup.haveAccount", "Already have an account?")}{" "}
+          <div className="w-full text-center text-xs text-gray-600">
+            Already have any account?{" "}
             <a
               href="/login"
               className="font-semibold text-green-600 hover:text-green-700"
             >
-              {t("signup.login", "Login")}
+              Login
             </a>
           </div>
         </div>

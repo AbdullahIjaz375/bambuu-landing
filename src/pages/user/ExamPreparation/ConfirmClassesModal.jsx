@@ -23,18 +23,35 @@ const ConfirmClassesModal = ({
   const [error, setError] = useState(null);
   const [booking, setBooking] = useState(false);
 
+  // Ensure selectedDates is always an array
+  const normalizedSelectedDates = Array.isArray(selectedDates)
+    ? selectedDates
+    : selectedDates
+      ? [selectedDates]
+      : [];
+
+  // Ensure selectedTimes is always an object
+  const normalizedSelectedTimes =
+    selectedTimes && typeof selectedTimes === "object" ? selectedTimes : {};
+
   // Convert dates and times to the format expected for booking
   const formatBookingData = () => {
-    const classes = selectedDates.map((date) => {
-      const time = selectedTimes[date];
+    const classes = normalizedSelectedDates.map((date) => {
+      const utcTime = normalizedSelectedTimes[date];
+      const localTime = utcTime
+        ? new Date(utcTime).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+          })
+        : "";
       return {
-        date: `${String(date).padStart(2, "0")}-05-25`, // Format as DD-MM-YY
-        time: time,
+        date: date,
+        time: localTime,
         title: "Exam Prep Class",
-        type: date % 2 === 0 ? "Class 6" : "Exam Prep Class", // Alternate between types for demo
+        type: date % 2 === 0 ? "Class 6" : "Exam Prep Class",
       };
     });
-
     return {
       classes,
       totalClasses: classes.length,
@@ -52,19 +69,9 @@ const ConfirmClassesModal = ({
         return;
       }
       // Build slots array: [{ time: ISOString }]
-      const slots = selectedDates.map((date) => {
-        const timeStr = selectedTimes[date];
-        const [year, month, day] = date.split("-").map(Number);
-        let [h, m] = timeStr.split(":");
-        m = m.slice(0, 2);
-        let hour = parseInt(h, 10);
-        let minute = parseInt(m, 10);
-        const isPM = timeStr.toLowerCase().includes("pm");
-        if (isPM && hour !== 12) hour += 12;
-        if (!isPM && hour === 12) hour = 0;
-        const d = new Date(year, month - 1, day, hour, minute, 0, 0);
-        return { time: d.toISOString() };
-      });
+      const slots = normalizedSelectedDates.map((date) => ({
+        time: normalizedSelectedTimes[date], // UTC string
+      }));
       const payload = {
         studentId: user?.uid || authUser?.uid,
         tutorId: tutorId,
@@ -82,8 +89,7 @@ const ConfirmClassesModal = ({
 
   const handleSuccessClose = () => {
     setShowSuccessModal(false);
-    const bookingData = formatBookingData();
-    onConfirm(bookingData);
+    if (onConfirm) onConfirm();
   };
 
   const bookingData = formatBookingData();
@@ -131,7 +137,8 @@ const ConfirmClassesModal = ({
                 </h3>
                 <button
                   onClick={() =>
-                    onRemoveClass && onRemoveClass(selectedDates[index])
+                    onRemoveClass &&
+                    onRemoveClass(normalizedSelectedDates[index])
                   }
                   className="flex items-center gap-1 text-xs font-medium text-red-500 hover:text-red-600"
                 >
@@ -171,7 +178,7 @@ const ConfirmClassesModal = ({
       <ClassesBooked
         isOpen={showSuccessModal}
         onClose={handleSuccessClose}
-        bookedClassesCount={selectedDates.length}
+        bookedClassesCount={normalizedSelectedDates.length}
         totalAvailableClasses={10}
       />
       {loading && <div>Booking classes...</div>}

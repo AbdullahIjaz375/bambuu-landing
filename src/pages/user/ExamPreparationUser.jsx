@@ -92,6 +92,16 @@ const ExamPreparationUser = () => {
   const nextPlanStart = examPrepStatus?.nextPlan?.purchaseDate
     ? new Date(examPrepStatus.nextPlan.purchaseDate)
     : null;
+
+  // Helper to extract YouTube embed URL
+  function getYouTubeEmbedUrl(url) {
+    if (!url) return null;
+    const regExp =
+      /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
+    const match = url.match(regExp);
+    return match ? `https://www.youtube.com/embed/${match[1]}` : null;
+  }
+
   // Send Message Functionality (same as InstructorProfileUser)
   const sendMessageClicked = async () => {
     if (isCreatingChannel || !tutor) return;
@@ -214,7 +224,10 @@ const ExamPreparationUser = () => {
             </div>
             <div className="text-base font-normal text-[#454545]">
               Need to purchase more classes?{" "}
-              <span className="cursor-pointer text-base font-bold text-[#14B82C]">
+              <span
+                className="cursor-pointer text-base font-bold text-[#14B82C]"
+                onClick={() => navigate("/subscriptions?tab=exam")}
+              >
                 Buy Now!
               </span>
             </div>
@@ -268,9 +281,37 @@ const ExamPreparationUser = () => {
                   </span>
                 </div>
               </div>
-              <div className="mb-4 flex h-32 w-full items-center justify-center rounded-xl bg-[#F5F5F5] text-base text-gray-400">
-                Video Section
-              </div>
+              {/* Video Section */}
+              {tutor.videoLink ? (
+                <div className="mb-4 w-full">
+                  <div className="flex min-h-[200px] w-full items-center justify-center rounded-2xl bg-[#eaeaea] text-2xl font-medium text-[#b3b3b3] sm:min-h-[220px] sm:rounded-[2rem] lg:h-[220px]">
+                    <iframe
+                      width="100%"
+                      height="100%"
+                      style={{
+                        minHeight: 200,
+                        minWidth: 200,
+                        aspectRatio: "16/9",
+                        borderRadius: "1rem",
+                      }}
+                      src={getYouTubeEmbedUrl(tutor.videoLink)}
+                      title="Tutor introduction video"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                    ></iframe>
+                  </div>
+                  <div className="mt-2 w-full text-center">
+                    <span className="text-sm font-normal italic text-[#5D5D5D] sm:text-base">
+                      Watch {tutor.name?.split(" ")[0] || "the tutor"}'s
+                      introduction video.
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="mb-4 flex h-32 w-full items-center justify-center rounded-xl bg-[#F5F5F5] text-base text-gray-400">
+                  No introduction video available.
+                </div>
+              )}
               <button
                 onClick={sendMessageClicked}
                 className="mt-auto w-full rounded-full border border-black bg-[#fffbc5] px-4 py-3 text-base font-normal text-black shadow transition hover:bg-[#fff9a0]"
@@ -417,7 +458,7 @@ const ExamPreparationUser = () => {
       <BookingFlowModal
         isOpen={showExamPrepBookingFlow}
         onClose={() => setShowExamPrepBookingFlow(false)}
-        user={user}
+        user={{ ...user, completedIntroCallTutorId: tutorId }}
         mode="exam"
         initialStep={6}
       />

@@ -116,19 +116,9 @@ const ExamClassSlots = ({
     setBooking(true);
     setError(null);
     try {
-      const slots = selectedDates.map((date) => {
-        const timeStr = selectedTimes[date];
-        const [year, month, day] = date.split("-").map(Number);
-        let [h, m] = timeStr.split(":");
-        m = m.slice(0, 2);
-        let hour = parseInt(h, 10);
-        let minute = parseInt(m, 10);
-        const isPM = timeStr.toLowerCase().includes("pm");
-        if (isPM && hour !== 12) hour += 12;
-        if (!isPM && hour === 12) hour = 0;
-        const d = new Date(year, month - 1, day, hour, minute, 0, 0);
-        return { time: d.toISOString() };
-      });
+      const slots = selectedDates.map((date) => ({
+        time: selectedTimes[date], // UTC string
+      }));
       const payload = {
         studentId: user?.uid,
         tutorId: tutorId,
@@ -136,8 +126,7 @@ const ExamClassSlots = ({
       };
       const resp = await bookExamPrepClass(payload);
       setBooking(false);
-      if (onBookingComplete)
-        onBookingComplete({ dates: selectedDates, times: selectedTimes });
+      if (onBookingComplete) onBookingComplete(selectedDates, selectedTimes);
       if (onClose) onClose();
     } catch (err) {
       setBooking(false);
@@ -183,16 +172,16 @@ const ExamClassSlots = ({
   const selectedDateKey = selectedDates[0];
   let availableTimes =
     slots && selectedDateKey ? slots[selectedDateKey] || [] : [];
-  // Remove duplicate times
-  availableTimes = Array.from(new Set(availableTimes));
+  // Remove duplicate UTC times
+  availableTimes = Array.from(
+    new Map(availableTimes.map((t) => [t.utc, t])).values(),
+  );
   const currentDate = selectedDateKey;
   const selectedTime = selectedTimes[selectedDateKey] || "";
 
   // Only allow selection of dates that have available slots
   // Use date keys in 'YYYY-MM-DD' format
   const availableDates = Object.keys(slots);
-  console.log("[ExamClassSlots] availableDates:", availableDates);
-
   const MAX_DATES = 10;
 
   return (
@@ -281,9 +270,6 @@ const ExamClassSlots = ({
                       const dateKey = day ? `${year}-${month}-${dayStr}` : null;
                       const enabled = !!day && availableDates.includes(dateKey);
                       if (typeof window !== "undefined") {
-                        console.log(
-                          `[ExamClassSlots] day: ${day}, dateKey: ${dateKey}, enabled: ${enabled}`,
-                        );
                       }
                       return (
                         <button
@@ -359,17 +345,17 @@ const ExamClassSlots = ({
                   No available times for this date.
                 </div>
               ) : (
-                availableTimes.map((time, idx) => (
+                availableTimes.map((timeObj, idx) => (
                   <button
-                    key={time + "-" + idx}
-                    onClick={() => handleTimeSelection(time)}
+                    key={timeObj.utc + "-" + idx}
+                    onClick={() => handleTimeSelection(timeObj.utc)}
                     className={`rounded-[16px] border px-2 py-3 text-base font-normal transition ${
-                      selectedTime === time
+                      selectedTime === timeObj.utc
                         ? "border-[#14B82C] bg-[#DBFDDF] text-base font-semibold text-[#14B82C]"
                         : "border-[#B0B0B0] bg-white text-[#14B82C] hover:bg-[#DBFDDF]"
                     }`}
                   >
-                    {time}
+                    {timeObj.display}
                   </button>
                 ))
               )}
