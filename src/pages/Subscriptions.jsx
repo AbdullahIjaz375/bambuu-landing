@@ -22,7 +22,7 @@ import { useNavigate } from "react-router-dom";
 
 Modal.setAppElement("#root");
 
-const Subscriptions = () => {
+const Subscriptions = ({ onNext, onBack, onClose, isModal = false }) => {
   const { user } = useAuth();
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("subscriptions");
@@ -603,9 +603,13 @@ const Subscriptions = () => {
                           toast.success(
                             "Exam Prep Plan purchased successfully!",
                           );
-                          navigate("/learn", {
-                            state: { showIntroBookingFlow: true },
-                          });
+                          if (isModal) {
+                            onNext && onNext();
+                          } else {
+                            navigate("/learn", {
+                              state: { showIntroBookingFlow: true },
+                            });
+                          }
                         } catch (err) {
                           toast.error(
                             err?.message ||
@@ -729,7 +733,11 @@ const Subscriptions = () => {
               <button
                 onClick={() => {
                   setShowFreeTrialModal(false);
-                  window.location.href = "/learn";
+                  if (isModal) {
+                    onNext && onNext();
+                  } else {
+                    window.location.href = "/learn";
+                  }
                 }}
                 className="w-full rounded-full border border-[#042F0C] bg-[#14B82C] py-2 text-[#042F0C]"
               >

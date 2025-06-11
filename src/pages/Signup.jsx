@@ -39,7 +39,7 @@ function useIsMobile(breakpoint = 640) {
   return isMobile;
 }
 
-const Signup = () => {
+const Signup = ({ onNext, onClose, isModal = false }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -295,10 +295,14 @@ const Signup = () => {
       setHasProfile(true);
       setShowSuccessModal(true);
 
-      if (!sessionUserData.name || !sessionUserData.email) {
-        navigate("/userEditProfile", { replace: true });
+      if (isModal) {
+        onNext && onNext();
       } else {
-        navigate("/learn", { replace: true });
+        if (!sessionUserData.name || !sessionUserData.email) {
+          navigate("/userEditProfile", { replace: true });
+        } else {
+          navigate("/learn", { replace: true });
+        }
       }
     } catch (error) {
       toast.update(loadingToastId, {
@@ -494,11 +498,20 @@ const Signup = () => {
 
       toast.success("Logged in successfully!", { autoClose: 3000 });
 
-      if (isFirstTimeLogin || !userDoc.data().name) {
-        setIsEmailVerified(true);
-        setHasProfile(false);
+      if (isModal) {
+        if (isFirstTimeLogin || !userDoc.data().name) {
+          setIsEmailVerified(true);
+          setHasProfile(false);
+        } else {
+          onNext && onNext();
+        }
       } else {
-        navigate("/learn", { replace: true });
+        if (isFirstTimeLogin || !userDoc.data().name) {
+          setIsEmailVerified(true);
+          setHasProfile(false);
+        } else {
+          navigate("/learn", { replace: true });
+        }
       }
     } catch (error) {
       console.error("Error during Google login:", error);
@@ -655,11 +668,20 @@ const Signup = () => {
 
       toast.success("Logged in successfully!", { autoClose: 3000 });
 
-      if (isFirstTimeLogin || !userDoc.data().name) {
-        setIsEmailVerified(true);
-        setHasProfile(false);
+      if (isModal) {
+        if (isFirstTimeLogin || !userDoc.data().name) {
+          setIsEmailVerified(true);
+          setHasProfile(false);
+        } else {
+          onNext && onNext();
+        }
       } else {
-        navigate("/learn", { replace: true });
+        if (isFirstTimeLogin || !userDoc.data().name) {
+          setIsEmailVerified(true);
+          setHasProfile(false);
+        } else {
+          navigate("/learn", { replace: true });
+        }
       }
     } catch (error) {
       console.error("Error during Apple login:", error);

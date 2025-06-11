@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import ComparisonTable from "../components/ComparisonTable";
+import MobileSignupModalFlow from "../components/mobile-flow/MobileSignupModalFlow";
 
 const features = [
   {
@@ -40,8 +41,14 @@ const packageFeatures = [
 ];
 
 export default function LandingMobile() {
+  const [showSignupFlow, setShowSignupFlow] = useState(false);
+
   return (
     <div className="min-h-screen w-full bg-[#F0FDF1] font-['Urbanist'] text-black">
+      {/* Onboarding Modal Flow */}
+      {showSignupFlow && (
+        <MobileSignupModalFlow onClose={() => setShowSignupFlow(false)} />
+      )}
       {/* Hero Section */}
       <div className="relative flex w-full flex-col items-center rounded-b-[40px] bg-white pb-8 pt-8">
         <img
@@ -74,7 +81,7 @@ export default function LandingMobile() {
           <button
             className="min-w-[140px] rounded-[18px] border border-black bg-[#FFBF00] px-4 py-2 text-sm font-semibold text-black"
             style={{ width: "fit-content" }}
-            onClick={() => window.open("/signup", "_self")}
+            onClick={() => setShowSignupFlow(true)}
           >
             Enroll Today
           </button>

@@ -105,10 +105,8 @@ const ProtectedRoute = ({ children, requiredRole }) => {
 
   // If the user is logged in and the current path is /login or /signup, redirect to /learn
   if (location.pathname === "/login" || location.pathname === "/signup") {
-    // Check if user is in mobile modal flow and should not be redirected
-    const inMobileFlow = localStorage.getItem("inMobileModalFlow");
-    if (inMobileFlow === "true") {
-      // Don't redirect if user is in mobile modal flow
+    if (sessionStorage.getItem("signupInModal") === "true") {
+      // Don't redirect if user is in mobile modal signup flow
       return children;
     }
     return <Navigate to="/learn" />;
