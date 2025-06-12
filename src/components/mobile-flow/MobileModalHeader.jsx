@@ -1,7 +1,12 @@
 import React from "react";
 import { X } from "lucide-react";
 
-const MobileModalHeader = ({ leftIcon, onClose, children }) => (
+const MobileModalHeader = ({
+  leftIcon,
+  onClose,
+  children,
+  subscriptionStep,
+}) => (
   <div className="relative flex min-h-[64px] w-full items-center justify-between rounded-t-[32px] px-4 py-4">
     {/* Top Left Icon */}
     {leftIcon ? (
@@ -14,10 +19,10 @@ const MobileModalHeader = ({ leftIcon, onClose, children }) => (
     {onClose ? (
       <button
         onClick={onClose}
-        className="z-10 flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 p-1 text-gray-500 hover:bg-gray-200 hover:text-gray-700"
+        className={`absolute right-8 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-[#F6F6F6] p-0 text-[#3D3D3D] shadow-md`}
         aria-label="Close"
       >
-        <X size={16} />
+        <X size={20} />
       </button>
     ) : (
       <span className="h-6 w-6" />

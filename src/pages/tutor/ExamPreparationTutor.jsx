@@ -66,12 +66,12 @@ const ExamPreparationTutor = () => {
     setShowTimeModal(false);
     setAvailabilityLoading(true);
     setAvailabilityError(null);
-    const slots =
-      slotsByDate ||
-      selectedDates.map((date) => ({
-        date: new Date(2025, 4, date).toISOString(),
-        time: "10:00 AM",
-      }));
+    const slots = [];
+    Object.entries(prefilledSlotsByDate).forEach(([date, times]) => {
+      times.forEach((time) => {
+        slots.push({ date, time });
+      });
+    });
     const payload = {
       tutorId: user.uid,
       slots,
@@ -303,7 +303,7 @@ const ExamPreparationTutor = () => {
           overlayClassName="fixed inset-0 bg-black bg-opacity-50 z-[1000]"
         >
           <TimeSlotModal
-            selectedDates={selectedDates}
+            selectedDates={prefilledDates}
             onClose={handleTimeSlotClose}
             onNext={handleTimeSlotNext}
             prefilledSlotsByDate={prefilledSlotsByDate}

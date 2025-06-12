@@ -15,11 +15,11 @@ const MobileSubscriptionStep = ({ onNext, onBack, onClose }) => {
   };
 
   return (
-    <MobileModal open={true} onClose={onClose}>
+    <MobileModal open={true} onClose={onClose} subscriptionStep={true}>
       <MobileModalHeader onClose={onClose} />
       <div className="px-6 pb-6 text-center">
-        <div className="mx-auto mt-2 flex w-full max-w-xs flex-col items-center px-4">
-          <div className="w-full max-w-xs overflow-hidden rounded-[32px] border border-[#14B82C] bg-[#E6FDE9] p-0 shadow-lg">
+        <div className="mx-auto mt-2 flex w-full max-w-xl flex-col items-center px-4">
+          <div className="w-full max-w-xl overflow-hidden rounded-[32px] border border-[#14B82C] bg-[#E6FDE9] p-0 shadow-lg">
             <div className="rounded-t-[32px] bg-[#FFBF00] px-4 py-2 text-center">
               <span className="text-sm font-semibold text-black">
                 Language Exams Package
@@ -64,13 +64,6 @@ const MobileSubscriptionStep = ({ onNext, onBack, onClose }) => {
               </button>
             </div>
           </div>
-          <button
-            type="button"
-            className="mt-4 w-full max-w-xs rounded-full border border-gray-300 py-2 text-gray-700 hover:bg-gray-100"
-            onClick={onBack}
-          >
-            Back
-          </button>
         </div>
       </div>
     </MobileModal>

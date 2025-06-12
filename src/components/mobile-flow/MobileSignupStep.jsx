@@ -193,8 +193,8 @@ const MobileSignupStep = ({ onNext, onClose }) => {
 
   // UI
   return (
-    <MobileModal open={true} onClose={onClose}>
-      <MobileModalHeader onClose={onClose} />
+    <MobileModal open={true} onClose={onClose} subscriptionStep={false}>
+      <MobileModalHeader onClose={onClose} subscriptionStep={false} />
       <div className="px-6 pb-6 text-center">
         <div className="mx-auto mt-2 flex w-full max-w-xs flex-col items-center px-6">
           <div className="mb-8 w-full space-y-2 text-center">
