@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
-import Signup from "../../pages/Signup";
-import Subscriptions from "../../pages/Subscriptions";
+import { useState, useEffect } from "react";
 import MobileConfirmationStep from "./MobileConfirmationStep";
+import MobileSubscriptionStep from "./MobileSubscriptionStep";
+import Signup from "../../pages/Signup";
 
 const MobileSignupModalFlow = ({ onClose }) => {
   const [step, setStep] = useState(0);
@@ -26,7 +26,7 @@ const MobileSignupModalFlow = ({ onClose }) => {
         <Signup onNext={handleNext} onClose={handleClose} isModal={true} />
       )}
       {step === 1 && (
-        <Subscriptions
+        <MobileSubscriptionStep
           onNext={handleNext}
           onBack={handleBack}
           onClose={handleClose}

@@ -52,23 +52,6 @@ const ClassCardTutor = ({
     });
   };
 
-  const formatDate = (timestamp) => {
-    if (!timestamp) return t("class-card-tutor.labels.tbd");
-    let date;
-    if (typeof timestamp === "string") {
-      date = new Date(timestamp);
-    } else if (timestamp.seconds) {
-      date = new Date(timestamp.seconds * 1000);
-    } else {
-      date = new Date(timestamp);
-    }
-    return date.toLocaleDateString("en-US", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-  };
-
   // New function to get the day name for recurring classes
   const getRecurringDayDisplay = (timestamp) => {
     if (!timestamp) return t("class-card-tutor.labels.tbd");
@@ -158,13 +141,7 @@ const ClassCardTutor = ({
                 : ""
             } flex h-auto flex-col border sm:h-[25rem] ${
               isPremium || examPrep ? "border-[#14b82c]" : "border-[#ffc71f]"
-            } ${
-              examPrep
-                ? "bg-[#E6FDE9]"
-                : classType === "Individual Premium"
-                  ? "bg-[#e6fde9]"
-                  : "bg-white"
-            } rounded-3xl p-2`}
+            } rounded-3xl bg-[#E6FDE9] p-2`}
           >
             <div className="relative aspect-video w-full sm:h-80">
               {examPrep ? (
@@ -196,10 +173,12 @@ const ClassCardTutor = ({
                 </span>
               )}
 
-              <div className="absolute bottom-0 left-0 right-0 space-y-1 rounded-b-2xl bg-[#B9F9C2BF]/75 backdrop-blur-sm">
-                <div className="mb-2 h-[1px] w-full rounded bg-[#46E25C]" />
-                <div className="p-2">
-                  <h2 className="ml-2 line-clamp-2 text-xl font-bold text-gray-800 sm:text-xl">
+              <div className="absolute bottom-0 left-0 right-0 rounded-b-2xl bg-[#B9F9C2BF]/75 pb-2 pr-2 backdrop-blur-sm">
+                {examPrep && (
+                  <div className="mb-2 h-[1px] w-full rounded bg-[#46E25C]" />
+                )}
+                <div className={`${examPrep ? "p-2" : "pl-1 pt-2"}`}>
+                  <h2 className="ml-2 line-clamp-2 truncate text-xl font-bold text-gray-800 sm:text-xl">
                     {className}
                   </h2>
                 </div>
@@ -256,7 +235,7 @@ const ClassCardTutor = ({
                     src="/svgs/clock.svg"
                   />{" "}
                   <span className="sm:text-md text-sm text-[#454545]">
-                    {formatTime(classDateTime)} ({classDuration}{" "}
+                    {formatTime(classDateTime)} ({examPrep ? 30 : classDuration}{" "}
                     {t("class-card-tutor.labels.min")})
                   </span>
                 </div>
@@ -342,8 +321,9 @@ const ClassCardTutor = ({
                 />
               </div>
 
-              <h2 className="mb-3 text-2xl font-bold">{className}</h2>
-
+              <h2 className="mb-3 max-w-full truncate text-2xl font-bold">
+                {className}
+              </h2>
               <div className="mb-6 flex items-center gap-2">
                 <div className="h-6 w-6">
                   {/* Language flag would go here */}

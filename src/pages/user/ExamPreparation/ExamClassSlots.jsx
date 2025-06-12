@@ -15,7 +15,7 @@ const ExamClassSlots = ({
   const [currentStep, setCurrentStep] = useState(1); // 1: date selection, 2: time selection, 3: confirmation
   const [selectedDates, setSelectedDates] = useState([]);
   const [selectedTimes, setSelectedTimes] = useState({}); // Object to store time for each date
-  const [currentMonth, setCurrentMonth] = useState(new Date(2025, 4)); // May 2025
+  const [currentMonth, setCurrentMonth] = useState(new Date());
   const [sameTime, setSameTime] = useState(false);
   const [currentDateIndex, setCurrentDateIndex] = useState(0);
   const [booking, setBooking] = useState(false);
@@ -334,7 +334,7 @@ const ExamClassSlots = ({
             {/* Duration and Timezone Info */}
             <div className="mb-6 flex justify-between text-sm text-gray-600">
               <span className="text-sm font-medium">
-                Duration: <b>60 minutes</b>
+                Duration: <b>30 minutes</b>
               </span>
             </div>
 

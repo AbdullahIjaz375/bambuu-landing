@@ -199,20 +199,14 @@ const ClassCard = ({
             introClass || examPrepClass
               ? "h-[280px] w-full min-w-[220px] max-w-[350px] bg-[#E6FDE9]"
               : ""
-          } ${isPremium || introClass || examPrepClass ? "border-[#14b82c]" : "border-[#ffc71f]"} ${
-            introClass || examPrepClass
-              ? "bg-[#E6FDE9]"
-              : isIndividualPremium
-                ? "bg-[#e6fde9]"
-                : "bg-white"
-          } mx-auto overflow-hidden rounded-3xl p-2`}
+          } ${isPremium || introClass || examPrepClass ? "border-[#14b82c]" : "border-[#ffc71f]"} } mx-auto overflow-hidden rounded-3xl bg-[#E6FDE9] p-2`}
         >
           <div
             className={`relative w-full ${
               isBooked ||
               hideBookButton ||
               user?.enrolledClasses?.includes(classId)
-                ? "h-[230px]"
+                ? "h-[270px]"
                 : "h-[190px]"
             } overflow-hidden`}
           >
@@ -245,15 +239,17 @@ const ClassCard = ({
               </span>
             )}
             <div className="absolute bottom-0 left-0 right-0 space-y-1 rounded-b-2xl bg-[#B9F9C2BF]/75 backdrop-blur-sm">
-              <div className="mb-2 h-[1px] w-full rounded bg-[#46E25C]" />
-              <div className="p-2">
+              {examPrepClass && (
+                <div className="mb-2 h-[1px] w-full rounded bg-[#46E25C]" />
+              )}
+              <div className={`${examPrepClass ? "p-2" : "pl-1 pt-2"}`}>
                 <h2 className="ml-2 truncate text-lg font-bold text-gray-800 sm:text-xl">
                   {className}
                 </h2>
               </div>
               {!(introClass || examPrepClass) && (
                 <div className="flex items-center justify-between">
-                  <div className="ml-2 flex items-center space-x-2">
+                  <div className="mb-2 ml-2 flex items-center space-x-2">
                     <img
                       src={
                         language === "English"
@@ -282,7 +278,7 @@ const ClassCard = ({
                       </span>
                     )}
                     {languageLevel !== "None" && !isBammbuu && (
-                      <span className="rounded-full bg-[#fff885] px-2 py-1 text-xs sm:px-3 sm:text-sm">
+                      <span className="mb-2 mr-2 rounded-full bg-[#fff885] px-2 py-1 text-xs sm:px-3 sm:text-sm">
                         {languageLevel}
                       </span>
                     )}
@@ -306,7 +302,7 @@ const ClassCard = ({
                       : formatTime(classDateTime)}
                   </span>
                 </div>
-                <div className="flex items-center space-x-1">
+                <div className="flex items-center space-x-1 space-y-1">
                   <img
                     alt="bammbuu"
                     src="/svgs/calendar.svg"
@@ -331,7 +327,8 @@ const ClassCard = ({
                     <User className="h-4 w-4 text-gray-600" />
                   )}
                   <span className="text-sm text-[#454545]">
-                    {adminName || t("class-card-tutor.labels.tbd")}
+                    {adminName + " (Instructor) " ||
+                      t("class-card-tutor.labels.tbd")}
                   </span>
                 </div>
                 {!(introClass || examPrepClass) && (

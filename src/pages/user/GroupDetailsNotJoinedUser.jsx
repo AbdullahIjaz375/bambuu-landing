@@ -531,8 +531,7 @@ const GroupDetailsNotJoinedUser = ({ onClose }) => {
                     />
                   </div>
 
-                  <div className="w-full space-y-4">
-                    {" "}
+                  <div className="w-full space-y-4 overflow-hidden">
                     {group.isPremium ? <GroupInfoCard group={group} /> : <></>}
                   </div>
                 </div>

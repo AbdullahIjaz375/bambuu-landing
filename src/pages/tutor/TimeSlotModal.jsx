@@ -147,7 +147,7 @@ const TimeSlotModal = ({
       </div>
       <div className="mb-2 mt-5 flex items-center gap-4">
         <span className="text-sm text-gray-700">
-          Duration: <b>60 minutes</b>
+          Duration: <b>30 minutes</b>
         </span>
       </div>
       <div className="mb-4 grid grid-cols-4 gap-3">

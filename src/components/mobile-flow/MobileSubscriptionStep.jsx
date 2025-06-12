@@ -3,12 +3,7 @@ import MobileModal from "../MobileModal";
 import ClipLoader from "react-spinners/ClipLoader";
 import MobileModalHeader from "./MobileModalHeader";
 
-const MobileSubscriptionStep = ({
-  onNext,
-  onBack,
-  onClose,
-  defaultTab = "exam",
-}) => {
+const MobileSubscriptionStep = ({ onNext, onBack, onClose }) => {
   const [loading, setLoading] = useState(false);
 
   const handleEnroll = () => {

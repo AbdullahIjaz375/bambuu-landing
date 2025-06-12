@@ -25,7 +25,7 @@ const GroupInfoCard = ({ group }) => {
   }, [group]);
 
   const baseCardClass =
-    "flex flex-row items-center w-full max-w-2xl gap-8 p-5 bg-white border rounded-3xl";
+    "flex flex-col sm:flex-row items-center w-full max-w-2xl gap-4 sm:gap-8 p-4 sm:p-5 bg-white border rounded-3xl overflow-hidden";
   const imgClass = "object-cover rounded-2xl";
 
   // Function to truncate text to a specific number of words
@@ -41,33 +41,35 @@ const GroupInfoCard = ({ group }) => {
       <img
         alt={`${tutorInfo?.name || "Tutor"}'s profile`}
         src={tutorInfo?.photoUrl || "/images/panda.png"}
-        className={`${imgClass} w-24 h-24 rounded-xl flex-shrink-0`}
+        className={`${imgClass} h-20 w-20 flex-shrink-0 rounded-xl sm:h-24 sm:w-24`}
       />
-      <div className="flex flex-col items-start w-full flex-1 gap-2 overflow-hidden min-w-[220px]">
-        <h1 className="text-lg font-medium truncate w-full">
+      <div className="flex w-full min-w-[0] flex-1 flex-col items-start gap-2 overflow-hidden">
+        <h1 className="w-full truncate text-lg font-medium">
           {tutorInfo?.name}
         </h1>
 
         <p
           title={tutorInfo?.bio}
-          className="text-xs text-left text-gray-600 w-full overflow-hidden"
+          className="w-full overflow-hidden whitespace-normal break-words text-left text-xs text-gray-600"
         >
-          {truncateText(tutorInfo?.bio, 12)}
+          {truncateText(tutorInfo?.bio, 18)}
         </p>
 
-        <div className="flex items-center justify-between w-full text-xs">
+        <div className="flex w-full flex-col items-start justify-between gap-2 text-xs sm:flex-row sm:items-center">
           <div className="flex flex-col gap-0.5">
-            <span className="text-gray-700">
+            <span className="break-words text-gray-700">
               {tutorInfo?.teachingLanguage} (Teaching)
             </span>
-            <span className="text-left text-gray-700">
+            <span className="break-words text-left text-gray-700">
               {tutorInfo?.nativeLanguage} (Native)
             </span>
           </div>
           <div className="flex flex-col gap-0.5">
             <div className="flex items-center gap-1">
               <img src="/svgs/location.svg" alt="location" />
-              <span className="text-gray-700">{tutorInfo?.country}</span>
+              <span className="break-words text-gray-700">
+                {tutorInfo?.country}
+              </span>
             </div>
             <div className="flex items-center gap-1">
               <img src="/svgs/users.svg" alt="users" />
