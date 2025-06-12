@@ -132,17 +132,6 @@ const ProtectedRoute = ({ children, requiredRole }) => {
     const userTypeFromContext = user?.userType;
     const effectiveUserType = userTypeFromContext || userType;
 
-    // If we still don't have a user type, or it's not in the allowed roles
-
-    // if (!effectiveUserType || !roles.includes(effectiveUserType)) {
-    //   // Instead of immediately redirecting to unauthorized, redirect to login if it seems
-    //   // like there might be authentication problems
-    //   if (!effectiveUserType || effectiveUserType === "undefined") {
-    //     return <Navigate to="/login" />;
-    //   } else {
-    //     return <Navigate to="/unauthorized" />;
-    //   }
-    // }
     // If user is authenticated but userType/profile is not yet loaded, show spinner
     if (!effectiveUserType || effectiveUserType === "undefined") {
       return (

@@ -4,6 +4,7 @@ import ClassesBooked from "./ClassesBooked";
 import { useState } from "react";
 import { bookExamPrepClass } from "../../../api/examPrepApi";
 import { useAuth } from "../../../context/AuthContext";
+import { ClipLoader } from "react-spinners";
 
 const ConfirmClassesModal = ({
   isOpen,
@@ -15,6 +16,7 @@ const ConfirmClassesModal = ({
   onRemoveClass,
   tutorId,
   user,
+  loading: externalLoading,
   ...props
 }) => {
   const { user: authUser } = useAuth();
@@ -22,6 +24,9 @@ const ConfirmClassesModal = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [booking, setBooking] = useState(false);
+
+  // Use either external loading prop or internal booking state
+  const isLoading = externalLoading || booking;
 
   // Ensure selectedDates is always an array
   const normalizedSelectedDates = Array.isArray(selectedDates)
@@ -113,6 +118,18 @@ const ConfirmClassesModal = ({
         overlayClassName="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center backdrop-blur-sm"
         ariaHideApp={false}
       >
+        {/* Loading Overlay */}
+        {isLoading && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-[40px] bg-white bg-opacity-80">
+            <div className="flex flex-col items-center">
+              <ClipLoader color="#14B82C" size={50} />
+              <p className="mt-4 text-lg font-medium text-[#042F0C]">
+                Booking your classes...
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div className="mb-6 text-center">
           <h2 className="text-xl font-bold text-black">
@@ -141,6 +158,7 @@ const ConfirmClassesModal = ({
                     onRemoveClass(normalizedSelectedDates[index])
                   }
                   className="flex items-center gap-1 text-xs font-medium text-red-500 hover:text-red-600"
+                  disabled={isLoading}
                 >
                   <Trash2 className="h-4 w-4" />
                   <span>Remove</span>
@@ -159,17 +177,26 @@ const ConfirmClassesModal = ({
           ))}
         </div>
 
+        {/* Error message */}
+        {error && (
+          <div className="mb-4 rounded-lg bg-red-50 p-3 text-center text-red-600">
+            {error}
+          </div>
+        )}
+
         {/* Action Buttons */}
         <div className="flex gap-9 pt-3">
           <button
             onClick={onBack}
             className="flex-1 rounded-full border border-[#042F0C] bg-white px-5 py-2 text-base font-medium text-black transition-colors hover:bg-gray-50"
+            disabled={isLoading}
           >
             No, Cancel
           </button>
           <button
             onClick={handleConfirmBooking}
-            className="flex-1 rounded-full border border-[#042F0C] bg-[#14B82C] px-5 py-2 text-base font-medium text-black transition-colors hover:bg-green-600"
+            className="flex-1 rounded-full border border-[#042F0C] bg-[#14B82C] px-5 py-2 text-base font-medium text-black transition-colors hover:bg-green-600 disabled:opacity-70"
+            disabled={isLoading}
           >
             Yes, Book Now
           </button>
@@ -181,8 +208,6 @@ const ConfirmClassesModal = ({
         bookedClassesCount={normalizedSelectedDates.length}
         totalAvailableClasses={10}
       />
-      {loading && <div>Booking classes...</div>}
-      {error && <div className="text-red-500">{error}</div>}
     </>
   );
 };

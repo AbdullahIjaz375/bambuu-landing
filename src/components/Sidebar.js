@@ -3,59 +3,12 @@ import { ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import TutorialOverlay from "./TutorialOverlay";
 import { useState } from "react";
-import { getStudentExamPrepTutorialStatus } from "../api/examPrepApi";
-import BookingFlowModal from "./BookingFlowModal";
 
 const Sidebar = ({ user, onExamPrepClick }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const [showIntroBookingFlow, setShowIntroBookingFlow] = useState(false);
-  const [showExamPrepBookingFlow, setShowExamPrepBookingFlow] = useState(false);
-  const [bookingInitialStep, setBookingInitialStep] = useState(0);
   const [selectedInstructor, setSelectedInstructor] = useState(null);
-
-  // Handler for Exam Prep sidebar click (student only)
-  const handleExamPrepSidebarClick = async (e) => {
-    e?.preventDefault?.();
-    if (!user?.uid) return;
-    try {
-      const status = await getStudentExamPrepTutorialStatus(user.uid);
-      // 1. Not purchased: go to subscriptions
-      if (!status.hasPurchasedPlan) {
-        navigate("/subscriptions?tab=exam");
-        return;
-      }
-      // 2. Purchased, not booked intro call: open BookingFlowModal step 0
-      if (!status.hasBookedIntroCall) {
-        setBookingInitialStep(0);
-        setShowIntroBookingFlow(true);
-        return;
-      }
-      // 3. Booked intro call, not done: open BookingFlowModal step 0 (or class details if you want)
-      if (status.hasBookedIntroCall && !status.doneWithIntroCall) {
-        setBookingInitialStep(0);
-        setShowIntroBookingFlow(true);
-        return;
-      }
-      // 4. Done with intro call, not booked exam prep class: open BookingFlowModal step 6
-      if (status.doneWithIntroCall && !status.hasBookedExamPrepClass) {
-        setBookingInitialStep(6);
-        setShowExamPrepBookingFlow(true);
-        return;
-      }
-      // 5. Booked exam prep class: open exam prep user page for the correct tutor
-      if (status.hasBookedExamPrepClass && status.completedIntroCallTutorId) {
-        navigate(`/examPreparationUser/${status.completedIntroCallTutorId}`);
-        return;
-      }
-      // fallback
-      navigate("/learn");
-    } catch (err) {
-      console.error("[Sidebar ExamPrep] Error:", err);
-      navigate("/learn");
-    }
-  };
 
   const studentMenuItems = [
     {
@@ -103,7 +56,7 @@ const Sidebar = ({ user, onExamPrepClick }) => {
       translationKey: "sidebar.tutor.examPreparation",
       lightImage: "/svgs/exam-preparation-light.svg",
       darkImage: "/svgs/exam-preparation-dark.svg",
-      onClick: handleExamPrepSidebarClick,
+      onClick: onExamPrepClick,
     },
   ];
 
@@ -259,23 +212,6 @@ const Sidebar = ({ user, onExamPrepClick }) => {
           </Link>
         ) : null}
       </div>
-
-      {/* Booking Modals for Exam Prep */}
-      <BookingFlowModal
-        isOpen={showIntroBookingFlow}
-        onClose={() => setShowIntroBookingFlow(false)}
-        user={user}
-        mode="intro"
-        initialStep={bookingInitialStep}
-        setSelectedInstructor={setSelectedInstructor}
-      />
-      <BookingFlowModal
-        isOpen={showExamPrepBookingFlow}
-        onClose={() => setShowExamPrepBookingFlow(false)}
-        user={user}
-        mode="exam"
-        initialStep={bookingInitialStep}
-      />
     </div>
   );
 };

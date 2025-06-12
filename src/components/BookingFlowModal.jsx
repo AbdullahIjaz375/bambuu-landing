@@ -10,6 +10,7 @@ import IntoductoryCallDone from "../pages/user/ExamPreparation/IntoductoryCallDo
 import ExamClassSlots from "../pages/user/ExamPreparation/ExamClassSlots";
 import ConfirmClassesModal from "../pages/user/ExamPreparation/ConfirmClassesModal";
 import ClassesBooked from "../pages/user/ExamPreparation/ClassesBooked";
+import { ClipLoader } from "react-spinners";
 import {
   getIntroCallSlots,
   bookIntroductoryCall,
@@ -37,7 +38,7 @@ const BookingFlowModal = ({
   initialStep = 0,
   onComplete,
   selectedInstructor,
-  setSelectedInstructor,
+  setSelectedInstructor = () => {},
 }) => {
   // Step index: 0=Start, 1=Explore, 2=Profile, 3=Slot, 4=Confirm, 5=Booked, 6=ExamPrepStart, 7=ExamClassSlots, 8=ExamConfirm, 9=ExamBooked
   const [step, setStep] = useState(initialStep);
@@ -68,6 +69,8 @@ const BookingFlowModal = ({
   const [bookingExamPrep, setBookingExamPrep] = useState(false);
   const [currentApiStep, setCurrentApiStep] = useState(null);
   const [stepperLoading, setStepperLoading] = useState(false);
+  // Add a global loading state
+  const [globalLoading, setGlobalLoading] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -243,6 +246,7 @@ const BookingFlowModal = ({
   };
   const handleBookIntroCall = async () => {
     if (!selectedInstructor?.uid) return;
+    setGlobalLoading(true);
     setLoadingSlots(true);
     setShowSlotPicker(true);
     setConfirmedInstructor(selectedInstructor);
@@ -278,6 +282,7 @@ const BookingFlowModal = ({
       setIntroCallSlots({});
     } finally {
       setLoadingSlots(false);
+      setGlobalLoading(false);
     }
   };
   const handleSlotPicked = (date, time) => {
@@ -288,6 +293,7 @@ const BookingFlowModal = ({
     setStep(4);
   };
   const handleBookingConfirmed = async () => {
+    setGlobalLoading(true);
     setBookingLoading(true);
     try {
       if (
@@ -320,6 +326,7 @@ const BookingFlowModal = ({
       alert("Booking failed: " + (err.message || err));
     } finally {
       setBookingLoading(false);
+      setGlobalLoading(false);
     }
   };
   const handleBookedModalClose = () => {
@@ -335,10 +342,12 @@ const BookingFlowModal = ({
   };
   // --- Handlers for exam prep flow ---
   const handleExamPrepStart = async () => {
+    setGlobalLoading(true);
     setShowExamPrepStart(false);
     setShowExamClassSlots(true);
     setStep(7);
     if (!confirmedInstructor?.uid) {
+      setGlobalLoading(false);
       return;
     }
     setLoadingExamPrepSlots(true);
@@ -373,6 +382,7 @@ const BookingFlowModal = ({
       setExamPrepSlots({});
     } finally {
       setLoadingExamPrepSlots(false);
+      setGlobalLoading(false);
     }
   };
   const handleExamClassSlotsComplete = (dates, times) => {
@@ -383,6 +393,7 @@ const BookingFlowModal = ({
     setStep(8);
   };
   const handleExamConfirmComplete = async () => {
+    setGlobalLoading(true);
     setBookingExamPrep(true);
     try {
       if (
@@ -418,6 +429,7 @@ const BookingFlowModal = ({
       alert("Booking failed: " + (err.message || err));
     } finally {
       setBookingExamPrep(false);
+      setGlobalLoading(false);
     }
   };
   const handleExamBookedClose = () => {
@@ -443,6 +455,18 @@ const BookingFlowModal = ({
           className="relative w-full max-w-lg rounded-3xl bg-white font-['Urbanist'] shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
+          {/* Global Loading Overlay */}
+          {globalLoading && (
+            <div className="absolute inset-0 z-50 flex items-center justify-center rounded-3xl bg-white bg-opacity-80">
+              <div className="flex flex-col items-center">
+                <ClipLoader color="#14B82C" size={50} />
+                <p className="mt-4 text-lg font-medium text-[#042F0C]">
+                  Loading...
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Step content rendering logic restored below */}
           {step === 0 && (
             <StartExamPrep

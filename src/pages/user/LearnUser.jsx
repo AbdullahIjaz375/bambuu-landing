@@ -201,8 +201,10 @@ const LearnUser = () => {
 
   const shouldShowOnboardingBanner =
     !!examPrepStatus?.hasPurchasedPlan &&
-    !examPrepStatus?.hasBookedIntroCall &&
-    !examPrepStatus?.hasBookedExamPrepClass;
+    (!examPrepStatus?.hasBookedIntroCall ||
+      !examPrepStatus?.doneWithIntroCall ||
+      (examPrepStatus?.doneWithIntroCall &&
+        !examPrepStatus?.hasBookedExamPrepClass));
 
   // --- Effects ---
   useEffect(() => {
@@ -439,6 +441,19 @@ const LearnUser = () => {
         return;
       }
 
+      // If intro call not booked, show intro booking flow
+      if (!status.hasBookedIntroCall) {
+        setShowIntroBookingFlow(true);
+        return;
+      }
+
+      // If intro call booked but not done, show intro booking flow
+      if (status.hasBookedIntroCall && !status.doneWithIntroCall) {
+        setShowIntroBookingFlow(true);
+        return;
+      }
+
+      // If intro call done but exam prep class not booked, show exam prep booking flow
       if (status.doneWithIntroCall && !status.hasBookedExamPrepClass) {
         setExamPrepBookingInitialStep(6);
         setShowExamPrepBookingFlow(true);
@@ -510,7 +525,7 @@ const LearnUser = () => {
       }
       // 5. Booked exam prep class: open exam prep tutor profile
       if (status.hasBookedExamPrepClass && status.completedIntroCallTutorId) {
-        navigate(`/tutorProfile/${status.completedIntroCallTutorId}`);
+        navigate(`/examPreparationUser/${status.completedIntroCallTutorId}`);
         return;
       }
       // fallback
@@ -806,7 +821,10 @@ const LearnUser = () => {
       </div>
       <BookingFlowModal
         isOpen={showIntroBookingFlow}
-        onClose={() => setShowIntroBookingFlow(false)}
+        onClose={() => {
+          setShowIntroBookingFlow(false);
+          setSelectedInstructor(null); // Reset instructor when modal is closed
+        }}
         user={user}
         mode="intro"
         selectedInstructor={selectedInstructor}
@@ -814,28 +832,45 @@ const LearnUser = () => {
       />
       <BookingFlowModal
         isOpen={showExamPrepBookingFlow}
-        onClose={() => setShowExamPrepBookingFlow(false)}
+        onClose={() => {
+          setShowExamPrepBookingFlow(false);
+          setExamPrepBookingInitialStep(6); // Reset to initial step when modal is closed
+        }}
         user={{
           ...user,
           completedIntroCallTutorId: examPrepStatus?.completedIntroCallTutorId,
         }}
         mode="exam"
         initialStep={examPrepBookingInitialStep}
+        selectedInstructor={selectedInstructor}
+        setSelectedInstructor={setSelectedInstructor}
       />
       {/* Sidebar-triggered modals */}
       <BookingFlowModal
         isOpen={showSidebarIntroBookingFlow}
-        onClose={() => setShowSidebarIntroBookingFlow(false)}
+        onClose={() => {
+          setShowSidebarIntroBookingFlow(false);
+          setSidebarExamPrepInitialStep(0); // Reset to initial step when modal is closed
+          setSelectedInstructor(null); // Reset instructor when modal is closed
+        }}
         user={sidebarExamPrepUser}
         mode="intro"
         initialStep={sidebarExamPrepInitialStep}
+        selectedInstructor={selectedInstructor}
+        setSelectedInstructor={setSelectedInstructor}
       />
       <BookingFlowModal
         isOpen={showSidebarExamPrepBookingFlow}
-        onClose={() => setShowSidebarExamPrepBookingFlow(false)}
+        onClose={() => {
+          setShowSidebarExamPrepBookingFlow(false);
+          setSidebarExamPrepInitialStep(0); // Reset to initial step when modal is closed
+          setSelectedInstructor(null); // Reset instructor when modal is closed
+        }}
         user={sidebarExamPrepUser}
         mode="exam"
         initialStep={sidebarExamPrepInitialStep}
+        selectedInstructor={selectedInstructor}
+        setSelectedInstructor={setSelectedInstructor}
       />
     </div>
   );
