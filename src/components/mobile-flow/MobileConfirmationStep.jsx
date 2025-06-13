@@ -6,8 +6,8 @@ const MobileConfirmationStep = ({ onClose }) => {
   return (
     <MobileModal open={true} onClose={onClose}>
       <MobileModalHeader onClose={onClose} />
-      <div className="px-6 pb-6 text-center font-urbanist">
-        <div className="mx-auto mt-2 flex w-full max-w-xs flex-col items-center px-4">
+      <div className="px-4 pb-6 text-center font-urbanist">
+        <div className="mx-auto mt-2 flex w-full max-w-xs flex-col items-center px-2 sm:px-4">
           <img
             src="/svgs/account-created.svg"
             alt="Enrolled"
@@ -21,26 +21,26 @@ const MobileConfirmationStep = ({ onClose }) => {
             Ready to start your prep? Just open the app and dive in. You've got
             this!
           </p>
-          <div className="mt-6 flex justify-center gap-2">
+          <div className="mt-6 flex w-full flex-wrap justify-center gap-2">
             <a
-              className="flex h-12 min-w-[180px] items-center justify-center gap-2 rounded-full bg-black"
+              className="flex h-12 min-w-[120px] flex-1 items-center justify-center gap-2 rounded-full bg-black px-4 sm:min-w-[150px] md:min-w-[180px]"
               href="https://apps.apple.com/pk/app/bammbuu-language-learning/id6739758405"
               target="_blank"
               rel="noopener noreferrer"
             >
               <img src="/svgs/ios.svg" alt="Apple Store" />
-              <span className="whitespace-nowrap font-urbanist text-xl font-medium text-white">
+              <span className="whitespace-nowrap font-urbanist text-lg font-semibold text-white sm:text-xl">
                 Apple Store
               </span>
             </a>
             <a
-              className="flex h-12 min-w-[180px] items-center justify-center gap-2 rounded-full bg-black"
+              className="flex h-12 min-w-[120px] flex-1 items-center justify-center gap-2 rounded-full bg-black px-4 sm:min-w-[150px] md:min-w-[180px]"
               href="https://play.google.com/store/apps/details?id=com.bammbuu.app&hl=en"
               target="_blank"
               rel="noopener noreferrer"
             >
               <img src="/svgs/google-play.svg" alt="Google Play" />
-              <span className="whitespace-nowrap font-urbanist text-xl font-medium text-white">
+              <span className="whitespace-nowrap font-urbanist text-lg font-semibold text-white sm:text-xl">
                 Google Play
               </span>
             </a>

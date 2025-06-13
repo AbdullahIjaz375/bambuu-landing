@@ -65,10 +65,8 @@ const BookingFlowModal = ({
   const [loadingExamPrepSlots, setLoadingExamPrepSlots] = useState(false);
   const [selectedExamPrepDates, setSelectedExamPrepDates] = useState([]);
   const [selectedExamPrepTimes, setSelectedExamPrepTimes] = useState({});
-  const [examPrepTutor, setExamPrepTutor] = useState(null);
   const [bookingExamPrep, setBookingExamPrep] = useState(false);
   const [currentApiStep, setCurrentApiStep] = useState(null);
-  const [stepperLoading, setStepperLoading] = useState(false);
   // Add a global loading state
   const [globalLoading, setGlobalLoading] = useState(false);
 
@@ -104,7 +102,6 @@ const BookingFlowModal = ({
       setLoadingExamPrepSlots(false);
       setSelectedExamPrepDates([]);
       setSelectedExamPrepTimes({});
-      setExamPrepTutor(null);
       setBookingExamPrep(false);
       if (mode === "exam" && startStep === 6) {
         setShowExamPrepStart(true);
@@ -204,7 +201,6 @@ const BookingFlowModal = ({
   useEffect(() => {
     async function fetchCurrentStep() {
       if (isOpen && user?.uid) {
-        setStepperLoading(true);
         try {
           const res = await getExamPrepCurrentStep(user.uid);
           if (res && typeof res.step === "number") {
@@ -215,23 +211,11 @@ const BookingFlowModal = ({
         } catch (err) {
           setCurrentApiStep(0);
         } finally {
-          setStepperLoading(false);
         }
       }
     }
     fetchCurrentStep();
   }, [isOpen, user?.uid]);
-
-  // Stepper labels for the first 7 steps
-  const stepLabels = [
-    "Start",
-    "Explore",
-    "Profile",
-    "Slot",
-    "Confirm",
-    "Booked",
-    "Exam Prep Start",
-  ];
 
   // --- Handlers for intro call flow ---
   const handleFindTutor = () => {
@@ -440,9 +424,6 @@ const BookingFlowModal = ({
   // --- Render logic ---
 
   if (!isOpen) return null;
-
-  // Stepper UI (only for steps 0-6)
-  const showStepper = step >= 0 && step <= 6;
 
   return (
     <>

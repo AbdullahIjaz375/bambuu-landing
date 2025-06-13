@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { bookExamPrepClass } from "../../../api/examPrepApi";
 import ConfirmClassesModal from "./ConfirmClassesModal";
 import Modal from "react-modal";
+import { ClipLoader } from "react-spinners";
 
 const ExamClassSlots = ({
   isOpen,
@@ -11,6 +12,7 @@ const ExamClassSlots = ({
   slots = {},
   user,
   tutorId,
+  loading = false,
 }) => {
   const [currentStep, setCurrentStep] = useState(1); // 1: date selection, 2: time selection, 3: confirmation
   const [selectedDates, setSelectedDates] = useState([]);
@@ -82,10 +84,19 @@ const ExamClassSlots = ({
 
   const handleTimeSelection = (time) => {
     const currentDate = selectedDates[currentDateIndex];
-    setSelectedTimes((prev) => ({
-      ...prev,
-      [currentDate]: time,
-    }));
+    if (sameTime) {
+      // Apply to all dates if sameTime is enabled
+      const newTimes = {};
+      selectedDates.forEach((date) => {
+        newTimes[date] = time;
+      });
+      setSelectedTimes(newTimes);
+    } else {
+      setSelectedTimes((prev) => ({
+        ...prev,
+        [currentDate]: time,
+      }));
+    }
   };
 
   const handleNextDate = () => {
@@ -136,14 +147,18 @@ const ExamClassSlots = ({
 
   const handleSameTimeToggle = () => {
     setSameTime(!sameTime);
-    if (!sameTime && selectedTimes[selectedDates[currentDateIndex]]) {
-      // If turning on same time and current date has a time, apply to all
-      const currentTime = selectedTimes[selectedDates[currentDateIndex]];
-      const newTimes = {};
-      selectedDates.forEach((date) => {
-        newTimes[date] = currentTime;
-      });
-      setSelectedTimes(newTimes);
+    if (!sameTime) {
+      // If turning ON, and any date has a time, apply it to all
+      const anyTime =
+        selectedTimes[selectedDates[currentDateIndex]] ||
+        Object.values(selectedTimes)[0];
+      if (anyTime) {
+        const newTimes = {};
+        selectedDates.forEach((date) => {
+          newTimes[date] = anyTime;
+        });
+        setSelectedTimes(newTimes);
+      }
     }
   };
 
@@ -169,7 +184,7 @@ const ExamClassSlots = ({
     selectedDates.length > 0 &&
     selectedDates.every((date) => selectedTimes[date]);
   // Use selectedDates and currentDateIndex to get the selected date key
-  const selectedDateKey = selectedDates[0];
+  const selectedDateKey = selectedDates[currentDateIndex] || selectedDates[0];
   let availableTimes =
     slots && selectedDateKey ? slots[selectedDateKey] || [] : [];
   // Remove duplicate UTC times
@@ -193,7 +208,11 @@ const ExamClassSlots = ({
         overlayClassName="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center backdrop-blur-sm"
         ariaHideApp={false}
       >
-        {currentStep === 1 ? (
+        {loading ? (
+          <div className="flex min-h-[300px] flex-col items-center justify-center">
+            <ClipLoader color="#14B82C" size={48} />
+          </div>
+        ) : currentStep === 1 ? (
           // Date Selection Step
           <>
             {/* Header */}

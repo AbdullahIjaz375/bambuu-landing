@@ -156,7 +156,10 @@ const SlotPickerModal = ({
                   <span className="text-[#222]">Duration:</span>{" "}
                   <span className="font-semibold">30 minutes</span>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
+                <div
+                  className="scrollbar-hide grid grid-cols-2 gap-2 overflow-y-auto"
+                  style={{ maxHeight: "340px" }}
+                >
                   {timeSlots.map((slot) => (
                     <button
                       key={slot}

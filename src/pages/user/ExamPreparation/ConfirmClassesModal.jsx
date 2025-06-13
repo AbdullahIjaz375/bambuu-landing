@@ -1,10 +1,10 @@
+import { useState } from "react";
 import { Trash2 } from "lucide-react";
+import { ClipLoader } from "react-spinners";
 import Modal from "react-modal";
 import ClassesBooked from "./ClassesBooked";
-import { useState } from "react";
 import { bookExamPrepClass } from "../../../api/examPrepApi";
 import { useAuth } from "../../../context/AuthContext";
-import { ClipLoader } from "react-spinners";
 
 const ConfirmClassesModal = ({
   isOpen,
@@ -176,13 +176,6 @@ const ConfirmClassesModal = ({
             </div>
           ))}
         </div>
-
-        {/* Error message */}
-        {error && (
-          <div className="mb-4 rounded-lg bg-red-50 p-3 text-center text-red-600">
-            {error}
-          </div>
-        )}
 
         {/* Action Buttons */}
         <div className="flex gap-9 pt-3">

@@ -58,9 +58,10 @@ const ClassCard = ({
       return "TBD";
     }
     // Use local time
+    const duration = introClass || examPrepClass ? 30 : classDuration;
     const startHour = date.getHours();
     const startMinutes = date.getMinutes();
-    const endDate = new Date(date.getTime() + classDuration * 60000);
+    const endDate = new Date(date.getTime() + duration * 60000);
     const endHour = endDate.getHours();
     const endMinutes = endDate.getMinutes();
     const formatDigit = (num) => num.toString().padStart(2, "0");
@@ -239,10 +240,12 @@ const ClassCard = ({
               </span>
             )}
             <div className="absolute bottom-0 left-0 right-0 space-y-1 rounded-b-2xl bg-[#B9F9C2BF]/75 backdrop-blur-sm">
-              {examPrepClass && (
+              {(introClass || examPrepClass) && (
                 <div className="mb-2 h-[1px] w-full rounded bg-[#46E25C]" />
               )}
-              <div className={`${examPrepClass ? "p-2" : "pl-1 pt-2"}`}>
+              <div
+                className={`${examPrepClass || introClass ? "p-2" : "pl-1 pt-2"}`}
+              >
                 <h2 className="ml-2 truncate text-lg font-bold text-gray-800 sm:text-xl">
                   {className}
                 </h2>
