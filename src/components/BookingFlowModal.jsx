@@ -437,7 +437,7 @@ const BookingFlowModal = ({
           onClick={(e) => e.stopPropagation()}
         >
           {/* Global Loading Overlay */}
-          {globalLoading && (
+          {globalLoading && step < 8 && (
             <div className="absolute inset-0 z-50 flex items-center justify-center rounded-3xl bg-white bg-opacity-80">
               <div className="flex flex-col items-center">
                 <ClipLoader color="#14B82C" size={50} />
@@ -522,6 +522,10 @@ const BookingFlowModal = ({
             <ConfirmClassesModal
               isOpen={showExamConfirm}
               onClose={() => setShowExamConfirm(false)}
+              onBack={() => {
+                setShowExamClassSlots(true);
+                setStep(7);
+              }}
               onConfirm={handleExamConfirmComplete}
               selectedDates={
                 Array.isArray(selectedExamPrepDates)
@@ -533,7 +537,7 @@ const BookingFlowModal = ({
               selectedTimes={selectedExamPrepTimes}
               tutorId={confirmedInstructor?.uid}
               user={user}
-              loading={bookingExamPrep}
+              // loading={bookingExamPrep}
             />
           )}
           {step === 9 && (

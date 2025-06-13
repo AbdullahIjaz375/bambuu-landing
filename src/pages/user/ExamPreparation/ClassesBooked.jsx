@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { getStudentClasses } from "../../../api/examPrepApi";
 import { useAuth } from "../../../context/AuthContext";
 import Modal from "react-modal";
+import { ClipLoader } from "react-spinners";
 
 const ClassesBooked = ({
   isOpen,
@@ -10,8 +11,12 @@ const ClassesBooked = ({
   totalAvailableClasses: totalAvailableClassesProp = 10,
 }) => {
   const { user } = useAuth();
-  const [bookedClassesCount, setBookedClassesCount] = useState(bookedClassesCountProp);
-  const [totalAvailableClasses, setTotalAvailableClasses] = useState(totalAvailableClassesProp);
+  const [bookedClassesCount, setBookedClassesCount] = useState(
+    bookedClassesCountProp,
+  );
+  const [totalAvailableClasses, setTotalAvailableClasses] = useState(
+    totalAvailableClassesProp,
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -28,7 +33,12 @@ const ClassesBooked = ({
       .finally(() => setLoading(false));
   }, [isOpen, user]);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading)
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
+        <ClipLoader color="#14B82C" size={50} />
+      </div>
+    );
   if (error) return <div className="text-red-500">{error}</div>;
 
   return (

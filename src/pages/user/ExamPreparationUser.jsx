@@ -329,7 +329,7 @@ const ExamPreparationUser = () => {
               </button>
             </div>
             {/* Main Content */}
-            <div className="flex flex-1 flex-col gap-6">
+            <div className="scrollbar-hide flex flex-1 flex-col gap-6 overflow-y-auto">
               {/* Top Cards */}
               <div className="flex w-full flex-wrap gap-4">
                 <div className="flex min-w-[220px] flex-1 flex-col items-start justify-center rounded-2xl bg-[#DBFDDF] px-12 py-6">
@@ -413,7 +413,12 @@ const ExamPreparationUser = () => {
                 </div>
               )}
               {/* Booked Classes Cards */}
-              <div className="flex flex-wrap gap-8">
+              <div
+                className="grid gap-8"
+                style={{
+                  gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+                }}
+              >
                 {classes.length === 0 ? (
                   <div className="text-gray-500">
                     No booked exam prep or intro call classes yet.

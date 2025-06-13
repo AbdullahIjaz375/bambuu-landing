@@ -21,7 +21,6 @@ const ConfirmClassesModal = ({
 }) => {
   const { user: authUser } = useAuth();
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [booking, setBooking] = useState(false);
 

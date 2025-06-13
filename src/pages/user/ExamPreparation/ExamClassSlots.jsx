@@ -83,18 +83,19 @@ const ExamClassSlots = ({
   };
 
   const handleTimeSelection = (time) => {
-    const currentDate = selectedDates[currentDateIndex];
     if (sameTime) {
-      // Apply to all dates if sameTime is enabled
       const newTimes = {};
       selectedDates.forEach((date) => {
-        newTimes[date] = time;
+        const slotObj = (slots[date] || []).find(
+          (s) => s.utc === time || s.label === time,
+        );
+        newTimes[date] = slotObj ? slotObj.utc : time;
       });
       setSelectedTimes(newTimes);
     } else {
       setSelectedTimes((prev) => ({
         ...prev,
-        [currentDate]: time,
+        [selectedDateKey]: time,
       }));
     }
   };
@@ -112,54 +113,47 @@ const ExamClassSlots = ({
   };
 
   const handleNextToConfirmation = () => {
-    // Check if all dates have times selected
     const allDatesHaveTime = selectedDates.every((date) => selectedTimes[date]);
     if (allDatesHaveTime) {
-      setCurrentStep(3);
+      if (onBookingComplete) onBookingComplete(selectedDates, selectedTimes);
+      if (onClose) onClose();
     }
   };
 
   const handleBackFromConfirmation = () => {
     setCurrentStep(2);
   };
-
-  const handleFinalBooking = async () => {
-    setBooking(true);
-    setError(null);
-    try {
-      const slots = selectedDates.map((date) => ({
-        time: selectedTimes[date], // UTC string
-      }));
-      const payload = {
-        studentId: user?.uid,
-        tutorId: tutorId,
-        slots,
-      };
-      const resp = await bookExamPrepClass(payload);
-      setBooking(false);
-      if (onBookingComplete) onBookingComplete(selectedDates, selectedTimes);
-      if (onClose) onClose();
-    } catch (err) {
-      setBooking(false);
-      setError(err.message || "Booking failed");
-    }
+  const handleFinalBooking = () => {
+    if (onBookingComplete) onBookingComplete(selectedDates, selectedTimes);
   };
 
   const handleSameTimeToggle = () => {
-    setSameTime(!sameTime);
-    if (!sameTime) {
-      // If turning ON, and any date has a time, apply it to all
-      const anyTime =
-        selectedTimes[selectedDates[currentDateIndex]] ||
-        Object.values(selectedTimes)[0];
-      if (anyTime) {
-        const newTimes = {};
-        selectedDates.forEach((date) => {
-          newTimes[date] = anyTime;
-        });
-        setSelectedTimes(newTimes);
+    setSameTime((prev) => {
+      const newValue = !prev;
+      if (newValue) {
+        // If turning ON, and any date has a time, apply it to all as UTC for each date
+        const anyTime =
+          selectedTimes[selectedDates[currentDateIndex]] ||
+          Object.values(selectedTimes)[0];
+        if (anyTime) {
+          const newTimes = {};
+          selectedDates.forEach((date) => {
+            // Find the slot object for this date that matches the selected time (by label or utc)
+            const slotObj = (slots[date] || []).find(
+              (s) =>
+                s.utc === anyTime ||
+                s.label ===
+                  (slots[selectedDates[0]] || []).find(
+                    (s0) => s0.utc === anyTime,
+                  )?.label,
+            );
+            newTimes[date] = slotObj ? slotObj.utc : anyTime;
+          });
+          setSelectedTimes(newTimes);
+        }
       }
-    }
+      return newValue;
+    });
   };
 
   const monthNames = [
@@ -471,7 +465,7 @@ const ExamClassSlots = ({
       </Modal>
 
       {/* Confirmation Modal */}
-      <ConfirmClassesModal
+      {/* <ConfirmClassesModal
         isOpen={currentStep === 3}
         onClose={onClose}
         onConfirm={handleFinalBooking}
@@ -487,7 +481,7 @@ const ExamClassSlots = ({
         onRemoveClass={handleRemoveClass}
         user={user}
         tutorId={tutorId}
-      />
+      /> */}
     </>
   );
 };
