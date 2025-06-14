@@ -347,7 +347,7 @@ const ExamClassSlots = ({
             {/* Duration and Timezone Info */}
             <div className="mb-6 flex justify-between text-sm text-gray-600">
               <span className="text-sm font-medium">
-                Duration: <b>30 minutes</b>
+                Duration: <b>60 minutes</b>
               </span>
             </div>
 

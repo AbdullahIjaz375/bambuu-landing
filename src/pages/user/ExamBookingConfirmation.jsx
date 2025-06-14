@@ -10,7 +10,7 @@ const ExamBookingConfirmation = ({
   onConfirm,
   tutor,
   loading,
-  // type = "Introductory Call",
+  type = "intro",
 }) => {
   return (
     <>
@@ -42,6 +42,9 @@ const ExamBookingConfirmation = ({
                 <span className="flex items-center gap-1 text-sm font-medium text-gray-700">
                   <Clock className="mr-1 h-4 w-4 text-gray-500" />
                   {selectedTime}
+                  <span className="ml-2 text-xs text-gray-500">
+                    ({type === "intro" ? 30 : 60} min )
+                  </span>
                 </span>
                 <span className="flex items-center gap-1 text-xs font-medium text-[#454545]">
                   <img

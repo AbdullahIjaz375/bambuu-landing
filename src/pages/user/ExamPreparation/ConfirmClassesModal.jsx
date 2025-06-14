@@ -169,7 +169,8 @@ const ConfirmClassesModal = ({
                   {classItem.date}
                 </p>
                 <p className="text-xs font-medium text-[#3D3D3D]">
-                  {classItem.time}
+                  {classItem.time}{" "}
+                  <span className="ml-1 text-gray-500">(60 min)</span>
                 </p>
               </div>
             </div>

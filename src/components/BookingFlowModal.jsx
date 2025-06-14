@@ -489,6 +489,7 @@ const BookingFlowModal = ({
               onConfirm={handleBookingConfirmed}
               tutor={confirmedInstructor}
               loading={bookingLoading}
+              type={mode === "intro" ? "intro" : "exam"}
             />
           )}
           {step === 5 && (
