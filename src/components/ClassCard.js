@@ -58,7 +58,7 @@ const ClassCard = ({
       return "TBD";
     }
     // Use local time
-    const duration = introClass || examPrepClass ? 30 : classDuration;
+    const duration = introClass ? 30 : examPrepClass ? 60 : classDuration;
     const startHour = date.getHours();
     const startMinutes = date.getMinutes();
     const endDate = new Date(date.getTime() + duration * 60000);

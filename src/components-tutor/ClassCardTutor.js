@@ -8,6 +8,7 @@ Modal.setAppElement("#root");
 
 const ClassCardTutor = ({
   examPrep,
+  introCall = false,
   classId,
   className,
   language,
@@ -235,7 +236,8 @@ const ClassCardTutor = ({
                     src="/svgs/clock.svg"
                   />{" "}
                   <span className="sm:text-md text-sm text-[#454545]">
-                    {formatTime(classDateTime)} ({examPrep ? 30 : classDuration}{" "}
+                    {formatTime(classDateTime)} (
+                    {introCall ? 30 : examPrep ? 60 : classDuration}{" "}
                     {t("class-card-tutor.labels.min")})
                   </span>
                 </div>
