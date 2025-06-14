@@ -94,7 +94,7 @@ export default function LandingMobile() {
           <iframe
             width="100%"
             height="100%"
-            src="https://www.youtube.com/embed/W8qJOBrmNkw"
+            src="https://www.youtube.com/embed/OKv2evfTpvw"
             title="YouTube video player"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowFullScreen

@@ -147,7 +147,7 @@ const Landing = () => {
                   aspectRatio: "16/9",
                   borderRadius: "1rem",
                 }}
-                src="https://www.youtube.com/embed/W8qJOBrmNkw"
+                src="https://www.youtube.com/embed/OKv2evfTpvw"
                 title="YouTube video player"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 allowFullScreen
