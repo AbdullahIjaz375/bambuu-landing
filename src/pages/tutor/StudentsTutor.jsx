@@ -87,14 +87,19 @@ const StudentsTutor = () => {
   };
 
   useEffect(() => {
-    const fetchUserChannels = async () => {
+    const fetchStreamChannels = async () => {
       if (!user) {
         setLoading(false);
         return;
       }
       try {
         setLoading(true);
-        const channels = await getUserChannels(user.uid);
+        // Query all channels where the tutor is a member
+        const channels = await streamClient.queryChannels(
+          { members: { $in: [user.uid] } },
+          { last_message_at: -1 },
+          { watch: true, state: true },
+        );
         setChannels(channels);
       } catch (err) {
         setChannels([]);
@@ -102,7 +107,7 @@ const StudentsTutor = () => {
         setLoading(false);
       }
     };
-    fetchUserChannels();
+    fetchStreamChannels();
   }, [user]);
 
   const handleChannelSelect = async (channel) => {
@@ -197,64 +202,53 @@ const StudentsTutor = () => {
     };
   };
 
-  const ChatItem = ({ channel }) => {
-    if (channel.type === "exam_prep") {
-      const { name, image } = getExamPrepDisplay(channel);
-      return (
-        <div
-          key={channel.id}
-          className={`flex cursor-pointer items-center gap-3 rounded-3xl border p-3 ${
-            selectedChannel?.id === channel.id
-              ? "border-[#22bf37] bg-[#f0fdf1]"
-              : "border-[#fbbf12] bg-white"
-          }`}
-          onClick={() => handleChannelSelect(channel)}
-        >
-          <div className="relative">
-            <img
-              src={image}
-              alt={name}
-              className="h-12 w-12 rounded-full object-cover"
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = "/default-avatar.png";
-              }}
-            />
-          </div>
-          <div className="flex-1">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">{name}</h3>
-            </div>
-          </div>
-        </div>
-      );
+  // Helper function to extract the student from a channel
+  const getStudentFromChannel = (channel) => {
+    if (!channel || !user) return null;
+    const members = Object.values(channel.state?.members || {});
+    // Find the member who is not the tutor
+    const student = members.find((m) => m.user?.id !== user.uid);
+    if (student && student.user) {
+      return {
+        id: student.user.id,
+        name: student.user.name,
+        image: student.user.image,
+        online: student.user.online || false,
+      };
     }
-    // Group chat UI (match MessagesUser.jsx, use users icon for member count if available)
-    const groupName = channel.data?.name || groupNames[channel.id] || "Group";
-    const groupImage = channel.data?.image || "/default-avatar.png";
-    const groupLanguage =
-      channel.data?.language || groupLanguages[channel.id] || "English";
-    let languageFlag = "/svgs/xs-us.svg";
-    if (groupLanguage === "Spanish") languageFlag = "/svgs/xs-spain.svg";
-    else if (groupLanguage === "English/Spanish")
-      languageFlag = "/svgs/eng-spanish-xs.svg";
-    const memberCount = channel.state?.members
-      ? Object.keys(channel.state.members).length
-      : "-";
+    return {
+      id: "",
+      name: "Student",
+      image: "/images/exam-prep-icon.png",
+      online: false,
+    };
+  };
+
+  const ChatItem = ({ channel }) => {
+    let name = "Group";
+    let image = "/default-avatar.png";
+    if (channel.type === "exam_prep" || channel.type === "one_to_one_chat") {
+      const student = getStudentFromChannel(channel);
+      name = student.name;
+      image = student.image;
+    } else if (channel.data?.name) {
+      name = channel.data.name;
+      image = channel.data.image || "/default-avatar.png";
+    }
     return (
       <div
         key={channel.id}
         className={`flex cursor-pointer items-center gap-3 rounded-3xl border p-3 ${
           selectedChannel?.id === channel.id
-            ? "border-[#fbbf12] bg-[#ffffea]"
+            ? "border-[#22bf37] bg-[#f0fdf1]"
             : "border-[#fbbf12] bg-white"
         }`}
         onClick={() => handleChannelSelect(channel)}
       >
         <div className="relative">
           <img
-            src={groupImage}
-            alt={groupName}
+            src={image}
+            alt={name}
             className="h-12 w-12 rounded-full object-cover"
             onError={(e) => {
               e.target.onerror = null;
@@ -263,30 +257,10 @@ const StudentsTutor = () => {
           />
         </div>
         <div className="flex-1">
-          <div className="mb-1 flex items-center gap-2">
-            <span className="truncate text-lg font-bold">{groupName}</span>
-          </div>
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="flex items-center gap-1">
-              <img src={languageFlag} alt={groupLanguage} className="h-5 w-5" />
-              <span className="text-sm font-medium text-gray-700">
-                {groupLanguage}
-              </span>
-            </div>
-            <div className="flex items-center gap-1">
-              <img src="/svgs/users.svg" alt="members" className="h-5 w-5" />
-              <span className="text-sm font-medium text-gray-700">
-                {memberCount}
-              </span>
-            </div>
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">{name}</h3>
           </div>
         </div>
-        {/* Unread badge for group chats */}
-        {unreadCounts[channel.id] > 0 && (
-          <span className="ml-2 flex h-6 w-6 items-center justify-center rounded-full bg-[#14B82C] text-xs text-white">
-            {unreadCounts[channel.id]}
-          </span>
-        )}
       </div>
     );
   };
