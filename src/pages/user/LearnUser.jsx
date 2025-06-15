@@ -674,7 +674,7 @@ const LearnUser = () => {
             </div>
             <div className="w-full lg:w-[60%]">
               <div className="mb-3">
-                <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+                <div className="ml-5 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                   <h2 className="text-xl font-bold sm:text-2xl">
                     {t("learnUser.languageLearning.title")}
                   </h2>

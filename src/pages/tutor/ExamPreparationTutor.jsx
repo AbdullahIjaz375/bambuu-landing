@@ -299,7 +299,7 @@ const ExamPreparationTutor = () => {
         <Modal
           isOpen={showTimeModal}
           onRequestClose={() => setShowTimeModal(false)}
-          className="fixed left-1/2 top-1/2 z-[1001] flex h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 transform flex-col rounded-[32px] bg-white p-4 font-urbanist shadow-lg md:p-6"
+          className="fixed left-1/2 top-1/2 z-[1001] flex h-[500px] w-[600px] -translate-x-1/2 -translate-y-1/2 transform flex-col rounded-[32px] bg-white p-4 font-urbanist shadow-lg md:p-6"
           overlayClassName="fixed inset-0 bg-black bg-opacity-50 z-[1000]"
         >
           <TimeSlotModal
@@ -307,6 +307,11 @@ const ExamPreparationTutor = () => {
             onClose={handleTimeSlotClose}
             onNext={handleTimeSlotNext}
             prefilledSlotsByDate={prefilledSlotsByDate}
+            type={
+              activeTab === t("exam-prep.tabs.introductory-calls")
+                ? "intro"
+                : "exam"
+            }
           />
           {availabilityLoading && <div>Setting availability...</div>}
           {availabilityError && (

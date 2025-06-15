@@ -6,6 +6,7 @@ import { streamClient } from "../../config/stream";
 import Sidebar from "../../components/Sidebar";
 import { ClipLoader } from "react-spinners";
 import { getChannelDisplayName } from "../../services/streamService";
+import { getUserChannels } from "../../api/examPrepApi";
 
 const StudentsTutor = () => {
   const { user } = useAuth();
@@ -43,6 +44,24 @@ const StudentsTutor = () => {
   // Helper function to extract the other user's info from a channel
   const getOtherUserFromChannel = (channel) => {
     if (!channel || !user) return null;
+    if (channel.type === "exam_prep") {
+      const members = channel.members || [];
+      const student = members.find((m) => m.userType !== "tutor");
+      if (student) {
+        return {
+          id: student.id,
+          name: student.name,
+          image: student.image,
+          online: student.online || false,
+        };
+      }
+      return {
+        id: "",
+        name: "Student",
+        image: "/images/exam-prep-icon.png",
+        online: false,
+      };
+    }
     // For one-to-one chats, always show the other user's name
     if (channel.type === "one_to_one_chat") {
       const members = Object.values(channel.state?.members || {});
@@ -61,253 +80,34 @@ const StudentsTutor = () => {
     // For group/class chats, always use channel.data.name
     return {
       id: channel.id,
-      name: channel.data.name,
-      image: channel.data.image,
+      name: channel.data?.name || channel.name || "Group",
+      image: channel.data?.image || "/default-avatar.png",
       online: false,
     };
   };
 
   useEffect(() => {
-    const loadChannels = async () => {
-      if (!user) return;
-
+    const fetchUserChannels = async () => {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
       try {
-        // Filter for all channels
-        const filter = {
-          type: {
-            $in: [
-              "standard_group",
-              "premium_group",
-              "premium_individual_class",
-              "one_to_one_chat",
-            ],
-          },
-          members: { $in: [user.uid] },
-        };
-
-        // Query all channels
-        const allChannels = await streamClient.queryChannels(
-          filter,
-          {},
-          {
-            watch: true,
-            state: true,
-            presence: true,
-          },
-        );
-
-        // IMPORTANT: For tutors, verify premium individual class channels have all members
-        const premiumClassChannels = allChannels.filter(
-          (ch) => ch.type === "premium_individual_class",
-        );
-
-        if (premiumClassChannels.length > 0) {
-          const { syncPremiumClassChannelName } = await import(
-            "../../services/channelNameSync"
-          );
-
-          await Promise.all(
-            premiumClassChannels.map(async (channel) => {
-              // Throttle: Only sync each channel once per session
-              if (!window._syncedChannels) window._syncedChannels = new Set();
-              if (window._syncedChannels.has(channel.id)) return;
-              window._syncedChannels.add(channel.id);
-
-              // Sync the name
-              await syncPremiumClassChannelName(channel.id);
-
-              // For tutors, ensure all enrolled students are in the channel
-              try {
-                const { getDoc, doc } = await import("firebase/firestore");
-                const { db } = await import("../../firebaseConfig");
-
-                const classDoc = await getDoc(doc(db, "classes", channel.id));
-                if (classDoc.exists()) {
-                  const classData = classDoc.data();
-                  const enrolledStudents = classData.classMemberIds || [];
-                  const currentMembers = Object.keys(
-                    channel.state?.members || {},
-                  );
-
-                  // Check if any enrolled students are missing from the channel
-                  for (const studentId of enrolledStudents) {
-                    if (!currentMembers.includes(studentId)) {
-                      try {
-                        await channel.addMembers([
-                          { user_id: studentId, role: "channel_member" },
-                        ]);
-                      } catch (addError) {
-                        console.error(
-                          `Failed to add student to channel:`,
-                          addError,
-                        );
-                      }
-                    }
-                  }
-                }
-              } catch (memberCheckError) {
-                console.error(
-                  `Error checking channel members:`,
-                  memberCheckError,
-                );
-              }
-            }),
-          );
-        }
-
-        // Initialize unread counts and online status tracking
-        const counts = {};
-        const onlineStatusMap = {};
-
-        await Promise.all(
-          allChannels.map(async (channel) => {
-            const state = await channel.watch();
-            const channelState = channel.state;
-            counts[channel.id] = channelState.unreadCount || 0;
-
-            // Initialize online users status tracking
-            if (
-              channel.type === "standard_group" ||
-              channel.type === "premium_group"
-            ) {
-              // For group chats, count online members
-              const members = Object.values(channel.state?.members || {});
-              const onlineCount = members.filter(
-                (member) => member.user?.online,
-              ).length;
-              const totalMembers = members.length;
-              onlineStatusMap[channel.id] = { onlineCount, totalMembers };
-            } else {
-              // For individual student chats, track student's online status
-              const members = Object.values(channel.state?.members || {});
-              const otherMember = members.find(
-                (member) => member.user?.id !== user.uid,
-              );
-              onlineStatusMap[channel.id] = {
-                isOnline: otherMember?.user?.online || false,
-              };
-            }
-
-            // Set up message listeners
-            channel.on("message.new", async (event) => {
-              // Update unread counts for messages from others
-              if (
-                event.user?.id !== user.uid &&
-                channel.id !== selectedChannel?.id
-              ) {
-                const state = channel.state;
-                const unreadCount = state.unreadCount || 1;
-                setUnreadCounts((prev) => ({
-                  ...prev,
-                  [channel.id]: unreadCount,
-                }));
-              }
-
-              // Re-sort channels based on the latest message
-              setChannels((prevChannels) => {
-                const updatedChannels = prevChannels.map((ch) =>
-                  ch.id === channel.id ? channel : ch,
-                );
-                return updatedChannels.sort((a, b) => {
-                  const aLastMessage = a.state.last_message_at
-                    ? new Date(a.state.last_message_at).getTime()
-                    : 0;
-                  const bLastMessage = b.state.last_message_at
-                    ? new Date(b.state.last_message_at).getTime()
-                    : 0;
-                  return bLastMessage - aLastMessage;
-                });
-              });
-            });
-
-            // Add presence change listeners
-            channel.on("user.presence.changed", async (event) => {
-              if (
-                channel.type === "standard_group" ||
-                channel.type === "premium_group"
-              ) {
-                // Update group online count
-                const members = Object.values(channel.state?.members || {});
-                const onlineCount = members.filter(
-                  (member) => member.user?.online,
-                ).length;
-                const totalMembers = members.length;
-
-                setOnlineUsers((prev) => ({
-                  ...prev,
-                  [channel.id]: { onlineCount, totalMembers },
-                }));
-              } else if (
-                channel.type === "premium_individual_class" ||
-                channel.type === "one_to_one_chat"
-              ) {
-                // Update student online status
-                const members = Object.values(channel.state?.members || {});
-                const otherMember = members.find(
-                  (member) => member.user?.id !== user.uid,
-                );
-
-                setOnlineUsers((prev) => ({
-                  ...prev,
-                  [channel.id]: {
-                    isOnline: otherMember?.user?.online || false,
-                  },
-                }));
-              }
-            });
-          }),
-        );
-
-        setUnreadCounts(counts);
-        setOnlineUsers(onlineStatusMap);
-
-        // Sort channels based on last_message_at
-        const sortedChannels = allChannels.sort((a, b) => {
-          const aLastMessage = a.state.last_message_at
-            ? new Date(a.state.last_message_at).getTime()
-            : 0;
-          const bLastMessage = b.state.last_message_at
-            ? new Date(b.state.last_message_at).getTime()
-            : 0;
-          return bLastMessage - aLastMessage;
-        });
-        const validChannels = sortedChannels.filter(
-          (channel) => channel.data.name && channel.data.name.trim() !== "",
-        );
-        setChannels(validChannels);
-
-        // Removed auto-selection of first chat when page loads
-      } catch (error) {
-        console.error("Error loading channels:", error);
+        setLoading(true);
+        const channels = await getUserChannels(user.uid);
+        setChannels(channels);
+      } catch (err) {
+        setChannels([]);
       } finally {
         setLoading(false);
       }
     };
-
-    loadChannels();
-
-    return () => {
-      channels.forEach((channel) => {
-        channel.off("message.new");
-        channel.off("message.read");
-        channel.off("user.presence.changed");
-      });
-    };
-  }, [user, selectedChannel]);
+    fetchUserChannels();
+  }, [user]);
 
   const handleChannelSelect = async (channel) => {
     setSelectedChannel(channel);
     setSelectedChatInfo(getOtherUserFromChannel(channel));
-
-    try {
-      await channel.markRead();
-      setUnreadCounts((prev) => ({
-        ...prev,
-        [channel.id]: 0,
-      }));
-    } catch (error) {
-      console.error("Error marking channel as read:", error);
-    }
   };
 
   const getMessagePreview = (message) => {
@@ -356,26 +156,13 @@ const StudentsTutor = () => {
     });
   };
 
-  // Standard chats - only standard_group
-  const standardChats = filterChannels(
-    channels.filter(
-      (channel) =>
-        channel.type === "standard_group" &&
-        channel.data.name &&
-        channel.data.name.trim() !== "",
-    ),
-  );
-
-  // Bammbuu+ chats - premium groups and individual chats
-  const bammbuuChats = filterChannels(
-    channels.filter(
-      (channel) =>
-        (channel.type === "premium_group" ||
-          channel.type === "premium_individual_class" ||
-          channel.type === "one_to_one_chat") &&
-        channel.data.name &&
-        channel.data.name.trim() !== "",
-    ),
+  // Categorize channels
+  const standardChats = channels.filter((ch) => ch.type === "standard_group");
+  const bammbuuChats = channels.filter(
+    (ch) =>
+      ch.type === "premium_group" ||
+      ch.type === "exam_prep" ||
+      ch.type === "one_to_one_chat",
   );
 
   const FormateDate = (created_at) => {
@@ -391,13 +178,28 @@ const StudentsTutor = () => {
   const groupMemberCounts = {};
   // If you want to fetch groupLanguages, groupNames, groupMemberCounts from Firestore, you can add similar logic as in MessagesUser.jsx
 
+  // Helper to get display name and image for a channel (for exam_prep, show student name)
+  const getExamPrepDisplay = (channel) => {
+    if (channel.type === "exam_prep") {
+      // Find the student (not the tutor/created_by)
+      const members = channel.members || [];
+      const student = members.find((m) => m.userType !== "tutor");
+      return {
+        name: student?.name || "Student",
+        image: student?.image || "/images/exam-prep-icon.png",
+        id: student?.id,
+      };
+    }
+    return {
+      name: channel.data?.name || channel.name || "Group",
+      image: channel.data?.image || "/default-avatar.png",
+      id: channel.id,
+    };
+  };
+
   const ChatItem = ({ channel }) => {
-    // One-to-one chat UI (same as MessagesUser.jsx)
-    if (
-      channel.type === "one_to_one_chat" ||
-      channel.type === "premium_individual_class"
-    ) {
-      const otherUser = getOtherUserFromChannel(channel);
+    if (channel.type === "exam_prep") {
+      const { name, image } = getExamPrepDisplay(channel);
       return (
         <div
           key={channel.id}
@@ -410,8 +212,8 @@ const StudentsTutor = () => {
         >
           <div className="relative">
             <img
-              src={otherUser?.image || "/default-avatar.png"}
-              alt={otherUser?.name}
+              src={image}
+              alt={name}
               className="h-12 w-12 rounded-full object-cover"
               onError={(e) => {
                 e.target.onerror = null;
@@ -421,17 +223,9 @@ const StudentsTutor = () => {
           </div>
           <div className="flex-1">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">
-                {getChannelDisplayName(channel, user)}
-              </h3>
+              <h3 className="text-lg font-semibold">{name}</h3>
             </div>
           </div>
-          {/* Unread badge for one-to-one chats */}
-          {unreadCounts[channel.id] > 0 && (
-            <span className="ml-2 flex h-6 w-6 items-center justify-center rounded-full bg-[#14B82C] text-xs text-white">
-              {unreadCounts[channel.id]}
-            </span>
-          )}
         </div>
       );
     }

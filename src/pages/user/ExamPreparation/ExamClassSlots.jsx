@@ -18,7 +18,6 @@ const ExamClassSlots = ({
   const [selectedDates, setSelectedDates] = useState([]);
   const [selectedTimes, setSelectedTimes] = useState({}); // Object to store time for each date
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [sameTime, setSameTime] = useState(false);
   const [currentDateIndex, setCurrentDateIndex] = useState(0);
   const [booking, setBooking] = useState(false);
   const [error, setError] = useState(null);
@@ -83,21 +82,10 @@ const ExamClassSlots = ({
   };
 
   const handleTimeSelection = (time) => {
-    if (sameTime) {
-      const newTimes = {};
-      selectedDates.forEach((date) => {
-        const slotObj = (slots[date] || []).find(
-          (s) => s.utc === time || s.label === time,
-        );
-        newTimes[date] = slotObj ? slotObj.utc : time;
-      });
-      setSelectedTimes(newTimes);
-    } else {
-      setSelectedTimes((prev) => ({
-        ...prev,
-        [selectedDateKey]: time,
-      }));
-    }
+    setSelectedTimes((prev) => ({
+      ...prev,
+      [selectedDateKey]: time,
+    }));
   };
 
   const handleNextDate = () => {
@@ -125,35 +113,6 @@ const ExamClassSlots = ({
   };
   const handleFinalBooking = () => {
     if (onBookingComplete) onBookingComplete(selectedDates, selectedTimes);
-  };
-
-  const handleSameTimeToggle = () => {
-    setSameTime((prev) => {
-      const newValue = !prev;
-      if (newValue) {
-        // If turning ON, and any date has a time, apply it to all as UTC for each date
-        const anyTime =
-          selectedTimes[selectedDates[currentDateIndex]] ||
-          Object.values(selectedTimes)[0];
-        if (anyTime) {
-          const newTimes = {};
-          selectedDates.forEach((date) => {
-            // Find the slot object for this date that matches the selected time (by label or utc)
-            const slotObj = (slots[date] || []).find(
-              (s) =>
-                s.utc === anyTime ||
-                s.label ===
-                  (slots[selectedDates[0]] || []).find(
-                    (s0) => s0.utc === anyTime,
-                  )?.label,
-            );
-            newTimes[date] = slotObj ? slotObj.utc : anyTime;
-          });
-          setSelectedTimes(newTimes);
-        }
-      }
-      return newValue;
-    });
   };
 
   const monthNames = [
@@ -330,11 +289,7 @@ const ExamClassSlots = ({
             {/* Header */}
             <div className="flex h-full flex-col">
               <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-2xl/[100%] font-medium">
-                  {sameTime
-                    ? "Choose time for all dates"
-                    : `Choose time for ${currentDate}`}
-                </h2>
+                <h2 className="text-2xl/[100%] font-medium">{currentDate}</h2>
                 <button
                   className="relative flex h-10 w-10 items-center justify-center rounded-full border-none bg-[#F6F6F6] p-0 transition hover:bg-[#ededed]"
                   onClick={onClose}
@@ -375,7 +330,7 @@ const ExamClassSlots = ({
             </div>
 
             {/* Date Navigation (only show when not same time) */}
-            {!sameTime && selectedDates.length > 1 && (
+            {!selectedDates.length > 1 && (
               <div className="mb-4 flex items-center justify-between">
                 <button
                   onClick={handlePrevDate}
@@ -413,32 +368,6 @@ const ExamClassSlots = ({
                 </button>
               </div>
             )}
-
-            {/* Same Time Toggle */}
-            <div className="mb-4 flex items-center rounded-[999px] border border-gray-200 px-4 py-2 shadow-sm">
-              <label
-                htmlFor="same-time"
-                className="flex w-full cursor-pointer items-center gap-2"
-              >
-                <input
-                  type="checkbox"
-                  id="same-time"
-                  className="peer sr-only"
-                  checked={sameTime}
-                  onChange={handleSameTimeToggle}
-                />
-                <div className="relative h-6 w-10 rounded-full bg-gray-200 transition-colors duration-300 peer-checked:bg-[#14B82C]">
-                  <div
-                    className={`absolute left-1 top-1 h-4 w-4 rounded-full bg-white transition-transform duration-300 ${
-                      sameTime ? "translate-x-4" : ""
-                    }`}
-                  />
-                </div>
-                <span className="text-base font-normal text-black">
-                  Select same time slot for all dates
-                </span>
-              </label>
-            </div>
 
             {/* Action Buttons */}
             <div className="mt-auto flex w-full gap-4">

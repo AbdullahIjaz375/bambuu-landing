@@ -413,12 +413,7 @@ const ExamPreparationUser = () => {
                 </div>
               )}
               {/* Booked Classes Cards */}
-              <div
-                className="grid gap-8"
-                style={{
-                  gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-                }}
-              >
+              <div className="flex flex-wrap items-start gap-6">
                 {classes.length === 0 ? (
                   <div className="text-gray-500">
                     No booked exam prep or intro call classes yet.

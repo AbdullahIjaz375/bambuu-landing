@@ -47,6 +47,7 @@ const TimeSlotModal = ({
   onClose,
   onNext,
   prefilledSlotsByDate = {},
+  type,
 }) => {
   // selectedSlotsByDate: { [dateString]: ["10:00 AM", ...] }
   const [selectedSlotsByDate, setSelectedSlotsByDate] = useState(() => {
@@ -56,7 +57,6 @@ const TimeSlotModal = ({
     });
     return obj;
   });
-  const [sameTime, setSameTime] = useState(false);
   const [activeDateIdx, setActiveDateIdx] = useState(0);
 
   useEffect(() => {
@@ -91,42 +91,14 @@ const TimeSlotModal = ({
 
   const handleNext = () => {
     let slots = [];
-    if (sameTime) {
-      // Use the slots from the first date for all dates
-      const firstDate = selectedDates[0];
-      const times = (selectedSlotsByDate[firstDate] || [])
-        .map((slot) =>
-          selectedDates.map((date) => ({
-            date,
-            time: slot,
-          })),
-        )
-        .flat();
-      // Group by date
-      const grouped = {};
-      times.forEach(({ date, time }) => {
-        if (!grouped[date]) grouped[date] = [];
-        grouped[date].push({
-          time: getDateWithTime(date, time),
+    slots = selectedDates
+      .map((date) => ({
+        times: (selectedSlotsByDate[date] || []).map((slot) => ({
+          time: getDateWithTime(date, slot),
           booked: false,
-        });
-      });
-      slots = Object.values(
-        Object.keys(grouped).reduce((acc, date) => {
-          acc[date] = { times: grouped[date] };
-          return acc;
-        }, {}),
-      );
-    } else {
-      slots = selectedDates
-        .map((date) => ({
-          times: (selectedSlotsByDate[date] || []).map((slot) => ({
-            time: getDateWithTime(date, slot),
-            booked: false,
-          })),
-        }))
-        .filter((slotObj) => slotObj.times.length > 0);
-    }
+        })),
+      }))
+      .filter((slotObj) => slotObj.times.length > 0);
     onNext(slots);
   };
 
@@ -147,7 +119,7 @@ const TimeSlotModal = ({
       </div>
       <div className="mb-2 mt-5 flex items-center gap-4">
         <span className="text-sm text-gray-700">
-          Duration: <b>30 minutes</b>
+          Duration: <b>{type === "intro" ? 30 : 60} minutes</b>
         </span>
       </div>
       <div className="mb-4 grid grid-cols-4 gap-3">
@@ -171,30 +143,6 @@ const TimeSlotModal = ({
           );
         })}
       </div>
-      <div className="mb-4 mt-5 flex items-center rounded-[999px] border border-gray-200 px-4 py-2 shadow-sm">
-        <label
-          htmlFor="same-time"
-          className="flex w-full cursor-pointer items-center gap-2"
-        >
-          <input
-            type="checkbox"
-            id="same-time"
-            className="peer sr-only"
-            checked={sameTime}
-            onChange={() => setSameTime((prev) => !prev)}
-          />
-          <div className="relative h-6 w-10 rounded-full bg-gray-200 transition-colors duration-300 peer-checked:bg-[#14B82C]">
-            <div
-              className={`absolute left-1 top-1 h-4 w-4 rounded-full bg-white transition-transform duration-300 ${
-                sameTime ? "translate-x-4" : ""
-              }`}
-            />
-          </div>
-          <span className="text-base font-normal text-black">
-            Select same time slot for all dates
-          </span>
-        </label>
-      </div>
       <div className="mb-2 flex justify-between">
         <button
           className="rounded-full border border-[#5D5D5D] bg-white px-8 py-2 font-semibold text-[#042f0c]"
@@ -205,7 +153,7 @@ const TimeSlotModal = ({
           Back
         </button>
         <div className="flex gap-2">
-          {selectedDates.length > 1 && !sameTime && (
+          {selectedDates.length > 1 && (
             <>
               <button
                 className="rounded-full border border-[#5D5D5D] bg-white px-4 py-2 font-semibold text-[#042f0c]"
@@ -229,24 +177,16 @@ const TimeSlotModal = ({
           )}
         </div>
         <button
-          disabled={
-            sameTime
-              ? (selectedSlotsByDate[selectedDates[0]] || []).length === 0
-              : selectedDates.some(
-                  (date) => (selectedSlotsByDate[date] || []).length === 0,
-                )
-          }
+          disabled={selectedDates.some(
+            (date) => (selectedSlotsByDate[date] || []).length === 0,
+          )}
           onClick={handleNext}
           className={`rounded-full bg-[#14B82C] px-8 py-2 font-semibold text-black ${
-            sameTime
-              ? (selectedSlotsByDate[selectedDates[0]] || []).length === 0
-                ? "cursor-not-allowed bg-[#b6e7c0]"
-                : "bg-[#14B82C]"
-              : selectedDates.some(
-                    (date) => (selectedSlotsByDate[date] || []).length === 0,
-                  )
-                ? "cursor-not-allowed bg-[#b6e7c0]"
-                : "bg-[#14B82C]"
+            selectedDates.some(
+              (date) => (selectedSlotsByDate[date] || []).length === 0,
+            )
+              ? "cursor-not-allowed bg-[#b6e7c0]"
+              : "bg-[#14B82C]"
           }`}
         >
           Next
