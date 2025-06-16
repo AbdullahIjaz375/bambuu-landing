@@ -162,12 +162,17 @@ const StudentsTutor = () => {
   };
 
   // Categorize channels
-  const standardChats = channels.filter((ch) => ch.type === "standard_group");
+  const standardChats = channels.filter(
+    (ch) =>
+      ch.type === "standard_group" &&
+      Object.keys(ch.state?.members || {}).length > 1,
+  );
   const bammbuuChats = channels.filter(
     (ch) =>
-      ch.type === "premium_group" ||
-      ch.type === "exam_prep" ||
-      ch.type === "one_to_one_chat",
+      (ch.type === "one_to_one_chat" ||
+        ch.type === "premium_group" ||
+        ch.type === "exam_prep") &&
+      Object.keys(ch.state?.members || {}).length > 1,
   );
 
   const FormateDate = (created_at) => {
