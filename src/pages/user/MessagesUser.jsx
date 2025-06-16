@@ -270,10 +270,43 @@ const MessagesUser = () => {
     };
   };
 
+  // Helper to get both student and tutor for exam_prep chat name
+  const getStudentAndTutorFromChannel = (channel) => {
+    if (!channel) return { student: null, tutor: null };
+    let student = null;
+    let tutor = null;
+    if (channel.type === "exam_prep") {
+      // For exam_prep, created_by is tutor, members array has student
+      tutor = channel.created_by || null;
+      // Try to find student in members (not tutor)
+      const members = channel.members || [];
+      student = members.find((m) => m.userType !== "tutor");
+    } else if (channel.type === "one_to_one_chat") {
+      const members = Object.values(channel.state?.members || {});
+      student = members.find((m) => m.user?.userType !== "tutor");
+      tutor = members.find((m) => m.user?.userType === "tutor");
+      if (student && student.user) student = student.user;
+      if (tutor && tutor.user) tutor = tutor.user;
+    }
+    return { student, tutor };
+  };
+
+  // Helper to get display name for exam_prep chat
+  const getExamPrepChatName = (channel) => {
+    if (channel.type === "exam_prep") {
+      const { student, tutor } = getStudentAndTutorFromChannel(channel);
+      const studentName = student?.name || "Student";
+      const tutorName = tutor?.name || "Tutor";
+      return `Exam Prep - ${studentName}/${tutorName}`;
+    }
+    return getChannelDisplayName(channel, user);
+  };
+
   const ChatItem = ({ channel, isInstructor }) => {
     // Exam prep one-to-one chat UI
     if (channel.type === "exam_prep") {
       const { name, image } = getExamPrepDisplay(channel);
+      const displayName = `Exam Prep - ${name}`;
       return (
         <div
           key={channel.id}
@@ -287,7 +320,7 @@ const MessagesUser = () => {
           <div className="relative">
             <img
               src={image}
-              alt={name}
+              alt={displayName}
               className="h-12 w-12 rounded-full object-cover"
               onError={(e) => {
                 e.target.onerror = null;
@@ -297,7 +330,7 @@ const MessagesUser = () => {
           </div>
           <div className="flex-1">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">{name}</h3>
+              <h3 className="text-lg font-semibold">{displayName}</h3>
             </div>
           </div>
         </div>
@@ -609,7 +642,11 @@ const MessagesUser = () => {
                       selectedChannel.data?.name ||
                       ""
                     }
-                    name={getChannelDisplayName(selectedChannel, user)}
+                    name={
+                      selectedChannel.type === "exam_prep"
+                        ? `Exam Prep - ${selectedChatInfo?.name || "Tutor"}`
+                        : getChannelDisplayName(selectedChannel, user)
+                    }
                   />
                 </>
               ) : (

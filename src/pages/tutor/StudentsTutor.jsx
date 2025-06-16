@@ -41,7 +41,27 @@ const StudentsTutor = () => {
     }
   };
 
-  // Helper function to extract the other user's info from a channel
+  // Helper function to extract the student and tutor info from a channel (for exam_prep naming)
+  const getStudentAndTutorFromChannel = (channel) => {
+    if (!channel || !user) return { student: null, tutor: null };
+    let student = null;
+    let tutor = null;
+    if (channel.type === "exam_prep") {
+      // exam_prep: members array with userType
+      const members = channel.members || [];
+      student = members.find((m) => m.userType !== "tutor");
+      tutor = members.find((m) => m.userType === "tutor");
+    } else if (channel.type === "one_to_one_chat") {
+      const members = Object.values(channel.state?.members || {});
+      student = members.find((m) => m.user?.userType !== "tutor");
+      tutor = members.find((m) => m.user?.userType === "tutor");
+      if (student && student.user) student = student.user;
+      if (tutor && tutor.user) tutor = tutor.user;
+    }
+    return { student, tutor };
+  };
+
+  // Helper function to get the other user (student) for chatInfo
   const getOtherUserFromChannel = (channel) => {
     if (!channel || !user) return null;
     if (channel.type === "exam_prep") {
@@ -62,18 +82,17 @@ const StudentsTutor = () => {
         online: false,
       };
     }
-    // For one-to-one chats, always show the other user's name
     if (channel.type === "one_to_one_chat") {
       const members = Object.values(channel.state?.members || {});
-      const otherMember = members.find(
-        (member) => member.user?.id !== user.uid,
+      const student = members.find(
+        (member) => member.user?.userType !== "tutor",
       );
-      if (otherMember && otherMember.user) {
+      if (student && student.user) {
         return {
-          id: otherMember.user.id,
-          name: otherMember.user.name,
-          image: otherMember.user.image,
-          online: otherMember.user.online || false,
+          id: student.user.id,
+          name: student.user.name,
+          image: student.user.image,
+          online: student.user.online || false,
         };
       }
     }
@@ -84,6 +103,17 @@ const StudentsTutor = () => {
       image: channel.data?.image || "/default-avatar.png",
       online: false,
     };
+  };
+
+  // Helper to get display name for exam_prep chat
+  const getExamPrepChatName = (channel) => {
+    if (channel.type === "exam_prep") {
+      const { student, tutor } = getStudentAndTutorFromChannel(channel);
+      const studentName = student?.name || "Student";
+      const tutorName = tutor?.name || "Tutor";
+      return `Exam Prep - ${studentName}/${tutorName}`;
+    }
+    return getChannelDisplayName(channel, user);
   };
 
   useEffect(() => {
@@ -234,7 +264,10 @@ const StudentsTutor = () => {
     let image = "/default-avatar.png";
     if (channel.type === "exam_prep" || channel.type === "one_to_one_chat") {
       const student = getStudentFromChannel(channel);
-      name = student.name;
+      name =
+        channel.type === "exam_prep"
+          ? `Exam Prep - ${student.name}`
+          : student.name;
       image = student.image;
     } else if (channel.data?.name) {
       name = channel.data.name;
@@ -361,7 +394,11 @@ const StudentsTutor = () => {
                   onChannelLeave={handleChannelLeave}
                   chatInfo={selectedChatInfo}
                   description={selectedChannel.data?.description || ""}
-                  name={getChannelDisplayName(selectedChannel, user)}
+                  name={
+                    selectedChannel.type === "exam_prep"
+                      ? `Exam Prep - ${getStudentFromChannel(selectedChannel)?.name || "Student"}`
+                      : getChannelDisplayName(selectedChannel, user)
+                  }
                 />
               ) : (
                 <div className="flex h-full items-center justify-center text-gray-500">
