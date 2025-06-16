@@ -2,16 +2,42 @@ import React, { useState } from "react";
 import MobileModal from "../MobileModal";
 import ClipLoader from "react-spinners/ClipLoader";
 import MobileModalHeader from "./MobileModalHeader";
+import { useAuth } from "../../context/AuthContext";
 
 const MobileSubscriptionStep = ({ onNext, onBack, onClose }) => {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
 
-  const handleEnroll = () => {
+  const handleEnroll = async () => {
+    if (!user?.uid || !user?.email) {
+      // Show error or prompt login
+      return;
+    }
     setLoading(true);
-    setTimeout(() => {
+    try {
+      const response = await fetch(
+        "https://createcheckoutsession-zzpsx27htq-uc.a.run.app",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: user.email,
+            studentId: user.uid,
+            context: "mobile",
+          }),
+        },
+      );
+      const data = await response.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        // Show error
+      }
+    } catch (err) {
+      // Show error
+    } finally {
       setLoading(false);
-      onNext();
-    }, 1200);
+    }
   };
 
   return (

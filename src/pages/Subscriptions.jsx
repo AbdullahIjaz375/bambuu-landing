@@ -593,28 +593,32 @@ const Subscriptions = ({ onNext, onBack, onClose, isModal = false }) => {
                     <button
                       className="w-full rounded-full border border-[#042F0C] bg-[#14B82C] p-3 text-base font-medium text-black transition-colors hover:bg-green-600"
                       onClick={async () => {
-                        if (!user?.uid) {
+                        if (!user?.uid || !user?.email) {
                           toast.error("You must be logged in to purchase.");
                           return;
                         }
                         setIsLoading(true);
                         try {
-                          await purchaseExamPrepPlan(user.uid);
-                          toast.success(
-                            "Exam Prep Plan purchased successfully!",
+                          const response = await fetch(
+                            "https://createcheckoutsession-zzpsx27htq-uc.a.run.app",
+                            {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({
+                                email: user.email,
+                                studentId: user.uid,
+                                context: "web",
+                              }),
+                            },
                           );
-                          if (isModal) {
-                            onNext && onNext();
+                          const data = await response.json();
+                          if (data.url) {
+                            window.location.href = data.url;
                           } else {
-                            navigate("/learn", {
-                              state: { showIntroBookingFlow: true },
-                            });
+                            toast.error("Failed to start checkout.");
                           }
                         } catch (err) {
-                          toast.error(
-                            err?.message ||
-                              "Failed to purchase Exam Prep Plan.",
-                          );
+                          toast.error("Error starting checkout.");
                         } finally {
                           setIsLoading(false);
                         }

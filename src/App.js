@@ -75,6 +75,7 @@ import TagManager from "react-gtm-module";
 import { initAnalytics, trackPageView } from "./utils/analytics";
 import ExamPreparationTutor from "./pages/tutor/ExamPreparationTutor";
 import ExamPreparationUser from "./pages/user/ExamPreparationUser";
+import MobileConfirmationStep from "./components/mobile-flow/MobileConfirmationStep";
 
 const App = () => {
   const { user, streamClient } = useAuth(); // Use useAuth() inside the component
@@ -594,6 +595,11 @@ const App = () => {
                     <ExamPreparationUser />
                   </ProtectedRoute>
                 }
+              />
+
+              <Route
+                path="/mobile-confirmation"
+                element={<MobileConfirmationStep />}
               />
             </Routes>
           </div>

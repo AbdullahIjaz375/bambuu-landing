@@ -274,16 +274,27 @@ const CustomChatComponent = ({
       setIsLoading(true);
       setShowDropdown(false); // Close dropdown immediately
 
-      if (!chatPartner || !chatPartner.id) {
-        console.error("Chat partner ID is missing");
+      // Use getStudentFromChannel to get the correct student ID
+      let studentId = null;
+      if (isStudentsTutorPage && channel) {
+        // getStudentFromChannel expects a channel with .state.members
+        const getStudentFromChannel = (channel) => {
+          const members = Object.values(channel.state?.members || {});
+          const student = members.find((m) => m.user?.userType !== "tutor");
+          return student && student.user ? student.user : null;
+        };
+        const student = getStudentFromChannel(channel);
+        studentId = student?.id;
+      }
+      if (!studentId) {
+        console.error("Student ID is missing");
         toast.error("Unable to view profile: user information missing");
         return;
       }
-
-      const studentDoc = await getDoc(doc(db, "students", chatPartner.id));
+      const studentDoc = await getDoc(doc(db, "students", studentId));
 
       if (!studentDoc.exists()) {
-        console.error("Student document doesn't exist for ID:", chatPartner.id);
+        console.error("Student document doesn't exist for ID:", studentId);
         toast.error("Student profile not found");
         return;
       }
@@ -292,7 +303,7 @@ const CustomChatComponent = ({
 
       // Check if we have at least some basic data
       if (!studentData) {
-        console.error("Student data is empty for ID:", chatPartner.id);
+        console.error("Student data is empty for ID:", studentId);
         toast.error("Student profile data is incomplete");
         return;
       }
@@ -300,7 +311,7 @@ const CustomChatComponent = ({
       // Set the profile data and open modal
       setStudentProfile({
         ...studentData,
-        id: chatPartner.id,
+        id: studentId,
         // Provide defaults for essential fields
         name: studentData.name || "Student",
         photoUrl: studentData.photoUrl || null,
@@ -680,9 +691,6 @@ const CustomChatComponent = ({
                   {t("chat.profile.title")}
                 </h2>
                 <div className="flex items-center">
-                  <div className="mr-2 flex items-center rounded-full bg-blue-100 px-2 py-1">
-                    <span className="text-sm font-medium text-blue-500">B</span>
-                  </div>
                   <button
                     onClick={() => setShowProfileModal(false)}
                     className="rounded-full p-1"

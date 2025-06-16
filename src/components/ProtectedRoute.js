@@ -141,8 +141,8 @@ const ProtectedRoute = ({ children, requiredRole }) => {
       );
     }
 
-    // If userType is loaded but not allowed, redirect to unauthorized
-    if (!roles.includes(effectiveUserType)) {
+    // Only redirect to unauthorized if loading is false and userType is loaded but not allowed
+    if (!loading && !roles.includes(effectiveUserType)) {
       return <Navigate to="/unauthorized" />;
     }
   }
