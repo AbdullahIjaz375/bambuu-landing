@@ -19,16 +19,6 @@ const ExamClassSlots = ({
   const [selectedTimes, setSelectedTimes] = useState({}); // Object to store time for each date
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [currentDateIndex, setCurrentDateIndex] = useState(0);
-  const [booking, setBooking] = useState(false);
-  const [error, setError] = useState(null);
-
-  const handleRemoveClass = (dateToRemove) => {
-    setSelectedDates(selectedDates.filter((d) => d !== dateToRemove));
-    const newTimes = { ...selectedTimes };
-    delete newTimes[dateToRemove];
-    setSelectedTimes(newTimes);
-  };
-
   // Generate calendar days for the current month
   const generateCalendarDays = () => {
     const year = currentMonth.getFullYear();
@@ -65,7 +55,11 @@ const ExamClassSlots = ({
       delete newTimes[dateKey];
       setSelectedTimes(newTimes);
     } else if (selectedDates.length < MAX_DATES) {
-      setSelectedDates([...selectedDates, dateKey]);
+      // Sort dates after adding new one
+      const newDates = [...selectedDates, dateKey].sort(
+        (a, b) => new Date(a) - new Date(b),
+      );
+      setSelectedDates(newDates);
     }
   };
 
@@ -106,13 +100,6 @@ const ExamClassSlots = ({
       if (onBookingComplete) onBookingComplete(selectedDates, selectedTimes);
       if (onClose) onClose();
     }
-  };
-
-  const handleBackFromConfirmation = () => {
-    setCurrentStep(2);
-  };
-  const handleFinalBooking = () => {
-    if (onBookingComplete) onBookingComplete(selectedDates, selectedTimes);
   };
 
   const monthNames = [
@@ -240,9 +227,23 @@ const ExamClassSlots = ({
                       ).padStart(2, "0");
                       const dayStr = String(day).padStart(2, "0");
                       const dateKey = day ? `${year}-${month}-${dayStr}` : null;
-                      const enabled = !!day && availableDates.includes(dateKey);
-                      if (typeof window !== "undefined") {
+                      let enabled = !!day && availableDates.includes(dateKey);
+
+                      // Disable if date is before today
+                      let isPast = false;
+                      if (day) {
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        const thisDate = new Date(
+                          year,
+                          currentMonth.getMonth(),
+                          day,
+                        );
+                        isPast = thisDate < today;
                       }
+
+                      // Disable past days but show them
+                      enabled = enabled && !isPast;
                       return (
                         <button
                           key={index}
@@ -289,7 +290,13 @@ const ExamClassSlots = ({
             {/* Header */}
             <div className="flex h-full flex-col">
               <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-2xl/[100%] font-medium">{currentDate}</h2>
+                <h2 className="text-2xl/[100%] font-medium">
+                  Choose time for{" "}
+                  {new Date(currentDate).toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "short",
+                  })}
+                </h2>
                 <button
                   className="relative flex h-10 w-10 items-center justify-center rounded-full border-none bg-[#F6F6F6] p-0 transition hover:bg-[#ededed]"
                   onClick={onClose}
@@ -313,104 +320,92 @@ const ExamClassSlots = ({
                   No available times for this date.
                 </div>
               ) : (
-                availableTimes.map((timeObj, idx) => (
-                  <button
-                    key={timeObj.utc + "-" + idx}
-                    onClick={() => handleTimeSelection(timeObj.utc)}
-                    className={`rounded-[16px] border px-2 py-3 text-base font-normal transition ${
-                      selectedTime === timeObj.utc
-                        ? "border-[#14B82C] bg-[#DBFDDF] text-base font-semibold text-[#14B82C]"
-                        : "border-[#B0B0B0] bg-white text-[#14B82C] hover:bg-[#DBFDDF]"
-                    }`}
-                  >
-                    {timeObj.display}
-                  </button>
-                ))
+                availableTimes.map((timeObj, idx) => {
+                  // --- Add this block ---
+                  let isPastTime = false;
+                  if (currentDate) {
+                    const now = new Date();
+                    const [hour, minute] = timeObj.display
+                      .replace(/ AM| PM/, "")
+                      .split(":")
+                      .map(Number);
+                    let slotHour = hour;
+                    if (/PM/.test(timeObj.display) && hour !== 12)
+                      slotHour += 12;
+                    if (/AM/.test(timeObj.display) && hour === 12) slotHour = 0;
+
+                    const slotDate = new Date(currentDate);
+                    slotDate.setHours(slotHour, minute, 0, 0);
+
+                    // Only check for today
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const isToday =
+                      new Date(currentDate).setHours(0, 0, 0, 0) ===
+                      today.getTime();
+                    if (isToday && slotDate < now) isPastTime = true;
+                  }
+                  // --- End block ---
+
+                  return (
+                    <button
+                      key={timeObj.utc + "-" + idx}
+                      onClick={() =>
+                        !isPastTime && handleTimeSelection(timeObj.utc)
+                      }
+                      disabled={isPastTime}
+                      className={`rounded-[16px] border px-2 py-3 text-base font-normal transition ${
+                        selectedTime === timeObj.utc
+                          ? "border-[#14B82C] bg-[#DBFDDF] text-base font-semibold text-[#14B82C]"
+                          : isPastTime
+                            ? "cursor-not-allowed border-[#e0e0e0] bg-gray-100 text-gray-400"
+                            : "border-[#B0B0B0] bg-white text-[#14B82C] hover:bg-[#DBFDDF]"
+                      }`}
+                    >
+                      {timeObj.display}
+                    </button>
+                  );
+                })
               )}
             </div>
-
-            {/* Date Navigation (only show when not same time) */}
-            {!selectedDates.length > 1 && (
-              <div className="mb-4 flex items-center justify-between">
-                <button
-                  onClick={handlePrevDate}
-                  disabled={currentDateIndex === 0}
-                  className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm ${
-                    currentDateIndex === 0
-                      ? "cursor-not-allowed text-gray-400"
-                      : "text-[#14B82C] hover:bg-[#DBFDDF]"
-                  }`}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  Previous Date
-                </button>
-
-                <span className="text-sm text-gray-600">
-                  {Object.keys(selectedTimes).length} / {selectedDates.length}{" "}
-                  completed
-                </span>
-
-                <button
-                  onClick={handleNextDate}
-                  disabled={
-                    currentDateIndex === selectedDates.length - 1 ||
-                    !selectedTime
-                  }
-                  className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm ${
-                    currentDateIndex === selectedDates.length - 1 ||
-                    !selectedTime
-                      ? "cursor-not-allowed text-gray-400"
-                      : "text-[#14B82C] hover:bg-[#DBFDDF]"
-                  }`}
-                >
-                  Next Date
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-              </div>
-            )}
 
             {/* Action Buttons */}
             <div className="mt-auto flex w-full gap-4">
               <button
-                onClick={handleBackToDateTime}
+                onClick={() => {
+                  if (currentDateIndex === 0) {
+                    handleBackToDateTime();
+                  } else {
+                    setCurrentDateIndex((idx) => idx - 1);
+                  }
+                }}
                 className="w-1/2 rounded-full border border-black bg-white px-6 py-2 text-base font-medium text-[#042F0C] transition-colors hover:bg-[#f6f6f6]"
               >
                 Back
               </button>
               <button
-                onClick={handleNextToConfirmation}
-                disabled={!canProceedToConfirmation}
+                onClick={() => {
+                  if (currentDateIndex === selectedDates.length - 1) {
+                    handleNextToConfirmation();
+                  } else {
+                    setCurrentDateIndex((idx) => idx + 1);
+                  }
+                }}
+                disabled={!selectedTime}
                 className={`w-1/2 rounded-full border border-[#042F0C] px-6 py-2 text-base font-medium text-black transition-colors ${
-                  canProceedToConfirmation
+                  selectedTime
                     ? "bg-[#14B82C] hover:bg-green-600"
                     : "cursor-not-allowed bg-[#b6e7c0]"
                 }`}
               >
-                Next
+                {currentDateIndex === selectedDates.length - 1
+                  ? "Next"
+                  : "Next"}
               </button>
             </div>
           </>
         )}
       </Modal>
-
-      {/* Confirmation Modal */}
-      {/* <ConfirmClassesModal
-        isOpen={currentStep === 3}
-        onClose={onClose}
-        onConfirm={handleFinalBooking}
-        onBack={handleBackFromConfirmation}
-        selectedDates={
-          Array.isArray(selectedDates)
-            ? selectedDates
-            : selectedDates
-              ? [selectedDates]
-              : []
-        }
-        selectedTimes={selectedTimes}
-        onRemoveClass={handleRemoveClass}
-        user={user}
-        tutorId={tutorId}
-      /> */}
     </>
   );
 };

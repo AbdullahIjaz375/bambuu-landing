@@ -13,7 +13,7 @@ const timeSlots = [
   "09:00 AM",
   "10:00 AM",
   "11:00 AM",
-  "12:00 AM",
+  "12:00 PM",
   "01:00 PM",
   "02:00 PM",
   "03:00 PM",
@@ -25,7 +25,7 @@ const timeSlots = [
   "09:00 PM",
   "10:00 PM",
   "11:00 PM",
-  "12:00 PM",
+  "12:00 AM",
 ];
 
 function getDateWithTime(date, timeStr) {
@@ -42,6 +42,15 @@ function getDateWithTime(date, timeStr) {
   return d.toISOString();
 }
 
+function formatDateKey(date) {
+  // Accepts Date object or string, returns "YYYY-MM-DD"
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 const TimeSlotModal = ({
   selectedDates,
   onClose,
@@ -49,40 +58,49 @@ const TimeSlotModal = ({
   prefilledSlotsByDate = {},
   type,
 }) => {
-  // selectedSlotsByDate: { [dateString]: ["10:00 AM", ...] }
+  // Initialize with prefilled data from the start
   const [selectedSlotsByDate, setSelectedSlotsByDate] = useState(() => {
     const obj = {};
     selectedDates.forEach((date) => {
-      obj[date] = [];
+      const dateKey = formatDateKey(date);
+      obj[dateKey] = prefilledSlotsByDate[dateKey]
+        ? [...prefilledSlotsByDate[dateKey]]
+        : [];
     });
     return obj;
   });
   const [activeDateIdx, setActiveDateIdx] = useState(0);
 
+  // Update when prefilledSlotsByDate or selectedDates change
   useEffect(() => {
-    // Prefill slots if provided and not already selected
     setSelectedSlotsByDate((prev) => {
-      const obj = { ...prev };
+      const obj = {};
       selectedDates.forEach((date) => {
+        const dateKey = formatDateKey(date);
         if (
-          prefilledSlotsByDate[date] &&
-          (!prev[date] || prev[date].length === 0)
+          prefilledSlotsByDate[dateKey] &&
+          prefilledSlotsByDate[dateKey].length > 0
         ) {
-          obj[date] = [...prefilledSlotsByDate[date]];
+          obj[dateKey] = [...prefilledSlotsByDate[dateKey]];
+        } else if (prev[dateKey]) {
+          obj[dateKey] = [...prev[dateKey]];
+        } else {
+          obj[dateKey] = [];
         }
       });
       return obj;
     });
-    // eslint-disable-next-line
   }, [prefilledSlotsByDate, selectedDates]);
 
   const currentDate = selectedDates[activeDateIdx];
+  const currentDateKey = formatDateKey(currentDate);
+
   const handleSlotClick = (slot) => {
     setSelectedSlotsByDate((prev) => {
-      const prevSlots = prev[currentDate] || [];
+      const prevSlots = prev[currentDateKey] || [];
       return {
         ...prev,
-        [currentDate]: prevSlots.includes(slot)
+        [currentDateKey]: prevSlots.includes(slot)
           ? prevSlots.filter((s) => s !== slot)
           : [...prevSlots, slot],
       };
@@ -90,16 +108,15 @@ const TimeSlotModal = ({
   };
 
   const handleNext = () => {
-    let slots = [];
-    slots = selectedDates
-      .map((date) => ({
-        times: (selectedSlotsByDate[date] || []).map((slot) => ({
-          time: getDateWithTime(date, slot),
-          booked: false,
-        })),
-      }))
-      .filter((slotObj) => slotObj.times.length > 0);
-    onNext(slots);
+    // Flatten all selected slots into a single times array
+    const times = selectedDates.flatMap((date) => {
+      const dateKey = formatDateKey(date);
+      return (selectedSlotsByDate[dateKey] || []).map((slot) => ({
+        time: getDateWithTime(date, slot),
+        booked: false,
+      }));
+    });
+    onNext([{ times }]);
   };
 
   return (
@@ -107,10 +124,9 @@ const TimeSlotModal = ({
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-2xl/[100%] font-medium">
           Choose time for{" "}
-          {new Date(currentDate).toLocaleDateString("en-US", {
-            month: "short",
+          {new Date(currentDate).toLocaleDateString("en-GB", {
             day: "numeric",
-            year: "numeric",
+            month: "short",
           })}
         </h2>
         <button onClick={onClose}>
@@ -124,18 +140,45 @@ const TimeSlotModal = ({
       </div>
       <div className="mb-4 grid grid-cols-4 gap-3">
         {timeSlots.map((slot) => {
-          const selected = (selectedSlotsByDate[currentDate] || []).includes(
-            slot,
-          );
+          let isPastTime = false;
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const slotDate = new Date(currentDate);
+          slotDate.setHours(0, 0, 0, 0);
+
+          // If current date is today, check if slot time is in the past
+          if (slotDate.getTime() === today.getTime()) {
+            // Parse slot time
+            let [hour, minute] = slot.split(":");
+            minute = parseInt(minute, 10);
+            hour = parseInt(hour, 10);
+            const isPM = slot.toLowerCase().includes("pm");
+            if (isPM && hour !== 12) hour += 12;
+            if (!isPM && hour === 12) hour = 0;
+
+            const slotDateTime = new Date(currentDate);
+            slotDateTime.setHours(hour, minute, 0, 0);
+
+            if (slotDateTime < new Date()) {
+              isPastTime = true;
+            }
+          }
+          const selected =
+            (selectedSlotsByDate[currentDateKey] || []).includes(slot) &&
+            !isPastTime;
+
           return (
             <button
               key={slot}
               type="button"
-              onClick={() => handleSlotClick(slot)}
+              onClick={() => !isPastTime && handleSlotClick(slot)}
+              disabled={isPastTime}
               className={`rounded-[16px] border px-4 py-2 text-base font-normal transition ${
                 selected
                   ? "border-[#14B82C] bg-[#DBFDDF] text-[#042F0C]"
-                  : "border-[#B0B0B0] bg-white text-[#888888] hover:bg-[#DBFDDF]"
+                  : isPastTime
+                    ? "cursor-not-allowed border-[#e0e0e0] bg-gray-100 text-gray-400"
+                    : "border-[#B0B0B0] bg-white text-[#888888] hover:bg-[#DBFDDF]"
               } `}
             >
               {slot}
@@ -147,49 +190,78 @@ const TimeSlotModal = ({
         <button
           className="rounded-full border border-[#5D5D5D] bg-white px-8 py-2 font-semibold text-[#042f0c]"
           onClick={() => {
-            onClose("back");
+            if (activeDateIdx === 0) {
+              onClose("back");
+            } else {
+              setActiveDateIdx((idx) => idx - 1);
+            }
           }}
         >
           Back
         </button>
-        <div className="flex gap-2">
-          {selectedDates.length > 1 && (
-            <>
-              <button
-                className="rounded-full border border-[#5D5D5D] bg-white px-4 py-2 font-semibold text-[#042f0c]"
-                disabled={activeDateIdx === 0}
-                onClick={() => setActiveDateIdx((idx) => Math.max(0, idx - 1))}
-              >
-                Previous Date
-              </button>
-              <button
-                className="rounded-full border border-[#5D5D5D] bg-white px-4 py-2 font-semibold text-[#042f0c]"
-                disabled={activeDateIdx === selectedDates.length - 1}
-                onClick={() =>
-                  setActiveDateIdx((idx) =>
-                    Math.min(selectedDates.length - 1, idx + 1),
-                  )
-                }
-              >
-                Next Date
-              </button>
-            </>
-          )}
-        </div>
         <button
-          disabled={selectedDates.some(
-            (date) => (selectedSlotsByDate[date] || []).length === 0,
-          )}
-          onClick={handleNext}
+          disabled={
+            // Disable if no valid (future) slot is selected for this date
+            (selectedSlotsByDate[currentDateKey] || []).length === 0 ||
+            (selectedSlotsByDate[currentDateKey] || []).every((slot) => {
+              // isPastTime logic for this slot
+              let isPastTime = false;
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+              const slotDate = new Date(currentDate);
+              slotDate.setHours(0, 0, 0, 0);
+              if (slotDate.getTime() === today.getTime()) {
+                let [hour, minute] = slot.split(":");
+                minute = parseInt(minute, 10);
+                hour = parseInt(hour, 10);
+                const isPM = slot.toLowerCase().includes("pm");
+                if (isPM && hour !== 12) hour += 12;
+                if (!isPM && hour === 12) hour = 0;
+                const slotDateTime = new Date(currentDate);
+                slotDateTime.setHours(hour, minute, 0, 0);
+                if (slotDateTime < new Date()) {
+                  isPastTime = true;
+                }
+              }
+              return isPastTime;
+            })
+          }
+          onClick={() => {
+            if (activeDateIdx === selectedDates.length - 1) {
+              handleNext();
+            } else {
+              setActiveDateIdx((idx) => idx + 1);
+            }
+          }}
           className={`rounded-full bg-[#14B82C] px-8 py-2 font-semibold text-black ${
-            selectedDates.some(
-              (date) => (selectedSlotsByDate[date] || []).length === 0,
-            )
+            (selectedSlotsByDate[currentDateKey] || []).length === 0 ||
+            (selectedSlotsByDate[currentDateKey] || []).every((slot) => {
+              // isPastTime logic for this slot (same as above)
+              let isPastTime = false;
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+              const slotDate = new Date(currentDate);
+              slotDate.setHours(0, 0, 0, 0);
+              if (slotDate.getTime() === today.getTime()) {
+                let [hour, minute] = slot.split(":");
+                minute = parseInt(minute, 10);
+                hour = parseInt(hour, 10);
+                const isPM = slot.toLowerCase().includes("pm");
+                if (isPM && hour !== 12) hour += 12;
+                if (!isPM && hour === 12) hour = 0;
+                const slotDateTime = new Date(currentDate);
+                slotDateTime.setHours(hour, minute, 0, 0);
+                if (slotDateTime < new Date()) {
+                  isPastTime = true;
+                }
+              }
+              return isPastTime;
+            })
               ? "cursor-not-allowed bg-[#b6e7c0]"
               : "bg-[#14B82C]"
           }`}
         >
-          Next
+          {activeDateIdx === selectedDates.length - 1 ? "Next" : "Next"}
         </button>
       </div>
     </div>

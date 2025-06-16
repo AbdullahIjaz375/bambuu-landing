@@ -37,6 +37,7 @@ const BookingFlowModal = ({
   mode = "intro",
   initialStep = 0,
   onComplete,
+  onBookingComplete,
   selectedInstructor,
   setSelectedInstructor = () => {},
 }) => {
@@ -69,6 +70,17 @@ const BookingFlowModal = ({
   const [currentApiStep, setCurrentApiStep] = useState(null);
   // Add a global loading state
   const [globalLoading, setGlobalLoading] = useState(false);
+
+  const handleRemoveExamClass = (dateToRemove) => {
+    setSelectedExamPrepDates((prevDates) =>
+      prevDates.filter((date) => date !== dateToRemove),
+    );
+    setSelectedExamPrepTimes((prevTimes) => {
+      const newTimes = { ...prevTimes };
+      delete newTimes[dateToRemove];
+      return newTimes;
+    });
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -409,6 +421,7 @@ const BookingFlowModal = ({
       setShowExamConfirm(false);
       setShowExamBooked(true);
       setStep(9);
+      if (onBookingComplete) onBookingComplete();
     } catch (err) {
       alert("Booking failed: " + (err.message || err));
     } finally {
@@ -538,6 +551,7 @@ const BookingFlowModal = ({
               selectedTimes={selectedExamPrepTimes}
               tutorId={confirmedInstructor?.uid}
               user={user}
+              onRemoveClass={handleRemoveExamClass}
               // loading={bookingExamPrep}
             />
           )}

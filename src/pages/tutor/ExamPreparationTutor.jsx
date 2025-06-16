@@ -50,7 +50,9 @@ const ExamPreparationTutor = () => {
   }, [user]);
 
   const handleCalendarNext = (dates) => {
-    setSelectedDates(dates);
+    // Sort dates before setting
+    const sortedDates = [...dates].sort((a, b) => new Date(a) - new Date(b));
+    setSelectedDates(sortedDates);
     setAvailibilityModal(false);
     setShowTimeModal(true);
   };
@@ -58,20 +60,15 @@ const ExamPreparationTutor = () => {
   const handleTimeSlotClose = (action) => {
     setShowTimeModal(false);
     if (action === "back") {
+      setPrefilledDates(selectedDates);
       setAvailibilityModal(true);
     }
   };
 
-  const handleTimeSlotNext = (slotsByDate = null) => {
+  const handleTimeSlotNext = (slots = []) => {
     setShowTimeModal(false);
     setAvailabilityLoading(true);
     setAvailabilityError(null);
-    const slots = [];
-    Object.entries(prefilledSlotsByDate).forEach(([date, times]) => {
-      times.forEach((time) => {
-        slots.push({ date, time });
-      });
-    });
     const payload = {
       tutorId: user.uid,
       slots,
@@ -122,6 +119,23 @@ const ExamPreparationTutor = () => {
     }
   };
 
+  const formatTimeSlot = (dateObj) => {
+    // Use local time to match the timeSlots in TimeSlotModal.jsx
+    let hours = dateObj.getHours();
+    const minutes = dateObj.getMinutes();
+
+    // Convert to 12-hour format with zero-padding
+    let hour12 = hours % 12;
+    if (hour12 === 0) hour12 = 12;
+
+    const ampm = hours >= 12 ? "PM" : "AM";
+    const hourStr = hour12.toString().padStart(2, "0");
+    const minuteStr = minutes.toString().padStart(2, "0");
+
+    // Match the format in timeSlots: "05:00 PM"
+    return `${hourStr}:${minuteStr} ${ampm}`;
+  };
+
   const handleManageAvailability = async () => {
     if (!user?.uid) return;
     setAvailabilityLoading(true);
@@ -142,13 +156,7 @@ const ExamPreparationTutor = () => {
             const month = String(dateObj.getMonth() + 1).padStart(2, "0");
             const day = String(dateObj.getDate()).padStart(2, "0");
             const dateKey = `${year}-${month}-${day}`;
-            const timeStr = dateObj
-              .toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: true,
-              })
-              .replace(/^0/, "");
+            const timeStr = formatTimeSlot(dateObj); // Use the new formatting function
             if (!slotsByDate[dateKey]) slotsByDate[dateKey] = [];
             slotsByDate[dateKey].push(timeStr);
           });
@@ -168,13 +176,7 @@ const ExamPreparationTutor = () => {
             const month = String(dateObj.getMonth() + 1).padStart(2, "0");
             const day = String(dateObj.getDate()).padStart(2, "0");
             const dateKey = `${year}-${month}-${day}`;
-            const timeStr = dateObj
-              .toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: true,
-              })
-              .replace(/^0/, "");
+            const timeStr = formatTimeSlot(dateObj); // Use the new formatting function
             if (!slotsByDate[dateKey]) slotsByDate[dateKey] = [];
             slotsByDate[dateKey].push(timeStr);
           });
@@ -246,6 +248,7 @@ const ExamPreparationTutor = () => {
             </div>
             <button
               onClick={handleManageAvailability}
+              disabled={availabilityLoading}
               className="flex w-full items-center justify-center rounded-full border border-[#5D5D5D] bg-[#14b82c] px-3 py-2 text-lg font-semibold text-[#042f0c] sm:w-auto sm:justify-start"
             >
               {t("exam-prep.manage-availability")}
@@ -294,16 +297,15 @@ const ExamPreparationTutor = () => {
           />
         </Modal>
       )}
-
       {showTimeModal && (
         <Modal
           isOpen={showTimeModal}
           onRequestClose={() => setShowTimeModal(false)}
-          className="fixed left-1/2 top-1/2 z-[1001] flex h-[500px] w-[600px] -translate-x-1/2 -translate-y-1/2 transform flex-col rounded-[32px] bg-white p-4 font-urbanist shadow-lg md:p-6"
+          className="fixed left-1/2 top-1/2 z-[1001] flex h-[560px] w-[600px] -translate-x-1/2 -translate-y-1/2 transform flex-col rounded-[32px] bg-white p-4 font-urbanist shadow-lg md:p-6"
           overlayClassName="fixed inset-0 bg-black bg-opacity-50 z-[1000]"
         >
           <TimeSlotModal
-            selectedDates={prefilledDates}
+            selectedDates={selectedDates}
             onClose={handleTimeSlotClose}
             onNext={handleTimeSlotNext}
             prefilledSlotsByDate={prefilledSlotsByDate}
@@ -319,7 +321,6 @@ const ExamPreparationTutor = () => {
           )}
         </Modal>
       )}
-
       {showSuccessModal && (
         <Modal
           isOpen={showSuccessModal}
@@ -328,6 +329,21 @@ const ExamPreparationTutor = () => {
           overlayClassName="fixed inset-0 bg-black bg-opacity-50 z-[1000]"
         >
           <SuccessModal onDone={() => setShowSuccessModal(false)} />
+        </Modal>
+      )}
+      {availabilityLoading && !showTimeModal && !showSuccessModal && (
+        <Modal
+          isOpen={true}
+          className="fixed left-1/2 top-1/2 z-[1002] flex h-[220px] w-[340px] -translate-x-1/2 -translate-y-1/2 transform flex-col items-center justify-center rounded-[32px] bg-white p-8 font-urbanist shadow-lg"
+          overlayClassName="fixed inset-0 bg-black bg-opacity-50 z-[1001]"
+          ariaHideApp={false}
+        >
+          <div className="flex h-full flex-col items-center justify-center">
+            <ClipLoader color="#14B82C" size={50} />
+            <p className="mt-4 text-lg font-medium text-[#042F0C]">
+              Setting availability...
+            </p>
+          </div>
         </Modal>
       )}
     </div>
