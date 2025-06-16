@@ -199,13 +199,6 @@ const LearnUser = () => {
   const { t, i18n } = useTranslation();
   const { currentLanguage, changeLanguage } = useLanguage();
 
-  const shouldShowOnboardingBanner =
-    !!examPrepStatus?.hasPurchasedPlan &&
-    (!examPrepStatus?.hasBookedIntroCall ||
-      !examPrepStatus?.doneWithIntroCall ||
-      (examPrepStatus?.doneWithIntroCall &&
-        !examPrepStatus?.hasBookedExamPrepClass));
-
   // --- Effects ---
   useEffect(() => {
     const fetchPlanTimeline = async () => {
@@ -623,6 +616,7 @@ const LearnUser = () => {
               <NotificationDropdown />
             </div>
           </div>
+
           {/* Renewal/Onboarding Banner */}
           {showRenewalBanner ? (
             <div className="mb-6 flex w-full items-center justify-between rounded-3xl border border-[#B0B0B0] bg-white px-6 py-3">
@@ -645,27 +639,38 @@ const LearnUser = () => {
               </button>
             </div>
           ) : (
-            shouldShowOnboardingBanner && (
-              <div className="mb-6 flex w-full items-center justify-between rounded-3xl border border-[#B0B0B0] bg-white px-6 py-3">
-                <div className="flex items-center gap-3">
-                  <img
-                    src="/svgs/preparation-package-icon.svg"
-                    alt="Onboarding"
-                    className="h-10 w-10"
-                  />
-                  <span className="text-base font-normal text-[#454545]">
-                    You purchased exam prep package. Let&apos;s complete your
-                    onboarding process!
-                  </span>
-                </div>
-                <button
-                  className="rounded-3xl border border-[#5D5D5D] bg-[#E6FDE9] px-5 py-2 text-base font-medium text-[#042F0C] transition hover:bg-[#E6FDE9]"
-                  onClick={handleOnboarding}
-                >
-                  Complete Onboarding
-                </button>
+            // Onboarding Banner (always show)
+            <div className="mb-6 flex w-full items-center justify-between rounded-3xl border border-[#B0B0B0] bg-white px-6 py-3">
+              <div className="flex items-center gap-3">
+                <img
+                  src="/svgs/preparation-package-icon.svg"
+                  alt="Onboarding"
+                  className="h-10 w-10"
+                />
+                <span className="text-base font-normal text-[#454545]">
+                  You purchased exam prep package. Let's complete your
+                  onboarding process!
+                </span>
               </div>
-            )
+              <button
+                className="rounded-3xl border border-[#5D5D5D] bg-[#E6FDE9] px-5 py-2 text-base font-medium text-[#042F0C] transition hover:bg-[#E6FDE9]"
+                onClick={() => {
+                  // If exam prep classes are booked, go to tutor profile (5th condition)
+                  if (
+                    examPrepStatus?.hasBookedExamPrepClass &&
+                    examPrepStatus?.completedIntroCallTutorId
+                  ) {
+                    navigate(
+                      `/examPreparationUser/${examPrepStatus.completedIntroCallTutorId}`,
+                    );
+                  } else {
+                    handleOnboarding();
+                  }
+                }}
+              >
+                Complete Onboarding
+              </button>
+            </div>
           )}
           {/* Calendar and Language Learning Section */}
           <div className="mb-4 flex w-full flex-col items-start justify-between gap-4 py-4 lg:flex-row">

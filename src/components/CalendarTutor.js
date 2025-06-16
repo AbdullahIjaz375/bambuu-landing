@@ -64,6 +64,10 @@ const CalendarTutor = ({ onNext, prefilledDates = [] }) => {
     setDate(newDate);
   };
 
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const selectedFutureDates = selectedDates.filter((d) => d >= today);
+
   const weekDayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   const isSameDay = (d1, d2) =>
@@ -125,39 +129,52 @@ const CalendarTutor = ({ onNext, prefilledDates = [] }) => {
             <div className="ml-0 mr-5 grid grid-cols-7 gap-x-1 sm:gap-x-6 sm:gap-y-2 sm:p-1">
               {monthDates
                 .filter(({ isCurrentMonth }) => isCurrentMonth)
-                .map(({ date: day, isCurrentMonth }) => (
-                  <button
-                    key={day.toISOString()}
-                    className={`flex h-11 w-11 items-center justify-center rounded-full border text-center text-[22px] font-bold transition-colors sm:h-12 sm:w-12 sm:text-[26px] ${
-                      isSelected(day)
-                        ? "border-[#888888] bg-[#DBFDDF] text-[#14B82C]"
-                        : "border-[#888888] bg-white text-[#14B82C] hover:bg-gray-50"
-                    }`}
-                    onClick={() => handleDateClick(day, isCurrentMonth)}
-                  >
-                    <span className="text-xl font-semibold sm:text-base">
-                      {day.getDate()}
-                    </span>
-                  </button>
-                ))}
+                .map(({ date: day, isCurrentMonth }) => {
+                  // Disable if before today
+                  const today = new Date();
+                  today.setHours(0, 0, 0, 0);
+                  const isPast = day < today;
+
+                  return (
+                    <button
+                      key={day.toISOString()}
+                      className={`flex h-11 w-11 items-center justify-center rounded-full border text-center text-[22px] font-bold transition-colors sm:h-12 sm:w-12 sm:text-[26px] ${
+                        isPast
+                          ? "cursor-not-allowed border-[#e0e0e0] bg-gray-100 text-gray-400"
+                          : isSelected(day)
+                            ? "border-[#888888] bg-[#DBFDDF] text-[#14B82C]"
+                            : "border-[#888888] bg-white text-[#14B82C] hover:bg-gray-50"
+                      }`}
+                      onClick={() =>
+                        !isPast && handleDateClick(day, isCurrentMonth)
+                      }
+                      disabled={isPast}
+                    >
+                      <span className="text-xl font-semibold sm:text-base">
+                        {day.getDate()}
+                      </span>
+                    </button>
+                  );
+                })}
             </div>
           </div>
         </div>
       </div>
       {/* Make Next button full width and centered */}
+
       <div className="mt-8 flex flex-col items-center gap-2 text-sm font-normal">
         <span className="text-sm text-gray-700">
-          {selectedDates.length} Day{selectedDates.length !== 1 ? "s" : ""}{" "}
-          Selected
+          {selectedFutureDates.length} Day
+          {selectedFutureDates.length !== 1 ? "s" : ""} Selected
         </span>
         <button
           className={`mt-2 h-11 w-full rounded-full text-lg/5 font-semibold text-black ${
-            selectedDates.length === 0
+            selectedFutureDates.length === 0
               ? "cursor-not-allowed bg-[#b6e7c0]"
               : "bg-[#14B82C]"
           }`}
-          disabled={selectedDates.length === 0}
-          onClick={() => onNext && onNext(selectedDates)}
+          disabled={selectedFutureDates.length === 0}
+          onClick={() => onNext && onNext(selectedFutureDates)}
         >
           Next
         </button>

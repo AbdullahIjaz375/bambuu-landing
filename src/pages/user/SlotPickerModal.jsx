@@ -123,24 +123,32 @@ const SlotPickerModal = ({
                 {days.map((date) => {
                   const dateStr = `${date.getFullYear()}-${String(
                     date.getMonth() + 1,
-                  ).padStart(2, "0")}-${String(date.getDate()).padStart(
+                  ).padStart(
                     2,
                     "0",
-                  )}`;
+                  )}-${String(date.getDate()).padStart(2, "0")}`;
                   const available = !!slots[dateStr];
                   const isSelected = selectedDate === dateStr;
+
+                  // Disable if date is in the past
+                  const today = new Date();
+                  today.setHours(0, 0, 0, 0);
+                  const isPast = date < today;
+
                   return (
                     <button
                       key={dateStr}
-                      disabled={!available}
-                      onClick={() => available && setSelectedDate(dateStr)}
+                      disabled={!available || isPast}
+                      onClick={() =>
+                        available && !isPast && setSelectedDate(dateStr)
+                      }
                       className={`relative flex h-10 w-10 items-center justify-center rounded-full border ${
-                        available
+                        available && !isPast
                           ? isSelected
                             ? "border-[#888888] bg-[#DBFDDF] text-xl font-semibold text-[#14B82C]"
                             : "border-[#888888] bg-white text-xl font-semibold text-[#14B82C] hover:bg-[#E6FDE9]"
-                          : "border-[#E7E7E7] bg-white text-xl font-semibold text-[#D1D1D1]"
-                      } ${available && "hover:border-[#14B82C]"} `}
+                          : "cursor-not-allowed border-[#E7E7E7] bg-white text-xl font-semibold text-[#D1D1D1]"
+                      } ${available && !isPast && "hover:border-[#14B82C]"} `}
                     >
                       <span>{date.getDate()}</span>
                     </button>

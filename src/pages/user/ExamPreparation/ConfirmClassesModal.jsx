@@ -41,6 +41,13 @@ const ConfirmClassesModal = ({
   // Convert dates and times to the format expected for booking
   const formatBookingData = () => {
     const classes = normalizedSelectedDates.map((date) => {
+      // Format date as dd-mm-yy
+      const d = new Date(date);
+      const day = d.getDate().toString().padStart(2, "0");
+      const month = (d.getMonth() + 1).toString().padStart(2, "0");
+      const year = d.getFullYear().toString().slice(-2);
+      const formattedDate = `${day}-${month}-${year}`;
+
       const utcTime = normalizedSelectedTimes[date];
       const localTime = utcTime
         ? new Date(utcTime).toLocaleTimeString([], {
@@ -50,7 +57,7 @@ const ConfirmClassesModal = ({
           })
         : "";
       return {
-        date: date,
+        date: formattedDate,
         time: localTime,
         title: "Exam Prep Class",
         type: date % 2 === 0 ? "Class 6" : "Exam Prep Class",
@@ -156,11 +163,11 @@ const ConfirmClassesModal = ({
                     onRemoveClass &&
                     onRemoveClass(normalizedSelectedDates[index])
                   }
-                  className="flex items-center gap-1 text-xs font-medium text-red-500 hover:text-red-600"
+                  className="flex items-center justify-center gap-1 text-xs font-medium text-red-500 hover:text-red-600 disabled:opacity-60"
                   disabled={isLoading}
                 >
-                  <Trash2 className="h-4 w-4" />
-                  <span>Remove</span>
+                  <img src="/svgs/trash-icon.svg" alt="Remove" />
+                  <span className="text-xs font-medium">Remove</span>
                 </button>
               </div>
               {/* Date and Time */}
@@ -169,8 +176,7 @@ const ConfirmClassesModal = ({
                   {classItem.date}
                 </p>
                 <p className="text-xs font-medium text-[#3D3D3D]">
-                  {classItem.time}{" "}
-                  <span className="ml-1 text-gray-500">(60 min)</span>
+                  {classItem.time}
                 </p>
               </div>
             </div>

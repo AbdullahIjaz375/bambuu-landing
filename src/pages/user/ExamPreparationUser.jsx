@@ -436,7 +436,7 @@ const ExamPreparationUser = () => {
                         } flex-grow`}
                         style={{
                           minWidth: "260px",
-                          maxWidth: "320px",
+                          maxWidth: "280px",
                           flexBasis: "268px",
                         }}
                       >

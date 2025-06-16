@@ -57,20 +57,20 @@ const ClassCard = ({
     } else {
       return "TBD";
     }
-    // Use local time
     const duration = introClass ? 30 : examPrepClass ? 60 : classDuration;
-    const startHour = date.getHours();
-    const startMinutes = date.getMinutes();
     const endDate = new Date(date.getTime() + duration * 60000);
-    const endHour = endDate.getHours();
-    const endMinutes = endDate.getMinutes();
-    const formatDigit = (num) => num.toString().padStart(2, "0");
-    // Show local time zone abbreviation
-    const tz = Intl.DateTimeFormat(undefined, { timeZoneName: "short" })
-      .format(date)
-      .split(" ")
-      .pop();
-    return `${formatDigit(startHour)}:${formatDigit(startMinutes)}-${formatDigit(endHour)}:${formatDigit(endMinutes)} ${tz}`;
+
+    // Format start and end time in 12-hour format with AM/PM
+    const format12 = (d) =>
+      d
+        .toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        })
+        .replace(/^0/, ""); // Remove leading zero
+
+    return `${format12(date)} - ${format12(endDate)}`;
   };
   // Add a helper to get the day name
   const getDayName = (timestamp) => {
@@ -196,7 +196,7 @@ const ClassCard = ({
         }}
       >
         <div
-          className={`flex h-[340px] w-full max-w-lg flex-col border ${
+          className={`flex h-[360px] w-full max-w-lg flex-col border ${
             introClass || examPrepClass
               ? "h-[280px] w-full min-w-[220px] max-w-[350px] bg-[#E6FDE9]"
               : ""
