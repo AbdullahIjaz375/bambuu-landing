@@ -70,6 +70,7 @@ const TimeSlotModal = ({
     return obj;
   });
   const [activeDateIdx, setActiveDateIdx] = useState(0);
+  const [sameTime, setSameTime] = useState(false);
 
   // Update when prefilledSlotsByDate or selectedDates change
   useEffect(() => {
@@ -186,9 +187,52 @@ const TimeSlotModal = ({
           );
         })}
       </div>
+
+      <div className="mb-4 mt-5 flex items-center rounded-[999px] border border-gray-200 px-4 py-2 shadow-sm">
+        <label
+          htmlFor="same-time"
+          className="flex w-full cursor-pointer items-center gap-2"
+        >
+          <input
+            type="checkbox"
+            id="same-time"
+            className="peer sr-only"
+            checked={sameTime}
+            onChange={() => {
+              setSameTime((prev) => {
+                const newValue = !prev;
+                if (newValue) {
+                  // When switching ON, copy current date's slots to all dates
+                  setSelectedSlotsByDate((prevSlots) => {
+                    const currentSlots = prevSlots[currentDateKey] || [];
+                    const newSlots = {};
+                    selectedDates.forEach((date) => {
+                      const dateKey = formatDateKey(date);
+                      newSlots[dateKey] = [...currentSlots];
+                    });
+                    return newSlots;
+                  });
+                }
+                return newValue;
+              });
+            }}
+          />
+          <div className="relative h-6 w-10 rounded-full bg-gray-200 transition-colors duration-300 peer-checked:bg-[#14B82C]">
+            <div
+              className={`absolute left-1 top-1 h-4 w-4 rounded-full bg-white transition-transform duration-300 ${
+                sameTime ? "translate-x-4" : ""
+              }`}
+            />
+          </div>
+          <span className="text-base font-normal text-black">
+            Select same time slot for all dates
+          </span>
+        </label>
+      </div>
+
       <div className="mb-2 flex justify-between">
         <button
-          className="rounded-full border border-[#5D5D5D] bg-white px-8 py-2 font-semibold text-[#042f0c]"
+          className="h-11 w-40 rounded-full border border-black bg-white px-8 py-2 font-semibold text-[#042f0c]"
           onClick={() => {
             if (activeDateIdx === 0) {
               onClose("back");
@@ -227,13 +271,15 @@ const TimeSlotModal = ({
             })
           }
           onClick={() => {
-            if (activeDateIdx === selectedDates.length - 1) {
+            if (sameTime) {
+              handleNext();
+            } else if (activeDateIdx === selectedDates.length - 1) {
               handleNext();
             } else {
               setActiveDateIdx((idx) => idx + 1);
             }
           }}
-          className={`rounded-full bg-[#14B82C] px-8 py-2 font-semibold text-black ${
+          className={`h-11 w-40 rounded-full border border-[#042F0C] bg-[#14B82C] px-8 py-2 font-semibold text-black ${
             (selectedSlotsByDate[currentDateKey] || []).length === 0 ||
             (selectedSlotsByDate[currentDateKey] || []).every((slot) => {
               // isPastTime logic for this slot (same as above)
@@ -261,7 +307,7 @@ const TimeSlotModal = ({
               : "bg-[#14B82C]"
           }`}
         >
-          {activeDateIdx === selectedDates.length - 1 ? "Next" : "Next"}
+          Next
         </button>
       </div>
     </div>
