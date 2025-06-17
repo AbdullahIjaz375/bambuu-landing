@@ -76,6 +76,7 @@ import { initAnalytics, trackPageView } from "./utils/analytics";
 import ExamPreparationTutor from "./pages/tutor/ExamPreparationTutor";
 import ExamPreparationUser from "./pages/user/ExamPreparationUser";
 import MobileConfirmationStep from "./components/mobile-flow/MobileConfirmationStep";
+import LandingExamPrep from "./pages/LandingExamPrep";
 
 const App = () => {
   const { user, streamClient } = useAuth(); // Use useAuth() inside the component
@@ -138,6 +139,14 @@ const App = () => {
                 element={
                   <PublicRoute>
                     <Splash />
+                  </PublicRoute>
+                }
+              />
+              <Route
+                path="/exam-prep"
+                element={
+                  <PublicRoute>
+                    <LandingExamPrep />
                   </PublicRoute>
                 }
               />
