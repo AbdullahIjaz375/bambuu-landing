@@ -109,41 +109,15 @@ const TimeSlotModal = ({
   };
 
   const handleNext = () => {
-    let slots = [];
-    if (sameTime) {
-      // Use the slots from the first date for all dates
-      const firstDate = selectedDates[0];
-      const times = (selectedSlotsByDate[firstDate] || [])
-        .map((slot) =>
-          selectedDates.map((date) => ({
-            date,
-            time: slot,
-          })),
-        )
-        .flat();
-      // Group by date
-      const grouped = {};
-      times.forEach(({ date, time }) => {
-        if (!grouped[date]) grouped[date] = [];
-        grouped[date].push({
-          time: getDateWithTime(date, time),
-          booked: false,
-        });
-      });
-      slots = Object.keys(grouped).map((date) => ({ times: grouped[date] }));
-    } else {
-      slots = selectedDates
-        .map((date) => ({
-          times: (selectedSlotsByDate[formatDateKey(date)] || []).map(
-            (slot) => ({
-              time: getDateWithTime(date, slot),
-              booked: false,
-            }),
-          ),
-        }))
-        .filter((slotObj) => slotObj.times.length > 0);
-    }
-    onNext(slots);
+    // Flatten all selected slots into a single times array
+    const times = selectedDates.flatMap((date) => {
+      const dateKey = formatDateKey(date);
+      return (selectedSlotsByDate[dateKey] || []).map((slot) => ({
+        time: getDateWithTime(date, slot),
+        booked: false,
+      }));
+    });
+    onNext([{ times }]);
   };
 
   return (
@@ -213,6 +187,7 @@ const TimeSlotModal = ({
           );
         })}
       </div>
+
       <div className="mb-4 mt-5 flex items-center rounded-[999px] border border-gray-200 px-4 py-2 shadow-sm">
         <label
           htmlFor="same-time"
@@ -223,7 +198,24 @@ const TimeSlotModal = ({
             id="same-time"
             className="peer sr-only"
             checked={sameTime}
-            onChange={() => setSameTime((prev) => !prev)}
+            onChange={() => {
+              setSameTime((prev) => {
+                const newValue = !prev;
+                if (newValue) {
+                  // When switching ON, copy current date's slots to all dates
+                  setSelectedSlotsByDate((prevSlots) => {
+                    const currentSlots = prevSlots[currentDateKey] || [];
+                    const newSlots = {};
+                    selectedDates.forEach((date) => {
+                      const dateKey = formatDateKey(date);
+                      newSlots[dateKey] = [...currentSlots];
+                    });
+                    return newSlots;
+                  });
+                }
+                return newValue;
+              });
+            }}
           />
           <div className="relative h-6 w-10 rounded-full bg-gray-200 transition-colors duration-300 peer-checked:bg-[#14B82C]">
             <div
@@ -237,6 +229,7 @@ const TimeSlotModal = ({
           </span>
         </label>
       </div>
+
       <div className="mb-2 flex justify-between">
         <button
           className="h-11 w-40 rounded-full border border-black bg-white px-8 py-2 font-semibold text-[#042f0c]"
@@ -252,35 +245,66 @@ const TimeSlotModal = ({
         </button>
         <button
           disabled={
-            sameTime
-              ? (selectedSlotsByDate[formatDateKey(selectedDates[0])] || [])
-                  .length === 0
-              : selectedDates.some(
-                  (date) =>
-                    (selectedSlotsByDate[formatDateKey(date)] || []).length ===
-                    0,
-                )
+            // Disable if no valid (future) slot is selected for this date
+            (selectedSlotsByDate[currentDateKey] || []).length === 0 ||
+            (selectedSlotsByDate[currentDateKey] || []).every((slot) => {
+              // isPastTime logic for this slot
+              let isPastTime = false;
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+              const slotDate = new Date(currentDate);
+              slotDate.setHours(0, 0, 0, 0);
+              if (slotDate.getTime() === today.getTime()) {
+                let [hour, minute] = slot.split(":");
+                minute = parseInt(minute, 10);
+                hour = parseInt(hour, 10);
+                const isPM = slot.toLowerCase().includes("pm");
+                if (isPM && hour !== 12) hour += 12;
+                if (!isPM && hour === 12) hour = 0;
+                const slotDateTime = new Date(currentDate);
+                slotDateTime.setHours(hour, minute, 0, 0);
+                if (slotDateTime < new Date()) {
+                  isPastTime = true;
+                }
+              }
+              return isPastTime;
+            })
           }
           onClick={() => {
-            if (activeDateIdx === selectedDates.length - 1 || sameTime) {
+            if (sameTime) {
+              handleNext();
+            } else if (activeDateIdx === selectedDates.length - 1) {
               handleNext();
             } else {
               setActiveDateIdx((idx) => idx + 1);
             }
           }}
           className={`h-11 w-40 rounded-full border border-[#042F0C] bg-[#14B82C] px-8 py-2 font-semibold text-black ${
-            sameTime
-              ? (selectedSlotsByDate[formatDateKey(selectedDates[0])] || [])
-                  .length === 0
-                ? "cursor-not-allowed bg-[#b6e7c0]"
-                : "bg-[#14B82C]"
-              : selectedDates.some(
-                    (date) =>
-                      (selectedSlotsByDate[formatDateKey(date)] || [])
-                        .length === 0,
-                  )
-                ? "cursor-not-allowed bg-[#b6e7c0]"
-                : "bg-[#14B82C]"
+            (selectedSlotsByDate[currentDateKey] || []).length === 0 ||
+            (selectedSlotsByDate[currentDateKey] || []).every((slot) => {
+              // isPastTime logic for this slot (same as above)
+              let isPastTime = false;
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+              const slotDate = new Date(currentDate);
+              slotDate.setHours(0, 0, 0, 0);
+              if (slotDate.getTime() === today.getTime()) {
+                let [hour, minute] = slot.split(":");
+                minute = parseInt(minute, 10);
+                hour = parseInt(hour, 10);
+                const isPM = slot.toLowerCase().includes("pm");
+                if (isPM && hour !== 12) hour += 12;
+                if (!isPM && hour === 12) hour = 0;
+                const slotDateTime = new Date(currentDate);
+                slotDateTime.setHours(hour, minute, 0, 0);
+                if (slotDateTime < new Date()) {
+                  isPastTime = true;
+                }
+              }
+              return isPastTime;
+            })
+              ? "cursor-not-allowed bg-[#b6e7c0]"
+              : "bg-[#14B82C]"
           }`}
         >
           Next

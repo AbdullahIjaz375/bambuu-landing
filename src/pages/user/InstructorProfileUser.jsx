@@ -33,15 +33,12 @@ const InstructorProfileUser = () => {
     hasBookedExamPrepClassWithOtherTutor,
     setHasBookedExamPrepClassWithOtherTutor,
   ] = useState(true);
-  const [showIntroBookingFlow, setShowIntroBookingFlow] = useState(false);
-  const [introBookingInitialStep, setIntroBookingInitialStep] = useState(0);
-  const [showExamPrepBookingFlow, setShowExamPrepBookingFlow] = useState(false);
-  const [examPrepBookingInitialStep, setExamPrepBookingInitialStep] =
-    useState(6);
-  const [hasPurchasedPlan, setHasPurchasedPlan] = useState(null);
+  const [showBookingFlowModal, setShowBookingFlowModal] = useState(false);
+  const [bookingFlowMode, setBookingFlowMode] = useState("intro");
+  const [bookingFlowStep, setBookingFlowStep] = useState(0);
   const [selectedInstructor, setSelectedInstructor] = useState(null);
 
-  // Handle exam preparation package click
+  // Refactored Exam Prep click handler for onboarding logic
   const handleExamPrepClick = async () => {
     setStepStatusLoading(true);
     setStepStatusError(null);
@@ -56,24 +53,28 @@ const InstructorProfileUser = () => {
 
       // 2. No intro call with this tutor
       if (!res.hasBookedIntroCall) {
-        setIntroBookingInitialStep(2);
+        setBookingFlowMode("intro");
+        setBookingFlowStep(2); // Go to profile step with this tutor
         setSelectedInstructor(tutor);
-        setShowIntroBookingFlow(true);
+        setShowBookingFlowModal(true);
         return;
       }
       // 3. Intro call booked but not completed
       if (res.hasBookedIntroCall && !res.doneWithIntroCall) {
-        if (res.pendingIntroCallClassId) {
-          navigate(`/classDetailsUser/${res.pendingIntroCallClassId}`);
-        } else return;
+        setBookingFlowMode("intro");
+        setBookingFlowStep(4); // Confirmation step
+        setSelectedInstructor(tutor);
+        setShowBookingFlowModal(true);
+        return;
       }
       // 4. Intro call completed, no exam prep class booked
       if (res.doneWithIntroCall && !res.hasBookedExamPrepClass) {
-        setExamPrepBookingInitialStep(3); // step 4
-        setShowExamPrepBookingFlow(true);
+        setBookingFlowMode("exam");
+        setBookingFlowStep(6); // Exam prep start step
+        setSelectedInstructor(tutor);
+        setShowBookingFlowModal(true);
         return;
       }
-
       // 5. Exam prep class booked
       if (res.hasBookedExamPrepClass) {
         navigate(`/examPreparationUser/${tutorId}`);
@@ -317,10 +318,8 @@ const InstructorProfileUser = () => {
         setHasBookedExamPrepClassWithOtherTutor(
           res.hasBookedExamPrepClassWithOtherTutor,
         );
-        setHasPurchasedPlan(res.hasPurchasedPlan); // <-- set plan purchase status
       } catch (err) {
         setHasBookedExamPrepClassWithOtherTutor(false); // fallback
-        setHasPurchasedPlan(null);
       }
     };
     fetchExamPrepStatus();
@@ -463,14 +462,12 @@ const InstructorProfileUser = () => {
                     style={{
                       opacity:
                         stepStatusLoading ||
-                        (hasBookedExamPrepClassWithOtherTutor &&
-                          hasPurchasedPlan !== false)
+                        hasBookedExamPrepClassWithOtherTutor
                           ? 0.6
                           : 1,
                       pointerEvents:
                         stepStatusLoading ||
-                        (hasBookedExamPrepClassWithOtherTutor &&
-                          hasPurchasedPlan !== false)
+                        hasBookedExamPrepClassWithOtherTutor
                           ? "none"
                           : "auto",
                     }}
@@ -516,21 +513,23 @@ const InstructorProfileUser = () => {
       </div>
 
       <BookingFlowModal
-        isOpen={showIntroBookingFlow}
-        onClose={() => setShowIntroBookingFlow(false)}
-        user={user}
-        mode="intro"
-        initialStep={introBookingInitialStep}
+        isOpen={showBookingFlowModal}
+        onClose={() => {
+          setShowBookingFlowModal(false);
+          setBookingFlowStep(0);
+          setBookingFlowMode("intro");
+          setSelectedInstructor(null);
+        }}
+        user={{
+          ...user,
+          ...(bookingFlowMode === "exam"
+            ? { completedIntroCallTutorId: tutorId }
+            : {}),
+        }}
+        mode={bookingFlowMode}
+        initialStep={bookingFlowStep}
         selectedInstructor={selectedInstructor}
         setSelectedInstructor={setSelectedInstructor}
-      />
-
-      <BookingFlowModal
-        isOpen={showExamPrepBookingFlow}
-        onClose={() => setShowExamPrepBookingFlow(false)}
-        user={user}
-        mode="exam"
-        initialStep={examPrepBookingInitialStep}
       />
     </div>
   );

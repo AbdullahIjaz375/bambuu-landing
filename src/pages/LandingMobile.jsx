@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import ComparisonTable from "../components/ComparisonTable";
 import MobileSignupModalFlow from "../components/mobile-flow/MobileSignupModalFlow";
+import { X } from "lucide-react";
 
 const features = [
   {
@@ -42,9 +43,27 @@ const packageFeatures = [
 
 export default function LandingMobile() {
   const [showSignupFlow, setShowSignupFlow] = useState(false);
+  const [showBanner, setShowBanner] = useState(true);
 
   return (
     <div className="min-h-screen w-full bg-[#F0FDF1] font-['Urbanist'] text-black">
+      {/* Notification Banner */}
+      {showBanner && (
+        <div className="relative z-10 mx-auto flex min-h-[66px] max-w-[393px] flex-row items-center justify-between gap-2 rounded-t-2xl bg-[#FFBF00] px-6 py-4">
+          <span className="text-sm font-medium text-black">
+            Don&apos;t Miss Out! The final 10 spots for July are filling up
+            fast.
+          </span>
+          <button
+            className="ml-2 text-xl text-black"
+            onClick={() => setShowBanner(false)}
+            aria-label="Close"
+            style={{ lineHeight: 1 }}
+          >
+            <X size={22} />
+          </button>
+        </div>
+      )}
       {/* Onboarding Modal Flow */}
       {showSignupFlow && (
         <MobileSignupModalFlow onClose={() => setShowSignupFlow(false)} />
