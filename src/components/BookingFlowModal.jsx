@@ -327,6 +327,7 @@ const BookingFlowModal = ({
   };
   const handleBookedModalClose = () => {
     setShowBookedModal(false);
+    if (onBookingComplete) onBookingComplete();
     if (mode === "intro") {
       // Just close the modal, do NOT start exam prep flow
       if (onClose) onClose();
@@ -431,6 +432,7 @@ const BookingFlowModal = ({
   };
   const handleExamBookedClose = () => {
     setShowExamBooked(false);
+    if (onBookingComplete) onBookingComplete();
     if (onComplete) onComplete();
     if (onClose) onClose();
   };

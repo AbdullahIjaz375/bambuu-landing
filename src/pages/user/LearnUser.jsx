@@ -199,10 +199,10 @@ const LearnUser = () => {
   const { t, i18n } = useTranslation();
   const { currentLanguage, changeLanguage } = useLanguage();
 
-  // --- Effects ---
-  useEffect(() => {
-    const fetchPlanTimeline = async () => {
-      if (!user?.uid) return;
+  // --- Data Refresh Function ---
+  const refreshData = async () => {
+    // Fetch credits and renewal banner
+    if (user?.uid) {
       try {
         const timeline = await getExamPrepPlanTimeline(user.uid);
         if (timeline?.activePlan) {
@@ -227,9 +227,87 @@ const LearnUser = () => {
         setExamPrepCredits(0);
         setShowRenewalBanner(false);
       }
-    };
-    fetchPlanTimeline();
-  }, [user?.uid]);
+    }
+    // Fetch classes
+    if (user && user.enrolledClasses) {
+      setLoading(true);
+      const classesData = [];
+      try {
+        for (const classId of user.enrolledClasses) {
+          const classRef = doc(db, "classes", classId);
+          const classDoc = await getDoc(classRef);
+          if (classDoc.exists()) {
+            const classData = classDoc.data();
+            classesData.push({ id: classId, ...classData });
+          }
+        }
+        setClasses(classesData);
+      } catch (error) {
+        setError(
+          "Unable to fetch classes at this time. Please try again later.",
+        );
+      } finally {
+        setLoading(false);
+      }
+    }
+    // Fetch language cards data
+    try {
+      setLoadingLanguages(true);
+      const classesSnapshot = await getDocs(collection(db, "classes"));
+      const tempLanguageData = {
+        spanish: { studentIds: new Set(), studentPhotos: [] },
+        english: { studentIds: new Set(), studentPhotos: [] },
+        exchange: { studentIds: new Set(), studentPhotos: [] },
+      };
+      for (const classDoc of classesSnapshot.docs) {
+        const classData = classDoc.data();
+        const language = classData.language;
+        const classMemberIds = classData.classMemberIds || [];
+        if (language === "Spanish") {
+          classMemberIds.forEach((id) =>
+            tempLanguageData.spanish.studentIds.add(id),
+          );
+        } else if (language === "English") {
+          classMemberIds.forEach((id) =>
+            tempLanguageData.english.studentIds.add(id),
+          );
+        } else if (language === "English-Spanish") {
+          classMemberIds.forEach((id) =>
+            tempLanguageData.exchange.studentIds.add(id),
+          );
+        }
+      }
+      tempLanguageData.spanish.studentIds = Array.from(
+        tempLanguageData.spanish.studentIds,
+      );
+      tempLanguageData.english.studentIds = Array.from(
+        tempLanguageData.english.studentIds,
+      );
+      tempLanguageData.exchange.studentIds = Array.from(
+        tempLanguageData.exchange.studentIds,
+      );
+      for (const langKey of ["spanish", "english", "exchange"]) {
+        const studentIds = tempLanguageData[langKey].studentIds.slice(0, 12);
+        const photoPromises = studentIds.map(async (studentId) => {
+          const studentRef = doc(db, "students", studentId);
+          const studentDoc = await getDoc(studentRef);
+          return studentDoc.exists() ? studentDoc.data().photoUrl || "" : "";
+        });
+        tempLanguageData[langKey].studentPhotos =
+          await Promise.all(photoPromises);
+      }
+      setLanguageData(tempLanguageData);
+    } catch (error) {
+      console.error("Error fetching classes or students:", error);
+    } finally {
+      setLoadingLanguages(false);
+    }
+  };
+
+  // --- Effects ---
+  useEffect(() => {
+    refreshData();
+  }, [user]);
 
   useEffect(() => {
     const languageToUse =
@@ -247,93 +325,6 @@ const LearnUser = () => {
     }
     localStorage.setItem("i18nextLng", languageToUse);
   }, [location.state, i18n, currentLanguage, changeLanguage]);
-
-  useEffect(() => {
-    const fetchClassesAndStudents = async () => {
-      try {
-        setLoadingLanguages(true);
-        const classesSnapshot = await getDocs(collection(db, "classes"));
-        const tempLanguageData = {
-          spanish: { studentIds: new Set(), studentPhotos: [] },
-          english: { studentIds: new Set(), studentPhotos: [] },
-          exchange: { studentIds: new Set(), studentPhotos: [] },
-        };
-        for (const classDoc of classesSnapshot.docs) {
-          const classData = classDoc.data();
-          const language = classData.language;
-          const classMemberIds = classData.classMemberIds || [];
-          if (language === "Spanish") {
-            classMemberIds.forEach((id) =>
-              tempLanguageData.spanish.studentIds.add(id),
-            );
-          } else if (language === "English") {
-            classMemberIds.forEach((id) =>
-              tempLanguageData.english.studentIds.add(id),
-            );
-          } else if (language === "English-Spanish") {
-            classMemberIds.forEach((id) =>
-              tempLanguageData.exchange.studentIds.add(id),
-            );
-          }
-        }
-        tempLanguageData.spanish.studentIds = Array.from(
-          tempLanguageData.spanish.studentIds,
-        );
-        tempLanguageData.english.studentIds = Array.from(
-          tempLanguageData.english.studentIds,
-        );
-        tempLanguageData.exchange.studentIds = Array.from(
-          tempLanguageData.exchange.studentIds,
-        );
-        for (const langKey of ["spanish", "english", "exchange"]) {
-          const studentIds = tempLanguageData[langKey].studentIds.slice(0, 12);
-          const photoPromises = studentIds.map(async (studentId) => {
-            const studentRef = doc(db, "students", studentId);
-            const studentDoc = await getDoc(studentRef);
-            return studentDoc.exists() ? studentDoc.data().photoUrl || "" : "";
-          });
-          tempLanguageData[langKey].studentPhotos =
-            await Promise.all(photoPromises);
-        }
-        setLanguageData(tempLanguageData);
-      } catch (error) {
-        console.error("Error fetching classes or students:", error);
-      } finally {
-        setLoadingLanguages(false);
-      }
-    };
-    fetchClassesAndStudents();
-  }, []);
-
-  useEffect(() => {
-    const fetchClasses = async () => {
-      if (!user || !user.enrolledClasses) {
-        setLoading(false);
-        return;
-      }
-      setLoading(true);
-      const classesData = [];
-      try {
-        for (const classId of user.enrolledClasses) {
-          const classRef = doc(db, "classes", classId);
-          const classDoc = await getDoc(classRef);
-          if (classDoc.exists()) {
-            const classData = classDoc.data();
-            classesData.push({ id: classId, ...classData });
-          }
-        }
-        setClasses(classesData);
-      } catch (error) {
-        console.error("Error fetching classes:", error);
-        setError(
-          "Unable to fetch classes at this time. Please try again later.",
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchClasses();
-  }, [user]);
 
   useEffect(() => {
     const fetchGroups = async () => {
@@ -838,6 +829,7 @@ const LearnUser = () => {
         mode="intro"
         selectedInstructor={selectedInstructor}
         setSelectedInstructor={setSelectedInstructor}
+        onBookingComplete={refreshData}
       />
       <BookingFlowModal
         isOpen={showExamPrepBookingFlow}
@@ -853,6 +845,7 @@ const LearnUser = () => {
         initialStep={examPrepBookingInitialStep}
         selectedInstructor={selectedInstructor}
         setSelectedInstructor={setSelectedInstructor}
+        onBookingComplete={refreshData}
       />
       {/* Sidebar-triggered modals */}
       <BookingFlowModal
@@ -867,6 +860,7 @@ const LearnUser = () => {
         initialStep={sidebarExamPrepInitialStep}
         selectedInstructor={selectedInstructor}
         setSelectedInstructor={setSelectedInstructor}
+        onBookingComplete={refreshData}
       />
       <BookingFlowModal
         isOpen={showSidebarExamPrepBookingFlow}
@@ -880,6 +874,7 @@ const LearnUser = () => {
         initialStep={sidebarExamPrepInitialStep}
         selectedInstructor={selectedInstructor}
         setSelectedInstructor={setSelectedInstructor}
+        onBookingComplete={refreshData}
       />
     </div>
   );
