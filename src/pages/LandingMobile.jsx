@@ -50,7 +50,7 @@ export default function LandingMobile() {
       {/* Notification Banner */}
       {showBanner && (
         <div className="relative z-10 mx-auto flex min-h-[66px] max-w-[393px] flex-row items-center justify-between gap-2 rounded-t-2xl bg-[#FFBF00] px-6 py-4">
-          <span className="text-sm font-medium text-black">
+          <span className="w-full text-center text-sm font-medium text-black">
             Don&apos;t Miss Out! The final 10 spots for July are filling up
             fast.
           </span>

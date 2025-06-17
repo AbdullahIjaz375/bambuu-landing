@@ -575,7 +575,11 @@ const Subscriptions = ({ onNext, onBack, onClose, isModal = false }) => {
                     <div>
                       Unlimited instructor-led group conversation classes
                     </div>
-                    <div>Personalized support from the bambuu team</div>
+                    <div>Personalized support from the bammbuu team</div>
+                    <div>
+                      We match you with a personal language
+                      <br /> partner to practice conversation
+                    </div>
                     <div>
                       Money back guarantee <span className="font-bold">**</span>
                     </div>
