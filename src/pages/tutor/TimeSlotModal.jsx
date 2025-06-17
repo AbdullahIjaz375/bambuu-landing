@@ -239,7 +239,7 @@ const TimeSlotModal = ({
       </div>
       <div className="mb-2 flex justify-between">
         <button
-          className="rounded-full border border-[#5D5D5D] bg-white px-8 py-2 font-semibold text-[#042f0c]"
+          className="h-11 w-40 rounded-full border border-black bg-white px-8 py-2 font-semibold text-[#042f0c]"
           onClick={() => {
             if (activeDateIdx === 0) {
               onClose("back");
@@ -268,7 +268,7 @@ const TimeSlotModal = ({
               setActiveDateIdx((idx) => idx + 1);
             }
           }}
-          className={`rounded-full bg-[#14B82C] px-8 py-2 font-semibold text-black ${
+          className={`h-11 w-40 rounded-full border border-[#042F0C] bg-[#14B82C] px-8 py-2 font-semibold text-black ${
             sameTime
               ? (selectedSlotsByDate[formatDateKey(selectedDates[0])] || [])
                   .length === 0

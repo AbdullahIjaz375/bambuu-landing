@@ -648,14 +648,14 @@ const LearnUser = () => {
                   className="h-10 w-10"
                 />
                 <span className="text-base font-normal text-[#454545]">
-                  You purchased exam prep package. Let's complete your
-                  onboarding process!
+                  {examPrepStatus?.hasPurchasedPlan
+                    ? "You purchased exam prep package. Let's complete your onboarding process!"
+                    : "Achieve exam success and true language fluency with our all-in-one immersive program."}
                 </span>
               </div>
               <button
                 className="rounded-3xl border border-[#5D5D5D] bg-[#E6FDE9] px-5 py-2 text-base font-medium text-[#042F0C] transition hover:bg-[#E6FDE9]"
                 onClick={() => {
-                  // If exam prep classes are booked, go to tutor profile (5th condition)
                   if (
                     examPrepStatus?.hasBookedExamPrepClass &&
                     examPrepStatus?.completedIntroCallTutorId
@@ -663,12 +663,16 @@ const LearnUser = () => {
                     navigate(
                       `/examPreparationUser/${examPrepStatus.completedIntroCallTutorId}`,
                     );
+                  } else if (!examPrepStatus?.hasPurchasedPlan) {
+                    navigate("/subscriptions?tab=exam");
                   } else {
                     handleOnboarding();
                   }
                 }}
               >
-                Complete Onboarding
+                {examPrepStatus?.hasPurchasedPlan
+                  ? "Complete Onboarding"
+                  : "Learn More"}
               </button>
             </div>
           )}
