@@ -33,6 +33,7 @@ const CustomChatComponent = ({
   const navigate = useNavigate();
   const location = useLocation();
   const isStudentsTutorPage = location.pathname.includes("/studentsTutor");
+  const isMessagesUserPage = location.pathname.includes("/messagesUser");
   const { t } = useTranslation();
 
   const [isLoading, setIsLoading] = useState(true);
@@ -95,7 +96,19 @@ const CustomChatComponent = ({
         await channelObj.watch();
 
         const state = channelObj.state;
-        const channelMessages = state.messages || [];
+        let channelMessages = state.messages || [];
+
+        // Filter out the first message if it's a system/hidden message and on StudentsTutor or MessagesUser page, but only for exam_prep channels
+        if (
+          (isStudentsTutorPage || isMessagesUserPage) &&
+          channelType === "exam_prep" &&
+          channelMessages.length > 0
+        ) {
+          const firstMsg = channelMessages[0];
+          if (firstMsg.type === "system" && firstMsg.hidden === true) {
+            channelMessages = channelMessages.slice(1);
+          }
+        }
 
         const formattedMessages = channelMessages.map((msg) => ({
           id: msg.id,
@@ -175,7 +188,14 @@ const CustomChatComponent = ({
         channel.stopWatching().catch(console.error);
       }
     };
-  }, [channelId, streamClient, type, user, isStudentsTutorPage]);
+  }, [
+    channelId,
+    streamClient,
+    type,
+    user,
+    isStudentsTutorPage,
+    isMessagesUserPage,
+  ]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {

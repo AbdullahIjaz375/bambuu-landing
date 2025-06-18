@@ -124,13 +124,75 @@ const StudentsTutor = () => {
       }
       try {
         setLoading(true);
-        // Query all channels where the tutor is a member
+        console.log("[StudentsTutor] Querying channels with:", {
+          filter: { members: { $in: [user.uid] } },
+          sort: { last_message_at: -1 },
+          options: { watch: true, state: true, message_limit: 0 },
+        });
         const channels = await streamClient.queryChannels(
           { members: { $in: [user.uid] } },
           { last_message_at: -1 },
-          { watch: true, state: true },
+          { watch: true, state: true, message_limit: 0 },
         );
+        console.log("[StudentsTutor] Channels returned:", channels);
+        if (channels.length === 0) {
+          console.warn(
+            "[StudentsTutor] No channels returned for user:",
+            user.uid,
+          );
+        } else {
+          const channelSummaries = channels.map((ch) => ({
+            id: ch.id,
+            type: ch.type,
+            members: ch.state?.members ? Object.keys(ch.state.members) : [],
+          }));
+          console.log("[StudentsTutor] Channel summaries:", channelSummaries);
+          // Log if the missing channel is present
+          const missingId = "s8fZSQpKcDJaUqZjbSjw";
+          const found = channels.find((ch) => ch.id === missingId);
+          if (!found) {
+            console.warn(
+              `[StudentsTutor] Channel with id ${missingId} NOT found in queryChannels result.`,
+            );
+            // Try to fetch the channel directly
+            try {
+              const directChannel = streamClient.channel(
+                "exam_prep",
+                missingId,
+              );
+              await directChannel.watch();
+              console.log(
+                `[StudentsTutor] Direct fetch for channel ${missingId}:`,
+                {
+                  id: directChannel.id,
+                  type: directChannel.type,
+                  members: directChannel.state?.members
+                    ? Object.keys(directChannel.state.members)
+                    : [],
+                  data: directChannel.data,
+                },
+              );
+            } catch (err) {
+              console.error(
+                `[StudentsTutor] Error fetching channel ${missingId} directly:`,
+                err,
+              );
+            }
+          } else {
+            console.log(
+              `[StudentsTutor] Channel with id ${missingId} IS present in queryChannels result.`,
+            );
+          }
+        }
         setChannels(channels);
+        if (channels.length === 0) {
+          console.warn(
+            "[StudentsTutor] No channels returned for user:",
+            user.uid,
+          );
+        } else {
+          console.log("[StudentsTutor] First channel sample:", channels[0]);
+        }
       } catch (err) {
         setChannels([]);
       } finally {
@@ -257,6 +319,13 @@ const StudentsTutor = () => {
       image: "/images/exam-prep-icon.png",
       online: false,
     };
+  };
+
+  // Helper to filter out hidden system messages
+  const filterVisibleMessages = (messages) => {
+    return messages.filter(
+      (msg) => msg.type !== "hidden_system" && !msg.hidden,
+    );
   };
 
   const ChatItem = ({ channel }) => {
@@ -399,6 +468,7 @@ const StudentsTutor = () => {
                       ? `Exam Prep - ${getStudentFromChannel(selectedChannel)?.name || "Student"}`
                       : getChannelDisplayName(selectedChannel, user)
                   }
+                  filterMessages={filterVisibleMessages}
                 />
               ) : (
                 <div className="flex h-full items-center justify-center text-gray-500">
