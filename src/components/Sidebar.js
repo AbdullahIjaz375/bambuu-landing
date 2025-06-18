@@ -3,12 +3,113 @@ import { ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import TutorialOverlay from "./TutorialOverlay";
 import { useState } from "react";
+import BookingFlowModal from "./BookingFlowModal";
+import {
+  getStudentExamPrepTutorialStatus,
+  getExamPrepStepStatus,
+  getStudentClasses,
+} from "../api/examPrepApi";
 
-const Sidebar = ({ user, onExamPrepClick }) => {
+const Sidebar = ({ user }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [selectedInstructor, setSelectedInstructor] = useState(null);
+
+  // Sidebar modal state
+  const [showSidebarIntroBookingFlow, setShowSidebarIntroBookingFlow] =
+    useState(false);
+  const [showSidebarExamPrepBookingFlow, setShowSidebarExamPrepBookingFlow] =
+    useState(false);
+  const [sidebarExamPrepInitialStep, setSidebarExamPrepInitialStep] =
+    useState(0);
+  const [sidebarExamPrepUser, setSidebarExamPrepUser] = useState(null);
+
+  // Exam Prep Sidebar Click Handler (now internal)
+  const handleExamPrepSidebarClick = async (e) => {
+    e?.preventDefault?.();
+    if (!user?.uid) return;
+    try {
+      const status = await getStudentExamPrepTutorialStatus(user.uid);
+
+      // 1. Not purchased: go to subscriptions
+      if (!status.hasPurchasedPlan) {
+        navigate("/subscriptions?tab=exam");
+        return;
+      }
+      // 2. Purchased, not booked intro call: open BookingFlowModal step 0
+      if (!status.hasBookedIntroCall) {
+        setSidebarExamPrepUser(user);
+        setSidebarExamPrepInitialStep(0);
+        setShowSidebarIntroBookingFlow(true);
+        return;
+      }
+      // 3. Booked intro call, not done: open class details page for that class
+      if (status.hasBookedIntroCall && !status.doneWithIntroCall) {
+        // Fetch user's classes (API version, not from parent)
+        let userClasses = [];
+        try {
+          const result = await getStudentClasses(user.uid);
+          // Defensive: handle both array and object response
+          if (Array.isArray(result)) {
+            userClasses = result;
+          } else if (result && Array.isArray(result.classes)) {
+            userClasses = result.classes;
+          } else {
+            userClasses = [];
+          }
+        } catch {
+          userClasses = [];
+        }
+        // Now userClasses is always an array
+        const introClass = userClasses.find(
+          (c) => c.classType === "introductory_call",
+        );
+        if (introClass && introClass.adminId) {
+          try {
+            const examPrepStatus = await getExamPrepStepStatus(
+              user.uid,
+              introClass.adminId,
+            );
+            if (examPrepStatus?.pendingIntroCallClassId) {
+              navigate(
+                `/classDetailsUser/${examPrepStatus.pendingIntroCallClassId}`,
+              );
+              return;
+            }
+          } catch (err) {
+            console.error(
+              "[Sidebar ExamPrep] getExamPrepStepStatus error:",
+              err,
+            );
+          }
+        }
+        // fallback if not found
+        navigate(`/classDetailsUser/`);
+        return;
+      }
+      // 4. Done with intro call, not booked exam prep class: open BookingFlowModal step 6
+      if (status.doneWithIntroCall && !status.hasBookedExamPrepClass) {
+        setSidebarExamPrepUser({
+          ...user,
+          completedIntroCallTutorId: status.completedIntroCallTutorId,
+        });
+        setSidebarExamPrepInitialStep(6);
+        setShowSidebarExamPrepBookingFlow(true);
+        return;
+      }
+      // 5. Booked exam prep class: open exam prep tutor profile
+      if (status.hasBookedExamPrepClass && status.completedIntroCallTutorId) {
+        navigate(`/examPreparationUser/${status.completedIntroCallTutorId}`);
+        return;
+      }
+      // fallback
+      navigate("/learn");
+    } catch (err) {
+      console.error("[Sidebar ExamPrep] Error:", err);
+      navigate("/learn");
+    }
+  };
 
   const studentMenuItems = [
     {
@@ -56,7 +157,7 @@ const Sidebar = ({ user, onExamPrepClick }) => {
       translationKey: "sidebar.tutor.examPreparation",
       lightImage: "/svgs/exam-preparation-light.svg",
       darkImage: "/svgs/exam-preparation-dark.svg",
-      onClick: onExamPrepClick,
+      onClick: handleExamPrepSidebarClick,
     },
   ];
 
@@ -91,7 +192,6 @@ const Sidebar = ({ user, onExamPrepClick }) => {
     return email && email.length > 20 ? `${email.slice(0, 20)}...` : email;
   };
 
-  // Function to check if user has Bammbuu+ subscription
   const hasBambuuPlus =
     user?.subscriptions?.some(
       (sub) =>
@@ -102,7 +202,6 @@ const Sidebar = ({ user, onExamPrepClick }) => {
         sub.type?.toLowerCase().includes("bambuu+"),
     ) || user?.isPremium === true;
 
-  // Determine the appropriate navigation items based on user type
   const menuItems =
     user?.userType === "tutor" ? tutorMenuItems : studentMenuItems;
   const profilePath =
@@ -196,8 +295,6 @@ const Sidebar = ({ user, onExamPrepClick }) => {
                 </div>
               </div>
               <div className="flex min-w-0 max-w-[8rem] flex-col">
-                {" "}
-                {/* limit width here */}
                 <span className="overflow-hidden truncate whitespace-nowrap text-base font-semibold text-black lg:text-lg">
                   {user.name || "User"}
                 </span>
@@ -212,6 +309,34 @@ const Sidebar = ({ user, onExamPrepClick }) => {
           </Link>
         ) : null}
       </div>
+
+      {/* Sidebar-triggered modals */}
+      <BookingFlowModal
+        isOpen={showSidebarIntroBookingFlow}
+        onClose={() => {
+          setShowSidebarIntroBookingFlow(false);
+          setSidebarExamPrepInitialStep(0);
+          setSelectedInstructor(null);
+        }}
+        user={sidebarExamPrepUser}
+        mode="intro"
+        initialStep={sidebarExamPrepInitialStep}
+        selectedInstructor={selectedInstructor}
+        setSelectedInstructor={setSelectedInstructor}
+      />
+      <BookingFlowModal
+        isOpen={showSidebarExamPrepBookingFlow}
+        onClose={() => {
+          setShowSidebarExamPrepBookingFlow(false);
+          setSidebarExamPrepInitialStep(0);
+          setSelectedInstructor(null);
+        }}
+        user={sidebarExamPrepUser}
+        mode="exam"
+        initialStep={sidebarExamPrepInitialStep}
+        selectedInstructor={selectedInstructor}
+        setSelectedInstructor={setSelectedInstructor}
+      />
     </div>
   );
 };

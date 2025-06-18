@@ -15,7 +15,10 @@ import {
 } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import ClassCard from "../../components/ClassCard";
-import { getExamPrepStatus } from "../../api/examPrepApi";
+import {
+  getExamPrepPlanTimeline,
+  getExamPrepStatus,
+} from "../../api/examPrepApi";
 import BookingFlowModal from "../../components/BookingFlowModal";
 
 const ExamPreparationUser = () => {
@@ -28,6 +31,7 @@ const ExamPreparationUser = () => {
   const [isCreatingChannel, setIsCreatingChannel] = useState(false);
   const [examPrepStatus, setExamPrepStatus] = useState(null);
   const [showExamPrepBookingFlow, setShowExamPrepBookingFlow] = useState(false);
+  const [planTimeline, setPlanTimeline] = useState(null);
 
   const channelRef = useRef(null);
 
@@ -80,17 +84,29 @@ const ExamPreparationUser = () => {
     fetchExamPrepStatus();
   }, [user?.uid]);
 
+  useEffect(() => {
+    const fetchPlanTimeline = async () => {
+      if (!user?.uid) return;
+      try {
+        const timeline = await getExamPrepPlanTimeline(user.uid);
+        setPlanTimeline(timeline);
+      } catch (e) {
+        setPlanTimeline(null);
+      }
+    };
+    fetchPlanTimeline();
+  }, [user?.uid]);
+
   // Helper values from API
-  const activePlan = examPrepStatus?.activePlans?.[0] || {};
-  const remainingClasses =
-    typeof activePlan.credits?.length === "number"
-      ? activePlan.credits.length
-      : 0;
+  const activePlan = planTimeline?.activePlan || {};
+  const remainingClasses = Array.isArray(activePlan.credits)
+    ? activePlan.credits.length
+    : 0;
   const expiryDate = activePlan.expiryDate
     ? new Date(activePlan.expiryDate)
     : null;
-  const nextPlanStart = examPrepStatus?.nextPlan?.purchaseDate
-    ? new Date(examPrepStatus.nextPlan.purchaseDate)
+  const nextPlanStart = planTimeline?.nextPlan?.purchaseDate
+    ? new Date(planTimeline.nextPlan.purchaseDate)
     : null;
 
   // Helper to extract YouTube embed URL
@@ -188,6 +204,10 @@ const ExamPreparationUser = () => {
     }
   };
 
+  const handleBack = () => {
+    navigate(`/tutor/${tutorId}`);
+  };
+
   // Loader covers the entire content area while loading
   if (loading) {
     return (
@@ -214,7 +234,7 @@ const ExamPreparationUser = () => {
             <div className="flex items-center gap-2 sm:gap-4">
               <button
                 className="rounded-full bg-gray-100 p-2 sm:p-3"
-                onClick={() => navigate(-1)}
+                onClick={handleBack}
               >
                 <ArrowLeft size={24} />
               </button>

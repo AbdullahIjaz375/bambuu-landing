@@ -44,7 +44,7 @@ const ExploreClassesUser = () => {
           }))
           .filter((cls) => !user.enrolledClasses?.includes(cls.id))
           .filter(
-            (cls) => !language || cls.language?.toLowerCase() === language
+            (cls) => !language || cls.language?.toLowerCase() === language,
           )
           // Enhanced filtering to remove classes with missing or invalid data
           .filter(
@@ -64,14 +64,14 @@ const ExploreClassesUser = () => {
               (cls.adminId || cls.tutorId) &&
               // Make sure we have valid language information
               cls.language &&
-              typeof cls.language === "string"
+              typeof cls.language === "string",
           );
 
         setExploreClasses(allClasses);
       } catch (error) {
         console.error("Error fetching classes:", error);
         setError(
-          "Unable to fetch classes at this time. Please try again later."
+          "Unable to fetch classes at this time. Please try again later.",
         );
       } finally {
         setLoading(false);
@@ -103,22 +103,22 @@ const ExploreClassesUser = () => {
 
   return (
     <div className="flex h-screen bg-white">
-      <div className="flex-shrink-0 w-64 h-full">
+      <div className="h-full w-64 flex-shrink-0">
         <Sidebar user={user} />
       </div>
 
-      <div className="flex-1 overflow-x-auto min-w-[calc(100%-16rem)] h-full">
-        <div className="h-[calc(100vh-1rem)] p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl m-2 overflow-y-auto">
+      <div className="h-full min-w-[calc(100%-16rem)] flex-1 overflow-x-auto">
+        <div className="m-2 h-[calc(100vh-1rem)] overflow-y-auto rounded-3xl border-2 border-[#e7e7e7] bg-white p-8">
           {/* Header */}
-          <div className="flex items-center justify-between pb-4 mb-6 border-b">
+          <div className="mb-6 flex items-center justify-between border-b pb-4">
             <div className="flex items-center gap-4">
               <button
-                className="flex-shrink-0 p-3 transition-colors bg-gray-100 rounded-full hover:bg-gray-200"
+                className="flex-shrink-0 rounded-full bg-gray-100 p-3 transition-colors hover:bg-gray-200"
                 onClick={handleBack}
               >
-                <ArrowLeft className="w-6 h-6" />
+                <ArrowLeft className="h-6 w-6" />
               </button>
-              <h1 className="text-4xl font-semibold whitespace-nowrap">
+              <h1 className="whitespace-nowrap text-4xl font-semibold">
                 {t("exploreClasses.title")}
               </h1>
             </div>
@@ -126,11 +126,11 @@ const ExploreClassesUser = () => {
 
           {/* Search Section */}
           <div className="relative mb-6">
-            <Search className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
+            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 transform text-gray-400" />
             <input
               type="text"
               placeholder={t("exploreClasses.search.placeholder")}
-              className="w-full py-3 pl-10 pr-4 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              className="w-full rounded-full border border-gray-200 py-3 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-yellow-400"
               value={searchQuery}
               onChange={handleSearchChange}
             />
@@ -139,13 +139,13 @@ const ExploreClassesUser = () => {
           {/* Content */}
           <div className="min-w-0">
             {loading ? (
-              <div className="flex items-center justify-center min-h-[60vh]">
+              <div className="flex min-h-[60vh] items-center justify-center">
                 <ClipLoader color="#14B82C" size={50} />
               </div>
             ) : error ? (
               <p className="text-center text-red-500">{error}</p>
             ) : filteredClasses.length === 0 ? (
-              <div className="flex items-center justify-center min-h-[60vh]">
+              <div className="flex min-h-[60vh] items-center justify-center">
                 <EmptyState
                   message={
                     searchQuery

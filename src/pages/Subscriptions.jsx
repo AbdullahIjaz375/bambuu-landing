@@ -583,7 +583,7 @@ const Subscriptions = ({ onNext, onBack, onClose, isModal = false }) => {
                   {/* Disclaimer Text */}
                   <div className="mb-4 px-2 text-sm font-normal leading-relaxed text-black">
                     Package features are provided for 1 <br />
-                    month and do not automatically renew.
+                    month and does not automatically renew.
                     <br />
                     We recommend 2 months of this package
                     <br /> to achieve best results.

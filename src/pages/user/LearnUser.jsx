@@ -6,6 +6,8 @@ import { useAuth } from "../../context/AuthContext";
 import { useNavigate, useLocation, Navigate } from "react-router-dom";
 import {
   getExamPrepPlanTimeline,
+  getExamPrepStatus,
+  getExamPrepStepStatus,
   getStudentExamPrepTutorialStatus,
 } from "../../api/examPrepApi";
 import { db } from "../../firebaseConfig";
@@ -482,52 +484,71 @@ const LearnUser = () => {
   }, [location.state]);
 
   // Handler for sidebar exam prep click
-  const handleExamPrepSidebarClick = async (e) => {
-    e?.preventDefault?.();
-    if (!user?.uid) return;
-    try {
-      const status = await getStudentExamPrepTutorialStatus(user.uid);
-      // 1. Not purchased: go to subscriptions
-      if (!status.hasPurchasedPlan) {
-        navigate("/subscriptions?tab=exam");
-        return;
-      }
-      // 2. Purchased, not booked intro call: open BookingFlowModal step 0
-      if (!status.hasBookedIntroCall) {
-        setSidebarExamPrepUser(user);
-        setSidebarExamPrepInitialStep(0);
-        setShowSidebarIntroBookingFlow(true);
-        return;
-      }
-      // 3. Booked intro call, not done: open class details page for that class
-      if (status.hasBookedIntroCall && !status.doneWithIntroCall) {
-        // You may need to fetch the classId for the intro call class
-        // For now, navigate to a placeholder route
-        navigate("/classesUser?highlight=introcall");
-        return;
-      }
-      // 4. Done with intro call, not booked exam prep class: open BookingFlowModal step 6
-      if (status.doneWithIntroCall && !status.hasBookedExamPrepClass) {
-        setSidebarExamPrepUser({
-          ...user,
-          completedIntroCallTutorId: status.completedIntroCallTutorId,
-        });
-        setSidebarExamPrepInitialStep(6);
-        setShowSidebarExamPrepBookingFlow(true);
-        return;
-      }
-      // 5. Booked exam prep class: open exam prep tutor profile
-      if (status.hasBookedExamPrepClass && status.completedIntroCallTutorId) {
-        navigate(`/examPreparationUser/${status.completedIntroCallTutorId}`);
-        return;
-      }
-      // fallback
-      navigate("/learn");
-    } catch (err) {
-      console.error("[Sidebar ExamPrep] Error:", err);
-      navigate("/learn");
-    }
-  };
+  // const handleExamPrepSidebarClick = async (e) => {
+  //   e?.preventDefault?.();
+  //   if (!user?.uid) return;
+  //   try {
+  //     const status = await getStudentExamPrepTutorialStatus(user.uid);
+  //     // 1. Not purchased: go to subscriptions
+  //     if (!status.hasPurchasedPlan) {
+  //       navigate("/subscriptions?tab=exam");
+  //       return;
+  //     }
+  //     // 2. Purchased, not booked intro call: open BookingFlowModal step 0
+  //     if (!status.hasBookedIntroCall) {
+  //       setSidebarExamPrepUser(user);
+  //       setSidebarExamPrepInitialStep(0);
+  //       setShowSidebarIntroBookingFlow(true);
+  //       return;
+  //     }
+  //     // 3. Booked intro call, not done: open class details page for that class
+  //     if (status.hasBookedIntroCall && !status.doneWithIntroCall) {
+  //       const introClass = classes.find(
+  //         (c) => c.classType === "introductory_call",
+  //       );
+  //       if (introClass && introClass.adminId) {
+  //         try {
+  //           const examPrepStatus = await getExamPrepStepStatus(
+  //             user.uid,
+  //             introClass.adminId,
+  //           );
+  //           console.log("examPrepStatus:", examPrepStatus);
+
+  //           if (examPrepStatus?.pendingIntroCallClassId) {
+  //             navigate(
+  //               `/classDetailsUser/${examPrepStatus.pendingIntroCallClassId}`,
+  //             );
+  //             return;
+  //           }
+  //         } catch (err) {
+  //           console.error("[Sidebar ExamPrep] getExamPrepStatus error:", err);
+  //         }
+  //       }
+
+  //       return;
+  //     }
+  //     // 4. Done with intro call, not booked exam prep class: open BookingFlowModal step 6
+  //     if (status.doneWithIntroCall && !status.hasBookedExamPrepClass) {
+  //       setSidebarExamPrepUser({
+  //         ...user,
+  //         completedIntroCallTutorId: status.completedIntroCallTutorId,
+  //       });
+  //       setSidebarExamPrepInitialStep(6);
+  //       setShowSidebarExamPrepBookingFlow(true);
+  //       return;
+  //     }
+  //     // 5. Booked exam prep class: open exam prep tutor profile
+  //     if (status.hasBookedExamPrepClass && status.completedIntroCallTutorId) {
+  //       navigate(`/examPreparationUser/${status.completedIntroCallTutorId}`);
+  //       return;
+  //     }
+  //     // fallback
+  //     navigate("/learn");
+  //   } catch (err) {
+  //     console.error("[Sidebar ExamPrep] Error:", err);
+  //     navigate("/learn");
+  //   }
+  // };
 
   // Place the auth loading and user check here, after all hooks
   if (authLoading) {
@@ -583,7 +604,7 @@ const LearnUser = () => {
   return (
     <div className="flex h-screen bg-white">
       <div className="h-full w-64 flex-shrink-0">
-        <Sidebar user={user} onExamPrepClick={handleExamPrepSidebarClick} />
+        <Sidebar user={user} />
       </div>
       <div className="h-full min-w-[calc(100%-16rem)] flex-1 overflow-x-auto">
         <div className="m-2 h-[calc(100vh-1rem)] overflow-y-auto rounded-3xl border-2 border-[#e7e7e7] bg-white p-8">
