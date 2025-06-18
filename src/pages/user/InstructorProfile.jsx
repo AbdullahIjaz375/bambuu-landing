@@ -9,6 +9,8 @@ import { getTutorProfile } from "../../api/examPrepApi";
 import { ClipLoader } from "react-spinners";
 
 const InstructorProfile = ({
+  isOpen,
+  onClose,
   selectedInstructor,
   setSelectedInstructor,
   onBookIntroCall,
@@ -118,8 +120,10 @@ const InstructorProfile = ({
   return (
     <>
       <Modal
-        isOpen={!!selectedInstructor}
-        onRequestClose={() => setSelectedInstructor(null)}
+        isOpen={isOpen}
+        onClonRequestClose={onClose}
+        // isOpen={!!selectedInstructor}
+        // onRequestClose={() => setSelectedInstructor(null)}
         className="custom-modal-content scrollbar-hide fixed left-1/2 top-1/2 flex max-h-[90vh] w-[468px] max-w-[95vw] -translate-x-1/2 -translate-y-1/2 flex-col items-center overflow-y-auto rounded-[2.5rem] border border-blue-200 bg-white p-0 font-urbanist shadow-xl outline-none"
         overlayClassName="custom-modal-overlay fixed inset-0 bg-black bg-opacity-20 z-50 flex items-center justify-center"
         ariaHideApp={false}
@@ -130,7 +134,8 @@ const InstructorProfile = ({
           </span>
           <button
             className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F6F6F6] hover:bg-[#ededed]"
-            onClick={() => setSelectedInstructor(null)}
+            // onClick={() => setSelectedInstructor(null)}
+            onClick={onClose}
           >
             <X className="h-6 w-6 text-[#3D3D3D]" />
           </button>

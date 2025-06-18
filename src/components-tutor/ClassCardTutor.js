@@ -147,7 +147,7 @@ const ClassCardTutor = ({
             <div className="relative aspect-video w-full sm:h-80">
               {examPrep ? (
                 <div className="flex h-full w-full flex-col items-center justify-center rounded-2xl bg-[#B9F9C2] font-tanker">
-                  <div className="mt-16 flex h-full w-full flex-1 flex-col items-center justify-start space-y-2 p-4">
+                  <div className="mt-14 flex h-full w-full flex-1 flex-col items-center justify-start space-y-2 p-4">
                     <span className="text-center text-[52.27px]/[100%] font-normal text-[#042F0C]">
                       {t("exam-prep.exam")}
                     </span>

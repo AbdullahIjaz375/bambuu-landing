@@ -3,6 +3,9 @@ import { ClipLoader } from "react-spinners";
 import { Clock } from "lucide-react";
 
 const ExamBookingConfirmation = ({
+  isOpen,
+  onClose,
+  onBack,
   showConfirm,
   setShowConfirm,
   selectedDate,
@@ -15,8 +18,10 @@ const ExamBookingConfirmation = ({
   return (
     <>
       <Modal
-        isOpen={showConfirm}
-        onRequestClose={() => setShowConfirm(false)}
+        isOpen={isOpen}
+        onRequestClose={onClose}
+        // isOpen={showConfirm}
+        // onRequestClose={() => setShowConfirm(false)}
         className="fixed left-1/2 top-1/2 flex w-auto max-w-[98vw] -translate-x-1/2 -translate-y-1/2 flex-col rounded-[2.5rem] bg-white p-0 font-urbanist shadow-xl outline-none"
         overlayClassName="fixed inset-0 bg-black bg-opacity-20 z-50 flex items-center justify-center backdrop-blur-sm"
         ariaHideApp={false}
@@ -79,7 +84,7 @@ const ExamBookingConfirmation = ({
           <div className="flex w-full max-w-md justify-between gap-6">
             <button
               className="flex-1 rounded-full border border-[#042F0C] bg-white px-6 py-3 text-base font-medium text-black transition hover:bg-[#F6FFF8]"
-              onClick={() => setShowConfirm(false)}
+              onClick={onBack}
               disabled={loading}
             >
               No, Cancel

@@ -4,6 +4,8 @@ import ExploreInstructors from "./ExploreInstructors";
 
 const StartExamPrep = ({
   showExamPrepModal,
+  isOpen,
+  onClose,
   setShowExamPrepModal,
   onFindTutor,
   currentApiStep = 0,
@@ -20,8 +22,8 @@ const StartExamPrep = ({
   ];
   return (
     <Modal
-      isOpen={showExamPrepModal}
-      onRequestClose={() => setShowExamPrepModal(false)}
+      isOpen={isOpen}
+      onRequestClose={onClose}
       className="absolute left-1/2 top-1/2 w-full max-w-[784px] -translate-x-1/2 -translate-y-1/2 transform rounded-[2.5rem] bg-white p-0 font-urbanist shadow-xl outline-none"
       overlayClassName="fixed inset-0 bg-black bg-opacity-20 z-50 flex items-center justify-center backdrop-blur-sm"
       ariaHideApp={false}
