@@ -37,6 +37,7 @@ const features = [
   "10 Live 1:1 Classes with certified tutors",
   "Unlimited Group Conversation Classes led by instructors",
   "Personalized Learning Plan based on your fluency goals",
+  "We match you with a personal language partner to practice conversation.",
   "Saved Resources tailored to your study plan",
   "24/7 AI SuperTutor for continuous language practice",
   "Direct Support from the bammbuu team",
@@ -303,10 +304,10 @@ const LandingExamPrep = () => {
                     </div>
                     <div className="italic">
                       *Our money-back guarantee requires you to complete the
-                      bammbuu recommended plan. If your br language goal, as
-                      discussed in your intro call, isn't met after 2 months of
+                      bammbuu recommended plan. If your language goal, as
+                      discussed in your intro call, isn’t met after 2 months of
                       our Immersive Exam Prep plan — including all 10 1:1
-                      classes and 3 live group sessions per month — we'll refund
+                      classes and 3 live group sessions per month — we’ll refund
                       you.
                     </div>
                   </div>
@@ -342,9 +343,8 @@ const LandingExamPrep = () => {
                       <div className="mb-4 flex flex-col items-center gap-1 text-xs text-black sm:mb-6 sm:gap-2 sm:text-sm">
                         <Info className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-[#FFBF00] sm:h-4 sm:w-4" />
                         <span className="text-center">
-                          Package do not automatically renew. We recommend 2
-                          months of this <br className="hidden sm:block" />
-                          package to achieve best results.
+                          Package does not automatically renew. We recommend 2
+                          months of this package to achieve best results.
                         </span>
                       </div>
 
