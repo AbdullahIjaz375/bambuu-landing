@@ -217,7 +217,7 @@ const InstructorProfileUser = () => {
   }, [tutorId]);
 
   const handleBack = () => {
-    navigate(-1);
+    navigate("/languageExpertsUser");
   };
 
   const renderClasses = () => {
