@@ -2,12 +2,22 @@ import React, { useState } from "react";
 import Modal from "react-modal";
 import ExamClassSlots from "./ExamClassSlots";
 
-const IntroductoryCallDone = ({ bookExamClass, setBookExamClass }) => {
+const IntroductoryCallDone = ({
+  isOpen,
+  onClose,
+  bookExamClass,
+  setBookExamClass,
+  onBookExamPreparation,
+}) => {
   const [showSlotBooking, setShowSlotBooking] = useState(false);
 
+  // const handleBookExamPreparation = () => {
+  //   setBookExamClass(false);
+  //   setShowSlotBooking(true);
+  // };
+
   const handleBookExamPreparation = () => {
-    setBookExamClass(false);
-    setShowSlotBooking(true);
+    if (onBookExamPreparation) onBookExamPreparation();
   };
 
   const handleSlotBookingComplete = (bookingData) => {
@@ -22,8 +32,9 @@ const IntroductoryCallDone = ({ bookExamClass, setBookExamClass }) => {
   return (
     <>
       <Modal
-        isOpen={bookExamClass}
-        onRequestClose={() => setBookExamClass(false)}
+        // isOpen={bookExamClass}
+        isOpen={isOpen}
+        onRequestClose={onClose}
         className="fixed left-1/2 top-1/2 flex w-[90%] max-w-[784px] -translate-x-1/2 -translate-y-1/2 transform flex-col items-center rounded-3xl bg-white px-6 py-2 font-urbanist shadow-2xl outline-none sm:px-10 sm:py-8"
         overlayClassName="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center backdrop-blur-sm"
         ariaHideApp={false}
@@ -57,11 +68,11 @@ const IntroductoryCallDone = ({ bookExamClass, setBookExamClass }) => {
       </Modal>
 
       {/* Exam Class Slots Modal */}
-      <ExamClassSlots
+      {/* <ExamClassSlots
         isOpen={showSlotBooking}
         onClose={() => setShowSlotBooking(false)}
         onBookingComplete={handleSlotBookingComplete}
-      />
+      /> */}
     </>
   );
 };

@@ -21,6 +21,8 @@ const filterInstructors = (list, filter) => {
 };
 
 const ExploreInstructors = ({
+  isOpen,
+  onClose,
   showExploreInstructorsModal,
   setShowExploreInstructorsModal,
   onInstructorSelect,
@@ -99,8 +101,8 @@ const ExploreInstructors = ({
 
   return (
     <Modal
-      isOpen={showExploreInstructorsModal}
-      onRequestClose={() => setShowExploreInstructorsModal(false)}
+      isOpen={isOpen}
+      onRequestClose={onClose}
       className="fixed left-1/2 top-1/2 flex h-[90vh] max-h-[842px] w-[95vw] max-w-[784px] -translate-x-1/2 -translate-y-1/2 transform flex-col rounded-[2.5rem] bg-white p-0 font-urbanist shadow-xl outline-none"
       overlayClassName="fixed inset-0 bg-black bg-opacity-20 z-50 flex items-center justify-center backdrop-blur-sm"
       ariaHideApp={false}
@@ -111,7 +113,8 @@ const ExploreInstructors = ({
           <h2 className="text-[18px] font-medium">Explore Instructors</h2>
           <button
             className="relative flex h-10 w-10 items-center justify-center rounded-full border-none bg-[#F6F6F6] p-0 transition hover:bg-[#ededed]"
-            onClick={() => setShowExploreInstructorsModal(false)}
+            // onClick={() => setShowExploreInstructorsModal(false)}
+            onClick={onClose}
           >
             <X className="h-6 w-6 text-[#3D3D3D] hover:text-gray-700" />
           </button>

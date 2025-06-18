@@ -669,7 +669,7 @@ const CustomChatComponent = ({
         <Modal
           isOpen={showProfileModal}
           onRequestClose={() => setShowProfileModal(false)}
-          className="z-50 mx-auto mt-40 max-w-lg rounded-3xl bg-white p-6 outline-none"
+          className="z-50 mx-auto mt-20 max-w-md rounded-3xl bg-white p-0 outline-none"
           overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
           style={{
             overlay: {
@@ -686,16 +686,16 @@ const CustomChatComponent = ({
         >
           {studentProfile ? (
             <div className="font-urbanist">
-              <div className="flex items-center justify-between border-b p-4">
-                <h2 className="text-2xl font-bold">
+              <div className="flex items-center justify-between px-6 pt-6">
+                <h2 className="text-2xl font-medium">
                   {t("chat.profile.title")}
                 </h2>
-                <div className="flex items-center">
+                <div className="flex items-center justify-center">
                   <button
                     onClick={() => setShowProfileModal(false)}
-                    className="rounded-full p-1"
+                    className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F6F6F6] hover:bg-gray-100"
                   >
-                    <X className="h-5 w-5" />
+                    <X className="text-[#3D3D3D]" />
                   </button>
                 </div>
               </div>
@@ -723,157 +723,33 @@ const CustomChatComponent = ({
                     {studentProfile.name || "Student"}
                   </h3>
                   <div className="mt-1 flex items-center">
-                    <svg
+                    <img
+                      src="/svgs/location.svg"
+                      alt="location"
                       className="mr-1 h-5 w-5"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z"
-                        stroke="black"
-                        strokeWidth="1.5"
-                        strokeMiterlimit="10"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M13.75 12C13.75 12.97 12.97 13.75 12 13.75C11.03 13.75 10.25 12.97 10.25 12V7C10.25 6.59 10.59 6.25 11 6.25H12C12.97 6.25 13.75 7.03 13.75 8V12Z"
-                        stroke="black"
-                        strokeWidth="1.5"
-                        strokeMiterlimit="10"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M10.25 4V2.75"
-                        stroke="black"
-                        strokeWidth="1.5"
-                        strokeMiterlimit="10"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M13.75 4V2.75"
-                        stroke="black"
-                        strokeWidth="1.5"
-                        strokeMiterlimit="10"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M10.25 12V17"
-                        stroke="black"
-                        strokeWidth="1.5"
-                        strokeMiterlimit="10"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M13.75 12V17"
-                        stroke="black"
-                        strokeWidth="1.5"
-                        strokeMiterlimit="10"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
+                    />
                     <span className="text-sm">
                       From: {studentProfile.country || "Not specified"}
                     </span>
                   </div>
                   <div className="mt-4 grid w-full grid-cols-2 gap-16">
                     <div className="flex items-center">
-                      <svg
+                      <img
+                        src="/svgs/language-circle.svg"
+                        alt="language"
                         className="mr-1 h-5 w-5"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M22 10V9C22 4 20 2 15 2H9C4 2 2 4 2 9V15C2 20 4 22 9 22H11"
-                          stroke="black"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M15.5 18.5C16.6 18.5 17.5 17.6 17.5 16.5C17.5 15.4 16.6 14.5 15.5 14.5C14.4 14.5 13.5 15.4 13.5 16.5C13.5 17.6 14.4 18.5 15.5 18.5Z"
-                          stroke="black"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M20.5 21.5C21.6 21.5 22.5 20.6 22.5 19.5C22.5 18.4 21.6 17.5 20.5 17.5C19.4 17.5 18.5 18.4 18.5 19.5C18.5 20.6 19.4 21.5 20.5 21.5Z"
-                          stroke="black"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M22.5 16.5L18.5 14.5"
-                          stroke="black"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M13.5 18.5L17.5 20.5"
-                          stroke="black"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
+                      />
                       <span className="text-sm">
                         Native:{" "}
                         {studentProfile.nativeLanguage || "Not specified"}
                       </span>
                     </div>
                     <div className="flex items-center">
-                      <svg
+                      <img
+                        src="/svgs/language-square.svg"
+                        alt="language"
                         className="mr-1 h-5 w-5"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M12.37 2.15009L21.37 5.75006C21.72 5.89006 22 6.31006 22 6.68006V10.0001"
-                          stroke="black"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M12.37 2.15009L3.37 5.75006C3.02 5.89006 2.75 6.31006 2.75 6.68006V16.2501C2.75 16.7401 3.13 17.2801 3.57 17.4701L11.57 21.1001C11.84 21.2201 12.3 21.2201 12.57 21.1001L20.57 17.4701C21.01 17.2801 21.39 16.7401 21.39 16.2501"
-                          stroke="black"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M8.93 10.8301L15.53 7.48009"
-                          stroke="black"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M8.93 14.1801L15.53 10.8301"
-                          stroke="black"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M8.93 17.5298L15.53 14.1798"
-                          stroke="black"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
+                      />
                       <span className="text-sm">
                         Learning:{" "}
                         {studentProfile.learningLanguage || "Not specified"}

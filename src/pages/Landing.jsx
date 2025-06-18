@@ -35,6 +35,27 @@ const Card = ({ title, description, imageSrc, index }) => {
   );
 };
 
+const features = [
+  "10 Live 1:1 Classes with certified tutors",
+  "Unlimited Group Conversation Classes led by instructors",
+  "Personalized Learning Plan based on your fluency goals",
+  "We match you with a personal language partner to practice conversation.",
+  "Saved Resources tailored to your study plan",
+  "24/7 AI SuperTutor for continuous language practice",
+  "Direct Support from the bammbuu team",
+  "Money-Back Guarantee if your goals aren't met*",
+];
+
+function useIsMobile(breakpoint = 640) {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < breakpoint);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < breakpoint);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [breakpoint]);
+  return isMobile;
+}
+
 const Landing = () => {
   const { user } = useAuth();
 

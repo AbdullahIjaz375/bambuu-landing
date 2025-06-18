@@ -74,7 +74,7 @@ const LearnLanguageUser = () => {
       } catch (error) {
         console.error("Error fetching classes:", error);
         setError(
-          "Unable to fetch classes at this time. Please try again later."
+          "Unable to fetch classes at this time. Please try again later.",
         );
       } finally {
         setLoading(false);
@@ -137,7 +137,13 @@ const LearnLanguageUser = () => {
           .map((doc) => ({ id: doc.id, ...doc.data() }))
           .filter((cls) => !user?.enrolledClasses?.includes(cls.id))
           .filter(
-            (cls) => !language || cls.language?.toLowerCase() === language
+            (cls) => !language || cls.language?.toLowerCase() === language,
+          )
+          // Exclude introductory_call and exam_prep class types
+          .filter(
+            (cls) =>
+              cls.classType !== "introductory_call" &&
+              cls.classType !== "exam_prep",
           )
           // Add filter for classes with valid date/time
           .filter((cls) => {
@@ -159,7 +165,7 @@ const LearnLanguageUser = () => {
           .filter(
             (group) =>
               !language ||
-              group.groupLearningLanguage?.toLowerCase() === language
+              group.groupLearningLanguage?.toLowerCase() === language,
           );
 
         setExploreClasses(allClasses);
@@ -182,29 +188,29 @@ const LearnLanguageUser = () => {
 
   return (
     <div className="flex h-screen bg-white">
-      <div className="flex-shrink-0 w-64 h-full">
+      <div className="h-full w-64 flex-shrink-0">
         <Sidebar user={user} />
       </div>
 
-      <div className="flex-1 overflow-x-auto min-w-[calc(100%-16rem)] h-full">
-        <div className="h-[calc(100vh-1rem)] p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl m-2 overflow-y-auto">
+      <div className="h-full min-w-[calc(100%-16rem)] flex-1 overflow-x-auto">
+        <div className="m-2 h-[calc(100vh-1rem)] overflow-y-auto rounded-3xl border-2 border-[#e7e7e7] bg-white p-8">
           {/* Header */}
-          <div className="flex flex-col justify-between gap-4 pb-4 mb-6 border-b sm:flex-row sm:items-center">
+          <div className="mb-6 flex flex-col justify-between gap-4 border-b pb-4 sm:flex-row sm:items-center">
             <div className="flex items-center gap-4">
               <button
-                className="flex-shrink-0 p-3 transition-colors bg-gray-100 rounded-full hover:bg-gray-200"
+                className="flex-shrink-0 rounded-full bg-gray-100 p-3 transition-colors hover:bg-gray-200"
                 onClick={handleBack}
               >
-                <ArrowLeft className="w-6 h-6" />
+                <ArrowLeft className="h-6 w-6" />
               </button>
-              <h1 className="text-4xl font-semibold whitespace-nowrap">
+              <h1 className="whitespace-nowrap text-4xl font-semibold">
                 {t("learnLanguage.title")}
               </h1>
             </div>
-            <div className="flex justify-center w-full sm:w-auto">
-              <div className="relative inline-flex p-1 bg-gray-100 border border-gray-300 rounded-full">
+            <div className="flex w-full justify-center sm:w-auto">
+              <div className="relative inline-flex rounded-full border border-gray-300 bg-gray-100 p-1">
                 <div
-                  className="absolute top-0 left-0 h-full bg-[#FFBF00] border border-[#042F0C] rounded-full transition-all duration-300 ease-in-out"
+                  className="absolute left-0 top-0 h-full rounded-full border border-[#042F0C] bg-[#FFBF00] transition-all duration-300 ease-in-out"
                   style={{
                     transform: `translateX(${
                       activeTab === "myBambuu" ? "0" : "100%"
@@ -214,13 +220,13 @@ const LearnLanguageUser = () => {
                 />
                 <button
                   onClick={() => setActiveTab("myBambuu")}
-                  className="relative z-10 px-4 sm:px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap"
+                  className="text-md relative z-10 whitespace-nowrap rounded-full px-4 py-2 font-medium text-[#042F0C] transition-colors sm:px-6"
                 >
                   {t("learnLanguage.tabs.myBambuu")}
                 </button>
                 <button
                   onClick={() => setActiveTab("exploreBambuu")}
-                  className="relative z-10 px-4 sm:px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap"
+                  className="text-md relative z-10 whitespace-nowrap rounded-full px-4 py-2 font-medium text-[#042F0C] transition-colors sm:px-6"
                 >
                   {t("learnLanguage.tabs.exploreBambuu")}
                 </button>
@@ -233,19 +239,19 @@ const LearnLanguageUser = () => {
             {activeTab === "myBambuu" ? (
               <>
                 {/* My Classes Section */}
-                <div className="w-full max-w-[160vh] mx-auto">
+                <div className="mx-auto w-full max-w-[160vh]">
                   <div className="flex items-center justify-between">
                     <h2 className="text-2xl font-bold">
                       {t("learnLanguage.myClasses.title")}
                     </h2>
                     {myClasses.length > 0 && (
                       <button
-                        className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+                        className="rounded-full border border-[#5d5d5d] bg-[#e6fde9] px-4 py-2 text-base font-medium text-[#042f0c] hover:bg-[#ccfcd2]"
                         onClick={() =>
                           navigate(
                             `/classesUser${
                               language ? `?language=${language}` : ""
-                            }`
+                            }`,
                           )
                         }
                       >
@@ -255,30 +261,30 @@ const LearnLanguageUser = () => {
                   </div>
 
                   {loading ? (
-                    <div className="flex items-center justify-center h-48">
+                    <div className="flex h-48 items-center justify-center">
                       <ClipLoader color="#14B82C" size={50} />
                     </div>
                   ) : error ? (
-                    <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
+                    <div className="flex flex-col items-center justify-center space-y-4 rounded-lg bg-white p-8">
                       <p className="text-center text-red-500">{error}</p>
                       <button
-                        className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+                        className="rounded-full border border-[#5d5d5d] bg-[#e6fde9] px-4 py-2 text-base font-medium text-[#042f0c] hover:bg-[#ccfcd2]"
                         onClick={() => window.location.reload()}
                       >
                         {t("learnLanguage.myClasses.error.tryAgain")}
                       </button>
                     </div>
                   ) : myClasses.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
+                    <div className="flex flex-col items-center justify-center space-y-4 rounded-lg bg-white p-8">
                       <EmptyState message="You have not joined any class yet!" />
                     </div>
                   ) : (
                     <div className="relative w-full">
-                      <div className="flex gap-2 pb-4 overflow-x-auto scrollbar-hide">
+                      <div className="scrollbar-hide flex gap-2 overflow-x-auto pb-4">
                         {myClasses.map((classItem) => (
                           <div
                             key={classItem.id}
-                            className="flex-none px-1 pt-3 w-72"
+                            className="w-72 flex-none px-1 pt-3"
                           >
                             <ClassCard
                               {...classItem}
@@ -292,19 +298,19 @@ const LearnLanguageUser = () => {
                 </div>
 
                 {/* My Groups Section */}
-                <div className="w-full max-w-[160vh] mx-auto">
-                  <div className="flex items-center justify-between mb-1">
+                <div className="mx-auto w-full max-w-[160vh]">
+                  <div className="mb-1 flex items-center justify-between">
                     <h2 className="text-2xl font-bold">
                       {t("learnLanguage.myGroups.title")}
                     </h2>
                     {myGroups.length > 0 && (
                       <button
-                        className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+                        className="rounded-full border border-[#5d5d5d] bg-[#e6fde9] px-4 py-2 text-base font-medium text-[#042f0c] hover:bg-[#ccfcd2]"
                         onClick={() =>
                           navigate(
                             `/groupsUser${
                               language ? `?language=${language}` : ""
-                            }`
+                            }`,
                           )
                         }
                       >
@@ -314,36 +320,36 @@ const LearnLanguageUser = () => {
                   </div>
 
                   {loadingGroups ? (
-                    <div className="flex items-center justify-center h-48">
+                    <div className="flex h-48 items-center justify-center">
                       <ClipLoader color="#14B82C" size={50} />
                     </div>
                   ) : errorGroups ? (
-                    <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
+                    <div className="flex flex-col items-center justify-center space-y-4 rounded-lg bg-white p-8">
                       <p className="text-center text-red-500">{errorGroups}</p>
                       <button
-                        className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+                        className="rounded-full border border-[#5d5d5d] bg-[#e6fde9] px-4 py-2 text-base font-medium text-[#042f0c] hover:bg-[#ccfcd2]"
                         onClick={() => window.location.reload()}
                       >
                         {t("learnLanguage.myGroups.error.tryAgain")}
                       </button>
                     </div>
                   ) : myGroups.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
+                    <div className="flex flex-col items-center justify-center space-y-4 rounded-lg bg-white p-8">
                       <EmptyState message="You are not part of any group yet!" />
                       <button
                         onClick={() => navigate("/groupsUser")}
-                        className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+                        className="rounded-full border border-[#5d5d5d] bg-[#e6fde9] px-4 py-2 text-base font-medium text-[#042f0c] hover:bg-[#ccfcd2]"
                       >
                         {t("learnLanguage.myGroups.createGroup")}
                       </button>
                     </div>
                   ) : (
                     <div className="relative w-full">
-                      <div className="flex gap-2 pb-4 overflow-x-auto scrollbar-hide">
+                      <div className="scrollbar-hide flex gap-2 overflow-x-auto pb-4">
                         {myGroups.map((group) => (
                           <div
                             key={group.id}
-                            className="flex-none px-1 pt-2 w-72"
+                            className="w-72 flex-none px-1 pt-2"
                           >
                             <GroupCard group={group} />
                           </div>
@@ -356,19 +362,19 @@ const LearnLanguageUser = () => {
             ) : (
               <>
                 {/* Explore Classes Section */}
-                <div className="w-full max-w-[160vh] mx-auto">
+                <div className="mx-auto w-full max-w-[160vh]">
                   <div className="flex items-center justify-between">
                     <h2 className="text-2xl font-bold">
                       {t("learnLanguage.exploreClasses.title")}
                     </h2>
                     {exploreClasses.length > 0 && (
                       <button
-                        className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+                        className="rounded-full border border-[#5d5d5d] bg-[#e6fde9] px-4 py-2 text-base font-medium text-[#042f0c] hover:bg-[#ccfcd2]"
                         onClick={() =>
                           navigate(
                             `/exploreClassesUser${
                               language ? `?language=${language}` : ""
-                            }`
+                            }`,
                           )
                         }
                       >
@@ -378,30 +384,30 @@ const LearnLanguageUser = () => {
                   </div>
 
                   {loadingExplore ? (
-                    <div className="flex items-center justify-center h-48">
+                    <div className="flex h-48 items-center justify-center">
                       <ClipLoader color="#14B82C" size={50} />
                     </div>
                   ) : errorExplore ? (
-                    <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
+                    <div className="flex flex-col items-center justify-center space-y-4 rounded-lg bg-white p-8">
                       <p className="text-center text-red-500">{errorExplore}</p>
                       <button
-                        className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+                        className="rounded-full border border-[#5d5d5d] bg-[#e6fde9] px-4 py-2 text-base font-medium text-[#042f0c] hover:bg-[#ccfcd2]"
                         onClick={() => window.location.reload()}
                       >
                         {t("learnLanguage.exploreClasses.error.tryAgain")}
                       </button>
                     </div>
                   ) : exploreClasses.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
+                    <div className="flex flex-col items-center justify-center space-y-4 rounded-lg bg-white p-8">
                       <EmptyState message="No available classes to explore at the moment!" />
                     </div>
                   ) : (
                     <div className="relative w-full">
-                      <div className="flex gap-2 pb-4 overflow-x-auto scrollbar-hide">
+                      <div className="scrollbar-hide flex gap-2 overflow-x-auto pb-4">
                         {exploreClasses.map((classItem) => (
                           <div
                             key={classItem.id}
-                            className="flex-none px-1 pt-3 w-72"
+                            className="w-72 flex-none px-1 pt-3"
                           >
                             <ExploreClassCard
                               {...classItem}
@@ -415,19 +421,19 @@ const LearnLanguageUser = () => {
                 </div>
 
                 {/* Explore Groups Section */}
-                <div className="w-full max-w-[160vh] mx-auto">
-                  <div className="flex items-center justify-between mb-1">
+                <div className="mx-auto w-full max-w-[160vh]">
+                  <div className="mb-1 flex items-center justify-between">
                     <h2 className="text-2xl font-bold">
                       {t("learnLanguage.exploreGroups.title")}
                     </h2>
                     {exploreGroups.length > 0 && (
                       <button
-                        className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+                        className="rounded-full border border-[#5d5d5d] bg-[#e6fde9] px-4 py-2 text-base font-medium text-[#042f0c] hover:bg-[#ccfcd2]"
                         onClick={() =>
                           navigate(
                             `/exploreGroupsUser${
                               language ? `?language=${language}` : ""
-                            }`
+                            }`,
                           )
                         }
                       >
@@ -437,30 +443,30 @@ const LearnLanguageUser = () => {
                   </div>
 
                   {loadingExplore ? (
-                    <div className="flex items-center justify-center h-48">
+                    <div className="flex h-48 items-center justify-center">
                       <ClipLoader color="#14B82C" size={50} />
                     </div>
                   ) : errorExplore ? (
-                    <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
+                    <div className="flex flex-col items-center justify-center space-y-4 rounded-lg bg-white p-8">
                       <p className="text-center text-red-500">{errorExplore}</p>
                       <button
-                        className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+                        className="rounded-full border border-[#5d5d5d] bg-[#e6fde9] px-4 py-2 text-base font-medium text-[#042f0c] hover:bg-[#ccfcd2]"
                         onClick={() => window.location.reload()}
                       >
                         {t("learnLanguage.exploreGroups.error.tryAgain")}
                       </button>
                     </div>
                   ) : exploreGroups.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center p-8 space-y-4 bg-white rounded-lg">
+                    <div className="flex flex-col items-center justify-center space-y-4 rounded-lg bg-white p-8">
                       <EmptyState message="No available groups to explore at the moment!" />
                     </div>
                   ) : (
                     <div className="relative w-full">
-                      <div className="flex gap-2 pb-4 overflow-x-auto scrollbar-hide">
+                      <div className="scrollbar-hide flex gap-2 overflow-x-auto pb-4">
                         {exploreGroups.map((group) => (
                           <div
                             key={group.id}
-                            className="flex-none px-1 pt-2 w-72"
+                            className="w-72 flex-none px-1 pt-2"
                           >
                             <ExploreGroupCard group={group} />
                           </div>
