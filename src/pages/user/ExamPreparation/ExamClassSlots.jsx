@@ -98,7 +98,6 @@ const ExamClassSlots = ({
     const allDatesHaveTime = selectedDates.every((date) => selectedTimes[date]);
     if (allDatesHaveTime) {
       if (onBookingComplete) onBookingComplete(selectedDates, selectedTimes);
-      if (onClose) onClose();
     }
   };
 
