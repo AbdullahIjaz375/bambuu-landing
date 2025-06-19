@@ -604,7 +604,7 @@ const Subscriptions = ({ onNext, onBack, onClose, isModal = false }) => {
                         setIsLoading(true);
                         try {
                           const response = await fetch(
-                            "https://createcheckoutsession-zzpsx27htq-uc.a.run.app",
+                            "https://createcheckoutsession-3idvfneyra-uc.a.run.app",
                             {
                               method: "POST",
                               headers: { "Content-Type": "application/json" },

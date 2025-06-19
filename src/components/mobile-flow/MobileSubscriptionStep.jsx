@@ -16,7 +16,7 @@ const MobileSubscriptionStep = ({ onNext, onBack, onClose }) => {
     setLoading(true);
     try {
       const response = await fetch(
-        "https://createcheckoutsession-zzpsx27htq-uc.a.run.app",
+        "https://createcheckoutsession-3idvfneyra-uc.a.run.app",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
