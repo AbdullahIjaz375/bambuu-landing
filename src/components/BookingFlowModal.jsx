@@ -556,6 +556,11 @@ const BookingFlowModal = ({
           onBookExamPreparation={handleExamPrepStart}
           loadingSlots={loadingExamPrepSlots}
           slotsLoaded={Object.keys(examPrepSlots).length > 0}
+          onExploreMore={() => {
+            setStep(1);
+            setShowExamPrepStart(false);
+            setShowExploreInstructorsModal(true);
+          }}
         />
       )}
       {step === 7 && (

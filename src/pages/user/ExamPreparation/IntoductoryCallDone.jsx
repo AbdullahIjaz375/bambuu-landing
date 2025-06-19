@@ -8,6 +8,7 @@ const IntroductoryCallDone = ({
   bookExamClass,
   setBookExamClass,
   onBookExamPreparation,
+  onExploreMore,
 }) => {
   const [showSlotBooking, setShowSlotBooking] = useState(false);
 
@@ -26,7 +27,7 @@ const IntroductoryCallDone = ({
 
   const handleExploreMore = () => {
     setBookExamClass(false);
-    // Handle explore more functionality
+    if (onExploreMore) onExploreMore();
   };
 
   return (
