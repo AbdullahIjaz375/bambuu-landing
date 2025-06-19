@@ -1037,5 +1037,70 @@
     "manage-availability": "Manage Availability",
     "exam": "EXAM",
     "preparation": "PREPARATION"
+  },
+  "examPrep": {
+    "banner": "Don't Miss Out! The final 10 spots for July are filling up fast.",
+    "hero": {
+      "title1": "Immersive Exam",
+      "title2": "Preparation Package",
+      "subtitle": "Ditch the dry drills. Learn through real conversation, gain confidence, and unlock the opportunities you deserve.",
+      "scheduleCall": "Schedule a Call",
+      "enrollToday": "Enroll Today",
+      "videoCaption": "Watch how bammbuu transforms exam prep into an experience."
+    },
+    "why": {
+      "title": "Why Choose bammbuu?",
+      "description": "Whether you're preparing for Spanish proficiency exams like DELE and SIELE, or aiming for top scores in English assessments such as IELTS and TOEFL, bammbuu provides the expert support you need. We also help learners succeed in university admissions and employment entrance exams by focusing on real-world communication and tailored study plans."
+    },
+    "modal": {
+      "bannerIconAlt": "Banner Icon",
+      "title": "Don't Miss Out!",
+      "spotsFilling": "The final 10 spots for July are filling up fast.",
+      "bookNow": "Book Now"
+    },
+    "features": {
+      "feature1": "10 Live 1:1 Classes with certified tutors",
+      "feature2": "Unlimited Group Conversation Classes led by instructors",
+      "feature3": "Personalized Learning Plan based on your fluency goals",
+      "feature4": "We match you with a personal language partner to practice conversation.",
+      "feature5": "Saved Resources tailored to your study plan",
+      "feature6": "24/7 AI SuperTutor for continuous language practice",
+      "feature7": "Direct Support from the bammbuu team",
+      "feature8": "Money-Back Guarantee if your goals aren't met*"
+    },
+    "cards": {
+      "card1": {
+        "title": "Conversation First",
+        "desc": "We prioritize real speaking practice over rote memorization to help you build fluency fast."
+      },
+      "card2": {
+        "title": "Personalized Plans",
+        "desc": "Every learner gets a custom plan built around their exam goals and speaking level."
+      },
+      "card3": {
+        "title": "Certified Experts",
+        "desc": "Learn from qualified tutors and native speakers with proven experience in language instruction."
+      },
+      "card4": {
+        "title": "All-in-One Tool",
+        "desc": "Practice anytime with SuperTutor AI, join live group classes, and access saved learning materials."
+      },
+      "card5": {
+        "title": "Confidence Guarantee",
+        "desc": "Our plan works — or you get your money back after completing the recommended program.*"
+      }
+    },
+    "whatYouGet": {
+      "title": "What You'll Get in the Package"
+    },
+    "moneyBackDisclaimer": "*Our money-back guarantee requires you to complete the bammbuu recommended plan. If your language goal, as discussed in your intro call, isn't met after 2 months of our Immersive Exam Prep plan — including all 10 1:1 classes and 3 live group sessions per month — we'll refund you.",
+    "pricing": {
+      "header": "Language Exams Package",
+      "price": "$499",
+      "duration": "1 Month of Access",
+      "includes": "Includes all listed features for intensive preparation.",
+      "notice": "Package does not automatically renew. We recommend 2 months of this package to achieve best results.",
+      "scheduleInfoCall": "Schedule an Informational Call"
+    }
   }
 }

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ComparisonTable from "../components/ComparisonTable";
 import MobileSignupModalFlow from "../components/mobile-flow/MobileSignupModalFlow";
 import { X } from "lucide-react";
@@ -45,6 +45,25 @@ const packageFeatures = [
 export default function LandingMobile() {
   const [showSignupFlow, setShowSignupFlow] = useState(false);
   const [showBanner, setShowBanner] = useState(true);
+  const [showPopup, setShowPopup] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowPopup(true);
+    }, 10000); // 10 seconds
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (showPopup) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [showPopup]);
 
   return (
     <div className="min-h-screen w-full bg-[#F0FDF1] font-['Urbanist'] text-black">
@@ -246,6 +265,47 @@ export default function LandingMobile() {
           </div>
         </div>
       </footer>
+
+      {/* Popup Modal */}
+      {showPopup && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
+          <div className="relative flex min-h-[421px] w-[90vw] max-w-[370px] flex-col items-center overflow-hidden rounded-[32px] bg-white p-0 shadow-2xl">
+            {/* Close button */}
+            <button
+              onClick={() => setShowPopup(false)}
+              className="absolute right-4 top-4 flex items-center justify-center rounded-full bg-[#E7E7E7] bg-opacity-70 p-2 text-[#3D3D3D] hover:bg-gray-100"
+              aria-label="Close"
+              type="button"
+            >
+              <X className="h-6 w-6" />
+            </button>
+            {/* Icon */}
+            <img
+              src="/svgs/exam-prep-modal-icon.svg"
+              alt="Banner Icon"
+              className="mx-auto mb-6 mt-20"
+            />
+            {/* Title */}
+            <h2 className="mb-3 text-center text-[28px] font-bold text-black">
+              Don't Miss Out!
+            </h2>
+            {/* Subtitle */}
+            <p className="mb-8 max-w-xs text-center text-base font-medium text-[#454545]">
+              The final 10 spots for July are filling up fast.
+            </p>
+            {/* CTA Button */}
+            <button
+              className="mb-6 w-[90%] rounded-full border border-[#042F0C] bg-[#14B82C] py-3 text-base font-medium text-black transition hover:bg-green-700"
+              onClick={() => {
+                setShowPopup(false);
+                setShowSignupFlow(true);
+              }}
+            >
+              Book Now
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

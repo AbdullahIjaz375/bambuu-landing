@@ -1,9 +1,8 @@
 import { motion } from "framer-motion";
 import Navbar from "../components/Navbar";
 import { useAuth } from "../context/AuthContext";
-import "../styles/LandingStyles.css";
 import Footer from "../components/Footer";
-import { Info, Star } from "lucide-react";
+import { Info, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ComparisonTable from "../components/ComparisonTable";
 import { useState, useEffect } from "react";
@@ -14,6 +13,8 @@ import MobileProfileStep from "../components/mobile-flow/MobileProfileStep";
 import MobileSubscriptionStep from "../components/mobile-flow/MobileSubscriptionStep";
 import MobileConfirmationStep from "../components/mobile-flow/MobileConfirmationStep";
 import LandingMobile from "./LandingMobile";
+import { useTranslation } from "react-i18next";
+import "../styles/LandingStyles.css";
 
 const Card = ({ icon, title, description, index }) => {
   return (
@@ -34,14 +35,14 @@ const Card = ({ icon, title, description, index }) => {
 };
 
 const features = [
-  "10 Live 1:1 Classes with certified tutors",
-  "Unlimited Group Conversation Classes led by instructors",
-  "Personalized Learning Plan based on your fluency goals",
-  "We match you with a personal language partner to practice conversation.",
-  "Saved Resources tailored to your study plan",
-  "24/7 AI SuperTutor for continuous language practice",
-  "Direct Support from the bammbuu team",
-  "Money-Back Guarantee if your goals aren't met*",
+  "feature1",
+  "feature2",
+  "feature3",
+  "feature4",
+  "feature5",
+  "feature6",
+  "feature7",
+  "feature8",
 ];
 
 function useIsMobile(breakpoint = 640) {
@@ -65,6 +66,27 @@ const LandingExamPrep = () => {
     localStorage.setItem("i18nextLng", lang);
     document.documentElement.lang = lang;
   };
+  const [showBanner, setShowBanner] = useState(true);
+  const [showPopup, setShowPopup] = useState(false);
+  const { t } = useTranslation();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowPopup(true);
+    }, 10000); // 10 seconds
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (showPopup) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [showPopup]);
 
   // Handle mobile modal flow completion
   const handleMobileFlowComplete = () => {
@@ -85,6 +107,20 @@ const LandingExamPrep = () => {
 
   return (
     <>
+      {/* Orange Banner */}
+      {showBanner && (
+        <div className="relative z-30 w-full bg-[#FFBF00] py-3 text-center text-lg font-medium text-[#454545]">
+          <span>{t("examPrep.banner")}</span>
+          <button
+            onClick={() => setShowBanner(false)}
+            className="absolute right-6 top-1/2 flex -translate-y-1/2 items-center justify-center rounded-full p-2 text-[#3D3D3D]"
+            aria-label="Close"
+            type="button"
+          >
+            <X className="h-6 w-6" />
+          </button>
+        </div>
+      )}
       <motion.div
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -102,13 +138,12 @@ const LandingExamPrep = () => {
         >
           <div className="mx-auto mt-6 flex w-full flex-col items-center justify-center space-y-4">
             <h1 className="w-full text-center text-2xl font-bold text-black sm:text-3xl lg:text-6xl">
-              Immersive Exam
-              <br /> Preparation Package
+              {t("examPrep.hero.title1")}
+              <br />
+              {t("examPrep.hero.title2")}
             </h1>
             <h1 className="w-full text-center text-base font-medium text-black sm:text-lg lg:text-2xl">
-              Ditch the dry drills. Learn through real conversation, gain
-              confidence, and <br className="hidden sm:block" />
-              unlock the opportunities you deserve.
+              {t("examPrep.hero.subtitle")}
             </h1>
             <div className="mx-auto mt-6 flex w-full flex-col items-center justify-center gap-3 text-base font-medium text-black sm:w-auto sm:flex-row sm:gap-5">
               <button
@@ -120,7 +155,7 @@ const LandingExamPrep = () => {
                 }
                 className="w-full rounded-full border border-black px-6 py-2 text-black transition hover:bg-gray-100 sm:w-auto"
               >
-                Schedule a Call
+                {t("examPrep.hero.scheduleCall")}
               </button>
               <button
                 className="w-full rounded-full border border-[black] bg-[#FFBF00] px-6 py-2 text-base font-medium text-black transition hover:bg-[#ffd94d] sm:w-auto"
@@ -133,7 +168,7 @@ const LandingExamPrep = () => {
                   }
                 }}
               >
-                Enroll Today
+                {t("examPrep.hero.enrollToday")}
               </button>
             </div>
           </div>
@@ -156,7 +191,7 @@ const LandingExamPrep = () => {
             </div>
             <div className="mt-4 w-full text-center">
               <span className="text-sm font-normal italic text-[#5D5D5D] sm:text-base">
-                Watch how bammbuu transforms exam prep into an experience.
+                {t("examPrep.hero.videoCaption")}
               </span>
             </div>
           </div>
@@ -171,16 +206,10 @@ const LandingExamPrep = () => {
           className="mx-auto mb-10 mt-10 flex w-full flex-col items-center justify-center space-y-4 sm:mb-20 sm:mt-20 sm:space-y-6 sm:px-4 lg:mb-32 lg:mt-40 lg:px-0"
         >
           <h1 className="w-full text-center text-2xl font-semibold text-black sm:text-4xl lg:text-[56px]">
-            Why Choose bammbuu?
+            {t("examPrep.why.title")}
           </h1>
           <p className="mx-auto text-center text-base font-normal text-[#3d3d3d] sm:text-lg lg:text-xl">
-            Whether you're preparing for Spanish proficiency exams like DELE and
-            SIELE, or aiming for top <br className="hidden sm:block" /> scores
-            in English assessments such as IELTS and TOEFL, bammbuu provides the
-            expert support <br className="hidden sm:block" /> you need. We also
-            help learners succeed in university admissions and employment
-            entrance <br className="hidden sm:block" /> exams by focusing on
-            real-world communication and tailored study plans.
+            {t("examPrep.why.description")}
           </p>
         </motion.div>
 
@@ -212,20 +241,8 @@ const LandingExamPrep = () => {
                           ? "/svgs/personalized-plans.svg"
                           : "/svgs/certified-experts.svg"
                     }
-                    title={
-                      i === 0
-                        ? "Conversation First"
-                        : i === 1
-                          ? "Personalized Plans"
-                          : "Certified Experts"
-                    }
-                    description={
-                      i === 0
-                        ? "We prioritize real speaking practice over rote memorization to help you build fluency fast."
-                        : i === 1
-                          ? "Every learner gets a custom plan built around their exam goals and speaking level."
-                          : "Learn from qualified tutors and native speakers with proven experience in language instruction."
-                    }
+                    title={t(`examPrep.cards.card${i + 1}.title`)}
+                    description={t(`examPrep.cards.card${i + 1}.desc`)}
                   />
                 </div>
               </motion.div>
@@ -249,12 +266,8 @@ const LandingExamPrep = () => {
                         ? "/svgs/all-one.svg"
                         : "/svgs/confidence-guarantee.svg"
                     }
-                    title={i === 3 ? "All-in-One Tool" : "Confidence Guarantee"}
-                    description={
-                      i === 3
-                        ? "Practice anytime with SuperTutor AI, join live group classes, and access saved learning materials."
-                        : "Our plan works — or you get your money back after completing the recommended program.*"
-                    }
+                    title={t(`examPrep.cards.card${i + 1}.title`)}
+                    description={t(`examPrep.cards.card${i + 1}.desc`)}
                   />
                 </div>
               </motion.div>
@@ -273,14 +286,14 @@ const LandingExamPrep = () => {
           <div className="min-h-[60vh] px-2 sm:min-h-screen sm:px-4">
             <div className="mx-auto max-w-6xl">
               <h1 className="mb-8 text-center text-2xl font-semibold text-black sm:mb-16 sm:text-4xl lg:text-[56px]">
-                What You'll Get in the Package
+                {t("examPrep.whatYouGet.title")}
               </h1>
 
               <div className="flex flex-col items-start gap-8 sm:gap-12 lg:flex-row lg:gap-16">
                 {/* Left Side - Features List */}
                 <div className="w-full flex-1">
                   <div className="mb-6 space-y-3 sm:mb-8 sm:space-y-4">
-                    {features.map((feature, index) => (
+                    {features.map((featureKey, index) => (
                       <div
                         key={index}
                         className="flex items-start gap-2 sm:gap-3"
@@ -291,7 +304,7 @@ const LandingExamPrep = () => {
                           className="mr-1 h-5 w-5 sm:h-6 sm:w-6"
                         />
                         <span className="text-base font-medium text-[#042F0C] sm:text-xl md:text-2xl">
-                          {feature}
+                          {t(`examPrep.features.${featureKey}`)}
                         </span>
                       </div>
                     ))}
@@ -303,12 +316,7 @@ const LandingExamPrep = () => {
                       <Info className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-[#FFBF00] sm:h-4 sm:w-4" />
                     </div>
                     <div className="italic">
-                      *Our money-back guarantee requires you to complete the
-                      bammbuu recommended plan. If your language goal, as
-                      discussed in your intro call, isn’t met after 2 months of
-                      our Immersive Exam Prep plan — including all 10 1:1
-                      classes and 3 live group sessions per month — we’ll refund
-                      you.
+                      {t("examPrep.moneyBackDisclaimer")}
                     </div>
                   </div>
                 </div>
@@ -319,7 +327,7 @@ const LandingExamPrep = () => {
                     {/* Header */}
                     <div className="bg-[#FFBF00] px-4 py-2 text-center sm:px-6 sm:py-3">
                       <span className="text-sm font-semibold text-black sm:text-base">
-                        Language Exams Package
+                        {t("examPrep.pricing.header")}
                       </span>
                     </div>
 
@@ -328,14 +336,13 @@ const LandingExamPrep = () => {
                       {/* Price */}
                       <div className="mb-4 text-center sm:mb-6">
                         <div className="mb-1 text-3xl font-semibold text-black sm:text-[56px]">
-                          $499
+                          {t("examPrep.pricing.price")}
                         </div>
                         <div className="mb-2 text-lg font-semibold text-black sm:text-2xl">
-                          1 Month of Access
+                          {t("examPrep.pricing.duration")}
                         </div>
                         <div className="text-base font-normal text-black sm:text-lg">
-                          Includes all listed features for intensive
-                          preparation.
+                          {t("examPrep.pricing.includes")}
                         </div>
                       </div>
 
@@ -343,8 +350,7 @@ const LandingExamPrep = () => {
                       <div className="mb-4 flex flex-col items-center gap-1 text-xs text-black sm:mb-6 sm:gap-2 sm:text-sm">
                         <Info className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-[#FFBF00] sm:h-4 sm:w-4" />
                         <span className="text-center">
-                          Package does not automatically renew. We recommend 2
-                          months of this package to achieve best results.
+                          {t("examPrep.pricing.notice")}
                         </span>
                       </div>
 
@@ -361,7 +367,7 @@ const LandingExamPrep = () => {
                             }
                           }}
                         >
-                          Enroll Today
+                          {t("examPrep.hero.enrollToday")}
                         </button>
                         <button
                           className="w-full bg-transparent px-6 py-2 text-base font-semibold text-[#12551E] transition-colors hover:bg-green-50"
@@ -372,7 +378,7 @@ const LandingExamPrep = () => {
                             )
                           }
                         >
-                          Schedule an Informational Call
+                          {t("examPrep.pricing.scheduleInfoCall")}
                         </button>
                       </div>
                     </div>
@@ -424,6 +430,55 @@ const LandingExamPrep = () => {
       >
         <Footer />
       </motion.div>
+      {/* Popup Modal */}
+      {showPopup && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm">
+          <div className="relative flex h-[490px] w-[1080px] max-w-full flex-col items-center overflow-hidden rounded-3xl bg-white p-0 shadow-2xl">
+            {/* Background image */}
+            <img
+              src="/images/banner-background.png"
+              alt="Banner Background"
+              className="absolute inset-0 h-full w-full object-cover opacity-80"
+            />
+
+            <div className="relative z-10 flex h-full w-full flex-col items-center justify-center p-8 sm:p-12">
+              <button
+                onClick={() => setShowPopup(false)}
+                className="absolute right-6 top-6 flex items-center justify-center rounded-full bg-[#E7E7E7] bg-opacity-70 p-2 text-[#3D3D3D] hover:bg-gray-100"
+                aria-label="Close"
+                type="button"
+              >
+                <X className="h-6 w-6" />
+              </button>
+              <img
+                src="/svgs/exam-prep-modal-icon.svg"
+                alt={t("examPrep.modal.bannerIconAlt")}
+                className="mx-auto mb-6"
+              />
+              <h2 className="mb-3 text-center text-[32px] font-bold text-black">
+                {t("examPrep.modal.title")}
+              </h2>
+              <p className="mb-8 max-w-xl text-center text-xl font-medium text-[#454545]">
+                {t("examPrep.modal.spotsFilling")}
+              </p>
+              <button
+                className="rounded-full border border-[#042F0C] bg-[#14B82C] px-8 py-2 text-base font-medium text-black transition hover:bg-green-700"
+                onClick={() => {
+                  setShowPopup(false);
+                  if (isMobile) {
+                    localStorage.setItem("inMobileModalFlow", "true");
+                    setMobileModalStep("signup");
+                  } else {
+                    navigate("/signup");
+                  }
+                }}
+              >
+                {t("examPrep.modal.bookNow")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

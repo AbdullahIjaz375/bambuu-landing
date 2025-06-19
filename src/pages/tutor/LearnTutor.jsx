@@ -29,10 +29,7 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { ClipLoader } from "react-spinners";
-import {
-  ClassTypeModal,
-  GroupSelectModal,
-} from "../../components-tutor/AddClassFlow";
+import { GroupSelectModal } from "../../components-tutor/AddClassFlow";
 import GroupCardTutor from "../../components-tutor/GroupCardTutor";
 import EmptyState from "../../components/EmptyState";
 import CalenderTutor from "../../components-tutor/CalenderTutor";
@@ -126,17 +123,7 @@ const LearnTutor = () => {
 
   //--------------------------------------------adding class----------------------------//
 
-  const [showClassTypeModal, setShowClassTypeModal] = useState(false);
   const [showGroupSelectModal, setShowGroupSelectModal] = useState(false);
-  // Add these handlers
-  const handleClassTypeSelect = (type) => {
-    setShowClassTypeModal(false);
-    if (type === "group") {
-      setShowGroupSelectModal(true);
-    } else {
-      navigate(`/addClassTutor?type=individual`);
-    }
-  };
 
   const handleGroupSelect = (group) => {
     setShowGroupSelectModal(false);
@@ -215,7 +202,7 @@ const LearnTutor = () => {
                 <div className="flex flex-row items-center space-x-2">
                   <button
                     className="flex items-center rounded-full border border-black bg-[#14b82c] px-3 py-2 text-lg font-semibold text-[#042f0c]"
-                    onClick={() => setShowClassTypeModal(true)}
+                    onClick={() => setShowGroupSelectModal(true)}
                   >
                     <Plus /> {t("learn-tutor.actions.new-class")}
                   </button>
@@ -306,17 +293,10 @@ const LearnTutor = () => {
           </div>
         </div>
 
-        <ClassTypeModal
-          isOpen={showClassTypeModal}
-          onClose={() => setShowClassTypeModal(false)}
-          onSelect={handleClassTypeSelect}
-        />
-
         <GroupSelectModal
           isOpen={showGroupSelectModal}
           onClose={() => {
             setShowGroupSelectModal(false);
-            setShowClassTypeModal(true);
           }}
           onSelect={handleGroupSelect}
           groups={groups}

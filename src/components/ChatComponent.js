@@ -684,13 +684,12 @@ const CustomChatComponent = ({
         </div>
       </Modal>
       {/* Student Profile Modal */}
-      {/* Student Profile Modal */}
       {isStudentsTutorPage && (
         <Modal
           isOpen={showProfileModal}
           onRequestClose={() => setShowProfileModal(false)}
-          className="z-50 mx-auto mt-20 max-w-md rounded-3xl bg-white p-0 outline-none"
-          overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          className="z-50 mx-auto mt-20 w-[420px] rounded-[48px] bg-white p-0 shadow-2xl outline-none"
+          overlayClassName="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50"
           style={{
             overlay: {
               zIndex: 60,
@@ -698,103 +697,152 @@ const CustomChatComponent = ({
             content: {
               border: "none",
               padding: "0",
-              maxWidth: "480px",
+              maxWidth: "420px",
               position: "relative",
               zIndex: 61,
             },
           }}
         >
           {studentProfile ? (
-            <div className="font-urbanist">
-              <div className="flex items-center justify-between px-6 pt-6">
-                <h2 className="text-2xl font-medium">
-                  {t("chat.profile.title")}
-                </h2>
-                <div className="flex items-center justify-center">
-                  <button
-                    onClick={() => setShowProfileModal(false)}
-                    className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F6F6F6] hover:bg-gray-100"
-                  >
-                    <X className="text-[#3D3D3D]" />
-                  </button>
-                </div>
+            <div className="flex h-auto w-[420px] flex-col gap-[40px] p-6 font-urbanist">
+              {/* Header */}
+              <div className="flex items-center justify-between pb-2">
+                <h2 className="text-xl font-semibold">Student Profile</h2>
+                <button
+                  onClick={() => setShowProfileModal(false)}
+                  className="flex items-center justify-center rounded-full bg-[#F6F6F6] p-2 text-[#3D3D3D] hover:bg-gray-100"
+                  aria-label="Close"
+                  type="button"
+                >
+                  <X className="h-6 w-6" />
+                </button>
               </div>
 
-              <div className="bg-green-50 p-4">
-                <div className="flex flex-col items-center">
-                  <div className="mb-2 flex h-20 w-20 items-center justify-center rounded-full bg-green-500">
-                    {studentProfile.photoUrl ? (
+              {/* Profile Card with Overlapping Avatar */}
+              <div className="relative flex w-full flex-col items-center">
+                <div className="relative flex h-40 w-full flex-col items-center justify-end rounded-2xl bg-[#E6FDE9] px-6 pb-6 pt-16">
+                  {/* Name and location */}
+                  <div className="mb-6 flex flex-col items-center">
+                    <div className="text-lg font-bold">
+                      {studentProfile.name || "Student"}
+                    </div>
+                    <div className="mt-1 flex items-center gap-1 text-sm text-gray-700">
                       <img
-                        src={studentProfile.photoUrl}
-                        alt={studentProfile.name}
-                        className="h-full w-full rounded-full object-cover"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = "/default-avatar.png";
-                        }}
+                        src="/svgs/location.svg"
+                        className="h-4 w-4"
+                        alt="From"
                       />
-                    ) : (
-                      <div className="text-4xl font-bold text-white">
-                        {studentProfile.name?.charAt(0) || "S"}
-                      </div>
-                    )}
+                      <span className="font-semibold">From:</span>
+                      <span
+                        className="max-w-[120px] truncate font-medium"
+                        title={studentProfile.country || "Not specified"}
+                      >
+                        {studentProfile.country || "Not specified"}
+                      </span>
+                    </div>
                   </div>
-                  <h3 className="text-xl font-bold">
-                    {studentProfile.name || "Student"}
-                  </h3>
-                  <div className="mt-1 flex items-center">
+                  <div className="absolute bottom-4 left-8 flex items-center gap-1 text-sm">
                     <img
-                      src="/svgs/location.svg"
-                      alt="location"
-                      className="mr-1 h-5 w-5"
+                      src="/svgs/language-circle.svg"
+                      className="h-4 w-4"
+                      alt="Native"
                     />
-                    <span className="text-sm">
-                      From: {studentProfile.country || "Not specified"}
+                    <span className="font-semibold">Native:</span>
+                    <span className="font-medium">
+                      {studentProfile.nativeLanguage || "Not specified"}
                     </span>
                   </div>
-                  <div className="mt-4 grid w-full grid-cols-2 gap-16">
-                    <div className="flex items-center">
-                      <img
-                        src="/svgs/language-circle.svg"
-                        alt="language"
-                        className="mr-1 h-5 w-5"
-                      />
-                      <span className="text-sm">
-                        Native:{" "}
-                        {studentProfile.nativeLanguage || "Not specified"}
-                      </span>
-                    </div>
-                    <div className="flex items-center">
-                      <img
-                        src="/svgs/language-square.svg"
-                        alt="language"
-                        className="mr-1 h-5 w-5"
-                      />
-                      <span className="text-sm">
-                        Learning:{" "}
-                        {studentProfile.learningLanguage || "Not specified"}
-                      </span>
-                    </div>
+                  <div className="absolute bottom-4 right-8 flex items-center gap-1 text-sm">
+                    <img
+                      src="/svgs/language-square.svg"
+                      className="h-4 w-4"
+                      alt="Learning"
+                    />
+                    <span className="font-semibold">Learning:</span>
+                    <span className="font-medium">
+                      {studentProfile.learningLanguage || "Not specified"}
+                    </span>
                   </div>
+                </div>
+                {/* Overlapping Avatar */}
+                <div className="absolute left-1/2 top-0 flex h-24 w-24 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[#14B82C]">
+                  {studentProfile.photoUrl ? (
+                    <img
+                      src={studentProfile.photoUrl}
+                      alt={studentProfile.name}
+                      className="h-24 w-24 rounded-full object-cover"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = "/images/panda.png";
+                      }}
+                    />
+                  ) : (
+                    <img
+                      src="/images/panda.png"
+                      alt="Avatar"
+                      className="h-24 w-24 rounded-full object-cover"
+                    />
+                  )}
                 </div>
               </div>
 
-              <div className="p-4">
-                <h3 className="mb-3 text-lg font-semibold">
-                  Your classes booked by this student
-                </h3>
+              {/* Section Title */}
+              <div className="text-base font-semibold">
+                Your classes booked by this student
+              </div>
 
+              {/* Classes List */}
+              <div className="space-y-4">
                 {studentProfile.classes && studentProfile.classes.length > 0 ? (
-                  <div className="space-y-3">
-                    {studentProfile.classes.map((classItem, index) => (
-                      <div
-                        key={index}
-                        className="rounded-lg border border-green-300 bg-[#f8fff9] p-3"
-                      >
-                        {/* Class details here */}
+                  studentProfile.classes.map((classItem, index) => (
+                    <div
+                      key={index}
+                      className="flex flex-row items-center gap-3 rounded-2xl border border-[#14B82C] bg-[#F0FDF1] px-3 py-3"
+                    >
+                      <img
+                        src={classItem.image || "/images/class1.png"}
+                        alt={classItem.title || "Class"}
+                        className="h-16 w-16 rounded-xl object-cover"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <div className="font-semibold">
+                            {classItem.title || "Class Title"}
+                          </div>
+                          <span className="rounded-full border border-[#FFBF00] bg-[#FFF9E5] px-3 py-1 text-xs font-medium text-[#B88A00]">
+                            {classItem.level || "Intermediate"}
+                          </span>
+                        </div>
+                        <div className="mt-1 flex flex-row items-center gap-2 text-sm text-[#454545]">
+                          <img
+                            src="/svgs/clock.svg"
+                            className="h-4 w-4"
+                            alt="Time"
+                          />
+                          <span>{classItem.time || "6:00-8:00 am"}</span>
+                          <img
+                            src="/svgs/calendar.svg"
+                            className="ml-2 h-4 w-4"
+                            alt="Date"
+                          />
+                          <span>{classItem.date || "30 NOV 2024"}</span>
+                          <img
+                            src={classItem.languageFlag || "/images/spain.png"}
+                            className="ml-2 h-4 w-4"
+                            alt="Language"
+                          />
+                        </div>
+                        <div className="mt-1 flex items-center gap-2 text-xs text-[#454545]">
+                          <img
+                            src="/svgs/user.svg"
+                            className="h-4 w-4"
+                            alt="Teacher"
+                          />
+                          <span>{classItem.teacher || "Student Name"}</span>
+                        </div>
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  ))
                 ) : (
                   <div className="rounded-lg bg-gray-50 py-4 text-center">
                     <p className="text-gray-500">No classes booked yet</p>
@@ -809,7 +857,7 @@ const CustomChatComponent = ({
             </div>
           )}
         </Modal>
-      )}{" "}
+      )}
       {/* Assign Resources Modal */}
       {isStudentsTutorPage && (
         <Modal

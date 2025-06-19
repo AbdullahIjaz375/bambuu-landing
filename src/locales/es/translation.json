@@ -1106,5 +1106,80 @@
       "noClasses": "Aún no hay clases reservadas",
       "loading": "Cargando perfil del estudiante..."
     }
+  },
+  "exam-prep": {
+    "title": "Paquete de Preparación de Exámenes",
+    "tabs": {
+      "exam-prep-classes": "Clases de Preparación de Exámenes",
+      "introductory-calls": "Llamadas Introductorias"
+    },
+    "manage-availability": "Gestionar Disponibilidad",
+    "exam": "EXAMEN",
+    "preparation": "PREPARACIÓN"
+  },
+  "examPrep": {
+    "banner": "¡No te lo pierdas! Las últimas 10 plazas para julio se están llenando rápidamente.",
+    "hero": {
+      "title1": "Preparación de Exámenes",
+      "title2": "Inmersiva",
+      "subtitle": "Deja de lado los ejercicios aburridos. Aprende a través de conversaciones reales, gana confianza y desbloquea las oportunidades que mereces.",
+      "scheduleCall": "Agendar una Llamada",
+      "enrollToday": "Inscribirse Hoy",
+      "videoCaption": "Mira cómo bammbuu transforma la preparación de exámenes en una experiencia."
+    },
+    "why": {
+      "title": "¿Por qué elegir bammbuu?",
+      "description": "Ya sea que te estés preparando para exámenes de competencia en español como DELE y SIELE, o apuntando a puntajes altos en evaluaciones de inglés como IELTS y TOEFL, bammbuu proporciona el apoyo experto que necesitas. También ayudamos a los estudiantes a tener éxito en admisiones universitarias y exámenes de ingreso laboral enfocándonos en la comunicación del mundo real y planes de estudio personalizados."
+    },
+    "modal": {
+      "bannerIconAlt": "Icono del Banner",
+      "title": "¡No te lo pierdas!",
+      "spotsFilling": "Las últimas 10 plazas para julio se están llenando rápidamente.",
+      "bookNow": "Reservar Ahora"
+    },
+    "features": {
+      "feature1": "10 Clases 1:1 en vivo con tutores certificados",
+      "feature2": "Clases de Conversación Grupales Ilimitadas dirigidas por instructores",
+      "feature3": "Plan de Aprendizaje Personalizado basado en tus objetivos de fluidez",
+      "feature4": "Te conectamos con un compañero de idioma personal para practicar conversación.",
+      "feature5": "Recursos Guardados adaptados a tu plan de estudio",
+      "feature6": "SuperTutor IA 24/7 para práctica continua del idioma",
+      "feature7": "Soporte Directo del equipo bammbuu",
+      "feature8": "Garantía de Devolución de Dinero si no se cumplen tus objetivos*"
+    },
+    "cards": {
+      "card1": {
+        "title": "Conversación Primero",
+        "desc": "Priorizamos la práctica real de habla sobre la memorización mecánica para ayudarte a construir fluidez rápidamente."
+      },
+      "card2": {
+        "title": "Planes Personalizados",
+        "desc": "Cada estudiante obtiene un plan personalizado construido alrededor de sus objetivos de examen y nivel de habla."
+      },
+      "card3": {
+        "title": "Expertos Certificados",
+        "desc": "Aprende de tutores calificados y hablantes nativos con experiencia comprobada en instrucción de idiomas."
+      },
+      "card4": {
+        "title": "Herramienta Todo en Uno",
+        "desc": "Practica en cualquier momento con SuperTutor IA, únete a clases grupales en vivo y accede a materiales de aprendizaje guardados."
+      },
+      "card5": {
+        "title": "Garantía de Confianza",
+        "desc": "Nuestro plan funciona — o recuperas tu dinero después de completar el programa recomendado.*"
+      }
+    },
+    "whatYouGet": {
+      "title": "Lo que obtendrás en el paquete"
+    },
+    "moneyBackDisclaimer": "*Nuestra garantía de devolución de dinero requiere que completes el plan recomendado por bammbuu. Si tu objetivo de idioma, como se discutió en tu llamada introductoria, no se cumple después de 2 meses de nuestro plan de Preparación de Exámenes Inmersiva — incluyendo todas las 10 clases 1:1 y 3 sesiones grupales en vivo por mes — te reembolsaremos.",
+    "pricing": {
+      "header": "Paquete de Exámenes de Idiomas",
+      "price": "$499",
+      "duration": "1 Mes de Acceso",
+      "includes": "Incluye todas las características listadas para preparación intensiva.",
+      "notice": "El paquete no se renueva automáticamente. Recomendamos 2 meses de este paquete para lograr los mejores resultados.",
+      "scheduleInfoCall": "Agendar una Llamada Informativa"
+    }
   }
 }
