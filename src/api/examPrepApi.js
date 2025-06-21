@@ -1,13 +1,7 @@
 // Exam Prep API Utility
 // Each endpoint has a unique base URL (no shared BASE_URL)
 
-const API_BASE_URL_PROD = "3idvfneyra-uc.a.run.app";
-const API_BASE_URL_DEV = "zzpsx27htq-uc.a.run.app";
-
-// Set to true for production, false for development
-const IS_PROD = true;
-
-const API_BASE_URL = IS_PROD ? API_BASE_URL_PROD : API_BASE_URL_DEV;
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 /**
  * Helper to make API requests
@@ -61,11 +55,7 @@ async function apiRequest(url, options = {}, token) {
 
 export function purchaseExamPrepPlan(studentId, token) {
   return apiRequest(
-    `https://${
-      IS_PROD
-        ? "purchaseexamprepplan-3idvfneyra-uc.a.run.app"
-        : "purchaseexamprepplan-zzpsx27htq-uc.a.run.app"
-    }`,
+    `https://purchaseexamprepplan-${API_BASE_URL}`,
     {
       method: "POST",
       body: JSON.stringify({ studentId }),
@@ -76,11 +66,7 @@ export function purchaseExamPrepPlan(studentId, token) {
 
 export function bookIntroductoryCall(data, token) {
   return apiRequest(
-    `https://${
-      IS_PROD
-        ? "bookintroductorycall-3idvfneyra-uc.a.run.app"
-        : "bookintroductorycall-zzpsx27htq-uc.a.run.app"
-    }`,
+    `https://bookintroductorycall-${API_BASE_URL}`,
     {
       method: "POST",
       body: JSON.stringify(data),
@@ -91,11 +77,7 @@ export function bookIntroductoryCall(data, token) {
 
 export function markIntroCallDone(data, token) {
   return apiRequest(
-    `https://${
-      IS_PROD
-        ? "markintrocalldone-3idvfneyra-uc.a.run.app"
-        : "markintrocalldone-zzpsx27htq-uc.a.run.app"
-    }`,
+    `https://markintrocalldone-${API_BASE_URL}`,
     {
       method: "POST",
       body: JSON.stringify(data),
@@ -106,11 +88,7 @@ export function markIntroCallDone(data, token) {
 
 export function bookExamPrepClass(data, token) {
   return apiRequest(
-    `https://${
-      IS_PROD
-        ? "bookexamprepclass-3idvfneyra-uc.a.run.app"
-        : "bookexamprepclass-zzpsx27htq-uc.a.run.app"
-    }`,
+    `https://bookexamprepclass-${API_BASE_URL}`,
     {
       method: "POST",
       body: JSON.stringify(data),
@@ -121,11 +99,9 @@ export function bookExamPrepClass(data, token) {
 
 export function getExamPrepStatus(studentId, token) {
   return apiRequest(
-    `https://${
-      IS_PROD
-        ? "getexamprepstatus-3idvfneyra-uc.a.run.app"
-        : "getexamprepstatus-zzpsx27htq-uc.a.run.app"
-    }?studentId=${encodeURIComponent(studentId)}`,
+    `https://getexamprepstatus-${API_BASE_URL}?studentId=${encodeURIComponent(
+      studentId,
+    )}`,
     {
       method: "GET",
     },
@@ -135,11 +111,7 @@ export function getExamPrepStatus(studentId, token) {
 
 export function setIntroCallSlots(data, token) {
   return apiRequest(
-    `https://${
-      IS_PROD
-        ? "setintroductorycallslots-3idvfneyra-uc.a.run.app"
-        : "setintroductorycallslots-zzpsx27htq-uc.a.run.app"
-    }`,
+    `https://setintroductorycallslots-${API_BASE_URL}`,
     {
       method: "POST",
       body: JSON.stringify(data),
@@ -150,11 +122,7 @@ export function setIntroCallSlots(data, token) {
 
 export function setExamPrepClassSlots(data, token) {
   return apiRequest(
-    `https://${
-      IS_PROD
-        ? "setexamprepclassslots-3idvfneyra-uc.a.run.app"
-        : "setexamprepclassslots-zzpsx27htq-uc.a.run.app"
-    }`,
+    `https://setexamprepclassslots-${API_BASE_URL}`,
     {
       method: "POST",
       body: JSON.stringify(data),
@@ -165,11 +133,9 @@ export function setExamPrepClassSlots(data, token) {
 
 export function getIntroCallSlots(tutorId, token) {
   return apiRequest(
-    `https://${
-      IS_PROD
-        ? "getintroductorycallslots-3idvfneyra-uc.a.run.app"
-        : "getintroductorycallslots-zzpsx27htq-uc.a.run.app"
-    }?tutorId=${encodeURIComponent(tutorId)}`,
+    `https://getintroductorycallslots-${API_BASE_URL}?tutorId=${encodeURIComponent(
+      tutorId,
+    )}`,
     {
       method: "GET",
     },
@@ -179,11 +145,9 @@ export function getIntroCallSlots(tutorId, token) {
 
 export function getExamPrepClassSlots(tutorId, token) {
   return apiRequest(
-    `https://${
-      IS_PROD
-        ? "getexamprepclassslots-3idvfneyra-uc.a.run.app"
-        : "getexamprepclassslots-zzpsx27htq-uc.a.run.app"
-    }?tutorId=${encodeURIComponent(tutorId)}`,
+    `https://getexamprepclassslots-${API_BASE_URL}?tutorId=${encodeURIComponent(
+      tutorId,
+    )}`,
     {
       method: "GET",
     },
@@ -212,39 +176,7 @@ export function getUserChannels(userId, token) {
 
 export function getTutorClasses(tutorId, token) {
   return apiRequest(
-    `https://${
-      IS_PROD
-        ? "gettutorclasses-3idvfneyra-uc.a.run.app"
-        : "gettutorclasses-zzpsx27htq-uc.a.run.app"
-    }?tutorId=${encodeURIComponent(tutorId)}`,
-    {
-      method: "GET",
-    },
-    token,
-  );
-}
-
-export function getStudentClasses(studentId, token) {
-  return apiRequest(
-    `https://${
-      IS_PROD
-        ? "getstudentclasses-3idvfneyra-uc.a.run.app"
-        : "getstudentclasses-zzpsx27htq-uc.a.run.app"
-    }?studentId=${encodeURIComponent(studentId)}`,
-    {
-      method: "GET",
-    },
-    token,
-  );
-}
-
-export function getExamPrepStepStatus(studentId, tutorId, token) {
-  return apiRequest(
-    `https://${
-      IS_PROD
-        ? "getexamprepstepstatus-3idvfneyra-uc.a.run.app"
-        : "getexamprepstepstatus-zzpsx27htq-uc.a.run.app"
-    }?studentId=${encodeURIComponent(studentId)}&tutorId=${encodeURIComponent(
+    `https://gettutorclasses-${API_BASE_URL}?tutorId=${encodeURIComponent(
       tutorId,
     )}`,
     {
@@ -254,13 +186,35 @@ export function getExamPrepStepStatus(studentId, tutorId, token) {
   );
 }
 
+export function getStudentClasses(studentId, token) {
+  return apiRequest(
+    `https://getstudentclasses-${API_BASE_URL}?studentId=${encodeURIComponent(
+      studentId,
+    )}`,
+    {
+      method: "GET",
+    },
+    token,
+  );
+}
+
+export function getExamPrepStepStatus(studentId, tutorId, token) {
+  return apiRequest(
+    `https://getexamprepstepstatus-${API_BASE_URL}?studentId=${encodeURIComponent(
+      studentId,
+    )}&tutorId=${encodeURIComponent(tutorId)}`,
+    {
+      method: "GET",
+    },
+    token,
+  );
+}
+
 export function getExamPrepPlanTimeline(studentId, token) {
   return apiRequest(
-    `https://${
-      IS_PROD
-        ? "getexamprepplantimeline-3idvfneyra-uc.a.run.app"
-        : "getexamprepplantimeline-zzpsx27htq-uc.a.run.app"
-    }?studentId=${encodeURIComponent(studentId)}`,
+    `https://getexamprepplantimeline-${API_BASE_URL}?studentId=${encodeURIComponent(
+      studentId,
+    )}`,
     {
       method: "GET",
     },
@@ -269,12 +223,14 @@ export function getExamPrepPlanTimeline(studentId, token) {
 }
 
 export function getStudentExamPrepTutorialStatus(studentId, token) {
+  const functionName =
+    process.env.NODE_ENV === "production"
+      ? "getstudentexampreptutorialstatus"
+      : "getstudentexampreptutorialstatusdev";
   return apiRequest(
-    `https://${
-      IS_PROD
-        ? "getstudentexampreptutorialstatus-3idvfneyra-uc.a.run.app"
-        : "getstudentexampreptutorialstatusdev-zzpsx27htq-uc.a.run.app"
-    }?studentId=${encodeURIComponent(studentId)}`,
+    `https://${functionName}-${API_BASE_URL}?studentId=${encodeURIComponent(
+      studentId,
+    )}`,
     {
       method: "GET",
     },
@@ -284,11 +240,9 @@ export function getStudentExamPrepTutorialStatus(studentId, token) {
 
 export function getTutorProfile(tutorId, token) {
   return apiRequest(
-    `https://${
-      IS_PROD
-        ? "gettutorprofile-3idvfneyra-uc.a.run.app"
-        : "gettutorprofile-zzpsx27htq-uc.a.run.app"
-    }?tutorId=${encodeURIComponent(tutorId)}`,
+    `https://gettutorprofile-${API_BASE_URL}?tutorId=${encodeURIComponent(
+      tutorId,
+    )}`,
     {
       method: "GET",
     },
@@ -309,11 +263,9 @@ export function updateTutorProfile(data, token) {
 
 export function getExamPrepCurrentStep(studentId, token) {
   return apiRequest(
-    `https://${
-      IS_PROD
-        ? "getexamprepcurrentstep-3idvfneyra-uc.a.run.app"
-        : "getexamprepcurrentstep-zzpsx27htq-uc.a.run.app"
-    }?studentId=${encodeURIComponent(studentId)}`,
+    `https://getexamprepcurrentstep-${API_BASE_URL}?studentId=${encodeURIComponent(
+      studentId,
+    )}`,
     {
       method: "GET",
     },
@@ -324,7 +276,9 @@ export function getExamPrepCurrentStep(studentId, token) {
 //dummy just to check if the api is working
 export function getExamPrepStepStatusMock(studentId, tutorId, token) {
   return apiRequest(
-    `https://getexamprepstepstatusdev-zzpsx27htq-uc.a.run.app?studentId=${encodeURIComponent(studentId)}&tutorId=${encodeURIComponent(tutorId)}`,
+    `https://getexamprepstepstatusdev-zzpsx27htq-uc.a.run.app?studentId=${encodeURIComponent(
+      studentId,
+    )}&tutorId=${encodeURIComponent(tutorId)}`,
     {
       method: "GET",
     },

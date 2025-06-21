@@ -10,7 +10,7 @@ import {
 import { OAuthProvider } from "firebase/auth";
 
 import { messaging } from "../firebaseConfig";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useAuth } from "../context/AuthContext";
 import ClipLoader from "react-spinners/ClipLoader";
@@ -65,6 +65,7 @@ const Signup = ({ onNext, onClose, isModal = false }) => {
   const navigate = useNavigate();
   const { user, loading, updateUserData } = useAuth();
   const [loading1, setLoading1] = useState(false);
+  const location = useLocation();
 
   const isMobile = useIsMobile();
 
@@ -295,13 +296,22 @@ const Signup = ({ onNext, onClose, isModal = false }) => {
       setHasProfile(true);
       setShowSuccessModal(true);
 
+      const examPrepFlow = location.state?.flow === "exam-prep";
+
       if (isModal) {
         onNext && onNext();
       } else {
-        if (!sessionUserData.name || !sessionUserData.email) {
-          navigate("/userEditProfile", { replace: true });
+        if (examPrepFlow) {
+          navigate("/subscribe-exam-prep");
         } else {
-          navigate("/learn", { replace: true });
+          if (!sessionUserData.name || !sessionUserData.email) {
+            navigate("/userEditProfile", { replace: true });
+          } else {
+            navigate("/learn", {
+              replace: true,
+              state: { language: appLanguageCode },
+            });
+          }
         }
       }
     } catch (error) {
@@ -503,7 +513,7 @@ const Signup = ({ onNext, onClose, isModal = false }) => {
           setIsEmailVerified(true);
           setHasProfile(false);
         } else {
-          onNext && onNext();
+          onNext();
         }
       } else {
         if (isFirstTimeLogin || !userDoc.data().name) {
@@ -673,7 +683,7 @@ const Signup = ({ onNext, onClose, isModal = false }) => {
           setIsEmailVerified(true);
           setHasProfile(false);
         } else {
-          onNext && onNext();
+          onNext();
         }
       } else {
         if (isFirstTimeLogin || !userDoc.data().name) {

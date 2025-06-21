@@ -479,7 +479,7 @@ const InstructorProfileUser = () => {
                         className="h-16 w-16"
                       />
                       <span className="text-base font-semibold">
-                        Exam Preparation Package
+                        Exam Preparation Program
                       </span>
                       {stepStatusLoading && (
                         <ClipLoader

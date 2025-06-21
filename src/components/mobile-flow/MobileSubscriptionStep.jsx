@@ -3,6 +3,7 @@ import MobileModal from "../MobileModal";
 import ClipLoader from "react-spinners/ClipLoader";
 import MobileModalHeader from "./MobileModalHeader";
 import { useAuth } from "../../context/AuthContext";
+import { createCheckoutSession } from "../../api/paymentApi";
 
 const MobileSubscriptionStep = ({ onNext, onBack, onClose }) => {
   const { user } = useAuth();
@@ -15,19 +16,12 @@ const MobileSubscriptionStep = ({ onNext, onBack, onClose }) => {
     }
     setLoading(true);
     try {
-      const response = await fetch(
-        "https://createcheckoutsession-3idvfneyra-uc.a.run.app",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: user.email,
-            studentId: user.uid,
-            context: "mobile",
-          }),
-        },
-      );
-      const data = await response.json();
+      const data = await createCheckoutSession({
+        email: user.email,
+        studentId: user.uid,
+        context: "mobile",
+      });
+
       if (data.url) {
         window.location.href = data.url;
       } else {

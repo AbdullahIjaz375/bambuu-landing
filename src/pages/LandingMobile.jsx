@@ -98,7 +98,7 @@ export default function LandingMobile() {
         <h1 className="px-4 text-center text-[32px] font-extrabold leading-tight">
           Immersive Exam
           <br />
-          Preparation Package
+          Preparation Program
         </h1>
         <p className="mt-3 px-6 text-center text-[18px] font-medium text-[#042F0C]">
           Ditch the dry drills. Learn through real conversation, gain

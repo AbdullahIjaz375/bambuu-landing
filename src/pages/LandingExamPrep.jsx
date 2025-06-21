@@ -164,7 +164,7 @@ const LandingExamPrep = () => {
                     localStorage.setItem("inMobileModalFlow", "true");
                     setMobileModalStep("signup");
                   } else {
-                    navigate("/signup");
+                    navigate("/signup", { state: { flow: "exam-prep" } });
                   }
                 }}
               >
@@ -363,7 +363,9 @@ const LandingExamPrep = () => {
                               localStorage.setItem("inMobileModalFlow", "true");
                               setMobileModalStep("signup");
                             } else {
-                              navigate("/signup");
+                              navigate("/signup", {
+                                state: { flow: "exam-prep" },
+                              });
                             }
                           }}
                         >
@@ -469,7 +471,7 @@ const LandingExamPrep = () => {
                     localStorage.setItem("inMobileModalFlow", "true");
                     setMobileModalStep("signup");
                   } else {
-                    navigate("/signup");
+                    navigate("/signup", { state: { flow: "exam-prep" } });
                   }
                 }}
               >

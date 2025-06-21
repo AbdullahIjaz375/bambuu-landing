@@ -130,7 +130,7 @@ const InstructorProfile = ({
       >
         <div className="relative flex w-full items-center justify-between px-6 pb-1 pt-4">
           <span className="text-2xl font-medium text-black">
-            Exam Preparation Package
+            Exam Preparation Program
           </span>
           <button
             className="flex h-10 w-10 items-center justify-center rounded-full bg-[#F6F6F6] hover:bg-[#ededed]"

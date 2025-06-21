@@ -77,6 +77,7 @@ import ExamPreparationTutor from "./pages/tutor/ExamPreparationTutor";
 import ExamPreparationUser from "./pages/user/ExamPreparationUser";
 import MobileConfirmationStep from "./components/mobile-flow/MobileConfirmationStep";
 import LandingExamPrep from "./pages/LandingExamPrep";
+import WebSubscriptionStep from "./pages/user/WebSubscriptionStep";
 
 const App = () => {
   const { user, streamClient } = useAuth(); // Use useAuth() inside the component
@@ -275,6 +276,15 @@ const App = () => {
                 element={
                   <ProtectedRoute requiredRole={["student", "tutor"]}>
                     <Subscriptions />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/subscribe-exam-prep"
+                element={
+                  <ProtectedRoute requiredRole="student">
+                    <WebSubscriptionStep />
                   </ProtectedRoute>
                 }
               />

@@ -239,7 +239,7 @@ const ExamPreparationUser = () => {
                 <ArrowLeft size={24} />
               </button>
               <h1 className="text-2xl font-medium text-black">
-                Exam Preparation Package
+                Exam Preparation Program
               </h1>
             </div>
             <div className="text-base font-normal text-[#454545]">
