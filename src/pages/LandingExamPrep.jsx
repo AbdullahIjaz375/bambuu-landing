@@ -88,6 +88,15 @@ const LandingExamPrep = () => {
     };
   }, [showPopup]);
 
+  const handleEnrollClick = () => {
+    if (isMobile) {
+      localStorage.setItem("inMobileModalFlow", "true");
+      setMobileModalStep("signup");
+    } else {
+      navigate("/signup", { state: { flow: "exam-prep" } });
+    }
+  };
+
   // Handle mobile modal flow completion
   const handleMobileFlowComplete = () => {
     localStorage.removeItem("inMobileModalFlow");
@@ -159,14 +168,7 @@ const LandingExamPrep = () => {
               </button>
               <button
                 className="w-full rounded-full border border-[black] bg-[#FFBF00] px-6 py-2 text-base font-medium text-black transition hover:bg-[#ffd94d] sm:w-auto"
-                onClick={() => {
-                  if (isMobile) {
-                    localStorage.setItem("inMobileModalFlow", "true");
-                    setMobileModalStep("signup");
-                  } else {
-                    navigate("/signup", { state: { flow: "exam-prep" } });
-                  }
-                }}
+                onClick={handleEnrollClick}
               >
                 {t("examPrep.hero.enrollToday")}
               </button>
@@ -358,16 +360,7 @@ const LandingExamPrep = () => {
                       <div className="space-y-2 sm:space-y-3">
                         <button
                           className="w-full rounded-full border border-[#042F0C] bg-[#14B82C] px-6 py-2 text-base font-semibold text-black transition-colors hover:bg-green-700 sm:text-lg"
-                          onClick={() => {
-                            if (isMobile) {
-                              localStorage.setItem("inMobileModalFlow", "true");
-                              setMobileModalStep("signup");
-                            } else {
-                              navigate("/signup", {
-                                state: { flow: "exam-prep" },
-                              });
-                            }
-                          }}
+                          onClick={handleEnrollClick}
                         >
                           {t("examPrep.hero.enrollToday")}
                         </button>
@@ -398,7 +391,7 @@ const LandingExamPrep = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
         >
-          <ComparisonTable />
+          <ComparisonTable onEnrollClick={handleEnrollClick} />
         </motion.div>
       </div>
       {/* Mobile Modal Stepper Flow */}
@@ -467,12 +460,7 @@ const LandingExamPrep = () => {
                 className="rounded-full border border-[#042F0C] bg-[#14B82C] px-8 py-2 text-base font-medium text-black transition hover:bg-green-700"
                 onClick={() => {
                   setShowPopup(false);
-                  if (isMobile) {
-                    localStorage.setItem("inMobileModalFlow", "true");
-                    setMobileModalStep("signup");
-                  } else {
-                    navigate("/signup", { state: { flow: "exam-prep" } });
-                  }
+                  handleEnrollClick();
                 }}
               >
                 {t("examPrep.modal.bookNow")}

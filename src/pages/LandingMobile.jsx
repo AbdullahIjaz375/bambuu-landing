@@ -243,7 +243,7 @@ export default function LandingMobile() {
 
       {/* Comparison Table Section */}
       <div className="mt-12 flex w-full flex-col items-center px-2">
-        <ComparisonTable />
+        <ComparisonTable onEnrollClick={() => setShowSignupFlow(true)} />
       </div>
 
       {/* Footer */}

@@ -96,7 +96,7 @@ const iconMap = {
 const BAMMBUU_COLUMN_LEFT = 304; // px from left edge of the table
 const BAMMBUU_COLUMN_WIDTH = 240;
 
-const ComparisonTable = () => {
+const ComparisonTable = ({ onEnrollClick }) => {
   const tableRef = useRef(null);
   const [highlightHeight, setHighlightHeight] = useState(0);
 
@@ -272,12 +272,12 @@ const ComparisonTable = () => {
         >
           Schedule a Call
         </a>
-        <a
-          href="/signup"
+        <button
+          onClick={onEnrollClick}
           className="rounded-full border border-black bg-[#FFBF00] px-6 py-2 text-center text-base font-medium text-black transition hover:bg-[#ffd94d]"
         >
           Enroll Today
-        </a>
+        </button>
       </div>
     </section>
   );
