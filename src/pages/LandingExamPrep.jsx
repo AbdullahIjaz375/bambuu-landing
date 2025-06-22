@@ -135,7 +135,7 @@ const LandingExamPrep = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <Navbar user={user} />
+        <Navbar user={user} onGetStartedClick={handleEnrollClick} />
       </motion.div>
       <div className="overflow-hidden">
         {/* section 1 */}

@@ -8,7 +8,7 @@ import { Avatar, Button, Menu } from "@mantine/core";
 import { LuCrown, LuLogOut } from "react-icons/lu";
 import { FaAngleDown } from "react-icons/fa6";
 
-const Navbar = ({ user }) => {
+const Navbar = ({ user, onGetStartedClick }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -30,18 +30,18 @@ const Navbar = ({ user }) => {
   };
 
   return (
-    <div className="w-full mt-4 bg-white">
+    <div className="mt-4 w-full bg-white">
       <div className="flex flex-col px-12 pt-4">
-        <div className="flex items-center justify-between ">
+        <div className="flex items-center justify-between">
           {/* Logo */}
           <Link
             to="/"
-            className="text-4xl font-bold text-green-600 md:text-7xl "
+            className="text-4xl font-bold text-green-600 md:text-7xl"
           >
             <img
               alt="bambuu"
               src="/images/bambuu-new-logo.png"
-              className="w-auto h-auto"
+              className="h-auto w-auto"
             />
           </Link>
 
@@ -74,7 +74,7 @@ const Navbar = ({ user }) => {
           </div> */}
 
           {/* Sign In/Out Button & Avatar */}
-          <div className="items-center hidden space-x-4 md:flex">
+          <div className="hidden items-center space-x-4 md:flex">
             {user ? (
               <>
                 <div className="relative">
@@ -86,12 +86,12 @@ const Navbar = ({ user }) => {
                     radius="lg"
                   >
                     <Menu.Target>
-                      <div className="flex items-center space-x-2 cursor-pointer">
+                      <div className="flex cursor-pointer items-center space-x-2">
                         <Avatar
                           src={user.photoUrl}
                           radius="xl"
                           size="sm"
-                          className=" hover:cursor-pointer"
+                          className="hover:cursor-pointer"
                         />
                         <span className="ml-2 text-lg text-black">
                           {user.name || "User"}
@@ -119,13 +119,25 @@ const Navbar = ({ user }) => {
                   </Menu>
                 </div>
               </>
+            ) : onGetStartedClick ? (
+              <Button
+                onClick={onGetStartedClick}
+                className="border-2 border-black text-black"
+                size="md"
+                variant="filled"
+                color="#14b82c"
+                radius="xl"
+              >
+                {" "}
+                Get Started
+              </Button>
             ) : (
               <Link
                 to="/welcome"
                 className="text-lg text-gray-700 hover:text-green-600"
               >
                 <Button
-                  className="text-black border-2 border-black"
+                  className="border-2 border-black text-black"
                   size="md"
                   variant="filled"
                   color="#14b82c"
