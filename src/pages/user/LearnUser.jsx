@@ -6,8 +6,6 @@ import { useAuth } from "../../context/AuthContext";
 import { useNavigate, useLocation, Navigate } from "react-router-dom";
 import {
   getExamPrepPlanTimeline,
-  getExamPrepStatus,
-  getExamPrepStepStatus,
   getStudentExamPrepTutorialStatus,
 } from "../../api/examPrepApi";
 import { db } from "../../firebaseConfig";
@@ -455,30 +453,47 @@ const LearnUser = () => {
   }, [user, navigate]);
 
   useEffect(() => {
-    const checkPurchaseSuccess = async () => {
-      const queryParams = new URLSearchParams(location.search);
-      if (queryParams.get("purchase_success") === "true") {
-        // Use a small timeout to ensure user data has time to propagate
-        setTimeout(async () => {
-          await refreshData(); // Refresh data to get latest purchase status
-          await handleOnboarding();
-        }, 500);
+    // This handles a flow where navigation state explicitly asks to show the modal.
+    if (location.state?.showIntroBookingFlow) {
+      setShowIntroBookingFlow(true);
+      // Clear the state from history so it doesn't trigger again on refresh
+      window.history.replaceState({}, document.title);
+      return; // Exit early and don't run the automatic check
+    }
 
-        // Clean up the URL
-        const newUrl = location.pathname;
-        window.history.replaceState({}, document.title, newUrl);
+    const runOnboardingCheck = async () => {
+      // Run this check only once per browser session to avoid nagging the user.
+      if (sessionStorage.getItem("onboardingCheckHasRun")) {
+        return;
+      }
+
+      if (user?.uid) {
+        // Set the flag before the async call to prevent race conditions on re-renders.
+        sessionStorage.setItem("onboardingCheckHasRun", "true");
+        try {
+          const timeline = await getExamPrepPlanTimeline(user.uid);
+
+          // If there's an active plan...
+          if (timeline?.activePlan) {
+            // ...and the introductory call hasn't been booked...
+            const isIntroCallBooked =
+              (timeline.activePlan.introductoryCallId?.length || 0) > 0;
+
+            if (!isIntroCallBooked) {
+              // ...then trigger the full onboarding flow logic.
+              handleOnboarding();
+            }
+          }
+        } catch (error) {
+          console.error("Onboarding check failed:", error);
+          // If the check fails, remove the flag so it can try again on the next page load.
+          sessionStorage.removeItem("onboardingCheckHasRun");
+        }
       }
     };
 
-    // Show intro booking flow if navigated from purchase via state
-    if (location.state?.showIntroBookingFlow) {
-      setShowIntroBookingFlow(true);
-      // Optionally clear the state so it doesn't show again on refresh
-      window.history.replaceState({}, document.title);
-    } else {
-      checkPurchaseSuccess();
-    }
-  }, [location, handleOnboarding]);
+    runOnboardingCheck();
+  }, [user, handleOnboarding, location.state]);
 
   useEffect(() => {
     const fetchStatus = async () => {
