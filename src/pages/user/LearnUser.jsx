@@ -419,7 +419,8 @@ const LearnUser = () => {
     if (user?.uid) updateFCMToken();
   }, []);
 
-  const handleOnboarding = async () => {
+  const handleOnboarding = useCallback(async () => {
+    if (!user?.uid) return;
     try {
       const status = await getStudentExamPrepTutorialStatus(user.uid);
       if (!status.hasPurchasedPlan) {
@@ -451,7 +452,33 @@ const LearnUser = () => {
         err,
       );
     }
-  };
+  }, [user, navigate]);
+
+  useEffect(() => {
+    const checkPurchaseSuccess = async () => {
+      const queryParams = new URLSearchParams(location.search);
+      if (queryParams.get("purchase_success") === "true") {
+        // Use a small timeout to ensure user data has time to propagate
+        setTimeout(async () => {
+          await refreshData(); // Refresh data to get latest purchase status
+          await handleOnboarding();
+        }, 500);
+
+        // Clean up the URL
+        const newUrl = location.pathname;
+        window.history.replaceState({}, document.title, newUrl);
+      }
+    };
+
+    // Show intro booking flow if navigated from purchase via state
+    if (location.state?.showIntroBookingFlow) {
+      setShowIntroBookingFlow(true);
+      // Optionally clear the state so it doesn't show again on refresh
+      window.history.replaceState({}, document.title);
+    } else {
+      checkPurchaseSuccess();
+    }
+  }, [location, handleOnboarding]);
 
   useEffect(() => {
     const fetchStatus = async () => {
@@ -464,91 +491,6 @@ const LearnUser = () => {
     };
     fetchStatus();
   }, [user.uid]);
-
-  useEffect(() => {
-    // Show intro booking flow if navigated from purchase
-    if (location.state?.showIntroBookingFlow) {
-      setShowIntroBookingFlow(true);
-      // Optionally clear the state so it doesn't show again on refresh
-      window.history.replaceState({}, document.title);
-    }
-
-    // Check for purchase success query param
-    const queryParams = new URLSearchParams(location.search);
-    if (queryParams.get("purchase_success") === "true") {
-      setShowIntroBookingFlow(true);
-      // Remove the query param from the URL
-      const newUrl = location.pathname;
-      window.history.replaceState({}, document.title, newUrl);
-    }
-  }, [location]);
-
-  // Handler for sidebar exam prep click
-  // const handleExamPrepSidebarClick = async (e) => {
-  //   e?.preventDefault?.();
-  //   if (!user?.uid) return;
-  //   try {
-  //     const status = await getStudentExamPrepTutorialStatus(user.uid);
-  //     // 1. Not purchased: go to subscriptions
-  //     if (!status.hasPurchasedPlan) {
-  //       navigate("/subscriptions?tab=exam");
-  //       return;
-  //     }
-  //     // 2. Purchased, not booked intro call: open BookingFlowModal step 0
-  //     if (!status.hasBookedIntroCall) {
-  //       setSidebarExamPrepUser(user);
-  //       setSidebarExamPrepInitialStep(0);
-  //       setShowSidebarIntroBookingFlow(true);
-  //       return;
-  //     }
-  //     // 3. Booked intro call, not done: open class details page for that class
-  //     if (status.hasBookedIntroCall && !status.doneWithIntroCall) {
-  //       const introClass = classes.find(
-  //         (c) => c.classType === "introductory_call",
-  //       );
-  //       if (introClass && introClass.adminId) {
-  //         try {
-  //           const examPrepStatus = await getExamPrepStepStatus(
-  //             user.uid,
-  //             introClass.adminId,
-  //           );
-  //           console.log("examPrepStatus:", examPrepStatus);
-
-  //           if (examPrepStatus?.pendingIntroCallClassId) {
-  //             navigate(
-  //               `/classDetailsUser/${examPrepStatus.pendingIntroCallClassId}`,
-  //             );
-  //             return;
-  //           }
-  //         } catch (err) {
-  //           console.error("[Sidebar ExamPrep] getExamPrepStatus error:", err);
-  //         }
-  //       }
-
-  //       return;
-  //     }
-  //     // 4. Done with intro call, not booked exam prep class: open BookingFlowModal step 6
-  //     if (status.doneWithIntroCall && !status.hasBookedExamPrepClass) {
-  //       setSidebarExamPrepUser({
-  //         ...user,
-  //         completedIntroCallTutorId: status.completedIntroCallTutorId,
-  //       });
-  //       setSidebarExamPrepInitialStep(6);
-  //       setShowSidebarExamPrepBookingFlow(true);
-  //       return;
-  //     }
-  //     // 5. Booked exam prep class: open exam prep tutor profile
-  //     if (status.hasBookedExamPrepClass && status.completedIntroCallTutorId) {
-  //       navigate(`/examPreparationUser/${status.completedIntroCallTutorId}`);
-  //       return;
-  //     }
-  //     // fallback
-  //     navigate("/learn");
-  //   } catch (err) {
-  //     console.error("[Sidebar ExamPrep] Error:", err);
-  //     navigate("/learn");
-  //   }
-  // };
 
   // Place the auth loading and user check here, after all hooks
   if (authLoading) {
