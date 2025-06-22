@@ -472,7 +472,16 @@ const LearnUser = () => {
       // Optionally clear the state so it doesn't show again on refresh
       window.history.replaceState({}, document.title);
     }
-  }, [location.state]);
+
+    // Check for purchase success query param
+    const queryParams = new URLSearchParams(location.search);
+    if (queryParams.get("purchase_success") === "true") {
+      setShowIntroBookingFlow(true);
+      // Remove the query param from the URL
+      const newUrl = location.pathname;
+      window.history.replaceState({}, document.title, newUrl);
+    }
+  }, [location]);
 
   // Handler for sidebar exam prep click
   // const handleExamPrepSidebarClick = async (e) => {
