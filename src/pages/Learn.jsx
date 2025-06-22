@@ -1,16 +1,25 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import LearnTutor from "./tutor/LearnTutor";
 import LearnUser from "./user/LearnUser";
-import { useLocation } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import i18n from "../i18n";
+import BookingFlowModal from "../components/BookingFlowModal";
 
 const Learn = () => {
   const { user } = useAuth();
   const userType = sessionStorage.getItem("userType");
   const location = useLocation();
   const { currentLanguage, changeLanguage } = useLanguage();
+  const [searchParams] = useSearchParams();
+  const [isBookingModalOpen, setBookingModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get("purchase") === "success") {
+      setBookingModalOpen(true);
+    }
+  }, [searchParams]);
 
   // Ensure language is consistent when directed to this page
   useEffect(() => {
@@ -36,6 +45,13 @@ const Learn = () => {
   // Pass all location props (including state with language) to child components
   return (
     <>
+      <BookingFlowModal
+        isOpen={isBookingModalOpen}
+        onClose={() => setBookingModalOpen(false)}
+        user={user}
+        initialStep={0}
+        mode="exam"
+      />
       {userType === "student" && <LearnUser key={location.key} {...location} />}
       {userType === "tutor" && <LearnTutor key={location.key} {...location} />}
     </>

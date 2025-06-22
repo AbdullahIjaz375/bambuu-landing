@@ -26,6 +26,7 @@ import { useTranslation } from "react-i18next";
 import { useLanguage } from "../context/LanguageContext"; // Import the language context
 import i18n from "../i18n";
 import MobileModal from "../components/MobileModal";
+import WebSubscriptionStep from "./user/WebSubscriptionStep";
 
 Modal.setAppElement("#root");
 
@@ -48,6 +49,7 @@ const Signup = ({ onNext, onClose, isModal = false }) => {
   const [verificationSent, setVerificationSent] = useState(false);
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const [hasProfile, setHasProfile] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
   const appleProvider = new OAuthProvider("apple.com");
   const { currentLanguage, changeLanguage } = useLanguage(); // Use the language context
   const { t } = useTranslation();
@@ -117,6 +119,7 @@ const Signup = ({ onNext, onClose, isModal = false }) => {
       setVerificationSent(false);
       setIsEmailVerified(false);
       setHasProfile(false);
+      setShowPaywall(false);
       setProfileData({
         name: "",
         nativeLanguage: "",
@@ -302,7 +305,7 @@ const Signup = ({ onNext, onClose, isModal = false }) => {
         onNext && onNext();
       } else {
         if (examPrepFlow) {
-          navigate("/subscribe-exam-prep");
+          setShowPaywall(true);
         } else {
           if (!sessionUserData.name || !sessionUserData.email) {
             navigate("/userEditProfile", { replace: true });
@@ -941,6 +944,10 @@ const Signup = ({ onNext, onClose, isModal = false }) => {
         </div>
       </div>
     );
+  }
+
+  if (showPaywall) {
+    return <WebSubscriptionStep />;
   }
 
   if (isMobile) {
