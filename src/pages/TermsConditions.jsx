@@ -1,16 +1,54 @@
 import React from "react";
+import { motion } from "framer-motion";
+import Navbar from "../components/Navbar";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import Footer from "../components/Footer";
 
 const TermsConditions = () => {
-  return (
-    <div className="px-4 py-8 mx-auto max-w-7xl font-urbanist">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="mb-4 text-4xl font-bold text-center">
-          TERMS AND CONDITIONS
-        </h1>
+  const { user } = useAuth;
+  const navigate = useNavigate();
 
+  const handleEnrollClick = () => {
+    // if (isMobile) {
+    //   localStorage.setItem("inMobileModalFlow", "true");
+    //   setMobileModalStep("signup");
+    // } else {
+    navigate("/signup", { state: { flow: "exam-prep" } });
+    // }
+  };
+  return (
+    <div className="mx-auto max-w-full p-0 font-urbanist">
+      <div className="bg-[#E6FDE9]">
+        <motion.div
+          initial={{ opacity: 0, y: -30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <Navbar
+            transparent
+            user={user}
+            onGetStartedClick={handleEnrollClick}
+          />
+          <div className="mx-auto max-w-7xl px-20 pb-40 pt-[68px] text-center">
+            <p className="text-base font-semibold text-[#14B82C]">
+              Current as of 20 Jan 2025
+            </p>
+            <h1 className="mt-4 text-5xl font-semibold tracking-tight text-[#042F0C] sm:text-6xl">
+              Terms and Conditions
+            </h1>
+            <p className="mt-6 text-xl font-normal leading-8 text-[#454545]">
+              Your privacy is important to us at Bammbuu. We respect your
+              privacy regarding any <br /> information we may collect from you
+              across our website.
+            </p>
+          </div>
+        </motion.div>
+      </div>
+      <div className="mx-auto mt-12 max-w-4xl">
         <div className="mb-12 space-y-2">
           <h2 className="text-xl font-semibold">TABLE OF CONTENTS</h2>
-          <ol className="pl-5 space-y-1 text-blue-600 list-decimal">
+          <ol className="list-decimal space-y-1 pl-5 text-blue-600">
             <li>
               <a href="#services" className="hover:underline">
                 OUR SERVICES
@@ -166,26 +204,26 @@ const TermsConditions = () => {
 
         <div className="space-y-12">
           <section>
-            <h2 className="mb-4 text-2xl font-semibold">
+            <h2 className="mb-4 text-3xl font-semibold text-[#181D27]">
               AGREEMENT TO OUR LEGAL TERMS
             </h2>
-            <p className="mb-4 text-gray-700">
+            <p className="text-[#535862 mb-4 text-lg font-normal">
               We are Capital H Ventures LLC ("Company," "we," "us," "our"), a
               company registered in Texas, United States at 17350 State Hwy 249,
               Ste 220 #22916, Houston, TX 77064.
             </p>
-            <p className="mb-4 text-gray-700">
+            <p className="text-[#535862 mb-4 text-lg font-normal">
               We operate the mobile application bammbuu (the "App"), as well as
               any other related products and services that refer or link to
               these legal terms (the "Legal Terms") (collectively, the
               "Services").
             </p>
-            <p className="mb-4 text-gray-700">
+            <p className="text-[#535862 mb-4 text-lg font-normal">
               You can contact us by phone at 512-814-8731, email at
               admin@bammbuu.co, or by mail to 17350 State Hwy 249, Ste 220
               #22916, Houston, TX 77064, United States.
             </p>
-            <p className="mb-4 text-gray-700">
+            <p className="text-[#535862 mb-4 text-lg font-normal">
               These Legal Terms constitute a legally binding agreement made
               between you, whether personally or on behalf of an entity ("you"),
               and Capital H Ventures LLC, concerning your access to and use of
@@ -195,7 +233,7 @@ const TermsConditions = () => {
               ARE EXPRESSLY PROHIBITED FROM USING THE SERVICES AND YOU MUST
               DISCONTINUE USE IMMEDIATELY.
             </p>
-            <p className="mb-4 text-gray-700">
+            <p className="text-[#535862 mb-4 text-lg font-normal">
               The Services are intended for users who are at least 18 years old.
               Persons under the age of 18 are not permitted to use or register
               for the Services.
@@ -203,15 +241,17 @@ const TermsConditions = () => {
           </section>
 
           <section id="services">
-            <h2 className="mb-4 text-2xl font-semibold">1. OUR SERVICES</h2>
-            <p className="mb-4 text-gray-700">
+            <h2 className="mb-4 text-3xl font-semibold text-[#181D27]">
+              1. OUR SERVICES
+            </h2>
+            <p className="text-[#535862 mb-4 text-lg font-normal">
               The information provided when using the Services is not intended
               for distribution to or use by any person or entity in any
               jurisdiction or country where such distribution or use would be
               contrary to law or regulation or which would subject us to any
               registration requirement within such jurisdiction or country.
             </p>
-            <p className="mb-4 text-gray-700">
+            <p className="text-[#535862 mb-4 text-lg font-normal">
               The Services are not tailored to comply with industry-specific
               regulations (Health Insurance Portability and Accountability Act
               (HIPAA), Federal Information Security Management Act (FISMA),
@@ -222,13 +262,13 @@ const TermsConditions = () => {
           </section>
 
           <section id="ip">
-            <h2 className="mb-4 text-2xl font-semibold">
+            <h2 className="mb-4 text-3xl font-semibold text-[#181D27]">
               2. INTELLECTUAL PROPERTY RIGHTS
             </h2>
             <h3 className="mb-3 text-xl font-medium">
               Our intellectual property
             </h3>
-            <p className="mb-4 text-gray-700">
+            <p className="text-[#535862 mb-4 text-lg font-normal">
               We are the owner or the licensee of all intellectual property
               rights in our Services, including all source code, databases,
               functionality, software, website designs, audio, video, text,
@@ -236,13 +276,13 @@ const TermsConditions = () => {
               "Content"), as well as the trademarks, service marks, and logos
               contained therein (the "Marks").
             </p>
-            <p className="mb-4 text-gray-700">
+            <p className="text-[#535862 mb-4 text-lg font-normal">
               Our Content and Marks are protected by copyright and trademark
               laws (and various other intellectual property rights and unfair
               competition laws) and treaties in the United States and around the
               world.
             </p>
-            <p className="mb-4 text-gray-700">
+            <p className="text-[#535862 mb-4 text-lg font-normal">
               The Content and Marks are provided in or through the Services "AS
               IS" for your personal, non-commercial use only.
             </p>
@@ -250,31 +290,31 @@ const TermsConditions = () => {
             <h3 className="mb-3 text-xl font-medium">
               Your use of our Services
             </h3>
-            <p className="mb-4 text-gray-700">
+            <p className="text-[#535862 mb-4 text-lg font-normal">
               Subject to your compliance with these Legal Terms, including the
               "PROHIBITED ACTIVITIES" section below, we grant you a
               non-exclusive, non-transferable, revocable license to:
             </p>
-            <ul className="mb-4 ml-6 text-gray-700 list-disc">
+            <ul className="mb-4 ml-6 list-disc text-gray-700">
               <li>access the Services; and</li>
               <li>
                 download or print a copy of any portion of the Content to which
                 you have properly gained access
               </li>
             </ul>
-            <p className="mb-4 text-gray-700">
+            <p className="text-[#535862 mb-4 text-lg font-normal">
               solely for your personal, non-commercial use.
             </p>
           </section>
 
           <section id="userreps">
-            <h2 className="mb-4 text-2xl font-semibold">
+            <h2 className="mb-4 text-3xl font-semibold text-[#181D27]">
               3. USER REPRESENTATIONS
             </h2>
-            <p className="mb-4 text-gray-700">
+            <p className="text-[#535862 mb-4 text-lg font-normal">
               By using the Services, you represent and warrant that:
             </p>
-            <ul className="mb-4 ml-6 text-gray-700 list-disc">
+            <ul className="mb-4 ml-6 list-disc text-gray-700">
               <li>
                 all registration information you submit will be true, accurate,
                 current, and complete;
@@ -306,10 +346,10 @@ const TermsConditions = () => {
           </section>
 
           <section id="userreg">
-            <h2 className="mb-4 text-2xl font-semibold">
+            <h2 className="mb-4 text-3xl font-semibold text-[#181D27]">
               4. USER REGISTRATION
             </h2>
-            <p className="mb-4 text-gray-700">
+            <p className="text-[#535862 mb-4 text-lg font-normal">
               You may be required to register to use the Services. You agree to
               keep your password confidential and will be responsible for all
               use of your account and password. We reserve the right to remove,
@@ -320,20 +360,20 @@ const TermsConditions = () => {
           </section>
 
           <section id="purchases">
-            <h2 className="mb-4 text-2xl font-semibold">
+            <h2 className="mb-4 text-3xl font-semibold text-[#181D27]">
               5. PURCHASES AND PAYMENT
             </h2>
-            <p className="mb-4 text-gray-700">
+            <p className="text-[#535862 mb-4 text-lg font-normal">
               We accept the following forms of payment:
             </p>
-            <ul className="mb-4 ml-6 text-gray-700 list-disc">
+            <ul className="mb-4 ml-6 list-disc text-gray-700">
               <li>PayPal</li>
               <li>Discover</li>
               <li>American Express</li>
               <li>Mastercard</li>
               <li>Visa</li>
             </ul>
-            <p className="mb-4 text-gray-700">
+            <p className="text-[#535862 mb-4 text-lg font-normal">
               You agree to provide current, complete, and accurate purchase and
               account information for all purchases made via the Services. You
               further agree to promptly update account and payment information,
@@ -346,9 +386,11 @@ const TermsConditions = () => {
           </section>
 
           <section id="subscriptions">
-            <h2 className="mb-4 text-2xl font-semibold">6. SUBSCRIPTIONS</h2>
+            <h2 className="mb-4 text-3xl font-semibold text-[#181D27]">
+              6. SUBSCRIPTIONS
+            </h2>
             <h3 className="mb-3 text-xl font-medium">Billing and Renewal</h3>
-            <p className="mb-4 text-gray-700">
+            <p className="text-[#535862 mb-4 text-lg font-normal">
               Your subscription will continue and automatically renew unless
               canceled. You consent to our charging your payment method on a
               recurring basis without requiring your prior approval for each
@@ -357,7 +399,7 @@ const TermsConditions = () => {
             </p>
 
             <h3 className="mb-3 text-xl font-medium">Cancellation</h3>
-            <p className="mb-4 text-gray-700">
+            <p className="text-[#535862 mb-4 text-lg font-normal">
               You can cancel your subscription at any time by logging into your
               account. Your cancellation will take effect at the end of the
               current paid term. If you have any questions or are unsatisfied
@@ -365,7 +407,7 @@ const TermsConditions = () => {
             </p>
 
             <h3 className="mb-3 text-xl font-medium">Fee Changes</h3>
-            <p className="mb-4 text-gray-700">
+            <p className="text-[#535862 mb-4 text-lg font-normal">
               We may, from time to time, make changes to the subscription fee
               and will communicate any price changes to you in accordance with
               applicable law.
@@ -373,26 +415,28 @@ const TermsConditions = () => {
           </section>
 
           <section id="returnpolicy">
-            <h2 className="mb-4 text-2xl font-semibold">7. POLICY</h2>
-            <p className="mb-4 text-gray-700">
+            <h2 className="mb-4 text-3xl font-semibold text-[#181D27]">
+              7. POLICY
+            </h2>
+            <p className="text-[#535862 mb-4 text-lg font-normal">
               All sales are final and no refund will be issued.
             </p>
           </section>
 
           <section id="prohibited">
-            <h2 className="mb-4 text-2xl font-semibold">
+            <h2 className="mb-4 text-3xl font-semibold text-[#181D27]">
               8. PROHIBITED ACTIVITIES
             </h2>
-            <p className="mb-4 text-gray-700">
+            <p className="text-[#535862 mb-4 text-lg font-normal">
               You may not access or use the Services for any purpose other than
               that for which we make the Services available. The Services may
               not be used in connection with any commercial endeavors except
               those that are specifically endorsed or approved by us.
             </p>
-            <p className="mb-4 text-gray-700">
+            <p className="text-[#535862 mb-4 text-lg font-normal">
               As a user of the Services, you agree not to:
             </p>
-            <ul className="mb-4 ml-6 text-gray-700 list-disc">
+            <ul className="mb-4 ml-6 list-disc text-gray-700">
               <li>
                 Systematically retrieve data or other content from the Services
                 to create or compile, directly or indirectly, a collection,
@@ -440,7 +484,7 @@ const TermsConditions = () => {
           </section>
 
           <section id="ugc">
-            <h2 className="mb-4 text-2xl font-semibold text-gray-900">
+            <h2 className="mb-4 text-3xl font-semibold text-[#181D27] text-gray-900">
               9. USER GENERATED CONTRIBUTIONS
             </h2>
             <div className="space-y-4">
@@ -464,7 +508,7 @@ const TermsConditions = () => {
           </section>
 
           <section id="license">
-            <h2 className="mb-4 text-2xl font-semibold text-gray-900">
+            <h2 className="mb-4 text-3xl font-semibold text-[#181D27] text-gray-900">
               10. CONTRIBUTION LICENSE
             </h2>
             <div className="space-y-4">
@@ -488,7 +532,7 @@ const TermsConditions = () => {
           </section>
 
           <section id="mobile">
-            <h2 className="mb-4 text-2xl font-semibold text-gray-900">
+            <h2 className="mb-4 text-3xl font-semibold text-[#181D27] text-gray-900">
               11. MOBILE APPLICATION LICENSE
             </h2>
             <div className="space-y-4">
@@ -527,7 +571,7 @@ const TermsConditions = () => {
           </section>
 
           <section id="socialmedia">
-            <h2 className="mb-4 text-2xl font-semibold text-gray-900">
+            <h2 className="mb-4 text-3xl font-semibold text-[#181D27] text-gray-900">
               12. SOCIAL MEDIA
             </h2>
             <div className="space-y-4">
@@ -562,7 +606,7 @@ const TermsConditions = () => {
           </section>
 
           <section id="thirdparty">
-            <h2 className="mb-4 text-2xl font-semibold text-gray-900">
+            <h2 className="mb-4 text-3xl font-semibold text-[#181D27] text-gray-900">
               13. THIRD-PARTY WEBSITES AND CONTENT
             </h2>
             <div className="space-y-4">
@@ -586,7 +630,7 @@ const TermsConditions = () => {
           </section>
 
           <section id="advertisers">
-            <h2 className="mb-4 text-2xl font-semibold text-gray-900">
+            <h2 className="mb-4 text-3xl font-semibold text-[#181D27] text-gray-900">
               14. ADVERTISERS
             </h2>
             <div className="space-y-4">
@@ -603,7 +647,7 @@ const TermsConditions = () => {
           </section>
 
           <section id="sitemanage">
-            <h2 className="mb-4 text-2xl font-semibold text-gray-900">
+            <h2 className="mb-4 text-3xl font-semibold text-[#181D27] text-gray-900">
               15. SERVICES MANAGEMENT
             </h2>
             <div className="space-y-4">
@@ -628,7 +672,7 @@ const TermsConditions = () => {
           </section>
 
           <section id="privacy">
-            <h2 className="mb-4 text-2xl font-semibold text-gray-900">
+            <h2 className="mb-4 text-3xl font-semibold text-[#181D27] text-gray-900">
               16. PRIVACY POLICY
             </h2>
             <div className="space-y-4">
@@ -648,7 +692,7 @@ const TermsConditions = () => {
             </div>
           </section>
           <section id="copyright">
-            <h2 className="mb-4 text-2xl font-semibold text-gray-900">
+            <h2 className="mb-4 text-3xl font-semibold text-[#181D27] text-gray-900">
               17. COPYRIGHT INFRINGEMENTS
             </h2>
             <div className="space-y-4">
@@ -670,7 +714,7 @@ const TermsConditions = () => {
           </section>
 
           <section id="terms">
-            <h2 className="mb-4 text-2xl font-semibold text-gray-900">
+            <h2 className="mb-4 text-3xl font-semibold text-[#181D27] text-gray-900">
               18. TERM AND TERMINATION
             </h2>
             <div className="space-y-4">
@@ -702,7 +746,7 @@ const TermsConditions = () => {
           </section>
 
           <section id="modifications">
-            <h2 className="mb-4 text-2xl font-semibold text-gray-900">
+            <h2 className="mb-4 text-3xl font-semibold text-[#181D27] text-gray-900">
               19. MODIFICATIONS AND INTERRUPTIONS
             </h2>
             <div className="space-y-4">
@@ -730,7 +774,7 @@ const TermsConditions = () => {
           </section>
 
           <section id="law">
-            <h2 className="mb-4 text-2xl font-semibold text-gray-900">
+            <h2 className="mb-4 text-3xl font-semibold text-[#181D27] text-gray-900">
               20. GOVERNING LAW
             </h2>
             <div className="space-y-4">
@@ -744,7 +788,7 @@ const TermsConditions = () => {
             </div>
           </section>
           <section id="disputes">
-            <h2 className="mb-4 text-2xl font-semibold text-gray-900">
+            <h2 className="mb-4 text-3xl font-semibold text-[#181D27] text-gray-900">
               21. DISPUTE RESOLUTION
             </h2>
             <div className="space-y-4">
@@ -819,7 +863,7 @@ const TermsConditions = () => {
           </section>
 
           <section id="corrections">
-            <h2 className="mb-4 text-2xl font-semibold text-gray-900">
+            <h2 className="mb-4 text-3xl font-semibold text-[#181D27] text-gray-900">
               22. CORRECTIONS
             </h2>
             <div className="space-y-4">
@@ -835,7 +879,7 @@ const TermsConditions = () => {
           </section>
 
           <section id="disclaimer">
-            <h2 className="mb-4 text-2xl font-semibold text-gray-900">
+            <h2 className="mb-4 text-3xl font-semibold text-[#181D27] text-gray-900">
               23. DISCLAIMER
             </h2>
             <div className="space-y-4">
@@ -881,7 +925,7 @@ const TermsConditions = () => {
             </div>
           </section>
           <section id="liability">
-            <h2 className="mb-4 text-2xl font-semibold text-gray-900">
+            <h2 className="mb-4 text-3xl font-semibold text-[#181D27] text-gray-900">
               24. LIMITATIONS OF LIABILITY
             </h2>
             <div className="space-y-4">
@@ -909,7 +953,7 @@ const TermsConditions = () => {
           </section>
 
           <section id="indemnification">
-            <h2 className="mb-4 text-2xl font-semibold text-gray-900">
+            <h2 className="mb-4 text-3xl font-semibold text-[#181D27] text-gray-900">
               25. INDEMNIFICATION
             </h2>
             <div className="space-y-4">
@@ -940,7 +984,7 @@ const TermsConditions = () => {
           </section>
 
           <section id="userdata">
-            <h2 className="mb-4 text-2xl font-semibold text-gray-900">
+            <h2 className="mb-4 text-3xl font-semibold text-[#181D27] text-gray-900">
               26. USER DATA
             </h2>
             <div className="space-y-4">
@@ -960,7 +1004,7 @@ const TermsConditions = () => {
           </section>
 
           <section id="electronic">
-            <h2 className="mb-4 text-2xl font-semibold text-gray-900">
+            <h2 className="mb-4 text-3xl font-semibold text-[#181D27] text-gray-900">
               27. ELECTRONIC COMMUNICATIONS, TRANSACTIONS, AND SIGNATURES
             </h2>
             <div className="space-y-4">
@@ -987,7 +1031,7 @@ const TermsConditions = () => {
           </section>
 
           <section id="california">
-            <h2 className="mb-4 text-2xl font-semibold text-gray-900">
+            <h2 className="mb-4 text-3xl font-semibold text-[#181D27] text-gray-900">
               28. CALIFORNIA USERS AND RESIDENTS
             </h2>
             <div className="space-y-4">
@@ -1003,7 +1047,7 @@ const TermsConditions = () => {
           </section>
 
           <section id="misc">
-            <h2 className="mb-4 text-2xl font-semibold text-gray-900">
+            <h2 className="mb-4 text-3xl font-semibold text-[#181D27] text-gray-900">
               29. MISCELLANEOUS
             </h2>
             <div className="space-y-4">
@@ -1030,7 +1074,7 @@ const TermsConditions = () => {
           </section>
 
           <section id="contact">
-            <h2 className="mb-4 text-2xl font-semibold text-gray-900">
+            <h2 className="mb-4 text-3xl font-semibold text-[#181D27] text-gray-900">
               30. CONTACT US
             </h2>
             <div className="space-y-4">
@@ -1051,6 +1095,7 @@ const TermsConditions = () => {
           </section>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };
