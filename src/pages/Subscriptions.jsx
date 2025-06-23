@@ -104,25 +104,6 @@ const Subscriptions = ({ onNext, onBack, onClose, isModal = false }) => {
             });
           }
 
-          const buyOneGetTwoOffer = offersData.find(
-            (plan) =>
-              plan.type === "buy_one_get_two" ||
-              plan.title?.includes("Buy one class credit get 2 classes free"),
-          );
-
-          if (buyOneGetTwoOffer) {
-            transformedOfferPlans.push({
-              id: buyOneGetTwoOffer.offerId,
-              title: t("plans-modal.offer-plans.premium.title"),
-              description: t("plans-modal.offer-plans.premium.description"),
-              price: buyOneGetTwoOffer.price,
-              isPopular: true,
-              type: "buy_one_get_two",
-              stripeLink: buyOneGetTwoOffer.url,
-              body: t("plans-modal.offer-plans.premium.body"),
-            });
-          }
-
           setOfferPlans(transformedOfferPlans);
         }
 
@@ -538,16 +519,18 @@ const Subscriptions = ({ onNext, onBack, onClose, isModal = false }) => {
         )} */}
 
         {activeTab === "offers" && (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {offerPlans.map((plan, index) => (
-              <OfferPlan
-                key={index}
-                plan={plan}
-                userId={user?.uid}
-                isSelected={selectedPlan?.id === plan.id}
-                onSelect={handlePlanSelect}
-              />
-            ))}
+          <div className="flex justify-center">
+            <div className="w-full max-w-md">
+              {offerPlans.map((plan, index) => (
+                <OfferPlan
+                  key={index}
+                  plan={plan}
+                  userId={user?.uid}
+                  isSelected={selectedPlan?.id === plan.id}
+                  onSelect={handlePlanSelect}
+                />
+              ))}
+            </div>
           </div>
         )}
 

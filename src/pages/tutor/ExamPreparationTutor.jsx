@@ -233,17 +233,21 @@ const ExamPreparationTutor = () => {
                 onClick={() =>
                   setActiveTab(t("exam-prep.tabs.exam-prep-classes"))
                 }
-                className="z-1 text-md relative flex h-10 w-1/2 items-center justify-center whitespace-nowrap rounded-full font-medium text-[#042F0C] transition-colors"
+                className="z-1 text-md relative flex h-10 w-1/2 max-w-[200px] items-center justify-center overflow-hidden truncate text-ellipsis whitespace-nowrap rounded-full font-medium text-[#042F0C] transition-colors"
               >
-                {t("exam-prep.tabs.exam-prep-classes")}
+                <span className="max-w-[180px] overflow-hidden truncate text-ellipsis">
+                  {t("exam-prep.tabs.exam-prep-classes")}
+                </span>
               </button>
               <button
                 onClick={() =>
                   setActiveTab(t("exam-prep.tabs.introductory-calls"))
                 }
-                className="z-1 text-md relative flex h-10 w-1/2 items-center justify-center whitespace-nowrap rounded-full font-medium text-[#042F0C] transition-colors"
+                className="z-1 text-md relative flex h-10 w-1/2 max-w-[200px] items-center justify-center overflow-hidden truncate text-ellipsis whitespace-nowrap rounded-full font-medium text-[#042F0C] transition-colors"
               >
-                {t("exam-prep.tabs.introductory-calls")}
+                <span className="max-w-[180px] overflow-hidden truncate text-ellipsis">
+                  {t("exam-prep.tabs.introductory-calls")}
+                </span>
               </button>
             </div>
             <button
