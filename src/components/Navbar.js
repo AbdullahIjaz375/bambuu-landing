@@ -8,7 +8,7 @@ import { Avatar, Button, Menu } from "@mantine/core";
 import { LuCrown, LuLogOut } from "react-icons/lu";
 import { FaAngleDown } from "react-icons/fa6";
 
-const Navbar = ({ user, onGetStartedClick }) => {
+const Navbar = ({ user, onGetStartedClick, transparent = false }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -29,8 +29,10 @@ const Navbar = ({ user, onGetStartedClick }) => {
     setDropdownOpen(!dropdownOpen);
   };
 
+  const bgClass = transparent ? "bg-transparent" : "bg-white";
+
   return (
-    <div className="mt-4 w-full bg-white">
+    <div className={`w-full pt-4 ${bgClass}`}>
       <div className="flex flex-col px-12 pt-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
@@ -122,7 +124,7 @@ const Navbar = ({ user, onGetStartedClick }) => {
             ) : onGetStartedClick ? (
               <Button
                 onClick={onGetStartedClick}
-                className="border-2 border-black text-black"
+                className="border border-black text-black"
                 size="md"
                 variant="filled"
                 color="#14b82c"
@@ -137,7 +139,7 @@ const Navbar = ({ user, onGetStartedClick }) => {
                 className="text-lg text-gray-700 hover:text-green-600"
               >
                 <Button
-                  className="border-2 border-black text-black"
+                  className="border border-black text-black"
                   size="md"
                   variant="filled"
                   color="#14b82c"
