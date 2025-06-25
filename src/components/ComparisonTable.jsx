@@ -276,7 +276,7 @@ const ComparisonTable = ({ onEnrollClick }) => {
           onClick={onEnrollClick}
           className="rounded-full border border-black bg-[#FFBF00] px-6 py-2 text-center text-base font-medium text-black transition hover:bg-[#ffd94d]"
         >
-          Enroll Today
+          Register
         </button>
       </div>
     </section>
