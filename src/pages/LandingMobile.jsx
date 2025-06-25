@@ -122,7 +122,7 @@ export default function LandingMobile() {
             style={{ width: "fit-content" }}
             onClick={() => setShowSignupFlow(true)}
           >
-            Enroll Today
+            Register
           </button>
         </div>
       </div>
@@ -232,7 +232,7 @@ export default function LandingMobile() {
               </span>
             </div>
             <button className="mb-3 w-full rounded-[24px] border border-[#042F0C] bg-[#14B82C] py-3 font-semibold text-black">
-              Enroll Today
+              Register
             </button>
             <button className="w-full rounded-[24px] border border-[#042F0C] bg-white py-3 font-semibold text-[#12551E]">
               Schedule an Informational Call

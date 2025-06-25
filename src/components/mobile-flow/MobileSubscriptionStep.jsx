@@ -65,11 +65,7 @@ const MobileSubscriptionStep = ({ onNext, onBack, onClose }) => {
                 onClick={handleEnroll}
                 disabled={loading}
               >
-                {loading ? (
-                  <ClipLoader color="#fff" size={20} />
-                ) : (
-                  "Enroll Today"
-                )}
+                {loading ? <ClipLoader color="#fff" size={20} /> : "Register"}
               </button>
               <button
                 className="w-full rounded-full border border-transparent bg-transparent py-2 text-base font-semibold text-[#12551E] hover:bg-green-50"
