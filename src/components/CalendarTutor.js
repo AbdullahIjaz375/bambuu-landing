@@ -27,11 +27,10 @@ const CalendarTutor = ({ onNext, prefilledDates = [] }) => {
     const lastDay = new Date(year, month + 1, 0);
     const days = [];
 
-    // Add days from previous month to start from Sunday
+    // Add empty cells before the first day of the month
     const prevMonthDays = firstDay.getDay();
-    for (let i = prevMonthDays - 1; i >= 0; i--) {
-      const day = new Date(year, month, -i);
-      days.push({ date: day, isCurrentMonth: false });
+    for (let i = 0; i < prevMonthDays; i++) {
+      days.push({ date: null, isCurrentMonth: false });
     }
 
     // Add days of current month
@@ -40,12 +39,33 @@ const CalendarTutor = ({ onNext, prefilledDates = [] }) => {
       days.push({ date: day, isCurrentMonth: true });
     }
 
-    // Add days from next month to complete the grid
-    const remainingDays = 42 - days.length; // 6 rows × 7 days
-    for (let i = 1; i <= remainingDays; i++) {
-      const day = new Date(year, month + 1, i);
-      days.push({ date: day, isCurrentMonth: false });
+    // Add empty cells after the last day to fill the last week
+    const totalCells = days.length;
+    const remainder = totalCells % 7;
+    if (remainder !== 0) {
+      for (let i = 0; i < 7 - remainder; i++) {
+        days.push({ date: null, isCurrentMonth: false });
+      }
     }
+
+    // Calculate number of rows
+    days.numRows = Math.ceil(days.length / 7);
+
+    // Debug: Log the grid for this month
+    const weekDayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    let grid = "\n[CalendarTutor] Grid for " + year + "-" + (month + 1) + ":\n";
+    for (let i = 0; i < days.length; i++) {
+      if (i % 7 === 0) grid += "\n";
+      const d = days[i];
+      grid +=
+        (d.isCurrentMonth && d.date
+          ? d.date.getDate().toString().padStart(2, "0")
+          : "__") +
+        "(" +
+        weekDayLabels[i % 7] +
+        ") ";
+    }
+    console.log(grid);
 
     return days;
   };
@@ -89,6 +109,7 @@ const CalendarTutor = ({ onNext, prefilledDates = [] }) => {
   };
 
   const monthDates = getMonthDates(date);
+  const numRows = monthDates.numRows || Math.ceil(monthDates.length / 7);
 
   return (
     <>
@@ -113,7 +134,10 @@ const CalendarTutor = ({ onNext, prefilledDates = [] }) => {
           </div>
         </div>
 
-        <div className="max-h-96 overflow-hidden transition-all duration-300 ease-in-out">
+        <div
+          className={numRows > 5 ? "overflow-y-auto" : "overflow-y-hidden"}
+          style={numRows > 5 ? { maxHeight: "320px" } : {}}
+        >
           <div className="scale-100 transform opacity-100 transition-all duration-300 ease-in-out">
             <div className="mb-2 grid grid-cols-7 gap-1">
               {weekDayLabels.map((day) => (
@@ -127,35 +151,43 @@ const CalendarTutor = ({ onNext, prefilledDates = [] }) => {
             </div>
 
             <div className="ml-0 mr-5 grid grid-cols-7 gap-x-1 sm:gap-x-6 sm:gap-y-2 sm:p-1">
-              {monthDates
-                .filter(({ isCurrentMonth }) => isCurrentMonth)
-                .map(({ date: day, isCurrentMonth }) => {
-                  // Disable if before today
-                  const today = new Date();
-                  today.setHours(0, 0, 0, 0);
-                  const isPast = day < today;
-
+              {monthDates.map(({ date: day, isCurrentMonth }, idx) => {
+                if (!day) {
                   return (
-                    <button
-                      key={day.toISOString()}
-                      className={`flex h-11 w-11 items-center justify-center rounded-full border text-center text-[22px] font-bold transition-colors sm:h-12 sm:w-12 sm:text-[26px] ${
-                        isPast
+                    <div
+                      key={`empty-${idx}`}
+                      className="h-11 w-11 sm:h-12 sm:w-12"
+                    />
+                  );
+                }
+                // Disable if before today or not current month
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const isPast = day < today;
+                const isDisabled = isPast || !isCurrentMonth;
+                return (
+                  <button
+                    key={day.toISOString()}
+                    className={`flex h-11 w-11 items-center justify-center rounded-full border text-center text-[22px] font-bold transition-colors sm:h-12 sm:w-12 sm:text-[26px] ${
+                      !isCurrentMonth
+                        ? "cursor-not-allowed border-[#e0e0e0] bg-gray-100 text-gray-300"
+                        : isPast
                           ? "cursor-not-allowed border-[#e0e0e0] bg-gray-100 text-gray-400"
                           : isSelected(day)
                             ? "border-[#888888] bg-[#DBFDDF] text-[#14B82C]"
                             : "border-[#888888] bg-white text-[#14B82C] hover:bg-gray-50"
-                      }`}
-                      onClick={() =>
-                        !isPast && handleDateClick(day, isCurrentMonth)
-                      }
-                      disabled={isPast}
-                    >
-                      <span className="text-xl font-semibold sm:text-base">
-                        {day.getDate()}
-                      </span>
-                    </button>
-                  );
-                })}
+                    }`}
+                    onClick={() =>
+                      !isDisabled && handleDateClick(day, isCurrentMonth)
+                    }
+                    disabled={isDisabled}
+                  >
+                    <span className="text-xl font-semibold sm:text-base">
+                      {isCurrentMonth ? day.getDate() : ""}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
