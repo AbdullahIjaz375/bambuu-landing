@@ -157,7 +157,7 @@ export function getExamPrepClassSlots(tutorId, token) {
 
 export function testGrantExamPrepPlan(studentId, tutorId, token) {
   return apiRequest(
-    "https://testgrantexamprepplan-zzpsx27htq-uc.a.run.app",
+    `https://testgrantexamprepplan-${API_BASE_URL}`,
     {
       method: "POST",
       body: JSON.stringify({ studentId, tutorId }),
@@ -168,7 +168,7 @@ export function testGrantExamPrepPlan(studentId, tutorId, token) {
 
 export function getUserChannels(userId, token) {
   return apiRequest(
-    `https://getuserchannels-zzpsx27htq-uc.a.run.app?userId=${encodeURIComponent(userId)}`,
+    `https://getuserchannels-${API_BASE_URL}?userId=${encodeURIComponent(userId)}`,
     { method: "GET" },
     token,
   ).then((res) => res.channels || []);
@@ -252,7 +252,7 @@ export function getTutorProfile(tutorId, token) {
 
 export function updateTutorProfile(data, token) {
   return apiRequest(
-    "https://updatetutorprofile-zzpsx27htq-uc.a.run.app",
+    `https://updatetutorprofile-${API_BASE_URL}`,
     {
       method: "POST",
       body: JSON.stringify(data),
@@ -276,7 +276,7 @@ export function getExamPrepCurrentStep(studentId, token) {
 //dummy just to check if the api is working
 export function getExamPrepStepStatusMock(studentId, tutorId, token) {
   return apiRequest(
-    `https://getexamprepstepstatusdev-zzpsx27htq-uc.a.run.app?studentId=${encodeURIComponent(
+    `https://getexamprepstepstatusdev-${API_BASE_URL}?studentId=${encodeURIComponent(
       studentId,
     )}&tutorId=${encodeURIComponent(tutorId)}`,
     {
