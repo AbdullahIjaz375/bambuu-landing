@@ -361,8 +361,8 @@ const ExamClassSlots = ({
                 </div>
               ) : (
                 availableTimes.map((timeObj, idx) => {
-                  // --- Add this block ---
                   let isPastTime = false;
+                  let isWithin12Hours = false;
                   if (currentDate) {
                     const now = new Date();
                     const [hour, minute] = timeObj.display
@@ -377,13 +377,14 @@ const ExamClassSlots = ({
                     const slotDate = new Date(currentDate);
                     slotDate.setHours(slotHour, minute, 0, 0);
 
-                    // Only check for today
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    const isToday =
-                      new Date(currentDate).setHours(0, 0, 0, 0) ===
-                      today.getTime();
-                    if (isToday && slotDate < now) isPastTime = true;
+                    // Check if slot is in the past
+                    isPastTime = slotDate < now;
+
+                    // Check if slot is within 12 hours from now
+                    const twelveHoursFromNow = new Date(
+                      now.getTime() + 12 * 60 * 60 * 1000,
+                    );
+                    isWithin12Hours = slotDate < twelveHoursFromNow;
                   }
                   // --- End block ---
 
@@ -392,15 +393,18 @@ const ExamClassSlots = ({
                   );
                   const isConflicting = isTimeSlotConflicting(timeObj);
                   const isDisabled =
-                    (isPastTime || isConflicting) && !isSelected;
+                    (isPastTime || isConflicting || isWithin12Hours) &&
+                    !isSelected;
 
                   return (
                     <button
                       key={timeObj.utc + "-" + idx}
                       onClick={() =>
-                        !isPastTime && handleTimeSelection(timeObj.utc)
+                        !isPastTime &&
+                        !isWithin12Hours &&
+                        handleTimeSelection(timeObj.utc)
                       }
-                      disabled={isPastTime}
+                      disabled={isPastTime || isWithin12Hours}
                       className={`rounded-[16px] border px-2 py-3 text-base font-normal transition ${
                         isSelected
                           ? "border-[#14B82C] bg-[#DBFDDF] text-base font-semibold text-[#14B82C]"
@@ -411,7 +415,9 @@ const ExamClassSlots = ({
                       title={
                         isConflicting && !isSelected
                           ? "This time conflicts with a selected class"
-                          : ""
+                          : isWithin12Hours && !isSelected
+                            ? "Minimum 12-hour notice required"
+                            : ""
                       }
                     >
                       {timeObj.display}
