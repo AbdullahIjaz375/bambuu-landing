@@ -116,7 +116,7 @@ const ExamClassSlots = ({
     "December",
   ];
 
-  const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   // Check if we can proceed to next step
   const canProceedToConfirmation =

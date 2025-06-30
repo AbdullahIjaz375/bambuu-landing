@@ -38,6 +38,15 @@ const InstructorProfileUser = () => {
   const [bookingFlowStep, setBookingFlowStep] = useState(0);
   const [selectedInstructor, setSelectedInstructor] = useState(null);
 
+  // Helper to extract YouTube embed URL
+  function getYouTubeEmbedUrl(url) {
+    if (!url) return null;
+    const regExp =
+      /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
+    const match = url.match(regExp);
+    return match ? `https://www.youtube.com/embed/${match[1]}` : null;
+  }
+
   // Refactored Exam Prep click handler for onboarding logic
   const handleExamPrepClick = async () => {
     setStepStatusLoading(true);
@@ -358,7 +367,7 @@ const InstructorProfileUser = () => {
   return (
     <div className="flex h-screen">
       <div className="m-2 flex flex-1 rounded-3xl border sm:m-6">
-        <div className="mx-2 flex w-full flex-col rounded-3xl bg-white p-3 sm:mx-4 sm:p-6">
+        <div className="scrollbar-hide flex h-full w-full flex-col rounded-3xl bg-white p-3 sm:mx-4 sm:p-6">
           {/* Header */}
           <div className="mb-6 flex items-center justify-between border-b pb-4">
             <div className="flex items-center gap-2 sm:gap-4">
@@ -375,128 +384,141 @@ const InstructorProfileUser = () => {
           </div>
 
           {/* Content Container */}
-          <div className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row">
+          <div className="flex h-full min-h-0 flex-1 flex-col gap-4 lg:flex-row">
             {/* Sidebar */}
             <div className="flex w-full flex-col lg:w-1/4">
-              <div className="scrollbar-hide flex flex-col items-center gap-4 overflow-y-auto rounded-3xl bg-[#E6FDE9] p-5 lg:h-full">
+              <div className="flex h-full w-full max-w-[420px] flex-shrink-0 flex-col items-center overflow-y-auto rounded-3xl bg-[#E6FDE9] p-6">
                 <img
                   src={tutor.photoUrl || "/images/panda.png"}
                   alt={tutor.name}
-                  className="mb-4 h-28 w-28 rounded-full border-4 border-white object-cover shadow"
+                  className="mb-4 h-32 w-32 rounded-full border-4 border-white object-cover shadow"
                 />
-                <h3 className="mb-2 text-xl font-semibold sm:text-2xl">
+                <h3 className="mb-2 text-center text-xl font-semibold">
                   {tutor.name}
                 </h3>
-                <div className="mb-4 mt-2 flex flex-wrap items-center justify-center gap-x-8 gap-y-2">
-                  <div className="flex items-center gap-1 text-xs sm:text-sm">
+                <div className="mb-4 text-center text-[15px] leading-snug text-gray-700">
+                  {tutor.bio}
+                </div>
+                <div className="mb-4 mt-2 grid w-full grid-cols-2 gap-x-4 gap-y-2 text-[15px]">
+                  <div className="flex items-center gap-1">
                     <img
-                      alt="language"
+                      alt="native"
                       src="/svgs/language.svg"
-                      className="h-4 sm:h-5"
+                      className="h-4"
                     />
                     <span>
-                      <span className="font-semibold">
-                        {t("instructor-profile.details.native.label")}:
-                      </span>{" "}
+                      <span className="font-semibold">Native:</span>{" "}
                       {tutor.nativeLanguage}
                     </span>
                   </div>
-                  <div className="flex items-center gap-1 text-xs sm:text-sm">
-                    <img
-                      alt="teaching"
-                      src="/svgs/language.svg"
-                      className="h-4 sm:h-5"
-                    />
+                  <div className="flex items-center gap-1">
+                    <img alt="from" src="/svgs/location.svg" className="h-4" />
                     <span>
-                      <span className="font-semibold">
-                        {t("instructor-profile.details.teaching.label")}:
-                      </span>{" "}
-                      {tutor.teachingLanguage}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1 text-xs sm:text-sm">
-                    <img
-                      alt="location"
-                      src="/svgs/location.svg"
-                      className="h-4 sm:h-5"
-                    />
-                    <span>
-                      <span className="font-semibold">
-                        {t("instructor-profile.details.from.label")}:
-                      </span>{" "}
+                      <span className="font-semibold">From:</span>{" "}
                       {tutor.country}
                     </span>
                   </div>
-                  <div className="flex items-center gap-1 text-xs sm:text-sm">
+                  <div className="flex items-center gap-1">
                     <img
-                      alt="students"
-                      src="/svgs/users.svg"
-                      className="h-4 sm:h-5"
+                      alt="teaching"
+                      src="/svgs/language.svg"
+                      className="h-4"
                     />
                     <span>
-                      <span className="font-semibold">
-                        {t("instructor-profile.details.students.label")}:
-                      </span>{" "}
-                      {tutor.tutorStudentIds.length}
+                      <span className="font-semibold">Teaching:</span>{" "}
+                      {tutor.teachingLanguage}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <img alt="students" src="/svgs/users.svg" className="h-4" />
+                    <span>
+                      <span className="font-semibold">Students:</span>{" "}
+                      {tutor.tutorStudentIds?.length || 0}
                     </span>
                   </div>
                 </div>
-                <div className="mb-4 mt-2 w-full">
-                  <ShowDescription description={tutor.bio} maxHeight={100} />
-                </div>
+                {/* Video Section */}
+                {tutor.videoLink ? (
+                  <div className="mb-4 w-full">
+                    <div className="flex min-h-[200px] w-full items-center justify-center rounded-2xl bg-[#eaeaea] text-2xl font-medium text-[#b3b3b3] sm:min-h-[220px] sm:rounded-[2rem] lg:h-[220px]">
+                      <iframe
+                        width="100%"
+                        height="100%"
+                        style={{
+                          minHeight: 200,
+                          minWidth: 200,
+                          aspectRatio: "16/9",
+                          borderRadius: "1rem",
+                        }}
+                        src={getYouTubeEmbedUrl(tutor.videoLink)}
+                        title="Tutor introduction video"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                      ></iframe>
+                    </div>
+                    <div className="mt-2 w-full text-center">
+                      <span className="text-sm font-normal italic text-[#5D5D5D] sm:text-base">
+                        Watch {tutor.name?.split(" ")[0] || "the tutor"}'s
+                        introduction video.
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mb-4 flex h-32 w-full items-center justify-center rounded-xl bg-[#F5F5F5] text-base text-gray-400">
+                    No introduction video available.
+                  </div>
+                )}
                 <button
                   onClick={sendMessageClicked}
-                  className="mt-2 w-full rounded-full border border-black bg-[#fffbc5] px-4 py-3 text-base font-normal text-black shadow transition hover:bg-[#fff9a0]"
+                  className="mt-auto w-full rounded-full border border-black bg-[#fffbc5] px-4 py-3 text-base font-normal text-black shadow transition hover:bg-[#fff9a0]"
                   style={{ borderWidth: 2 }}
+                  disabled={isCreatingChannel}
                 >
-                  {t("instructor-profile.buttons.send-message")}
-                </button>
-              </div>
-              {/* Exam Preparation Package Button BELOW the green box */}
-              <div className="mt-6 flex w-full items-center justify-center">
-                <div className="w-full">
-                  <button
-                    className="flex w-full items-center justify-between rounded-2xl border border-[#FFBF00] bg-[#FFFFEA] px-6 py-4 text-left text-black shadow transition hover:bg-[#fff9a0]"
-                    onClick={handleExamPrepClick}
-                    disabled={stepStatusLoading}
-                    style={{
-                      opacity:
-                        stepStatusLoading ||
-                        hasBookedExamPrepClassWithOtherTutor
-                          ? 0.6
-                          : 1,
-                      pointerEvents:
-                        stepStatusLoading ||
-                        hasBookedExamPrepClassWithOtherTutor
-                          ? "none"
-                          : "auto",
-                    }}
-                  >
-                    <div className="flex items-center gap-3">
-                      <img
-                        src="/svgs/preparation-package-icon.svg"
-                        alt="Exam"
-                        className="h-16 w-16"
-                      />
-                      <span className="text-base font-semibold">
-                        Exam Preparation Program
-                      </span>
-                      {stepStatusLoading && (
-                        <ClipLoader
-                          color="#14B82C"
-                          size={18}
-                          className="ml-2"
-                        />
-                      )}
-                    </div>
-                    <ChevronRightIcon className="h-4 w-4" />
-                  </button>
-                  {stepStatusError && (
-                    <div className="mt-2 text-sm text-red-500">
-                      {stepStatusError}
-                    </div>
+                  {isCreatingChannel ? (
+                    <span className="flex items-center justify-center">
+                      <ClipLoader color="#14B82C" size={18} className="mr-2" />
+                      {t("instructor-profile.buttons.send-message")}
+                    </span>
+                  ) : (
+                    t("instructor-profile.buttons.send-message")
                   )}
-                </div>
+                </button>
+                {/* Exam Preparation Program Button INSIDE the green box */}
+                <button
+                  className="mt-4 flex w-full items-center justify-between rounded-2xl border border-[#FFBF00] bg-[#FFFFEA] px-6 py-4 text-left text-black shadow transition hover:bg-[#fff9a0]"
+                  onClick={handleExamPrepClick}
+                  disabled={stepStatusLoading}
+                  style={{
+                    opacity:
+                      stepStatusLoading || hasBookedExamPrepClassWithOtherTutor
+                        ? 0.6
+                        : 1,
+                    pointerEvents:
+                      stepStatusLoading || hasBookedExamPrepClassWithOtherTutor
+                        ? "none"
+                        : "auto",
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <img
+                      src="/svgs/preparation-package-icon.svg"
+                      alt="Exam"
+                      className="h-16 w-16"
+                    />
+                    <span className="text-base font-semibold">
+                      Exam Preparation Program
+                    </span>
+                    {stepStatusLoading && (
+                      <ClipLoader color="#14B82C" size={18} className="ml-2" />
+                    )}
+                  </div>
+                  <ChevronRightIcon className="h-4 w-4" />
+                </button>
+                {stepStatusError && (
+                  <div className="mt-2 text-sm text-red-500">
+                    {stepStatusError}
+                  </div>
+                )}
               </div>
             </div>
             {/* Main content */}
