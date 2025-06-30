@@ -386,8 +386,8 @@ const InstructorProfileUser = () => {
           {/* Content Container */}
           <div className="flex h-full min-h-0 flex-1 flex-col gap-4 lg:flex-row">
             {/* Sidebar */}
-            <div className="flex w-full flex-col lg:w-1/4">
-              <div className="flex h-full w-full max-w-[420px] flex-shrink-0 flex-col items-center overflow-y-auto rounded-3xl bg-[#E6FDE9] p-6">
+            <div className="flex h-full max-h-[calc(100vh-48px)] w-full flex-col overflow-y-auto lg:w-1/4">
+              <div className="flex w-full max-w-[420px] flex-shrink-0 flex-col items-center overflow-y-auto rounded-3xl bg-[#E6FDE9] p-6">
                 <img
                   src={tutor.photoUrl || "/images/panda.png"}
                   alt={tutor.name}
@@ -483,43 +483,43 @@ const InstructorProfileUser = () => {
                     t("instructor-profile.buttons.send-message")
                   )}
                 </button>
-                {/* Exam Preparation Program Button INSIDE the green box */}
-                <button
-                  className="mt-4 flex w-full items-center justify-between rounded-2xl border border-[#FFBF00] bg-[#FFFFEA] px-6 py-4 text-left text-black shadow transition hover:bg-[#fff9a0]"
-                  onClick={handleExamPrepClick}
-                  disabled={stepStatusLoading}
-                  style={{
-                    opacity:
-                      stepStatusLoading || hasBookedExamPrepClassWithOtherTutor
-                        ? 0.6
-                        : 1,
-                    pointerEvents:
-                      stepStatusLoading || hasBookedExamPrepClassWithOtherTutor
-                        ? "none"
-                        : "auto",
-                  }}
-                >
-                  <div className="flex items-center gap-3">
-                    <img
-                      src="/svgs/preparation-package-icon.svg"
-                      alt="Exam"
-                      className="h-16 w-16"
-                    />
-                    <span className="text-base font-semibold">
-                      Exam Preparation Program
-                    </span>
-                    {stepStatusLoading && (
-                      <ClipLoader color="#14B82C" size={18} className="ml-2" />
-                    )}
-                  </div>
-                  <ChevronRightIcon className="h-4 w-4" />
-                </button>
-                {stepStatusError && (
-                  <div className="mt-2 text-sm text-red-500">
-                    {stepStatusError}
-                  </div>
-                )}
               </div>
+              {/* Exam Preparation Program Button OUTSIDE the green box */}
+              <button
+                className="mt-4 flex w-full max-w-[420px] items-center justify-between rounded-2xl border border-[#FFBF00] bg-[#FFFFEA] px-6 py-4 text-left text-black shadow transition hover:bg-[#fff9a0]"
+                onClick={handleExamPrepClick}
+                disabled={stepStatusLoading}
+                style={{
+                  opacity:
+                    stepStatusLoading || hasBookedExamPrepClassWithOtherTutor
+                      ? 0.6
+                      : 1,
+                  pointerEvents:
+                    stepStatusLoading || hasBookedExamPrepClassWithOtherTutor
+                      ? "none"
+                      : "auto",
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <img
+                    src="/svgs/preparation-package-icon.svg"
+                    alt="Exam"
+                    className="h-16 w-16"
+                  />
+                  <span className="text-base font-semibold">
+                    Exam Preparation Program
+                  </span>
+                  {stepStatusLoading && (
+                    <ClipLoader color="#14B82C" size={18} className="ml-2" />
+                  )}
+                </div>
+                <ChevronRightIcon className="h-4 w-4" />
+              </button>
+              {stepStatusError && (
+                <div className="mt-2 max-w-[420px] text-sm text-red-500">
+                  {stepStatusError}
+                </div>
+              )}
             </div>
             {/* Main content */}
             <div className="flex min-h-0 flex-1 flex-col">

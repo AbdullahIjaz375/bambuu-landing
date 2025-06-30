@@ -2,6 +2,8 @@ import { X } from "lucide-react";
 import { useState, useEffect } from "react";
 
 const timeSlots = [
+  "12:00 AM",
+  "12:30 AM",
   "01:00 AM",
   "01:30 AM",
   "02:00 AM",
@@ -48,8 +50,6 @@ const timeSlots = [
   "10:30 PM",
   "11:00 PM",
   "11:30 PM",
-  "12:00 AM",
-  "12:30 AM",
 ];
 
 function getDateWithTime(date, timeStr) {
@@ -120,38 +120,6 @@ const TimeSlotModal = ({
   const currentDate = selectedDates[activeDateIdx];
   const currentDateKey = formatDateKey(currentDate);
 
-  // Helper function to check if a slot conflicts with any selected slot
-  const isSlotConflicting = (slot) => {
-    const selectedSlots = selectedSlotsByDate[currentDateKey] || [];
-
-    for (const selectedSlot of selectedSlots) {
-      const slotMinutes = convertTimeToMinutes(slot);
-      const selectedSlotMinutes = convertTimeToMinutes(selectedSlot);
-
-      // Check if the current slot falls within the 1-hour window of any selected slot
-      const diff = Math.abs(slotMinutes - selectedSlotMinutes);
-      if (diff < 60) {
-        // Less than 60 minutes apart
-        return true;
-      }
-    }
-    return false;
-  };
-
-  // Helper function to convert time string to minutes since midnight
-  const convertTimeToMinutes = (timeStr) => {
-    let [h, m] = timeStr.split(":");
-    m = m.slice(0, 2);
-    let hour = parseInt(h, 10);
-    let minute = parseInt(m, 10);
-    const isPM = timeStr.toLowerCase().includes("pm");
-
-    if (isPM && hour !== 12) hour += 12;
-    if (!isPM && hour === 12) hour = 0;
-
-    return hour * 60 + minute;
-  };
-
   const handleSlotClick = (slot) => {
     setSelectedSlotsByDate((prev) => {
       const prevSlots = prev[currentDateKey] || [];
@@ -195,58 +163,53 @@ const TimeSlotModal = ({
           Duration: <b>{type === "intro" ? 30 : 60} minutes</b>
         </span>
       </div>
-      <div className="mb-4" style={{ maxHeight: "320px", overflowY: "auto" }}>
-        <div className="grid grid-cols-4 gap-3">
-          {timeSlots.map((slot) => {
-            let isPastTime = false;
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const slotDate = new Date(currentDate);
-            slotDate.setHours(0, 0, 0, 0);
+      <div className="mb-4 grid max-h-96 grid-cols-4 gap-3 overflow-y-auto">
+        {timeSlots.map((slot) => {
+          let isPastTime = false;
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const slotDate = new Date(currentDate);
+          slotDate.setHours(0, 0, 0, 0);
 
-            // If current date is today, check if slot time is in the past
-            if (slotDate.getTime() === today.getTime()) {
-              // Parse slot time
-              let [hour, minute] = slot.split(":");
-              minute = parseInt(minute, 10);
-              hour = parseInt(hour, 10);
-              const isPM = slot.toLowerCase().includes("pm");
-              if (isPM && hour !== 12) hour += 12;
-              if (!isPM && hour === 12) hour = 0;
+          // If current date is today, check if slot time is in the past
+          if (slotDate.getTime() === today.getTime()) {
+            // Parse slot time
+            let [hour, minute] = slot.split(":");
+            minute = parseInt(minute, 10);
+            hour = parseInt(hour, 10);
+            const isPM = slot.toLowerCase().includes("pm");
+            if (isPM && hour !== 12) hour += 12;
+            if (!isPM && hour === 12) hour = 0;
 
-              const slotDateTime = new Date(currentDate);
-              slotDateTime.setHours(hour, minute, 0, 0);
+            const slotDateTime = new Date(currentDate);
+            slotDateTime.setHours(hour, minute, 0, 0);
 
-              if (slotDateTime < new Date()) {
-                isPastTime = true;
-              }
+            if (slotDateTime < new Date()) {
+              isPastTime = true;
             }
+          }
+          const selected =
+            (selectedSlotsByDate[currentDateKey] || []).includes(slot) &&
+            !isPastTime;
 
-            const selected =
-              (selectedSlotsByDate[currentDateKey] || []).includes(slot) &&
-              !isPastTime;
-            const isConflicting = isSlotConflicting(slot);
-            const isDisabled = isPastTime || (isConflicting && !selected);
-
-            return (
-              <button
-                key={slot}
-                type="button"
-                onClick={() => !isDisabled && handleSlotClick(slot)}
-                disabled={isDisabled}
-                className={`rounded-[16px] border px-4 py-2 text-base font-normal transition ${
-                  selected
-                    ? "border-[#14B82C] bg-[#DBFDDF] text-[#042F0C]"
-                    : isDisabled
-                      ? "cursor-not-allowed border-[#e0e0e0] bg-gray-100 text-gray-400"
-                      : "border-[#B0B0B0] bg-white text-[#888888] hover:bg-[#DBFDDF]"
-                } `}
-              >
-                {slot}
-              </button>
-            );
-          })}
-        </div>
+          return (
+            <button
+              key={slot}
+              type="button"
+              onClick={() => !isPastTime && handleSlotClick(slot)}
+              disabled={isPastTime}
+              className={`rounded-[16px] border px-4 py-2 text-base font-normal transition ${
+                selected
+                  ? "border-[#14B82C] bg-[#DBFDDF] text-[#042F0C]"
+                  : isPastTime
+                    ? "cursor-not-allowed border-[#e0e0e0] bg-gray-100 text-gray-400"
+                    : "border-[#B0B0B0] bg-white text-[#888888] hover:bg-[#DBFDDF]"
+              } `}
+            >
+              {slot}
+            </button>
+          );
+        })}
       </div>
 
       <div className="mb-4 mt-5 flex items-center rounded-[999px] border border-gray-200 px-4 py-2 shadow-sm">

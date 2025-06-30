@@ -40,29 +40,67 @@ const ConfirmClassesModal = ({
 
   // Convert dates and times to the format expected for booking
   const formatBookingData = () => {
-    const classes = normalizedSelectedDates.map((date) => {
-      // Format date as dd-mm-yy
-      const d = new Date(date);
-      const day = d.getDate().toString().padStart(2, "0");
-      const month = (d.getMonth() + 1).toString().padStart(2, "0");
-      const year = d.getFullYear().toString().slice(-2);
-      const formattedDate = `${day}-${month}-${year}`;
+    const classes = [];
 
-      const utcTime = normalizedSelectedTimes[date];
-      const localTime = utcTime
-        ? new Date(utcTime).toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: true,
-          })
-        : "";
-      return {
-        date: formattedDate,
-        time: localTime,
-        title: "Exam Prep Class",
-        type: date % 2 === 0 ? "Class 6" : "Exam Prep Class",
-      };
+    // Handle the case where selectedTimes is an object with arrays of times per date
+    normalizedSelectedDates.forEach((date) => {
+      const timesForDate = normalizedSelectedTimes[date];
+
+      // If timesForDate is an array, create separate entries for each time
+      if (Array.isArray(timesForDate)) {
+        timesForDate.forEach((utcTime) => {
+          // Format date as dd-mm-yy
+          const d = new Date(date);
+          const day = d.getDate().toString().padStart(2, "0");
+          const month = (d.getMonth() + 1).toString().padStart(2, "0");
+          const year = d.getFullYear().toString().slice(-2);
+          const formattedDate = `${day}-${month}-${year}`;
+
+          const localTime = utcTime
+            ? new Date(utcTime).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+              })
+            : "";
+
+          classes.push({
+            date: formattedDate,
+            time: localTime,
+            title: "Exam Prep Class",
+            type: "Exam Prep Class",
+            originalDate: date,
+            originalTime: utcTime,
+          });
+        });
+      } else {
+        // Handle legacy case where timesForDate is a single string
+        const utcTime = timesForDate;
+        const d = new Date(date);
+        const day = d.getDate().toString().padStart(2, "0");
+        const month = (d.getMonth() + 1).toString().padStart(2, "0");
+        const year = d.getFullYear().toString().slice(-2);
+        const formattedDate = `${day}-${month}-${year}`;
+
+        const localTime = utcTime
+          ? new Date(utcTime).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: true,
+            })
+          : "";
+
+        classes.push({
+          date: formattedDate,
+          time: localTime,
+          title: "Exam Prep Class",
+          type: "Exam Prep Class",
+          originalDate: date,
+          originalTime: utcTime,
+        });
+      }
     });
+
     return {
       classes,
       totalClasses: classes.length,
@@ -79,10 +117,24 @@ const ConfirmClassesModal = ({
         setBooking(false);
         return;
       }
+
       // Build slots array: [{ time: ISOString }]
-      const slots = normalizedSelectedDates.map((date) => ({
-        time: normalizedSelectedTimes[date], // UTC string
-      }));
+      const slots = [];
+
+      normalizedSelectedDates.forEach((date) => {
+        const timesForDate = normalizedSelectedTimes[date];
+
+        if (Array.isArray(timesForDate)) {
+          // Multiple times per date
+          timesForDate.forEach((utcTime) => {
+            slots.push({ time: utcTime });
+          });
+        } else {
+          // Single time per date (legacy)
+          slots.push({ time: timesForDate });
+        }
+      });
+
       const payload = {
         studentId: user?.uid || authUser?.uid,
         tutorId: tutorId,
@@ -161,7 +213,10 @@ const ConfirmClassesModal = ({
                 <button
                   onClick={() =>
                     onRemoveClass &&
-                    onRemoveClass(normalizedSelectedDates[index])
+                    onRemoveClass(
+                      classItem.originalDate,
+                      classItem.originalTime,
+                    )
                   }
                   className="flex items-center justify-center gap-1 text-xs font-medium text-red-500 hover:text-red-600 disabled:opacity-60"
                   disabled={isLoading}

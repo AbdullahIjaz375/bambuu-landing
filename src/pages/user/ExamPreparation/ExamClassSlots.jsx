@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
-import { bookExamPrepClass } from "../../../api/examPrepApi";
-import ConfirmClassesModal from "./ConfirmClassesModal";
 import Modal from "react-modal";
 import { ClipLoader } from "react-spinners";
 
@@ -16,9 +14,10 @@ const ExamClassSlots = ({
 }) => {
   const [currentStep, setCurrentStep] = useState(1); // 1: date selection, 2: time selection, 3: confirmation
   const [selectedDates, setSelectedDates] = useState([]);
-  const [selectedTimes, setSelectedTimes] = useState({}); // Object to store time for each date
+  const [selectedTimes, setSelectedTimes] = useState({});
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [currentDateIndex, setCurrentDateIndex] = useState(0);
+
   // Generate calendar days for the current month
   const generateCalendarDays = () => {
     const year = currentMonth.getFullYear();
@@ -49,17 +48,24 @@ const ExamClassSlots = ({
     const month = String(currentMonth.getMonth() + 1).padStart(2, "0");
     const dayStr = String(day).padStart(2, "0");
     const dateKey = `${year}-${month}-${dayStr}`;
+
+    // Toggle date selection - if already selected, remove it; if not selected, add it
     if (selectedDates.includes(dateKey)) {
       setSelectedDates(selectedDates.filter((d) => d !== dateKey));
       const newTimes = { ...selectedTimes };
       delete newTimes[dateKey];
       setSelectedTimes(newTimes);
-    } else if (selectedDates.length < MAX_DATES) {
+    } else {
       // Sort dates after adding new one
       const newDates = [...selectedDates, dateKey].sort(
         (a, b) => new Date(a) - new Date(b),
       );
       setSelectedDates(newDates);
+      // Initialize empty array for this date
+      setSelectedTimes((prev) => ({
+        ...prev,
+        [dateKey]: [],
+      }));
     }
   };
 
@@ -76,28 +82,44 @@ const ExamClassSlots = ({
   };
 
   const handleTimeSelection = (time) => {
-    setSelectedTimes((prev) => ({
-      ...prev,
-      [selectedDateKey]: time,
-    }));
-  };
+    const currentDateTimes = selectedTimes[selectedDateKey] || [];
 
-  const handleNextDate = () => {
-    if (currentDateIndex < selectedDates.length - 1) {
-      setCurrentDateIndex(currentDateIndex + 1);
-    }
-  };
-
-  const handlePrevDate = () => {
-    if (currentDateIndex > 0) {
-      setCurrentDateIndex(currentDateIndex - 1);
+    // Toggle time selection - if already selected, remove it; if not selected, add it
+    if (currentDateTimes.includes(time)) {
+      const newTimes = currentDateTimes.filter((t) => t !== time);
+      setSelectedTimes((prev) => ({
+        ...prev,
+        [selectedDateKey]: newTimes,
+      }));
+    } else {
+      // Add new time to the array
+      setSelectedTimes((prev) => ({
+        ...prev,
+        [selectedDateKey]: [...currentDateTimes, time],
+      }));
     }
   };
 
   const handleNextToConfirmation = () => {
-    const allDatesHaveTime = selectedDates.every((date) => selectedTimes[date]);
+    // Check if all selected dates have at least one time selected
+    const allDatesHaveTime = selectedDates.every(
+      (date) => selectedTimes[date] && selectedTimes[date].length > 0,
+    );
+
     if (allDatesHaveTime) {
-      if (onBookingComplete) onBookingComplete(selectedDates, selectedTimes);
+      // Transform the data structure for the confirmation modal
+      // Create an array where each time slot is a separate entry
+      const allSlots = [];
+      selectedDates.forEach((date) => {
+        selectedTimes[date].forEach((time) => {
+          allSlots.push({
+            date: date,
+            time: time,
+          });
+        });
+      });
+
+      if (onBookingComplete) onBookingComplete(allSlots);
     }
   };
 
@@ -118,10 +140,6 @@ const ExamClassSlots = ({
 
   const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-  // Check if we can proceed to next step
-  const canProceedToConfirmation =
-    selectedDates.length > 0 &&
-    selectedDates.every((date) => selectedTimes[date]);
   // Use selectedDates and currentDateIndex to get the selected date key
   const selectedDateKey = selectedDates[currentDateIndex] || selectedDates[0];
   let availableTimes =
@@ -131,12 +149,28 @@ const ExamClassSlots = ({
     new Map(availableTimes.map((t) => [t.utc, t])).values(),
   );
   const currentDate = selectedDateKey;
-  const selectedTime = selectedTimes[selectedDateKey] || "";
+  const selectedTimesForCurrentDate = selectedTimes[selectedDateKey] || [];
+
+  // Function to check if a time slot conflicts with selected slots
+  const isTimeSlotConflicting = (timeObj) => {
+    if (selectedTimesForCurrentDate.length === 0) return false;
+
+    const slotTime = new Date(timeObj.utc);
+
+    // Check if this slot conflicts with any selected slot
+    return selectedTimesForCurrentDate.some((selectedTimeUtc) => {
+      const selectedTime = new Date(selectedTimeUtc);
+      const timeDiff = Math.abs(slotTime.getTime() - selectedTime.getTime());
+      const minutesDiff = timeDiff / (1000 * 60);
+
+      // If the time difference is less than 90 minutes (60 min class + 30 min buffer), it's conflicting
+      return minutesDiff < 60;
+    });
+  };
 
   // Only allow selection of dates that have available slots
   // Use date keys in 'YYYY-MM-DD' format
   const availableDates = Object.keys(slots);
-  const MAX_DATES = 10;
 
   return (
     <>
@@ -290,7 +324,7 @@ const ExamClassSlots = ({
             <div className="flex h-full flex-col">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-2xl/[100%] font-medium">
-                  Choose time for{" "}
+                  Choose times for{" "}
                   {new Date(currentDate).toLocaleDateString("en-GB", {
                     day: "numeric",
                     month: "short",
@@ -309,6 +343,13 @@ const ExamClassSlots = ({
             <div className="mb-6 flex justify-between text-sm text-gray-600">
               <span className="text-sm font-medium">
                 Duration: <b>60 minutes</b>
+              </span>
+            </div>
+
+            {/* Selected Times Count */}
+            <div className="mb-4 text-center">
+              <span className="text-sm text-gray-700">
+                {selectedTimesForCurrentDate.length} times selected
               </span>
             </div>
 
@@ -346,6 +387,13 @@ const ExamClassSlots = ({
                   }
                   // --- End block ---
 
+                  const isSelected = selectedTimesForCurrentDate.includes(
+                    timeObj.utc,
+                  );
+                  const isConflicting = isTimeSlotConflicting(timeObj);
+                  const isDisabled =
+                    (isPastTime || isConflicting) && !isSelected;
+
                   return (
                     <button
                       key={timeObj.utc + "-" + idx}
@@ -354,12 +402,17 @@ const ExamClassSlots = ({
                       }
                       disabled={isPastTime}
                       className={`rounded-[16px] border px-2 py-3 text-base font-normal transition ${
-                        selectedTime === timeObj.utc
+                        isSelected
                           ? "border-[#14B82C] bg-[#DBFDDF] text-base font-semibold text-[#14B82C]"
-                          : isPastTime
+                          : isDisabled
                             ? "cursor-not-allowed border-[#e0e0e0] bg-gray-100 text-gray-400"
                             : "border-[#B0B0B0] bg-white text-[#14B82C] hover:bg-[#DBFDDF]"
                       }`}
+                      title={
+                        isConflicting && !isSelected
+                          ? "This time conflicts with a selected class"
+                          : ""
+                      }
                     >
                       {timeObj.display}
                     </button>
@@ -390,9 +443,9 @@ const ExamClassSlots = ({
                     setCurrentDateIndex((idx) => idx + 1);
                   }
                 }}
-                disabled={!selectedTime}
+                disabled={selectedTimesForCurrentDate.length === 0}
                 className={`w-1/2 rounded-full border border-[#042F0C] px-6 py-2 text-base font-medium text-black transition-colors ${
-                  selectedTime
+                  selectedTimesForCurrentDate.length > 0
                     ? "bg-[#14B82C] hover:bg-green-600"
                     : "cursor-not-allowed bg-[#b6e7c0]"
                 }`}

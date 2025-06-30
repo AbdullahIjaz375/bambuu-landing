@@ -64,21 +64,25 @@ const BookingFlowModal = ({
   // Exam prep slots state
   const [examPrepSlots, setExamPrepSlots] = useState({});
   const [loadingExamPrepSlots, setLoadingExamPrepSlots] = useState(false);
-  const [selectedExamPrepDates, setSelectedExamPrepDates] = useState([]);
-  const [selectedExamPrepTimes, setSelectedExamPrepTimes] = useState({});
+  const [selectedExamPrepSlots, setSelectedExamPrepSlots] = useState([]); // Array of {date, time} objects
   const [currentApiStep, setCurrentApiStep] = useState(null);
   // Add a global loading state
   const [globalLoading, setGlobalLoading] = useState(false);
 
-  const handleRemoveExamClass = (dateToRemove) => {
-    setSelectedExamPrepDates((prevDates) =>
-      prevDates.filter((date) => date !== dateToRemove),
-    );
-    setSelectedExamPrepTimes((prevTimes) => {
-      const newTimes = { ...prevTimes };
-      delete newTimes[dateToRemove];
-      return newTimes;
-    });
+  const handleRemoveExamClass = (dateToRemove, timeToRemove = null) => {
+    if (timeToRemove) {
+      // Remove specific time slot
+      setSelectedExamPrepSlots((prevSlots) =>
+        prevSlots.filter(
+          (slot) => !(slot.date === dateToRemove && slot.time === timeToRemove),
+        ),
+      );
+    } else {
+      // Remove all time slots for a date (legacy behavior)
+      setSelectedExamPrepSlots((prevSlots) =>
+        prevSlots.filter((slot) => slot.date !== dateToRemove),
+      );
+    }
   };
 
   useEffect(() => {
@@ -111,8 +115,7 @@ const BookingFlowModal = ({
       setShowExamBooked(false);
       setExamPrepSlots({});
       setLoadingExamPrepSlots(false);
-      setSelectedExamPrepDates([]);
-      setSelectedExamPrepTimes({});
+      setSelectedExamPrepSlots([]);
       if (mode === "exam" && startStep === 6) {
         setShowExamPrepStart(true);
       }
@@ -380,10 +383,9 @@ const BookingFlowModal = ({
       setGlobalLoading(false);
     }
   };
-  const handleExamClassSlotsComplete = (dates, times) => {
+  const handleExamClassSlotsComplete = (slots) => {
     setShowExamClassSlots(false);
-    setSelectedExamPrepDates(dates);
-    setSelectedExamPrepTimes(times);
+    setSelectedExamPrepSlots(slots); // slots is now an array of {date, time} objects
     setShowExamConfirm(true);
     setStep(8);
   };
@@ -393,23 +395,15 @@ const BookingFlowModal = ({
       if (
         !user?.uid ||
         !confirmedInstructor?.uid ||
-        !selectedExamPrepDates.length
+        !selectedExamPrepSlots.length
       ) {
         throw new Error("Missing required booking information");
       }
       // Build slots array: [{ time: ISOString }]
-      const slots = selectedExamPrepDates.map((date) => {
-        const timeStr = selectedExamPrepTimes[date];
-        const [year, month, day] = date.split("-").map(Number);
-        let [h, m] = timeStr.split(":");
-        m = m.slice(0, 2);
-        let hour = parseInt(h, 10);
-        let minute = parseInt(m, 10);
-        const isPM = timeStr.toLowerCase().includes("pm");
-        if (isPM && hour !== 12) hour += 12;
-        if (!isPM && hour === 12) hour = 0;
-        const d = new Date(year, month - 1, day, hour, minute, 0, 0);
-        return { time: d.toISOString() };
+      const slots = selectedExamPrepSlots.map((slot) => {
+        const { date, time } = slot;
+        // time is already in UTC format from ExamClassSlots
+        return { time: time };
       });
       const resp = await bookExamPrepClass({
         studentId: user.uid,
@@ -593,14 +587,16 @@ const BookingFlowModal = ({
             setStep(7);
           }}
           onConfirm={handleExamConfirmComplete}
-          selectedDates={
-            Array.isArray(selectedExamPrepDates)
-              ? selectedExamPrepDates
-              : selectedExamPrepDates
-                ? [selectedExamPrepDates]
-                : []
-          }
-          selectedTimes={selectedExamPrepTimes}
+          selectedDates={[
+            ...new Set(selectedExamPrepSlots.map((slot) => slot.date)),
+          ]}
+          selectedTimes={selectedExamPrepSlots.reduce((acc, slot) => {
+            if (!acc[slot.date]) {
+              acc[slot.date] = [];
+            }
+            acc[slot.date].push(slot.time);
+            return acc;
+          }, {})}
           tutorId={confirmedInstructor?.uid}
           user={user}
           onRemoveClass={handleRemoveExamClass}

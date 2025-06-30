@@ -58,7 +58,17 @@ const ExamPreparationUser = () => {
             (c) =>
               c.classType === "exam_prep" ||
               c.classType === "introductory_call",
-          );
+          )
+          .sort((a, b) => {
+            // Sort by classDateTime, with earlier dates first
+            const dateA = a.classDateTime?.seconds
+              ? new Date(a.classDateTime.seconds * 1000)
+              : new Date(0);
+            const dateB = b.classDateTime?.seconds
+              ? new Date(b.classDateTime.seconds * 1000)
+              : new Date(0);
+            return dateA - dateB;
+          });
         setClasses(filtered);
       } catch (err) {
         setTutor(null);
