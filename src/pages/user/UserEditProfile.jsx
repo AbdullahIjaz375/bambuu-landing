@@ -328,7 +328,6 @@ const UserEditProfile = () => {
       <div className="h-full min-w-[calc(100%-16rem)] flex-1 overflow-x-auto">
         <div className="flex h-full flex-col">
           <div className="m-2 flex-1 rounded-3xl border-2 border-[#e7e7e7] bg-white p-8">
-            {/* Fixed Header Section */}
             <div className="sticky top-0 z-10 bg-white">
               <div className="mb-6 flex items-center justify-between border-b pb-4">
                 <div className="flex items-center gap-4">
