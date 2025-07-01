@@ -249,6 +249,7 @@ const UserEditProfile = () => {
     learningLanguageProficiency:
       user?.learningLanguageProficiency || "Intermediate",
     country: user?.country || "",
+    bio: user?.bio || "",
   });
   const [image, setImage] = useState(null);
   const [selectedImage, setSelectedImage] = useState(user?.photoUrl || null);
@@ -290,7 +291,7 @@ const UserEditProfile = () => {
 
     try {
       let photoURL = user.photoUrl;
-      if (formData.profileImage && formData.profileImage !== user.photoUrl) {
+      if (image) {
         photoURL = await handleImageUpload(user.uid);
       }
 
