@@ -160,6 +160,14 @@ const SlotPickerModal = ({
             {/* Time slots section - Only visible when date is selected and not loading */}
             {!loading && selectedDate && (
               <div className="flex min-w-[230px] flex-col justify-start pt-2">
+                <div className="mb-2 text-lg font-semibold text-[#222]">
+                  {new Date(selectedDate).toLocaleDateString("en-GB", {
+                    weekday: "long",
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </div>
                 <div className="mb-2 text-[15px]">
                   <span className="text-[#222]">Duration:</span>{" "}
                   <span className="font-semibold">30 minutes</span>
