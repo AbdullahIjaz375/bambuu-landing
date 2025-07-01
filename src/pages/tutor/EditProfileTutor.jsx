@@ -339,8 +339,9 @@ const TutorEditProfile = () => {
         user?.accessToken,
       );
       // Optionally update Firestore only for the image (if needed)
-      // const userRef = doc(db, "tutors", user.uid);
-      // await updateDoc(userRef, { photoUrl: updatedUserData.photoUrl });
+      // Update Firestore with the new photoUrl
+      const userRef = doc(db, "tutors", user.uid);
+      await updateDoc(userRef, { photoUrl: updatedUserData.photoUrl });
       // Update context and session storage
       const newUserData = {
         ...user,
@@ -349,6 +350,7 @@ const TutorEditProfile = () => {
       };
       setUser(newUserData);
       sessionStorage.setItem("user", JSON.stringify(newUserData));
+      setSelectedImage(updatedUserData.photoUrl); // Update the displayed image
       navigate("/profileTutor");
     } catch (error) {
       console.error("Error updating profile:", error);
