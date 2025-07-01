@@ -9,11 +9,13 @@ import Sidebar from "../../components/Sidebar";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { doc, getDoc } from "firebase/firestore";
+import { useLanguage } from "../../context/LanguageContext";
 
 const ProfileUser = () => {
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { changeLanguage } = useLanguage();
 
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -45,7 +47,7 @@ const ProfileUser = () => {
         sub.type === "individual_premium" ||
         sub.type === "group_premium" ||
         sub.type?.toLowerCase().includes("premium") ||
-        sub.type?.toLowerCase().includes("bambuu+")
+        sub.type?.toLowerCase().includes("bambuu+"),
     ) ||
     user?.isPremium === true ||
     userData?.isPremium === true;
@@ -110,13 +112,13 @@ const ProfileUser = () => {
 
   return (
     <div className="flex h-screen bg-white">
-      <div className="flex-shrink-0 w-64 h-full">
+      <div className="h-full w-64 flex-shrink-0">
         <Sidebar user={user} />
       </div>
 
-      <div className="flex-1 overflow-x-auto min-w-[calc(100%-16rem)] h-full">
-        <div className="h-[calc(100vh-1rem)] p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl m-2 overflow-y-auto">
-          <div className="flex items-center justify-between pb-4 mb-6 border-b">
+      <div className="h-full min-w-[calc(100%-16rem)] flex-1 overflow-x-auto">
+        <div className="m-2 h-[calc(100vh-1rem)] overflow-y-auto rounded-3xl border-2 border-[#e7e7e7] bg-white p-8">
+          <div className="mb-6 flex items-center justify-between border-b pb-4">
             <div className="flex items-center gap-4">
               <h1 className="text-4xl font-semibold">{t("profile.title")}</h1>
             </div>
@@ -124,26 +126,26 @@ const ProfileUser = () => {
 
           <div className="grid grid-cols-2 gap-6">
             {/* Profile Info Card */}
-            <div className="bg-[#e6fde9] rounded-3xl p-8 flex flex-col items-center">
-              <div className="relative flex items-center justify-center w-32 h-32 mb-4">
+            <div className="flex flex-col items-center rounded-3xl bg-[#e6fde9] p-8">
+              <div className="relative mb-4 flex h-32 w-32 items-center justify-center">
                 {hasBambuuPlus && (
-                  <div className="absolute z-10 -top-1 -right-1 w-8 h-8">
+                  <div className="absolute -right-1 -top-1 z-10 h-8 w-8">
                     <img
                       alt="bambbuu plus"
                       src="/svgs/bambuu-plus-user.svg"
-                      className="w-full h-full"
+                      className="h-full w-full"
                     />
                   </div>
                 )}
                 <div
-                  className={`w-32 h-32 bg-white rounded-full ${
+                  className={`h-32 w-32 rounded-full bg-white ${
                     hasBambuuPlus ? "ring-4 ring-green-500" : ""
                   }`}
                 >
                   <img
                     src={user?.photoUrl || "/svgs/supertutor-panda.svg"}
                     alt="Profile"
-                    className="object-cover w-full h-full rounded-full"
+                    className="h-full w-full rounded-full object-cover"
                   />
                 </div>
               </div>
@@ -152,54 +154,54 @@ const ProfileUser = () => {
                 {user?.name || "User"}
               </h2>
 
-              <div className="flex items-center gap-2 px-3 py-1 mb-6 text-xl bg-white rounded-full">
-                <img alt="bambbuu" src="/svgs/fire.svg" className="w-6 h-6" />
+              <div className="mb-6 flex items-center gap-2 rounded-full bg-white px-3 py-1 text-xl">
+                <img alt="bambbuu" src="/svgs/fire.svg" className="h-6 w-6" />
                 <span className="font-semibold text-[#6D6D6D]">
                   {t("profile.appStreak")}
                 </span>
-                <span className="font-bold text-green-600 ">
+                <span className="font-bold text-green-600">
                   {user?.currentStreak || 0}
                 </span>
               </div>
 
-              <div className="grid w-full grid-cols-3 gap-4 mb-6 text-xl">
+              <div className="mb-6 grid w-full grid-cols-3 gap-4 text-xl">
                 {/* Language and Location Info */}
-                <div className="flex items-center min-w-0 gap-1">
+                <div className="flex min-w-0 items-center gap-1">
                   <img
                     alt="bambbuu"
                     src="/svgs/language-circle.svg"
-                    className="flex-shrink-0 w-6 h-6"
+                    className="h-6 w-6 flex-shrink-0"
                   />
-                  <span className="font-semibold text-black whitespace-nowrap">
+                  <span className="whitespace-nowrap font-semibold text-black">
                     {t("profile.native")}:
                   </span>
-                  <span className="font-medium text-gray-600 truncate">
+                  <span className="truncate font-medium text-gray-600">
                     {user?.nativeLanguage || "-"}
                   </span>
                 </div>
-                <div className="flex items-center min-w-0 gap-1">
+                <div className="flex min-w-0 items-center gap-1">
                   <img
                     alt="bambbuu"
                     src="/svgs/language-circle.svg"
-                    className="flex-shrink-0 w-6 h-6"
+                    className="h-6 w-6 flex-shrink-0"
                   />
-                  <span className="font-semibold text-black whitespace-nowrap">
+                  <span className="whitespace-nowrap font-semibold text-black">
                     {t("profile.learning")}:
                   </span>
-                  <span className="font-medium text-gray-600 truncate">
+                  <span className="truncate font-medium text-gray-600">
                     {user?.learningLanguage || "-"}
                   </span>
                 </div>
-                <div className="flex items-center min-w-0 gap-1">
+                <div className="flex min-w-0 items-center gap-1">
                   <img
                     alt="bambbuu"
                     src="/svgs/location.svg"
-                    className="flex-shrink-0 w-6 h-6"
+                    className="h-6 w-6 flex-shrink-0"
                   />
-                  <span className="font-semibold text-black whitespace-nowrap">
+                  <span className="whitespace-nowrap font-semibold text-black">
                     {t("profile.from")}:
                   </span>
-                  <span className="font-medium text-gray-600 truncate">
+                  <span className="truncate font-medium text-gray-600">
                     {user?.country || "-"}
                   </span>
                 </div>
@@ -207,7 +209,7 @@ const ProfileUser = () => {
 
               <div className="grid w-full grid-cols-2 gap-4 text-xl">
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-black whitespace-nowrap">
+                  <span className="whitespace-nowrap font-semibold text-black">
                     {t("profile.stats.totalClassesJoined")}:
                   </span>
                   <span className="font-medium text-gray-600">
@@ -215,7 +217,7 @@ const ProfileUser = () => {
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-black whitespace-nowrap">
+                  <span className="whitespace-nowrap font-semibold text-black">
                     {t("profile.stats.totalGroupsJoined")}:
                   </span>
                   <span className="font-medium text-gray-600">
@@ -231,31 +233,31 @@ const ProfileUser = () => {
                 <button
                   key={item.path}
                   onClick={() => handleItemClick(item.path)}
-                  className="flex items-center justify-between w-full px-6 py-4 text-green-600 border border-green-500 rounded-full hover:bg-green-50"
+                  className="flex w-full items-center justify-between rounded-full border border-green-500 px-6 py-4 text-green-600 hover:bg-green-50"
                 >
                   <div className="flex items-center gap-3">
-                    <img alt="bambbuu" src={item.icon} className="w-6 h-6" />
+                    <img alt="bambbuu" src={item.icon} className="h-6 w-6" />
                     <span className="text-xl text-black">{item.label}</span>
                   </div>
-                  <ChevronRight className="w-5 h-5 text-black" />
+                  <ChevronRight className="h-5 w-5 text-black" />
                 </button>
               ))}
 
               <button
                 onClick={handleSignOut}
-                className="flex items-center justify-between w-full px-6 py-4 text-red-600 border border-red-500 rounded-full hover:bg-red-50"
+                className="flex w-full items-center justify-between rounded-full border border-red-500 px-6 py-4 text-red-600 hover:bg-red-50"
               >
                 <div className="flex items-center gap-3">
                   <img
                     alt="bambbuu"
                     src="/svgs/logout.svg"
-                    className="w-6 h-6"
+                    className="h-6 w-6"
                   />
                   <span className="text-xl">
                     {t("profile.navigation.logout")}
                   </span>
                 </div>
-                <ChevronRight className="w-5 h-5 text-red-600" />
+                <ChevronRight className="h-5 w-5 text-red-600" />
               </button>
             </div>
           </div>

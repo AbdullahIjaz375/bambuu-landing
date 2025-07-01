@@ -111,6 +111,7 @@ import { useAuth } from "../context/AuthContext";
 import { useTranslation } from "react-i18next";
 import "../i18n";
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "../context/LanguageContext";
 
 Modal.setAppElement("#root");
 
@@ -119,17 +120,11 @@ const AppTab = () => {
   const [isLanguageModalOpen, setIsLanguageModalOpen] = useState(false);
   const [selectedReason, setSelectedReason] = useState("");
   const { user, setUser } = useAuth();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const userr = sessionStorage.getItem("user");
   const userType = userr ? JSON.parse(userr).userType : null;
-
-  // Update i18n language when user preference changes
-  useEffect(() => {
-    if (user?.languagePreference) {
-      i18n.changeLanguage(user.languagePreference);
-    }
-  }, [user?.languagePreference, i18n]);
+  const { changeLanguage, currentLanguage } = useLanguage();
 
   const feedbackOptions = [
     t("feedback.betterAlternative"),
@@ -183,9 +178,10 @@ const AppTab = () => {
         JSON.stringify({
           ...sessionUser,
           languagePreference: newLanguage,
-        })
+        }),
       );
 
+      await changeLanguage(newLanguage);
       setIsLanguageModalOpen(false);
       toast.success(t("toast.languageUpdated"));
     } catch (error) {
@@ -204,28 +200,28 @@ const AppTab = () => {
 
       <div className="max-w-2xl space-y-4">
         <div
-          className="flex items-center justify-between p-3 text-lg bg-white border border-gray-200 rounded-full cursor-pointer"
+          className="flex cursor-pointer items-center justify-between rounded-full border border-gray-200 bg-white p-3 text-lg"
           onClick={() => setIsLanguageModalOpen(true)}
         >
           <div className="flex items-center gap-3">
-            <img alt="bambuu" src="/svgs/translate.svg" className="w-6 h-6" />
+            <img alt="bambuu" src="/svgs/translate.svg" className="h-6 w-6" />
             <span>{t("settings.appLanguage")}</span>
           </div>
           <div className="flex items-center gap-2">
             <span>{user?.languagePreference?.toUpperCase() || "EN"}</span>
-            <ChevronLeft className="w-5 h-5 rotate-180" />
+            <ChevronLeft className="h-5 w-5 rotate-180" />
           </div>
         </div>
 
         <div
-          className="flex items-center justify-between p-3 text-lg bg-white border border-[#F04438] rounded-full cursor-pointer"
+          className="flex cursor-pointer items-center justify-between rounded-full border border-[#F04438] bg-white p-3 text-lg"
           onClick={() => navigate(getDeleteAccountRoute(userType))}
         >
           <div className="flex items-center gap-3 text-[#F04438]">
-            <img alt="bambuu" src="/svgs/user-remove.svg" className="w-6 h-6" />
+            <img alt="bambuu" src="/svgs/user-remove.svg" className="h-6 w-6" />
             <span>{t("settings.deleteAccount")}</span>
           </div>
-          <ChevronLeft className="w-5 h-5 rotate-180 text-[#F04438]" />
+          <ChevronLeft className="h-5 w-5 rotate-180 text-[#F04438]" />
         </div>
       </div>
 
@@ -234,14 +230,14 @@ const AppTab = () => {
         isOpen={isLanguageModalOpen}
         onRequestClose={() => setIsLanguageModalOpen(false)}
         contentLabel="Language Selection Modal"
-        className="fixed w-full max-w-md p-6 transform -translate-x-1/2 -translate-y-1/2 bg-white outline-none font-urbanist top-1/2 left-1/2 rounded-3xl"
+        className="fixed left-1/2 top-1/2 w-full max-w-md -translate-x-1/2 -translate-y-1/2 transform rounded-3xl bg-white p-6 font-urbanist outline-none"
         overlayClassName="fixed inset-0 bg-black bg-opacity-50 z-[1000]"
       >
         <div className="flex flex-col items-center">
           <img
             alt="language"
             src="/svgs/translate.svg"
-            className="w-16 h-16 mb-4"
+            className="mb-4 h-16 w-16"
           />
           <h2 className="mb-2 text-2xl font-semibold">
             {t("settings.languageModal.title")}
@@ -250,33 +246,31 @@ const AppTab = () => {
             {t("settings.languageModal.description")}
           </p>
         </div>
-        <div className="flex flex-col items-start justify-start mb-6 space-y-3">
+        <div className="mb-6 flex flex-col items-start justify-start space-y-3">
           <button
             onClick={() => handleLanguageChange("en")}
-            className={`w-full px-3 py-2 text-black text-left rounded-full transition-colors
-              ${
-                user?.languagePreference === "en"
-                  ? "bg-[#FFBF00] border border-black"
-                  : "border border-gray-200 hover:bg-gray-50"
-              }`}
+            className={`w-full rounded-full px-3 py-2 text-left text-black transition-colors ${
+              user?.languagePreference === "en"
+                ? "border border-black bg-[#FFBF00]"
+                : "border border-gray-200 hover:bg-gray-50"
+            }`}
           >
             <span className="">{t("settings.languageModal.english")}</span>
           </button>
           <button
             onClick={() => handleLanguageChange("es")}
-            className={`w-full px-3 py-2 text-black text-left rounded-full transition-colors
-              ${
-                user?.languagePreference === "es"
-                  ? "bg-[#FFBF00] border border-black"
-                  : "border border-gray-200 hover:bg-gray-50"
-              }`}
+            className={`w-full rounded-full px-3 py-2 text-left text-black transition-colors ${
+              user?.languagePreference === "es"
+                ? "border border-black bg-[#FFBF00]"
+                : "border border-gray-200 hover:bg-gray-50"
+            }`}
           >
             <span className="">{t("settings.languageModal.spanish")}</span>
           </button>
         </div>
         <button
           onClick={() => setIsLanguageModalOpen(false)}
-          className="w-full py-3 font-medium border border-gray-300 rounded-full hover:bg-gray-50"
+          className="w-full rounded-full border border-gray-300 py-3 font-medium hover:bg-gray-50"
         >
           {t("settings.languageModal.cancel")}
         </button>
@@ -287,7 +281,7 @@ const AppTab = () => {
         isOpen={isDeleteUserModalOpen}
         onRequestClose={() => setIsDeleteModalOpen(false)}
         contentLabel="Delete Account Modal"
-        className="fixed w-full max-w-md p-6 transform -translate-x-1/2 -translate-y-1/2 bg-white outline-none font-urbanist top-1/2 left-1/2 rounded-3xl"
+        className="fixed left-1/2 top-1/2 w-full max-w-md -translate-x-1/2 -translate-y-1/2 transform rounded-3xl bg-white p-6 font-urbanist outline-none"
         overlayClassName="fixed inset-0 bg-black bg-opacity-50 z-[1000]"
       >
         <div className="flex flex-col items-center">
@@ -299,17 +293,16 @@ const AppTab = () => {
             {t("settings.deleteModal.description")}
           </p>
         </div>
-        <div className="flex flex-col items-start justify-start mb-6 space-y-3">
+        <div className="mb-6 flex flex-col items-start justify-start space-y-3">
           {feedbackOptions.map((option) => (
             <button
               key={option}
               onClick={() => setSelectedReason(option)}
-              className={`w-full px-3 py-2 text-left rounded-full transition-colors
-                ${
-                  selectedReason === option
-                    ? "bg-gray-100 border-2 border-gray-300"
-                    : "border border-gray-200 hover:bg-gray-50"
-                }`}
+              className={`w-full rounded-full px-3 py-2 text-left transition-colors ${
+                selectedReason === option
+                  ? "border-2 border-gray-300 bg-gray-100"
+                  : "border border-gray-200 hover:bg-gray-50"
+              }`}
             >
               <span className="text-gray-700">{option}</span>
             </button>
@@ -318,15 +311,15 @@ const AppTab = () => {
         <div className="flex flex-row gap-2">
           <button
             onClick={() => setIsDeleteModalOpen(false)}
-            className="w-full py-3 font-medium border border-gray-300 rounded-full hover:bg-gray-50"
+            className="w-full rounded-full border border-gray-300 py-3 font-medium hover:bg-gray-50"
           >
             {t("settings.deleteModal.cancel")}
           </button>
-          <button className="w-full py-3 font-medium text-white bg-red-500 rounded-full hover:bg-red-600">
+          <button className="w-full rounded-full bg-red-500 py-3 font-medium text-white hover:bg-red-600">
             {t("settings.deleteModal.confirm")}
           </button>
         </div>
-        <p className="mt-4 text-sm text-center text-gray-500">
+        <p className="mt-4 text-center text-sm text-gray-500">
           {t("settings.deleteModal.warning")}
         </p>
       </Modal>

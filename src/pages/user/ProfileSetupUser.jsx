@@ -18,41 +18,8 @@ const ProfileSetup = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { currentLanguage, changeLanguage } = useLanguage();
-
-  // Apply language from navigation state and ensure it's properly set
-  useEffect(() => {
-    // Check if language was passed in navigation state or use the one from localStorage
-    const languageToUse =
-      location.state?.language || localStorage.getItem("i18nextLng") || "en";
-
-    // Immediately apply the language to prevent flicker
-    if (currentLanguage !== languageToUse) {
-      changeLanguage(languageToUse);
-
-      // Additional measure to ensure language is applied
-      setTimeout(() => {
-        if (i18n.language !== languageToUse) {
-          i18n.changeLanguage(languageToUse);
-          document.documentElement.lang = languageToUse;
-        }
-      }, 50);
-    }
-
-    // Ensure language is explicitly saved to localStorage
-    localStorage.setItem("i18nextLng", languageToUse);
-  }, [location.state, changeLanguage, currentLanguage, i18n]);
-
-  // Handle language change with stronger persistence
-  const handleLanguageChange = (lang) => {
-    changeLanguage(lang);
-    // Ensure immediate language switching
-    i18n.changeLanguage(lang);
-    // Double ensure persistence
-    localStorage.setItem("i18nextLng", lang);
-    document.documentElement.lang = lang;
-  };
 
   useEffect(() => {
     const fetchTopContent = async () => {
@@ -63,7 +30,7 @@ const ProfileSetup = () => {
         const classesQuery = query(
           collection(db, "classes"),
           where("availableSpots", ">", 0), // Only filter by availableSpots
-          limit(3) // Limit the results
+          limit(3), // Limit the results
         );
         const classesSnapshot = await getDocs(classesQuery);
         const classesData = classesSnapshot.docs.map((doc) => ({
@@ -72,7 +39,7 @@ const ProfileSetup = () => {
         }));
 
         const filteredClasses = classesData.filter(
-          (cls) => !user?.enrolledClasses?.includes(cls.id)
+          (cls) => !user?.enrolledClasses?.includes(cls.id),
         );
         setClasses(filteredClasses);
 
@@ -80,7 +47,7 @@ const ProfileSetup = () => {
         const groupsQuery = query(
           collection(db, "groups"),
           where("isPremium", "==", false), // Only filter by isPremium
-          limit(3) // Limit the results
+          limit(3), // Limit the results
         );
 
         const groupsSnapshot = await getDocs(groupsQuery);
@@ -90,7 +57,7 @@ const ProfileSetup = () => {
         }));
 
         const filteredGroups = groupsData.filter(
-          (group) => !user?.joinedGroups?.includes(group.id)
+          (group) => !user?.joinedGroups?.includes(group.id),
         );
         setGroups(filteredGroups);
       } catch (error) {
@@ -128,9 +95,14 @@ const ProfileSetup = () => {
     }
   };
 
+  // Handle language change with context only
+  const handleLanguageChange = (lang) => {
+    changeLanguage(lang);
+  };
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="flex min-h-screen items-center justify-center bg-gray-100">
         <ClipLoader color="#14B82C" size={50} />
       </div>
     );
@@ -138,11 +110,11 @@ const ProfileSetup = () => {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-4 bg-gray-100">
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-gray-100">
         <p className="text-red-500">{error}</p>
         <button
           onClick={() => window.location.reload()}
-          className="px-4 py-2 text-base border border-[#5d5d5d] font-medium text-[#042f0c] bg-[#e6fde9] rounded-full hover:bg-[#ccfcd2]"
+          className="rounded-full border border-[#5d5d5d] bg-[#e6fde9] px-4 py-2 text-base font-medium text-[#042f0c] hover:bg-[#ccfcd2]"
         >
           Try Again
         </button>
@@ -151,31 +123,31 @@ const ProfileSetup = () => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100">
       {/* Language Selector */}
-      <div className="absolute top-4 right-4">
+      <div className="absolute right-4 top-4">
         <select
           value={currentLanguage}
           onChange={(e) => handleLanguageChange(e.target.value)}
-          className="px-2 py-1 text-sm border border-gray-200 rounded-full focus:outline-none focus:ring-1 focus:ring-green-500"
+          className="rounded-full border border-gray-200 px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-green-500"
         >
           <option value="en">English</option>
           <option value="es">Español</option>
         </select>
       </div>
 
-      <div className="w-full max-w-5xl px-4 py-8 mx-auto">
-        <h1 className="mb-2 text-4xl font-bold text-center">
+      <div className="mx-auto w-full max-w-5xl px-4 py-8">
+        <h1 className="mb-2 text-center text-4xl font-bold">
           {t("profileSetup.title", "Profile Setup")}
         </h1>
-        <p className="mb-8 text-xl text-center text-gray-600">
+        <p className="mb-8 text-center text-xl text-gray-600">
           {currentView === "groups"
             ? t("profileSetup.joinGroups", "Let's join a few groups below.")
             : t("profileSetup.bookClasses", "Let's book a few classes below.")}
         </p>
 
         {/* Grid of cards */}
-        <div className="grid grid-cols-1 gap-4 mb-4 md:grid-cols-3">
+        <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-3">
           {currentView === "groups" ? (
             groups.length > 0 ? (
               groups.map((group) => (
@@ -185,7 +157,7 @@ const ProfileSetup = () => {
               <div className="col-span-3 text-center text-gray-500">
                 {t(
                   "profileSetup.noGroups",
-                  "No groups available to join at the moment."
+                  "No groups available to join at the moment.",
                 )}
               </div>
             )
@@ -201,7 +173,7 @@ const ProfileSetup = () => {
             <div className="col-span-3 text-center text-gray-500">
               {t(
                 "profileSetup.noClasses",
-                "No classes available to book at the moment."
+                "No classes available to book at the moment.",
               )}
             </div>
           )}
@@ -211,30 +183,30 @@ const ProfileSetup = () => {
         <div
           className={`flex ${
             currentView === "groups" ? "justify-start" : "justify-center"
-          } mt-8 mb-4`}
+          } mb-4 mt-8`}
         >
           <div className="relative">
-            <div className="p-5 bg-[#042F0C] text-white rounded-2xl max-w-md">
+            <div className="max-w-md rounded-2xl bg-[#042F0C] p-5 text-white">
               <h3 className="mb-2 text-sm font-medium">
                 {currentView === "groups"
                   ? t(
                       "profileSetup.tooltips.joinGroups.title",
-                      "Join 1 or more language learning groups."
+                      "Join 1 or more language learning groups.",
                     )
                   : t(
                       "profileSetup.tooltips.bookClasses.title",
-                      "Book 1 or more classes."
+                      "Book 1 or more classes.",
                     )}
               </h3>
               <p className="mb-4 text-sm">
                 {currentView === "groups"
                   ? t(
                       "profileSetup.tooltips.joinGroups.description",
-                      "Description: Make the most out of bammbuu. Community language groups are free to create and join. They allow you to connect with native speakers to practice language through live conversation."
+                      "Description: Make the most out of bammbuu. Community language groups are free to create and join. They allow you to connect with native speakers to practice language through live conversation.",
                     )
                   : t(
                       "profileSetup.tooltips.bookClasses.description",
-                      "Book unlimited live group conversation classes hosted by certified language instructors for one monthly price. These classes are more structured and expert feedback is provided to help with your learning."
+                      "Book unlimited live group conversation classes hosted by certified language instructors for one monthly price. These classes are more structured and expert feedback is provided to help with your learning.",
                     )}
               </p>
               <div className="flex items-center justify-between">
@@ -246,7 +218,7 @@ const ProfileSetup = () => {
                 </button>
                 <button
                   onClick={handleNext}
-                  className="px-4 py-1 bg-white text-[#043D11] rounded-full hover:bg-opacity-90"
+                  className="rounded-full bg-white px-4 py-1 text-[#043D11] hover:bg-opacity-90"
                 >
                   {currentView === "groups"
                     ? t("profileSetup.buttons.nextStep", "Next (1/4)")
@@ -264,7 +236,7 @@ const ProfileSetup = () => {
                   : "translate-x-1/2"
               }`}
             >
-              <div className="w-0 h-0 border-l-8 border-r-8 border-b-8 border-transparent border-b-[#042F0C]" />
+              <div className="h-0 w-0 border-b-8 border-l-8 border-r-8 border-transparent border-b-[#042F0C]" />
             </div>
           </div>
         </div>

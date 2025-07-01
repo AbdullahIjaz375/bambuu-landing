@@ -40,28 +40,28 @@ const SignupSplash = () => {
       title: t("onboarding.screens.1.title", "Let's get Started!"),
       description: t(
         "onboarding.screens.1.description",
-        "Make the most out of bammbuu. Learn and practice languages through conversation. Read the following directions to learn how!"
+        "Make the most out of bammbuu. Learn and practice languages through conversation. Read the following directions to learn how!",
       ),
     },
     {
       title: t("onboarding.screens.2.title", ""),
       description: t(
         "onboarding.screens.2.description",
-        "Create or join a language learning group for free! Join live conversation classes to practice with native speakers."
+        "Create or join a language learning group for free! Join live conversation classes to practice with native speakers.",
       ),
     },
     {
       title: t("onboarding.screens.3.title", ""),
       description: t(
         "onboarding.screens.3.description",
-        "Join unlimited live group conversation classes hosted by certified language instructors for one monthly price. These classes are more structured and expert feedback is provided to help with your learning."
+        "Join unlimited live group conversation classes hosted by certified language instructors for one monthly price. These classes are more structured and expert feedback is provided to help with your learning.",
       ),
     },
     {
       title: t("onboarding.screens.4.title", ""),
       description: t(
         "onboarding.screens.4.description",
-        "Book live 1:1 language classes with certified instructors to bring your language learning to the next level. Practice 24/7 with our AI language SuperTutor."
+        "Book live 1:1 language classes with certified instructors to bring your language learning to the next level. Practice 24/7 with our AI language SuperTutor.",
       ),
     },
   ];
@@ -87,14 +87,14 @@ const SignupSplash = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen p-4 bg-[#dbdbdb]">
-      <div className="flex flex-col overflow-hidden bg-white shadow-md rounded-3xl">
+    <div className="flex min-h-screen items-center justify-center bg-[#dbdbdb] p-4">
+      <div className="flex flex-col overflow-hidden rounded-3xl bg-white shadow-md">
         {/* Language Selector */}
-        <div className="absolute top-4 right-4">
+        <div className="absolute right-4 top-4">
           <select
             value={currentLanguage}
-            onChange={(e) => handleLanguageChange(e.target.value)}
-            className="px-2 py-1 text-sm border border-gray-200 rounded-full focus:outline-none focus:ring-1 focus:ring-green-500"
+            onChange={(e) => changeLanguage(e.target.value)}
+            className="rounded-full border border-gray-200 px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-green-500"
           >
             <option value="en">English</option>
             <option value="es">Español</option>
@@ -108,16 +108,16 @@ const SignupSplash = () => {
 
         {/* Bottom half - interactive content */}
         <div className="flex flex-col items-center p-8">
-          <h2 className="mb-4 text-2xl font-bold text-center">
+          <h2 className="mb-4 text-center text-2xl font-bold">
             {screens[currentStep].title}
           </h2>
 
-          <p className="max-w-sm mb-8 text-center text-black">
+          <p className="mb-8 max-w-sm text-center text-black">
             {screens[currentStep].description}
           </p>
 
           {/* Progress dots */}
-          <div className="flex justify-center mb-8 space-x-2">
+          <div className="mb-8 flex justify-center space-x-2">
             {screens.map((_, index) => (
               <div
                 key={index}
@@ -129,17 +129,17 @@ const SignupSplash = () => {
           </div>
 
           {/* Navigation buttons */}
-          <div className="flex flex-row items-center w-full space-x-4">
+          <div className="flex w-full flex-row items-center space-x-4">
             <button
               onClick={handleSkip}
-              className="w-full py-2 border-[#042F0C] border text-[#042F0C] rounded-full"
+              className="w-full rounded-full border border-[#042F0C] py-2 text-[#042F0C]"
             >
               {t("onboarding.buttons.skip", "Skip")}
             </button>
 
             <button
               onClick={handleNext}
-              className="w-full py-2 font-medium text-[#042F0C] bg-[#14B82C] border-[#042F0C] border rounded-full"
+              className="w-full rounded-full border border-[#042F0C] bg-[#14B82C] py-2 font-medium text-[#042F0C]"
             >
               {currentStep === screens.length - 1
                 ? t("onboarding.buttons.getStarted", "Get Started")

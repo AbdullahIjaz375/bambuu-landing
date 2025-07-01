@@ -6,6 +6,7 @@ import { StreamChat } from "stream-chat";
 import { streamVideoClient, fetchChatToken } from "../config/stream";
 import i18n from "../i18n";
 import { checkAccess } from "../utils/accessControl";
+import { LanguageProvider } from "./LanguageContext";
 
 const AuthContext = createContext();
 const streamClient = StreamChat.getInstance(
@@ -19,20 +20,13 @@ export const AuthProvider = ({ children }) => {
   });
   const [loading, setLoading] = useState(true);
 
-  // Initialize language from session storage or user preferences
+  // On user change, update language from user preference using i18n directly
   useEffect(() => {
-    const initializeLanguage = () => {
-      const storedUser = sessionStorage.getItem("user");
-      if (storedUser) {
-        const userData = JSON.parse(storedUser);
-        if (userData?.languagePreference) {
-          i18n.changeLanguage(userData.languagePreference);
-        }
-      }
-    };
+    if (user && user.languagePreference) {
+      i18n.changeLanguage(user.languagePreference);
+    }
+  }, [user]);
 
-    initializeLanguage();
-  }, []);
   const connectStreamUser = async (userData) => {
     try {
       // Don't attempt to connect if there's no user data
@@ -130,12 +124,6 @@ export const AuthProvider = ({ children }) => {
           (docData.email ? docData.email.split("@")[0] : "User"),
         email: docData.email || "",
       };
-
-      // Set language when fetching latest data
-      if (userData.languagePreference) {
-        i18n.changeLanguage(userData.languagePreference);
-      }
-
       return userData;
     }
     return null;
@@ -158,12 +146,6 @@ export const AuthProvider = ({ children }) => {
             // Continue with existing userData if fetch fails
           }
         }
-
-        // Update language when updating user data
-        if (userData.languagePreference) {
-          i18n.changeLanguage(userData.languagePreference);
-        }
-
         // Update state and session storage
         setUser(userData);
         sessionStorage.setItem("user", JSON.stringify(userData));
@@ -181,20 +163,8 @@ export const AuthProvider = ({ children }) => {
         }
       } else {
         // User is logging out or null
-        const currentLanguage = i18n.language;
-
-        try {
-          await disconnectStreamUser();
-        } catch (disconnectError) {
-          console.error("Error disconnecting Stream user:", disconnectError);
-          // Continue with logout process even if Stream disconnect fails
-        }
-
         setUser(null);
         sessionStorage.clear();
-
-        // Update language when updating user data
-        i18n.changeLanguage(currentLanguage);
       }
     } catch (error) {
       console.error("Unexpected error in updateUserData:", error);
@@ -308,17 +278,19 @@ export const AuthProvider = ({ children }) => {
     : null;
 
   return (
-    <AuthContext.Provider
-      value={{
-        user: userWithAccess,
-        loading,
-        updateUserData,
-        setUser,
-        streamClient,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
+    <LanguageProvider user={user} setUser={setUser}>
+      <AuthContext.Provider
+        value={{
+          user: userWithAccess,
+          loading,
+          updateUserData,
+          setUser,
+          streamClient,
+        }}
+      >
+        {children}
+      </AuthContext.Provider>
+    </LanguageProvider>
   );
 };
 

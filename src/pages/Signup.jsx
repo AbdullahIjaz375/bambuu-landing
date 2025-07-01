@@ -23,8 +23,7 @@ import { COUNTRIES } from "../config/contries";
 import { LANGUAGES } from "../config/languages";
 import { TEACHINGLANGUAGES } from "../config/teachingLanguages";
 import { useTranslation } from "react-i18next";
-import { useLanguage } from "../context/LanguageContext"; // Import the language context
-import i18n from "../i18n";
+import { useLanguage } from "../context/LanguageContext";
 import MobileModal from "../components/MobileModal";
 import WebSubscriptionStep from "./user/WebSubscriptionStep";
 
@@ -51,7 +50,7 @@ const Signup = ({ onNext, onClose, isModal = false }) => {
   const [hasProfile, setHasProfile] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
   const appleProvider = new OAuthProvider("apple.com");
-  const { currentLanguage, changeLanguage } = useLanguage(); // Use the language context
+  const { currentLanguage, changeLanguage } = useLanguage();
   const { t } = useTranslation();
 
   const [profileData, setProfileData] = useState({
@@ -101,8 +100,6 @@ const Signup = ({ onNext, onClose, isModal = false }) => {
 
   const handleLanguageChange = (lang) => {
     changeLanguage(lang);
-    i18n.changeLanguage(lang);
-    localStorage.setItem("i18nextLng", lang);
     document.documentElement.lang = lang;
   };
 
@@ -210,15 +207,12 @@ const Signup = ({ onNext, onClose, isModal = false }) => {
       // Set app language based on the user's selection
       // If the user selects Spanish as native language, set the app language to Spanish
       const selectedNativeLanguage = profileData.nativeLanguage;
-      let appLanguageCode =
-        currentLanguage || localStorage.getItem("i18nextLng") || "en";
+      let appLanguageCode = localStorage.getItem("i18nextLng") || "en";
 
       // If native language is Spanish, set app language to Spanish
       if (selectedNativeLanguage === "Spanish") {
         appLanguageCode = "es";
         changeLanguage("es");
-        i18n.changeLanguage("es");
-        localStorage.setItem("i18nextLng", "es");
         document.documentElement.lang = "es";
       }
 
@@ -331,8 +325,7 @@ const Signup = ({ onNext, onClose, isModal = false }) => {
   };
 
   const handleSkip = () => {
-    const currentLanguageToUse =
-      currentLanguage || localStorage.getItem("i18nextLng") || "en";
+    const currentLanguageToUse = localStorage.getItem("i18nextLng") || "en";
     navigate("/learn", {
       replace: true,
       state: { language: currentLanguageToUse },
@@ -340,8 +333,7 @@ const Signup = ({ onNext, onClose, isModal = false }) => {
   };
 
   const handleOnboarding = () => {
-    const currentLanguageToUse =
-      currentLanguage || localStorage.getItem("i18nextLng") || "en";
+    const currentLanguageToUse = localStorage.getItem("i18nextLng") || "en";
     navigate("/onboarding", {
       replace: true,
       state: { language: currentLanguageToUse },
@@ -957,7 +949,7 @@ const Signup = ({ onNext, onClose, isModal = false }) => {
           <div className="mb-4 flex w-full justify-end">
             <select
               value={currentLanguage}
-              onChange={(e) => handleLanguageChange(e.target.value)}
+              onChange={(e) => changeLanguage(e.target.value)}
               className="rounded-full border border-gray-200 px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-green-500"
             >
               <option value="en">English</option>
@@ -1179,7 +1171,7 @@ const Signup = ({ onNext, onClose, isModal = false }) => {
           <div className="mb-4 flex justify-end">
             <select
               value={currentLanguage}
-              onChange={(e) => handleLanguageChange(e.target.value)}
+              onChange={(e) => changeLanguage(e.target.value)}
               className="rounded-full border border-gray-200 px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-green-500"
             >
               <option value="en">English</option>

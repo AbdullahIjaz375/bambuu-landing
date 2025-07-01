@@ -12,6 +12,7 @@ import { ClipLoader } from "react-spinners";
 import ExploreClassCard from "../../components/ExploreClassCard";
 import ExploreGroupCard from "../../components/ExploreGroupCard";
 import EmptyState from "../../components/EmptyState";
+import { useLanguage } from "../../context/LanguageContext";
 
 const LearnLanguageUser = () => {
   const [searchParams] = useSearchParams();
@@ -34,6 +35,8 @@ const LearnLanguageUser = () => {
   const [exploreGroups, setExploreGroups] = useState([]);
   const [loadingExplore, setLoadingExplore] = useState(true);
   const [errorExplore, setErrorExplore] = useState(null);
+
+  const { currentLanguage, changeLanguage } = useLanguage();
 
   // Fetch My Classes
   useEffect(() => {

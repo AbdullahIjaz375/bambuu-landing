@@ -310,23 +310,6 @@ const LearnUser = () => {
   }, [user]);
 
   useEffect(() => {
-    const languageToUse =
-      location.state?.language ||
-      localStorage.getItem("iwhite8nextLng") ||
-      "en";
-    if (i18n.language !== languageToUse || currentLanguage !== languageToUse) {
-      changeLanguage(languageToUse);
-      setTimeout(() => {
-        if (i18n.language !== languageToUse) {
-          i18n.changeLanguage(languageToUse);
-          document.documentElement.lang = languageToUse;
-        }
-      }, 50);
-    }
-    localStorage.setItem("i18nextLng", languageToUse);
-  }, [location.state, i18n, currentLanguage, changeLanguage]);
-
-  useEffect(() => {
     const fetchGroups = async () => {
       if (!user?.joinedGroups?.length) {
         setLoadingGroups(false);

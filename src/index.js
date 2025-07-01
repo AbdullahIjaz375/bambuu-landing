@@ -37,7 +37,7 @@ if ("serviceWorker" in navigator && "PushManager" in window) {
   window.addEventListener("load", async () => {
     try {
       const registration = await navigator.serviceWorker.register(
-        "/firebase-messaging-sw.js"
+        "/firebase-messaging-sw.js",
       );
     } catch (error) {
       console.error("ServiceWorker registration failed:", error);
@@ -55,5 +55,5 @@ ReactDOM.render(
       </MantineProvider>
     </AuthProvider>
   </React.StrictMode>,
-  document.getElementById("root")
+  document.getElementById("root"),
 );

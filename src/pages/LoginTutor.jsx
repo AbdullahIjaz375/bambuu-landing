@@ -19,7 +19,7 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { useTranslation } from "react-i18next";
-import i18n from "../i18n";
+import { useLanguage } from "../context/LanguageContext";
 
 // Helper: Update query string by setting a new ref value.
 const getUpdatedQuery = (locationSearch, newRef) => {
@@ -60,16 +60,12 @@ const LoginTutor = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { user, loading, updateUserData } = useAuth();
-  const [selectedLanguage, setSelectedLanguage] = useState(
-    localStorage.getItem("i18nextLng") || "en"
-  );
+  const { currentLanguage, changeLanguage } = useLanguage();
   const { t } = useTranslation();
 
   // Handle language change
   const handleLanguageChange = (lang) => {
-    setSelectedLanguage(lang);
-    i18n.changeLanguage(lang);
-    localStorage.setItem("i18nextLng", lang);
+    changeLanguage(lang);
   };
 
   // Helper: Redirect after login.
@@ -150,7 +146,7 @@ const LoginTutor = () => {
       const userCredential = await signInWithEmailAndPassword(
         auth,
         email,
-        password
+        password,
       );
       const user = userCredential.user;
       const tutorRef = doc(db, "tutors", user.uid);
@@ -237,21 +233,21 @@ const LoginTutor = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex min-h-screen items-center justify-center">
         <ClipLoader color="#14B82C" size={50} />
       </div>
     );
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50 ">
-      <div className="w-full max-w-md p-6 space-y-6 bg-white rounded-3xl border border-[#e7e7e7]">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <div className="w-full max-w-md space-y-6 rounded-3xl border border-[#e7e7e7] bg-white p-6">
         {/* Language Selector */}
         <div className="flex justify-end">
           <select
-            value={selectedLanguage}
-            onChange={(e) => handleLanguageChange(e.target.value)}
-            className="px-2 py-1 text-sm border border-gray-200 rounded-full focus:outline-none focus:ring-1 focus:ring-green-500"
+            value={currentLanguage}
+            onChange={(e) => changeLanguage(e.target.value)}
+            className="rounded-full border border-gray-200 px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-green-500"
           >
             <option value="en">English</option>
             <option value="es">Español</option>
@@ -285,20 +281,20 @@ const LoginTutor = () => {
                 value={email}
                 onChange={handleEmailChange}
                 placeholder={t("login.emailPlaceholder", "Enter your email")}
-                className={`w-full p-2 border rounded-3xl ${
+                className={`w-full rounded-3xl border p-2 ${
                   emailError
                     ? "border-red-500 focus:border-red-500"
                     : "border-gray-300 focus:border-green-500"
-                } focus:ring-0 focus:outline-none`}
+                } focus:outline-none focus:ring-0`}
                 required
               />
               {emailError && (
-                <div className="absolute transform -translate-y-1/2 right-3 top-1/2">
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 transform">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="currentColor"
-                    className="w-5 h-5 text-red-500"
+                    className="h-5 w-5 text-red-500"
                   >
                     <path
                       fillRule="evenodd"
@@ -327,19 +323,19 @@ const LoginTutor = () => {
                 onChange={handlePasswordChange}
                 placeholder={t(
                   "login.passwordPlaceholder",
-                  "Enter your password"
+                  "Enter your password",
                 )}
-                className={`w-full p-2 border rounded-3xl ${
+                className={`w-full rounded-3xl border p-2 ${
                   passwordError
                     ? "border-red-500 focus:border-red-500"
                     : "border-gray-300 focus:border-green-500"
-                } focus:ring-0 focus:outline-none`}
+                } focus:outline-none focus:ring-0`}
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute transform -translate-y-1/2 right-3 top-1/2"
+                className="absolute right-3 top-1/2 -translate-y-1/2 transform"
               >
                 {showPassword ? (
                   <svg
@@ -348,7 +344,7 @@ const LoginTutor = () => {
                     viewBox="0 0 24 24"
                     strokeWidth={1.5}
                     stroke="currentColor"
-                    className="w-5 h-5 text-gray-500"
+                    className="h-5 w-5 text-gray-500"
                   >
                     <path
                       strokeLinecap="round"
@@ -363,7 +359,7 @@ const LoginTutor = () => {
                     viewBox="0 0 24 24"
                     strokeWidth={1.5}
                     stroke="currentColor"
-                    className="w-5 h-5 text-gray-500"
+                    className="h-5 w-5 text-gray-500"
                   >
                     <path
                       strokeLinecap="round"
@@ -400,10 +396,10 @@ const LoginTutor = () => {
                 location.search.includes("ref=class")
                   ? "/login?ref=class"
                   : location.search.includes("ref=sub")
-                  ? "/login?ref=sub"
-                  : "/login"
+                    ? "/login?ref=sub"
+                    : "/login"
               }
-              className="text-[#14b82c] font-semibold"
+              className="font-semibold text-[#14b82c]"
             >
               {t("loginTutor.loginAsStudent", "Login as Student")}
             </Link>
@@ -412,8 +408,8 @@ const LoginTutor = () => {
           {/* Login Button */}
           <button
             type="submit"
-            className={`w-full py-3 rounded-full focus:outline-none border border-[#042F0C] text-[#042F0C] ${
-              email && password ? " bg-[#14B82C] " : " bg-[#b9f9c2]"
+            className={`w-full rounded-full border border-[#042F0C] py-3 text-[#042F0C] focus:outline-none ${
+              email && password ? "bg-[#14B82C]" : "bg-[#b9f9c2]"
             }`}
           >
             {t("login.loginButton", "Login")}

@@ -25,7 +25,7 @@ import {
 } from "firebase/firestore";
 import { getMessaging, getToken } from "firebase/messaging";
 import { useTranslation } from "react-i18next";
-import { useLanguage } from "../context/LanguageContext"; // Import the language context
+import { useLanguage } from "../context/LanguageContext";
 
 // Helper: Updates the current query string by replacing any existing "ref" value with the provided newRef.
 const getUpdatedQuery = (locationSearch, newRef) => {
@@ -71,13 +71,8 @@ const Login = () => {
   const [passwordError, setPasswordError] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { currentLanguage, changeLanguage } = useLanguage(); // Use the language context
+  const { currentLanguage, changeLanguage } = useLanguage();
   const { t } = useTranslation();
-
-  // Handle language change
-  const handleLanguageChange = (lang) => {
-    changeLanguage(lang);
-  };
 
   // Ensure that if a class URL was saved, the student login URL keeps ?ref=class.
   useEffect(() => {
@@ -727,7 +722,7 @@ const Login = () => {
         <div className="flex justify-end">
           <select
             value={currentLanguage}
-            onChange={(e) => handleLanguageChange(e.target.value)}
+            onChange={(e) => changeLanguage(e.target.value)}
             className="rounded-full border border-gray-200 px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-green-500"
           >
             <option value="en">English</option>
