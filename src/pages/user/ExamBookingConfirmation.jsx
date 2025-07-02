@@ -59,8 +59,14 @@ const ExamBookingConfirmation = ({
                   />
                   {selectedDate &&
                     (() => {
-                      const d = new Date(selectedDate + "T00:00:00");
+                      const [year, month, day] = selectedDate.split("-");
+                      const d = new Date(
+                        Number(year),
+                        Number(month) - 1,
+                        Number(day),
+                      );
                       return d.toLocaleDateString("en-GB", {
+                        weekday: "long",
                         day: "2-digit",
                         month: "short",
                         year: "numeric",

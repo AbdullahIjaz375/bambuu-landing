@@ -326,12 +326,20 @@ const ExamClassSlots = ({
               <h2 className="text-2xl/[100%] font-medium">
                 Choose times for{" "}
                 {currentDate &&
-                  new Date(currentDate).toLocaleDateString("en-GB", {
-                    weekday: "long",
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}
+                  (() => {
+                    const [year, month, day] = currentDate.split("-");
+                    const localDate = new Date(
+                      Number(year),
+                      Number(month) - 1,
+                      Number(day),
+                    );
+                    return localDate.toLocaleDateString("en-GB", {
+                      weekday: "long",
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    });
+                  })()}
               </h2>
               <button
                 className="relative flex h-10 w-10 items-center justify-center rounded-full border-none bg-[#F6F6F6] p-0 transition hover:bg-[#ededed]"

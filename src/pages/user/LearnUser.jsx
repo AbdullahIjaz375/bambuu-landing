@@ -404,27 +404,32 @@ const LearnUser = () => {
     if (!user?.uid) return;
     try {
       const status = await getStudentExamPrepTutorialStatus(user.uid);
+      console.log(
+        "[LearnUser] getStudentExamPrepTutorialStatus response:",
+        status,
+      );
       if (!status.hasPurchasedPlan) {
         navigate("/subscriptions?tab=exam");
         return;
       }
-
-      // If intro call not booked, show intro booking flow
-      if (!status.hasBookedIntroCall) {
-        setShowIntroBookingFlow(true);
+      // If user has completed intro call and booked exam prep class, do nothing (or redirect if needed)
+      if (status.hasBookedExamPrepClass && status.doneWithIntroCall) {
         return;
       }
-
-      // If intro call booked but not done, show intro booking flow
+      // If user has completed intro call but not booked exam prep class, show exam prep modal
+      if (status.doneWithIntroCall && !status.hasBookedExamPrepClass) {
+        setExamPrepBookingInitialStep(6);
+        setShowExamPrepBookingFlow(true);
+        return;
+      }
+      // If user has booked intro call but not completed it, show intro call modal
       if (status.hasBookedIntroCall && !status.doneWithIntroCall) {
         setShowIntroBookingFlow(true);
         return;
       }
-
-      // If intro call done but exam prep class not booked, show exam prep booking flow
-      if (status.doneWithIntroCall && !status.hasBookedExamPrepClass) {
-        setExamPrepBookingInitialStep(6);
-        setShowExamPrepBookingFlow(true);
+      // If user has not booked intro call, show intro call modal
+      if (!status.hasBookedIntroCall) {
+        setShowIntroBookingFlow(true);
         return;
       }
     } catch (err) {
@@ -482,6 +487,10 @@ const LearnUser = () => {
     const fetchStatus = async () => {
       try {
         const status = await getStudentExamPrepTutorialStatus(user.uid);
+        console.log(
+          "[LearnUser] fetchStatus getStudentExamPrepTutorialStatus response:",
+          status,
+        );
         setExamPrepStatus(status);
       } catch {
         setExamPrepStatus(null);
@@ -807,10 +816,8 @@ const LearnUser = () => {
           setShowExamPrepBookingFlow(false);
           setExamPrepBookingInitialStep(6); // Reset to initial step when modal is closed
         }}
-        user={{
-          ...user,
-          completedIntroCallTutorId: examPrepStatus?.completedIntroCallTutorId,
-        }}
+        user={user}
+        examPrepStatus={examPrepStatus}
         mode="exam"
         initialStep={examPrepBookingInitialStep}
         selectedInstructor={selectedInstructor}

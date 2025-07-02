@@ -223,19 +223,17 @@ export function getExamPrepPlanTimeline(studentId, token) {
 }
 
 export function getStudentExamPrepTutorialStatus(studentId, token) {
-  const functionName =
-    process.env.NODE_ENV === "production"
-      ? "getstudentexampreptutorialstatus"
-      : "getstudentexampreptutorialstatusdev";
-  return apiRequest(
-    `https://${functionName}-${API_BASE_URL}?studentId=${encodeURIComponent(
-      studentId,
-    )}`,
-    {
-      method: "GET",
-    },
+  const functionName = "getstudentexampreptutorialstatus";
+  const url = `https://${functionName}-${API_BASE_URL}?studentId=${encodeURIComponent(studentId)}`;
+  const options = {
+    method: "GET",
+  };
+  console.log("[examPrepApi] getStudentExamPrepTutorialStatus request:", {
+    url,
+    options,
     token,
-  );
+  });
+  return apiRequest(url, options, token);
 }
 
 export function getTutorProfile(tutorId, token) {

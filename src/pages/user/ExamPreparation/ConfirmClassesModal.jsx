@@ -50,11 +50,12 @@ const ConfirmClassesModal = ({
       if (Array.isArray(timesForDate)) {
         timesForDate.forEach((utcTime) => {
           // Format date as dd-mm-yy
-          const d = new Date(date);
-          const day = d.getDate().toString().padStart(2, "0");
-          const month = (d.getMonth() + 1).toString().padStart(2, "0");
-          const year = d.getFullYear().toString().slice(-2);
-          const formattedDate = `${day}-${month}-${year}`;
+          const [y, m, dStr] = date.split("-");
+          const dObj = new Date(Number(y), Number(m) - 1, Number(dStr));
+          const day = dObj.getDate().toString().padStart(2, "0");
+          const monthStr = (dObj.getMonth() + 1).toString().padStart(2, "0");
+          const yearStr = dObj.getFullYear().toString().slice(-2);
+          const formattedDate = `${day}-${monthStr}-${yearStr}`;
 
           const localTime = utcTime
             ? new Date(utcTime).toLocaleTimeString([], {
@@ -76,11 +77,12 @@ const ConfirmClassesModal = ({
       } else {
         // Handle legacy case where timesForDate is a single string
         const utcTime = timesForDate;
-        const d = new Date(date);
-        const day = d.getDate().toString().padStart(2, "0");
-        const month = (d.getMonth() + 1).toString().padStart(2, "0");
-        const year = d.getFullYear().toString().slice(-2);
-        const formattedDate = `${day}-${month}-${year}`;
+        const [y, m, dStr] = date.split("-");
+        const dObj = new Date(Number(y), Number(m) - 1, Number(dStr));
+        const day = dObj.getDate().toString().padStart(2, "0");
+        const monthStr = (dObj.getMonth() + 1).toString().padStart(2, "0");
+        const yearStr = dObj.getFullYear().toString().slice(-2);
+        const formattedDate = `${day}-${monthStr}-${yearStr}`;
 
         const localTime = utcTime
           ? new Date(utcTime).toLocaleTimeString([], {
