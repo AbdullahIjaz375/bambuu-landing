@@ -14,7 +14,6 @@ import { useTranslation } from "react-i18next";
 import { ClassContext } from "../../context/ClassContext";
 import UserAvatar from "../../utils/getAvatar";
 import ShowDescription from "../../components/ShowDescription";
-import { Calendar, Clock, Globe } from "lucide-react";
 Modal.setAppElement("#root");
 
 const ClassDetailsTutor = ({ onClose }) => {
@@ -176,11 +175,8 @@ const ClassDetailsTutor = ({ onClose }) => {
   const [showVideoCall, setShowVideoCall] = useState(false);
 
   const handleJoinClass = () => {
-    // setTutorSelectedClassId(classId);
-    // navigate(`/callTutor`, { state: { classId } });
-    // Open the new tab with the video call URL
-    const callUrl = `/callTutor`; // Update this URL as needed
-    // window.open(callUrl, "_blank");
+    setTutorSelectedClassId(classId);
+    navigate("/callTutor");
   };
 
   //-----------------------------------------------------------------------------------------------------------//
