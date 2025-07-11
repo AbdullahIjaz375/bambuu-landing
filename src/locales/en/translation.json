@@ -1102,5 +1102,63 @@
       "notice": "Package does not automatically renew. We recommend 2 months of this package to achieve best results.",
       "scheduleInfoCall": "Schedule an Informational Call"
     }
+  },
+  "signup": {
+    "title": "Sign Up",
+    "subtitle": "Let's create a new account!",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "createAccount": "Create Account",
+    "orContinueWith": "or continue with",
+    "google": "Google",
+    "apple": "Apple",
+    "termsConditions": "By signing up, you agree to our",
+    "terms": "Terms & Conditions",
+    "and": "and",
+    "privacyPolicy": "Privacy Policy",
+    "haveAccount": "Already have an account?",
+    "login": "Login",
+    "emailPlaceholder": "Enter your email",
+    "passwordPlaceholder": "Enter your password",
+    "confirmPasswordPlaceholder": "Re-enter your password",
+    "verification": {
+      "title": "Email Verification",
+      "message": "An email with verification link has been sent to",
+      "changeEmail": "Sign up with different email"
+    },
+    "profile": {
+      "title": "Complete Profile",
+      "subtitle": "Add your personal details to get started.",
+      "name": "Name",
+      "namePlaceholder": "Enter your name",
+      "nativeLanguage": "Native Language",
+      "selectNativeLanguage": "Select your native language",
+      "learningLanguage": "Learning Language",
+      "selectLearningLanguage": "Select language you want to learn",
+      "proficiency": "Your Proficiency in",
+      "country": "Country",
+      "selectCountry": "Select your country",
+      "ageVerification": "I confirm that I am at least 18 years old",
+      "ageWarning": "You must be at least 18 years old to use this application.",
+      "submit": "Submit",
+      "levels": {
+        "beginner": "Beginner",
+        "intermediate": "Intermediate",
+        "advanced": "Advanced"
+      }
+    },
+    "success": {
+      "title": "Account Created Successfully!",
+      "message": "Great! All set. You can book your first class and start learning.",
+      "skipNow": "Skip Now",
+      "startLearning": "Start Learning with bammbuu"
+    },
+    "successModal": {
+      "title": "Account Created Successfully!",
+      "description": "Great! All set. You can book your first class and start learning.",
+      "skipButton": "Skip Now",
+      "startLearningButton": "Start Learning with bammbuu"
+    }
   }
 }
