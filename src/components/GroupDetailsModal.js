@@ -56,7 +56,7 @@ const GroupDetailsModal = ({ group, onClose }) => {
             return classDoc.exists()
               ? { id: classDoc.id, ...classDoc.data() }
               : null;
-          })
+          }),
         );
         setClasses(classesData.filter(Boolean));
       }
@@ -71,7 +71,7 @@ const GroupDetailsModal = ({ group, onClose }) => {
             return userDoc.exists()
               ? { id: userDoc.id, ...userDoc.data() }
               : null;
-          })
+          }),
         );
         setMembers(membersData.filter(Boolean));
       }
@@ -106,7 +106,7 @@ const GroupDetailsModal = ({ group, onClose }) => {
 
       // Remove user from group's memberIds
       const updatedMemberIds = groupData.memberIds.filter(
-        (id) => id !== user.uid
+        (id) => id !== user.uid,
       );
       await updateDoc(groupRef, {
         memberIds: updatedMemberIds,
@@ -114,7 +114,7 @@ const GroupDetailsModal = ({ group, onClose }) => {
 
       // Remove group from user's joinedGroups
       const updatedJoinedGroups = (user.joinedGroups || []).filter(
-        (id) => id !== group.id
+        (id) => id !== group.id,
       );
 
       // Update user document
@@ -162,7 +162,7 @@ const GroupDetailsModal = ({ group, onClose }) => {
 
       // Remove user from group's memberIds
       const updatedMemberIds = groupData.memberIds.filter(
-        (id) => id !== userId
+        (id) => id !== userId,
       );
       await updateDoc(groupRef, {
         memberIds: updatedMemberIds,
@@ -172,7 +172,7 @@ const GroupDetailsModal = ({ group, onClose }) => {
       const userDoc = await getDoc(userRef);
       const userData = userDoc.data();
       const updatedJoinedGroups = (userData.joinedGroups || []).filter(
-        (id) => id !== group.id
+        (id) => id !== group.id,
       );
 
       // Update user document
@@ -182,7 +182,7 @@ const GroupDetailsModal = ({ group, onClose }) => {
 
       // Update local state
       setMembers((prevMembers) =>
-        prevMembers.filter((member) => member.id !== userId)
+        prevMembers.filter((member) => member.id !== userId),
       );
       setShowRemoveConfirmation(false);
       setSelectedUser(null);
@@ -262,7 +262,7 @@ const GroupDetailsModal = ({ group, onClose }) => {
       if (classImage) {
         const imageRef = ref(
           storage,
-          `classes/${Date.now()}_${classImage.name}`
+          `classes/${Date.now()}_${classImage.name}`,
         );
         await uploadBytes(imageRef, classImage);
         imageUrl = await getDownloadURL(imageRef);
@@ -441,7 +441,7 @@ const GroupDetailsModal = ({ group, onClose }) => {
   const renderClasses = () => {
     if (classes.length === 0) {
       return (
-        <div className="flex items-center justify-center h-64">
+        <div className="flex h-64 items-center justify-center">
           <p className="text-gray-500">No classes available</p>
         </div>
       );
@@ -452,44 +452,44 @@ const GroupDetailsModal = ({ group, onClose }) => {
         {classes.map((classItem) => (
           <div
             key={classItem.id}
-            className="max-w-md "
+            className="max-w-md"
             // onClick={() => handleCardClick(classItem)}
             role="button"
             tabIndex={0}
           >
-            <div className="flex flex-col items-center justify-center border border-[#14b82c] bg-white rounded-3xl p-1">
+            <div className="flex flex-col items-center justify-center rounded-3xl border border-[#14b82c] bg-white p-1">
               <div className="relative w-full">
                 <img
                   src={classItem.imageUrl || "/images/panda.png"}
                   alt={classItem.className}
-                  className="object-cover w-full h-28 rounded-t-2xl"
+                  className="h-28 w-full rounded-t-2xl object-cover"
                 />
                 {classItem.isBammbuu && (
                   <img
                     src="/images/panda.png"
                     alt="Bammbuu+"
-                    className="absolute w-16 h-4 top-1 left-1"
+                    className="absolute left-1 top-1 h-4 w-16"
                   />
                 )}
               </div>
 
-              <div className="w-full space-y-1 bg-[#c3f3c9] rounded-b-3xl p-2">
+              <div className="w-full space-y-1 rounded-b-3xl bg-[#c3f3c9] p-2">
                 <div className="flex items-start justify-between">
-                  <span className="px-2  text-xs bg-[#14b82c] text-white rounded-full">
+                  <span className="rounded-full bg-[#14b82c] px-2 text-xs text-white">
                     {classItem.isPhysical ? "Physical" : "Online"}
                   </span>
                   {classItem.recurrenceType && (
-                    <span className="px-2  text-xs bg-[#14b82c] text-white rounded-full">
+                    <span className="rounded-full bg-[#14b82c] px-2 text-xs text-white">
                       {classItem.recurrenceType}
                     </span>
                   )}
                 </div>
                 <div className="flex flex-row items-center justify-between">
-                  <h2 className="font-bold text-gray-800 text-md">
+                  <h2 className="text-md font-bold text-gray-800">
                     {classItem.className}
                   </h2>
 
-                  <span className="px-2 text-xs bg-[#fff885] rounded-full">
+                  <span className="rounded-full bg-[#fff885] px-2 text-xs">
                     {classItem.languageLevel}
                   </span>
                 </div>
@@ -504,32 +504,32 @@ const GroupDetailsModal = ({ group, onClose }) => {
                 </div>
               </div>
 
-              <div className="flex flex-col items-center justify-center w-full p-2 space-y-2">
-                <div className="flex flex-row items-center justify-between w-full">
+              <div className="flex w-full flex-col items-center justify-center space-y-2 p-2">
+                <div className="flex w-full flex-row items-center justify-between">
                   <div className="flex flex-row items-center justify-center space-x-2">
-                    <Clock className="w-3 h-3 text-gray-600" />
-                    <span className="text-[#454545] text-xs">
+                    <Clock className="h-3 w-3 text-gray-600" />
+                    <span className="text-xs text-[#454545]">
                       {formatTime(classItem.classDateTime)} (
                       {classItem.classDuration} min)
                     </span>
                   </div>
                   <div className="flex flex-row items-center justify-center space-x-2">
-                    <Calendar className="w-3 h-3 text-gray-600" />
-                    <span className="text-[#454545] text-xs">
+                    <Calendar className="h-3 w-3 text-gray-600" />
+                    <span className="text-xs text-[#454545]">
                       {formatDate(classItem.classDateTime)}
                     </span>
                   </div>
                 </div>
-                <div className="flex flex-row items-center justify-between w-full">
+                <div className="flex w-full flex-row items-center justify-between">
                   <div className="flex flex-row items-center justify-center space-x-2">
-                    <User className="w-3 h-3 text-gray-600" />
-                    <span className="text-[#454545] text-xs">
+                    <User className="h-3 w-3 text-gray-600" />
+                    <span className="text-xs text-[#454545]">
                       {classItem.teacherName || "TBD"}
                     </span>
                   </div>
                   <div className="flex flex-row items-center justify-center space-x-2">
-                    <Users className="w-3 h-3 text-gray-600" />
-                    <span className="text-[#454545] text-xs">
+                    <Users className="h-3 w-3 text-gray-600" />
+                    <span className="text-xs text-[#454545]">
                       {classItem.classMemberIds?.length || 0}/
                       {classItem.maxStudents || 100}
                     </span>
@@ -547,7 +547,7 @@ const GroupDetailsModal = ({ group, onClose }) => {
   const renderMembers = () => {
     if (members.length === 0) {
       return (
-        <div className="flex items-center justify-center h-64">
+        <div className="flex h-64 items-center justify-center">
           <p className="text-gray-500">No members available</p>
         </div>
       );
@@ -558,17 +558,17 @@ const GroupDetailsModal = ({ group, onClose }) => {
         {members.map((member) => (
           <div
             key={member.id}
-            className="flex items-center justify-between px-4 py-3 border-b border-gray-100 hover:bg-gray-50"
+            className="flex items-center justify-between border-b border-gray-100 px-4 py-3 hover:bg-gray-50"
           >
             <div className="flex items-center gap-3">
               <div className="relative">
                 <img
                   src={member.photoUrl || "/images/panda.png"}
                   alt={member.name}
-                  className="object-cover rounded-full w-9 h-9"
+                  className="h-9 w-9 rounded-full object-cover"
                 />
                 {member.id === group.groupAdminId && (
-                  <div className="absolute flex items-center justify-center w-4 h-4 bg-yellow-400 rounded-full -top-1 -right-1">
+                  <div className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-yellow-400">
                     <span className="text-xs text-black">★</span>
                   </div>
                 )}
@@ -589,7 +589,7 @@ const GroupDetailsModal = ({ group, onClose }) => {
                     setSelectedUser(member);
                     setShowRemoveConfirmation(true);
                   }}
-                  className="px-3 py-1 text-xs text-red-500 border border-red-500 rounded-full hover:bg-red-50"
+                  className="rounded-full border border-red-500 px-3 py-1 text-xs text-red-500 hover:bg-red-50"
                 >
                   Remove
                 </button>
@@ -603,12 +603,12 @@ const GroupDetailsModal = ({ group, onClose }) => {
   return (
     <>
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-        <div className="w-full max-w-6xl p-6 mx-4 bg-white rounded-3xl">
-          <div className="flex items-center justify-between mb-6">
+        <div className="mx-4 w-full max-w-6xl rounded-3xl bg-white p-6">
+          <div className="mb-6 flex items-center justify-between">
             <h2 className="text-2xl font-semibold">Group Details</h2>
             <button
               onClick={onClose}
-              className="p-2 rounded-full hover:bg-gray-100"
+              className="rounded-full p-2 hover:bg-gray-100"
             >
               <X size={24} />
             </button>
@@ -616,34 +616,34 @@ const GroupDetailsModal = ({ group, onClose }) => {
 
           <div className="flex gap-6">
             {/* Left sidebar */}
-            <div className="w-1/3 p-6 bg-[#fffef0] rounded-2xl">
+            <div className="w-1/3 rounded-2xl bg-[#fffef0] p-6">
               <div className="flex flex-col items-center text-center">
                 <img
                   src={group.imageUrl}
                   alt={group.groupName}
-                  className="w-32 h-32 mb-4 rounded-full"
+                  className="mb-4 h-32 w-32 rounded-full"
                 />
                 <h3 className="mb-2 text-2xl font-medium">{group.groupName}</h3>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="px-3 py-1 text-sm bg-yellow-200 rounded-full">
+                <div className="mb-2 flex items-center gap-2">
+                  <span className="rounded-full bg-yellow-200 px-3 py-1 text-sm">
                     {group.groupLearningLanguage}
                   </span>
-                  <span className="px-3 py-1 text-sm bg-yellow-200 rounded-full">
+                  <span className="rounded-full bg-yellow-200 px-3 py-1 text-sm">
                     Advanced
                   </span>
                 </div>
-                <div className="flex items-center gap-2 mb-4">
+                <div className="mb-4 flex items-center gap-2">
                   <User />
                   <span className="text-sm">
                     {group.groupAdminName} (Admin)
                   </span>
                 </div>
                 <p className="mb-6 text-gray-600">{group.groupDescription}</p>
-                <button className="w-full px-4 py-2 mb-2 text-black border border-gray-300 rounded-full">
+                <button className="mb-2 w-full rounded-full border border-gray-300 px-4 py-2 text-black">
                   View Group Chat
                 </button>
                 <button
-                  className="w-full px-4 py-2 text-red-500 border border-red-500 rounded-full"
+                  className="w-full rounded-full border border-red-500 px-4 py-2 text-red-500"
                   onClick={() => setShowLeaveConfirmation(true)}
                 >
                   Leave Group
@@ -653,10 +653,10 @@ const GroupDetailsModal = ({ group, onClose }) => {
 
             {/* Main content */}
             <div className="flex-1">
-              <div className="flex flex-row items-center justify-between mb-6">
-                <div className="flex gap-2 ">
+              <div className="mb-6 flex flex-row items-center justify-between">
+                <div className="flex gap-2">
                   <button
-                    className={`px-6 py-2 rounded-full ${
+                    className={`rounded-full px-6 py-2 ${
                       activeTab === "Classes"
                         ? "bg-yellow-400 text-black"
                         : "bg-white text-black"
@@ -666,7 +666,7 @@ const GroupDetailsModal = ({ group, onClose }) => {
                     Classes
                   </button>
                   <button
-                    className={`px-6 py-2 rounded-full ${
+                    className={`rounded-full px-6 py-2 ${
                       activeTab === "Members"
                         ? "bg-yellow-400 text-black"
                         : "bg-white text-black"
@@ -677,18 +677,18 @@ const GroupDetailsModal = ({ group, onClose }) => {
                   </button>
                 </div>
                 <button
-                  className="bg-[#14b82c] border border-[#19291c] text-[#19291c] px-6 py-2 rounded-full"
+                  className="rounded-full border border-[#19291c] bg-[#14b82c] px-6 py-2 text-[#19291c]"
                   onClick={handleAddClassButtonClick}
                 >
                   + Create New Class
                 </button>
               </div>
               {loading ? (
-                <div className="flex items-center justify-center h-64">
+                <div className="flex h-64 items-center justify-center">
                   <ClipLoader color="#FFB800" size={40} />
                 </div>
               ) : (
-                <div className="overflow-y-auto max-h-[600px]">
+                <div className="max-h-[600px] overflow-y-auto">
                   {activeTab === "Classes" ? renderClasses() : renderMembers()}
                 </div>
               )}
@@ -700,11 +700,11 @@ const GroupDetailsModal = ({ group, onClose }) => {
       <Modal
         isOpen={isAddClassModalOpen}
         onRequestClose={() => setAddClassModalOpen(false)}
-        className="w-[1000px] p-8 mx-auto bg-white rounded-3xl outline-none font-urbanist"
+        className="mx-auto w-[1000px] rounded-3xl bg-white p-8 font-urbanist outline-none"
         overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
       >
         <div className="relative">
-          <div className="flex items-center justify-between mb-6">
+          <div className="mb-6 flex items-center justify-between">
             <h2 className="text-2xl font-medium">Create New Class</h2>
             <button
               onClick={() => setAddClassModalOpen(false)}
@@ -715,16 +715,16 @@ const GroupDetailsModal = ({ group, onClose }) => {
           </div>
 
           {/* Image Upload */}
-          <div className="flex justify-start mb-8">
+          <div className="mb-8 flex justify-start">
             <div
-              className="relative flex items-center justify-center border border-gray-300 border-dashed rounded-full cursor-pointer w-28 h-28 bg-gray-50"
+              className="relative flex h-28 w-28 cursor-pointer items-center justify-center rounded-full border border-dashed border-gray-300 bg-gray-50"
               onClick={() => document.getElementById("classImage").click()}
             >
               {classPreviewImage ? (
                 <img
                   src={classPreviewImage}
                   alt="Preview"
-                  className="object-cover w-full h-full rounded-full"
+                  className="h-full w-full rounded-full object-cover"
                 />
               ) : (
                 <Camera size={24} className="text-gray-400" />
@@ -754,7 +754,7 @@ const GroupDetailsModal = ({ group, onClose }) => {
                   onChange={(e) =>
                     handleClassDataChange("className", e.target.value)
                   }
-                  className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                  className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:border-gray-300 focus:outline-none"
                 />
               </div>
 
@@ -763,12 +763,12 @@ const GroupDetailsModal = ({ group, onClose }) => {
                 <label className="text-sm font-medium text-gray-700">
                   Class Language
                 </label>
-                <div className="flex gap-2 mt-1">
+                <div className="mt-1 flex gap-2">
                   <button
                     onClick={() => handleClassDataChange("language", "English")}
-                    className={`px-4 py-2 rounded-full text-sm ${
+                    className={`rounded-full px-4 py-2 text-sm ${
                       classData.language === "English"
-                        ? "bg-yellow-400 border border-yellow-500"
+                        ? "border border-yellow-500 bg-yellow-400"
                         : "border border-gray-200"
                     }`}
                   >
@@ -776,9 +776,9 @@ const GroupDetailsModal = ({ group, onClose }) => {
                   </button>
                   <button
                     onClick={() => handleClassDataChange("language", "Spanish")}
-                    className={`px-4 py-2 rounded-full text-sm ${
+                    className={`rounded-full px-4 py-2 text-sm ${
                       classData.language === "Spanish"
-                        ? "bg-yellow-400 border border-yellow-500"
+                        ? "border border-yellow-500 bg-yellow-400"
                         : "border border-gray-200"
                     }`}
                   >
@@ -788,12 +788,12 @@ const GroupDetailsModal = ({ group, onClose }) => {
                     onClick={() =>
                       handleClassDataChange(
                         "language",
-                        "English-Spanish Exchange"
+                        "English-Spanish Exchange",
                       )
                     }
-                    className={`px-4 py-2 rounded-full text-sm ${
+                    className={`rounded-full px-4 py-2 text-sm ${
                       classData.language === "English-Spanish Exchange"
-                        ? "bg-yellow-400 border border-yellow-500"
+                        ? "border border-yellow-500 bg-yellow-400"
                         : "border border-gray-200"
                     }`}
                   >
@@ -813,9 +813,9 @@ const GroupDetailsModal = ({ group, onClose }) => {
                 onChange={(e) =>
                   handleClassDataChange("classDescription", e.target.value)
                 }
-                maxLength={400}
+                maxLength={200}
                 rows={3}
-                className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:border-gray-300 focus:outline-none"
               />
             </div>
             <div className="flex flex-row items-start justify-between space-x-4">
@@ -824,16 +824,16 @@ const GroupDetailsModal = ({ group, onClose }) => {
                 <label className="text-sm font-medium text-gray-700">
                   Class Level
                 </label>
-                <div className="flex gap-2 mt-1">
+                <div className="mt-1 flex gap-2">
                   {["Beginner", "Intermediate", "Advanced"].map((level) => (
                     <button
                       key={level}
                       onClick={() =>
                         handleClassDataChange("languageLevel", level)
                       }
-                      className={`px-4 py-2 rounded-full text-sm ${
+                      className={`rounded-full px-4 py-2 text-sm ${
                         classData.languageLevel === level
-                          ? "bg-yellow-400 border border-yellow-500"
+                          ? "border border-yellow-500 bg-yellow-400"
                           : "border border-gray-200"
                       }`}
                     >
@@ -848,7 +848,7 @@ const GroupDetailsModal = ({ group, onClose }) => {
                 <label className="text-sm font-medium text-gray-700">
                   Class Type
                 </label>
-                <div className="flex flex-wrap gap-2 mt-1">
+                <div className="mt-1 flex flex-wrap gap-2">
                   {[
                     "One-time",
                     "Daily",
@@ -861,9 +861,9 @@ const GroupDetailsModal = ({ group, onClose }) => {
                       onClick={() =>
                         handleClassDataChange("recurrenceType", type)
                       }
-                      className={`px-4 py-2 rounded-full text-sm ${
+                      className={`rounded-full px-4 py-2 text-sm ${
                         classData.recurrenceType === type
-                          ? "bg-yellow-400 border border-yellow-500"
+                          ? "border border-yellow-500 bg-yellow-400"
                           : "border border-gray-200"
                       }`}
                     >
@@ -879,12 +879,12 @@ const GroupDetailsModal = ({ group, onClose }) => {
                 <label className="text-sm font-medium text-gray-700">
                   Class Location
                 </label>
-                <div className="flex gap-2 mt-1">
+                <div className="mt-1 flex gap-2">
                   <button
                     onClick={() => handleClassDataChange("physicalClass", true)}
-                    className={`px-4 py-2 rounded-full text-sm ${
+                    className={`rounded-full px-4 py-2 text-sm ${
                       classData.physicalClass
-                        ? "bg-yellow-400 border border-yellow-500"
+                        ? "border border-yellow-500 bg-yellow-400"
                         : "border border-gray-200"
                     }`}
                   >
@@ -894,9 +894,9 @@ const GroupDetailsModal = ({ group, onClose }) => {
                     onClick={() =>
                       handleClassDataChange("physicalClass", false)
                     }
-                    className={`px-4 py-2 rounded-full text-sm ${
+                    className={`rounded-full px-4 py-2 text-sm ${
                       !classData.physicalClass
-                        ? "bg-yellow-400 border border-yellow-500"
+                        ? "border border-yellow-500 bg-yellow-400"
                         : "border border-gray-200"
                     }`}
                   >
@@ -917,7 +917,7 @@ const GroupDetailsModal = ({ group, onClose }) => {
                     onChange={(e) =>
                       handleClassDataChange("classAddress", e.target.value)
                     }
-                    className="mt-2 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                    className="mt-2 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:border-gray-300 focus:outline-none"
                   />
                 </div>
               )}
@@ -936,10 +936,10 @@ const GroupDetailsModal = ({ group, onClose }) => {
                   onChange={(e) =>
                     handleClassDataChange(
                       "availableSpots",
-                      parseInt(e.target.value)
+                      parseInt(e.target.value),
                     )
                   }
-                  className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                  className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:border-gray-300 focus:outline-none"
                 />
               </div>
 
@@ -948,16 +948,16 @@ const GroupDetailsModal = ({ group, onClose }) => {
                 <label className="text-sm font-medium text-gray-700">
                   Class Duration
                 </label>
-                <div className="flex gap-2 mt-1">
+                <div className="mt-1 flex gap-2">
                   {[30, 60].map((duration) => (
                     <button
                       key={duration}
                       onClick={() =>
                         handleClassDataChange("classDuration", duration)
                       }
-                      className={`px-4 py-2 rounded-full text-sm ${
+                      className={`rounded-full px-4 py-2 text-sm ${
                         classData.classDuration === duration
-                          ? "bg-yellow-400 border border-yellow-500"
+                          ? "border border-yellow-500 bg-yellow-400"
                           : "border border-gray-200"
                       }`}
                     >
@@ -979,7 +979,7 @@ const GroupDetailsModal = ({ group, onClose }) => {
                   onChange={(e) =>
                     handleClassDataChange("classDateTime", e.target.value)
                   }
-                  className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                  className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:border-gray-300 focus:outline-none"
                 />
               </div>
               <div>
@@ -988,7 +988,7 @@ const GroupDetailsModal = ({ group, onClose }) => {
                 </label>
                 <input
                   type="time"
-                  className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                  className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:border-gray-300 focus:outline-none"
                 />
               </div>
             </div>
@@ -997,17 +997,17 @@ const GroupDetailsModal = ({ group, onClose }) => {
             <div className="flex justify-between pt-4">
               <button
                 onClick={() => setAddClassModalOpen(false)}
-                className="px-8 py-2.5 border border-gray-200 rounded-full text-sm font-medium"
+                className="rounded-full border border-gray-200 px-8 py-2.5 text-sm font-medium"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSaveClass}
                 disabled={!isFormValid || isCreating}
-                className={`px-8 py-2.5 rounded-full text-sm font-medium min-w-[120px] flex items-center justify-center ${
+                className={`flex min-w-[120px] items-center justify-center rounded-full px-8 py-2.5 text-sm font-medium ${
                   isFormValid && !isCreating
-                    ? "bg-[#a6fab6] border border-[#042f0c] cursor-pointer hover:bg-[#95e1a4]"
-                    : "bg-gray-200 border border-gray-300 cursor-not-allowed"
+                    ? "cursor-pointer border border-[#042f0c] bg-[#a6fab6] hover:bg-[#95e1a4]"
+                    : "cursor-not-allowed border border-gray-300 bg-gray-200"
                 }`}
               >
                 {isCreating ? "Creating..." : "Create Class"}
@@ -1020,7 +1020,7 @@ const GroupDetailsModal = ({ group, onClose }) => {
       <Modal
         isOpen={showLeaveConfirmation}
         onRequestClose={() => setShowLeaveConfirmation(false)}
-        className="z-50 max-w-sm p-6 mx-auto mt-40 bg-white outline-none rounded-3xl font-urbanist"
+        className="z-50 mx-auto mt-40 max-w-sm rounded-3xl bg-white p-6 font-urbanist outline-none"
         overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
         style={{
           overlay: {
@@ -1041,13 +1041,13 @@ const GroupDetailsModal = ({ group, onClose }) => {
           </h2>
           <div className="flex flex-row gap-2">
             <button
-              className="w-full py-2 font-medium border border-gray-300 rounded-full hover:bg-gray-50"
+              className="w-full rounded-full border border-gray-300 py-2 font-medium hover:bg-gray-50"
               onClick={() => setShowLeaveConfirmation(false)}
             >
               No, Cancel
             </button>
             <button
-              className="w-full py-2 font-medium text-black bg-[#ff4d4d] rounded-full hover:bg-[#ff3333] border border-[#8b0000]"
+              className="w-full rounded-full border border-[#8b0000] bg-[#ff4d4d] py-2 font-medium text-black hover:bg-[#ff3333]"
               onClick={handleLeaveGroup}
             >
               {isLeaving ? "Leaving..." : "Yes, Leave"}
@@ -1059,7 +1059,7 @@ const GroupDetailsModal = ({ group, onClose }) => {
       <Modal
         isOpen={showRemoveConfirmation}
         onRequestClose={() => setShowRemoveConfirmation(false)}
-        className="z-50 max-w-sm p-6 mx-auto mt-40 bg-white outline-none rounded-3xl font-urbanist"
+        className="z-50 mx-auto mt-40 max-w-sm rounded-3xl bg-white p-6 font-urbanist outline-none"
         overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
         style={{
           overlay: {
@@ -1084,13 +1084,13 @@ const GroupDetailsModal = ({ group, onClose }) => {
           </p>
           <div className="flex flex-row gap-2">
             <button
-              className="w-full py-2 font-medium border border-gray-300 rounded-full hover:bg-gray-50"
+              className="w-full rounded-full border border-gray-300 py-2 font-medium hover:bg-gray-50"
               onClick={() => setShowRemoveConfirmation(false)}
             >
               Cancel
             </button>
             <button
-              className="w-full py-2 font-medium text-black bg-[#ff4d4d] rounded-full hover:bg-[#ff3333] border border-[#8b0000]"
+              className="w-full rounded-full border border-[#8b0000] bg-[#ff4d4d] py-2 font-medium text-black hover:bg-[#ff3333]"
               onClick={() => handleRemoveUser(selectedUser.id)}
               disabled={isRemoving}
             >

@@ -206,11 +206,11 @@ const ExamPreparationTutor = () => {
 
   return (
     <div className="flex h-screen bg-white">
-      <div className="h-full w-64 flex-shrink-0">
+      <div className="h-full w-[272px] flex-shrink-0 p-4">
         <Sidebar user={user} />
       </div>
-      <div className="m-2 flex-1 overflow-auto rounded-3xl border-2 border-[#e7e7e7] bg-white px-6 pt-4">
-        <div className="sticky top-0 z-10 bg-white">
+      <div className="min-w-[calc(100% - 272px)] h-[calc(100vh-0px)] flex-1 overflow-x-auto p-4 pl-0">
+        <div className="h-[calc(100vh-32px)] overflow-y-auto rounded-3xl border border-[#e7e7e7] bg-white p-[16px]">
           <div className="mb-6 flex items-center justify-between border-b pb-4">
             <div className="flex items-center gap-4">
               <h1 className="text-4xl font-medium">{t("exam-prep.title")}</h1>
@@ -260,7 +260,7 @@ const ExamPreparationTutor = () => {
           </div>
           <div className="relative mt-2 w-full">
             {loading ? (
-              <div className="flex flex-1 items-center justify-center">
+              <div className="flex h-[400px] w-full items-center justify-center">
                 <ClipLoader color="#FFB800" size={40} />
               </div>
             ) : (

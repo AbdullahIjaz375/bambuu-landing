@@ -108,7 +108,7 @@ const GroupDetailsTutor = ({ onClose }) => {
             return classDoc.exists()
               ? { id: classDoc.id, ...classDoc.data() }
               : null;
-          })
+          }),
         );
         setClasses(classesData.filter(Boolean));
       }
@@ -123,7 +123,7 @@ const GroupDetailsTutor = ({ onClose }) => {
             return userDoc.exists()
               ? { id: userDoc.id, ...userDoc.data() }
               : null;
-          })
+          }),
         );
         setMembers(membersData.filter(Boolean));
       }
@@ -158,7 +158,7 @@ const GroupDetailsTutor = ({ onClose }) => {
 
       // Remove user from group's memberIds
       const updatedMemberIds = groupData.memberIds.filter(
-        (id) => id !== user.uid
+        (id) => id !== user.uid,
       );
       await updateDoc(groupRef, {
         memberIds: updatedMemberIds,
@@ -166,7 +166,7 @@ const GroupDetailsTutor = ({ onClose }) => {
 
       // Remove group from user's joinedGroups
       const updatedJoinedGroups = (user.joinedGroups || []).filter(
-        (id) => id !== group.id
+        (id) => id !== group.id,
       );
 
       // Update user document
@@ -214,7 +214,7 @@ const GroupDetailsTutor = ({ onClose }) => {
 
       // Remove user from group's memberIds
       const updatedMemberIds = groupData.memberIds.filter(
-        (id) => id !== userId
+        (id) => id !== userId,
       );
       await updateDoc(groupRef, {
         memberIds: updatedMemberIds,
@@ -224,7 +224,7 @@ const GroupDetailsTutor = ({ onClose }) => {
       const userDoc = await getDoc(userRef);
       const userData = userDoc.data();
       const updatedJoinedGroups = (userData.joinedGroups || []).filter(
-        (id) => id !== group.id
+        (id) => id !== group.id,
       );
 
       // Update user document
@@ -234,7 +234,7 @@ const GroupDetailsTutor = ({ onClose }) => {
 
       // Update local state
       setMembers((prevMembers) =>
-        prevMembers.filter((member) => member.id !== userId)
+        prevMembers.filter((member) => member.id !== userId),
       );
       setShowRemoveConfirmation(false);
       setSelectedUser(null);
@@ -325,7 +325,7 @@ const GroupDetailsTutor = ({ onClose }) => {
       if (classImage) {
         const imageRef = ref(
           storage,
-          `classes/${classId}/image_${Date.now()}_${classImage.name}`
+          `classes/${classId}/image_${Date.now()}_${classImage.name}`,
         );
         await uploadBytes(imageRef, classImage);
         imageUrl = await getDownloadURL(imageRef);
@@ -350,7 +350,7 @@ const GroupDetailsTutor = ({ onClose }) => {
         dateValue.getMonth(),
         dateValue.getDate(),
         dateValue.getHours(),
-        dateValue.getMinutes()
+        dateValue.getMinutes(),
       );
 
       const newClass = {
@@ -498,7 +498,7 @@ const GroupDetailsTutor = ({ onClose }) => {
                 if (memberData) {
                   await updateDoc(memberRef, {
                     enrolledClasses: (memberData.enrolledClasses || []).filter(
-                      (id) => id !== classId
+                      (id) => id !== classId,
                     ),
                     // Remove tutorStudentIds relationship if exists
                     // tutorStudentIds: (memberData.tutorStudentIds || []).filter(
@@ -506,7 +506,7 @@ const GroupDetailsTutor = ({ onClose }) => {
                     // ),
                   });
                 }
-              })
+              }),
             );
           }
 
@@ -519,10 +519,10 @@ const GroupDetailsTutor = ({ onClose }) => {
             if (userType === "tutor") {
               await updateDoc(adminRef, {
                 tutorOfClasses: (adminData.tutorOfClasses || []).filter(
-                  (id) => id !== classId
+                  (id) => id !== classId,
                 ),
                 enrolledClasses: (adminData.enrolledClasses || []).filter(
-                  (id) => id !== classId
+                  (id) => id !== classId,
                 ),
                 // Update tutorStudentIds
                 // tutorStudentIds: (adminData.tutorStudentIds || []).filter(
@@ -532,10 +532,10 @@ const GroupDetailsTutor = ({ onClose }) => {
             } else {
               await updateDoc(adminRef, {
                 adminOfClasses: (adminData.adminOfClasses || []).filter(
-                  (id) => id !== classId
+                  (id) => id !== classId,
                 ),
                 enrolledClasses: (adminData.enrolledClasses || []).filter(
-                  (id) => id !== classId
+                  (id) => id !== classId,
                 ),
               });
             }
@@ -543,7 +543,7 @@ const GroupDetailsTutor = ({ onClose }) => {
 
           // Delete class document
           await deleteDoc(classRef);
-        })
+        }),
       );
 
       // 2. Update group members
@@ -557,11 +557,11 @@ const GroupDetailsTutor = ({ onClose }) => {
             if (memberData) {
               await updateDoc(memberRef, {
                 joinedGroups: (memberData.joinedGroups || []).filter(
-                  (id) => id !== group.id
+                  (id) => id !== group.id,
                 ),
               });
             }
-          })
+          }),
         );
       }
 
@@ -575,18 +575,18 @@ const GroupDetailsTutor = ({ onClose }) => {
           userType === "tutor"
             ? {
                 tutorOfGroups: (adminData.tutorOfGroups || []).filter(
-                  (id) => id !== group.id
+                  (id) => id !== group.id,
                 ),
                 joinedGroups: (adminData.joinedGroups || []).filter(
-                  (id) => id !== group.id
+                  (id) => id !== group.id,
                 ),
               }
             : {
                 adminOfGroups: (adminData.adminOfGroups || []).filter(
-                  (id) => id !== group.id
+                  (id) => id !== group.id,
                 ),
                 joinedGroups: (adminData.joinedGroups || []).filter(
-                  (id) => id !== group.id
+                  (id) => id !== group.id,
                 ),
               };
         await updateDoc(adminRef, updateData);
@@ -599,29 +599,29 @@ const GroupDetailsTutor = ({ onClose }) => {
       const updatedUser = JSON.parse(sessionStorage.getItem("user"));
       if (userType === "tutor") {
         updatedUser.tutorOfGroups = (updatedUser.tutorOfGroups || []).filter(
-          (id) => id !== group.id
+          (id) => id !== group.id,
         );
         updatedUser.tutorOfClasses = (updatedUser.tutorOfClasses || []).filter(
-          (id) => !group.classIds?.includes(id)
+          (id) => !group.classIds?.includes(id),
         );
         updatedUser.enrolledClasses = (
           updatedUser.enrolledClasses || []
         ).filter((id) => !group.classIds?.includes(id));
         updatedUser.joinedGroups = (updatedUser.joinedGroups || []).filter(
-          (id) => id !== group.id
+          (id) => id !== group.id,
         );
       } else {
         updatedUser.adminOfGroups = (updatedUser.adminOfGroups || []).filter(
-          (id) => id !== group.id
+          (id) => id !== group.id,
         );
         updatedUser.adminOfClasses = (updatedUser.adminOfClasses || []).filter(
-          (id) => !group.classIds?.includes(id)
+          (id) => !group.classIds?.includes(id),
         );
         updatedUser.enrolledClasses = (
           updatedUser.enrolledClasses || []
         ).filter((id) => !group.classIds?.includes(id));
         updatedUser.joinedGroups = (updatedUser.joinedGroups || []).filter(
-          (id) => id !== group.id
+          (id) => id !== group.id,
         );
       }
       sessionStorage.setItem("user", JSON.stringify(updatedUser));
@@ -645,7 +645,7 @@ const GroupDetailsTutor = ({ onClose }) => {
   const renderClasses = () => {
     if (classes.length === 0) {
       return (
-        <div className="flex items-center justify-center h-96">
+        <div className="flex h-96 items-center justify-center">
           <EmptyState
             message={t("group-details-tutor.empty-states.no-classes")}
           />
@@ -689,7 +689,7 @@ const GroupDetailsTutor = ({ onClose }) => {
   const renderMembers = () => {
     if (members.length === 0) {
       return (
-        <div className="flex items-center justify-center h-96">
+        <div className="flex h-96 items-center justify-center">
           <EmptyState
             message={t("group-details-tutor.empty-states.no-members")}
           />
@@ -702,17 +702,17 @@ const GroupDetailsTutor = ({ onClose }) => {
         {members.map((member) => (
           <div
             key={member.id}
-            className="flex items-center justify-between px-4 py-3 border border-gray-200 hover:bg-gray-50 rounded-3xl"
+            className="flex items-center justify-between rounded-3xl border border-gray-200 px-4 py-3 hover:bg-gray-50"
           >
             <div className="flex items-center gap-3">
               <div className="relative">
                 <img
                   src={member.photoUrl || "/images/panda.png"}
                   alt={member.name}
-                  className="object-cover rounded-full w-9 h-9"
+                  className="h-9 w-9 rounded-full object-cover"
                 />
                 {member.id === group.groupAdminId && (
-                  <div className="absolute flex items-center justify-center w-4 h-4 bg-yellow-400 rounded-full -top-1 -right-1">
+                  <div className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-yellow-400">
                     <span className="text-xs text-black">★</span>
                   </div>
                 )}
@@ -736,7 +736,7 @@ const GroupDetailsTutor = ({ onClose }) => {
                     setSelectedUser(member);
                     setShowRemoveConfirmation(true);
                   }}
-                  className="px-3 py-1 text-xs text-red-500 border border-red-500 rounded-full hover:bg-red-50"
+                  className="rounded-full border border-red-500 px-3 py-1 text-xs text-red-500 hover:bg-red-50"
                 >
                   {t("group-details-tutor.actions.remove-member")}
                 </button>
@@ -749,8 +749,8 @@ const GroupDetailsTutor = ({ onClose }) => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-[100vh] ">
-        <div className="p-8 bg-white rounded-lg">
+      <div className="flex h-[100vh] items-center justify-center">
+        <div className="rounded-lg bg-white p-8">
           <ClipLoader color="#FFB800" size={40} />
         </div>
       </div>
@@ -760,11 +760,11 @@ const GroupDetailsTutor = ({ onClose }) => {
   if (error) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-        <div className="p-8 bg-white rounded-lg">
+        <div className="rounded-lg bg-white p-8">
           <p className="mb-4 text-red-500">{error}</p>
           <button
             onClick={onClose}
-            className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
+            className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
           >
             {t("group-details-tutor.error.close")}
           </button>
@@ -780,12 +780,12 @@ const GroupDetailsTutor = ({ onClose }) => {
   return (
     <>
       <div className="flex min-h-screen">
-        <div className="flex flex-1 m-6 border rounded-3xl">
-          <div className="flex flex-col w-full p-6 mx-4 bg-white rounded-3xl">
-            <div className="flex items-center justify-between pb-4 mb-6 border-b">
+        <div className="m-6 flex flex-1 rounded-3xl border">
+          <div className="mx-4 flex w-full flex-col rounded-3xl bg-white p-6">
+            <div className="mb-6 flex items-center justify-between border-b pb-4">
               <div className="flex items-center gap-4">
                 <button
-                  className="p-3 bg-gray-100 rounded-full"
+                  className="rounded-full bg-gray-100 p-3"
                   onClick={handleBack}
                 >
                   <ArrowLeft size="30" />
@@ -796,33 +796,33 @@ const GroupDetailsTutor = ({ onClose }) => {
               </div>
             </div>
 
-            <div className="flex flex-1 min-h-0 gap-6">
+            <div className="flex min-h-0 flex-1 gap-6">
               {/* Left sidebar */}
               <div
-                className={`w-1/4 p-6 rounded-3xl ${
+                className={`w-1/4 rounded-3xl p-6 ${
                   group.isPremium ? "bg-[#e6fce8]" : "bg-[#ffffea]"
                 }`}
               >
                 {" "}
-                <div className="flex flex-col items-center justify-between h-full text-center">
+                <div className="flex h-full flex-col items-center justify-between text-center">
                   <div className="flex flex-col items-center text-center">
                     <img
                       src={group.imageUrl}
                       alt={group.groupName}
-                      className="object-cover w-32 h-32 mb-4 rounded-full"
+                      className="mb-4 h-32 w-32 rounded-full object-cover"
                     />
                     <h3 className="mb-2 text-2xl font-medium">
                       {group.groupName}
                     </h3>
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="mb-2 flex items-center gap-2">
                       <div className="flex flex-row items-center space-x-1">
                         <img
                           src={
                             group.language === "English"
                               ? "/svgs/xs-us.svg"
                               : group.language === "Spanish"
-                              ? "/svgs/xs-spain.svg"
-                              : "/svgs/eng-spanish-xs.svg"
+                                ? "/svgs/xs-spain.svg"
+                                : "/svgs/eng-spanish-xs.svg"
                           }
                           alt={
                             group.language === "English"
@@ -831,24 +831,24 @@ const GroupDetailsTutor = ({ onClose }) => {
                           }
                           className="w-5"
                         />{" "}
-                        <span className=" text-md">
+                        <span className="text-md">
                           {group.groupLearningLanguage}
                         </span>
                       </div>
                     </div>
-                    <div className="flex flex-row items-center mt-2 space-x-40">
-                      <div className="flex items-center gap-1 mb-4">
+                    <div className="mt-2 flex flex-row items-center space-x-40">
+                      <div className="mb-4 flex items-center gap-1">
                         <img
                           src={group.groupAdminImageUrl}
                           alt="admin"
-                          className="w-6 h-6 rounded-full"
+                          className="h-6 w-6 rounded-full"
                         />{" "}
                         <span className="text-sm text-gray-800">
                           {group.groupAdminName} (
                           {t("group-details-tutor.member-status.admin")})
                         </span>
                       </div>
-                      <div className="flex items-center gap-1 mb-4">
+                      <div className="mb-4 flex items-center gap-1">
                         <img alt="bammbuu" src="/svgs/users.svg" />{" "}
                         <span className="text-sm text-gray-800">
                           {" "}
@@ -857,20 +857,20 @@ const GroupDetailsTutor = ({ onClose }) => {
                       </div>
                     </div>
                     <p className="mb-6 text-gray-600">
-                      <ShowDescription 
-                       description={group.groupDescription} 
-                       maxHeight={100}
-                       />
+                      <ShowDescription
+                        description={group.groupDescription}
+                        maxHeight={100}
+                      />
                     </p>
                   </div>
 
                   <div className="w-full">
                     {" "}
                     <button
-                      className={`w-full px-4 py-2 mb-2 text-black border  rounded-full ${
+                      className={`mb-2 w-full rounded-full border px-4 py-2 text-black ${
                         group.isPremium
-                          ? "bg-[#bffcc4] border-[#0a0d0b]"
-                          : "bg-[#ffffea] border-gray-300"
+                          ? "border-[#0a0d0b] bg-[#bffcc4]"
+                          : "border-gray-300 bg-[#ffffea]"
                       }`}
                     >
                       {t("group-details-tutor.actions.view-chat")}
@@ -878,13 +878,13 @@ const GroupDetailsTutor = ({ onClose }) => {
                     {user.uid === group.groupAdminId ? (
                       <>
                         <button
-                          className="w-full px-4 py-2 mb-2 text-black bg-white border border-black rounded-full"
+                          className="mb-2 w-full rounded-full border border-black bg-white px-4 py-2 text-black"
                           onClick={() => navigate(`/editGroupTutor/${groupId}`)}
                         >
                           {t("group-details-tutor.actions.edit-details")}
                         </button>
                         <button
-                          className="w-full px-4 py-2 text-red-500 border border-red-500 rounded-full"
+                          className="w-full rounded-full border border-red-500 px-4 py-2 text-red-500"
                           onClick={() => setShowDeleteConfirmation(true)}
                         >
                           {t("group-details-tutor.actions.delete-group")}
@@ -892,7 +892,7 @@ const GroupDetailsTutor = ({ onClose }) => {
                       </>
                     ) : (
                       <button
-                        className="w-full px-4 py-2 text-red-500 border border-red-500 rounded-full"
+                        className="w-full rounded-full border border-red-500 px-4 py-2 text-red-500"
                         onClick={() => setShowLeaveConfirmation(true)}
                       >
                         {t("group-details-tutor.actions.leave-group")}
@@ -903,13 +903,13 @@ const GroupDetailsTutor = ({ onClose }) => {
               </div>
 
               {/* Main content */}
-              <div className="flex flex-col flex-1 min-h-0">
+              <div className="flex min-h-0 flex-1 flex-col">
                 {/* Previous code remains the same until the buttons section */}
-                <div className="flex flex-row items-center justify-between mb-6">
+                <div className="mb-6 flex flex-row items-center justify-between">
                   <div className="flex justify-center">
-                    <div className="relative inline-flex p-1 bg-gray-100 border border-gray-300 rounded-full">
+                    <div className="relative inline-flex rounded-full border border-gray-300 bg-gray-100 p-1">
                       <div
-                        className="absolute top-0 left-0 h-full bg-[#FFBF00] border border-[#042F0C] rounded-full transition-all duration-300 ease-in-out"
+                        className="absolute left-0 top-0 h-full rounded-full border border-[#042F0C] bg-[#FFBF00] transition-all duration-300 ease-in-out"
                         style={{
                           transform: `translateX(${
                             activeTab === "Classes" ? "0" : "100%"
@@ -919,13 +919,13 @@ const GroupDetailsTutor = ({ onClose }) => {
                       />
                       <button
                         onClick={() => setActiveTab("Classes")}
-                        className="relative z-10 px-4 sm:px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap"
+                        className="text-md relative z-10 whitespace-nowrap rounded-full px-4 py-2 font-medium text-[#042F0C] transition-colors sm:px-6"
                       >
                         {t("group-details-tutor.tabs.classes")}
                       </button>
                       <button
                         onClick={() => setActiveTab("Members")}
-                        className="relative z-10 px-4 sm:px-6 py-2 rounded-full text-[#042F0C] text-md font-medium transition-colors whitespace-nowrap"
+                        className="text-md relative z-10 whitespace-nowrap rounded-full px-4 py-2 font-medium text-[#042F0C] transition-colors sm:px-6"
                       >
                         {t("group-details-tutor.tabs.members")}
                       </button>
@@ -934,7 +934,7 @@ const GroupDetailsTutor = ({ onClose }) => {
 
                   {user.uid === group.groupAdminId && (
                     <button
-                      className="bg-[#14b82c] border border-[#19291c] text-[#19291c] px-6 py-2 rounded-full"
+                      className="rounded-full border border-[#19291c] bg-[#14b82c] px-6 py-2 text-[#19291c]"
                       onClick={handleAddClassButtonClick}
                     >
                       + {t("group-details-tutor.actions.create-class")}
@@ -942,7 +942,7 @@ const GroupDetailsTutor = ({ onClose }) => {
                   )}
                 </div>
                 {loading ? (
-                  <div className="flex items-center justify-center flex-1">
+                  <div className="flex flex-1 items-center justify-center">
                     <ClipLoader color="#FFB800" size={40} />
                   </div>
                 ) : (
@@ -961,11 +961,11 @@ const GroupDetailsTutor = ({ onClose }) => {
       <Modal
         isOpen={isAddClassModalOpen}
         onRequestClose={() => setAddClassModalOpen(false)}
-        className="w-[1000px] p-8 mx-auto bg-white rounded-3xl outline-none font-urbanist"
+        className="mx-auto w-[1000px] rounded-3xl bg-white p-8 font-urbanist outline-none"
         overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
       >
         <div className="relative">
-          <div className="flex items-center justify-between mb-6">
+          <div className="mb-6 flex items-center justify-between">
             <h2 className="text-2xl font-medium">Create New Class</h2>
             <button
               onClick={() => setAddClassModalOpen(false)}
@@ -976,16 +976,16 @@ const GroupDetailsTutor = ({ onClose }) => {
           </div>
 
           {/* Image Upload */}
-          <div className="flex justify-start mb-8">
+          <div className="mb-8 flex justify-start">
             <div
-              className="relative flex items-center justify-center border border-gray-300 border-dashed rounded-full cursor-pointer w-28 h-28 bg-gray-50"
+              className="relative flex h-28 w-28 cursor-pointer items-center justify-center rounded-full border border-dashed border-gray-300 bg-gray-50"
               onClick={() => document.getElementById("classImage").click()}
             >
               {classPreviewImage ? (
                 <img
                   src={classPreviewImage}
                   alt="Preview"
-                  className="object-cover w-full h-full rounded-full"
+                  className="h-full w-full rounded-full object-cover"
                 />
               ) : (
                 <Camera size={24} className="text-gray-400" />
@@ -1015,7 +1015,7 @@ const GroupDetailsTutor = ({ onClose }) => {
                   onChange={(e) =>
                     handleClassDataChange("className", e.target.value)
                   }
-                  className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
+                  className="w-full rounded-3xl border border-gray-300 p-2 focus:border-[#14B82C] focus:outline-none focus:ring-0"
                 />
               </div>
 
@@ -1024,12 +1024,12 @@ const GroupDetailsTutor = ({ onClose }) => {
                 <label className="text-sm font-medium text-gray-700">
                   Class Language
                 </label>
-                <div className="flex gap-2 mt-1">
+                <div className="mt-1 flex gap-2">
                   <button
                     onClick={() => handleClassDataChange("language", "English")}
-                    className={`px-4 py-2 rounded-full text-sm ${
+                    className={`rounded-full px-4 py-2 text-sm ${
                       classData.language === "English"
-                        ? "bg-yellow-400 border border-yellow-500"
+                        ? "border border-yellow-500 bg-yellow-400"
                         : "border border-gray-200"
                     }`}
                   >
@@ -1037,9 +1037,9 @@ const GroupDetailsTutor = ({ onClose }) => {
                   </button>
                   <button
                     onClick={() => handleClassDataChange("language", "Spanish")}
-                    className={`px-4 py-2 rounded-full text-sm ${
+                    className={`rounded-full px-4 py-2 text-sm ${
                       classData.language === "Spanish"
-                        ? "bg-yellow-400 border border-yellow-500"
+                        ? "border border-yellow-500 bg-yellow-400"
                         : "border border-gray-200"
                     }`}
                   >
@@ -1049,12 +1049,12 @@ const GroupDetailsTutor = ({ onClose }) => {
                     onClick={() =>
                       handleClassDataChange(
                         "language",
-                        "English-Spanish Exchange"
+                        "English-Spanish Exchange",
                       )
                     }
-                    className={`px-4 py-2 rounded-full text-sm ${
+                    className={`rounded-full px-4 py-2 text-sm ${
                       classData.language === "English-Spanish Exchange"
-                        ? "bg-yellow-400 border border-yellow-500"
+                        ? "border border-yellow-500 bg-yellow-400"
                         : "border border-gray-200"
                     }`}
                   >
@@ -1074,9 +1074,9 @@ const GroupDetailsTutor = ({ onClose }) => {
                 onChange={(e) =>
                   handleClassDataChange("classDescription", e.target.value)
                 }
-                maxLength={400}
+                maxLength={200}
                 rows={3}
-                className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
+                className="w-full resize-none rounded-3xl border border-gray-300 p-2 focus:border-[#14B82C] focus:outline-none focus:ring-0"
               />
             </div>
             <div className="flex flex-row items-start justify-between space-x-4">
@@ -1085,16 +1085,16 @@ const GroupDetailsTutor = ({ onClose }) => {
                 <label className="text-sm font-medium text-gray-700">
                   Class Level
                 </label>
-                <div className="flex gap-2 mt-1">
+                <div className="mt-1 flex gap-2">
                   {["Beginner", "Intermediate", "Advanced"].map((level) => (
                     <button
                       key={level}
                       onClick={() =>
                         handleClassDataChange("languageLevel", level)
                       }
-                      className={`px-4 py-2 rounded-full text-sm ${
+                      className={`rounded-full px-4 py-2 text-sm ${
                         classData.languageLevel === level
-                          ? "bg-yellow-400 border border-yellow-500"
+                          ? "border border-yellow-500 bg-yellow-400"
                           : "border border-gray-200"
                       }`}
                     >
@@ -1109,16 +1109,16 @@ const GroupDetailsTutor = ({ onClose }) => {
                 <label className="text-sm font-medium text-gray-700">
                   Class Type
                 </label>
-                <div className="flex flex-wrap gap-2 mt-1">
+                <div className="mt-1 flex flex-wrap gap-2">
                   {["One-time", "Daily", "Weekly", "Monthly"].map((type) => (
                     <button
                       key={type}
                       onClick={() =>
                         handleClassDataChange("selectedRecurrenceType", type)
                       }
-                      className={`px-4 py-2 rounded-full text-sm ${
+                      className={`rounded-full px-4 py-2 text-sm ${
                         classData.selectedRecurrenceType === type
-                          ? "bg-yellow-400 border border-yellow-500"
+                          ? "border border-yellow-500 bg-yellow-400"
                           : "border border-gray-200"
                       }`}
                     >
@@ -1135,14 +1135,14 @@ const GroupDetailsTutor = ({ onClose }) => {
                   <label className="text-sm font-medium text-gray-700">
                     Class Location
                   </label>
-                  <div className="flex gap-2 mt-1">
+                  <div className="mt-1 flex gap-2">
                     <button
                       onClick={() =>
                         handleClassDataChange("classLocation", "Physical")
                       }
-                      className={`px-4 py-2 rounded-full text-sm ${
+                      className={`rounded-full px-4 py-2 text-sm ${
                         classData.classLocation === "Physical"
-                          ? "bg-yellow-400 border border-yellow-500"
+                          ? "border border-yellow-500 bg-yellow-400"
                           : "border border-gray-200"
                       }`}
                     >
@@ -1152,9 +1152,9 @@ const GroupDetailsTutor = ({ onClose }) => {
                       onClick={() =>
                         handleClassDataChange("classLocation", "Virtual")
                       }
-                      className={`px-4 py-2 rounded-full text-sm ${
+                      className={`rounded-full px-4 py-2 text-sm ${
                         classData.classLocation === "Virtual"
-                          ? "bg-yellow-400 border border-yellow-500"
+                          ? "border border-yellow-500 bg-yellow-400"
                           : "border border-gray-200"
                       }`}
                     >
@@ -1175,7 +1175,7 @@ const GroupDetailsTutor = ({ onClose }) => {
                       onChange={(e) =>
                         handleClassDataChange("classAddress", e.target.value)
                       }
-                      className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
+                      className="w-full rounded-3xl border border-gray-300 p-2 focus:border-[#14B82C] focus:outline-none focus:ring-0"
                     />
                   </div>
                 )}
@@ -1209,16 +1209,16 @@ const GroupDetailsTutor = ({ onClose }) => {
                 <label className="text-sm font-medium text-gray-700">
                   Class Duration
                 </label>
-                <div className="flex gap-2 mt-1">
+                <div className="mt-1 flex gap-2">
                   {[30, 60].map((duration) => (
                     <button
                       key={duration}
                       onClick={() =>
                         handleClassDataChange("classDuration", duration)
                       }
-                      className={`px-4 py-2 rounded-full text-sm ${
+                      className={`rounded-full px-4 py-2 text-sm ${
                         classData.classDuration === duration
-                          ? "bg-yellow-400 border border-yellow-500"
+                          ? "border border-yellow-500 bg-yellow-400"
                           : "border border-gray-200"
                       }`}
                     >
@@ -1250,7 +1250,7 @@ const GroupDetailsTutor = ({ onClose }) => {
                 <input
                   type="date"
                   value={formatToYYYYMMDD(classData.classDateTime)}
-                  className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
+                  className="w-full rounded-3xl border border-gray-300 p-2 focus:border-[#14B82C] focus:outline-none focus:ring-0"
                   onChange={(e) => {
                     // parse the user input as local, not UTC
                     const [year, month, day] = e.target.value
@@ -1260,7 +1260,7 @@ const GroupDetailsTutor = ({ onClose }) => {
                     // preserve the time from the existing Date if you want
                     newLocalDate.setHours(classData.classDateTime.getHours());
                     newLocalDate.setMinutes(
-                      classData.classDateTime.getMinutes()
+                      classData.classDateTime.getMinutes(),
                     );
 
                     setClassData((prev) => ({
@@ -1276,7 +1276,7 @@ const GroupDetailsTutor = ({ onClose }) => {
                 </label>
                 <input
                   type="time"
-                  className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
+                  className="w-full rounded-3xl border border-gray-300 p-2 focus:border-[#14B82C] focus:outline-none focus:ring-0"
                 />
               </div>
             </div>
@@ -1285,17 +1285,17 @@ const GroupDetailsTutor = ({ onClose }) => {
             <div className="flex justify-between pt-4">
               <button
                 onClick={() => setAddClassModalOpen(false)}
-                className="px-8 py-2.5 border border-gray-200 rounded-full text-sm font-medium"
+                className="rounded-full border border-gray-200 px-8 py-2.5 text-sm font-medium"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSaveClass}
                 disabled={!isFormValid || isCreating}
-                className={`px-8 py-2.5 rounded-full text-sm font-medium min-w-[120px] flex items-center justify-center ${
+                className={`flex min-w-[120px] items-center justify-center rounded-full px-8 py-2.5 text-sm font-medium ${
                   isFormValid && !isCreating
-                    ? "bg-[#a6fab6] border border-[#042f0c] cursor-pointer hover:bg-[#95e1a4]"
-                    : "bg-gray-200 border border-gray-300 cursor-not-allowed"
+                    ? "cursor-pointer border border-[#042f0c] bg-[#a6fab6] hover:bg-[#95e1a4]"
+                    : "cursor-not-allowed border border-gray-300 bg-gray-200"
                 }`}
               >
                 {isCreating ? "Creating..." : "Create Class"}
@@ -1308,7 +1308,7 @@ const GroupDetailsTutor = ({ onClose }) => {
       <Modal
         isOpen={showLeaveConfirmation}
         onRequestClose={() => setShowLeaveConfirmation(false)}
-        className="z-50 max-w-sm p-6 mx-auto mt-40 bg-white outline-none rounded-3xl font-urbanist"
+        className="z-50 mx-auto mt-40 max-w-sm rounded-3xl bg-white p-6 font-urbanist outline-none"
         overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
         style={{
           overlay: {
@@ -1329,13 +1329,13 @@ const GroupDetailsTutor = ({ onClose }) => {
           </h2>
           <div className="flex flex-row gap-2">
             <button
-              className="w-full py-2 font-medium border border-gray-300 rounded-full hover:bg-gray-50"
+              className="w-full rounded-full border border-gray-300 py-2 font-medium hover:bg-gray-50"
               onClick={() => setShowLeaveConfirmation(false)}
             >
               No, Cancel
             </button>
             <button
-              className="w-full py-2 font-medium text-black bg-[#ff4d4d] rounded-full hover:bg-[#ff3333] border border-[#8b0000]"
+              className="w-full rounded-full border border-[#8b0000] bg-[#ff4d4d] py-2 font-medium text-black hover:bg-[#ff3333]"
               onClick={handleLeaveGroup}
             >
               {isLeaving ? "Leaving..." : "Yes, Leave"}
@@ -1347,7 +1347,7 @@ const GroupDetailsTutor = ({ onClose }) => {
       <Modal
         isOpen={showRemoveConfirmation}
         onRequestClose={() => setShowRemoveConfirmation(false)}
-        className="z-50 max-w-sm p-6 mx-auto mt-40 bg-white outline-none rounded-3xl font-urbanist"
+        className="z-50 mx-auto mt-40 max-w-sm rounded-3xl bg-white p-6 font-urbanist outline-none"
         overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
         style={{
           overlay: {
@@ -1372,13 +1372,13 @@ const GroupDetailsTutor = ({ onClose }) => {
           </p>
           <div className="flex flex-row gap-2">
             <button
-              className="w-full py-2 font-medium border border-gray-300 rounded-full hover:bg-gray-50"
+              className="w-full rounded-full border border-gray-300 py-2 font-medium hover:bg-gray-50"
               onClick={() => setShowRemoveConfirmation(false)}
             >
               Cancel
             </button>
             <button
-              className="w-full py-2 font-medium text-black bg-[#ff4d4d] rounded-full hover:bg-[#ff3333] border border-[#8b0000]"
+              className="w-full rounded-full border border-[#8b0000] bg-[#ff4d4d] py-2 font-medium text-black hover:bg-[#ff3333]"
               onClick={() => handleRemoveUser(selectedUser.id)}
               disabled={isRemoving}
             >
@@ -1391,7 +1391,7 @@ const GroupDetailsTutor = ({ onClose }) => {
       <Modal
         isOpen={showDeleteConfirmation}
         onRequestClose={() => setShowDeleteConfirmation(false)}
-        className="z-50 max-w-sm p-6 mx-auto mt-40 bg-white outline-none rounded-3xl font-urbanist"
+        className="z-50 mx-auto mt-40 max-w-sm rounded-3xl bg-white p-6 font-urbanist outline-none"
         overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
         style={{
           overlay: {
@@ -1412,13 +1412,13 @@ const GroupDetailsTutor = ({ onClose }) => {
           </h2>
           <div className="flex flex-row gap-2">
             <button
-              className="w-full py-2 font-medium border border-gray-300 rounded-full hover:bg-gray-50"
+              className="w-full rounded-full border border-gray-300 py-2 font-medium hover:bg-gray-50"
               onClick={() => setShowDeleteConfirmation(false)}
             >
               No, Cancel
             </button>
             <button
-              className="w-full py-2 font-medium text-black bg-[#ff4d4d] rounded-full hover:bg-[#ff3333] border border-[#8b0000]"
+              className="w-full rounded-full border border-[#8b0000] bg-[#ff4d4d] py-2 font-medium text-black hover:bg-[#ff3333]"
               onClick={handleDeleteGroup}
               disabled={isDeleting}
             >

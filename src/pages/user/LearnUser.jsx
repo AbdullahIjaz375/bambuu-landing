@@ -552,11 +552,11 @@ const LearnUser = () => {
   // --- Render ---
   return (
     <div className="flex h-screen bg-white">
-      <div className="h-full w-64 flex-shrink-0">
+      <div className="h-full w-[272px] flex-shrink-0 p-4">
         <Sidebar user={user} />
       </div>
-      <div className="h-full min-w-[calc(100%-16rem)] flex-1 overflow-x-auto">
-        <div className="m-2 h-[calc(100vh-1rem)] overflow-y-auto rounded-3xl border-2 border-[#e7e7e7] bg-white p-8">
+      <div className="min-w-[calc(100% - 272px)] h-[calc(100vh-0px)] flex-1 overflow-x-auto p-4 pl-0">
+        <div className="h-[calc(100vh-32px)] overflow-y-auto rounded-3xl border border-[#e7e7e7] bg-white p-[16px]">
           {/* Header */}
           <div className="mb-4 flex items-center justify-between border-b border-[#e7e7e7] pb-4">
             <div className="flex flex-row items-center space-x-4">
@@ -658,7 +658,7 @@ const LearnUser = () => {
                     {t("learnUser.languageLearning.title")}
                   </h2>
                   <button
-                    className="w-full rounded-full border border-[#5d5d5d] bg-[#e6fde9] px-4 py-2 text-base font-medium text-[#042f0c] hover:bg-[#ccfcd2] sm:w-auto"
+                    className="flex min-h-10 items-center rounded-3xl border-[0.75px] border-[#5D5D5D] bg-[#e6fde9] px-4 py-1 text-base font-medium text-[#042f0c]"
                     onClick={() => navigate("/languages")}
                   >
                     {t("learnUser.languageLearning.viewAll")}
@@ -681,14 +681,14 @@ const LearnUser = () => {
             </div>
           </div>
           {/* My Classes Section */}
-          <div className="mx-auto mb-8 w-full max-w-[165vh]">
+          <div className="mb-8 w-full">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-2xl font-bold">
                 {t("learnUser.classes.title")}
               </h2>
               {classes.length > 0 && (
                 <button
-                  className="rounded-full border border-[#5d5d5d] bg-[#e6fde9] px-4 py-2 text-base font-medium text-[#042f0c] hover:bg-[#ccfcd2]"
+                  className="flex min-h-10 items-center rounded-3xl border-[0.75px] border-[#5D5D5D] bg-[#e6fde9] px-4 py-1 text-base font-medium text-[#042f0c]"
                   onClick={() => navigate("/classesUser")}
                 >
                   {t("learnUser.classes.viewAll")}
@@ -700,7 +700,7 @@ const LearnUser = () => {
                 <ClipLoader color="#14B82C" size={50} />
               </div>
             ) : error ? (
-              <div className="flex flex-col items-center justify-center space-y-4 rounded-lg bg-white p-8">
+              <div className="flex flex-col items-center justify-center space-y-4">
                 <p className="text-center text-red-500">{error}</p>
                 <button
                   className="rounded-full border border-[#5d5d5d] bg-[#e6fde9] px-4 py-2 text-base font-medium text-[#042f0c] hover:bg-[#ccfcd2]"
@@ -710,7 +710,7 @@ const LearnUser = () => {
                 </button>
               </div>
             ) : classes.length === 0 ? (
-              <div className="flex flex-col items-center justify-center space-y-4 rounded-lg bg-white p-8">
+              <div className="flex flex-col items-center justify-center space-y-4 rounded-[20px] border border-[#e7e7e7] bg-white p-8">
                 <EmptyState message="You have not booked a class yet!" />
                 <button
                   className="rounded-full border border-[#5d5d5d] bg-[#e6fde9] px-4 py-2 text-base font-medium text-[#042f0c] hover:bg-[#ccfcd2]"
@@ -738,14 +738,14 @@ const LearnUser = () => {
             )}
           </div>
           {/* My Groups Section */}
-          <div className="mx-auto w-full max-w-[165vh]">
+          <div className="w-full">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-2xl font-bold">
                 {t("learnUser.groups.title")}
               </h2>
               {groups.length > 0 && (
                 <button
-                  className="rounded-full border border-[#5d5d5d] bg-[#e6fde9] px-4 py-2 text-base font-medium text-[#042f0c] hover:bg-[#ccfcd2]"
+                  className="flex min-h-10 items-center rounded-3xl border-[0.75px] border-[#5D5D5D] bg-[#e6fde9] px-4 py-1 text-base font-medium text-[#042f0c]"
                   onClick={() => navigate("/groupsUser")}
                 >
                   {t("learnUser.groups.viewAll")}
@@ -757,7 +757,7 @@ const LearnUser = () => {
                 <ClipLoader color="#14B82C" size={50} />
               </div>
             ) : errorGroups ? (
-              <div className="flex flex-col items-center justify-center space-y-4 rounded-lg bg-white p-8">
+              <div className="flex flex-col items-center justify-center space-y-4">
                 <p className="text-center text-red-500">{errorGroups}</p>
                 <button
                   className="rounded-full border border-[#5d5d5d] bg-[#e6fde9] px-4 py-2 text-base font-medium text-[#042f0c] hover:bg-[#ccfcd2]"
@@ -767,7 +767,7 @@ const LearnUser = () => {
                 </button>
               </div>
             ) : groups.length === 0 ? (
-              <div className="flex flex-col items-center justify-center space-y-4 rounded-lg bg-white p-8">
+              <div className="flex flex-col items-center justify-center space-y-4 rounded-[20px] border border-[#e7e7e7] bg-white p-8">
                 <EmptyState message="You are not part of any group yet!" />
                 <div className="flex flex-row items-center justify-center space-x-4">
                   <button

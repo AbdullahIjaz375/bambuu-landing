@@ -208,9 +208,12 @@ const Sidebar = ({ user }) => {
     user?.userType === "tutor" ? "/profileTutor" : "/profileUser";
 
   return (
-    <div className="sticky left-2 top-2 ml-2 flex h-[calc(100vh-1rem)] min-w-[15.5rem] max-w-[15.5rem] flex-col overflow-y-auto rounded-3xl border-2 border-[#b9f9c2] bg-[#e6fde9] pb-4 pt-6">
+    <div
+      style={{ height: "calc(100vh - 32px)" }}
+      className="sticky left-0 top-0 flex min-w-60 max-w-60 flex-col overflow-y-auto rounded-3xl border border-[#B9F9C2] bg-[#e6fde9] pb-4 pt-6"
+    >
       {/* Logo */}
-      <Link to="/" className="mb-8 px-6">
+      <Link to="/" className="mb-12 px-6">
         <img
           alt="bambuu"
           src="/svgs/bammbuu-dashboard-logo.svg"
@@ -219,7 +222,7 @@ const Sidebar = ({ user }) => {
       </Link>
 
       {/* Navigation Menu */}
-      <nav className="relative flex-1 overflow-y-auto px-4">
+      <nav className="relative flex-1 overflow-y-auto px-6">
         <div>
           <TutorialOverlay />
         </div>
@@ -229,7 +232,7 @@ const Sidebar = ({ user }) => {
             <div key={item.path} onClick={item.onClick} className="mb-2">
               {item.onClick ? (
                 <div
-                  className={`flex cursor-pointer items-center gap-3 rounded-full py-2 pl-3 text-base transition-colors lg:text-lg ${
+                  className={`flex cursor-pointer items-center gap-2 rounded-full py-2 pl-4 text-base font-medium transition-colors ${
                     isActive
                       ? "bg-[#14B82C] text-white"
                       : "text-[#042F0C] hover:bg-[#6fdb55]"
@@ -245,7 +248,7 @@ const Sidebar = ({ user }) => {
               ) : (
                 <Link
                   to={item.path}
-                  className={`flex items-center gap-3 rounded-full py-2 pl-3 text-base transition-colors lg:text-lg ${
+                  className={`flex items-center gap-2 rounded-full py-2 pl-4 text-base font-medium transition-colors ${
                     isActive
                       ? "bg-[#14B82C] text-white"
                       : "text-[#042F0C] hover:bg-[#6fdb55]"
@@ -265,7 +268,7 @@ const Sidebar = ({ user }) => {
       </nav>
 
       {/* User Profile Section */}
-      <div className="px-3">
+      <div className="pl-6 pr-[22px]">
         {user ? (
           <Link
             to={profilePath}
@@ -295,10 +298,10 @@ const Sidebar = ({ user }) => {
                 </div>
               </div>
               <div className="flex min-w-0 max-w-[8rem] flex-col">
-                <span className="overflow-hidden truncate whitespace-nowrap text-base font-semibold text-black lg:text-lg">
+                <span className="overflow-hidden truncate whitespace-nowrap text-base font-semibold text-black">
                   {user.name || "User"}
                 </span>
-                <span className="overflow-hidden truncate whitespace-nowrap text-xs text-gray-700 lg:text-sm">
+                <span className="max-w-[106px] overflow-hidden truncate whitespace-nowrap text-xs font-normal text-[#454545]">
                   {truncateEmail(user.email) || "email"}
                 </span>
               </div>

@@ -361,12 +361,13 @@ const TutorEditProfile = () => {
 
   return (
     <div className="flex h-screen bg-white">
-      <div className="h-full w-64 flex-shrink-0">
+      <div className="h-full w-[272px] flex-shrink-0 p-4">
         <Sidebar user={user} />
       </div>
-      <div className="h-full min-w-[calc(100%-16rem)] flex-1 overflow-x-auto">
-        <div className="flex h-full flex-col">
-          <div className="m-2 flex-1 rounded-3xl border-2 border-[#e7e7e7] bg-white p-8">
+
+      <div className="min-w-[calc(100% - 272px)] h-[calc(100vh-0px)] flex-1 overflow-x-auto p-4 pl-0">
+        <div className="h-[calc(100vh-32px)] overflow-y-auto rounded-3xl border border-[#e7e7e7] bg-white p-[16px]">
+          <div className="flex h-full flex-col">
             {/* Fixed Header Section */}
             <div className="sticky top-0 z-10 bg-white">
               <div className="mb-6 flex items-center justify-between border-b pb-4">
@@ -423,7 +424,7 @@ const TutorEditProfile = () => {
                       value={formData.name}
                       onChange={handleInputChange}
                       className="w-full rounded-3xl border border-gray-300 p-3 focus:border-[#14B82C] focus:outline-none focus:ring-0"
-                      placeholder="Enter your name"
+                      placeholder="enter your name"
                     />
                   </div>
 

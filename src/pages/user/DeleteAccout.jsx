@@ -56,7 +56,7 @@ const DeleteAccount = () => {
         if (classDoc.exists()) {
           const classData = classDoc.data();
           const updatedMembers = classData.classMemberIds.filter(
-            (id) => id !== userId
+            (id) => id !== userId,
           );
 
           if (classData.classType === "individualPremium") {
@@ -96,11 +96,11 @@ const DeleteAccount = () => {
                 const memberData = memberDoc.data();
                 await updateDoc(memberRef, {
                   enrolledClasses: memberData.enrolledClasses.filter(
-                    (id) => id !== classId
+                    (id) => id !== classId,
                   ),
                 });
               }
-            })
+            }),
           );
 
           await deleteDoc(classRef);
@@ -134,7 +134,7 @@ const DeleteAccount = () => {
             const classStorageRef = ref(storage, `classes/${classId}`);
             const classFiles = await listAll(classStorageRef);
             await Promise.all(
-              classFiles.items.map((file) => deleteObject(file))
+              classFiles.items.map((file) => deleteObject(file)),
             );
           }
 
@@ -147,11 +147,11 @@ const DeleteAccount = () => {
                 const memberData = memberDoc.data();
                 await updateDoc(memberRef, {
                   joinedGroups: memberData.joinedGroups.filter(
-                    (id) => id !== groupId
+                    (id) => id !== groupId,
                   ),
                 });
               }
-            })
+            }),
           );
 
           // Delete group storage
@@ -253,20 +253,20 @@ const DeleteAccount = () => {
 
   return (
     <div className="flex h-screen bg-white">
-      <div className="flex-shrink-0 w-64 h-full">
+      <div className="h-full w-[272px] flex-shrink-0 p-4">
         <Sidebar user={user} />
       </div>
-      <div className="flex-1 overflow-x-auto min-w-[calc(100%-16rem)] h-full">
-        <div className="h-[calc(100vh-1rem)] p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl m-2 overflow-y-auto">
-          <div className="flex items-center justify-between pb-4 mb-6 border-b">
+      <div className="min-w-[calc(100% - 272px)] h-[calc(100vh-0px)] flex-1 overflow-x-auto p-4 pl-0">
+        <div className="h-[calc(100vh-32px)] overflow-y-auto rounded-3xl border border-[#e7e7e7] bg-white p-[16px]">
+          <div className="mb-6 flex items-center justify-between border-b pb-4">
             <div className="flex items-center gap-4">
               <button
-                className="flex-shrink-0 p-3 transition-colors bg-gray-100 rounded-full hover:bg-gray-200"
+                className="flex-shrink-0 rounded-full bg-gray-100 p-3 transition-colors hover:bg-gray-200"
                 onClick={() => navigate(-1)}
               >
-                <ArrowLeft className="w-6 h-6" />
+                <ArrowLeft className="h-6 w-6" />
               </button>
-              <h1 className="text-4xl font-semibold whitespace-nowrap">
+              <h1 className="whitespace-nowrap text-4xl font-semibold">
                 {t("settings.deleteAccount")}
               </h1>
             </div>
@@ -288,17 +288,16 @@ const DeleteAccount = () => {
                 </p>
               </div>
 
-              <div className="flex flex-col items-start justify-start mb-6 space-y-3">
+              <div className="mb-6 flex flex-col items-start justify-start space-y-3">
                 {feedbackOptions.map((option) => (
                   <button
                     key={option}
                     onClick={() => setSelectedReason(option)}
-                    className={`w-full px-3 py-2 text-left rounded-full transition-colors
-                      ${
-                        selectedReason === option
-                          ? "bg-gray-100 border-2 border-gray-300"
-                          : "border border-gray-200 hover:bg-gray-50"
-                      }`}
+                    className={`w-full rounded-full px-3 py-2 text-left transition-colors ${
+                      selectedReason === option
+                        ? "border-2 border-gray-300 bg-gray-100"
+                        : "border border-gray-200 hover:bg-gray-50"
+                    }`}
                     disabled={isDeleting}
                   >
                     <span className="text-gray-700">{option}</span>
@@ -308,14 +307,14 @@ const DeleteAccount = () => {
 
               <div className="flex flex-row gap-2">
                 <button
-                  className="w-full py-3 font-medium text-black bg-white border border-black rounded-full hover:bg-gray-100"
+                  className="w-full rounded-full border border-black bg-white py-3 font-medium text-black hover:bg-gray-100"
                   onClick={() => navigate(-1)}
                   disabled={isDeleting}
                 >
                   Cancel
                 </button>
                 <button
-                  className="w-full py-3 font-medium text-white bg-red-500 rounded-full hover:bg-red-600 disabled:opacity-50"
+                  className="w-full rounded-full bg-red-500 py-3 font-medium text-white hover:bg-red-600 disabled:opacity-50"
                   onClick={handleDeleteAccount}
                   disabled={isDeleting || !selectedReason}
                 >
@@ -325,7 +324,7 @@ const DeleteAccount = () => {
                 </button>
               </div>
 
-              <p className="mt-4 text-sm text-center text-gray-500">
+              <p className="mt-4 text-center text-sm text-gray-500">
                 {t("settings.deleteModal.warning")}
               </p>
             </div>

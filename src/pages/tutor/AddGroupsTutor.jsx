@@ -124,18 +124,18 @@ const AddGroupsTutor = () => {
   };
   return (
     <div className="flex h-screen bg-white">
-      <div className="flex-shrink-0 w-64 h-full">
+      <div className="h-full w-[272px] flex-shrink-0 p-4">
         <Sidebar user={user} />
       </div>
-      <div className="flex-1 overflow-x-auto min-w-[calc(100%-16rem)] h-full">
-        <div className="flex flex-col h-full">
-          <div className="flex-1 p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl m-2">
+      <div className="min-w-[calc(100% - 272px)] h-[calc(100vh-0px)] flex-1 overflow-x-auto p-4 pl-0">
+        <div className="h-[calc(100vh-32px)] overflow-y-auto rounded-3xl border border-[#e7e7e7] bg-white p-[16px]">
+          <div className="flex h-full flex-col">
             {/* Fixed Header Section */}
             <div className="sticky top-0 z-10 bg-white">
-              <div className="flex items-center justify-between pb-4 mb-6 border-b">
+              <div className="mb-6 flex items-center justify-between border-b pb-4">
                 <div className="flex items-center gap-4">
                   <button
-                    className="p-3 bg-gray-100 rounded-full"
+                    className="rounded-full bg-gray-100 p-3"
                     onClick={() => navigate(-1)}
                   >
                     <ArrowLeft size="30" />
@@ -146,10 +146,10 @@ const AddGroupsTutor = () => {
             </div>
             <div className="overflow-y-auto">
               <div className="flex flex-col space-y-24">
-                <div className="flex flex-col ">
+                <div className="flex flex-col">
                   <div className="mb-6">
                     <div
-                      className="relative flex items-center justify-center mb-4 bg-gray-100 rounded-full cursor-pointer w-28 h-28 hover:bg-gray-200"
+                      className="relative mb-4 flex h-28 w-28 cursor-pointer items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200"
                       onClick={() =>
                         document.getElementById("groupImage").click()
                       }
@@ -158,12 +158,12 @@ const AddGroupsTutor = () => {
                         <img
                           src={selectedImage}
                           alt="Group"
-                          className="object-cover w-full h-full rounded-full"
+                          className="h-full w-full rounded-full object-cover"
                         />
                       ) : (
-                        <ImagePlus className="w-8 h-8 text-gray-400" />
+                        <ImagePlus className="h-8 w-8 text-gray-400" />
                       )}
-                      <div className="absolute right-0 p-1 bg-black rounded-full shadow-lg bottom-1">
+                      <div className="absolute bottom-1 right-0 rounded-full bg-black p-1 shadow-lg">
                         <img src="/svgs/camera.svg" />
                       </div>
                       <input
@@ -178,7 +178,7 @@ const AddGroupsTutor = () => {
 
                   <div className="w-1/2 space-y-6">
                     <div>
-                      <label className="block text-[#3d3d3d] mb-1 text-lg font-semibold">
+                      <label className="mb-1 block text-lg font-semibold text-[#3d3d3d]">
                         Group Name
                       </label>
                       <input
@@ -186,12 +186,12 @@ const AddGroupsTutor = () => {
                         placeholder="Group name"
                         value={groupName}
                         onChange={(e) => setGroupName(e.target.value)}
-                        className="w-full p-3 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
+                        className="w-full rounded-3xl border border-gray-300 p-3 focus:border-[#14B82C] focus:outline-none focus:ring-0"
                       />
                     </div>
 
                     <div>
-                      <label className="block mb-1 text-[#3d3d3d]  text-lg font-semibold">
+                      <label className="mb-1 block text-lg font-semibold text-[#3d3d3d]">
                         Group Description
                       </label>
                       <textarea
@@ -199,12 +199,13 @@ const AddGroupsTutor = () => {
                         value={groupDescription}
                         onChange={(e) => setGroupDescription(e.target.value)}
                         rows="4"
-                        className="w-full p-3 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
+                        maxLength={200}
+                        className="w-full resize-none rounded-3xl border border-gray-300 p-3 focus:border-[#14B82C] focus:outline-none focus:ring-0"
                       />
                     </div>
 
                     <div>
-                      <label className="block mb-1 text-[#3d3d3d] text-lg font-semibold">
+                      <label className="mb-1 block text-lg font-semibold text-[#3d3d3d]">
                         Learning Language
                       </label>
                       <div className="flex flex-wrap gap-2">
@@ -213,15 +214,15 @@ const AddGroupsTutor = () => {
                             <button
                               key={lang}
                               onClick={() => setLearningLanguage(lang)}
-                              className={`px-4 py-2 text-md rounded-full ${
+                              className={`text-md rounded-full px-4 py-2 ${
                                 learningLanguage === lang
-                                  ? "bg-[#14B82C] text-black border border-[#042F0C]"
-                                  : "bg-white text-gray-600 border"
+                                  ? "border border-[#042F0C] bg-[#14B82C] text-black"
+                                  : "border bg-white text-gray-600"
                               }`}
                             >
                               {lang}
                             </button>
-                          )
+                          ),
                         )}
                       </div>
                     </div>
@@ -248,10 +249,10 @@ const AddGroupsTutor = () => {
               </div> */}
                   </div>
                 </div>
-                <div className="flex justify-between gap-4 mt-8">
+                <div className="mt-8 flex justify-between gap-4">
                   <button
                     onClick={() => navigate("/groupsUser")}
-                    className="px-10 py-3 text-[#042f0c] text-xl font-medium bg-white border border-[#5d5d5d] rounded-full"
+                    className="rounded-full border border-[#5d5d5d] bg-white px-10 py-3 text-xl font-medium text-[#042f0c]"
                   >
                     Cancel
                   </button>
@@ -264,7 +265,7 @@ const AddGroupsTutor = () => {
                       !learningLanguage ||
                       !selectedImage
                     }
-                    className="px-10 py-3 text-[#042f0c] text-xl font-medium bg-[#14b82c] border border-[#5d5d5d] disabled:bg-[#b9f9c2] disabled:text-[#b0b0b0] disabled:border-[#b0b0b0] rounded-full"
+                    className="rounded-full border border-[#5d5d5d] bg-[#14b82c] px-10 py-3 text-xl font-medium text-[#042f0c] disabled:border-[#b0b0b0] disabled:bg-[#b9f9c2] disabled:text-[#b0b0b0]"
                   >
                     {loading ? "Creating..." : "Create Group"}
                   </button>

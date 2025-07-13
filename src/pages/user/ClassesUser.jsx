@@ -92,12 +92,12 @@ const ClassesUser = () => {
 
   return (
     <div className="flex h-screen bg-white">
-      <div className="h-full w-64 flex-shrink-0">
+      <div className="h-full w-[272px] flex-shrink-0 p-4">
         <Sidebar user={user} />
       </div>
 
-      <div className="h-full min-w-[calc(100%-16rem)] flex-1 overflow-x-auto">
-        <div className="m-2 h-[calc(100vh-1rem)] overflow-y-auto rounded-3xl border-2 border-[#e7e7e7] bg-white p-8">
+      <div className="min-w-[calc(100% - 272px)] h-[calc(100vh-0px)] flex-1 overflow-x-auto p-4 pl-0">
+        <div className="h-[calc(100vh-32px)] overflow-y-auto rounded-3xl border border-[#e7e7e7] bg-white p-[16px]">
           {/* Header */}
           <div className="mb-6 flex items-center justify-between border-b pb-4">
             <div className="flex items-center gap-4">
