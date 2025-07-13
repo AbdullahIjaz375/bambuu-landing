@@ -15,8 +15,8 @@ const Footer = () => {
           className="h-auto w-auto"
         />
       </div>
-      <div className="flex flex-row items-center justify-between px-10">
-        <div className="flex flex-row space-x-8">
+      <div className="grid grid-cols-3 items-center px-20">
+        <div className="flex gap-5">
           <h1 className="text-xl text-[#6D6D6D]">
             © 2024 All rights reserved
           </h1>
@@ -24,7 +24,7 @@ const Footer = () => {
             Contact Us
           </Link>
         </div>
-        <div className="flex flex-row items-center justify-center space-x-12">
+        <div className="flex justify-center gap-6">
           <a href="https://www.instagram.com/bammbuu_languages/">
             {" "}
             <img
@@ -49,7 +49,7 @@ const Footer = () => {
           {/* <img alt="bambuu" src="/images/x.png" className="w-auto h-auto" /> */}
         </div>
 
-        <div className="flex flex-row items-center space-x-6">
+        <div className="flex justify-end gap-5">
           {" "}
           {pathname !== "/privacy-policy" && (
             <Link to="/privacy-policy">

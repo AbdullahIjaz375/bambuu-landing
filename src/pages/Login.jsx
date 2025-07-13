@@ -717,7 +717,7 @@ const Login = () => {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md space-y-4 rounded-3xl border border-[#e7e7e7] bg-white p-6">
+      <div className="w-full max-w-md space-y-4 rounded-[40px] border border-[#e7e7e7] bg-white p-6">
         {/* Language Selector */}
         <div className="flex justify-end">
           <select
@@ -755,7 +755,7 @@ const Login = () => {
         {/* Login Form */}
         <form onSubmit={handleEmailLoginStudent} className="space-y-4">
           <div className="space-y-1">
-            <label className="block text-sm text-gray-700">
+            <label className="block text-sm font-semibold leading-5 text-[#3D3D3D]">
               {t("login.email", "Email")}
             </label>
             <div className="relative">
@@ -763,7 +763,7 @@ const Login = () => {
                 type="email"
                 value={email}
                 onChange={handleEmailChange}
-                placeholder={t("login.emailPlaceholder", "Enter your email")}
+                placeholder={t("login.emailPlaceholder", "enter your email")}
                 className={`w-full rounded-3xl border p-2 ${
                   emailError
                     ? "border-red-500 focus:border-red-500"
@@ -795,7 +795,7 @@ const Login = () => {
             )}
           </div>
           <div className="space-y-1">
-            <label className="block text-sm text-gray-700">
+            <label className="block text-sm font-semibold leading-5 text-[#3D3D3D]">
               {t("login.password", "Password")}
             </label>
             <div className="relative">
@@ -805,7 +805,7 @@ const Login = () => {
                 onChange={handlePasswordChange}
                 placeholder={t(
                   "login.passwordPlaceholder",
-                  "Enter your password",
+                  "enter your password",
                 )}
                 className={`w-full rounded-3xl border p-2 ${
                   passwordError
@@ -921,7 +921,7 @@ const Login = () => {
         </div>
 
         {/* Terms */}
-        <div className="pt-6 text-center text-sm text-[#9e9e9e]">
+        <div className="px-[42px] pt-8 text-center text-sm/[160%] text-[#9e9e9e]">
           <p>
             {t("login.termsConditions", "By logging, you agree to our")}{" "}
             <a href="#" className="text-black">

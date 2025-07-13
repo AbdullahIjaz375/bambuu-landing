@@ -24,40 +24,39 @@ const UserSettings = () => {
 
   return (
     <div className="flex h-screen bg-white">
-      <div className="flex-shrink-0 w-64 h-full">
+      <div className="h-full w-[272px] flex-shrink-0 p-4">
         <Sidebar user={user} />
       </div>
 
-      <div className="flex-1 overflow-x-auto min-w-[calc(100%-16rem)] h-full">
-        <div className="h-[calc(100vh-1rem)] p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl m-2 overflow-y-auto">
+      <div className="min-w-[calc(100% - 272px)] h-[calc(100vh-0px)] flex-1 overflow-x-auto p-4 pl-0">
+        <div className="h-[calc(100vh-32px)] overflow-y-auto rounded-3xl border border-[#e7e7e7] bg-white p-[16px]">
           {/* Header */}
-          <div className="flex items-center justify-between pb-4 mb-12 border-b">
+          <div className="mb-12 flex items-center justify-between border-b pb-4">
             <div className="flex items-center gap-4">
               <button
-                className="flex-shrink-0 p-3 transition-colors bg-gray-100 rounded-full hover:bg-gray-200"
+                className="flex-shrink-0 rounded-full bg-gray-100 p-3 transition-colors hover:bg-gray-200"
                 onClick={() => navigate(-1)}
               >
-                <ArrowLeft className="w-6 h-6" />
+                <ArrowLeft className="h-6 w-6" />
               </button>
-              <h1 className="text-4xl font-semibold whitespace-nowrap">
+              <h1 className="whitespace-nowrap text-4xl font-semibold">
                 {t("user-settings.title")}
               </h1>
             </div>
           </div>
 
           {/* Tabs Navigation */}
-          <div className="flex mb-8 bg-gray-100 border border-[#888888] rounded-full  w-fit">
+          <div className="mb-8 flex w-fit rounded-full border border-[#888888] bg-gray-100">
             <div className="flex">
               {TABS.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-12 py-1 rounded-full text-lg font-medium transition-all whitespace-nowrap
-                    ${
-                      activeTab === tab.id
-                        ? "bg-[#ffbf00] text-[#042f0c] border border-[#042f0c]"
-                        : "text-[#042f0c] hover:text-black"
-                    }`}
+                  className={`whitespace-nowrap rounded-full px-12 py-1 text-lg font-medium transition-all ${
+                    activeTab === tab.id
+                      ? "border border-[#042f0c] bg-[#ffbf00] text-[#042f0c]"
+                      : "text-[#042f0c] hover:text-black"
+                  }`}
                 >
                   {t(tab.translationKey)}
                 </button>

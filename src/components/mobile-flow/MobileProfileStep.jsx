@@ -199,7 +199,7 @@ const MobileProfileStep = ({ onNext, onBack, onClose }) => {
                   }
                   placeholder={t(
                     "signup.profile.namePlaceholder",
-                    "Enter your name",
+                    "enter your name",
                   )}
                   className="w-full rounded-3xl border border-gray-300 p-2 focus:border-[#14B82C] focus:outline-none focus:ring-0"
                   required

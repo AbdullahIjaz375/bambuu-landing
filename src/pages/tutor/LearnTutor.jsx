@@ -146,12 +146,12 @@ const LearnTutor = () => {
   return (
     <>
       <div className="flex h-screen bg-white">
-        <div className="h-full w-64 flex-shrink-0">
+        <div className="h-full w-[272px] flex-shrink-0 p-4">
           <Sidebar user={user} />
         </div>
 
-        <div className="h-full min-w-[calc(100%-16rem)] flex-1 overflow-x-auto">
-          <div className="m-2 h-[calc(100vh-1rem)] overflow-y-auto rounded-3xl border-2 border-[#e7e7e7] bg-white p-8">
+        <div className="min-w-[calc(100% - 272px)] h-[calc(100vh-0px)] flex-1 overflow-x-auto p-4 pl-0">
+          <div className="h-[calc(100vh-32px)] overflow-y-auto rounded-3xl border border-[#e7e7e7] bg-white p-[16px]">
             <div className="mb-4 flex items-center justify-between border-b border-[#e7e7e7] pb-4">
               <div className="flex flex-row items-center space-x-4">
                 <h1 className="text-3xl font-semibold">
@@ -168,7 +168,7 @@ const LearnTutor = () => {
 
             <CalenderTutor />
 
-            <div className="mx-auto w-full max-w-[160vh]">
+            <div className="w-full">
               <div className="flex flex-row items-center justify-between pt-4">
                 <div className="relative inline-flex rounded-full border border-gray-300 bg-gray-100 p-1">
                   <div
@@ -201,14 +201,14 @@ const LearnTutor = () => {
                 </div>
                 <div className="flex flex-row items-center space-x-2">
                   <button
-                    className="flex items-center rounded-full border border-black bg-[#14b82c] px-3 py-2 text-lg font-semibold text-[#042f0c]"
+                    className="flex min-h-10 items-center rounded-3xl border-[0.75px] border-[#5D5D5D] bg-[#14b82c] px-4 py-1 text-base font-medium text-[#042f0c]"
                     onClick={() => setShowGroupSelectModal(true)}
                   >
                     <Plus /> {t("learn-tutor.actions.new-class")}
                   </button>
 
                   <button
-                    className="flex items-center rounded-full border border-black bg-[#e6fde9] px-3 py-2 text-lg font-semibold text-[#042f0c]"
+                    className="flex min-h-10 items-center rounded-3xl border-[0.75px] border-[#5D5D5D] bg-[#e6fde9] px-4 py-1 text-base font-medium text-[#042f0c]"
                     onClick={() => navigate("/classesTutor")}
                   >
                     {t("learn-tutor.actions.view-all")}
@@ -243,7 +243,7 @@ const LearnTutor = () => {
               )}
             </div>
 
-            <div className="mx-auto w-full max-w-[160vh]">
+            <div className="w-full">
               <div className="flex flex-row items-center justify-between pt-4">
                 <div>
                   <h2 className="text-2xl font-bold">
@@ -252,14 +252,14 @@ const LearnTutor = () => {
                 </div>
                 <div className="flex flex-row items-center space-x-2">
                   <button
-                    className="flex items-center rounded-full border border-black bg-[#14b82c] px-3 py-2 text-lg font-semibold text-[#042f0c]"
+                    className="flex min-h-10 items-center rounded-3xl border-[0.75px] border-[#5D5D5D] bg-[#14b82c] px-4 py-1 text-base font-medium text-[#042f0c]"
                     onClick={() => navigate("/addGroupsTutor")}
                   >
                     <Plus /> {t("learn-tutor.actions.new-group")}
                   </button>
 
                   <button
-                    className="flex items-center rounded-full border border-black bg-[#e6fde9] px-3 py-2 text-lg font-semibold text-[#042f0c]"
+                    className="flex min-h-10 items-center rounded-3xl border-[0.75px] border-[#5D5D5D] bg-[#e6fde9] px-4 py-1 text-base font-medium text-[#042f0c]"
                     onClick={() => navigate("/groupsTutor")}
                   >
                     {t("learn-tutor.actions.view-all")}

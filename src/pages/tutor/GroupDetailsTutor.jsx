@@ -1074,9 +1074,9 @@ const GroupDetailsTutor = ({ onClose }) => {
                 onChange={(e) =>
                   handleClassDataChange("classDescription", e.target.value)
                 }
-                maxLength={400}
+                maxLength={200}
                 rows={3}
-                className="w-full rounded-3xl border border-gray-300 p-2 focus:border-[#14B82C] focus:outline-none focus:ring-0"
+                className="w-full resize-none rounded-3xl border border-gray-300 p-2 focus:border-[#14B82C] focus:outline-none focus:ring-0"
               />
             </div>
             <div className="flex flex-row items-start justify-between space-x-4">

@@ -29,17 +29,15 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
-      <div className="w-full max-w-md p-6 space-y-6 bg-white rounded-3xl border border-[#e7e7e7]">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <div className="w-full max-w-md space-y-6 rounded-3xl border border-[#e7e7e7] bg-white p-6">
         {/* Lock Icon */}
         <div className="flex justify-center">
-          <div className="w-24 h-24 flex items-center justify-center bg-[#fff5d1] rounded-full">
-            <img alt="bambuu" src="/svgs/forgot-pass.svg" />
-          </div>
+          <img alt="bambuu" src="/svgs/forgot-pass.svg" />
         </div>
 
         {/* Title */}
-        <h1 className="text-3xl font-bold text-center">Forgot Password</h1>
+        <h1 className="text-center text-3xl font-bold">Forgot Password</h1>
 
         {!isEmailSent ? (
           <>
@@ -55,15 +53,15 @@ const ForgotPassword = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  className="w-full p-2 border border-gray-300 rounded-3xl focus:border-[#14B82C] focus:ring-0 focus:outline-none"
+                  placeholder="enter your email"
+                  className="w-full rounded-3xl border border-gray-300 p-2 focus:border-[#14B82C] focus:outline-none focus:ring-0"
                   required
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full py-3 bg-[#14b82c] text-black rounded-full hover:bg-[#119526] focus:outline-none border border-[#042f0c]"
+                className="w-full rounded-full border border-[#042f0c] bg-[#14b82c] py-3 text-black hover:bg-[#119526] focus:outline-none"
               >
                 Continue
               </button>
@@ -81,17 +79,17 @@ const ForgotPassword = () => {
 
             <button
               onClick={() => setIsEmailSent(false)}
-              className="w-full py-3 bg-[#ffb822] text-black rounded-full hover:bg-[#ffa822] focus:outline-none"
+              className="flex h-11 w-full items-center justify-center rounded-3xl border border-black bg-[#FFBF00] p-4 text-black hover:opacity-80"
             >
               Change Email
             </button>
 
-            <div className="text-sm text-center">
+            <div className="text-center text-sm">
               <p className="text-gray-600">
                 Didn't receive any email yet?{" "}
                 <button
                   onClick={handleResendEmail}
-                  className="text-[#14b82c] font-semibold hover:underline"
+                  className="font-semibold text-[#14b82c] hover:underline"
                 >
                   Resend Email
                 </button>

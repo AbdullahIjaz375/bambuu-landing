@@ -191,12 +191,12 @@ const LearnLanguageUser = () => {
 
   return (
     <div className="flex h-screen bg-white">
-      <div className="h-full w-64 flex-shrink-0">
+      <div className="h-full w-[272px] flex-shrink-0 p-4">
         <Sidebar user={user} />
       </div>
 
-      <div className="h-full min-w-[calc(100%-16rem)] flex-1 overflow-x-auto">
-        <div className="m-2 h-[calc(100vh-1rem)] overflow-y-auto rounded-3xl border-2 border-[#e7e7e7] bg-white p-8">
+      <div className="min-w-[calc(100% - 272px)] h-[calc(100vh-0px)] flex-1 overflow-x-auto p-4 pl-0">
+        <div className="h-[calc(100vh-32px)] overflow-y-auto rounded-3xl border border-[#e7e7e7] bg-white p-[16px]">
           {/* Header */}
           <div className="mb-6 flex flex-col justify-between gap-4 border-b pb-4 sm:flex-row sm:items-center">
             <div className="flex items-center gap-4">
@@ -242,7 +242,7 @@ const LearnLanguageUser = () => {
             {activeTab === "myBambuu" ? (
               <>
                 {/* My Classes Section */}
-                <div className="mx-auto w-full max-w-[160vh]">
+                <div className="w-full">
                   <div className="flex items-center justify-between">
                     <h2 className="text-2xl font-bold">
                       {t("learnLanguage.myClasses.title")}
@@ -301,7 +301,7 @@ const LearnLanguageUser = () => {
                 </div>
 
                 {/* My Groups Section */}
-                <div className="mx-auto w-full max-w-[160vh]">
+                <div className="w-full">
                   <div className="mb-1 flex items-center justify-between">
                     <h2 className="text-2xl font-bold">
                       {t("learnLanguage.myGroups.title")}
@@ -365,7 +365,7 @@ const LearnLanguageUser = () => {
             ) : (
               <>
                 {/* Explore Classes Section */}
-                <div className="mx-auto w-full max-w-[160vh]">
+                <div className="w-full">
                   <div className="flex items-center justify-between">
                     <h2 className="text-2xl font-bold">
                       {t("learnLanguage.exploreClasses.title")}
@@ -424,7 +424,7 @@ const LearnLanguageUser = () => {
                 </div>
 
                 {/* Explore Groups Section */}
-                <div className="mx-auto w-full max-w-[160vh]">
+                <div className="w-full">
                   <div className="mb-1 flex items-center justify-between">
                     <h2 className="text-2xl font-bold">
                       {t("learnLanguage.exploreGroups.title")}

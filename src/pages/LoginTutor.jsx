@@ -272,7 +272,7 @@ const LoginTutor = () => {
         {/* Login Form */}
         <form onSubmit={handleEmailLoginTutor} className="space-y-4">
           <div className="space-y-1">
-            <label className="block text-sm text-gray-700">
+            <label className="block text-sm font-semibold leading-5 text-[#3D3D3D]">
               {t("login.email", "Email")}
             </label>
             <div className="relative">
@@ -313,7 +313,7 @@ const LoginTutor = () => {
           </div>
 
           <div className="space-y-1">
-            <label className="block text-sm text-gray-700">
+            <label className="block text-sm font-semibold leading-5 text-[#3D3D3D]">
               {t("login.password", "Password")}
             </label>
             <div className="relative">

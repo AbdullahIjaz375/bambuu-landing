@@ -9,55 +9,58 @@ import { useTranslation } from "react-i18next";
 
 // Import or define your translations
 const translations = {
-  "languageExperts": {
-    "title": "Language Experts",
-    "intro": "Join our community of language experts and help others learn your native language. Share your expertise and connect with students from around the world.",
-    "email": {
-      "subject": "Language Expert Application"
+  languageExperts: {
+    title: "Language Experts",
+    intro:
+      "Join our community of language experts and help others learn your native language. Share your expertise and connect with students from around the world.",
+    email: {
+      subject: "Language Expert Application",
     },
-    "form": {
-      "name": {
-        "label": "Full Name",
-        "placeholder": "Enter your full name",
-        "error": "Please enter your name"
+    form: {
+      name: {
+        label: "Full Name",
+        placeholder: "Enter your full name",
+        error: "Please enter your name",
       },
-      "nativeLanguage": {
-        "label": "Native Language"
+      nativeLanguage: {
+        label: "Native Language",
       },
-      "country": {
-        "label": "Country",
-        "placeholder": "Select your country",
-        "error": "Please select your country"
+      country: {
+        label: "Country",
+        placeholder: "Select your country",
+        error: "Please select your country",
       },
-      "aboutYourself": {
-        "label": "About Yourself",
-        "placeholder": "Tell us about yourself, your teaching experience, and why you want to become a language expert...",
-        "error": "Please tell us about yourself",
-        "errorLength": "Bio should be less than 500 characters",
-        "charCount": "{{count}}/500 characters"
+      aboutYourself: {
+        label: "About Yourself",
+        placeholder:
+          "Tell us about yourself, your teaching experience, and why you want to become a language expert...",
+        error: "Please tell us about yourself",
+        errorLength: "Bio should be less than 500 characters",
+        charCount: "{{count}}/500 characters",
       },
-      "teachingLanguage": {
-        "label": "Language You Want to Teach"
+      teachingLanguage: {
+        label: "Language You Want to Teach",
       },
-      "proficiencyLevel": {
-        "label": "Proficiency Level You Can Teach",
-        "levels": {
-          "beginner": "Beginner",
-          "intermediate": "Intermediate",
-          "advanced": "Advanced"
-        }
-      }
+      proficiencyLevel: {
+        label: "Proficiency Level You Can Teach",
+        levels: {
+          beginner: "Beginner",
+          intermediate: "Intermediate",
+          advanced: "Advanced",
+        },
+      },
     },
-    "buttons": {
-      "cancel": "Cancel",
-      "submit": "Submit Application",
-      "submitting": "Submitting..."
+    buttons: {
+      cancel: "Cancel",
+      submit: "Submit Application",
+      submitting: "Submitting...",
     },
-    "status": {
-      "success": "Your application has been submitted successfully. We'll review it and get back to you soon.",
-      "formError": "Please fix the errors in the form before submitting."
-    }
-  }
+    status: {
+      success:
+        "Your application has been submitted successfully. We'll review it and get back to you soon.",
+      formError: "Please fix the errors in the form before submitting.",
+    },
+  },
 };
 
 const BecomeAnExpertUser = () => {
@@ -71,8 +74,8 @@ const BecomeAnExpertUser = () => {
   // Initialize translations if needed
   useEffect(() => {
     // This is a fallback if the translation system isn't properly initialized
-    if (!i18n.exists('languageExperts.title')) {
-      i18n.addResourceBundle('en', 'translation', translations, true, true);
+    if (!i18n.exists("languageExperts.title")) {
+      i18n.addResourceBundle("en", "translation", translations, true, true);
     }
   }, [i18n]);
 
@@ -100,15 +103,24 @@ const BecomeAnExpertUser = () => {
   const validateForm = () => {
     const newErrors = {};
     if (!formData.name.trim())
-      newErrors.name = t("languageExperts.form.name.error", "Please enter your name");
+      newErrors.name = t(
+        "languageExperts.form.name.error",
+        "Please enter your name",
+      );
     if (!formData.country)
-      newErrors.country = t("languageExperts.form.country.error", "Please select your country");
+      newErrors.country = t(
+        "languageExperts.form.country.error",
+        "Please select your country",
+      );
     if (!formData.aboutYourself.trim())
-      newErrors.aboutYourself = t("languageExperts.form.aboutYourself.error", "Please tell us about yourself");
+      newErrors.aboutYourself = t(
+        "languageExperts.form.aboutYourself.error",
+        "Please tell us about yourself",
+      );
     if (formData.aboutYourself.length > 500)
       newErrors.aboutYourself = t(
         "languageExperts.form.aboutYourself.errorLength",
-        "Bio should be less than 500 characters"
+        "Bio should be less than 500 characters",
       );
 
     setErrors(newErrors);
@@ -147,7 +159,10 @@ const BecomeAnExpertUser = () => {
     if (!validateForm()) {
       setSubmitStatus({
         type: "error",
-        message: t("languageExperts.status.formError", "Please fix the errors in the form before submitting.")
+        message: t(
+          "languageExperts.status.formError",
+          "Please fix the errors in the form before submitting.",
+        ),
       });
       return;
     }
@@ -168,7 +183,7 @@ const BecomeAnExpertUser = () => {
 
     // Construct the mailto link
     const mailtoLink = `mailto:admin@bammbuu.co?subject=${encodeURIComponent(
-      t("languageExperts.email.subject", "Language Expert Application")
+      t("languageExperts.email.subject", "Language Expert Application"),
     )}&body=${encodeURIComponent(emailBody)}`;
 
     // Open the user's email client
@@ -176,7 +191,10 @@ const BecomeAnExpertUser = () => {
 
     setSubmitStatus({
       type: "success",
-      message: t("languageExperts.status.success", "Your application has been submitted successfully. We'll review it and get back to you soon.")
+      message: t(
+        "languageExperts.status.success",
+        "Your application has been submitted successfully. We'll review it and get back to you soon.",
+      ),
     });
 
     setLoading(false);
@@ -191,24 +209,27 @@ const BecomeAnExpertUser = () => {
 
   return (
     <div className="flex h-screen bg-white">
-      <div className="flex-shrink-0 w-64 h-full">
+      <div className="h-full w-[272px] flex-shrink-0 p-4">
         <Sidebar user={user} />
       </div>
-      <div className="flex-1 overflow-x-auto min-w-[calc(100%-16rem)] h-full">
-        <div className="flex flex-col h-full">
-          <div className="flex-1 p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl m-2">
+      <div className="min-w-[calc(100% - 272px)] h-[calc(100vh-0px)] flex-1 overflow-x-auto p-4 pl-0">
+        <div className="h-[calc(100vh-32px)] overflow-y-auto rounded-3xl border border-[#e7e7e7] bg-white p-[16px]">
+          <div className="flex h-full flex-col">
             {/* Fixed Header Section */}
             <div className="sticky top-0 z-10 bg-white">
-              <div className="flex items-center justify-between pb-4 mb-6 border-b">
+              <div className="mb-6 flex items-center justify-between border-b pb-4">
                 <div className="flex items-center gap-4">
                   <button
-                    className="p-3 bg-gray-100 rounded-full"
+                    className="rounded-full bg-gray-100 p-3"
                     onClick={() => navigate(-1)}
                   >
                     <ArrowLeft size="30" />
                   </button>
                   <h1 className="text-4xl font-semibold">
-                    {getTranslation("languageExperts.title", "Language Experts")}
+                    {getTranslation(
+                      "languageExperts.title",
+                      "Language Experts",
+                    )}
                   </h1>
                 </div>
               </div>
@@ -217,7 +238,7 @@ const BecomeAnExpertUser = () => {
             {/* Status Messages */}
             {submitStatus.message && (
               <div
-                className={`p-4 mb-6 rounded-lg ${
+                className={`mb-6 rounded-lg p-4 ${
                   submitStatus.type === "success"
                     ? "bg-green-100 text-green-700"
                     : "bg-red-100 text-red-700"
@@ -230,14 +251,20 @@ const BecomeAnExpertUser = () => {
             {/* Scrollable Content */}
             <div className="overflow-y-auto">
               <p className="mb-8 text-gray-600">
-                {getTranslation("languageExperts.intro", "Join our community of language experts and help others learn your native language. Share your expertise and connect with students from around the world.")}
+                {getTranslation(
+                  "languageExperts.intro",
+                  "Join our community of language experts and help others learn your native language. Share your expertise and connect with students from around the world.",
+                )}
               </p>
 
               <form className="max-w-3xl">
                 <div className="space-y-6">
                   <div>
-                    <label className="block mb-2 text-sm font-medium">
-                      {getTranslation("languageExperts.form.name.label", "Full Name")}{" "}
+                    <label className="mb-2 block text-sm font-medium">
+                      {getTranslation(
+                        "languageExperts.form.name.label",
+                        "Full Name",
+                      )}{" "}
                       <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -245,10 +272,13 @@ const BecomeAnExpertUser = () => {
                       name="name"
                       value={formData.name}
                       onChange={handleInputChange}
-                      className={`w-full p-3 border rounded-lg ${
+                      className={`w-full rounded-lg border p-3 ${
                         errors.name ? "border-red-500" : "border-gray-300"
                       }`}
-                      placeholder={getTranslation("languageExperts.form.name.placeholder", "Enter your full name")}
+                      placeholder={getTranslation(
+                        "languageExperts.form.name.placeholder",
+                        "Enter your full name",
+                      )}
                     />
                     {errors.name && (
                       <p className="mt-1 text-sm text-red-500">{errors.name}</p>
@@ -256,14 +286,17 @@ const BecomeAnExpertUser = () => {
                   </div>
 
                   <div>
-                    <label className="block mb-2 text-sm font-medium">
-                      {getTranslation("languageExperts.form.nativeLanguage.label", "Native Language")}
+                    <label className="mb-2 block text-sm font-medium">
+                      {getTranslation(
+                        "languageExperts.form.nativeLanguage.label",
+                        "Native Language",
+                      )}
                     </label>
                     <select
                       name="nativeLanguage"
                       value={formData.nativeLanguage}
                       onChange={handleInputChange}
-                      className="w-full p-3 text-gray-600 border rounded-lg"
+                      className="w-full rounded-lg border p-3 text-gray-600"
                     >
                       {languagesList.map((language) => (
                         <option key={language.code} value={language.name}>
@@ -274,20 +307,26 @@ const BecomeAnExpertUser = () => {
                   </div>
 
                   <div>
-                    <label className="block mb-2 text-sm font-medium">
-                      {getTranslation("languageExperts.form.country.label", "Country")}{" "}
+                    <label className="mb-2 block text-sm font-medium">
+                      {getTranslation(
+                        "languageExperts.form.country.label",
+                        "Country",
+                      )}{" "}
                       <span className="text-red-500">*</span>
                     </label>
                     <select
                       name="country"
                       value={formData.country}
                       onChange={handleInputChange}
-                      className={`w-full p-3 border rounded-lg ${
+                      className={`w-full rounded-lg border p-3 ${
                         errors.country ? "border-red-500" : "border-gray-300"
                       }`}
                     >
                       <option value="">
-                        {getTranslation("languageExperts.form.country.placeholder", "Select your country")}
+                        {getTranslation(
+                          "languageExperts.form.country.placeholder",
+                          "Select your country",
+                        )}
                       </option>
                       {countries.map((country) => (
                         <option key={country.value} value={country.value}>
@@ -303,22 +342,25 @@ const BecomeAnExpertUser = () => {
                   </div>
 
                   <div>
-                    <label className="block mb-2 text-sm font-medium">
-                      {getTranslation("languageExperts.form.aboutYourself.label", "About Yourself")}{" "}
+                    <label className="mb-2 block text-sm font-medium">
+                      {getTranslation(
+                        "languageExperts.form.aboutYourself.label",
+                        "About Yourself",
+                      )}{" "}
                       <span className="text-red-500">*</span>
                     </label>
                     <textarea
                       name="aboutYourself"
                       value={formData.aboutYourself}
                       onChange={handleInputChange}
-                      className={`w-full p-3 border rounded-lg ${
+                      className={`w-full rounded-lg border p-3 ${
                         errors.aboutYourself
                           ? "border-red-500"
                           : "border-gray-300"
                       }`}
                       placeholder={getTranslation(
-                        "languageExperts.form.aboutYourself.placeholder", 
-                        "Tell us about yourself, your teaching experience, and why you want to become a language expert..."
+                        "languageExperts.form.aboutYourself.placeholder",
+                        "Tell us about yourself, your teaching experience, and why you want to become a language expert...",
                       )}
                       rows={4}
                     />
@@ -333,8 +375,11 @@ const BecomeAnExpertUser = () => {
                   </div>
 
                   <div>
-                    <label className="block mb-2 text-sm font-medium">
-                      {getTranslation("languageExperts.form.teachingLanguage.label", "Language You Want to Teach")}
+                    <label className="mb-2 block text-sm font-medium">
+                      {getTranslation(
+                        "languageExperts.form.teachingLanguage.label",
+                        "Language You Want to Teach",
+                      )}
                     </label>
                     <div className="flex gap-2">
                       {["English", "Spanish"].map((lang) => (
@@ -342,10 +387,10 @@ const BecomeAnExpertUser = () => {
                           key={lang}
                           type="button"
                           onClick={() => handleLanguageSelection(lang)}
-                          className={`w-32 py-2 px-4 border border-gray-300 rounded-full ${
+                          className={`w-32 rounded-full border border-gray-300 px-4 py-2 ${
                             formData.teachingLanguage === lang
                               ? "bg-[#14B82C] text-[#042f0c]"
-                              : "bg-gray-100 text-gray-600 border border-gray-300"
+                              : "border border-gray-300 bg-gray-100 text-gray-600"
                           }`}
                         >
                           {lang}
@@ -355,8 +400,11 @@ const BecomeAnExpertUser = () => {
                   </div>
 
                   <div>
-                    <label className="block mb-2 text-sm font-medium">
-                      {getTranslation("languageExperts.form.proficiencyLevel.label", "Proficiency Level You Can Teach")}
+                    <label className="mb-2 block text-sm font-medium">
+                      {getTranslation(
+                        "languageExperts.form.proficiencyLevel.label",
+                        "Proficiency Level You Can Teach",
+                      )}
                     </label>
                     <div className="flex gap-2">
                       {["Beginner", "Intermediate", "Advanced"].map((level) => (
@@ -364,15 +412,15 @@ const BecomeAnExpertUser = () => {
                           key={level}
                           type="button"
                           onClick={() => handleProficiencyChange(level)}
-                          className={`w-32 py-2 px-4 rounded-full ${
+                          className={`w-32 rounded-full px-4 py-2 ${
                             formData.proficiencyLevel === level
                               ? "bg-[#14B82C] text-[#042f0c]"
-                              : "bg-gray-100 text-gray-600 border border-gray-300"
+                              : "border border-gray-300 bg-gray-100 text-gray-600"
                           }`}
                         >
                           {getTranslation(
                             `languageExperts.form.proficiencyLevel.levels.${level.toLowerCase()}`,
-                            level
+                            level,
                           )}
                         </button>
                       ))}
@@ -380,30 +428,37 @@ const BecomeAnExpertUser = () => {
                   </div>
                 </div>
               </form>
-            </div>
-            <div className="flex justify-between mt-12">
-              <button
-                onClick={() => navigate(-1)}
-                className="px-8 py-3 text-[#042f0c] border border-[#5d5d5d] rounded-full"
-              >
-                {getTranslation("languageExperts.buttons.cancel", "Cancel")}
-              </button>
-              <button
-                disabled={
-                  loading ||
-                  !formData.name ||
-                  !formData.nativeLanguage ||
-                  !formData.aboutYourself ||
-                  !formData.teachingLanguage ||
-                  !formData.country
-                }
-                className="px-8 py-3 text-[#042f0c] bg-[#14b82c] border border-[#5d5d5d] rounded-full disabled:bg-[#b9f9c2] disabled:text-[#b0b0b0] disabled:border-[#b0b0b0]"
-                onClick={handleSubmit}
-              >
-                {loading
-                  ? getTranslation("languageExperts.buttons.submitting", "Submitting...")
-                  : getTranslation("languageExperts.buttons.submit", "Submit Application")}
-              </button>
+
+              <div className="mt-12 flex justify-between">
+                <button
+                  onClick={() => navigate(-1)}
+                  className="rounded-full border border-[#5d5d5d] px-8 py-3 text-[#042f0c]"
+                >
+                  {getTranslation("languageExperts.buttons.cancel", "Cancel")}
+                </button>
+                <button
+                  disabled={
+                    loading ||
+                    !formData.name ||
+                    !formData.nativeLanguage ||
+                    !formData.aboutYourself ||
+                    !formData.teachingLanguage ||
+                    !formData.country
+                  }
+                  className="rounded-full border border-[#5d5d5d] bg-[#14b82c] px-8 py-3 text-[#042f0c] disabled:border-[#b0b0b0] disabled:bg-[#b9f9c2] disabled:text-[#b0b0b0]"
+                  onClick={handleSubmit}
+                >
+                  {loading
+                    ? getTranslation(
+                        "languageExperts.buttons.submitting",
+                        "Submitting...",
+                      )
+                    : getTranslation(
+                        "languageExperts.buttons.submit",
+                        "Submit Application",
+                      )}
+                </button>
+              </div>
             </div>
           </div>
         </div>

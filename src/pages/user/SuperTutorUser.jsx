@@ -9,14 +9,14 @@ const ChatMessage = ({ message, isBot }) => (
     <div
       className={`max-w-[80%] p-3 ${
         isBot
-          ? "bg-gray-100 text-[#2c2c2c] border rounded-tr-2xl rounded-bl-2xl rounded-br-2xl"
-          : "bg-[#14b82c] text-white border border-[#14561d] rounded-tl-2xl rounded-bl-2xl rounded-br-2xl"
+          ? "rounded-bl-2xl rounded-br-2xl rounded-tr-2xl border bg-gray-100 text-[#2c2c2c]"
+          : "rounded-bl-2xl rounded-br-2xl rounded-tl-2xl border border-[#14561d] bg-[#14b82c] text-white"
       }`}
     >
       {message ? (
         <p className="text-lg">{message}</p>
       ) : (
-        <Ellipsis className="w-6 h-6 text-gray-600 animate-spin" />
+        <Ellipsis className="h-6 w-6 animate-spin text-gray-600" />
       )}
     </div>
   </div>
@@ -67,7 +67,7 @@ const SuperTutorChat = () => {
               },
             ],
           }),
-        }
+        },
       );
 
       const data = await response.json();
@@ -95,8 +95,8 @@ const SuperTutorChat = () => {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-180px)]">
-      <div className="flex-1 px-4 overflow-y-auto scrollbar-hide">
+    <div className="flex h-[calc(100vh-180px)] flex-col">
+      <div className="scrollbar-hide flex-1 overflow-y-auto px-4">
         {messages.map((message, index) => (
           <ChatMessage
             key={index}
@@ -115,14 +115,14 @@ const SuperTutorChat = () => {
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             placeholder="Type your message..."
-            className="w-full px-4 py-3 pr-12 text-[#2c2c2c] bg-white border rounded-full focus:outline-none focus:border-green-500"
+            className="w-full rounded-full border bg-white px-4 py-3 pr-12 text-[#2c2c2c] focus:border-green-500 focus:outline-none"
           />
           <button
             type="submit"
             disabled={isLoading}
-            className={`p-2 text-white bg-yellow-500 rounded-full ${
+            className={`rounded-full bg-yellow-500 p-2 text-white ${
               isLoading
-                ? "opacity-50 cursor-not-allowed"
+                ? "cursor-not-allowed opacity-50"
                 : "hover:bg-yellow-600"
             }`}
           >
@@ -142,17 +142,17 @@ const SuperTutorUser = () => {
       <Tooltip />
 
       <div className="flex h-screen bg-white">
-        <div className="flex-shrink-0 w-64 h-full ">
+        <div className="h-full w-[272px] flex-shrink-0 p-4">
           <Sidebar user={user} />
         </div>
-        <div className="flex-1 overflow-x-auto min-w-[calc(100%-16rem)] h-full">
-          <div className="flex-1 p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl m-2">
-            <div className="flex items-center justify-between pb-4 mb-6 border-b">
+        <div className="min-w-[calc(100% - 272px)] h-[calc(100vh-0px)] flex-1 overflow-x-auto p-4 pl-0">
+          <div className="h-[calc(100vh-32px)] overflow-y-auto rounded-3xl border border-[#e7e7e7] bg-white p-[16px]">
+            <div className="mb-6 flex items-center justify-between border-b pb-4">
               <div className="flex items-center gap-2">
                 <img
                   alt="supertutor"
                   src="/svgs/supertutor-panda.svg"
-                  className="w-auto h-auto"
+                  className="h-auto w-auto"
                 />
                 <h1 className="ml-1 text-4xl font-semibold">Super Tutor</h1>
 
@@ -168,7 +168,7 @@ const SuperTutorUser = () => {
                   <Tooltip id="image-tooltip" />
                 </div>
               </div>
-              <button className="p-3 text-xl font-medium text-black bg-gray-100 rounded-full">
+              <button className="rounded-full bg-gray-100 p-3 text-xl font-medium text-black">
                 <RotateCw />
               </button>
             </div>

@@ -482,7 +482,9 @@ const MessagesUser = () => {
   if (loading) {
     return (
       <div className="flex min-h-screen bg-white">
-        <Sidebar user={user} />
+        <div className="h-full w-[272px] flex-shrink-0 p-4">
+          <Sidebar user={user} />
+        </div>
         <div className="flex flex-1 items-center justify-center">
           <ClipLoader color="#14B82C" size={50} />
         </div>
@@ -493,44 +495,46 @@ const MessagesUser = () => {
   return (
     <div className="flex h-screen bg-white">
       {/* Sidebar */}
-      <div className="h-full w-64 flex-shrink-0">
+      <div className="h-full w-[272px] flex-shrink-0 p-4">
         <Sidebar user={user} />
       </div>
 
       {/* Main Content */}
-      <div className="h-full min-w-[calc(100%-16rem)] flex-1 overflow-x-auto">
-        <div className="m-2 flex-1 rounded-3xl border-2 border-[#e7e7e7] bg-white px-6 pt-4">
+      <div className="min-w-[calc(100% - 272px)] h-[calc(100vh-0px)] flex-1 overflow-x-auto p-4 pl-0">
+        <div className="h-[calc(100vh-32px)] overflow-y-auto rounded-3xl border border-[#e7e7e7] bg-white p-[16px]">
           <div className="mb-6 flex items-center justify-between border-b pb-4">
             <div className="flex items-center gap-4">
               <h1 className="text-4xl font-semibold">Community</h1>
             </div>
           </div>
-          <div className="m-2 flex h-[calc(100vh-125px)] flex-1 rounded-3xl bg-white">
+          <div className="m-2 flex h-[calc(100vh-157px)] flex-1 rounded-3xl bg-white">
             <div className="flex w-96 flex-col overflow-hidden rounded-2xl bg-[#f6f6f6] p-4">
               <div className="mb-4 flex w-full justify-center sm:w-auto">
-                <div className="relative inline-flex rounded-full border border-gray-300 bg-gray-100 p-1">
-                  <div
-                    className="absolute left-0 top-0 h-full rounded-full border border-gray-800 bg-amber-400 transition-all duration-300 ease-in-out"
-                    style={{
-                      transform:
-                        activeTab === "standard"
-                          ? "translateX(0)"
-                          : "translateX(82.0%)",
-                      width: activeTab === "standard" ? "45%" : "55%",
-                    }}
-                  />
-                  <button
-                    onClick={() => setActiveTab("standard")}
-                    className="text-md relative z-10 w-2/5 whitespace-nowrap rounded-full px-6 py-1 font-medium text-gray-800 transition-colors"
-                  >
-                    Standard Chats
-                  </button>
-                  <button
-                    onClick={() => setActiveTab("bammbuu")}
-                    className="text-md relative z-10 w-3/5 whitespace-nowrap rounded-full px-6 py-1 font-medium text-gray-800 transition-colors"
-                  >
-                    bammbuuu+ Chats
-                  </button>
+                <div className="mb-10 flex w-full justify-center sm:w-auto">
+                  <div className="relative inline-flex rounded-full border border-[#888888] bg-white p-1">
+                    <div
+                      className="absolute left-0 top-0 h-full rounded-full border border-[#042F0C] bg-[#FFBF00] transition-all duration-300 ease-in-out"
+                      style={{
+                        transform:
+                          activeTab === "standard"
+                            ? "translateX(0)"
+                            : "translateX(82.0%)",
+                        width: activeTab === "standard" ? "47.5%" : "55%",
+                      }}
+                    />
+                    <button
+                      onClick={() => setActiveTab("standard")}
+                      className="relative z-10 whitespace-nowrap rounded-full px-[22px] py-1 text-sm font-medium text-[#042f0c] transition-colors"
+                    >
+                      Standard Chats
+                    </button>
+                    <button
+                      onClick={() => setActiveTab("bammbuu")}
+                      className="relative z-10 whitespace-nowrap rounded-full px-6 py-1 font-medium text-black transition-colors"
+                    >
+                      bammbuuu+ Chats
+                    </button>
+                  </div>
                 </div>
               </div>
               <div className="relative mb-4">

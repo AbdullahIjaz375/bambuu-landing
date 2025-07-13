@@ -74,15 +74,15 @@ const LanguagesUser = () => {
 
           if (language === "Spanish") {
             classMemberIds.forEach((id) =>
-              tempLanguageData.spanish.studentIds.add(id)
+              tempLanguageData.spanish.studentIds.add(id),
             );
           } else if (language === "English") {
             classMemberIds.forEach((id) =>
-              tempLanguageData.english.studentIds.add(id)
+              tempLanguageData.english.studentIds.add(id),
             );
           } else if (language === "English-Spanish") {
             classMemberIds.forEach((id) =>
-              tempLanguageData.exchange.studentIds.add(id)
+              tempLanguageData.exchange.studentIds.add(id),
             );
           }
         }
@@ -95,28 +95,28 @@ const LanguagesUser = () => {
 
           if (language === "Spanish") {
             groupMemberIds.forEach((id) =>
-              tempLanguageData.spanish.studentIds.add(id)
+              tempLanguageData.spanish.studentIds.add(id),
             );
           } else if (language === "English") {
             groupMemberIds.forEach((id) =>
-              tempLanguageData.english.studentIds.add(id)
+              tempLanguageData.english.studentIds.add(id),
             );
           } else if (language === "English-Spanish") {
             groupMemberIds.forEach((id) =>
-              tempLanguageData.exchange.studentIds.add(id)
+              tempLanguageData.exchange.studentIds.add(id),
             );
           }
         }
 
         // Convert Sets to Arrays for easier handling
         tempLanguageData.spanish.studentIds = Array.from(
-          tempLanguageData.spanish.studentIds
+          tempLanguageData.spanish.studentIds,
         );
         tempLanguageData.english.studentIds = Array.from(
-          tempLanguageData.english.studentIds
+          tempLanguageData.english.studentIds,
         );
         tempLanguageData.exchange.studentIds = Array.from(
-          tempLanguageData.exchange.studentIds
+          tempLanguageData.exchange.studentIds,
         );
 
         // Fetch student profile pictures (limit to 12 per language for display)
@@ -131,9 +131,8 @@ const LanguagesUser = () => {
             }
             return "";
           });
-          tempLanguageData[langKey].studentPhotos = await Promise.all(
-            photoPromises
-          );
+          tempLanguageData[langKey].studentPhotos =
+            await Promise.all(photoPromises);
         }
 
         setLanguageData(tempLanguageData);
@@ -153,22 +152,22 @@ const LanguagesUser = () => {
 
   return (
     <div className="flex h-screen bg-white">
-      <div className="flex-shrink-0 w-64 h-full">
+      <div className="h-full w-[272px] flex-shrink-0 p-4">
         <Sidebar user={user} />
       </div>
 
-      <div className="flex-1 overflow-x-auto min-w-[calc(100%-16rem)] h-full">
-        <div className="h-[calc(100vh-1rem)] p-8 bg-white border-2 border-[#e7e7e7] rounded-3xl m-2 overflow-y-auto">
+      <div className="min-w-[calc(100% - 272px)] h-[calc(100vh-0px)] flex-1 overflow-x-auto p-4 pl-0">
+        <div className="h-[calc(100vh-32px)] overflow-y-auto rounded-3xl border border-[#e7e7e7] bg-white p-[16px]">
           {/* Header */}
-          <div className="flex flex-col justify-between gap-4 pb-4 mb-6 border-b sm:flex-row sm:items-center">
+          <div className="mb-6 flex flex-col justify-between gap-4 border-b pb-4 sm:flex-row sm:items-center">
             <div className="flex items-center gap-4">
               <button
-                className="flex-shrink-0 p-3 transition-colors bg-gray-100 rounded-full hover:bg-gray-200"
+                className="flex-shrink-0 rounded-full bg-gray-100 p-3 transition-colors hover:bg-gray-200"
                 onClick={handleBack}
               >
-                <ArrowLeft className="w-6 h-6" />
+                <ArrowLeft className="h-6 w-6" />
               </button>
-              <h1 className="text-4xl font-semibold whitespace-nowrap">
+              <h1 className="whitespace-nowrap text-4xl font-semibold">
                 {t("learnLanguage.title")}
               </h1>
             </div>
@@ -182,13 +181,13 @@ const LanguagesUser = () => {
 
               const students = languageData[card.id].studentPhotos.slice(
                 0,
-                MAX_DISPLAY_PHOTOS
+                MAX_DISPLAY_PHOTOS,
               );
               const studentCount = languageData[card.id].studentIds.length;
               // Only show additional count (beyond what's displayed in photos)
               const additionalStudents = Math.max(
                 0,
-                studentCount - students.length
+                studentCount - students.length,
               );
 
               return (
@@ -197,38 +196,38 @@ const LanguagesUser = () => {
                   onClick={() => navigate(card.path)}
                   className={`flex items-center gap-6 p-6 ${card.bgColor} rounded-3xl border ${card.borderColor} cursor-pointer`}
                 >
-                  <div className="flex-shrink-0 w-16 h-16 overflow-hidden rounded-full">
+                  <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-full">
                     <img
                       src={card.imgSrc}
                       alt={card.alt}
-                      className="object-cover w-full h-full"
+                      className="h-full w-full object-cover"
                     />
                   </div>
                   <div className="flex flex-col items-start justify-between space-y-2">
-                    <span className="text-xl font-bold whitespace-nowrap">
+                    <span className="whitespace-nowrap text-xl font-bold">
                       {card.title}
                     </span>
                     <div className="flex items-center">
-                      <div className="flex relative">
+                      <div className="relative flex">
                         {students.length > 0 ? (
                           <>
                             {students.map((photo, i) => (
                               <div
                                 key={i}
-                                className="flex items-center justify-center w-8 h-8 bg-white border-2 border-white rounded-full -mr-2"
+                                className="-mr-2 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-white"
                                 style={{ zIndex: students.length - i }}
                               >
                                 {photo ? (
                                   <img
                                     src={photo}
                                     alt={`Student ${i + 1}`}
-                                    className="object-cover w-full h-full rounded-full"
+                                    className="h-full w-full rounded-full object-cover"
                                   />
                                 ) : (
                                   <img
                                     src={"/images/panda.png"}
                                     alt={`Student ${i + 1}`}
-                                    className="object-cover w-full h-full rounded-full opacity-75"
+                                    className="h-full w-full rounded-full object-cover opacity-75"
                                   />
                                 )}
                               </div>
@@ -236,7 +235,7 @@ const LanguagesUser = () => {
 
                             {/* Only show the count badge if there are MORE users than shown in the photos */}
                             {additionalStudents > 0 && (
-                              <div className="flex items-center justify-center ml-2 text-xs font-medium text-green-800 bg-green-100 rounded-full px-2 py-1">
+                              <div className="ml-2 flex items-center justify-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
                                 +
                                 {additionalStudents > 999
                                   ? `${Math.floor(additionalStudents / 1000)}k`
@@ -247,7 +246,7 @@ const LanguagesUser = () => {
                         ) : (
                           <div className="flex items-center justify-center text-xs font-medium text-gray-600">
                             {studentCount > 0 ? (
-                              <div className="flex items-center justify-center text-xs font-medium text-green-800 bg-green-100 rounded-full px-2 py-1">
+                              <div className="flex items-center justify-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
                                 {studentCount}{" "}
                                 {studentCount === 1 ? "user" : "users"}
                               </div>

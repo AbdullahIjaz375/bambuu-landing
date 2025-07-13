@@ -223,12 +223,12 @@ const EditClassPage = () => {
 
   return (
     <div className="flex h-screen bg-white">
-      <div className="h-full w-64 flex-shrink-0">
+      <div className="h-full w-[272px] flex-shrink-0 p-4">
         <Sidebar user={user} />
       </div>
-      <div className="h-full min-w-[calc(100%-16rem)] flex-1 overflow-x-auto">
-        <div className="flex h-full flex-col">
-          <div className="m-2 flex-1 rounded-3xl border-2 border-[#e7e7e7] bg-white p-8">
+      <div className="min-w-[calc(100% - 272px)] h-[calc(100vh-0px)] flex-1 overflow-x-auto p-4 pl-0">
+        <div className="h-[calc(100vh-32px)] overflow-y-auto rounded-3xl border border-[#e7e7e7] bg-white p-[16px]">
+          <div className="flex h-full flex-col">
             {/* Fixed Header Section */}
             <div className="sticky top-0 z-10 bg-white">
               <div className="mb-6 flex items-center justify-between border-b pb-4">
@@ -332,7 +332,7 @@ const EditClassPage = () => {
                       }
                       maxLength={400}
                       rows={3}
-                      className="w-full rounded-3xl border border-gray-300 p-2 focus:border-[#14B82C] focus:outline-none focus:ring-0"
+                      className="w-full resize-none rounded-3xl border border-gray-300 p-2 focus:border-[#14B82C] focus:outline-none focus:ring-0"
                     />
                     <div className="mt-1 text-right text-xs text-gray-500">
                       {classData.classDescription.length}/400 characters

@@ -156,7 +156,9 @@ const LanguageExpertsPage = () => {
   if (loading) {
     return (
       <div className="flex min-h-screen bg-white">
-        <Sidebar user={user} />
+        <div className="h-full w-[272px] flex-shrink-0 p-4">
+          <Sidebar user={user} />
+        </div>
         <div className="flex flex-1 items-center justify-center">
           <ClipLoader color="#14B82C" size={50} />
         </div>
@@ -166,12 +168,12 @@ const LanguageExpertsPage = () => {
 
   return (
     <div className="flex min-h-screen flex-col bg-white lg:flex-row">
-      <div className="w-full lg:w-64 lg:flex-shrink-0">
+      <div className="h-full w-[272px] flex-shrink-0 p-4">
         <Sidebar user={user} />
       </div>
 
-      <div className="min-w-0 flex-1 overflow-auto">
-        <div className="m-2 h-[calc(100vh-1rem)] overflow-y-auto rounded-3xl border-2 border-[#e7e7e7] bg-white p-8">
+      <div className="min-w-[calc(100% - 272px)] h-[calc(100vh-0px)] flex-1 overflow-x-auto p-4 pl-0">
+        <div className="h-[calc(100vh-32px)] overflow-y-auto rounded-3xl border border-[#e7e7e7] bg-white p-[16px]">
           {/* Header */}
           <div className="mb-6 flex flex-col justify-between gap-4 border-b pb-4 sm:flex-row sm:items-center">
             <div className="flex items-center gap-4">
