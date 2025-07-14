@@ -170,6 +170,7 @@ const BookingFlowModal = ({
   ]);
 
   // Add a useEffect to fetch exam prep slots when step 6 is reached and confirmedInstructor is set
+  // Only fetch slots, don't automatically advance to step 7
   useEffect(() => {
     if (step === 6 && confirmedInstructor?.uid && mode === "exam") {
       setLoadingExamPrepSlots(true);
@@ -197,9 +198,7 @@ const BookingFlowModal = ({
             });
           });
           setExamPrepSlots(slotMap);
-
-          setShowExamClassSlots(true);
-          setStep(7);
+          // Don't automatically advance to step 7 - let user interaction handle it
         })
         .catch((err) => {
           setExamPrepSlots({});
@@ -342,46 +341,44 @@ const BookingFlowModal = ({
   const handleExamPrepStart = async () => {
     setGlobalLoading(true);
     setShowExamPrepStart(false);
+
+    // If slots are already loaded, use them; otherwise fetch them
+    if (Object.keys(examPrepSlots).length === 0 && confirmedInstructor?.uid) {
+      setLoadingExamPrepSlots(true);
+      try {
+        const data = await getExamPrepClassSlots(confirmedInstructor.uid);
+        const slotMap = {};
+        (data.examPrepSlots || []).forEach((slotDay) => {
+          (slotDay.times || []).forEach((slot) => {
+            if (!slot.time || slot.booked) return;
+            const dateObj = new Date(slot.time);
+            if (isNaN(dateObj.getTime())) return;
+            const year = dateObj.getFullYear();
+            const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+            const day = String(dateObj.getDate()).padStart(2, "0");
+            const dateKey = `${year}-${month}-${day}`;
+            const display = dateObj
+              .toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+              })
+              .replace(/^0/, "");
+            if (!slotMap[dateKey]) slotMap[dateKey] = [];
+            slotMap[dateKey].push({ display, utc: slot.time });
+          });
+        });
+        setExamPrepSlots(slotMap);
+      } catch (err) {
+        setExamPrepSlots({});
+      } finally {
+        setLoadingExamPrepSlots(false);
+      }
+    }
+
     setShowExamClassSlots(true);
     setStep(7);
-    if (!confirmedInstructor?.uid) {
-      setGlobalLoading(false);
-      return;
-    }
-    setLoadingExamPrepSlots(true);
-    try {
-      const data = await getExamPrepClassSlots(confirmedInstructor.uid);
-      const slotMap = {};
-      (data.examPrepSlots || []).forEach((slotDay) => {
-        (slotDay.times || []).forEach((slot) => {
-          if (!slot.time || slot.booked) return;
-          const dateObj = new Date(slot.time);
-          if (isNaN(dateObj.getTime())) return;
-          const year = dateObj.getFullYear();
-          const month = String(dateObj.getMonth() + 1).padStart(2, "0");
-          const day = String(dateObj.getDate()).padStart(2, "0");
-          const dateKey = `${year}-${month}-${day}`;
-          const display = dateObj
-            .toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-              hour12: true,
-            })
-            .replace(/^0/, "");
-          if (!slotMap[dateKey]) slotMap[dateKey] = [];
-          slotMap[dateKey].push({ display, utc: slot.time });
-        });
-      });
-      setExamPrepSlots(slotMap);
-
-      setShowExamClassSlots(true);
-      setStep(7);
-    } catch (err) {
-      setExamPrepSlots({});
-    } finally {
-      setLoadingExamPrepSlots(false);
-      setGlobalLoading(false);
-    }
+    setGlobalLoading(false);
   };
   const handleExamClassSlotsComplete = (slots) => {
     setShowExamClassSlots(false);

@@ -1103,7 +1103,7 @@ const Signup = ({ onNext, onClose, isModal = false }) => {
 
   return (
     <>
-      <div className="flex items-center justify-center bg-gray-50">
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
         <div className="w-full max-w-md space-y-4 rounded-[40px] border border-[#e7e7e7] bg-white p-6">
           {/* Language Selector */}
           <div className="mb-4 flex justify-end">
