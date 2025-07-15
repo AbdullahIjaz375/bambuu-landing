@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Slider from "react-slick";
 
 const splashContent = [
   {
@@ -34,7 +33,6 @@ const SplashScreen = () => {
       navigate("/signup");
     } else {
       setCurrentStep((prev) => prev + 1);
-      sliderRef.current.slickNext();
     }
   };
 
@@ -42,86 +40,92 @@ const SplashScreen = () => {
     navigate("/signup");
   };
 
-  const settings = {
-    dots: false,
-    infinite: false,
-    speed: 500,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    swipe: true,
-    beforeChange: (oldIndex, newIndex) => setCurrentStep(newIndex),
-    arrows: false,
-  };
-
-  const sliderRef = React.useRef();
   const isLastStep = currentStep === splashContent.length - 1;
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-4 bg-[#f0fdf1]">
-      <div className="flex flex-col items-center w-full max-w-md space-y-8">
-        {/* Panda Mascot */}
-        <div className="">
-          <img
-            src="/svgs/panda-splash.svg"
-            alt="Bammbuu Panda"
-            className="w-full h-auto"
-          />
-        </div>
+    <div className="flex min-h-screen w-full flex-col items-center justify-center bg-[#f0fdf1]">
+      <div className="flex w-full max-w-sm flex-col items-center">
+        {/* Top Section with Panda and Welcome */}
+        <div className="mb-16 flex flex-col items-center">
+          <div className="flex flex-col items-center gap-8">
+            {/* Panda Mascot */}
+            <div className="flex h-56 w-44 items-center justify-center">
+              <img
+                src="/svgs/panda-splash.svg"
+                alt="Bammbuu Panda"
+                className="w-full max-w-[177.5px]"
+              />
+            </div>
 
-        {/* Welcome Text */}
-        <div className="space-y-4 text-center">
-          <h1 className="text-2xl font-semibold text-black">Hi, Welcome to</h1>
-          <div className="">
-            <img
-              src="/svgs/logo-splash.svg"
-              alt="Bammbuu Panda"
-              className="w-full h-auto"
-            />
+            {/* Welcome Text */}
+            <div className="text-center">
+              <h1 className="font-urbanist text-2xl font-semibold text-black">
+                Hi, Welcome to
+              </h1>
+            </div>
+
+            {/* Logo */}
+            <div className="flex w-full justify-center">
+              <img
+                src="/svgs/logo-splash.svg"
+                alt="Bammbuu Logo"
+                className="h-10 w-64"
+              />
+            </div>
           </div>
         </div>
 
-        {/* Slider Content */}
-        <div className="w-full">
-          <Slider ref={sliderRef} {...settings}>
+        {/* Content Section */}
+        <div className="mb-24 flex w-full flex-col items-center gap-6">
+          {/* Slider Content */}
+          <div className="w-full">
             {splashContent.map((content, index) => (
-              <div key={index} className="outline-none">
-                <div className="text-center space-y-4 min-h-[120px]">
-                  <h2 className="text-3xl font-semibold text-black">
+              <div
+                key={index}
+                className={`outline-none ${index === currentStep ? "block" : "hidden"}`}
+              >
+                <div className="space-y-4 text-center">
+                  <h2 className="font-urbanist text-[32px] font-extrabold text-black">
                     {content.title}
                   </h2>
-                  <p className="px-4 text-lg text-center text-black">
+                  <p className="font-urbanist text-base font-normal leading-relaxed text-black">
                     {content.description}
                   </p>
                 </div>
               </div>
             ))}
-          </Slider>
-        </div>
+          </div>
 
-        {/* Progress Dots */}
-        <div className="flex space-x-2">
-          {splashContent.map((_, index) => (
-            <div
-              key={index}
-              className={`h-2 w-2 rounded-full ${
-                index === currentStep ? "bg-[#14B82C]" : "bg-[#83F292]"
-              }`}
-            />
-          ))}
+          {/* Progress Dots */}
+          <div className="flex items-center gap-1">
+            {splashContent.map((_, index) => (
+              <div
+                key={index}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  index === currentStep
+                    ? "w-6 bg-[#14B82C]"
+                    : "w-2 bg-[#83F292]"
+                }`}
+              />
+            ))}
+          </div>
         </div>
 
         {/* Navigation Buttons */}
-        <div className="w-full space-y-6">
+        <div className="flex w-full flex-col items-center gap-4">
           <button
             onClick={handleNext}
-            className="w-full py-3 font-semibold text-black bg-[#14B82C] rounded-full border border-black"
+            className="flex h-12 w-full items-center justify-center rounded-3xl border border-[#042F0C] bg-[#14B82C] px-4 transition-colors duration-200 hover:bg-[#12A228]"
           >
-            {isLastStep ? "Get Started" : "Next"}
+            <span className="font-urbanist text-base font-medium text-black">
+              {isLastStep ? "Get Started" : "Next"}
+            </span>
           </button>
+
           {!isLastStep && (
             <button
               onClick={handleSkip}
-              className="w-full text-sm text-[#146721] hover:cursor-pointer"
+              className="w-full text-center font-urbanist text-sm font-normal text-[#042F0C] transition-colors duration-200 hover:text-[#146721]"
             >
               Skip
             </button>

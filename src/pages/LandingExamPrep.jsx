@@ -175,15 +175,13 @@ const LandingExamPrep = () => {
             </div>
           </div>
           <div className="mx-auto mt-10 flex w-full flex-col items-center">
-            <div className="flex min-h-[200px] w-full max-w-full items-center justify-center rounded-2xl bg-[#eaeaea] text-2xl font-medium text-[#b3b3b3] sm:min-h-[320px] sm:max-w-[1280px] sm:rounded-[3rem] sm:text-5xl lg:h-[720px]">
+            <div className="relative w-full max-w-[1280px] overflow-hidden rounded-[64px] bg-[#eaeaea] sm:rounded-[3rem]">
               <iframe
                 width="100%"
                 height="100%"
                 style={{
-                  minHeight: 200,
-                  minWidth: 200,
                   aspectRatio: "16/9",
-                  borderRadius: "1rem",
+                  display: "block",
                 }}
                 src="https://www.youtube.com/embed/OKv2evfTpvw"
                 title="YouTube video player"

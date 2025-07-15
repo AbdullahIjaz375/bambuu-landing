@@ -20,9 +20,9 @@ const ContactUs = () => {
     const message = e.target.message.value;
 
     const mailtoLink = `mailto:admin@bammbuu.com?subject=${encodeURIComponent(
-      "Contact Form Submission"
+      "Contact Form Submission",
     )}&body=${encodeURIComponent(
-      `Name: ${firstName} ${lastName}\nEmail: ${email}\nPhone: ${phone}\nMessage: ${message}`
+      `Name: ${firstName} ${lastName}\nEmail: ${email}\nPhone: ${phone}\nMessage: ${message}`,
     )}`;
 
     window.location.href = mailtoLink;
@@ -34,24 +34,24 @@ const ContactUs = () => {
       <div className="overflow-hidden font-urbanist">
         {/* Contact Us Section */}
         <div className="bg-[#E6FDE9] pb-32">
-          <div className="flex flex-col px-12 pt-4 ">
-            <div className="flex items-center justify-between ">
+          <div className="flex flex-col px-12 pt-4">
+            <div className="flex items-center justify-between">
               {/* Logo */}
               <Link
                 to="/"
-                className="text-4xl font-bold text-green-600 md:text-7xl "
+                className="text-4xl font-bold text-green-600 md:text-7xl"
               >
                 <img
                   alt="bambuu"
                   src="/images/bambuu-new-logo.png"
-                  className="w-40 h-auto md:w-auto"
+                  className="h-auto w-40 md:w-auto"
                 />
               </Link>
 
-              <div className="items-center space-x-4 ">
-                <Link className="text-sm text-gray-700 md:text-lg hover:text-green-600">
+              <div className="items-center space-x-4">
+                <Link className="text-base font-medium hover:text-green-600">
                   <Button
-                    className="text-black border-2 border-black"
+                    className="border border-[#042F0C] text-black"
                     size="md"
                     variant="filled"
                     color="#14b82c"
@@ -64,15 +64,15 @@ const ContactUs = () => {
               </div>
             </div>
           </div>
-          <div className="flex flex-col items-center justify-center px-4 mt-8 space-y-8 lg:space-y-16 lg:mt-20 lg:px-0">
-            <div className="flex flex-col items-center justify-center mb-6 space-y-4">
-              <h1 className="text-lg font-semibold text-center text-[#14B82C] lg:text-xl">
+          <div className="mt-8 flex flex-col items-center justify-center space-y-8 px-4 lg:mt-20 lg:space-y-16 lg:px-0">
+            <div className="mb-6 flex flex-col items-center justify-center space-y-4">
+              <h1 className="text-center text-lg font-semibold text-[#14B82C] lg:text-xl">
                 Contact Us
               </h1>
-              <h1 className="text-xl font-bold text-center text-[#042F0C] lg:text-5xl">
+              <h1 className="text-center text-xl font-bold text-[#042F0C] lg:text-5xl">
                 We’d love to hear from you
               </h1>
-              <h1 className="text-lg text-center text-black lg:text-2xl">
+              <h1 className="text-center text-lg text-black lg:text-2xl">
                 Please fill out this form.
               </h1>
             </div>
@@ -84,71 +84,71 @@ const ContactUs = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="max-w-xl p-8 mx-auto mt-20"
+          className="mx-auto mt-20 max-w-xl p-8"
         >
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="flex gap-4">
               <div className="flex-1">
-                <label className="block mb-1 text-sm font-medium text-gray-700">
+                <label className="mb-1 block text-sm font-medium text-gray-700">
                   First Name
                 </label>
                 <input
                   type="text"
                   name="firstName"
                   placeholder="enter your first name"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-full focus:outline-none focus:ring-1 focus:ring-green-500"
+                  className="w-full rounded-full border border-gray-200 px-4 py-3 focus:outline-none focus:ring-1 focus:ring-green-500"
                   required
                 />
               </div>
               <div className="flex-1">
-                <label className="block mb-1 text-sm font-medium text-gray-700">
+                <label className="mb-1 block text-sm font-medium text-gray-700">
                   Last Name
                 </label>
                 <input
                   type="text"
                   name="lastName"
                   placeholder="enter your last name"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-full focus:outline-none focus:ring-1 focus:ring-green-500"
+                  className="w-full rounded-full border border-gray-200 px-4 py-3 focus:outline-none focus:ring-1 focus:ring-green-500"
                   required
                 />
               </div>
             </div>
 
             <div>
-              <label className="block mb-1 text-sm font-medium text-gray-700">
+              <label className="mb-1 block text-sm font-medium text-gray-700">
                 Email
               </label>
               <input
                 type="email"
                 name="email"
                 placeholder="enter your email"
-                className="w-full px-4 py-3 border border-gray-200 rounded-full focus:outline-none focus:ring-1 focus:ring-green-500"
+                className="w-full rounded-full border border-gray-200 px-4 py-3 focus:outline-none focus:ring-1 focus:ring-green-500"
                 required
               />
             </div>
 
             <div>
-              <label className="block mb-1 text-sm font-medium text-gray-700">
+              <label className="mb-1 block text-sm font-medium text-gray-700">
                 Phone Number
               </label>
               <input
                 type="tel"
                 name="phone"
                 placeholder="enter your phone number"
-                className="w-full px-4 py-3 border border-gray-200 rounded-full focus:outline-none focus:ring-1 focus:ring-green-500"
+                className="w-full rounded-full border border-gray-200 px-4 py-3 focus:outline-none focus:ring-1 focus:ring-green-500"
                 required
               />
             </div>
 
             <div>
-              <label className="block mb-1 text-sm font-medium text-gray-700">
+              <label className="mb-1 block text-sm font-medium text-gray-700">
                 Message
               </label>
               <textarea
                 name="message"
                 placeholder="Leave us a message..."
                 rows="4"
-                className="w-full px-4 py-3 border border-gray-200 rounded-3xl focus:outline-none focus:ring-1 focus:ring-green-500"
+                className="w-full rounded-3xl border border-gray-200 px-4 py-3 focus:outline-none focus:ring-1 focus:ring-green-500"
                 required
               />
             </div>
@@ -157,7 +157,7 @@ const ContactUs = () => {
               <input
                 type="checkbox"
                 id="privacy"
-                className="text-green-600 border-gray-300 rounded focus:ring-green-500"
+                className="rounded border-gray-300 text-green-600 focus:ring-green-500"
                 required
               />
               <label htmlFor="privacy" className="text-sm text-gray-600">
@@ -171,7 +171,7 @@ const ContactUs = () => {
 
             <button
               type="submit"
-              className="w-full px-4 py-3 text-black transition-colors bg-[#14B82C] rounded-full hover:cursor-pointer border border-[#042F0C]"
+              className="w-full rounded-full border border-[#042F0C] bg-[#14B82C] px-4 py-3 text-black transition-colors hover:cursor-pointer"
             >
               Send message
             </button>

@@ -1239,7 +1239,7 @@ const Signup = ({ onNext, onClose, isModal = false }) => {
           </div>
 
           {/* Terms & Privacy */}
-          <div className="mb-4 text-center text-sm text-gray-500">
+          <div className="px-[42px] pt-8 text-center text-sm/[160%] text-[#9e9e9e]">
             <p>
               {t("signup.termsConditions", "By signing up, you agree to our")}{" "}
               <Link to="/terms" className="text-black hover:underline">

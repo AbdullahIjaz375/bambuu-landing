@@ -120,7 +120,7 @@ const GroupDetailsUser = ({ onClose }) => {
             return classDoc.exists()
               ? { id: classDoc.id, ...classDoc.data() }
               : null;
-          })
+          }),
         );
         setClasses(classesData.filter(Boolean));
       }
@@ -135,7 +135,7 @@ const GroupDetailsUser = ({ onClose }) => {
             return userDoc.exists()
               ? { id: userDoc.id, ...userDoc.data() }
               : null;
-          })
+          }),
         );
         setMembers(membersData.filter(Boolean));
       }
@@ -185,7 +185,7 @@ const GroupDetailsUser = ({ onClose }) => {
 
       // Remove user from group's memberIds
       const updatedMemberIds = groupData.memberIds.filter(
-        (id) => id !== user.uid
+        (id) => id !== user.uid,
       );
       await updateDoc(groupRef, {
         memberIds: updatedMemberIds,
@@ -193,7 +193,7 @@ const GroupDetailsUser = ({ onClose }) => {
 
       // Remove group from user's joinedGroups
       const updatedJoinedGroups = (user.joinedGroups || []).filter(
-        (id) => id !== group.id
+        (id) => id !== group.id,
       );
 
       // Update user document
@@ -241,7 +241,7 @@ const GroupDetailsUser = ({ onClose }) => {
 
       // Remove user from group's memberIds
       const updatedMemberIds = groupData.memberIds.filter(
-        (id) => id !== userId
+        (id) => id !== userId,
       );
       await updateDoc(groupRef, {
         memberIds: updatedMemberIds,
@@ -251,7 +251,7 @@ const GroupDetailsUser = ({ onClose }) => {
       const userDoc = await getDoc(userRef);
       const userData = userDoc.data();
       const updatedJoinedGroups = (userData.joinedGroups || []).filter(
-        (id) => id !== group.id
+        (id) => id !== group.id,
       );
 
       // Update user document
@@ -261,7 +261,7 @@ const GroupDetailsUser = ({ onClose }) => {
 
       // Update local state
       setMembers((prevMembers) =>
-        prevMembers.filter((member) => member.id !== userId)
+        prevMembers.filter((member) => member.id !== userId),
       );
       setShowRemoveConfirmation(false);
       setSelectedUser(null);
@@ -353,7 +353,7 @@ const GroupDetailsUser = ({ onClose }) => {
       if (classImage) {
         const imageRef = ref(
           storage,
-          `classes/${classId}/image_${Date.now()}_${classImage.name}`
+          `classes/${classId}/image_${Date.now()}_${classImage.name}`,
         );
         await uploadBytes(imageRef, classImage);
         imageUrl = await getDownloadURL(imageRef);
@@ -376,7 +376,7 @@ const GroupDetailsUser = ({ onClose }) => {
         dateValue.getMonth(),
         dateValue.getDate(),
         dateValue.getHours(),
-        dateValue.getMinutes()
+        dateValue.getMinutes(),
       );
 
       const newClass = {
@@ -520,15 +520,15 @@ const GroupDetailsUser = ({ onClose }) => {
                 if (memberData) {
                   await updateDoc(memberRef, {
                     enrolledClasses: (memberData.enrolledClasses || []).filter(
-                      (id) => id !== classId
+                      (id) => id !== classId,
                     ),
                     // Remove tutorStudentIds relationship if exists
                     tutorStudentIds: (memberData.tutorStudentIds || []).filter(
-                      (id) => id !== classData.adminId
+                      (id) => id !== classData.adminId,
                     ),
                   });
                 }
-              })
+              }),
             );
           }
 
@@ -541,23 +541,23 @@ const GroupDetailsUser = ({ onClose }) => {
             if (userType === "tutor") {
               await updateDoc(adminRef, {
                 tutorOfClasses: (adminData.tutorOfClasses || []).filter(
-                  (id) => id !== classId
+                  (id) => id !== classId,
                 ),
                 enrolledClasses: (adminData.enrolledClasses || []).filter(
-                  (id) => id !== classId
+                  (id) => id !== classId,
                 ),
                 // Update tutorStudentIds
                 tutorStudentIds: (adminData.tutorStudentIds || []).filter(
-                  (studentId) => !classData.classMemberIds?.includes(studentId)
+                  (studentId) => !classData.classMemberIds?.includes(studentId),
                 ),
               });
             } else {
               await updateDoc(adminRef, {
                 adminOfClasses: (adminData.adminOfClasses || []).filter(
-                  (id) => id !== classId
+                  (id) => id !== classId,
                 ),
                 enrolledClasses: (adminData.enrolledClasses || []).filter(
-                  (id) => id !== classId
+                  (id) => id !== classId,
                 ),
               });
             }
@@ -565,7 +565,7 @@ const GroupDetailsUser = ({ onClose }) => {
 
           // Delete class document
           await deleteDoc(classRef);
-        })
+        }),
       );
 
       // 2. Update group members
@@ -579,11 +579,11 @@ const GroupDetailsUser = ({ onClose }) => {
             if (memberData) {
               await updateDoc(memberRef, {
                 joinedGroups: (memberData.joinedGroups || []).filter(
-                  (id) => id !== group.id
+                  (id) => id !== group.id,
                 ),
               });
             }
-          })
+          }),
         );
       }
 
@@ -597,18 +597,18 @@ const GroupDetailsUser = ({ onClose }) => {
           userType === "tutor"
             ? {
                 tutorOfGroups: (adminData.tutorOfGroups || []).filter(
-                  (id) => id !== group.id
+                  (id) => id !== group.id,
                 ),
                 joinedGroups: (adminData.joinedGroups || []).filter(
-                  (id) => id !== group.id
+                  (id) => id !== group.id,
                 ),
               }
             : {
                 adminOfGroups: (adminData.adminOfGroups || []).filter(
-                  (id) => id !== group.id
+                  (id) => id !== group.id,
                 ),
                 joinedGroups: (adminData.joinedGroups || []).filter(
-                  (id) => id !== group.id
+                  (id) => id !== group.id,
                 ),
               };
         await updateDoc(adminRef, updateData);
@@ -621,29 +621,29 @@ const GroupDetailsUser = ({ onClose }) => {
       const updatedUser = JSON.parse(sessionStorage.getItem("user"));
       if (userType === "tutor") {
         updatedUser.tutorOfGroups = (updatedUser.tutorOfGroups || []).filter(
-          (id) => id !== group.id
+          (id) => id !== group.id,
         );
         updatedUser.tutorOfClasses = (updatedUser.tutorOfClasses || []).filter(
-          (id) => !group.classIds?.includes(id)
+          (id) => !group.classIds?.includes(id),
         );
         updatedUser.enrolledClasses = (
           updatedUser.enrolledClasses || []
         ).filter((id) => !group.classIds?.includes(id));
         updatedUser.joinedGroups = (updatedUser.joinedGroups || []).filter(
-          (id) => id !== group.id
+          (id) => id !== group.id,
         );
       } else {
         updatedUser.adminOfGroups = (updatedUser.adminOfGroups || []).filter(
-          (id) => id !== group.id
+          (id) => id !== group.id,
         );
         updatedUser.adminOfClasses = (updatedUser.adminOfClasses || []).filter(
-          (id) => !group.classIds?.includes(id)
+          (id) => !group.classIds?.includes(id),
         );
         updatedUser.enrolledClasses = (
           updatedUser.enrolledClasses || []
         ).filter((id) => !group.classIds?.includes(id));
         updatedUser.joinedGroups = (updatedUser.joinedGroups || []).filter(
-          (id) => id !== group.id
+          (id) => id !== group.id,
         );
       }
       sessionStorage.setItem("user", JSON.stringify(updatedUser));
@@ -666,7 +666,7 @@ const GroupDetailsUser = ({ onClose }) => {
   const renderClasses = () => {
     if (classes.length === 0) {
       return (
-        <div className="flex items-center justify-center h-96">
+        <div className="flex h-96 items-center justify-center">
           <EmptyState message="No classes available" />
         </div>
       );
@@ -749,7 +749,7 @@ const GroupDetailsUser = ({ onClose }) => {
 
     if (allMembers.length === 0) {
       return (
-        <div className="flex items-center justify-center h-48 sm:h-64 md:h-96">
+        <div className="flex h-48 items-center justify-center sm:h-64 md:h-96">
           <EmptyState message="No members available" />
         </div>
       );
@@ -760,21 +760,21 @@ const GroupDetailsUser = ({ onClose }) => {
         {allMembers.map((member) => (
           <div
             key={member.id}
-            className="flex items-center justify-between px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 md:py-2 border border-gray-200 hover:bg-gray-50 rounded-2xl sm:rounded-3xl"
+            className="flex items-center justify-between rounded-2xl border border-gray-200 px-2 py-1.5 hover:bg-gray-50 sm:rounded-3xl sm:px-3 sm:py-2 md:px-4 md:py-2"
           >
-            <div className="flex items-center gap-2 flex-grow overflow-hidden">
+            <div className="flex flex-grow items-center gap-2 overflow-hidden">
               <img
                 src={member.photoUrl || "/images/panda.png"}
                 alt={member.name}
-                className="object-cover flex-shrink-0 rounded-full w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9"
+                className="h-7 w-7 flex-shrink-0 rounded-full object-cover sm:h-8 sm:w-8 md:h-9 md:w-9"
               />
 
-              <div className="flex flex-row items-center justify-between w-full overflow-hidden">
-                <span className="text-xs sm:text-sm font-medium text-gray-900 truncate mr-1">
+              <div className="flex w-full flex-row items-center justify-between overflow-hidden">
+                <span className="mr-1 truncate text-xs font-medium text-gray-900 sm:text-sm">
                   {member.name}
                 </span>
                 {member.id === group.groupAdminId && (
-                  <span className="px-1 py-0.5 text-xs text-right whitespace-nowrap text-gray-500 bg-gray-200 rounded-full">
+                  <span className="whitespace-nowrap rounded-full bg-gray-200 px-1 py-0.5 text-right text-xs text-gray-500">
                     Admin
                   </span>
                 )}
@@ -786,7 +786,7 @@ const GroupDetailsUser = ({ onClose }) => {
                   <Menu.Target>
                     <button
                       onClick={(e) => e.stopPropagation()}
-                      className="flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 flex-shrink-0 ml-1"
+                      className="ml-1 flex h-6 w-6 flex-shrink-0 items-center justify-center sm:h-7 sm:w-7 md:h-8 md:w-8"
                     >
                       <EllipsisVertical size={16} className="text-gray-400" />
                     </button>
@@ -798,7 +798,7 @@ const GroupDetailsUser = ({ onClose }) => {
                         setSelectedUser(member);
                         setShowRemoveConfirmation(true);
                       }}
-                      className="text-red-500 font-urbanist"
+                      className="font-urbanist text-red-500"
                     >
                       Remove from group
                     </Menu.Item>
@@ -813,8 +813,8 @@ const GroupDetailsUser = ({ onClose }) => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-[100vh] ">
-        <div className="p-8 bg-white rounded-lg">
+      <div className="flex h-[100vh] items-center justify-center">
+        <div className="rounded-lg bg-white p-8">
           <ClipLoader color="#FFB800" size={40} />
         </div>
       </div>
@@ -824,11 +824,11 @@ const GroupDetailsUser = ({ onClose }) => {
   if (error) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-        <div className="p-8 bg-white rounded-lg">
+        <div className="rounded-lg bg-white p-8">
           <p className="mb-4 text-red-500">{error}</p>
           <button
             onClick={onClose}
-            className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
+            className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
           >
             Close
           </button>
@@ -843,18 +843,18 @@ const GroupDetailsUser = ({ onClose }) => {
   return (
     <>
       <div className="flex min-h-screen">
-        <div className="flex flex-1 m-1 border sm:m-2 md:m-6 rounded-xl md:rounded-3xl">
-          <div className="flex flex-col w-full p-2 bg-white sm:p-3 md:p-6 rounded-xl md:rounded-3xl">
-            <div className="flex items-center justify-between pb-2 mb-2 border-b sm:mb-3 md:pb-4 md:mb-6">
+        <div className="m-1 flex flex-1 rounded-xl border sm:m-2 md:m-6 md:rounded-3xl">
+          <div className="flex w-full flex-col rounded-xl bg-white p-2 sm:p-3 md:rounded-3xl md:p-6">
+            <div className="mb-2 flex items-center justify-between border-b pb-2 sm:mb-3 md:mb-6 md:pb-4">
               <div className="flex items-center gap-2 md:gap-4">
                 {" "}
                 <button
-                  className="p-1.5 bg-gray-100 rounded-full sm:p-2 md:p-3"
+                  className="rounded-full bg-gray-100 p-1.5 sm:p-2 md:p-3"
                   onClick={handleBack}
                 >
                   <ArrowLeft
                     size={16}
-                    className="sm:w-5 sm:h-5 md:w-6 md:h-6"
+                    className="sm:h-5 sm:w-5 md:h-6 md:w-6"
                   />
                 </button>
                 <h1 className="text-lg font-semibold sm:text-xl md:text-2xl lg:text-3xl">
@@ -862,79 +862,79 @@ const GroupDetailsUser = ({ onClose }) => {
                 </h1>
               </div>
             </div>{" "}
-            <div className="flex flex-col flex-1 min-h-0 gap-3 lg:flex-row md:gap-6">
+            <div className="flex min-h-0 flex-1 flex-col gap-3 md:gap-6 lg:flex-row">
               {/* Left sidebar */}
               <div
-                className={`w-full lg:w-1/3 p-3 sm:p-4 md:p-5 rounded-xl md:rounded-3xl flex-shrink-0 ${
+                className={`w-full flex-shrink-0 rounded-xl p-3 sm:p-4 md:rounded-3xl md:p-5 lg:w-1/3 ${
                   group.isPremium ? "bg-[#e6fce8]" : "bg-[#ffffea]"
                 }`}
               >
-                <div className="flex flex-col items-center justify-between h-full text-center max-w-full">
-                  <div className="flex flex-col items-center text-center max-w-full">
+                <div className="flex h-full max-w-full flex-col items-center justify-between text-center">
+                  <div className="flex max-w-full flex-col items-center text-center">
                     <img
                       src={group.imageUrl}
                       alt={group.groupName}
-                      className="object-cover w-12 h-12 mb-2 rounded-full sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24"
+                      className="mb-2 h-12 w-12 rounded-full object-cover sm:h-16 sm:w-16 md:h-20 md:w-20 lg:h-24 lg:w-24"
                     />
-                    <h3 className="mb-1 text-sm font-semibold truncate w-full sm:text-base md:text-lg lg:text-xl">
+                    <h3 className="mb-1 w-full truncate text-sm font-semibold sm:text-base md:text-lg lg:text-xl">
                       {group.groupName}
                     </h3>
-                    <div className="flex items-center gap-1 mb-1">
+                    <div className="mb-1 flex items-center gap-1">
                       <div className="flex flex-row items-center space-x-1">
                         <img
                           src={
                             group.groupLearningLanguage === "English"
                               ? "/svgs/xs-us.svg"
                               : group.groupLearningLanguage === "Spanish"
-                              ? "/svgs/xs-spain.svg"
-                              : "/svgs/eng-spanish-xs.svg"
+                                ? "/svgs/xs-spain.svg"
+                                : "/svgs/eng-spanish-xs.svg"
                           }
                           alt={
                             group.groupLearningLanguage === "English"
                               ? "US Flag"
                               : "Spain Flag"
                           }
-                          className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5"
+                          className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5"
                         />
                         <span className="text-xs sm:text-sm">
                           {group.groupLearningLanguage}
                         </span>
                       </div>
                     </div>
-                    <div className="flex justify-between items-center w-full gap-x-20">
-                      <span className="text-md text-gray-800 truncate max-w-[120px] sm:max-w-[160px] md:max-w-[200px]">
+                    <div className="flex w-full items-center justify-between gap-x-20">
+                      <span className="text-md max-w-[120px] truncate text-gray-800 sm:max-w-[160px] md:max-w-[200px]">
                         {group.groupAdminName} (Admin)
                       </span>
                       <div className="flex items-center gap-2">
                         <img
                           alt="bammbuu"
                           src="/svgs/users.svg"
-                          className="w-3 h-3 sm:w-4 sm:h-4"
+                          className="h-3 w-3 sm:h-4 sm:w-4"
                         />
                         <span className="text-xs text-gray-800">
                           {group?.memberIds.length}
                         </span>
                       </div>
                     </div>
-                    <div className="w-full mt-1 sm:mt-2 md:mt-3 px-1">
+                    <div className="mt-1 w-full px-1 sm:mt-2 md:mt-3">
                       <ShowDescription
                         description={group.groupDescription}
                         maxHeight={60}
                       />
                     </div>
                   </div>
-                  <div className="w-full mt-2 space-y-2">
+                  <div className="mt-2 w-full space-y-2">
                     {group.isPremium && (
-                      <div className="w-full scale-90 origin-top sm:scale-100">
+                      <div className="w-full origin-top scale-90 sm:scale-100">
                         <GroupInfoCard group={group} />
                       </div>
                     )}
                     <div className="w-full space-y-1 sm:space-y-2">
                       <button
-                        className={`w-full px-2 py-1 text-xs sm:text-sm md:text-base text-black border rounded-full ${
+                        className={`w-full rounded-full border px-2 py-1 text-xs text-black sm:text-sm md:text-base ${
                           group.isPremium
-                            ? "bg-[#bffcc4] border-[#0a0d0b]"
-                            : "bg-[#FFFBC5] border-black"
+                            ? "border-[#0a0d0b] bg-[#bffcc4]"
+                            : "border-black bg-[#FFFBC5]"
                         }`}
                         onClick={() => {
                           localStorage.setItem("activetab", "bammbuu");
@@ -946,13 +946,13 @@ const GroupDetailsUser = ({ onClose }) => {
                       {user.uid === group.groupAdminId ? (
                         <>
                           <button
-                            className="w-full px-2 py-1 text-xs sm:text-sm text-black bg-white border border-black rounded-full md:px-4 md:text-base"
+                            className="w-full rounded-full border border-black bg-white px-2 py-1 text-xs text-black sm:text-sm md:px-4 md:text-base"
                             onClick={() => navigate(`/editGroup/${groupId}`)}
                           >
                             {t("group-details.buttons.editDetails")}
                           </button>
                           <button
-                            className="w-full px-2 py-1 text-xs sm:text-sm text-red-500 bg-white border border-red-500 rounded-full md:px-4 md:text-base"
+                            className="w-full rounded-full border border-red-500 bg-white px-2 py-1 text-xs text-red-500 sm:text-sm md:px-4 md:text-base"
                             onClick={() => setShowDeleteConfirmation(true)}
                           >
                             {t("group-details.buttons.deleteGroup")}
@@ -960,7 +960,7 @@ const GroupDetailsUser = ({ onClose }) => {
                         </>
                       ) : (
                         <button
-                          className="w-full px-2 py-1 text-xs sm:text-sm text-red-500 border border-red-500 rounded-full md:px-4 md:text-base"
+                          className="w-full rounded-full border border-red-500 px-2 py-1 text-xs text-red-500 sm:text-sm md:px-4 md:text-base"
                           onClick={() => setShowLeaveConfirmation(true)}
                         >
                           {t("group-details.buttons.leaveGroup")}
@@ -971,12 +971,12 @@ const GroupDetailsUser = ({ onClose }) => {
                 </div>
               </div>
               {/* Main content */}{" "}
-              <div className="flex flex-col flex-1 min-h-0">
-                <div className="flex flex-col items-center justify-between gap-2 mb-3 md:flex-row md:mb-6 md:gap-0">
-                  <div className="flex justify-center w-full md:w-auto">
-                    <div className="relative inline-flex p-1 bg-gray-100 border border-gray-300 rounded-full">
+              <div className="flex min-h-0 flex-1 flex-col">
+                <div className="mb-3 flex flex-col items-center justify-between gap-2 md:mb-6 md:flex-row md:gap-0">
+                  <div className="flex w-full justify-center md:w-auto">
+                    <div className="relative inline-flex rounded-full border border-gray-300 bg-gray-100 p-1">
                       <div
-                        className="absolute top-0 left-0 h-full bg-[#FFBF00] border border-[#042F0C] rounded-full transition-all duration-300 ease-in-out"
+                        className="absolute left-0 top-0 h-full rounded-full border border-[#042F0C] bg-[#FFBF00] transition-all duration-300 ease-in-out"
                         style={{
                           transform: `translateX(${
                             activeTab === "Classes" ? "0" : "100%"
@@ -986,13 +986,13 @@ const GroupDetailsUser = ({ onClose }) => {
                       />
                       <button
                         onClick={() => setActiveTab("Classes")}
-                        className="relative z-10 px-3 sm:px-6 md:px-8 py-1 rounded-full text-[#042F0C] text-xs sm:text-sm md:text-base font-medium transition-colors whitespace-nowrap"
+                        className="relative z-10 whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium text-[#042F0C] transition-colors sm:px-6 sm:text-sm md:px-8 md:text-base"
                       >
                         {t("group-details.classes")}
                       </button>
                       <button
                         onClick={() => setActiveTab("Members")}
-                        className="relative z-10 px-3 sm:px-6 md:px-8 py-1 rounded-full text-[#042F0C] text-xs sm:text-sm md:text-base font-medium transition-colors whitespace-nowrap"
+                        className="relative z-10 whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium text-[#042F0C] transition-colors sm:px-6 sm:text-sm md:px-8 md:text-base"
                       >
                         {t("group-details.members")}
                       </button>
@@ -1001,7 +1001,7 @@ const GroupDetailsUser = ({ onClose }) => {
 
                   {user.uid === group.groupAdminId && (
                     <button
-                      className="w-full mt-2 md:mt-0 md:w-auto bg-[#14b82c] border border-[#19291c] text-[#19291c] px-2 sm:px-3 md:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm md:text-base"
+                      className="mt-2 w-full rounded-full border border-[#19291c] bg-[#14b82c] px-2 py-1.5 text-xs text-[#19291c] sm:px-3 sm:py-2 sm:text-sm md:mt-0 md:w-auto md:px-6 md:text-base"
                       onClick={handleAddClassButtonClick}
                     >
                       {t("group-details.buttons.createClass")}
@@ -1009,11 +1009,11 @@ const GroupDetailsUser = ({ onClose }) => {
                   )}
                 </div>
                 {loading ? (
-                  <div className="flex items-center justify-center flex-1">
+                  <div className="flex flex-1 items-center justify-center">
                     <ClipLoader
                       color="#FFB800"
                       size={30}
-                      className="sm:w-10 sm:h-10"
+                      className="sm:h-10 sm:w-10"
                     />
                   </div>
                 ) : (
@@ -1032,11 +1032,11 @@ const GroupDetailsUser = ({ onClose }) => {
       <Modal
         isOpen={isAddClassModalOpen}
         onRequestClose={() => setAddClassModalOpen(false)}
-        className="max-w-[90vw] w-[1000px] max-h-[90vh] p-4 md:p-6 lg:p-8 mx-auto bg-white rounded-3xl outline-none font-urbanist overflow-y-auto scrollbar-hide"
+        className="scrollbar-hide mx-auto max-h-[90vh] w-[1000px] max-w-[90vw] overflow-y-auto rounded-3xl bg-white p-4 font-urbanist outline-none md:p-6 lg:p-8"
         overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
       >
         <div className="relative">
-          <div className="flex items-center justify-between mb-6">
+          <div className="mb-6 flex items-center justify-between">
             <h2 className="text-2xl font-medium">{t("createClass.title")}</h2>
             <button
               onClick={() => setAddClassModalOpen(false)}
@@ -1047,16 +1047,16 @@ const GroupDetailsUser = ({ onClose }) => {
           </div>
 
           {/* Image Upload */}
-          <div className="flex justify-start mb-8">
+          <div className="mb-8 flex justify-start">
             <div
-              className="relative flex items-center justify-center border border-gray-300 border-dashed rounded-full cursor-pointer w-28 h-28 bg-gray-50"
+              className="relative flex h-28 w-28 cursor-pointer items-center justify-center rounded-full border border-dashed border-gray-300 bg-gray-50"
               onClick={() => document.getElementById("classImage").click()}
             >
               {classPreviewImage ? (
                 <img
                   src={classPreviewImage}
                   alt="Preview"
-                  className="object-cover w-full h-full rounded-full"
+                  className="h-full w-full rounded-full object-cover"
                 />
               ) : (
                 <Camera size={24} className="text-gray-400" />
@@ -1086,7 +1086,7 @@ const GroupDetailsUser = ({ onClose }) => {
                   onChange={(e) =>
                     handleClassDataChange("className", e.target.value)
                   }
-                  className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                  className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:border-gray-300 focus:outline-none"
                 />
               </div>
 
@@ -1095,12 +1095,12 @@ const GroupDetailsUser = ({ onClose }) => {
                 <label className="text-sm font-medium text-gray-700">
                   {t("createClass.language.label")}
                 </label>
-                <div className="flex gap-2 mt-1">
+                <div className="mt-1 flex gap-2">
                   <button
                     onClick={() => handleClassDataChange("language", "English")}
-                    className={`px-4 py-2 rounded-full text-sm ${
+                    className={`rounded-full px-4 py-2 text-sm ${
                       classData.language === "English"
-                        ? "bg-yellow-400 border border-yellow-500"
+                        ? "border border-yellow-500 bg-yellow-400"
                         : "border border-gray-200"
                     }`}
                   >
@@ -1108,9 +1108,9 @@ const GroupDetailsUser = ({ onClose }) => {
                   </button>
                   <button
                     onClick={() => handleClassDataChange("language", "Spanish")}
-                    className={`px-4 py-2 rounded-full text-sm ${
+                    className={`rounded-full px-4 py-2 text-sm ${
                       classData.language === "Spanish"
-                        ? "bg-yellow-400 border border-yellow-500"
+                        ? "border border-yellow-500 bg-yellow-400"
                         : "border border-gray-200"
                     }`}
                   >
@@ -1120,9 +1120,9 @@ const GroupDetailsUser = ({ onClose }) => {
                     onClick={() =>
                       handleClassDataChange("language", "English-Spanish")
                     }
-                    className={`px-4 py-2 rounded-full text-sm ${
+                    className={`rounded-full px-4 py-2 text-sm ${
                       classData.language === "English-Spanish"
-                        ? "bg-yellow-400 border border-yellow-500"
+                        ? "border border-yellow-500 bg-yellow-400"
                         : "border border-gray-200"
                     }`}
                   >
@@ -1144,7 +1144,7 @@ const GroupDetailsUser = ({ onClose }) => {
                 }
                 maxLength={400}
                 rows={3}
-                className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:border-gray-300 focus:outline-none"
               />
             </div>
             <div className="flex flex-row items-start justify-between space-x-4">
@@ -1153,16 +1153,16 @@ const GroupDetailsUser = ({ onClose }) => {
                 <label className="text-sm font-medium text-gray-700">
                   {t("createClass.level.label")}
                 </label>
-                <div className="flex gap-2 mt-1">
+                <div className="mt-1 flex gap-2">
                   {["Beginner", "Intermediate", "Advanced"].map((level) => (
                     <button
                       key={level}
                       onClick={() =>
                         handleClassDataChange("languageLevel", level)
                       }
-                      className={`px-4 py-2 rounded-full text-sm ${
+                      className={`rounded-full px-4 py-2 text-sm ${
                         classData.languageLevel === level
-                          ? "bg-yellow-400 border border-yellow-500"
+                          ? "border border-yellow-500 bg-yellow-400"
                           : "border border-gray-200"
                       }`}
                     >
@@ -1177,7 +1177,7 @@ const GroupDetailsUser = ({ onClose }) => {
                 <label className="text-sm font-medium text-gray-700">
                   {t("createClass.type.label")}
                 </label>
-                <div className="flex flex-wrap gap-2 mt-1">
+                <div className="mt-1 flex flex-wrap gap-2">
                   {[
                     "One-time",
                     "Daily",
@@ -1190,9 +1190,9 @@ const GroupDetailsUser = ({ onClose }) => {
                       onClick={() =>
                         handleClassDataChange("selectedRecurrenceType", type)
                       }
-                      className={`px-4 py-2 rounded-full text-sm ${
+                      className={`rounded-full px-4 py-2 text-sm ${
                         classData.selectedRecurrenceType === type
-                          ? "bg-yellow-400 border border-yellow-500"
+                          ? "border border-yellow-500 bg-yellow-400"
                           : "border border-gray-200"
                       }`}
                     >
@@ -1209,14 +1209,14 @@ const GroupDetailsUser = ({ onClose }) => {
                   <label className="text-sm font-medium text-gray-700">
                     {t("createClass.location.label")}
                   </label>
-                  <div className="flex gap-2 mt-1">
+                  <div className="mt-1 flex gap-2">
                     <button
                       onClick={() =>
                         handleClassDataChange("classLocation", "Physical")
                       }
-                      className={`px-4 py-2 rounded-full text-sm ${
+                      className={`rounded-full px-4 py-2 text-sm ${
                         classData.classLocation === "Physical"
-                          ? "bg-yellow-400 border border-yellow-500"
+                          ? "border border-yellow-500 bg-yellow-400"
                           : "border border-gray-200"
                       }`}
                     >
@@ -1226,9 +1226,9 @@ const GroupDetailsUser = ({ onClose }) => {
                       onClick={() =>
                         handleClassDataChange("classLocation", "Virtual")
                       }
-                      className={`px-4 py-2 rounded-full text-sm ${
+                      className={`rounded-full px-4 py-2 text-sm ${
                         classData.classLocation === "Virtual"
-                          ? "bg-yellow-400 border border-yellow-500"
+                          ? "border border-yellow-500 bg-yellow-400"
                           : "border border-gray-200"
                       }`}
                     >
@@ -1245,13 +1245,13 @@ const GroupDetailsUser = ({ onClose }) => {
                     <input
                       type="text"
                       placeholder={t(
-                        "createClass.location.address.placeholder"
+                        "createClass.location.address.placeholder",
                       )}
                       value={classData.classAddress}
                       onChange={(e) =>
                         handleClassDataChange("classAddress", e.target.value)
                       }
-                      className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                      className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:border-gray-300 focus:outline-none"
                     />
                   </div>
                 )}
@@ -1286,16 +1286,16 @@ const GroupDetailsUser = ({ onClose }) => {
                 <label className="text-sm font-medium text-gray-700">
                   {t("createClass.duration.label")}
                 </label>
-                <div className="flex gap-2 mt-1">
+                <div className="mt-1 flex gap-2">
                   {[30, 60].map((duration) => (
                     <button
                       key={duration}
                       onClick={() =>
                         handleClassDataChange("classDuration", duration)
                       }
-                      className={`px-4 py-2 rounded-full text-sm ${
+                      className={`rounded-full px-4 py-2 text-sm ${
                         classData.classDuration === duration
-                          ? "bg-yellow-400 border border-yellow-500"
+                          ? "border border-yellow-500 bg-yellow-400"
                           : "border border-gray-200"
                       }`}
                     >
@@ -1314,7 +1314,7 @@ const GroupDetailsUser = ({ onClose }) => {
                 <input
                   type="date"
                   value={formatToYYYYMMDD(classData.classDateTime)}
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:border-[#14B82C] focus:ring-0 focus:outline-none"
+                  className="w-full rounded-lg border border-gray-300 p-2 focus:border-[#14B82C] focus:outline-none focus:ring-0"
                   onChange={(e) => {
                     // parse the user input as local, not UTC
                     const [year, month, day] = e.target.value
@@ -1324,7 +1324,7 @@ const GroupDetailsUser = ({ onClose }) => {
                     // preserve the time from the existing Date if you want
                     newLocalDate.setHours(classData.classDateTime.getHours());
                     newLocalDate.setMinutes(
-                      classData.classDateTime.getMinutes()
+                      classData.classDateTime.getMinutes(),
                     );
 
                     setClassData((prev) => ({
@@ -1340,7 +1340,7 @@ const GroupDetailsUser = ({ onClose }) => {
                 </label>
                 <input
                   type="time"
-                  className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gray-300"
+                  className="mt-1 w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:border-gray-300 focus:outline-none"
                 />
               </div>
             </div>
@@ -1349,17 +1349,17 @@ const GroupDetailsUser = ({ onClose }) => {
             <div className="flex justify-between pt-4">
               <button
                 onClick={() => setAddClassModalOpen(false)}
-                className="px-8 py-2.5 border border-gray-200 rounded-full text-sm font-medium"
+                className="rounded-full border border-gray-200 px-8 py-2.5 text-sm font-medium"
               >
                 {t("createClass.buttons.cancel")}
               </button>
               <button
                 onClick={handleSaveClass}
                 disabled={!isFormValid || isCreating}
-                className={`px-8 py-2.5 rounded-full text-sm font-medium min-w-[120px] flex items-center justify-center ${
+                className={`flex min-w-[120px] items-center justify-center rounded-full px-8 py-2.5 text-sm font-medium ${
                   isFormValid && !isCreating
-                    ? "bg-[#a6fab6] border border-[#042f0c] cursor-pointer hover:bg-[#95e1a4]"
-                    : "bg-gray-200 border border-gray-300 cursor-not-allowed"
+                    ? "cursor-pointer border border-[#042f0c] bg-[#a6fab6] hover:bg-[#95e1a4]"
+                    : "cursor-not-allowed border border-gray-300 bg-gray-200"
                 }`}
               >
                 {isCreating
@@ -1374,7 +1374,7 @@ const GroupDetailsUser = ({ onClose }) => {
       <Modal
         isOpen={showLeaveConfirmation}
         onRequestClose={() => setShowLeaveConfirmation(false)}
-        className="z-50 max-w-sm p-6 mx-auto mt-40 bg-white outline-none rounded-3xl font-urbanist"
+        className="z-50 mx-auto mt-40 max-w-sm rounded-3xl bg-white p-6 font-urbanist outline-none"
         overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
         style={{
           overlay: {
@@ -1399,13 +1399,13 @@ const GroupDetailsUser = ({ onClose }) => {
           </h2>
           <div className="flex flex-row gap-2">
             <button
-              className="w-full py-2 font-medium border border-gray-300 rounded-full hover:bg-gray-50"
+              className="w-full rounded-full border border-gray-300 py-2 font-medium hover:bg-gray-50"
               onClick={() => setShowLeaveConfirmation(false)}
             >
               {t("leaveGroup.buttons.no")}
             </button>
             <button
-              className="w-full py-2 font-medium text-black bg-[#ff4d4d] rounded-full hover:bg-[#ff3333] border border-[#8b0000]"
+              className="w-full rounded-full border border-[#8b0000] bg-[#ff4d4d] py-2 font-medium text-black hover:bg-[#ff3333]"
               onClick={handleLeaveGroup}
             >
               {isLeaving
@@ -1419,7 +1419,7 @@ const GroupDetailsUser = ({ onClose }) => {
       <Modal
         isOpen={showRemoveConfirmation}
         onRequestClose={() => setShowRemoveConfirmation(false)}
-        className="z-50 max-w-sm p-6 mx-auto mt-40 bg-white outline-none rounded-3xl font-urbanist"
+        className="z-50 mx-auto mt-40 max-w-sm rounded-3xl bg-white p-6 font-urbanist outline-none"
         overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
         style={{
           overlay: {
@@ -1447,13 +1447,13 @@ const GroupDetailsUser = ({ onClose }) => {
           <p className="mb-6 text-gray-600">{t("removeUser.description")}</p>
           <div className="flex flex-row gap-2">
             <button
-              className="w-full py-2 font-medium border border-gray-300 rounded-full hover:bg-gray-50"
+              className="w-full rounded-full border border-gray-300 py-2 font-medium hover:bg-gray-50"
               onClick={() => setShowRemoveConfirmation(false)}
             >
               {t("removeUser.buttons.cancel")}
             </button>
             <button
-              className="w-full py-2 font-medium text-black bg-[#ff4d4d] rounded-full hover:bg-[#ff3333] border border-[#8b0000]"
+              className="w-full rounded-full border border-[#8b0000] bg-[#ff4d4d] py-2 font-medium text-black hover:bg-[#ff3333]"
               onClick={() => handleRemoveUser(selectedUser.id)}
               disabled={isRemoving}
             >
@@ -1468,7 +1468,7 @@ const GroupDetailsUser = ({ onClose }) => {
       <Modal
         isOpen={showDeleteConfirmation}
         onRequestClose={() => setShowDeleteConfirmation(false)}
-        className="z-50 max-w-sm p-6 mx-auto mt-40 bg-white outline-none rounded-3xl font-urbanist"
+        className="z-50 mx-auto mt-40 max-w-sm rounded-3xl bg-white p-6 font-urbanist outline-none"
         overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
         style={{
           overlay: {
@@ -1493,13 +1493,13 @@ const GroupDetailsUser = ({ onClose }) => {
           </h2>
           <div className="flex flex-row gap-2">
             <button
-              className="w-full py-2 font-medium border border-gray-300 rounded-full hover:bg-gray-50"
+              className="w-full rounded-full border border-gray-300 py-2 font-medium hover:bg-gray-50"
               onClick={() => setShowDeleteConfirmation(false)}
             >
               {t("deleteGroup.buttons.cancel")}
             </button>
             <button
-              className="w-full py-2 font-medium text-black bg-[#ff4d4d] rounded-full hover:bg-[#ff3333] border border-[#8b0000]"
+              className="w-full rounded-full border border-[#8b0000] bg-[#ff4d4d] py-2 font-medium text-black hover:bg-[#ff3333]"
               onClick={handleDeleteGroup}
               disabled={isDeleting}
             >
