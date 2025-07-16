@@ -179,8 +179,6 @@ const ClassDetailsTutor = ({ onClose }) => {
     navigate("/callTutor");
   };
 
-  //-----------------------------------------------------------------------------------------------------------//
-
   //-------------------------------------------------Deleting Class---------------------------------------//
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
