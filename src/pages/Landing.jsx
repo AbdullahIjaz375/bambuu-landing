@@ -75,7 +75,7 @@ const Landing = () => {
               Level-up your language
               <br /> learning today.
             </h1>
-            <h1 className="text-center text-xl text-black lg:text-2xl">
+            <h1 className="text-center text-[32px] font-medium text-[#042F0C]">
               Learn a new language. Practice through conversation.
             </h1>
           </div>

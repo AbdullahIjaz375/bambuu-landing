@@ -7,7 +7,7 @@ const Footer = () => {
   const { pathname } = location;
 
   return (
-    <div className="footer-background mt-40 flex flex-col space-y-20 rounded-t-[20vh] border-t-8 border-[#B9F9C2] pb-12 pt-24">
+    <div className="footer-background flex flex-col space-y-20 rounded-t-[20vh] border-t-4 border-[#B9F9C2] pb-12 pt-24">
       <div className="flex items-center justify-center">
         <img
           alt="bambuu"

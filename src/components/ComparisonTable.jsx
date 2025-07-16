@@ -93,7 +93,7 @@ const iconMap = {
  *   - That means the Bammbuu column starts at left: 304px.
  *   - The width of the Bammbuu column itself is 240px (as per your Figma spec).
  */
-const BAMMBUU_COLUMN_LEFT = 304; // px from left edge of the table
+const BAMMBUU_COLUMN_LEFT = 340; // px from left edge of the table
 const BAMMBUU_COLUMN_WIDTH = 240;
 
 const ComparisonTable = ({ onEnrollClick }) => {
@@ -112,12 +112,12 @@ const ComparisonTable = ({ onEnrollClick }) => {
   }, []);
 
   return (
-    <section className="flex w-full flex-col items-center px-2 py-10 font-urbanist lg:px-0">
-      <h2 className="mb-8 text-center text-[32px] font-semibold text-black lg:text-[56px]">
+    <section className="flex w-full flex-col items-center font-urbanist">
+      <h2 className="mb-20 text-center text-[32px] font-semibold text-black lg:text-[56px]">
         bammbuu vs others
       </h2>
 
-      <div className="w-full max-w-[1280px] overflow-x-auto">
+      <div className="mb-20 w-full max-w-[1280px] overflow-x-auto rounded-[32px] border border-[#F0F0F0]">
         <div className="relative">
           {/**
            * This div is the single "highlight" behind the entire Bammbuu column.
@@ -135,7 +135,7 @@ const ComparisonTable = ({ onEnrollClick }) => {
 
           <table
             ref={tableRef}
-            className="relative z-20 w-full min-w-[900px] text-left"
+            className="z-1 relative w-full min-w-[900px] text-left"
           >
             <thead>
               <tr className="bg-[#F0F0F0] text-[18px] font-semibold text-[#141414]">
@@ -152,7 +152,7 @@ const ComparisonTable = ({ onEnrollClick }) => {
                  *   • If you want the header text area to be fully opaque white (so no light‐green tint behind),
                  *     you can add bg-white. If you want it tinted, remove bg-white.
                  */}
-                <th className="z-20 min-w-[240px] px-6 py-5 text-[#042F0C]">
+                <th className="absolute z-10 min-w-[240px] px-6 py-5 text-[#042F0C]">
                   bammbuu Languages
                   <br />
                   <span className="text-[15px] font-normal">
@@ -176,7 +176,7 @@ const ComparisonTable = ({ onEnrollClick }) => {
               {features.map((row, i) => (
                 <tr
                   key={row.label}
-                  className={i % 2 === 0 ? "bg-[#FCFCFC]" : "bg-white"}
+                  className={`${i % 2 === 0 ? "bg-[#FCFCFC]" : "bg-white"} border border-[#F0F0F0]`}
                 >
                   <td className="relative z-20 min-w-[304px] bg-transparent px-6 py-4 align-top font-semibold text-[#141414]">
                     {row.label}
@@ -187,7 +187,7 @@ const ComparisonTable = ({ onEnrollClick }) => {
                    * • No border, no background.  The "bammbuu-highlight" div does that.
                    * • z-20 so that icon/text sits on top of the highlight.
                    */}
-                  <td className="relative z-20 min-w-[240px] px-6 py-4 align-top text-[#042F0C]">
+                  <td className="relative z-20 min-w-[240px] px-6 py-4 text-[#042F0C]">
                     <span className="flex items-center gap-2">
                       {typeof row.bammbuu === "string" ? (
                         row.bammbuu
@@ -206,7 +206,7 @@ const ComparisonTable = ({ onEnrollClick }) => {
                     </span>
                   </td>
 
-                  <td className="min-w-[180px] bg-transparent px-6 py-4 align-top">
+                  <td className="min-w-[180px] bg-transparent px-6 py-4">
                     {typeof row.apps === "string" ? (
                       row.apps
                     ) : (
@@ -223,7 +223,7 @@ const ComparisonTable = ({ onEnrollClick }) => {
                     )}
                   </td>
 
-                  <td className="min-w-[180px] bg-transparent px-6 py-4 align-top">
+                  <td className="min-w-[180px] bg-transparent px-6 py-4">
                     {typeof row.tutors === "string" ? (
                       row.tutors
                     ) : (
@@ -240,7 +240,7 @@ const ComparisonTable = ({ onEnrollClick }) => {
                     )}
                   </td>
 
-                  <td className="min-w-[180px] bg-transparent px-6 py-4 align-top">
+                  <td className="min-w-[180px] bg-transparent px-6 py-4">
                     {typeof row.generic === "string" ? (
                       row.generic
                     ) : (
@@ -263,7 +263,7 @@ const ComparisonTable = ({ onEnrollClick }) => {
         </div>
       </div>
 
-      <div className="mt-8 flex flex-col gap-4 md:flex-row">
+      <div className="mb-[175px] flex flex-col gap-6 md:flex-row">
         <a
           href="https://calendly.com/bammbuu-languages/info-call-llamada-de-informacion"
           target="_blank"

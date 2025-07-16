@@ -34,7 +34,7 @@ const ContactUs = () => {
       <div className="overflow-hidden font-urbanist">
         {/* Contact Us Section */}
         <div className="bg-[#E6FDE9] pb-32">
-          <div className="flex flex-col px-12 pt-4">
+          <div className="flex flex-col p-12 pb-0">
             <div className="flex items-center justify-between">
               {/* Logo */}
               <Link
@@ -72,7 +72,7 @@ const ContactUs = () => {
               <h1 className="text-center text-xl font-bold text-[#042F0C] lg:text-5xl">
                 We’d love to hear from you
               </h1>
-              <h1 className="text-center text-lg text-black lg:text-2xl">
+              <h1 className="text-center text-lg text-[#454545] lg:text-2xl">
                 Please fill out this form.
               </h1>
             </div>

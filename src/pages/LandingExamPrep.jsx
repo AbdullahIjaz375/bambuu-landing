@@ -23,13 +23,15 @@ const Card = ({ icon, title, description, index }) => {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-100px" }}
       transition={{ duration: 0.8, delay: index * 0.1 }}
-      className="flex flex-col items-center rounded-[48px] border border-[#14B82C] bg-[#F0FDF1] p-8 text-center"
+      className="flex h-full flex-col items-center rounded-[48px] border border-[#14B82C] bg-[#F0FDF1] p-6 pt-10 text-center"
     >
-      {icon && <img src={icon} alt="card-icon" className="mb-4 h-10" />}
+      {icon && <img src={icon} alt="card-icon" className="mb-4 h-16 w-16" />}
       <div className="mb-2 flex items-center justify-center gap-2">
         <h3 className="text-[32px] font-bold text-[#042F0C]">{title}</h3>
       </div>
-      <p className="text-xl font-normal text-[#3d3d3d]">{description}</p>
+      <p className="w-full min-w-80 text-xl font-normal leading-[30px] text-[#3d3d3d]">
+        {description}
+      </p>
     </motion.div>
   );
 };
@@ -137,24 +139,24 @@ const LandingExamPrep = () => {
       >
         <Navbar user={user} onGetStartedClick={handleEnrollClick} />
       </motion.div>
-      <div className="overflow-hidden">
+      <div className="overflow-hidden px-20">
         {/* section 1 */}
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="mt-8 flex w-full flex-col items-center justify-center space-y-8 rounded-3xl lg:mt-16 lg:space-y-16 lg:rounded-[20vh] lg:px-0"
+          className="mb-[157px] mt-[100px] flex w-full flex-col items-center justify-center rounded-3xl lg:rounded-[20vh] lg:px-0"
         >
-          <div className="mx-auto mt-6 flex w-full flex-col items-center justify-center space-y-4">
-            <h1 className="w-full text-center text-2xl font-bold text-black sm:text-3xl lg:text-6xl">
+          <div className="mx-auto flex w-full flex-col items-center justify-center">
+            <h1 className="mb-6 w-full text-center text-6xl font-extrabold leading-tight text-black">
               {t("examPrep.hero.title1")}
               <br />
               {t("examPrep.hero.title2")}
             </h1>
-            <h1 className="w-full text-center text-base font-medium text-black sm:text-lg lg:text-2xl">
+            <h1 className="mb-12 w-full max-w-[767px] text-center text-2xl font-medium text-[#042F0C]">
               {t("examPrep.hero.subtitle")}
             </h1>
-            <div className="mx-auto mt-6 flex w-full flex-col items-center justify-center gap-3 text-base font-medium text-black sm:w-auto sm:flex-row sm:gap-5">
+            <div className="mx-auto mb-4 flex w-full flex-col items-center justify-center gap-3 text-base font-medium text-black sm:w-auto sm:flex-row sm:gap-[24px]">
               <button
                 onClick={() =>
                   window.open(
@@ -162,20 +164,20 @@ const LandingExamPrep = () => {
                     "_blank",
                   )
                 }
-                className="w-full rounded-full border border-black px-6 py-2 text-black transition hover:bg-gray-100 sm:w-auto"
+                className="flex h-[44px] w-[174px] items-center justify-center rounded-full border border-black bg-white px-0 text-black transition hover:bg-gray-100"
               >
                 {t("examPrep.hero.scheduleCall")}
               </button>
               <button
-                className="w-full rounded-full border border-[black] bg-[#FFBF00] px-6 py-2 text-base font-medium text-black transition hover:bg-[#ffd94d] sm:w-auto"
+                className="flex h-[44px] w-[174px] items-center justify-center rounded-full border border-black bg-[#FFBF00] px-0 text-base font-medium text-black transition hover:bg-[#ffd94d]"
                 onClick={handleEnrollClick}
               >
                 {t("examPrep.hero.enrollToday")}
               </button>
             </div>
           </div>
-          <div className="mx-auto mt-10 flex w-full flex-col items-center">
-            <div className="relative w-full max-w-[1280px] overflow-hidden rounded-[64px] bg-[#eaeaea] sm:rounded-[3rem]">
+          <div className="mx-auto flex w-full flex-col items-center">
+            <div className="relative m-0 w-full overflow-hidden rounded-[64px] bg-[#eaeaea] p-0 sm:rounded-[3rem]">
               <iframe
                 width="100%"
                 height="100%"
@@ -189,7 +191,7 @@ const LandingExamPrep = () => {
                 allowFullScreen
               ></iframe>
             </div>
-            <div className="mt-4 w-full text-center">
+            <div className="mt-6 w-full text-center">
               <span className="text-sm font-normal italic text-[#5D5D5D] sm:text-base">
                 {t("examPrep.hero.videoCaption")}
               </span>
@@ -203,14 +205,16 @@ const LandingExamPrep = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="mx-auto mb-10 mt-10 flex w-full flex-col items-center justify-center space-y-4 sm:mb-20 sm:mt-20 sm:space-y-6 sm:px-4 lg:mb-32 lg:mt-40 lg:px-0"
+          className="mx-auto mb-20 flex w-full flex-col items-center justify-center"
         >
-          <h1 className="w-full text-center text-2xl font-semibold text-black sm:text-4xl lg:text-[56px]">
-            {t("examPrep.why.title")}
-          </h1>
-          <p className="mx-auto text-center text-base font-normal text-[#3d3d3d] sm:text-lg lg:text-xl">
-            {t("examPrep.why.description")}
-          </p>
+          <div className="mx-auto my-0 flex w-full max-w-[848px] flex-col items-center justify-center gap-4">
+            <h1 className="text-center text-[56px] font-semibold text-black sm:text-5xl">
+              {t("examPrep.why.title")}
+            </h1>
+            <p className="text-center text-xl font-normal text-[#3d3d3d] sm:text-lg">
+              {t("examPrep.why.description")}
+            </p>
+          </div>
         </motion.div>
 
         {/* section 3 - Cards */}
@@ -219,10 +223,10 @@ const LandingExamPrep = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="mx-auto mb-10 flex w-full max-w-7xl flex-col items-center justify-center px-2 sm:mb-16 sm:px-4 lg:mx-auto lg:mb-32 lg:px-6 xl:px-8"
+          className="mx-auto mb-[200px] flex w-full flex-col items-center justify-center"
         >
           {/* First row: 3 cards */}
-          <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 md:grid-cols-3">
+          <div className="grid w-full grid-cols-1 items-stretch gap-10 sm:grid-cols-2 md:grid-cols-3">
             {[0, 1, 2].map((i) => (
               <motion.div
                 key={i}
@@ -230,26 +234,25 @@ const LandingExamPrep = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: i * 0.1 }}
+                className="h-full w-full"
               >
-                <div className="mx-auto flex w-full justify-center">
-                  <Card
-                    index={i}
-                    icon={
-                      i === 0
-                        ? "/svgs/conversation-first.svg"
-                        : i === 1
-                          ? "/svgs/personalized-plans.svg"
-                          : "/svgs/certified-experts.svg"
-                    }
-                    title={t(`examPrep.cards.card${i + 1}.title`)}
-                    description={t(`examPrep.cards.card${i + 1}.desc`)}
-                  />
-                </div>
+                <Card
+                  index={i}
+                  icon={
+                    i === 0
+                      ? "/svgs/conversation-first.svg"
+                      : i === 1
+                        ? "/svgs/personalized-plans.svg"
+                        : "/svgs/certified-experts.svg"
+                  }
+                  title={t(`examPrep.cards.card${i + 1}.title`)}
+                  description={t(`examPrep.cards.card${i + 1}.desc`)}
+                />
               </motion.div>
             ))}
           </div>
           {/* Second row: 2 cards */}
-          <div className="mt-4 grid w-full grid-cols-1 gap-4 sm:mt-6 sm:grid-cols-2 sm:gap-6">
+          <div className="mt-10 grid w-full grid-cols-1 items-stretch gap-10 sm:grid-cols-2">
             {[3, 4].map((i) => (
               <motion.div
                 key={i}
@@ -257,19 +260,18 @@ const LandingExamPrep = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: (i - 3) * 0.1 }}
+                className="h-full w-full"
               >
-                <div className="mx-auto flex w-full justify-center">
-                  <Card
-                    index={i}
-                    icon={
-                      i === 3
-                        ? "/svgs/all-one.svg"
-                        : "/svgs/confidence-guarantee.svg"
-                    }
-                    title={t(`examPrep.cards.card${i + 1}.title`)}
-                    description={t(`examPrep.cards.card${i + 1}.desc`)}
-                  />
-                </div>
+                <Card
+                  index={i}
+                  icon={
+                    i === 3
+                      ? "/svgs/all-one.svg"
+                      : "/svgs/confidence-guarantee.svg"
+                  }
+                  title={t(`examPrep.cards.card${i + 1}.title`)}
+                  description={t(`examPrep.cards.card${i + 1}.desc`)}
+                />
               </motion.div>
             ))}
           </div>
@@ -281,17 +283,17 @@ const LandingExamPrep = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="mx-auto mb-10 mt-20 flex w-full flex-col items-center justify-center space-y-6 sm:mt-40 sm:px-4 lg:mb-10 lg:mt-40 lg:px-0"
+          className="mx-auto mb-[200px] flex w-full flex-col items-center justify-center"
         >
-          <div className="min-h-[60vh] px-2 sm:min-h-screen sm:px-4">
-            <div className="mx-auto max-w-6xl">
-              <h1 className="mb-8 text-center text-2xl font-semibold text-black sm:mb-16 sm:text-4xl lg:text-[56px]">
+          <div className="">
+            <div className="mx-auto">
+              <h1 className="mb-20 text-center text-[56px] font-semibold text-black">
                 {t("examPrep.whatYouGet.title")}
               </h1>
 
-              <div className="flex flex-col items-start gap-8 sm:gap-12 lg:flex-row lg:gap-16">
+              <div className="flex items-start gap-10">
                 {/* Left Side - Features List */}
-                <div className="w-full flex-1">
+                <div className="mt-8 w-full max-w-[654px] flex-1">
                   <div className="mb-6 space-y-3 sm:mb-8 sm:space-y-4">
                     {features.map((featureKey, index) => (
                       <div
@@ -301,44 +303,43 @@ const LandingExamPrep = () => {
                         <img
                           src="/svgs/tick-star.svg"
                           alt="Check"
-                          className="mr-1 h-5 w-5 sm:h-6 sm:w-6"
+                          className="mr-1 h-8 w-8"
                         />
-                        <span className="text-base font-medium text-[#042F0C] sm:text-xl md:text-2xl">
+                        <span className="text-2xl font-medium leading-[30px] text-[#042F0C]">
                           {t(`examPrep.features.${featureKey}`)}
                         </span>
                       </div>
                     ))}
-                  </div>
-
-                  {/* Disclaimer Box */}
-                  <div className="flex items-start gap-2 rounded-xl bg-[#FFFFEA] p-3 text-xs font-normal text-[#3D3D3D] sm:gap-3 sm:p-4 sm:text-sm">
-                    <div className="mt-0.5 h-4 w-4 flex-shrink-0 sm:h-5 sm:w-5">
-                      <Info className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-[#FFBF00] sm:h-4 sm:w-4" />
-                    </div>
-                    <div className="italic">
-                      {t("examPrep.moneyBackDisclaimer")}
+                    {/* Disclaimer Box */}
+                    <div className="flex items-start gap-2 rounded-2xl bg-[#FFFFEA] p-4 text-sm font-normal text-[#3D3D3D]">
+                      <div className="mt-0.5 h-4 w-4 flex-shrink-0">
+                        <Info className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-[#FFBF00]" />
+                      </div>
+                      <div className="italic">
+                        {t("examPrep.moneyBackDisclaimer")}
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Right Side - Pricing Card */}
-                <div className="mx-auto mt-8 w-full max-w-md flex-shrink-0 lg:mx-0 lg:mt-0">
-                  <div className="overflow-hidden rounded-[32px] border border-[#14B82C] bg-[#E6FDE9] shadow-lg sm:rounded-[48px] lg:h-[500px]">
+                <div className="mx-auto w-full max-w-[550px] flex-shrink-0">
+                  <div className="overflow-hidden rounded-[32px] border border-[#14B82C] bg-[#E6FDE9] shadow-lg sm:rounded-[48px]">
                     {/* Header */}
-                    <div className="bg-[#FFBF00] px-4 py-2 text-center sm:px-6 sm:py-3">
-                      <span className="text-sm font-semibold text-black sm:text-base">
+                    <div className="mb-14 bg-[#FFBF00] px-4 py-2 text-center sm:px-6 sm:py-3">
+                      <span className="text-base font-semibold text-black">
                         {t("examPrep.pricing.header")}
                       </span>
                     </div>
 
                     {/* Content */}
-                    <div className="p-4 sm:p-8">
+                    <div className="px-8">
                       {/* Price */}
-                      <div className="mb-4 text-center sm:mb-6">
-                        <div className="mb-1 text-3xl font-semibold text-black sm:text-[56px]">
+                      <div className="mb-[54px] text-center">
+                        <div className="mb-2 text-[56px] font-semibold text-black">
                           {t("examPrep.pricing.price")}
                         </div>
-                        <div className="mb-2 text-lg font-semibold text-black sm:text-2xl">
+                        <div className="mb-5 text-lg font-semibold text-black sm:text-2xl">
                           {t("examPrep.pricing.duration")}
                         </div>
                         <div className="text-base font-normal text-black sm:text-lg">
@@ -347,23 +348,23 @@ const LandingExamPrep = () => {
                       </div>
 
                       {/* Notice */}
-                      <div className="mb-4 flex flex-col items-center gap-1 text-xs text-black sm:mb-6 sm:gap-2 sm:text-sm">
-                        <Info className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-[#FFBF00] sm:h-4 sm:w-4" />
+                      <div className="mb-12 flex flex-col items-center gap-1 text-base font-normal text-black">
+                        <Info className="mt-0.5 h-6 w-6 flex-shrink-0 text-[#FFBF00]" />
                         <span className="text-center">
                           {t("examPrep.pricing.notice")}
                         </span>
                       </div>
 
                       {/* Buttons */}
-                      <div className="space-y-2 sm:space-y-3">
+                      <div className="">
                         <button
-                          className="w-full rounded-full border border-[#042F0C] bg-[#14B82C] px-6 py-2 text-base font-semibold text-black transition-colors hover:bg-green-700 sm:text-lg"
+                          className="mx-auto mb-4 w-full rounded-full border border-[#042F0C] bg-[#14B82C] px-6 py-2 text-lg font-semibold text-black transition-colors hover:bg-green-700"
                           onClick={handleEnrollClick}
                         >
                           {t("examPrep.hero.enrollToday")}
                         </button>
                         <button
-                          className="w-full bg-transparent px-6 py-2 text-base font-semibold text-[#12551E] transition-colors hover:bg-green-50"
+                          className="mb-2 w-full bg-transparent px-6 py-2 text-base font-semibold text-[#12551E] transition-colors hover:bg-green-50"
                           onClick={() =>
                             window.open(
                               "https://calendly.com/bammbuu-languages/info-call-llamada-de-informacion",
