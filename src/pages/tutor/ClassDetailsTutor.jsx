@@ -146,7 +146,6 @@ const ClassDetailsTutor = ({ onClose }) => {
         enrolledClasses: updatedEnrolledClasses,
       });
 
-      // Update local state
       setMembers((prevMembers) =>
         prevMembers.filter((member) => member.id !== userId),
       );
