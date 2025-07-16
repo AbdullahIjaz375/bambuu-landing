@@ -9,6 +9,7 @@ import Sidebar from "../../components/Sidebar";
 import ExploreClassCard from "../../components/ExploreClassCard";
 import EmptyState from "../../components/EmptyState";
 import { useTranslation } from "react-i18next";
+import { shouldHidePremiumOneTimeClass } from "../../utils/accessControl";
 
 const ExploreClassesUser = () => {
   const { user } = useAuth();
@@ -64,7 +65,9 @@ const ExploreClassesUser = () => {
               (cls.adminId || cls.tutorId) &&
               // Make sure we have valid language information
               cls.language &&
-              typeof cls.language === "string",
+              typeof cls.language === "string" &&
+              // Hide premium one-time classes that are within 12 hours of starting
+              !shouldHidePremiumOneTimeClass(cls, user),
           );
 
         setExploreClasses(allClasses);

@@ -8,6 +8,7 @@ import { ClipLoader } from "react-spinners";
 import ClassCard from "../../components/ClassCard";
 import Sidebar from "../../components/Sidebar";
 import EmptyState from "../../components/EmptyState";
+import { shouldHidePremiumOneTimeClass } from "../../utils/accessControl";
 
 const ClassesUser = () => {
   const { user } = useAuth();
@@ -46,7 +47,15 @@ const ClassesUser = () => {
           if (classDoc.exists()) {
             const classData = classDoc.data();
             if (!language || classData.language?.toLowerCase() === language) {
-              classesData.push({ id: classId, ...classData });
+              // Only add the class if it shouldn't be hidden
+              if (
+                !shouldHidePremiumOneTimeClass(
+                  { id: classId, ...classData },
+                  user,
+                )
+              ) {
+                classesData.push({ id: classId, ...classData });
+              }
             }
           }
         }

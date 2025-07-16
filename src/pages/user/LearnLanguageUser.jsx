@@ -13,6 +13,7 @@ import ExploreClassCard from "../../components/ExploreClassCard";
 import ExploreGroupCard from "../../components/ExploreGroupCard";
 import EmptyState from "../../components/EmptyState";
 import { useLanguage } from "../../context/LanguageContext";
+import { shouldHidePremiumOneTimeClass } from "../../utils/accessControl";
 
 const LearnLanguageUser = () => {
   const [searchParams] = useSearchParams();
@@ -158,7 +159,9 @@ const LearnLanguageUser = () => {
               typeof cls.classDateTime.seconds === "number" &&
               // Ensure the class has a valid ID and name
               cls.id &&
-              cls.className
+              cls.className &&
+              // Hide premium one-time classes that are within 12 hours of starting
+              !shouldHidePremiumOneTimeClass(cls, user)
             );
           });
 

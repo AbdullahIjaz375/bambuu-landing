@@ -114,3 +114,59 @@ export const checkAccess = (user, contentType, classType = null) => {
   );
   return { hasAccess: false, reason: "User does not have the required access" };
 };
+
+/**
+ * Check if a premium one-time class should be hidden from non-members
+ * @param {Object} classData - The class data object
+ * @param {Object} user - The current user object
+ * @returns {boolean} - True if the class should be hidden
+ */
+export const shouldHidePremiumOneTimeClass = (classData, user) => {
+  // Only apply this rule to premium classes
+  const isPremium =
+    classData.classType === "Individual Premium" ||
+    classData.classType === "Group Premium";
+  if (!isPremium) {
+    return false;
+  }
+
+  // Only apply to one-time classes
+  const isOneTime =
+    classData.recurrenceTypes &&
+    classData.recurrenceTypes.length > 0 &&
+    classData.recurrenceTypes[0] === "One-time";
+  if (!isOneTime) {
+    return false;
+  }
+
+  // If user is a member of the class, don't hide it
+  if (
+    user &&
+    classData.classMemberIds &&
+    classData.classMemberIds.includes(user.uid)
+  ) {
+    return false;
+  }
+
+  // If user is the admin/tutor of the class, don't hide it
+  if (
+    user &&
+    (classData.adminId === user.uid || classData.tutorId === user.uid)
+  ) {
+    return false;
+  }
+
+  // Check if class is within 12 hours of starting
+  if (!classData.classDateTime || !classData.classDateTime.seconds) {
+    return false;
+  }
+
+  const classStartTime = new Date(classData.classDateTime.seconds * 1000);
+  const now = new Date();
+  const twelveHoursBeforeClass = new Date(
+    classStartTime.getTime() - 12 * 60 * 60 * 1000,
+  );
+
+  // Hide the class if we're within 12 hours of it starting
+  return now >= twelveHoursBeforeClass;
+};

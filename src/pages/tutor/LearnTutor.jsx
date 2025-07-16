@@ -33,6 +33,7 @@ import { GroupSelectModal } from "../../components-tutor/AddClassFlow";
 import GroupCardTutor from "../../components-tutor/GroupCardTutor";
 import EmptyState from "../../components/EmptyState";
 import CalenderTutor from "../../components-tutor/CalenderTutor";
+import { shouldHidePremiumOneTimeClass } from "../../utils/accessControl";
 
 const LearnTutor = () => {
   const { t } = useTranslation();
@@ -89,7 +90,9 @@ const LearnTutor = () => {
           .filter(
             (class_) =>
               class_.classType !== "exam_prep" &&
-              class_.classType !== "introductory_call",
+              class_.classType !== "introductory_call" &&
+              // Hide premium one-time classes that are within 12 hours of starting
+              !shouldHidePremiumOneTimeClass(class_, user),
           );
 
         const fetchedGroups = groupSnapshots

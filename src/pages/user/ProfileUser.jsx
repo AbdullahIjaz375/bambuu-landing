@@ -41,14 +41,34 @@ const ProfileUser = () => {
 
   // Enhanced logic to check if user has Bammbuu+ subscription
   const hasBambuuPlus =
-    user?.subscriptions?.some(
-      (sub) =>
-        sub.type === "bammbuu+ Instructor-led group Classes" ||
-        sub.type === "individual_premium" ||
-        sub.type === "group_premium" ||
-        sub.type?.toLowerCase().includes("premium") ||
-        sub.type?.toLowerCase().includes("bambuu+"),
-    ) ||
+    user?.subscriptions?.some((sub) => {
+      if (
+        !sub.startDate ||
+        !sub.endDate ||
+        sub.type === "None" ||
+        sub.type === "none"
+      ) {
+        return false;
+      }
+      const endDate = new Date(sub.endDate.seconds * 1000);
+      const startDate = new Date(sub.startDate.seconds * 1000);
+      const now = new Date();
+
+      // Check if subscription is active
+      if (endDate <= now || startDate > now) {
+        return false;
+      }
+
+      const type = sub.type.trim().toLowerCase();
+      return (
+        type === "bammbuu+ instructor-led group classes" ||
+        type === "individual_premium" ||
+        type === "group_premium" ||
+        type === "immersive exam prep" ||
+        type?.toLowerCase().includes("premium") ||
+        type?.toLowerCase().includes("bambuu+")
+      );
+    }) ||
     user?.isPremium === true ||
     userData?.isPremium === true;
   const handleSignOut = async () => {

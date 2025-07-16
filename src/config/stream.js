@@ -44,12 +44,33 @@ export const fetchChatToken = async (userId) => {
     const isPremium =
       userInfo.freeAccess ||
       (userInfo.subscriptions &&
-        userInfo.subscriptions.some(
-          (sub) =>
-            sub.type === "Bammbuu Groups" &&
-            (!sub.endDate || new Date(sub.endDate) > new Date()) &&
-            (!sub.startDate || new Date(sub.startDate) <= new Date()),
-        ));
+        userInfo.subscriptions.some((sub) => {
+          if (
+            !sub.startDate ||
+            !sub.endDate ||
+            sub.type === "None" ||
+            sub.type === "none"
+          ) {
+            return false;
+          }
+          const endDate = new Date(sub.endDate.seconds * 1000);
+          const startDate = new Date(sub.startDate.seconds * 1000);
+          const now = new Date();
+
+          // Check if subscription is active
+          if (endDate <= now || startDate > now) {
+            return false;
+          }
+
+          // Check for various subscription types that grant premium access
+          const type = sub.type.trim().toLowerCase();
+          return (
+            type === "bammbuu groups" ||
+            type === "immersive exam prep" ||
+            type === "bammbuu+ instructor-led group classes" ||
+            type === "group_premium"
+          );
+        }));
 
     const isTutor = userInfo.userType === "tutor";
 

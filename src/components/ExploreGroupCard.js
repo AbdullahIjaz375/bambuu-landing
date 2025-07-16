@@ -212,8 +212,33 @@ const GroupCard = ({ group }) => {
       return false;
     }
 
-    // Original subscription check
-    // ...rest of the check
+    // Find a valid subscription that grants premium group access
+    return user.subscriptions.some((sub) => {
+      if (
+        !sub.startDate ||
+        !sub.endDate ||
+        sub.type === "None" ||
+        sub.type === "none"
+      ) {
+        return false;
+      }
+      const endDate = new Date(sub.endDate.seconds * 1000);
+      const startDate = new Date(sub.startDate.seconds * 1000);
+      const now = new Date();
+
+      // Check if subscription is active
+      if (endDate <= now || startDate > now) {
+        return false;
+      }
+
+      const type = sub.type.trim().toLowerCase();
+      return (
+        type === "bammbuu groups" ||
+        type === "immersive exam prep" ||
+        type === "bammbuu+ instructor-led group classes" ||
+        type === "group_premium"
+      );
+    });
   };
 
   const handlePremiumAccess = () => {

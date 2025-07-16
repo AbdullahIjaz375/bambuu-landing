@@ -8,7 +8,7 @@ export const useClassBooking = () => {
     user,
     classType,
     subscriptions,
-    credits = 0
+    credits = 0,
   ) => {
     if (classType !== "Individual Premium" && classType !== "Group Premium") {
       return {
@@ -40,7 +40,13 @@ export const useClassBooking = () => {
 
     const hasValidSubscription = validSubscriptions.some((sub) => {
       if (classType === "Group Premium") {
-        return sub.type === "bammbuu+ Instructor-led group Classes";
+        const type = sub.type.trim().toLowerCase();
+        return (
+          type === "bammbuu+ instructor-led group classes" ||
+          type === "immersive exam prep" ||
+          type === "bammbuu groups" ||
+          type === "group_premium"
+        );
       } else if (classType === "Individual Premium") {
         return sub.type === "Unlimited Credits";
       }
@@ -80,7 +86,7 @@ export const useClassBooking = () => {
     credits,
     onSuccess,
     onFailure,
-    handleEnrollment
+    handleEnrollment,
   ) => {
     setIsProcessing(true);
     setError(null);
@@ -90,7 +96,7 @@ export const useClassBooking = () => {
         user,
         classType,
         subscriptions,
-        credits
+        credits,
       );
 
       if (!eligibility.canBook) {

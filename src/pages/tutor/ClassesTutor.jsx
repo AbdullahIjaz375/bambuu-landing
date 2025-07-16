@@ -13,6 +13,7 @@ import {
 } from "../../components-tutor/AddClassFlow";
 import EmptyState from "../../components/EmptyState";
 import { useTranslation } from "react-i18next";
+import { shouldHidePremiumOneTimeClass } from "../../utils/accessControl";
 
 const ClassesTutor = () => {
   const { t } = useTranslation();
@@ -61,7 +62,11 @@ const ClassesTutor = () => {
           const classDoc = await getDoc(classRef);
 
           if (classDoc.exists()) {
-            classesData.push({ id: classId, ...classDoc.data() });
+            const classData = { id: classId, ...classDoc.data() };
+            // Only add the class if it shouldn't be hidden (tutors can always see their own classes)
+            if (!shouldHidePremiumOneTimeClass(classData, user)) {
+              classesData.push(classData);
+            }
           }
         }
         setClasses(classesData);

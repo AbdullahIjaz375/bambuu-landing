@@ -786,11 +786,29 @@ const ClassDetailsNotJoinedUser = ({ onClose }) => {
   const canAccessPremium =
     user?.freeAccess ||
     user?.subscriptions?.some((sub) => {
-      if (!sub.endDate) return false;
+      if (
+        !sub.startDate ||
+        !sub.endDate ||
+        sub.type === "None" ||
+        sub.type === "none"
+      ) {
+        return false;
+      }
       const endDate = new Date(sub.endDate.seconds * 1000);
+      const startDate = new Date(sub.startDate.seconds * 1000);
+      const now = new Date();
+
+      // Check if subscription is active
+      if (endDate <= now || startDate > now) {
+        return false;
+      }
+
+      const type = sub.type.trim().toLowerCase();
       return (
-        endDate > new Date() &&
-        sub.type === "bammbuu+ Instructor-led group Classes"
+        type === "bammbuu+ instructor-led group classes" ||
+        type === "immersive exam prep" ||
+        type === "bammbuu groups" ||
+        type === "group_premium"
       );
     });
 
