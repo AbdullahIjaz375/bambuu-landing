@@ -231,8 +231,12 @@ const InstructorProfileUser = () => {
   };
 
   const renderClasses = () => {
+    // Get user and enrolled classes once
+    const user = JSON.parse(sessionStorage.getItem("user"));
+    const enrolledClasses = user?.enrolledClasses || [];
+
     // Filter out classes with type "exam_prep" or "introductory_call"
-    const availableClasses = classes.filter((classItem) => {
+    let availableClasses = classes.filter((classItem) => {
       if (
         classItem.classType === "exam_prep" ||
         classItem.classType === "introductory_call"
@@ -253,6 +257,39 @@ const InstructorProfileUser = () => {
       }
       return true;
     });
+
+    // Premium group one-time class filtering (hide for non-enrolled users if <12h left)
+    const now = Date.now();
+    const TWELVE_HOURS_MS = 12 * 60 * 60 * 1000;
+    availableClasses = availableClasses.filter((classItem) => {
+      const isEnrolled = enrolledClasses.includes(classItem.classId);
+      const isPremium = classItem.classType === "Group Premium";
+      const isOneTime =
+        (Array.isArray(classItem.recurrenceTypes) &&
+          classItem.recurrenceTypes.includes("One-time")) ||
+        classItem.selectedRecurrenceType === "One-time";
+      const classStart = classItem.classDateTime?.seconds
+        ? classItem.classDateTime.seconds * 1000
+        : null;
+      const startsInLessThan12Hours =
+        classStart && classStart - now < TWELVE_HOURS_MS;
+      if (!isEnrolled && isPremium && isOneTime && startsInLessThan12Hours) {
+        return false;
+      }
+      return true;
+    });
+
+    // Sort availableClasses by class start time (earliest first)
+    availableClasses.sort((a, b) => {
+      const aTime = a.classDateTime?.seconds
+        ? a.classDateTime.seconds
+        : Infinity;
+      const bTime = b.classDateTime?.seconds
+        ? b.classDateTime.seconds
+        : Infinity;
+      return aTime - bTime;
+    });
+
     if (availableClasses.length === 0) {
       return (
         <div className="flex h-96 items-center justify-center">
@@ -260,9 +297,6 @@ const InstructorProfileUser = () => {
         </div>
       );
     }
-
-    const user = JSON.parse(sessionStorage.getItem("user"));
-    const enrolledClasses = user?.enrolledClasses || [];
 
     return (
       <div className="ml-2 mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
