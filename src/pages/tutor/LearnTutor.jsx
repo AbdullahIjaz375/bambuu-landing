@@ -1,33 +1,14 @@
-import { Search, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import NotificationDropdown from "../../components/NotificationDropdown";
 import React, { useState, useEffect } from "react";
-import {
-  Bell,
-  ChevronLeft,
-  ChevronRight,
-  Users,
-  BookOpen,
-  Star,
-  Database,
-  UserCircle,
-  User,
-} from "lucide-react";
 import Sidebar from "../../components/Sidebar";
 import ClassCardTutor from "../../components-tutor/ClassCardTutor";
 import { useAuth } from "../../context/AuthContext";
-import GroupCard from "../../components/GroupCard";
 import { useNavigate, Navigate } from "react-router-dom";
 import { db } from "../../firebaseConfig";
 import { useTranslation } from "react-i18next";
 
-import {
-  doc,
-  getDoc,
-  collection,
-  query,
-  where,
-  getDocs,
-} from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 import { ClipLoader } from "react-spinners";
 import { GroupSelectModal } from "../../components-tutor/AddClassFlow";
 import GroupCardTutor from "../../components-tutor/GroupCardTutor";
