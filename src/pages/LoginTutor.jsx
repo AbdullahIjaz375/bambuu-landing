@@ -276,12 +276,15 @@ const LoginTutor = () => {
               {t("login.email", "Email")}
             </label>
             <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <img src="/svgs/email-icon.svg" alt="Email" />
+              </span>
               <input
                 type="email"
                 value={email}
                 onChange={handleEmailChange}
                 placeholder={t("login.emailPlaceholder", "Enter your email")}
-                className={`w-full rounded-3xl border p-2 ${
+                className={`w-full rounded-3xl border p-2 pl-10 ${
                   emailError
                     ? "border-red-500 focus:border-red-500"
                     : "border-gray-300 focus:border-green-500"
@@ -317,6 +320,9 @@ const LoginTutor = () => {
               {t("login.password", "Password")}
             </label>
             <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <img src="/svgs/lock-icon.svg" alt="Lock" />
+              </span>
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
@@ -325,7 +331,7 @@ const LoginTutor = () => {
                   "login.passwordPlaceholder",
                   "Enter your password",
                 )}
-                className={`w-full rounded-3xl border p-2 ${
+                className={`w-full rounded-3xl border p-2 pl-10 ${
                   passwordError
                     ? "border-red-500 focus:border-red-500"
                     : "border-gray-300 focus:border-green-500"
@@ -338,40 +344,9 @@ const LoginTutor = () => {
                 className="absolute right-3 top-1/2 -translate-y-1/2 transform"
               >
                 {showPassword ? (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="h-5 w-5 text-gray-500"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774"
-                    />
-                  </svg>
+                  <img src="/svgs/eye-open.svg" alt="eye-open" />
                 ) : (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="h-5 w-5 text-gray-500"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
+                  <img src="/svgs/eye-closed.svg" alt="eye-closed" />
                 )}
               </button>
             </div>

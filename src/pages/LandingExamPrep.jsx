@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Navbar from "../components/Navbar";
 import { useAuth } from "../context/AuthContext";
@@ -5,8 +6,6 @@ import Footer from "../components/Footer";
 import { Info, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ComparisonTable from "../components/ComparisonTable";
-import { useState, useEffect } from "react";
-import MobileModal from "../components/MobileModal";
 import { useLanguage } from "../context/LanguageContext";
 import MobileSignupStep from "../components/mobile-flow/MobileSignupStep";
 import MobileProfileStep from "../components/mobile-flow/MobileProfileStep";

@@ -86,8 +86,8 @@ const ContactUs = () => {
           transition={{ duration: 0.8 }}
           className="mx-auto mt-20 max-w-xl p-8"
         >
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="flex gap-4">
+          <form onSubmit={handleSubmit} className="">
+            <div className="mb-6 flex gap-4">
               <div className="flex-1">
                 <label className="mb-1 block text-sm font-medium text-gray-700">
                   First Name
@@ -122,7 +122,7 @@ const ContactUs = () => {
                 type="email"
                 name="email"
                 placeholder="enter your email"
-                className="w-full rounded-full border border-gray-200 px-4 py-3 focus:outline-none focus:ring-1 focus:ring-green-500"
+                className="mb-6 w-full rounded-full border border-gray-200 px-4 py-3 focus:outline-none focus:ring-1 focus:ring-green-500"
                 required
               />
             </div>
@@ -135,7 +135,7 @@ const ContactUs = () => {
                 type="tel"
                 name="phone"
                 placeholder="enter your phone number"
-                className="w-full rounded-full border border-gray-200 px-4 py-3 focus:outline-none focus:ring-1 focus:ring-green-500"
+                className="mb-6 w-full rounded-full border border-gray-200 px-4 py-3 focus:outline-none focus:ring-1 focus:ring-green-500"
                 required
               />
             </div>
@@ -148,19 +148,22 @@ const ContactUs = () => {
                 name="message"
                 placeholder="Leave us a message..."
                 rows="4"
-                className="w-full rounded-3xl border border-gray-200 px-4 py-3 focus:outline-none focus:ring-1 focus:ring-green-500"
+                className="mb-6 w-full rounded-3xl border border-gray-200 px-4 py-3 focus:outline-none focus:ring-1 focus:ring-green-500"
                 required
               />
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="mb-8 flex items-center gap-2">
               <input
                 type="checkbox"
                 id="privacy"
                 className="rounded border-gray-300 text-green-600 focus:ring-green-500"
                 required
               />
-              <label htmlFor="privacy" className="text-sm text-gray-600">
+              <label
+                htmlFor="privacy"
+                className="text-base font-normal text-gray-600"
+              >
                 You agree to our friendly{" "}
                 <a href="#" className="underline">
                   privacy policy

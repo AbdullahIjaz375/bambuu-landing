@@ -76,6 +76,8 @@ const GroupDetailsUser = ({ onClose }) => {
     fetchGroup();
   }, [groupId]);
 
+  console.log("classes", classes);
+
   //-----------------------------getting tutor details------------------------------------------//
 
   const [groupTutor, setGroupTutor] = useState(null);
@@ -533,7 +535,7 @@ const GroupDetailsUser = ({ onClose }) => {
           }
 
           // Update tutor/admin
-          const adminRef = doc(db, userCollection, classData.adminId);
+          const adminRef = doc(userCollection, classData.adminId);
           const adminDoc = await getDoc(adminRef);
           const adminData = adminDoc.data();
 
@@ -664,7 +666,34 @@ const GroupDetailsUser = ({ onClose }) => {
 
   //---------------------------------------------------------------------------------------------------------//
   const renderClasses = () => {
-    if (classes.length === 0) {
+    // Get enrolled classes from localStorage
+    const user = JSON.parse(sessionStorage.getItem("user"));
+    const enrolledClasses = user?.enrolledClasses || [];
+
+    // Filtering logic for premium group one-time classes within 12 hours
+    const now = Date.now();
+    const TWELVE_HOURS_MS = 12 * 60 * 60 * 1000;
+    const filteredClasses = classes.filter((classItem) => {
+      const isEnrolled = enrolledClasses.includes(classItem.classId);
+      const isPremium = classItem.classType === "Group Premium";
+      const isOneTime =
+        (Array.isArray(classItem.recurrenceTypes) &&
+          classItem.recurrenceTypes.includes("One-time")) ||
+        classItem.selectedRecurrenceType === "One-time";
+      const classStart = classItem.classDateTime?.seconds
+        ? classItem.classDateTime.seconds * 1000
+        : null;
+      const startsInLessThan12Hours =
+        classStart && classStart - now < TWELVE_HOURS_MS;
+
+      // Hide if: not enrolled, premium, one-time, and starts in <12h
+      if (!isEnrolled && isPremium && isOneTime && startsInLessThan12Hours) {
+        return false;
+      }
+      return true;
+    });
+
+    if (filteredClasses.length === 0) {
       return (
         <div className="flex h-96 items-center justify-center">
           <EmptyState message="No classes available" />
@@ -672,13 +701,9 @@ const GroupDetailsUser = ({ onClose }) => {
       );
     }
 
-    // Get enrolled classes from localStorage
-    const user = JSON.parse(sessionStorage.getItem("user"));
-    const enrolledClasses = user?.enrolledClasses || [];
-
     return (
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
-        {classes.map((classItem) => {
+        {filteredClasses.map((classItem) => {
           const isEnrolled = enrolledClasses.includes(classItem.classId);
 
           return isEnrolled ? (

@@ -26,6 +26,7 @@ import { useTranslation } from "react-i18next";
 import { useLanguage } from "../context/LanguageContext";
 import MobileModal from "../components/MobileModal";
 import WebSubscriptionStep from "./user/WebSubscriptionStep";
+import CustomSelect from "../components/CustomSelect";
 
 Modal.setAppElement("#root");
 
@@ -69,6 +70,9 @@ const Signup = ({ onNext, onClose, isModal = false }) => {
   const location = useLocation();
 
   const isMobile = useIsMobile();
+
+  // Add state for checkbox
+  const [isAgeChecked, setIsAgeChecked] = useState(false);
 
   useEffect(() => {
     let verificationTimer;
@@ -763,77 +767,80 @@ const Signup = ({ onNext, onClose, isModal = false }) => {
                 <label className="block text-sm font-semibold">
                   {t("signup.profile.name", "Name")}
                 </label>
-                <input
-                  type="text"
-                  value={profileData.name}
-                  onChange={(e) =>
-                    setProfileData({ ...profileData, name: e.target.value })
-                  }
-                  placeholder={t(
-                    "signup.profile.namePlaceholder",
-                    "enter your name",
-                  )}
-                  className="w-full rounded-3xl border border-gray-300 p-2 focus:border-[#14B82C] focus:outline-none focus:ring-0"
-                  required
-                />
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                    <img src="/svgs/profile-icon.svg" alt="Profile" />
+                  </span>
+                  <input
+                    type="text"
+                    value={profileData.name}
+                    onChange={(e) =>
+                      setProfileData({ ...profileData, name: e.target.value })
+                    }
+                    placeholder={t(
+                      "signup.profile.namePlaceholder",
+                      "enter your name",
+                    )}
+                    className="w-full rounded-3xl border border-[#E7E7E7] p-2 pl-10 focus:border-[#14B82C] focus:outline-none focus:ring-0"
+                    required
+                  />
+                </div>
               </div>
 
               <div className="space-y-1">
                 <label className="block text-sm font-medium">
                   {t("signup.profile.nativeLanguage", "Native Language")}
                 </label>
-                <select
+                <CustomSelect
+                  options={LANGUAGES.map((language) => language.name)}
                   value={profileData.nativeLanguage}
-                  onChange={(e) =>
+                  onChange={(value) =>
                     setProfileData({
                       ...profileData,
-                      nativeLanguage: e.target.value,
+                      nativeLanguage: value,
                     })
                   }
-                  className="w-full rounded-full border border-gray-200 px-4 py-2 text-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder={t(
+                    "signup.profile.selectNativeLanguage",
+                    "Select your native language",
+                  )}
+                  searchPlaceholder="Search Language"
+                  icon={
+                    <img
+                      src="/svgs/language-circle-select.svg"
+                      alt="Language"
+                    />
+                  }
                   required
-                >
-                  <option value="">
-                    {t(
-                      "signup.profile.selectNativeLanguage",
-                      "Select your native language",
-                    )}
-                  </option>
-                  {LANGUAGES.map((language) => (
-                    <option key={language.code} value={language.name}>
-                      {language.name}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
 
               <div className="space-y-1">
                 <label className="block text-sm font-medium">
                   {t("signup.profile.learningLanguage", "Learning Language")}
                 </label>
-                <select
+                <CustomSelect
+                  options={TEACHINGLANGUAGES}
                   value={profileData.learningLanguage}
-                  onChange={(e) =>
+                  onChange={(value) =>
                     setProfileData({
                       ...profileData,
-                      learningLanguage: e.target.value,
+                      learningLanguage: value,
                     })
                   }
-                  className="w-full rounded-full border border-gray-200 px-4 py-2 text-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder={t(
+                    "signup.profile.selectLearningLanguage",
+                    "Select language you want to learn",
+                  )}
+                  searchPlaceholder="Search Language"
+                  icon={
+                    <img
+                      src="/svgs/language-square-select.svg"
+                      alt="Learning Language"
+                    />
+                  }
                   required
-                >
-                  <option value="">
-                    {t(
-                      "signup.profile.selectLearningLanguage",
-                      "Select language you want to learn",
-                    )}
-                  </option>
-                  {TEACHINGLANGUAGES.map((lang) => (
-                    <option key={lang} value={lang}>
-                      {lang}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
 
               <div className="space-y-1">
@@ -865,36 +872,49 @@ const Signup = ({ onNext, onClose, isModal = false }) => {
                 <label className="block text-sm font-medium">
                   {t("signup.profile.country", "Country")}
                 </label>
-                <select
+                <CustomSelect
+                  options={COUNTRIES}
                   value={profileData.country}
-                  onChange={(e) =>
-                    setProfileData({ ...profileData, country: e.target.value })
+                  onChange={(value) =>
+                    setProfileData({
+                      ...profileData,
+                      country: value,
+                    })
                   }
-                  className="w-full rounded-full border border-gray-200 px-4 py-2 text-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder={t(
+                    "signup.profile.selectCountry",
+                    "Select your country",
+                  )}
+                  searchPlaceholder="Search Country"
+                  icon={<img src="/svgs/flag-select.svg" alt="Country" />}
                   required
-                >
-                  <option value="">
-                    {t("signup.profile.selectCountry", "Select your country")}
-                  </option>
-                  {COUNTRIES.map((country) => (
-                    <option key={country} value={country}>
-                      {country}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
 
               <div className="space-y-2">
                 <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="ageVerification"
-                    className="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
-                    required
-                  />
+                  <div className="relative">
+                    <input
+                      type="checkbox"
+                      id="ageVerification"
+                      className="peer h-5 w-5 appearance-none rounded border border-gray-300 bg-transparent"
+                      checked={isAgeChecked}
+                      onChange={(e) => setIsAgeChecked(e.target.checked)}
+                      required
+                    />
+                    <img
+                      src={
+                        isAgeChecked
+                          ? "/svgs/checked.svg"
+                          : "/svgs/unchecked.svg"
+                      }
+                      alt={isAgeChecked ? "Checked" : "Unchecked"}
+                      className="pointer-events-none absolute left-0 top-0 h-5 w-5"
+                    />
+                  </div>
                   <label
                     htmlFor="ageVerification"
-                    className="ml-2 text-sm font-medium text-gray-700"
+                    className="ml-2 text-base font-normal leading-6 text-[#888888]"
                   >
                     {t(
                       "signup.profile.ageVerification",
@@ -950,7 +970,7 @@ const Signup = ({ onNext, onClose, isModal = false }) => {
             <select
               value={currentLanguage}
               onChange={(e) => changeLanguage(e.target.value)}
-              className="rounded-full border border-gray-200 px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-green-500"
+              className="rounded-full border border-[#E7E7E7] px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-green-500"
             >
               <option value="en">English</option>
               <option value="es">Español</option>
@@ -976,7 +996,7 @@ const Signup = ({ onNext, onClose, isModal = false }) => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
-                  className="w-full rounded-3xl border border-gray-300 p-2 pl-10 focus:border-[#14B82C] focus:outline-none focus:ring-0"
+                  className="w-full rounded-3xl border border-[#E7E7E7] p-2 pl-10 focus:border-[#14B82C] focus:outline-none focus:ring-0"
                   required
                 />
               </div>
@@ -1131,15 +1151,19 @@ const Signup = ({ onNext, onClose, isModal = false }) => {
               <label className="block text-sm font-semibold leading-6">
                 Email
               </label>
-
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="enter your email"
-                className="w-full rounded-3xl border border-gray-300 p-2 focus:border-[#14B82C] focus:outline-none focus:ring-0"
-                required
-              />
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                  <img src="/svgs/email-icon.svg" alt="Email" />
+                </span>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="enter your email"
+                  className="w-full rounded-3xl border border-[#E7E7E7] p-2 pl-10 focus:border-[#14B82C] focus:outline-none focus:ring-0"
+                  required
+                />
+              </div>
             </div>
 
             <div className="space-y-1">
@@ -1147,12 +1171,15 @@ const Signup = ({ onNext, onClose, isModal = false }) => {
                 Password
               </label>
               <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                  <img src="/svgs/lock-icon.svg" alt="Lock" />
+                </span>
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="enter your password"
-                  className="w-full rounded-3xl border border-gray-300 p-2 focus:border-[#14B82C] focus:outline-none focus:ring-0"
+                  className="w-full rounded-3xl border border-[#E7E7E7] p-2 pl-10 focus:border-[#14B82C] focus:outline-none focus:ring-0"
                   required
                 />
                 <button
@@ -1174,12 +1201,15 @@ const Signup = ({ onNext, onClose, isModal = false }) => {
                 Confirm Password
               </label>
               <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                  <img src="/svgs/lock-icon.svg" alt="Lock" />
+                </span>
                 <input
                   type={showConfirmPassword ? "text" : "password"}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="re-enter your password"
-                  className="w-full rounded-3xl border border-gray-300 p-2 focus:border-[#14B82C] focus:outline-none focus:ring-0"
+                  className="w-full rounded-3xl border border-[#E7E7E7] p-2 pl-10 focus:border-[#14B82C] focus:outline-none focus:ring-0"
                   required
                 />
                 <button
@@ -1188,9 +1218,9 @@ const Signup = ({ onNext, onClose, isModal = false }) => {
                   className="absolute right-3 top-1/2 -translate-y-1/2 transform text-gray-500"
                 >
                   {showConfirmPassword ? (
-                    <img src="/svgs/eye-closed.svg" alt="eye-open" />
+                    <img src="/svgs/eye-open.svg" alt="eye-open" />
                   ) : (
-                    <img src="/svgs/eye-open.svg" alt="eye-closed" />
+                    <img src="/svgs/eye-closed.svg" alt="eye-closed" />
                   )}
                 </button>
               </div>

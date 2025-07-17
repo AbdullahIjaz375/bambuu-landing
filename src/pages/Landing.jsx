@@ -13,13 +13,13 @@ const Card = ({ title, description, imageSrc, index }) => {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-100px" }}
       transition={{ duration: 0.8, delay: index * 0.2 }}
-      className="flex h-auto w-full flex-col items-center justify-between overflow-hidden rounded-3xl border-2 border-[#14b82c] bg-[#e6fde9] px-4 py-4 sm:rounded-[5vh] sm:px-6 sm:py-6 md:h-[520px] lg:h-[580px] lg:px-6"
+      className="flex h-auto w-full flex-col items-center justify-between overflow-hidden rounded-3xl border border-[#14b82c] bg-[#e6fde9] px-[90.28px] pt-14 sm:rounded-[5vh] md:h-[520px] lg:h-[580px]"
     >
       <div className="flex flex-col items-center space-y-2 sm:space-y-3">
-        <h2 className="text-center text-lg font-semibold text-[#042f0c] sm:text-xl lg:text-2xl">
+        <h2 className="text-center text-[32px] font-bold text-[#042f0c]">
           {title}
         </h2>
-        <p className="max-w-prose text-center text-sm text-[#3d3d3d] sm:text-base">
+        <p className="max-w-prose text-center text-xl font-normal text-[#3d3d3d]">
           {description}
         </p>
       </div>
@@ -68,10 +68,10 @@ const Landing = () => {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="section1-background mt-8 flex flex-col items-center justify-center space-y-8 rounded-3xl border-b-8 border-[#B9F9C2] px-4 lg:mt-16 lg:space-y-16 lg:rounded-[20vh] lg:px-0"
+          className="section1-background mt-8 flex flex-col items-center justify-center space-y-8 rounded-3xl border-b-4 border-[#B9F9C2] lg:mt-16 lg:space-y-16 lg:rounded-[20vh]"
         >
           <div className="mt-6 flex flex-col items-center justify-center space-y-4">
-            <h1 className="text-center text-3xl font-bold text-black lg:text-6xl">
+            <h1 className="text-center text-[64px] font-extrabold leading-tight text-[#042F0C]">
               Level-up your language
               <br /> learning today.
             </h1>
@@ -94,7 +94,7 @@ const Landing = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="mb-20 mt-20 flex flex-col items-start justify-between space-y-8 px-6 lg:mb-32 lg:mt-40 lg:flex-row lg:space-y-0 lg:px-28"
+          className="mb-20 mt-20 flex flex-col items-start justify-between space-y-8 px-20 lg:mb-32 lg:mt-40 lg:flex-row lg:space-y-0"
         >
           <h1 className="w-full text-left text-3xl font-semibold text-black lg:w-1/2 lg:text-6xl">
             About bammbuu
@@ -113,7 +113,7 @@ const Landing = () => {
         </motion.div>
 
         {/* section 3 - Cards */}
-        <div className="mx-auto mb-16 max-w-7xl px-4 lg:mb-32 lg:px-6 xl:px-8">
+        <div className="mx-auto mb-16 px-20 lg:mb-32">
           <div className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 md:gap-4 lg:gap-5">
             <Card
               index={0}
@@ -148,7 +148,7 @@ const Landing = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="mx-4 mb-8 flex flex-col items-center justify-center space-y-6 rounded-3xl border-2 border-[#14b82c] bg-[#e6fde9] pt-16 lg:mx-28 lg:space-y-10 lg:rounded-[6vh] lg:pt-28"
+          className="mx-20 mb-8 flex flex-col items-center justify-center space-y-6 rounded-3xl border border-[#14b82c] bg-[#e6fde9] pt-16 lg:space-y-10 lg:rounded-[6vh] lg:pt-28"
         >
           <h1 className="px-4 text-center text-3xl font-semibold text-black lg:text-6xl">
             The bammbuu mobile version

@@ -1139,7 +1139,7 @@
       "proficiency": "Your Proficiency in",
       "country": "Country",
       "selectCountry": "Select your country",
-      "ageVerification": "I confirm that I am at least 18 years old",
+      "ageVerification": "Are you at least 18 years of age?",
       "ageWarning": "You must be at least 18 years old to use this application.",
       "submit": "Submit",
       "levels": {
